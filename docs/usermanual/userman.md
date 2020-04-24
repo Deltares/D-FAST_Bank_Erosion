@@ -8,8 +8,7 @@ Some examples for which WAQBANK can compute bank erosion are:
 * Bank adjustments such as removal of bank protection
 * Applying or removing fore shore protection
 * Changes in shipping type or intensity
-* Changes in currents (e.g.
-due to construction of side channels)
+* Changes in currents (e.g. due to construction of side channels)
 
 Output
 The output of WAQBANK is:
@@ -107,8 +106,8 @@ An example of a definition file is given in Figure 2.1.
 
 Table 2.2  Keywords in the definition file of WAQBANK
 
-| Keyword | | Value | Description |
-|---------|-|-------|-------------|
+| Keyword |  | Value | Description |
+|---------|--|-------|-------------|
 | Path | M | pathname | Pathname of used m-files (unnecessary when using executables)
 | Nbank | M | integer | Number of bank lines, (standard 2 lines) |
 | GridFile  | M | filename | Rgf-file for defining grid coordinates |
@@ -123,8 +122,8 @@ Table 2.2  Keywords in the definition file of WAQBANK
 
 Input BankLines.exe
 
-| Keyword | | Value | Description |
-|---------|-|-------|-------------|
+| Keyword |  | Value | Description |
+|---------|--|-------|-------------|
 | SDS-file | M | filename | SDS-file for determining representative bank line |
 | Line1    | M | filename | Textfile with xy-coordinates of search line 1 |
 | LineN    | M | filename | Textfile with xy-coordinaten of search line N |
@@ -138,10 +137,10 @@ Input BankLines.exe
 
 Input BankErosion.exe
 
-| Keyword | | Value | Description |
-|---------|-|-------|-------------|
+| Keyword |  | Value | Description |
+|---------|--|-------|-------------|
 | Terosion | M | real | Simulation period  [years] |
-| RiverAxis     | M | filename | Textfile with xy-coordinates of river axis |
+| RiverAxis | M | filename | Textfile with xy-coordinates of river axis |
 | Fairway  | M | filename | Textfile with xy-coordinates of fairway axis |
 | BankType | M | filename/real | Bank strength definition (for each bank line per river-km) |
 | Vship  | M | filename/real | Relative velocity of the ships (per river-km) [m/s] |
