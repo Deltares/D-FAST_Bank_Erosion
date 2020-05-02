@@ -1,9 +1,9 @@
 # Introduction
 
-Since 2010 Deltares is working on a bank erosion module that can be used in combination with WAQUA.
+Since 2010 Deltares is working on a bank erosion module that can be used in combination with D-Flow FM.
 The module computes local erosion sensitivity, visualizes the bank movement and gives an estimation of the amount of bank material that is released in the first year and after the equilibrium is reached.
-WAQBANK can easily be used as a post processing tool of WAQUA-simulations.
-Some examples for which WAQBANK can compute bank erosion are:
+D-FAST Bank Erosion can easily be used as a post processing tool of D-Flow FM-simulations.
+Some examples for which D-FAST Bank Erosion can compute bank erosion are:
 
 * Bank adjustments such as removal of bank protection
 * Applying or removing fore shore protection
@@ -11,36 +11,35 @@ Some examples for which WAQBANK can compute bank erosion are:
 * Changes in currents (e.g. due to construction of side channels)
 
 Output
-The output of WAQBANK is:
+The output of D-FAST Bank Erosion is:
 1. Bank line movement after one year and when the final equilibrium state is reached.
 1. Amount of sediment that is released from the banks after one year and when the final equilibrium state is reached.
 
 This output is presented in graphs / figures and written to text files.
 
 Input
-The input of WAQBANK is:
-1. WAQUA results (SDS-files)
+The input of D-FAST Bank Erosion is:
+1. D-Flow FM results (NetCDF map-files)
 1. Local data: level of bank protection removal, subsoil characteristics, shipping information (quantity, location of fairway)
 
-The layout of this manual is as follows: In chapter 2 a description is given on how to use WAQBANK (installation, input, output).
-The background of WAQBANK is outlined in chapters 3 and 4 (partly in Dutch).
+The layout of this manual is as follows: In chapter 2 a description is given on how to use D-FAST Bank Erosion (installation, input, output).
+The background of D-FAST Bank Erosion is outlined in chapters 3 and 4 (partly in Dutch).
 
-# WAQBANK
 ## Installation
 
-WAQBANK itself consists of 2 executables called 'BankLines.exe' and BankErosion.exe'.
+D-FAST Bank Erosion itself consists of 2 executables called 'BankLines.exe' and BankErosion.exe'.
 The first is needed to establish the initial bank lines and the second computes the bank line movement and eroded volume.
-Both executables of WAQBANK can be called from the DOS prompt.
+Both executables of D-FAST Bank Erosion can be called from the DOS prompt.
 
-To be able to run WAQBANK it is necessary to install MCRinstaller.
-The required version of the installer is standard provided with WAQBANK.
+To be able to run D-FAST Bank Erosion it is necessary to install MCRinstaller.
+The required version of the installer is standard provided with D-FAST Bank Erosion.
 
-By default WAQBANK is looking for the definition file deffile.def in the same directory as the executables.
+By default D-FAST Bank Erosion is looking for the definition file deffile.def in the same directory as the executables.
 When the definition file has another name or location, this should be passed when the modules are called.
 
 ## Scenario plan
-WAQBANK is not calibrated for local bank erosion .
-Therefore it is strongly advised to use WAQBANK only in a relative way.
+D-FAST Bank Erosion is not calibrated for local bank erosion .
+Therefore it is strongly advised to use D-FAST Bank Erosion only in a relative way.
 In this way an image can be formed of
 * at which locations the bank is most sensitive to erosion (by comparing different locations along the river)
 * how sensitive a location is for certain measures (by comparing different scenarios at 1 location)
@@ -49,22 +48,22 @@ We advise to compute different scenarios and compare between them.
 An example is: 1 scenario with a subsoil of sand and 1 scenario with a subsoil of clay.
 This means that only the type of subsoil is changed and the other input remains unchanged.
 
-## WAQUA-computations
-Before WAQBANK can be used, steady state WAQUA-computations  have to be performed for each discharge level.
+## D-Flow FM-computations
+Before D-FAST Bank Erosion can be used, steady state D-Flow FM-computations  have to be performed for each discharge level.
 This first requires a schematisation of the discharge hydrograph in discharge levels and a probability per discharge step.
 The discretisation of the discharge hydrograph is not a trivial procedure.
 Deltares advises to use at least ten discharge levels.
 
-By default two figures are generated during WAQBANK computation which the user can use to check if the discharge levels are chosen properly.
+By default two figures are generated during D-FAST Bank Erosion computation which the user can use to check if the discharge levels are chosen properly.
 These are a figure with water levels and a figure with flow velocities.
 In both figures the area that is sensitive to erosion is indicated.
 Based on these figures it can be decided to include or remove discharge levels from the computation.
-For each discharge level an SDS-file (WAQUA output file) must be provided.
-WAQBANK uses the water levels and flow velocities that are stored in the last time step.
-It is important that the WAQUA computations are in steady state.
+For each discharge level an NetCDF map-file (D-Flow FM output file) must be provided.
+D-FAST Bank Erosion uses the water levels and flow velocities that are stored in the last time step.
+It is important that the D-Flow FM computations are in steady state.
 The probability (normalized weighting of the time period) per discharge level is defined by the user in the definition file.
 
-Note: It is of utmost importance that in the SDS-file with the reference (average) discharge (which is used to establish the initial bank lines) the water remains within the main channel during the whole computation.
+Note: It is of utmost importance that in the NetCDF map-file with the reference (average) discharge (which is used to establish the initial bank lines) the water remains within the main channel during the whole computation.
 Practically this means that the simulation has to be started with a low initial water level with no (or as little as possible) water in the flood plains.
 When this criterion is not met, strange peaks in the detected bank lines may occur.
 
@@ -104,27 +103,27 @@ E = expert
 Filenames can be either given with a single filename, or with their (relative) path and they should contain no spaces.
 An example of a definition file is given in Figure 2.1.
 
-Table 2.2  Keywords in the definition file of WAQBANK
+Table 2.2  Keywords in the definition file of D-FAST Bank Erosion
 
 | Keyword |  | Value | Description |
 |---------|--|-------|-------------|
-| Path | M | pathname | Pathname of used m-files (unnecessary when using executables)
+| Path | M | pathname | [REMOVED] Pathname of used m-files (unnecessary when using executables)
 | Nbank | M | integer | Number of bank lines, (standard 2 lines) |
 | GridFile  | M | filename | Rgf-file for defining grid coordinates |
 | RiverKM | M | filename | Textfile with riverkilometres and correspondig xy-coordinates |
 | Boundaries  | O | integers | river chainage of the region of interst;  rkm-start:rkm-end, e.g. 81:100 (default: all) |
-| NLim | O | integers | Range of N-values from SDS-file that is considered (default: all), only used when keyword 'Boundaries' is not available. |
-| Mlim | O | integers | Range of M-values from SDS-file that is considered (default: all), only used when keyword 'Boundaries' is not available. |
-| Plotting | O | logical | Plotting results (default: false) |
-| SavePlots | O | Logical | Saving plots (default: true) |
-| ClosePlots | O | Logical | Close plots and close Quickplot when simulation is finished (default: false) |
-| Waqview | O | logical | Generating output for Waqview (default: false) |
+| NLim | O | integers | [REMOVED] Range of N-values from SDS-file that is considered (default: all), only used when keyword 'Boundaries' is not available. |
+| Mlim | O | integers | [REMOVED] Range of M-values from SDS-file that is considered (default: all), only used when keyword 'Boundaries' is not available. |
+| Plotting | O | logical | [REMOVED] Plotting results (default: false) |
+| SavePlots | O | Logical | [REMOVED] Saving plots (default: true) |
+| ClosePlots | O | Logical | [REMOVED] Close plots and close Quickplot when simulation is finished (default: false) |
+| Waqview | O | logical | [REMOVED] Generating output for Waqview (default: false) |
 
 Input BankLines.exe
 
 | Keyword |  | Value | Description |
 |---------|--|-------|-------------|
-| SDS-file | M | filename | SDS-file for determining representative bank line |
+| SDS-file | M | filename | [REPLACE BY File] SDS-file for determining representative bank line |
 | Line1    | M | filename | Textfile with xy-coordinates of search line 1 |
 | LineN    | M | filename | Textfile with xy-coordinaten of search line N |
 | BankDir | O | string | Directory for storing bank lines (default: current directory) |
@@ -148,9 +147,9 @@ Input BankErosion.exe
 | ShipType | M | filename/integer | Type of ship (per river-km) |
 | Draught | M | filename/real | Draught of the ships (per river-km) [m] |
 | NLevel | M | integer | Number of discharge levels |
-| SDSfile1 | M | filename | SDS-file for computing bank erosion for discharge 1 (only used when 'Nlevel'>1) |
+| File1 | M | filename | [REPLACES SDSfile1] NetCDF map-file for computing bank erosion for discharge 1 (only used when 'Nlevel'>1) |
 | PDischarge1 | M | real | Probability of discharge 1 (sum of probabilities should be 1) |
-| SDSfileN | M | filename | SDS-file for computing bank erosion for discharge 'Nlevel' (only used when 'Nlevel'>1) |
+| FileN | M | filename | [REPLACES SDSfileN] NetCDF map-file for computing bank erosion for discharge 'Nlevel' (only used when 'Nlevel'>1) |
 | PDischargeN | M | real | Probability of discharge 'Nlevel' (sum of probabilities should be 1) |
 | RefLevel | O | integer | Reference level: discharge level with SDS-file that is equal to 'SDS-file' (only used when 'Nlevel'>1)  (default: 1) |
 | Classes | O | logical | Use classes (true) or critical shear stress (false) in 'BankType' (default: true) |
@@ -223,7 +222,7 @@ Input BankErosion.exe
     SDSfile10      = SDSfiles\SDS-q1500
     PDischarge10   =   0.0014
 
-Figure 2.1	Example of a definition file for WAQBANK
+Figure 2.1	Example of a definition file for D-FAST Bank Erosion
 
 ## Banklines <BankLines.exe> :
 determines the representative bank lines within the area of interest (for background information see chapter 3).
@@ -240,7 +239,7 @@ BankLines path\deffile_other.txt
 with path the path to the directory where the definition file is located and deffile_other.txt the name of the definition file.
 
 Required input:
-* WAQUA-output file (SDS-file) at representative discharge (SDSfile),
+* D-Flow FM-output file (NetCDF map-file) at representative discharge (SDSfile),
 * Number of bank Lines (Nbank default two, the left and right bank),
 * For each of the bank lines a file with xy-coordinates of the estimated location of the bank  line (Line1, Line2, ..., LineN, with N the number of bank lines)
 * File which links river kilometres to xy-coordinates (RiverKM),
@@ -290,8 +289,8 @@ The creation of these files can be time consuming, so it is recommended not to c
 Required input:
 * The considered simulation time (Terosion, default 1 year),
 * The number of discharge levels (NLevel),
-* WAQUA-output files (SDS-files) for the different discharge levels and the corresponding probability distribution (SDSfile1, SDSfile2, ..., SDSfileM and PDischarge1, PDischarge2, ..., PDischargeM, with M the number of discharge levels).
-When only 1 discharge level is given, the standard SDS-file (SDSfile) is used,
+* D-Flow FM-output files (NetCDF map-files) for the different discharge levels and the corresponding probability distribution (File1, File2, ..., FileN and PDischarge1, PDischarge2, ..., PDischargeN, with N the number of discharge levels).
+When only 1 discharge level is given, the standard NetCDF map-file (SDSfile) is used,
 * Grid for positioning of results (GridFile), only needed when WaqView=true,
 * Number of bank Lines (Nbank default two, the left and right bank),
 * File which links river kilometres to xy-coordinates (RiverKM),
@@ -382,12 +381,12 @@ Figure 2.13 Bank retreat at the end of the simulation period and for the equilib
 
 
 # Detection of bank lines
-The location of bank lines is determined by looking at the transition of water to land at a reference discharge computed with a WAQUA model.
-To determine the exact location of the bank lines, first all cells in the WAQUA-grid are marked that are at the transition from land to water at these discharge level.
+The location of bank lines is determined by looking at the transition of water to land at a reference discharge computed with a D-Flow FM model.
+To determine the exact location of the bank lines, first all cells in the D-Flow FM-grid are marked that are at the transition from land to water at these discharge level.
 The concerned cells have positive water depth and one or more neighbouring cells with a zero water depth.
 Within these transition cells a bank line can be defined.
 The bank line is at the location where the water depth is equal to zero, that is the water level is equal to the bed level.
-In WAQUA the bed level,  , is defined in the corner points of a cell and the water level,  , in the centre of a cell, see Figure 3.1.
+In D-Flow FM the bed level,  , is defined in the corner points of a cell and the water level,  , in the centre of a cell, see Figure 3.1.
 The bank line is now found by interpolating the bed level linearly along the grid lines and marking the location where the bed level is equal to the water level.
 In this way, two points are found which can be connected to form (a part of) the bank line.
 
@@ -414,14 +413,14 @@ If they are important, extra lines should be added that (globally) represent the
 
 
 Figure 3.2 Detection of bank lines at a shortcut in the Muese river.
-Red: Baseline 'oeverlijnen', Blue: detected bank line from WAQUA computation (Q=278,5 m3/s, average discharge)
+Red: Baseline 'oeverlijnen', Blue: detected bank line from D-Flow FM computation (Q=278,5 m3/s, average discharge)
 
-Groynes are not detected as such by the tool, because they are defined on subgrid level in WAQUA, see Figure 3.3.
+Groynes are not detected as such by the tool, because they are defined on subgrid level in D-Flow FM, see Figure 3.3.
 The detected bank line is in this case following the banks within groyne sections.
 This is an advantage, since possible bank erosion only takes place in the groyne sections and not along the groynes themselves.
 
 Figure 3.3 Detection of a bank line close to groynes.
-Red: Baseline 'oeverlijnen', Blue: detected bank line from WAQUA computation (Q=278,5 m3/s, average discharge)
+Red: Baseline 'oeverlijnen', Blue: detected bank line from D-Flow FM computation (Q=278,5 m3/s, average discharge)
 
 
 # Potential bank line shift and bank erosion
@@ -547,9 +546,9 @@ Voor de kritische stroomsnelheid voor erosie geldt:
 	
 
 met   [ ] de Chezy coefficient voor hydraulische ruwheid.
-De waarde voor de Chezy coefficient wordt overgenomen uit de WAQUA berekening.
+De waarde voor de Chezy coefficient wordt overgenomen uit de D-Flow FM berekening.
 
-De stroomsnelheid langs de oever wordt bepaald aan de hand van de stroomsnelheid uit WAQUA.
+De stroomsnelheid langs de oever wordt bepaald aan de hand van de stroomsnelheid uit D-Flow FM.
 De waarde voor de kritische schuifspanning voor erosie,  , is gerelateerd aan de sterkte coefficient voor oevermateriaal,  , zoals beschreven in Bijlage B)
 
 ## Total bank shift
@@ -615,8 +614,8 @@ De invloed van het afgeslagen materiaal op de golfhoogte (en daardoor de erosie 
 
 Het meenemen van een variabele afvoer is mogelijk door de afvoerverdeling te schematiseren met een hydrograaf.
 Deze hydrograaf bestaat uit   afvoerniveaus en hun bijbehorende kans op voorkomen.
-Voor elk afvoerniveau wordt een aparte WAQUA-berekening uitgevoerd.
-Uit deze WAQUA simulaties kunnen dan de stroomsnelheid langs de oeverlijn en het niveau van de waterspiegel worden afgeleid.
+Voor elk afvoerniveau wordt een aparte D-Flow FM-berekening uitgevoerd.
+Uit deze D-Flow FM simulaties kunnen dan de stroomsnelheid langs de oeverlijn en het niveau van de waterspiegel worden afgeleid.
 Hierbij wordt er vanuit gegaan dat in ieder geval de afvoer wordt meegenomen die is gebruikt om de initiele oeverlijn te bepalen (de gemiddelde afvoer).
 
 Vervolgens worden oeverlijnverschuivingingen voor de afzonderlijke afvoerniveaus bepaald en deze worden daarna gewogen gesommeerd aan de hand van de kans van voorkomen van het betreffende afvoerniveau.
@@ -681,7 +680,7 @@ met
 
 Figuur 4.7	Geschatte profiel evenwichtsoever.
 
-## Limitations of WAQBANK
+## Limitations of D-FAST Bank Erosion
 
 De oevererosiemodule is bedoeld als hulpmiddel om in te kunnen schatten waar potentieel oevererosie plaats kan vinden en niet om de daadwerkelijke oevererosie te voorspellen.
 In deze sectie worden een paar beperkingen van de oevererosiemodule aangestipt.
@@ -716,7 +715,7 @@ Andere erosiemechanismen zoals windgolven, uitstromend grondwater, bevriezing en
 
 Door oevererosie verandert lokaal de breedte van de rivier en ook zorgt het afgeslagen materiaal voor een andere bodemligging.
 Hierdoor veranderen ook de stromingscondities in de rivier en langs de oever.
-Aangezien de oevererosiemodule is gebaseerd uitkomsten van WAQUA berekeningen wordt deze dynamiek van de bodem en oevers echter niet meegenomen.
+Aangezien de oevererosiemodule is gebaseerd uitkomsten van D-Flow FM berekeningen wordt deze dynamiek van de bodem en oevers echter niet meegenomen.
 
 # References
 Crosato, A. (2007), Effects of smoothing and regridding in numerical meander migration models. Water Resources Research, Vol 43.
