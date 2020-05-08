@@ -5,6 +5,16 @@ from pathlib import Path
 import dfastbe_kernel
 
 
+def bank_lines(paramfile, variable):
+    """Determines the representative bank lines within the area of interest (First step)."""
+    1
+
+
+def bank_erosion(paramfile, variable, variable2):
+    """Determines the expected bank erosion within the area of interest (Second step)."""
+    1
+    
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description='D-FAST Bank Erosion.')
     parser.add_argument("-i", "--inputfile",
