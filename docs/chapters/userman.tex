@@ -1,31 +1,39 @@
-# Introduction
+\chapter{Introduction}
 
 Since 2010 Deltares is working on a bank erosion module that can be used in combination with D-Flow FM.
 The module computes local erosion sensitivity, visualizes the bank movement and gives an estimation of the amount of bank material that is released in the first year and after the equilibrium is reached.
 D-FAST Bank Erosion can easily be used as a post processing tool of D-Flow FM-simulations.
 Some examples for which D-FAST Bank Erosion can compute bank erosion are:
 
-* Bank adjustments such as removal of bank protection
-* Applying or removing fore shore protection
-* Changes in shipping type or intensity
-* Changes in currents (e.g. due to construction of side channels)
+\begin{itemize}
+\item Bank adjustments such as removal of bank protection
+\item Applying or removing fore shore protection
+\item Changes in shipping type or intensity
+\item Changes in currents (e.g. due to construction of side channels)
+\end{itemize}
 
 Output
 The output of D-FAST Bank Erosion is:
-1. Bank line movement after one year and when the final equilibrium state is reached.
-1. Amount of sediment that is released from the banks after one year and when the final equilibrium state is reached.
+
+\begin{enumerate}
+\item Bank line movement after one year and when the final equilibrium state is reached.
+\item Amount of sediment that is released from the banks after one year and when the final equilibrium state is reached.
+\end{enumerate}
 
 This output is presented in graphs / figures and written to text files.
 
 Input
 The input of D-FAST Bank Erosion is:
-1. D-Flow FM results (NetCDF map-files)
-1. Local data: level of bank protection removal, subsoil characteristics, shipping information (quantity, location of fairway)
+
+\begin{enumerate}
+\item D-Flow FM results (NetCDF map-files)
+\item Local data: level of bank protection removal, subsoil characteristics, shipping information (quantity, location of fairway)
+\end{enumerate}
 
 The layout of this manual is as follows: In chapter 2 a description is given on how to use D-FAST Bank Erosion (installation, input, output).
 The background of D-FAST Bank Erosion is outlined in chapters 3 and 4 (partly in Dutch).
 
-## Installation
+\section{Installation}
 
 D-FAST Bank Erosion itself consists of 2 executables called 'BankLines.exe' and BankErosion.exe'.
 The first is needed to establish the initial bank lines and the second computes the bank line movement and eroded volume.
@@ -37,18 +45,23 @@ The required version of the installer is standard provided with D-FAST Bank Eros
 By default D-FAST Bank Erosion is looking for the definition file deffile.def in the same directory as the executables.
 When the definition file has another name or location, this should be passed when the modules are called.
 
-## Scenario plan
+\section{Scenario plan}
+
 D-FAST Bank Erosion is not calibrated for local bank erosion .
 Therefore it is strongly advised to use D-FAST Bank Erosion only in a relative way.
 In this way an image can be formed of
-* at which locations the bank is most sensitive to erosion (by comparing different locations along the river)
-* how sensitive a location is for certain measures (by comparing different scenarios at 1 location)
+
+\begin{itemize}
+\item at which locations the bank is most sensitive to erosion (by comparing different locations along the river)
+\item how sensitive a location is for certain measures (by comparing different scenarios at 1 location)
+\end{itemize}
 
 We advise to compute different scenarios and compare between them.
 An example is: 1 scenario with a subsoil of sand and 1 scenario with a subsoil of clay.
 This means that only the type of subsoil is changed and the other input remains unchanged.
 
-## D-Flow FM-computations
+\section{D-Flow FM-computations}
+
 Before D-FAST Bank Erosion can be used, steady state D-Flow FM-computations  have to be performed for each discharge level.
 This first requires a schematisation of the discharge hydrograph in discharge levels and a probability per discharge step.
 The discretisation of the discharge hydrograph is not a trivial procedure.
@@ -71,25 +84,27 @@ When this criterion is not met, strange peaks in the detected bank lines may occ
 
 An example of discharge levels for the river Meuse in combination with different probabilities for different scenarios (wet/dry/intermediate) is given in Table 2.1.
 
-| Dicharge level nr. | Discharge (m3/s) | 1998-2002 (wet) | 2004-2010 (dry) | 2008-2011 (intermediate) |
-|--------------------|------------------|-----------------|-----------------|--------------------------|
-| 1 | 75 | 0,2932 | 0,1808 | 0,3110 |
-| 2 | 150 | 0,1918 | 0,2466 | 0,2329 |
-| 3 | 272 | 0,1918 | 0,2603 | 0,2055 |
-| 4 | 400 | 0,0411 | 0,0548 | 0,0685 |
-| 5 | 500 | 0,1507 | 0,1370 | 0,0959 |
-| 6 | 750 | 0,0548 | 0,0712 | 0,0548 |
-| 7 | 900 | 0,0329 | 0,0384 | 0,0164 |
-| 8 | 1100 | 0,0164 | 0,0082 | 0,0055 |
-| 9 | 1300 | 0,0137 | 0,0014 | 0,0021 |
-| 10 | 1500 | 0,0041 | 0,0014 | 0,0021 |
-| 11 | 1700 | 0,0041 | 0,0000 | 0,0021 |
-| 12 | 1900 | 0,0041 | 0,0000 | 0,0021 |
-| 13 | 2300 | 0,0014 | 0,0000 | 0,0014 |
+\begin{tabular}{lllll}
+Dicharge level nr. & Discharge (m3/s) & 1998-2002 (wet) & 2004-2010 (dry) & 2008-2011 (intermediate) \\ \hline
+1 & 75 & 0.2932 & 0.1808 & 0.3110 \\
+2 & 150 & 0.1918 & 0.2466 & 0.2329 \\
+3 & 272 & 0.1918 & 0.2603 & 0.2055 \\
+4 & 400 & 0.0411 & 0.0548 & 0.0685 \\
+5 & 500 & 0.1507 & 0.1370 & 0.0959 \\
+6 & 750 & 0.0548 & 0.0712 & 0.0548 \\
+7 & 900 & 0.0329 & 0.0384 & 0.0164 \\
+8 & 1100 & 0.0164 & 0.0082 & 0.0055 \\
+9 & 1300 & 0.0137 & 0.0014 & 0.0021 \\
+10 & 1500 & 0.0041 & 0.0014 & 0.0021 \\
+11 & 1700 & 0.0041 & 0.0000 & 0.0021 \\
+12 & 1900 & 0.0041 & 0.0000 & 0.0021 \\
+13 & 2300 & 0.0014 & 0.0000 & 0.0014 \hline
+\end{tabular}
 
 Table 2.1	Probabilities of a discharge level for different scenarios (De Vries, 2012)
 
-## Definitionfile <defile.def>:
+\section{Definitionfile <defile.def>}
+
 The definition file contains input parameters for the executables 'BankLines' en 'BankErosion'.
 De executables search for the file 'defile.def' in the same directory as themselves, unless another file or path name is given.
 The possible keywords and their description are given in Table 2.2.
@@ -105,67 +120,71 @@ An example of a definition file is given in Figure 2.1.
 
 Table 2.2  Keywords in the definition file of D-FAST Bank Erosion
 
-| Keyword |  | Value | Description |
-|---------|--|-------|-------------|
-| Path | M | pathname | [REMOVED] Pathname of used m-files (unnecessary when using executables)
-| Nbank | M | integer | Number of bank lines, (standard 2 lines) |
-| GridFile  | M | filename | Rgf-file for defining grid coordinates |
-| RiverKM | M | filename | Textfile with riverkilometres and correspondig xy-coordinates |
-| Boundaries  | O | integers | river chainage of the region of interst;  rkm-start:rkm-end, e.g. 81:100 (default: all) |
-| NLim | O | integers | [REMOVED] Range of N-values from SDS-file that is considered (default: all), only used when keyword 'Boundaries' is not available. |
-| Mlim | O | integers | [REMOVED] Range of M-values from SDS-file that is considered (default: all), only used when keyword 'Boundaries' is not available. |
-| Plotting | O | logical | [REMOVED] Plotting results (default: false) |
-| SavePlots | O | Logical | [REMOVED] Saving plots (default: true) |
-| ClosePlots | O | Logical | [REMOVED] Close plots and close Quickplot when simulation is finished (default: false) |
-| Waqview | O | logical | [REMOVED] Generating output for Waqview (default: false) |
+\begin{tabular}{llll}
+Keyword &  & Value & Description \\ \hline
+Path & M & pathname & [REMOVED] Pathname of used m-files (unnecessary when using executables) \\
+Nbank & M & integer & Number of bank lines, (standard 2 lines) \\
+GridFile  & M & filename & Rgf-file for defining grid coordinates \\
+RiverKM & M & filename & Textfile with riverkilometres and correspondig xy-coordinates \\
+Boundaries  & O & integers & river chainage of the region of interst;  rkm-start:rkm-end, e.g. 81:100 (default: all) \\
+NLim & O & integers & [REMOVED] Range of N-values from SDS-file that is considered (default: all), only used when keyword 'Boundaries' is not available. \\
+Mlim & O & integers & [REMOVED] Range of M-values from SDS-file that is considered (default: all), only used when keyword 'Boundaries' is not available. \\
+Plotting & O & logical & [REMOVED] Plotting results (default: false) \\
+SavePlots & O & Logical & [REMOVED] Saving plots (default: true) \\
+ClosePlots & O & Logical & [REMOVED] Close plots and close Quickplot when simulation is finished (default: false) \\
+Waqview & O & logical & [REMOVED] Generating output for Waqview (default: false) \hline
+\end{tabular}
 
 Input BankLines.exe
 
-| Keyword |  | Value | Description |
-|---------|--|-------|-------------|
-| SDS-file | M | filename | [REPLACE BY File] SDS-file for determining representative bank line |
-| Line1    | M | filename | Textfile with xy-coordinates of search line 1 |
-| LineN    | M | filename | Textfile with xy-coordinaten of search line N |
-| BankDir | O | string | Directory for storing bank lines (default: current directory) |
-| BankFile | O | filename | Text file(s) in which xy-coordinates of bank lines are stored (default 'bankfile') |
-| LocalDir | O | filename | Directory for storing local output (default: 'local') |
-| SortLim | E | real | Maximum number of vertices used for sorting (default: 50) |
-| Waterdepth | E | real | Water depth used for defining bank line (default 0.0) |
-| Dlines | E | nline reals | Distance from pre-defined lines used for determining bank lines (default: 50) |
-| Dremove | E | nline reals | Ommiting coordinates that are more than this distance from neighbouring points (default: 5000) |
+\begin{tabular}{llll}
+Keyword &  & Value & Description \\ \hline
+SDS-file & M & filename & [REPLACE BY File] SDS-file for determining representative bank line \\
+Line1    & M & filename & Textfile with xy-coordinates of search line 1 \\
+LineN    & M & filename & Textfile with xy-coordinaten of search line N \\
+BankDir & O & string & Directory for storing bank lines (default: current directory) \\
+BankFile & O & filename & Text file(s) in which xy-coordinates of bank lines are stored (default 'bankfile') \\
+LocalDir & O & filename & Directory for storing local output (default: 'local') \\
+SortLim & E & real & Maximum number of vertices used for sorting (default: 50) \\
+Waterdepth & E & real & Water depth used for defining bank line (default 0.0) \\
+Dlines & E & nline reals & Distance from pre-defined lines used for determining bank lines (default: 50) \\
+Dremove & E & nline reals & Ommiting coordinates that are more than this distance from neighbouring points (default: 5000) \hline
+\end{tabular}
 
 Input BankErosion.exe
 
-| Keyword |  | Value | Description |
-|---------|--|-------|-------------|
-| Terosion | M | real | Simulation period  [years] |
-| RiverAxis | M | filename | Textfile with xy-coordinates of river axis |
-| Fairway  | M | filename | Textfile with xy-coordinates of fairway axis |
-| BankType | M | filename/real | Bank strength definition (for each bank line per river-km) |
-| Vship  | M | filename/real | Relative velocity of the ships (per river-km) [m/s] |
-| Nship  | M | filename/integer | Number of ships per year (per river-km) |
-| ShipType | M | filename/integer | Type of ship (per river-km) |
-| Draught | M | filename/real | Draught of the ships (per river-km) [m] |
-| NLevel | M | integer | Number of discharge levels |
-| File1 | M | filename | [REPLACES SDSfile1] NetCDF map-file for computing bank erosion for discharge 1 (only used when 'Nlevel'>1) |
-| PDischarge1 | M | real | Probability of discharge 1 (sum of probabilities should be 1) |
-| FileN | M | filename | [REPLACES SDSfileN] NetCDF map-file for computing bank erosion for discharge 'Nlevel' (only used when 'Nlevel'>1) |
-| PDischargeN | M | real | Probability of discharge 'Nlevel' (sum of probabilities should be 1) |
-| RefLevel | O | integer | Reference level: discharge level with SDS-file that is equal to 'SDS-file' (only used when 'Nlevel'>1)  (default: 1) |
-| Classes | O | logical | Use classes (true) or critical shear stress (false) in 'BankType' (default: true) |
-| ProtectLevel | O | filename | Text file(s) with level of bank protection for each bank line per river-km (default: -1000) |
-| Slope | O | filename | Text file(s) with equilibrium slope for each bank line per river-km  (default: 20) |
-| OutputDir | O | String | Directory for storing output files |
-| BankNew | O | filename | Text file(s) in which new xy-coordinates of bank lines are stored (default 'banknew') |
-| BankEq | O | filename | Text file(s) in which xy-coordinates of equilibrium bank lines are stored (default: 'bankeq') |
-| EroVol | O | filename | Text file in which eroded volume per river-km is stored (default: 'erovol.evo') |
-| OutputInterval | O | real | interval in which the output (eroded volume) is given (default: 1 km) [km] |
-| VelFilter | E | logical | Filtering velocity along bank lines (default: true) |
-| Revert | E | nline integers | Reverting direction of erosion (default 0) |
-| Wave0 | E | real | Distance from fairway axis at which waveheight is zero (default 200 m) |
-| Wave1 | E | real | Distance from fairway axis at which reduction of waveheigth to zero starts (default Wave0-50 m) |
-| Nwave | E | integer | Number of waves per ship (default 5) |
+\begin{tabular}{llll}
+Keyword &  & Value & Description \\ \hline
+Terosion & M & real & Simulation period  [years] \\
+RiverAxis & M & filename & Textfile with xy-coordinates of river axis \\
+Fairway  & M & filename & Textfile with xy-coordinates of fairway axis \\
+BankType & M & filename/real & Bank strength definition (for each bank line per river-km) \\
+Vship  & M & filename/real & Relative velocity of the ships (per river-km) [m/s] \\
+Nship  & M & filename/integer & Number of ships per year (per river-km) \\
+ShipType & M & filename/integer & Type of ship (per river-km) \\
+Draught & M & filename/real & Draught of the ships (per river-km) [m] \\
+NLevel & M & integer & Number of discharge levels \\
+File1 & M & filename & [REPLACES SDSfile1] NetCDF map-file for computing bank erosion for discharge 1 (only used when 'Nlevel'>1) \\
+PDischarge1 & M & real & Probability of discharge 1 (sum of probabilities should be 1) \\
+FileN & M & filename & [REPLACES SDSfileN] NetCDF map-file for computing bank erosion for discharge 'Nlevel' (only used when 'Nlevel'>1) \\
+PDischargeN & M & real & Probability of discharge 'Nlevel' (sum of probabilities should be 1) \\
+RefLevel & O & integer & Reference level: discharge level with SDS-file that is equal to 'SDS-file' (only used when 'Nlevel'>1)  (default: 1) \\
+Classes & O & logical & Use classes (true) or critical shear stress (false) in 'BankType' (default: true) \\
+ProtectLevel & O & filename & Text file(s) with level of bank protection for each bank line per river-km (default: -1000) \\
+Slope & O & filename & Text file(s) with equilibrium slope for each bank line per river-km  (default: 20) \\
+OutputDir & O & String & Directory for storing output files \\
+BankNew & O & filename & Text file(s) in which new xy-coordinates of bank lines are stored (default 'banknew') \\
+BankEq & O & filename & Text file(s) in which xy-coordinates of equilibrium bank lines are stored (default: 'bankeq') \\
+EroVol & O & filename & Text file in which eroded volume per river-km is stored (default: 'erovol.evo') \\
+OutputInterval & O & real & interval in which the output (eroded volume) is given (default: 1 km) [km] \\
+VelFilter & E & logical & Filtering velocity along bank lines (default: true) \\
+Revert & E & nline integers & Reverting direction of erosion (default 0) \\
+Wave0 & E & real & Distance from fairway axis at which waveheight is zero (default 200 m) \\
+Wave1 & E & real & Distance from fairway axis at which reduction of waveheigth to zero starts (default Wave0-50 m) \\
+Nwave & E & integer & Number of waves per ship (default 5) \\
+\end{tabular}
 
+\begin{verbatim}
     % General input parameters bank erosion module
     NBank          = 2
     GridFile       = inputfiles\maas40m_1.rgf
@@ -221,10 +240,12 @@ Input BankErosion.exe
     PDischarge9    =   0.0014
     SDSfile10      = SDSfiles\SDS-q1500
     PDischarge10   =   0.0014
+\end{verbatim}
 
 Figure 2.1	Example of a definition file for D-FAST Bank Erosion
 
-## Banklines <BankLines.exe> :
+\section{Banklines <BankLines.exe>}\
+
 determines the representative bank lines within the area of interest (for background information see chapter 3).
 The input of Banklines is given through the definition file (deffile.def), see section 2.4.
 
@@ -239,17 +260,28 @@ BankLines path\deffile_other.txt
 with path the path to the directory where the definition file is located and deffile_other.txt the name of the definition file.
 
 Required input:
-* D-Flow FM-output file (NetCDF map-file) at representative discharge (SDSfile),
-* Number of bank Lines (Nbank default two, the left and right bank),
-* For each of the bank lines a file with xy-coordinates of the estimated location of the bank  line (Line1, Line2, ..., LineN, with N the number of bank lines)
-* File which links river kilometres to xy-coordinates (RiverKM),
+
+\begin{itemize}
+\item D-Flow FM-output file (NetCDF map-file) at representative discharge (SDSfile),
+\item Number of bank Lines (Nbank default two, the left and right bank),
+\item For each of the bank lines a file with xy-coordinates of the estimated location of the bank  line (Line1, Line2, ..., LineN, with N the number of bank lines)
+\item File which links river kilometres to xy-coordinates (RiverKM),
+\end{itemize}
+
+
 Optional
-* Area of interest in the form of a range of river kilometres or in terms of mn-coordinates (Boundaries or NLim and MLim).
-* Name of the directory to which the output will be written (BankDir)
+
+\begin{itemize}
+\item Area of interest in the form of a range of river kilometres or in terms of mn-coordinates (Boundaries or NLim and MLim).
+\item Name of the directory to which the output will be written (BankDir)
+\end{itemize}
 
 Output:
-* XY-coordinates of the determined bank lines.
-* Plot of the bank lines (optional, Plotting)
+
+\begin{itemize}
+\item XY-coordinates of the determined bank lines.
+\item Plot of the bank lines (optional, Plotting)
+\end{itemize}
 
 The computation has ended successfully when the message "BankLines ended successfully!" appears.
 
@@ -264,7 +296,8 @@ Points too close to eachother will result in large computation times, which can 
 Figure 2.2	Example of output of  BankLines.exe
 
 
-## BankErosion <BankErosion.exe>:
+\section{BankErosion <BankErosion.exe>}
+
 determines the expected bank erosion within the area of interest (for background information see chapter 4).
 The input of BankErosion  is given through the definition file (deffile.def), see section 2.4.
 
@@ -287,42 +320,48 @@ At the next call of BankLines they are created once again.
 The creation of these files can be time consuming, so it is recommended not to clean the files when the reach and/or used SDS-files are not changed.
 
 Required input:
-* The considered simulation time (Terosion, default 1 year),
-* The number of discharge levels (NLevel),
-* D-Flow FM-output files (NetCDF map-files) for the different discharge levels and the corresponding probability distribution (File1, File2, ..., FileN and PDischarge1, PDischarge2, ..., PDischargeN, with N the number of discharge levels).
+
+\begin{itemize}
+\item The considered simulation time (Terosion, default 1 year),
+\item The number of discharge levels (NLevel),
+\item D-Flow FM-output files (NetCDF map-files) for the different discharge levels and the corresponding probability distribution (File1, File2, ..., FileN and PDischarge1, PDischarge2, ..., PDischargeN, with N the number of discharge levels).
 When only 1 discharge level is given, the standard NetCDF map-file (SDSfile) is used,
-* Grid for positioning of results (GridFile), only needed when WaqView=true,
-* Number of bank Lines (Nbank default two, the left and right bank),
-* File which links river kilometres to xy-coordinates (RiverKM),
-* XY-coordinates of the river and fairway axis (RiverAxis, Fairway),
-* Information about the strength or type of the soil of the banks (BankType).
+\item Grid for positioning of results (GridFile), only needed when WaqView=true,
+\item Number of bank Lines (Nbank default two, the left and right bank),
+\item File which links river kilometres to xy-coordinates (RiverKM),
+\item XY-coordinates of the river and fairway axis (RiverAxis, Fairway),
+\item Information about the strength or type of the soil of the banks (BankType).
 This can be done either in the form of classes (see Tabel 4.1 for values and explanation) or with a critical shear stress (see Table 5.1 for examples).
 In the first case Classes=true should be set and in the second case Classes=false (default).
 The bank strength information can be given either with a fixed value for the whole track or in a ASCII-file per river kilometer (first column river-km, second column bank type, see Figure 2.3),
-* Shipping information (Vship, Nship, ShipType, Draught).
+\item Shipping information (Vship, Nship, ShipType, Draught).
 This can be done either with a fixed value for the whole track or in a file per river kilometer (first column river-km, second column shipping information: similar to entering bank type, see Figure 2.3).
 Optional
-* ASCII-file with level of bank protection (wrt NAP) for each bank line per river-km.
+\item ASCII-file with level of bank protection (wrt NAP) for each bank line per river-km.
 (First column river-km, second column bank protection level: similar to entering bank type, see Figure 2.3).
 By default the bank protection level is 1 meter below the water level of the representative discharge,
-* ASCII-file with slope of foreshore (1:n) for each bank line per river-km.
+\item ASCII-file with slope of foreshore (1:n) for each bank line per river-km.
 (First column river-km, second column slope parameter n: similar to entering bank type, see Figure 2.3).
 Default a slope of 1:20 will be used,
-* Name of the directory to which the output will be written (OutputDir),
-* Name of the file to which the results will be written (BankNew, BankEq, EroVol),
-* Name of the directory to which local files will be written (LocalDir).
+\item Name of the directory to which the output will be written (OutputDir),
+\item Name of the file to which the results will be written (BankNew, BankEq, EroVol),
+\item Name of the directory to which local files will be written (LocalDir).
+\end{itemize}
 
 Output:
-* Map with waterdepth, initial bank lines, river kilometers and fairway axis (see Figure 2.4),
-* Map with erosion sensitivity of the banks based on computed bank retreat (see Figure 2.5),
-* The computed erosion volume during the simulation period split up for left and right bank and for each discharge level (see Figure 2.6),
-* Total erosion volume based on equilibrium bank line (see Figure 2.7),
-* Control figures for water levels of each discharge (see Figuur 2.8 and Figuur 2.9),
-* Control figures for flow velocity of each discharge (see Figuur 2.10 and Figuur 2.11),
-* Map with indication of applied bank type (see Figuur 2.12),
-* Bank retreat at the end of the simulation period and for the equilibrium situation (see Figure 2.13),
-* XY-coordinates of the computed bank lines at the end of the simulation period and of the equilibrium bank lines,
-* Files to be able to visualize information in Waqview.
+
+\begin{itemize}
+\item Map with waterdepth, initial bank lines, river kilometers and fairway axis (see Figure 2.4),
+\item Map with erosion sensitivity of the banks based on computed bank retreat (see Figure 2.5),
+\item The computed erosion volume during the simulation period split up for left and right bank and for each discharge level (see Figure 2.6),
+\item Total erosion volume based on equilibrium bank line (see Figure 2.7),
+\item Control figures for water levels of each discharge (see Figuur 2.8 and Figuur 2.9),
+\item Control figures for flow velocity of each discharge (see Figuur 2.10 and Figuur 2.11),
+\item Map with indication of applied bank type (see Figuur 2.12),
+\item Bank retreat at the end of the simulation period and for the equilibrium situation (see Figure 2.13),
+\item XY-coordinates of the computed bank lines at the end of the simulation period and of the equilibrium bank lines,
+\item Files to be able to visualize information in Waqview.
+\end{itemize}
 
 The computation has ended successfully when the message "BankErosion ended successfully!" appears.
 
@@ -380,7 +419,8 @@ Figure 2.13 Bank retreat at the end of the simulation period and for the equilib
 
 
 
-# Detection of bank lines
+\section{Detection of bank lines}
+
 The location of bank lines is determined by looking at the transition of water to land at a reference discharge computed with a D-Flow FM model.
 To determine the exact location of the bank lines, first all cells in the D-Flow FM-grid are marked that are at the transition from land to water at these discharge level.
 The concerned cells have positive water depth and one or more neighbouring cells with a zero water depth.
@@ -423,7 +463,8 @@ Figure 3.3 Detection of a bank line close to groynes.
 Red: Baseline 'oeverlijnen', Blue: detected bank line from D-Flow FM computation (Q=278,5 m3/s, average discharge)
 
 
-# Potential bank line shift and bank erosion
+\chapter{Potential bank line shift and bank erosion}
+
 Wanneer de ligging van de initiele oeverlijn bekend is, kan de potentiele oeverlijnverschuiving en oeverafslag worden bepaald.
 De ontwikkelde oevererosiemodule is bedoeld als hulpmiddel om de potentiele oevererosie in te kunnen schatten en niet om de daadwerkelijke oevererosie te voorspellen.
 Binnen de oevererosiemodule worden twee erosiemechanismen meegenomen: erosie door scheepsgolven en erosie door stroming.
@@ -434,7 +475,7 @@ In paragraaf 4.5 wordt uitgelegd hoe er kan worden omgegaan met een variabel afv
 Het bepalen van de evenwichtsoever en het daarbij behorende geerodeerde volume wordt uitgelegd in paragraaf 4.6.
 Ten slotte worden enkele van de beperkingen van de oevererosiemodule aangestipt in paragraaf 4.7.
 
-## Determining potential erosion by ship waves
+\section{Determining potential erosion by ship waves}
 
 Scheepsgolven zijn een van de belangrijkste factoren wat betreft oeverafslag (Verheij (2000))  en worden daarom als eerste oevererosiemechanisme meegenomen in de oevererosiemodule.
  De afleiding voor de erosieformulering voor scheepsgolven is overgenomen uit de BEM module (Verheij (2000), Stolker & Verheij (2001b)) en definities van grootheden zijn gegeven in Figuur 4.1.
@@ -517,7 +558,7 @@ Klasse	Grond	cE (m-1s-1)	  (Pa)
 3	Matig / slechte klei 	2 10-4	0,95
 4	Zand	12,5 10-4	0,15
 
-## Determining potential erosion by currents
+\section{Determining potential erosion by currents}
 
 Naast oeverafslag door scheepsgolven kan ook een sterke stroming langs de oever zelf zorgen voor oevererosie.
 Dit mechanisme wordt ook meegenomen in de oevererosiemodule.
@@ -551,7 +592,7 @@ De waarde voor de Chezy coefficient wordt overgenomen uit de D-Flow FM berekenin
 De stroomsnelheid langs de oever wordt bepaald aan de hand van de stroomsnelheid uit D-Flow FM.
 De waarde voor de kritische schuifspanning voor erosie,  , is gerelateerd aan de sterkte coefficient voor oevermateriaal,  , zoals beschreven in Bijlage B)
 
-## Total bank shift
+\section{Total bank shift}
 
 De totale oeverlijnverschuiving wordt gevonden door te sommeren over de oeverlijnverschuivingen veroorzaakt door de verschillende erosiemechanismen:
 
@@ -571,7 +612,8 @@ Blauw: oorspronkelijke locatie, Groen: nieuwe locatie
 Blauw: oorspronkelijke locatie, Rood: nieuwe locatie gebaseerd op individuele segmenten, Groen: nieuwe locatie (gemiddelde van de rode punten).
 
 Om numerieke problemen te voorkomen worden te kleine oeverlijnsegementen samengevoegd met hun buren.
-## Potential bank erosion volume
+
+\section{Potential bank erosion volume}
 
 Naast de potentiele oeverlijnverschuiving is ook het potentiele volume aan sediment dat vrijkomt door erosie van belang.
 Deze hoeveelheid sediment komt uiteindelijk in de rivier terecht, wat gevolgen kan hebben voor de bodemligging en eventueel noodzaak kan geven tot extra baggerwerkzaamheden.
@@ -610,7 +652,7 @@ De invloed hiervan kan niet worden bepaald door alleen een sedimentbalans op te 
 een sedimenttransportformule, omdat soms grote hompen klei blijven liggen die eerst moeten desintegreren voordat de stroming ze kan meenemen.
 De invloed van het afgeslagen materiaal op de golfhoogte (en daardoor de erosie door scheepsgolven) kan wel worden meegenomen door de parameter voor golfdemping, , te verhogen.
 
-## Variable discharge
+\section{Variable discharge}
 
 Het meenemen van een variabele afvoer is mogelijk door de afvoerverdeling te schematiseren met een hydrograaf.
 Deze hydrograaf bestaat uit   afvoerniveaus en hun bijbehorende kans op voorkomen.
@@ -626,7 +668,7 @@ In de oevererosiemodule wordt echter uitgegaan van een initiele oeverlijn (behor
 De mate van erosie van deze lijn varieert echter wel met de afvoer.
 
 
-### Erosion by ship waves
+\subsection{Erosion by ship waves}
 
 Een varierend afvoerniveau zorgt voor een varierend niveau van de waterspiegel.
 De initiele oeverlijn is echter alleen onderhevig aan erosie door golven bij een gegeven afvoer   als de hoogte van de lijn in het invloedsgebied   ligt, waarbij   de golfhoogte bij de oever en   het niveau van de waterspiegel bij afvoer  .
@@ -642,12 +684,13 @@ c)
 d)
 Figuur 4.6 Erosie door golven bij meerdere afvoerniveaus: a) geen erosie, oeverlijn ligt boven invloedsgebied b) erosie, c) erosie, d) geen erosie, oeverlijn ligt onder invloedsgebied
 
-### Erosion by currents
+\subsection{Erosion by currents}
 
 Voor elk afvoerniveau wordt de erosie door stroming bepaald met behulp van de stroomsnelheid langs de oeverlijn behorende bij het betreffende afvoerniveau.
 Hierbij is er natuurlijk alleen stroming langs de oeverlijn als deze lijn op of onder de waterspiegel ligt.
 In de voorbeelden weergegeven in Figuur 4.6 is de oeverlijn dus alleen onderhevig aan erosie door stroming bij afvoerniveaus   en  .
-### Total erosion
+
+\subsection{Total erosion}
 
 De totale verschuiving van de oeverlijn bij het meenemen van meerdere afvoerniveaus wordt gevonden door de oeverlijnverschuivingen bij de verschillende afvoeren gewogen te sommeren over alle afvoerniveaus:
 
@@ -665,7 +708,8 @@ De verschuiving van de oeverlijn kan dan weer op dezelfde manier worden bepaald 
 De potentiele oeverafslag dient eerst per afvoerniveau te worden berekend (zie paragraaf 4.4).
 Daarna kan de totale potentiele oeverafslag worden bepaald door gewogen te sommeren met de kans van voorkomen van het betreffende afvoerniveau, analoog aan de bepaling van de totale oeverlijnverschuiving (vergelijking (1.3)).
 
-## Determining equilibrium bank
+\section{Determining equilibrium bank}
+
 In van der Mark (2011), Hoofdstuk 3 is een analyse gemaakt van kentallen voor te verwachten oevererosie langs de IJssel.
 Daarin wordt gesteld dat de meest waarschijnlijke te verwachten taludhelling van de evenwichtsoever 1:20 is.
 Aan de hand hiervan kan een schatting worden gegeven van de erosieafstand   voor het behalen van de evenwichtssituatie (zie ook Figuur 4.7):
@@ -680,11 +724,12 @@ met
 
 Figuur 4.7	Geschatte profiel evenwichtsoever.
 
-## Limitations of D-FAST Bank Erosion
+\section{Limitations of D-FAST Bank Erosion}
 
 De oevererosiemodule is bedoeld als hulpmiddel om in te kunnen schatten waar potentieel oevererosie plaats kan vinden en niet om de daadwerkelijke oevererosie te voorspellen.
 In deze sectie worden een paar beperkingen van de oevererosiemodule aangestipt.
-### Homogeneous bank
+
+\subsection{Homogeneous bank}
 
 Een van de belangrijkste beperkingen is dat de samenstelling van de oever homogeen wordt verondersteld.
 Dit is in de werkelijkheid niet het geval.
@@ -702,22 +747,24 @@ c) erosion process in case of horizontal layers
 Figure 4.8 Non-homogeneous banks.
 
 
-### Only erosion along initial bank line
+\subsection{Only erosion along initial bank line}
 
 Er wordt alleen oevererosie bepaald voor de opgegeven initiele oeverlijn (behorende bij een gemiddelde afvoer).
 In werkelijkheid is het echter ook mogelijk dat er oevererosie op andere locaties plaatsvindt.
 
-### Only erosion by ship waves and currents
+\subsection{Only erosion by ship waves and currents}
+
 In de oevererosiemodule wordt alleen erosie door scheepsgolven en stroming gemodelleerd.
 Andere erosiemechanismen zoals windgolven, uitstromend grondwater, bevriezing en vertrapping door vee worden in de module niet meegenomen.
 
-### Profile and bed level remain constant
+\subsection{Profile and bed level remain constant}
 
 Door oevererosie verandert lokaal de breedte van de rivier en ook zorgt het afgeslagen materiaal voor een andere bodemligging.
 Hierdoor veranderen ook de stromingscondities in de rivier en langs de oever.
 Aangezien de oevererosiemodule is gebaseerd uitkomsten van D-Flow FM berekeningen wordt deze dynamiek van de bodem en oevers echter niet meegenomen.
 
-# References
+\chapter*{References}
+
 Crosato, A. (2007), Effects of smoothing and regridding in numerical meander migration models. Water Resources Research, Vol 43.
 
 CUR, (1996). Erosie van onverdedigde oevers, CUR-rapport 96-7, Gouda.
@@ -753,7 +800,7 @@ Verheij, H.J., F. van der Knaap & H. Sessink (2007), Verder ontwikkelen van oeve
 Vroeg, J.H. de (1999), Breach growth in cohesive materials : selection of cases. Rapport H3468, WL | Delft Hydraulics, Delft.
 
 
-# Strength of bank material for different soil types
+\chapter{Strength of bank material for different soil types}
 The value for the coefficient for strength of bank material, cE , and the critical shear stress for erosion,  , for different soil types is given in Table 5.1 (Verheij et al, 1995, CUR, 1996 TAW, 1998, de Vroeg, 1999).
 
 The following relation is applicable:
@@ -768,17 +815,17 @@ Sturdy grass	0,01 10-4	185
 Mediocre grass	0,02 10-4	93
 Bad grass	0,03 10-4	62
 Very good clay (compact)	0,5 10-4	4
-Clay with 60% sand (firm)	0,6 10-4	2,5
+Clay with 60\% sand (firm)	0,6 10-4	2,5
 Good clay with  little structure	0,75 10-4	2
 Strongly structure good clay
 (mediocre)	1,5 10-4	1,5
 Bad clay (weak)	3,5 10-4	0,65
-Sand with 17% silt	10 10-4	0,20
-Sand with 10% silt	12,5 10-4	0,15
-Sand with 0% silt	15 10-4	0,10
+Sand with 17\% silt	10 10-4	0,20
+Sand with 10\% silt	12,5 10-4	0,15
+Sand with 0\% silt	15 10-4	0,10
 
 
-# Determining ship induced wave height at the beginning of the fore shore
+\chapter{Determining ship induced wave height at the beginning of the fore shore}
 To determine the ship induced wave height at the beginning of the fore shore,   [m], the following formula is used (source: Handleiding DIPRO, 1997)
 
 	
