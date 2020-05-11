@@ -30,8 +30,8 @@ The input of D-FAST Bank Erosion is:
 \item Local data: level of bank protection removal, subsoil characteristics, shipping information (quantity, location of fairway)
 \end{enumerate}
 
-The layout of this manual is as follows: In chapter 2 a description is given on how to use D-FAST Bank Erosion (installation, input, output).
-The background of D-FAST Bank Erosion is outlined in chapters 3 and 4 (partly in Dutch).
+The layout of this manual is as follows: In this chapter a description is given on how to use D-FAST Bank Erosion (installation, input, output).
+The background of D-FAST Bank Erosion is outlined in \autoref{Chp3} and \autoref{Chp4} (partly in Dutch).
 
 \section{Installation}
 
@@ -84,7 +84,7 @@ When this criterion is not met, strange peaks in the detected bank lines may occ
 
 
 
-An example of discharge levels for the river Meuse in combination with different probabilities for different scenarios (wet/dry/intermediate) is given in Table 2.1.
+An example of discharge levels for the river Meuse in combination with different probabilities for different scenarios (wet/dry/intermediate) is given in \autoref{Tab2.1}.
 
 \begin{table}
 \begin{tabular}{p{2cm}p{2cm}p{2cm}p{2cm}p{2cm}}
@@ -107,11 +107,11 @@ Dicharge level nr. & Discharge (m3/s) & 1998-2002 (wet) & 2004-2010 (dry) & 2008
 \label{Tab2.1}
 \end{table}
 
-\section{Definitionfile <defile.def>}
+\section{Definitionfile <defile.def>}\label{Sec2.4}
 
 The definition file contains input parameters for the executables 'BankLines' en 'BankErosion'.
 De executables search for the file 'defile.def' in the same directory as themselves, unless another file or path name is given.
-The possible keywords and their description are given in Table 2.2.
+The possible keywords and their description are given in \autoref{Tab2.2}.
 The existence, not the order, of the keywords is of importance.
 
 In the table the following abbreviations are used:
@@ -122,10 +122,9 @@ In the table the following abbreviations are used:
 \end{itemize}
 
 Filenames can be either given with a single filename, or with their (relative) path and they should contain no spaces.
-An example of a definition file is given in Figure 2.1.
+An example of a definition file is given in \autoref{Fig2.1}.
 
-Table 2.2  Keywords in the definition file of D-FAST Bank Erosion
-
+\begin{table}
 \begin{tabular}{lllp{5cm}}
 Keyword &  & Value & Description \\ \hline
 Path & M & pathname & [REMOVED] Pathname of used m-files (unnecessary when using executables) \\
@@ -140,6 +139,9 @@ SavePlots & O & Logical & [REMOVED] Saving plots (default: true) \\
 ClosePlots & O & Logical & [REMOVED] Close plots and close Quickplot when simulation is finished (default: false) \\
 Waqview & O & logical & [REMOVED] Generating output for Waqview (default: false) \\ \hline
 \end{tabular}
+\caption{Keywords in the definition file of D-FAST Bank Erosion}
+\label{Tab2.2}
+\end{table}
 
 Input BankLines.exe
 
@@ -255,7 +257,7 @@ Nwave & E & integer & Number of waves per ship (default 5) \\ \hline
 \section{Banklines <BankLines.exe>}
 
 determines the representative bank lines within the area of interest (for background information see chapter 3).
-The input of Banklines is given through the definition file (deffile.def), see section 2.4.
+The input of Banklines is given through the definition file (deffile.def), see \autoref{Sec2.4}.
 
 When the definition file has the name deffile.def and is located in the same directory as the executable the module can be called as follows:
 
@@ -297,7 +299,7 @@ Output:
 
 The computation has ended successfully when the message "BankLines ended successfully!" appears.
 
-An example of the output as is generated with Banklines.exe is shown in Figure 2.2.
+An example of the output as is generated with Banklines.exe is shown in \autoref{Fig2.2}.
 The water depth is given with colored surfaces (per grid cell), the black lines are the determined bank lines and the river kilometers are displayed on the river axis.
 
 Note: To obtain the best results, the points of the estimated location of the banks given in  \command{Line1}, \command{Line2}, ..., \command{LineN} (obtained for example from the 'oeverlijnen' from Baseline data), should be equally distributed along the bank with a distance that is in the same order of the gridcellsize along the bank.
@@ -314,7 +316,7 @@ Points too close to eachother will result in large computation times, which can 
 \section{BankErosion <BankErosion.exe>}
 
 determines the expected bank erosion within the area of interest (for background information see chapter 4).
-The input of BankErosion  is given through the definition file (deffile.def), see section 2.4.
+The input of BankErosion  is given through the definition file (deffile.def), see \autoref{Sec2.4}.
 
 When the definition file has the name deffile.def and is located in the same directory as the executable the module can be called as follows:
 
@@ -352,20 +354,20 @@ When only 1 discharge level is given, the standard NetCDF map-file (\command{SDS
 \item File which links river kilometres to xy-coordinates (\command{RiverKM}),
 \item XY-coordinates of the river and fairway axis (\command{RiverAxis}, \command{Fairway}),
 \item Information about the strength or type of the soil of the banks (\command{BankType}).
-This can be done either in the form of classes (see Tabel 4.1 for values and explanation) or with a critical shear stress (see Table 5.1 for examples).
+This can be done either in the form of classes (see Tabel 4.1 for values and explanation) or with a critical shear stress (see \autoref{Tab5.1} for examples).
 In the first case \command{Classes=true} should be set and in the second case \command{Classes=false} (default).
-The bank strength information can be given either with a fixed value for the whole track or in a ASCII-file per river kilometer (first column river-km, second column bank type, see Figure 2.3),
+The bank strength information can be given either with a fixed value for the whole track or in a ASCII-file per river kilometer (first column river-km, second column bank type, see \autoref{Fig2.3}),
 \item Shipping information (\command{Vship}, \command{Nship}, \command{ShipType}, \command{Draught}).
-This can be done either with a fixed value for the whole track or in a file per river kilometer (first column river-km, second column shipping information: similar to entering bank type, see Figure 2.3).
+This can be done either with a fixed value for the whole track or in a file per river kilometer (first column river-km, second column shipping information: similar to entering bank type, see \autoref{Fig2.3}).
 \end{itemize}
 
 Optional
 \begin{itemize}
 \item ASCII-file with level of bank protection (wrt NAP) for each bank line per river-km.
-(First column river-km, second column bank protection level: similar to entering bank type, see Figure 2.3).
+(First column river-km, second column bank protection level: similar to entering bank type, see \autoref{Fig2.3}).
 By default the bank protection level is 1 meter below the water level of the representative discharge,
 \item ASCII-file with slope of foreshore (1:n) for each bank line per river-km.
-(First column river-km, second column slope parameter n: similar to entering bank type, see Figure 2.3).
+(First column river-km, second column slope parameter n: similar to entering bank type, see \autoref{Fig2.3}).
 Default a slope of 1:20 will be used,
 \item Name of the directory to which the output will be written (\command{OutputDir}),
 \item Name of the file to which the results will be written (\command{BankNew}, \command{BankEq}, \command{EroVol}),
@@ -375,14 +377,14 @@ Default a slope of 1:20 will be used,
 Output:
 
 \begin{itemize}
-\item Map with waterdepth, initial bank lines, river kilometers and fairway axis (see Figure 2.4),
-\item Map with erosion sensitivity of the banks based on computed bank retreat (see Figure 2.5),
-\item The computed erosion volume during the simulation period split up for left and right bank and for each discharge level (see Figure 2.6),
-\item Total erosion volume based on equilibrium bank line (see Figure 2.7),
-\item Control figures for water levels of each discharge (see Figuur 2.8 and Figuur 2.9),
-\item Control figures for flow velocity of each discharge (see Figuur 2.10 and Figuur 2.11),
-\item Map with indication of applied bank type (see Figuur 2.12),
-\item Bank retreat at the end of the simulation period and for the equilibrium situation (see Figure 2.13),
+\item Map with waterdepth, initial bank lines, river kilometers and fairway axis (see \autoref{Fig2.4}),
+\item Map with erosion sensitivity of the banks based on computed bank retreat (see \autoref{Fig2.5}),
+\item The computed erosion volume during the simulation period split up for left and right bank and for each discharge level (see \autoref{Fig2.6}),
+\item Total erosion volume based on equilibrium bank line (see \autoref{Fig2.7}),
+\item Control figures for water levels of each discharge (see \autoref{Fig2.8} and \autoref{Fig2.9}),
+\item Control figures for flow velocity of each discharge (see \autoref{Fig2.10} and \autoref{Fig2.11}),
+\item Map with indication of applied bank type (see \autoref{Fig2.12}),
+\item Bank retreat at the end of the simulation period and for the equilibrium situation (see \autoref{Fig2.13}),
 \item XY-coordinates of the computed bank lines at the end of the simulation period and of the equilibrium bank lines,
 \item Files to be able to visualize information in Waqview.
 \end{itemize}
@@ -462,593 +464,4 @@ When no information is available, the closest value will be used.}
 \includegraphics[width=\textwidth]{figures/Fig2-13.png}
 \caption{Bank retreat at the end of the simulation period and for the equilibrium situation}
 \label{Fig2.13}
-\end{figure}
-
-\section{Detection of bank lines}
-
-The location of bank lines is determined by looking at the transition of water to land at a reference discharge computed with a D-Flow FM model.
-To determine the exact location of the bank lines, first all cells in the D-Flow FM-grid are marked that are at the transition from land to water at these discharge level.
-The concerned cells have positive water depth and one or more neighbouring cells with a zero water depth.
-Within these transition cells a bank line can be defined.
-The bank line is at the location where the water depth is equal to zero, that is the water level is equal to the bed level.
-In D-Flow FM the bed level, $d$ , is defined in the corner points of a cell and the water level, $z$ , in the centre of a cell, see Figure 3.1.
-The bank line is now found by interpolating the bed level linearly along the grid lines and marking the location where the bed level is equal to the water level.
-In this way, two points are found which can be connected to form (a part of) the bank line.
-
-\begin{figure}
-\includegraphics[width=5cm]{figures/Fig3-1.png}
-\caption{Location of a bank line within a transition cell}
-\label{Fig3.1}
-\end{figure}
-
-An example is given in Figure 3.1, where $d_1$ and $d_2$ are smaller than $-z$ en $d_3$ en $d_4$ larger than $-z$ (water depth $h = z+d$ ).
-
-The found locations of the bank lines will depend on the chosen discharge level.
-However, as long as the discharge is within the main channel, the locations will be fairly constant.
-
-Generally, bank erosion only within the main channel.
-It is therefore possible to only take into account those cells that are within a certain range of predefined lines.
-This is also necessary when more than one bank line is present (as is common in rivers), because otherwise it is not clear which coordinates belong to one bank or the other.
-
-For the Dutch rivers 'oeverlijnen' from Baseline can be used for these pre-defined lines.
-These lines should be defined in a simple text file consisting of x- and y- coordinates (\command{Line1}, ..., \command{LineN}, in the definition file).
-
-One of the disadvantages of the 'oeverlijnen' from Baseline is that they only depict the main channel.
-Possible side channels, shortcuts or lakes will then not be detected by the tool, see Figure 3.2.
-If they are important, extra lines should be added that (globally) represent the bank lines of these features.
-
-\begin{figure}
-\includegraphics[width=\textwidth]{figures/Fig3-2.png}
-\caption{Detection of bank lines at a shortcut in the Muese river.
-Red: Baseline 'oeverlijnen', Blue: detected bank line from D-Flow FM computation (Q = 278.5 m\textsuperscript{3}/s, average discharge)}
-\label{Fig3.2}
-\end{figure}
-
-Groynes are not detected as such by the tool, because they are defined on subgrid level in D-Flow FM, see Figure 3.3.
-The detected bank line is in this case following the banks within groyne sections.
-This is an advantage, since possible bank erosion only takes place in the groyne sections and not along the groynes themselves.
-
-\begin{figure}
-\includegraphics[width=\textwidth]{figures/Fig3-3.png}
-\caption{Detection of a bank line close to groynes.
-Red: Baseline 'oeverlijnen', Blue: detected bank line from D-Flow FM computation (Q=278,5 m\textsuperscript{3}/s, average discharge)}
-\label{Fig3.3}
-\end{figure}
-
-
-\chapter{Potential bank line shift and bank erosion}
-
-Wanneer de ligging van de initiele oeverlijn bekend is, kan de potentiele oeverlijnverschuiving en oeverafslag worden bepaald.
-De ontwikkelde oevererosiemodule is bedoeld als hulpmiddel om de potentiele oevererosie in te kunnen schatten en niet om de daadwerkelijke oevererosie te voorspellen.
-Binnen de oevererosiemodule worden twee erosiemechanismen meegenomen: erosie door scheepsgolven en erosie door stroming.
-Deze mechanismen worden in de volgende twee paragrafen verder uitgewerkt.
-Verder wordt in paragraaf 0 uitgelegd hoe de oeverlijnverschuiving in zijn werk gaat.
-De bepaling van het potentieel geerodeerd volume wordt uitgewerkt in paragraaf 4.4.
-In paragraaf 4.5 wordt uitgelegd hoe er kan worden omgegaan met een variabel afvoerniveau.
-Het bepalen van de evenwichtsoever en het daarbij behorende geerodeerde volume wordt uitgelegd in paragraaf 4.6.
-Ten slotte worden enkele van de beperkingen van de oevererosiemodule aangestipt in paragraaf 4.7.
-
-\section{Determining potential erosion by ship waves}
-
-Scheepsgolven zijn een van de belangrijkste factoren wat betreft oeverafslag (Verheij (2000))  en worden daarom als eerste oevererosiemechanisme meegenomen in de oevererosiemodule.
- De afleiding voor de erosieformulering voor scheepsgolven is overgenomen uit de BEM module (Verheij (2000), Stolker \& Verheij (2001b)) en definities van grootheden zijn gegeven in Figuur 4.1.
-
-\begin{figure}
-\includegraphics[width=8cm]{figures/Fig4-1.png}
-\caption{Definities grootheden erosie door golven}
-\label{Fig4.1}
-\end{figure}
-
-Op basis van grootschalige Deltagootproeven, waarbij diverse taluds van verschillende samenstelling werden belast onder loodrechte golfaanval, is afgeleid dat de erosiesnelheid kwadratisch toeneemt met de golfhoogte bij de oever:
-
-\begin{equation}
-\diff{y}{t} = c_E H^2
-\label{Eq1.1}
-\end{equation}
-
-met:
-
-\begin{symbollist}
-\item[$y$] breedte van de afgekalfde oeverstrook \unitbrackets{m}
-\item[$c_E$] sterkte coefficient voor oevermateriaal \unitbrackets{m\textsuperscript{-1}s\textsuperscript{-1}}
-\item[$H$] golfhoogte bij de oever \unitbrackets{m}
-\end{symbollist}
-
-In het algemeen wordt verondersteld dat de afname van de golfhoogte via een negatieve e-macht is gerelateerd aan de breedte van de oeverstrook:
-
-\begin{equation}
-H = H_0 e^{-\mu y}
-\label{Eq1.2}
-\end{equation}
-
-Hierin is:
-
-\begin{symbollist}
-\item[$H_0$] initiele golfhoogte aan het begin van de vooroever \unitbrackets{m}
-\item[$\mu$] parameter voor golfdemping \unitbrackets{m\textsuperscript{-1}}
-\end{symbollist}
-
-Substitutie van vergelijking (1.2) in vergelijking (1.1) levert een differentiaalvergelijking op met de algemene oplossing:
-
-\begin{equation}
-\Delta n_\text{wave} = \frac{1}{2 \mu} ln ( 2 \mu c_E H_0^2 t + 1 )
-\end{equation}
-
-waarbij:
-
-\begin{symbollist}
-\item[$\Delta n_\text{wave}$] afstand waarmee de oeverlijn verschuift \unitbrackets{m}
-\item[$t$] tijd \unitbrackets{s}
-\end{symbollist}
-
-Deze formule is toepasbaar voor zowel wind- als scheepsgolven.
-In geval van scheepsgolven kan voor de tijd $t$ worden uitgegaan van de volgende relatie
-
-\begin{equation}
-t = T N n t_\text{eros} \text{ met } T = 0.51 \frac{v_s}{g} \text{.}
-\end{equation}
-
-waarbij:
-
-\begin{symbollist}
-\item[$T$] periode van de scheepsgolven \unitbrackets{s}
-\item[$N$] aantal ongeladen schepen per jaar \unitbrackets{-}
-\item[$n$] aantal golven per schip \textbf{-}
-\item[$v_s$] vaarsnelheid schepen \unitbrackets{m/s}
-\item[$g$] valversnelling 9.81 \unitbrackets{m/s\textsuperscript{2}}
-\item[$t_\text{eros}$] beschouwde periode \unitbrackets{jaar}
-\end{symbollist}
-
-De waarde voor de initiele golfhoogte aan het begin van de vooroever $H_0$ kan met behulp van formules zoals uit DIPRO worden berekend aan de hand van het type maatgevende schepen, hun vaarsnelheid en diepgang, de afstand tussen de vaargeul en de oever en de waterdiepte (zie Bijlage A5A).
-
-De parameter $\mu$ kan worden gebruikt om de invloed in rekening te brengen van de vorm van de vooroever op de golfdemping, maar ook het dempende effect van vooroeverconstructries, vegetaties, en afzettingen van oevermateriaal.
-In de oevererosiemodule wordt alleen het effect van de helling van de vooroever op de golfdemping meegenomen.
-De dempingsterm voor glooiende bodemhellingen wordt als volgt bepaald (Verheij (2000)):
-
-\begin{equation}
-\mu_\text{vo} = \frac{\tan \alpha}{H_0}
-\end{equation}
-
-Waarbij $\tan \alpha = \frac{1}{n}$ voor een vooroever met een helling van 1:$n$ (zie ook Figuur 4.1).
-Uitgaande van een initiele golfhoogte $H_0 = 0.4$ leidt een helling tussen de 1:100 en 1:20 tot waarden van $\mu_\text{vo}$ liggend tussen 0.025 en 0.125.
-In Figuur 4.2 is een voorbeeld gegeven van de invloed van de dempingsparameter $\mu_\text{vo}$ op de oevererosie door golven.
-
-\begin{figure}
-\includegraphics[width=\textwidth]{figures/Fig4-2.png}
-\caption{Voorbeeld van oevererosie door golven voor matig/goede klei.}
-\label{Fig4.2}
-\end{figure}
-
-Naast de golfdemping door de helling van de vooroever kunnen de inkomende golven ook worden gedempt door de begroeiing.
-Voor golfdemping door riet is de volgende relatie beschikbaar
-
-\begin{equation}
-\mu_r = 8.5 \cdot 10^{-4} N_r^{0.8}
-\end{equation}
-
-met $N_r$ de rietstengeldichtheid (aantal stengels per vierkante meter).
-De totale golfdemping door de helling van de vooroever en riet wordt dan
-
-\begin{equation}
-\mu_\text{tot} = \mu_\text{vo} + \mu_r
-\end{equation}
-
-De waarde voor de sterkte van het oevermateriaal $c_E$ hangt af van de samenstelling van de oever en kan ruimtelijk varieren.
-Waarden voor $c_E$ voor verschillende oeversamenstellingen zijn te vinden in Tabel 4.1.
-Per oeverlijn moet in een tekstbestand worden aangegeven uit welke klasse het oevermateriaal bestaat voor een bepaald riviertraject.
-
-\begin{table}
-\begin{tabular}{llll}
-Klasse & Grond & $c_E$ \unitbrackets{m\textsuperscript{-1} s\textsuperscript{-1}} & $\tau_c$ \unitbrackets{Pa} \\ \hline
-0 & Beschermde oeverlijn & 0 & $\infty$ \\
-1 & Begroeide oeverlijn & 0.02 10\textsuperscript{-4} & 95 \\
-2 & Goede klei & 0.6 10\textsuperscript{-4} & 3 \\
-3 & Matig / slechte klei  & 2 10\textsuperscript{-4} & 0.95 \\
-4 & Zand & 12.5 10\textsuperscript{-4} & 0.15 \\ \hline
-\end{tabular}
-\caption{Klassenindeling grondsoorten oevererosiemodule}
-\label{Tab4.1}
-\end{table}
-
-\section{Determining potential erosion by currents}
-
-Naast oeverafslag door scheepsgolven kan ook een sterke stroming langs de oever zelf zorgen voor oevererosie.
-Dit mechanisme wordt ook meegenomen in de oevererosiemodule.
-Voor elke oeverlijn kan de potentiele oevererosie door stroming bij een bepaalde afvoer $Q$ worden bepaald aan de hand van de volgende formule:
-
-\begin{equation}
-\Delta n_\text{flow} = E \left ( \frac{u_b^2}{u_c^2} - 1 \right ) t_\text{eros}
-\end{equation}
-
-met
-
-\begin{symbollist}
-\item[$\Delta n_\text{flow}$] afstand waarmee de oeverlijn verschuift in periode $t_\text{eros}$ \unitbrackets{m}
-\item[$E$] erosiecoefficient van de oever \unitbrackets{m/s}
-\item[$u_b$] stroomsnelheid langs de oeverlijn \unitbrackets{m/s}
-\item[$u_c$] kritische stroomsnelheid voor erosie \unitbrackets{m/s}
-\item[$t_\text{eros}$] beschouwde periode \unitbrackets{s}
-\end{symbollist}
-
-De erosiecoefficient wordt bepaald volgens:
-
-\begin{equation}
-E = \alpha \sqrt{\tau_c}
-\end{equation}
-
-met $\alpha$ = 2 10\textsuperscript{-7} \unitbrackets{m\textsuperscript{-3/2} kg\textsuperscript{1/2}} en $\tau_c$ \unitbrackets{N/m\textsuperscript{2}} de kritische schuifspanning voor erosie.
-Deze waarde voor de erosiecoefficient is vergelijkbaar met erosiecoefficienten die in de literatuur gevonden worden (bijv.
-Crosato, 2007).
-
-Deze relatie tussen de kritische schuifspanning en de erosiecoefficient is echter niet universeel en daarom is het ook mogelijk om de erosiecoefficient als afzonderlijke invoer op te geven.
-
-Voor de kritische stroomsnelheid voor erosie geldt:
-
-\begin{equation}
-u_c = \sqrt{\frac{\tau_c}{\rho} \frac{C^2}{g}}
-\end{equation}
-
-met $C$ \unitbrackets{m\textsuperscript{1/2}/s} de Chezy coefficient voor hydraulische ruwheid.
-De waarde voor de Chezy coefficient wordt overgenomen uit de D-Flow FM berekening.
-
-De stroomsnelheid langs de oever wordt bepaald aan de hand van de stroomsnelheid uit D-Flow FM.
-De waarde voor de kritische schuifspanning voor erosie, $\tau_c$ , is gerelateerd aan de sterkte coefficient voor oevermateriaal, $c_E$ , zoals beschreven in Bijlage B)
-
-\section{Total bank shift}
-
-De totale oeverlijnverschuiving wordt gevonden door te sommeren over de oeverlijnverschuivingen veroorzaakt door de verschillende erosiemechanismen:
-
-\begin{equation}
-\Delta n = \Delta n_\text{flow} + \Delta n_\text{wave}
-\end{equation}
-
-De nieuwe locatie van een oeverlijn wordt bepaald door elk lijnsegment te verplaatsen volgens zijn lokale verschuiving.
-De nieuwe locatie van een punt van de oeverlijn wordt gevonden door het snijpunt van de twee naburige segmenten te berekenen, zie Figuur 4.3.
-Echter, in sommige situaties kan dit resulteren in erg grote verplaatsingen van punten, vooral wanneer naburige segmenten bijna in elkaars verlengde liggen.
-In deze gevallen worden eerst twee locaties bepaald gebaseerd op de verplaatsing van elk van de naburige segmenten (rode stippen in Figuur 4.4).
-De uiteindelijke locatie van een punt wordt dan bepaald door het gemiddelde van deze twee punten te nemen (groene stip in Figuur 4.4).
-
-
-\begin{figure}
-\includegraphics[width=6cm]{figures/Fig4-3.png}
-\caption{Het verschuiven van een oeverlijn gebaseerd op het snijpunt van twee lijnsegmenten.
-Blauw: oorspronkelijke locatie, Groen: nieuwe locatie}
-\label{Fig4.3}
-\end{figure}
-
-\begin{figure}
-\includegraphics[width=5cm]{figures/Fig4-4.png}
-\caption{Het verschuiven van een oeverlijn gebaseerd op de gemiddelde verplaatsing van twee lijnsegmenten.
-Blauw: oorspronkelijke locatie, Rood: nieuwe locatie gebaseerd op individuele segmenten, Groen: nieuwe locatie (gemiddelde van de rode punten).}
-\label{Fig4.4}
-\end{figure}
-
-Om numerieke problemen te voorkomen worden te kleine oeverlijnsegementen samengevoegd met hun buren.
-
-\section{Potential bank erosion volume}
-
-Naast de potentiele oeverlijnverschuiving is ook het potentiele volume aan sediment dat vrijkomt door erosie van belang.
-Deze hoeveelheid sediment komt uiteindelijk in de rivier terecht, wat gevolgen kan hebben voor de bodemligging en eventueel noodzaak kan geven tot extra baggerwerkzaamheden.
-Het potentiele volume aan sediment dat vrijkomt door erosie kan worden afgeschat door
-
-\begin{equation}
-V_\text{afslag} = ( \delta h_\text{bov} + \delta h_\text{ben} ) \Delta n
-\end{equation}
-
-waarbij $\Delta n$ de totale oeverlijnverschuiving en $\delta h$ het invloedsgebied van het afslagproces (boven en onder de waterspiegel).
-
-Er wordt verondersteld dat de oever in zijn geheel terugschrijdt en daarom geldt voor het invloedsgebied boven de waterspiegel:
-
-\begin{equation}
-\delta h_\text{bov} = z_\text{oever} - z
-\end{equation}
-
-met
-
-\begin{symbollist}
-\item[$z$] waterspiegelniveau \unitbrackets{m}
-\item[$z_\text{oever}$] niveau bovenkant steiloever \unitbrackets{m}
-\end{symbollist}
-
-De grootte van het invloedsgebied onder de waterspiegel wordt bepaald door de golfhoogte en het niveau tot waar het stortsteen blijft liggen.
-Hiervoor wordt de volgende relatie gebruikt:
-
-\begin{equation}
-\delta h_\text{ben} = \min ( z-z_\text{ss}, 2 H )
-\end{equation}
-
-waarbij:
-
-\begin{symbollist}
-\item{$z$} waterspiegelniveau \unitbrackets{m}
-\item{$z_\text{ss}$} niveau bovenkant stortsteen \unitbrackets{m}
-\item{H} golfhoogte bij de oever \unitbrackets{m}
-\end{symbollist}
-
-In Figuur 4.5 is geschematiseerd weergegeven wat het geerodeerd volume is voor verschillende situaties van de waterstand.
-
-
-\begin{figure}
-\includegraphics[width=\textwidth]{figures/Fig4-5.png}
-\caption{Geerodeerd volume voor verschillende situaties van de waterstand.}
-\label{Fig4.5}
-\end{figure}
-
-De terugschrijding van de oever wordt volledig bepaald door de oeverafslag, ongeacht of het materiaal dat voor de oever op de bodem terecht komt meteen wordt afgevoerd of niet.
-Het afgeslagen materiaal beinvloedt wel de vervolgerosie, omdat het in zekere zin de oever beschermt.
-De invloed hiervan kan niet worden bepaald door alleen een sedimentbalans op te stellen a.d.h.v.
-een sedimenttransportformule, omdat soms grote hompen klei blijven liggen die eerst moeten desintegreren voordat de stroming ze kan meenemen.
-De invloed van het afgeslagen materiaal op de golfhoogte (en daardoor de erosie door scheepsgolven) kan wel worden meegenomen door de parameter voor golfdemping, $\mu$, te verhogen.
-
-\section{Variable discharge}
-
-Het meenemen van een variabele afvoer is mogelijk door de afvoerverdeling te schematiseren met een hydrograaf.
-Deze hydrograaf bestaat uit $n_Q$ afvoerniveaus en hun bijbehorende kans op voorkomen.
-Voor elk afvoerniveau wordt een aparte D-Flow FM-berekening uitgevoerd.
-Uit deze D-Flow FM simulaties kunnen dan de stroomsnelheid langs de oeverlijn en het niveau van de waterspiegel worden afgeleid.
-Hierbij wordt er vanuit gegaan dat in ieder geval de afvoer wordt meegenomen die is gebruikt om de initiele oeverlijn te bepalen (de gemiddelde afvoer).
-
-Vervolgens worden oeverlijnverschuivingingen voor de afzonderlijke afvoerniveaus bepaald en deze worden daarna gewogen gesommeerd aan de hand van de kans van voorkomen van het betreffende afvoerniveau.
-Voor elk afvoerniveau $Q_i$ wordt dus eerst de totale erosie $\Delta n ( Q_i )$ voor die afvoer bepaald, die bestaat uit een deel veroorzaakt door scheepsgolven en een deel veroorzaakt door stroming.
-
-Een variabele afvoer betekent dat ook het niveau van de waterspiegel tijdsafhankelijk is en daarmee de locatie waar de oevererosie optreedt.
-In de oevererosiemodule wordt echter uitgegaan van een initiele oeverlijn (behorende bij een gemiddelde afvoer).
-De mate van erosie van deze lijn varieert echter wel met de afvoer.
-
-
-\subsection{Erosion by ship waves}
-
-Een varierend afvoerniveau zorgt voor een varierend niveau van de waterspiegel.
-De initiele oeverlijn is echter alleen onderhevig aan erosie door golven bij een gegeven afvoer $Q_i$ als de hoogte van de lijn in het invloedsgebied [$z(Q_i) - 2 H$, $z(Q_i) + \frac{1}{2} H$] ligt, waarbij $H$ de golfhoogte bij de oever en $z(Q_i)$ het niveau van de waterspiegel bij afvoer $Q_i$.
-In de voorbeelden weergegeven in Figuur 4.6 is de oeverlijn dus alleen onderhevig aan erosie door golven bij afvoerniveaus $Q_2$ en $Q_3$.
-Of een oeverlijn binnen het invloedsgebied ligt waarin erosie door golven moet worden meegenomen, kan plaatsafhankelijk zijn.
-In het benedenstroomse gebied liggen de waterniveaus bij verschillende afvoeren in het algemeen dichter bij elkaar dan bovenstrooms en ook vlakbij een stuw met een opgegeven stuwpeil kan het waterniveau redelijk constant blijven voor verschillende afvoeren.
-
-\begin{figure}
-\begin{tabular}{p{6cm}p{6cm}}
-\includegraphics[width=5cm]{figures/Fig4-6a.png} \linebreak
-a) &
-\includegraphics[width=5cm]{figures/Fig4-6b.png} \linebreak
-b) \\
-\includegraphics[width=5cm]{figures/Fig4-6c.png} \linebreak
-c) &
-\includegraphics[width=5cm]{figures/Fig4-6d.png} \linebreak
-d) \\
-\end{tabular}
-%\includegraphics[width=]{}
-\caption{Erosie door golven bij meerdere afvoerniveaus: a) geen erosie, oeverlijn ligt boven invloedsgebied b) erosie, c) erosie, d) geen erosie, oeverlijn ligt onder invloedsgebied}
-\label{Fig4.6}
-\end{figure}
-
-\subsection{Erosion by currents}
-
-Voor elk afvoerniveau wordt de erosie door stroming bepaald met behulp van de stroomsnelheid langs de oeverlijn behorende bij het betreffende afvoerniveau.
-Hierbij is er natuurlijk alleen stroming langs de oeverlijn als deze lijn op of onder de waterspiegel ligt.
-In de voorbeelden weergegeven in Figuur 4.6 is de oeverlijn dus alleen onderhevig aan erosie door stroming bij afvoerniveaus $Q_3$ en $Q_4$.
-
-\subsection{Total erosion}
-
-De totale verschuiving van de oeverlijn bij het meenemen van meerdere afvoerniveaus wordt gevonden door de oeverlijnverschuivingen bij de verschillende afvoeren gewogen te sommeren over alle afvoerniveaus:
-
-\begin{align}
-\Delta n_\text{tot} &= \sum_{i=1}^{n_Q} p(Q_i) \Delta n(Q_i) \\
-                    &= \sum_{i=1}^{n_Q} p(Q_i) \left [ \Delta n_\text{wave}(Q_i) + \Delta n_\text{flow}(Q_i) \right ]
-\label{Eq1.3}
-\end{align}
-
-waarbij:
-
-\begin{symbollist}
-\item[$\Delta n_\text{tot}$]  totale verschuiving van de oeverlijn \unitbrackets{m}
-\item[$n_Q$] aantal gebruikte afvoerniveaus \unitbrackets{-}
-\item[$p(Q_i)$] jaarlijkse kans op afvoer $Q_i$ \unitbrackets{-}
-\item[$\Delta n(Q_i)$] totale verschuiving van de oeverlijn bij afvoer $Q_i$ \unitbrackets{m}
-\item[$\Delta n_\text{wave}(Q_i)$] verschuiving van de oeverlijn door scheepsgolven bij afvoer $Q_i$ \unitbrackets{m}
-\item[$\Delta n_text{flow}(Q_i)$] verschuiving van de oeverlijn door stroming bij afvoer $Q_i$ \unitbrackets{m}
-\end{symbollist}
-
-De verschuiving van de oeverlijn kan dan weer op dezelfde manier worden bepaald als uitgewerkt in paragraaf 0, maar nu met de totale oeverlijnverschuiving zoals gegeven in vergelijking (1.3).
-De potentiele oeverafslag dient eerst per afvoerniveau te worden berekend (zie paragraaf 4.4).
-Daarna kan de totale potentiele oeverafslag worden bepaald door gewogen te sommeren met de kans van voorkomen van het betreffende afvoerniveau, analoog aan de bepaling van de totale oeverlijnverschuiving (vergelijking (1.3)).
-
-\section{Determining equilibrium bank}
-
-In van der Mark (2011), Hoofdstuk 3 is een analyse gemaakt van kentallen voor te verwachten oevererosie langs de IJssel.
-Daarin wordt gesteld dat de meest waarschijnlijke te verwachten taludhelling van de evenwichtsoever 1:20 is.
-Aan de hand hiervan kan een schatting worden gegeven van de erosieafstand $\Delta n_\text{eq}$ voor het behalen van de evenwichtssituatie (zie ook Figuur 4.7):
-
-\begin{equation}
-\Delta n_\text{eq} = \frac{h_t}{\mu_\text{slope}}
-\end{equation}
-
-Waarbij $\mu_\text{slope}$ de inverse van de taludhelling van de evenwichtsoever (default waarde 1/20) en $h_t = \max (z_\text{up} - z_\text{do}, 0)$ met $z_\text{up} = \min [ h_\text{bank}, z(Q_\text{ref}) + 2 H_0]$ en $z_\text{do} = \max [ z_\text{ss}, z(Q_\text{ref}) - 2 H_0 ]$.
-Het totaal afgeslagen volume voor het bereiken van een evenwichtsoever is dan gelijk aan
-
-\begin{equation}
-V_\text{eq} = ( \frac{1}{2} h_t + h_s ) \Delta n_\text{eq}
-\end{equation}
-
-met $h_s = \max [ h_\text{bank} - z(Q_\text{ref}) _ 2 H_0, 0 ]$.
-
-
-\begin{figure}
-\includegraphics[width=\textwidth]{figures/Fig4-7.png}
-\caption{Geschatte profiel evenwichtsoever.}
-\label{Fig4.7}
-\end{figure}
-
-\section{Limitations of D-FAST Bank Erosion}
-
-De oevererosiemodule is bedoeld als hulpmiddel om in te kunnen schatten waar potentieel oevererosie plaats kan vinden en niet om de daadwerkelijke oevererosie te voorspellen.
-In deze sectie worden een paar beperkingen van de oevererosiemodule aangestipt.
-
-\subsection{Homogeneous bank}
-
-Een van de belangrijkste beperkingen is dat de samenstelling van de oever homogeen wordt verondersteld.
-Dit is in de werkelijkheid niet het geval.
-Er worden vaak horizontale of verticale lagen waargenomen.
-In Figure 4.8 worden beide situaties weergegeven en de manier waarop het erosieproces plaatsvindt in het geval van horizontale lagen.
-Om verticale lagen te kunnen modelleren, kunnen verschillende waarden van $c_E$ worden gebruikt voor elke laag.
-De situatie met horizontale lagen is complexer, omdat in dit geval plotseling grote hoeveelheden oevermateriaal in een keer naar beneden kunnen glijden.
-
-\begin{figure}
-\begin{tabular}{p{6cm}p{6cm}}
-\includegraphics[width=5cm]{figures/Fig4-8a.png} \linebreak
-a) vertical layers &
-\includegraphics[width=5cm]{figures/Fig4-8b.png} \linebreak
-b) horizontal layers \\
-\includegraphics[width=5cm]{figures/Fig4-8c.png} \linebreak
-c) erosion process in case of horizontal layers &
-\includegraphics[width=5cm]{figures/Fig4-8d.png} \\
-\end{tabular}
-\caption{Non-homogeneous banks.}
-\label{Fig4.8}
-\end{figure}
-
-\subsection{Only erosion along initial bank line}
-
-Er wordt alleen oevererosie bepaald voor de opgegeven initiele oeverlijn (behorende bij een gemiddelde afvoer).
-In werkelijkheid is het echter ook mogelijk dat er oevererosie op andere locaties plaatsvindt.
-
-\subsection{Only erosion by ship waves and currents}
-
-In de oevererosiemodule wordt alleen erosie door scheepsgolven en stroming gemodelleerd.
-Andere erosiemechanismen zoals windgolven, uitstromend grondwater, bevriezing en vertrapping door vee worden in de module niet meegenomen.
-
-\subsection{Profile and bed level remain constant}
-
-Door oevererosie verandert lokaal de breedte van de rivier en ook zorgt het afgeslagen materiaal voor een andere bodemligging.
-Hierdoor veranderen ook de stromingscondities in de rivier en langs de oever.
-Aangezien de oevererosiemodule is gebaseerd uitkomsten van D-Flow FM berekeningen wordt deze dynamiek van de bodem en oevers echter niet meegenomen.
-
-\chapter*{References}
-
-Crosato, A. (2007), Effects of smoothing and regridding in numerical meander migration models. Water Resources Research, Vol 43.
-
-CUR, (1996). Erosie van onverdedigde oevers, CUR-rapport 96-7, Gouda.
-
-IWACO, Waterloopkundig Laboratorium en CSO (1998). Trajectnota/MER Zandmaas-Maasroute, Ontwerp natuurvriendelijke oevers. eindrapport 3361070.
-
-Mark, R. van der, R.A.M. van der Sligte, A. Becker, E. Mosselman \& H.J. Verheij (2011), Morfologische effectstudie KRW-maatregelen IJssel.
-Rapport 1204885, Deltares, Delft.
-
-Schuurman, F. (2010), Casestudie oevererosie Maas, DHV memo kenmerk LW-AF20100800/RK, 30 december 2010.
-
-Sieben, J., J.A.F. van Essen, M.J.M. Scholten and L.W.J. van Hal, (2005), Inschatting van de kans op achterloopsheid bij kribben, RIZA werkdocument 2005.148x.
-
-Sieben, J. (2005), Wie het water deert, die het water keert - Inventarisatie van beheer en onderhoud van kribben en oeververdedigingen, RIZA werkdocument 2005.034x.
-
-Spruyt, A. (2009), Shifting margins, behaviour of dynamic banks, Internal memorandum 200186-003-ZWS-0003-v2-m-Oeverdetectie, Deltares, Delft, 4 november 2010.
-
-Spruyt, A. \& E. Mosselman (2010), Deelproject 3: Schuivende marges, gedrag van dynamische oevers (Shifting margins, behaviour of dynamic banks).
-Appendix C in TO Rivierkundige Onderzoeksthema's; Rapportage 2009, Rapport 1200186.000, Deltares.
-
-Stolker, C. \& H.J. Verheij (2001a), Gevoeligheidsonderzoek sedimentatie en erosie in kribvakken langs de Lek. Rapport Q2792, WL | Delft Hydraulics, Delft, Februari 2001.
-
-Stolker, C. \& H.J. Verheij (2001b), Calibratie van een oeverafslagmodel voor de Zandmaas. Rapport Q3060, WL | Delft Hydraulics, Delft, November 2001.
-
-TAW (1998), Technisch rapport erosiebestendigheid van grasland als dijkbekleding, Technische Adviescommissie voor de Waterkeringen, Delft.
-
-Verheij, H.J., Meijer, D.G., Kruse, G.A.M., Smith, G.M., Vesseur, M., (1995). Investigation of the strength of a grass cover upon river dikes [in Dutch], Report Q1878, Deltares, Delft.
-
-Verheij, H.J. (2000), Samenwerkingsproject Modellering Afslagoevers. Rapport Q2529, WL | Delft Hydraulics, Delft.
-
-Verheij, H.J., F. van der Knaap \& H. Sessink (2007), Verder ontwikkelen van oeverafslagmodel BEM. Rapport Q4264.02, WL | Delft Hydraulics, Delft.
-
-Vroeg, J.H. de (1999), Breach growth in cohesive materials : selection of cases. Rapport H3468, WL | Delft Hydraulics, Delft.
-
-
-\chapter{Strength of bank material for different soil types}
-
-The value for the coefficient for strength of bank material, $c_E$ , and the critical shear stress for erosion, $\tau_c$ , for different soil types is given in Table 5.1 (Verheij et al, 1995, CUR, 1996 TAW, 1998, de Vroeg, 1999).
-
-The following relation is applicable:
-
-\begin{equation}
-c_E = \frac{\beta}{\tau_c}
-\end{equation}
-
-with $\beta$ = $1.85 \cdot 10^{-4}$ \unitbrackets{kg / (m\textsuperscript{2} s\textsuperscript{3})}.
-
-\begin{table}
-\begin{tabular}{p{5cm}rr}
-Grond & $c_E$ \unitbrackets{m\textsuperscript{-1}s\textsuperscript{-1}} & $\tau_c$ \unitbrackets{Pa} \\ \hline
-Protected bank & 0 & $\infty$ \\
-Sturdy grass & 0,01 $10^{-4}$ & 185 \\
-Mediocre grass & 0,02 $10^{-4}$ & 93 \\
-Bad grass & 0,03 $10^{-4}$ & 62 \\
-Very good clay (compact) & 0,5 $10^{-4}$ & 4 \\
-Clay with 60\% sand (firm) & 0,6 $10^{-4}$ & 2,5 \\
-Good clay with  little structure & 0,75 $10^{-4}$ & 2 \\
-Strongly structure good clay (mediocre) & 1,5 $10^{-4}$ & 1,5 \\
-Bad clay (weak) & 3,5 $10^{-4}$ & 0,65 \\
-Sand with 17\% silt & 10 $10^{-4}$ & 0,20 \\
-Sand with 10\% silt & 12,5 $10^{-4}$ & 0,15 \\
-Sand with 0\% silt & 15 $10^{-4}$ & 0,10 \\ \hline
-\end{tabular}
-\caption{Corresponding values for $c_E$ and $\tau_c$ (source: Verheij et al, 1995)}
-\label{Tab5.1}
-\end{table}
-
-\chapter{Determining ship induced wave height at the beginning of the fore shore}
-To determine the ship induced wave height at the beginning of the fore shore, $H_0$ \unitbrackets{m}, the following formula is used (source: Handleiding DIPRO, 1997)
-
-\begin{equation}
-H_0 = \alpha_1 h \left ( \frac{s}{h} \right )^{-1/3} F^4
-\end{equation}
-
-with
-
-\begin{symbollist}
-\item[$\alpha_1$] ship dependent coefficient \unitbrackets{-}
-\item[$F$] Froude number ($F$<0.8) \unitbrackets{-}
-\item[$h$] water depth (considering a  trapezoidal profile) \unitbrackets{m}
-\item[$s$] distance of shore to ship \unitbrackets{m}
-\end{symbollist}
-
-The Froude number is computed according to:
-
-\begin{equation}
-F = \frac{v_s}{\sqrt{g h}}
-\end{equation}
-
-with
-
-\begin{symbollist}
-\item[$g$] gravity acceleration 9.81 \unitbrackets{m/s\textsuperscript{2}}
-\item[$v_s$] ship velocity \unitbrackets{m/s}
-\end{symbollist}
-
-The value of the Froude number is limited to 0.8.
-
-For the coefficient $\alpha_1$ the following values are used, with $T_s$ \unitbrackets{m} the draught of the ships:
-
-\begin{tabular}{ll}
-Ship type & $\alpha_1$ \\ \hline
-Push barge & 0.5 \\
-RHK ship / Motorship & 0.28 $T_s^\text{1.25}$ \\
-Towboat & 1.0 \\ \hline
-\end{tabular}
-
-By using this formulas, the value of $H_0$ can be computed based on the dominant ship type, their velocity and draught, the distance between fairway and shore and the water depth.
-
-To prevent wave load on smaller channels far from the main channel, the wave height is smoothly reduced to zero from distance $s_1$ to $s_0$ from the fairway.
-This is accomplished by multiplying $H_0$ with the following function:
-
-\begin{equation}
-f(s) = \left \{ \begin{matrix}
-1 & 0 < s < s_1 \\
-\cos \left ( \frac{s - s_1}{s_0 - s_1} \pi \right ) & s_1 < s < s_0 \\
-0 & s > s_0
-\end{matrix} \right .
-\end{equation}
-
-The value for $s_0$ will be in the order of 150 - 200 m and for  the following relation is used: $s_1 = s_0 - 50$.
-In Figure 5.1 the wave height $H_0$ as function of the distance from the fairway $s$ is depicted for various values of the water depth $h$ for a moter ship with a draught of 1.2 m with a relative velocity of $v_s = 6$ m/s.
-The wave height is reduced to zero between $s_1 = 100$ m and $s_0 = 150$ m.
-
-\begin{figure}
-\includegraphics[width=\textwidth]{figures/Fig5-1.png}
-\caption{Wave height as function from the distance from the fairway for different values of the water depth.}
-\label{Fig5.1}
 \end{figure}
