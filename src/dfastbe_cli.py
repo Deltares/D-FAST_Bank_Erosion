@@ -18,18 +18,27 @@ import matplotlib
 
 def bankerosion(filename = "config.ini"): #, variable, variable2):
     log_text("header_bankerosion", dict = {"version": dfastbe_kernel.program_version(), "location": "https://github.com/Deltares/D-FAST_Bank_Erosion"})
+    rho = 1000 # density of water [kg/m3]
+    g = 9.81 # gravititional accelaration [m/s2]
 
     # read configuration file
+    mytimer = timer(None)
     logging.info("reading configuration file ...")
     config = read_config_file(filename)
 
     # check bankdir for input
     # check localdir
     # check outputdir
+    outputdir = get_str(config, "General", "outputdir")
+    if not os.path.exists(outputdir):
+        os.makedirs(outputdir)
     
     # get simulation time terosion
+    Teros = get_int(config, "General", "Terosion", positive = True)
+    print("Total simulation time: {} year".format(Teros))
     
     # read bank lines
+    mytimer = timer(mytimer)
     logging.info("reading bank lines ...")
     bankfile = "banks.shp"
     banklines = geopandas.read_file(bankfile)
@@ -38,6 +47,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     
     # check if simulation file exists
     # read simulation data (getsimdata)
+    mytimer = timer(mytimer)
     logging.info("reading simulation data ...")
     simfile = get_simfile(config, "General", "")
     sim, dh0 = get_simdata(simfile)
@@ -58,10 +68,10 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     face_nr = numpy.repeat(numpy.arange(n_faces).reshape((n_faces, 1)), max_n_nodes, axis = 1).reshape((max_n_nodes*n_faces))
     face_nr = face_nr[i12]
 
-    numpy_false = numpy.zeros((1), dtype = numpy.bool)
-    equal_to_previous = numpy.concatenate((numpy_false, (numpy.diff(en, axis = 0) == 0).all(axis = 1)))
-    new_edge = numpy.invert(equal_to_previous)
-    boundary_edge = new_edge & numpy.invert(numpy.concatenate((equal_to_previous[1:], numpy_false)))
+    numpy_true = numpy.ones((1), dtype = numpy.bool)
+    equal_to_previous = numpy.concatenate((~numpy_true, (numpy.diff(en, axis = 0) == 0).all(axis = 1)))
+    new_edge = ~equal_to_previous
+    boundary_edge = new_edge & numpy.concatenate((new_edge[1:], numpy_true))
     boundary_edge = boundary_edge[new_edge]
 
     n_unique_edges = numpy.sum(new_edge)
@@ -78,6 +88,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     ef[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
     
     # map bank lines to mesh cells
+    mytimer = timer(mytimer)
     logging.info("intersect bank lines with mesh ...")
     bankline_faces = [None] * n_banklines
     xf = sim["x_node"][fn]
@@ -85,122 +96,22 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     xe = sim["x_node"][en]
     ye = sim["y_node"][en]
     boundary_edge_nrs = numpy.nonzero(boundary_edge)[0]
-    bank_segments = [None] * len(banklines.geometry)
-    for i in range(len(banklines.geometry)):
-        print("bank line {}".format(i+1))
-        bp = numpy.array(banklines.geometry[i])
-        #
-        crds = numpy.zeros((len(bp),2))
-        idx  = numpy.zeros(len(bp), dtype = numpy.int64)
-        l = 0
-        #
-        for j, bpj in enumerate(bp):
-            if j == 0:
-                # first bp inside or outside?
-                dx = xf - bpj[0]
-                dy = yf - bpj[1]
-                possible_cells = numpy.nonzero(numpy.invert((dx < 0).all(axis = 1) | (dx > 0).all(axis = 1) | (dy < 0).all(axis = 1) | (dy > 0).all(axis = 1)))[0]
-                if len(possible_cells) == 0:
-                    # no cells found ... it must be outside
-                    index = -1
-                    # print("Starting outside mesh")
-                else:
-                    # one or more possible cells, check whether it's really inside one of them
-                    # using numpy math might be faster, but since it's should only be for a few points let's using shapely
-                    pnt = shapely.geometry.Point(bp[0])
-                    for k in possible_cells:
-                        polygon_k = shapely.geometry.Polygon(numpy.concatenate((xf[k:k+1], yf[k:k+1]), axis = 0).T)
-                        if polygon_k.contains(pnt):
-                            index = k
-                            # print("Starting in {}".format(index))
-                            break
-                    else:
-                        index = -1
-                        # print("Starting outside mesh")
-                crds[l,:] = bpj
-                idx[l] = -1
-                l += 1
-            else:
-                # second or later point
-                bpj1 = bp[j - 1]
-                prev_b = 0
-                prev_pnt = bpj1
-                while True:
-                    if index < 0:
-                        edges = boundary_edge_nrs
-                    else:
-                        edges = fe[index]
-                    X0 = xe[edges,0]
-                    dX = xe[edges,1] - X0
-                    Y0 = ye[edges,0]
-                    dY = ye[edges,1] - Y0
-                    xi0 = bpj1[0]
-                    dxi = bpj[0] - xi0
-                    yi0 = bpj1[1]
-                    dyi = bpj[1] - yi0
-                    det = dX * dyi - dY * dxi
-                    a = (dyi * (xi0 - X0) - dxi * (yi0 - Y0)) / det # along mesh edge
-                    b = (dY * (xi0 - X0) - dX * (yi0 - Y0)) / det # along bank line
-                    slices = numpy.nonzero((b > prev_b) & (b <= 1) & (a >= 0) & (a <= 1))[0]
-                    # print("number of slices: ", len(slices))
-                    if len(slices) == 0:
-                        # rest of segment associated with same face
-                        # print("{}: -- no slice --".format(j))
-                        if l == crds.shape[0]:
-                            crds.resize((2*l,2))
-                            idx.resize(2*l)
-                        crds[l,:] = bpj
-                        idx[l] = index
-                        l += 1
-                        break
-                    else:
-                        if len(slices) > 1:
-                            # crossing multiple edges, when and how?
-                            # - crossing at a corner point?
-                            # - going out and in again for cell seems unlogical
-                            # - going in and out again for boundary seems possible [check: encountered]
-                            # print("multiple intersections at ", b[slices])
-                            bmin = numpy.amin(b[slices])
-                            slices = slices[b[slices] == bmin]
-                        # len(slices) == 1
-                        edge = edges[slices[0]]
-                        faces = ef[edge]
-                        prev_b = b[slices[0]]
-                        if l == crds.shape[0]:
-                            crds.resize((2*l,2))
-                            idx.resize(2*l)
-                        crds[l,:] = bpj1 + prev_b * (bpj - bpj1)
-                        idx[l] = index
-                        l += 1
-                        if index < 0:
-                            index = faces[0]
-                            # print("{}: Moving into {} via edge {} at b = {}".format(j, index, edge, prev_b))
-                        else:
-                            if faces[0] == index:
-                                index = faces[1]
-                                # if index < 0:
-                                #     print("{}: Moving outside mesh via edge {} at b = {}".format(j, edge, prev_b))
-                                # else:
-                                #     print("{}: Moving to {} via edge {} at b = {}".format(j, index, edge, prev_b))
-                            elif faces[1] == index:
-                                index = faces[0]
-                                # print("{}: Moving to {} via edge {} at b = {}".format(j, index, edge, prev_b))
-                            else:
-                                raise Exception("Shouldn't come here .... index {} differs from both faces {} and {} associated with slicing edge {}".format(index, faces[0], faces[1], edge))
-        # clip to actual length
-        crds = crds[:l,:]
-        idx = idx[:l]
-        # remove tiny segments (about 35% is less than 1 mm)
-        d_thresh = 0.001
-        d = numpy.sqrt((numpy.diff(crds, axis = 0)**2).sum(axis = 1))
-        mask = numpy.concatenate((numpy.ones((1), dtype = 'bool'), d > d_thresh))
-        bank_segments[i] = [crds[mask,:], idx[mask]]
+    bank_crds = [None] * n_banklines
+    bank_idx = [None] * n_banklines
+    for ib in range(n_banklines):
+        bp = numpy.array(banklines.geometry[ib])
+        print("bank line {} ({} nodes)".format(ib+1, len(bp)))
+        
+        crds, idx = intersect_line_mesh(bp, xf, yf, xe, ye, fe, ef, boundary_edge_nrs)
+        bank_crds[ib] = crds
+        bank_idx[ib] = idx
 
     # plot water depth
 
     # optional write banklines.deg for waqview (arcungenerate)
 
     # read river axis file
+    mytimer = timer(mytimer)
     logging.info("reading river axis file ...")
     river_axis_file = get_str(config, "General", "riveraxis")
     river_axis = read_xyc(river_axis_file)
@@ -215,40 +126,15 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
         # TODO: do sorting
 
     # read river km file
+    mytimer = timer(mytimer)
     logging.info("reading chainage file and selecting range of interest ...")
     xykm = get_xykm(config)
     xykm_numpy = numpy.array(xykm)
-    xykm_numpy2 = xykm_numpy[:,:2] # remove third column containing chainage
 
     # map km to axis points, further using axis
+    mytimer = timer(mytimer)
     logging.info("selecting river axis range of interest ...")
-    river_axis_km = numpy.zeros(len(river_axis.coords))
-    for i, rp in enumerate(river_axis.coords):
-        rp_numpy = numpy.array(rp)
-        # find closest point to rp on xykm
-        imin = numpy.argmin(((rp_numpy - xykm_numpy2)**2).sum(axis = 1))
-        p0 = xykm_numpy2[imin]
-        dist2 = ((rp_numpy - p0)**2).sum()
-        # print(i,rp,imin,dist2)
-        km = xykm_numpy[imin, 2]
-        # check if closest point is on left link, right link, or node
-        if imin > 0:
-            p1 = xykm_numpy2[imin - 1]
-            alpha = ((p1[0] - p0[0]) + (p1[1] - p0[1])) / ((p1[0] - p0[0])**2 + (p1[1] - p0[1])**2)
-            if alpha > 0 and alpha < 1:
-                dist2link = (rp_numpy[0] - p0[0] - alpha * (p1[0] - p0[0]))**2 + (rp_numpy[1] - p0[1] - alpha * (p1[1] - p0[1]))**2
-                if dist2link < dist2:
-                    dist2 = dist2link
-                    km = xykm_numpy[imin, 2] + alpha * (xykm_numpy[imin - 1, 2] - xykm_numpy[imin, 2]) 
-        if imin < 0:
-            p1 = xykm_numpy2[imin + 1]
-            alpha = ((p1[0] - p0[0]) + (p1[1] - p0[1])) / ((p1[0] - p0[0])**2 + (p1[1] - p0[1])**2)
-            if alpha > 0 and alpha < 1:
-                dist2link = (rp_numpy[0] - p0[0] - alpha * (p1[0] - p0[0]))**2 + (rp_numpy[1] - p0[1] - alpha * (p1[1] - p0[1]))**2
-                if dist2link < dist2:
-                    dist2 = dist2link
-                    km = xykm_numpy[imin, 2] + alpha * (xykm_numpy[imin + 1, 2] - xykm_numpy[imin, 2]) 
-        river_axis_km[i] = km
+    river_axis_km = get_km(numpy.array(river_axis.coords), xykm_numpy)
     max_km = numpy.where(river_axis_km == river_axis_km.max())[0]
     min_km = numpy.where(river_axis_km == river_axis_km.min())[0]
     if max_km.max() < min_km.min():
@@ -268,56 +154,98 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     # get output interval
     km_step = get_float(config, "General", "outputinterval", 1.0)
     # map to output interval
-    km_bin = numpy.rint((river_axis_km - river_axis_km.min())/km_step)
+    km_bin = (river_axis_km.min(), river_axis_km.max(), km_step)
+    km = get_km_bins(km_bin)
 
     # read fairway file
+    mytimer = timer(mytimer)
     logging.info("reading fairway file ...")
     fairway_file = get_str(config, "General", "fairway")
     fairway = read_xyc(fairway_file)
     fairway_numpy = numpy.array(fairway)
+    
     # optional write fairway,mnf file --> no M,N coordinates possible --> single M index or can we speed up such that there is no need to buffer?
     # map fairway to mesh cells
-    logging.info("determine mesh cells for fairway nodes ...")
-    # fairway_index = TODO
+    mytimer = timer(mytimer)
+    logging.info("determine mesh cells for fairway nodes ... ({} nodes)".format(len(fairway_numpy)))
+    fairway_index = map_line_mesh(fairway_numpy, xf, yf, xe, ye, fe, ef, boundary_edge_nrs)
+
+    # linking bank lines to chainage
+    mytimer = timer(mytimer)
+    logging.info("mapping chainage to bank segments ...")
+    bank_km = [None] * n_banklines
+    for ib, bcrds in enumerate(bank_crds):
+        bank_km[ib] = get_km(bcrds, xykm_numpy)
 
     # distance fairway-bankline (bankfairway)
+    mytimer = timer(mytimer)
     logging.info("computing distance between bank lines and fairway ...")
-    s = [None] * n_banklines
+    distance_fw = [None] * n_banklines
     ifw = [None] * n_banklines
-    for ib, b in enumerate(banklines.geometry):
-        s[ib] = numpy.zeros(len(b.coords))
-        ifw[ib] = numpy.zeros(len(b.coords), dtype = numpy.int64)
+    for ib, bcrds in enumerate(bank_crds):
+        distance_fw[ib] = numpy.zeros(len(bcrds))
+        ifw[ib] = numpy.zeros(len(bcrds), dtype = numpy.int64)
         ifw_last = None
-        for ip, bp in enumerate(b.coords):
+        for ip, bp in enumerate(bcrds):
             # check only fairway points starting from latest match (in MATLAB code +/-10 from latest match)
             if ifw_last is None:
-                ifw[ib][ip] = numpy.argmin(((numpy.array(bp) - fairway_numpy)**2).sum(axis = 1))
+                ifw[ib][ip] = numpy.argmin(((bp - fairway_numpy)**2).sum(axis = 1))
             else:
                 ifw_min = max(0, ifw_last - 10)
-                ifw[ib][ip] = ifw_min + numpy.argmin(((numpy.array(bp) - fairway_numpy[ifw_min:ifw_last+10, :])**2).sum(axis = 1))
+                ifw[ib][ip] = ifw_min + numpy.argmin(((bp - fairway_numpy[ifw_min:ifw_last+10, :])**2).sum(axis = 1))
             ifw_last = ifw[ib][ip]
-            s[ib][ip] = ((numpy.array(bp) - fairway_numpy[ifw_last])**2).sum()**0.5
+            distance_fw[ib][ip] = ((bp - fairway_numpy[ifw_last])**2).sum()**0.5
 
     # water level at fairway
-    # s1 = sim[""]
+    # s1 = sim["zw_face"]
     zfw_ini = [None] * n_banklines
-    for i, b in enumerate(banklines.geometry):
-        # n = fairway_index[ifw[i]]
-        # zfw_ini[i] = s1[n]
-        pass
+    for ib in range(n_banklines):
+        ii = fairway_index[ifw[ib]]
+        zfw_ini[ib] = sim["zw_face"][ii]
 
-    # wave reduction s0
-    # wave reduction s1
+    # wave reduction s0, s1
+    dfw0  = get_parameter(config, "General", "wave0", bank_km, default = 200, positive = True, onefile = True)
+    dfw1  = get_parameter(config, "General", "wave1", bank_km, default = 150, positive = True, onefile = True)
+
     # save 1_banklines
+    
     # read vship, nship, nwave, draught (tship), shiptype (ship) ... independent of level number
+    vship0 = get_parameter(config, "General", "vship", bank_km, positive = True, onefile = True)
+    Nship0 = get_parameter(config, "General", "Nship", bank_km, positive = True, onefile = True)
+    nwave0 = get_parameter(config, "General", "nwave", bank_km, default = 5, positive = True, onefile = True)
+    Tship0 = get_parameter(config, "General", "Draught", bank_km, positive = True, onefile = True)
+    ship0 = get_parameter(config, "General", "shiptype", bank_km, valid = [1, 2, 3], onefile = True)
+    parslope0 = get_parameter(config, "General", "slope", bank_km, default = 20, positive = True, ext = "slp")
+    parreed0 = get_parameter(config, "General", "reed", bank_km, default = 0, positive = True, ext = "rdd")
+    
     # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
-    taucls_thr = [1e20, 95, 3.0, 0.95, 0.15]
+    classes = get_bool(config, "General", "Classes")
+    taucls = numpy.array([1e20, 95, 3.0, 0.95, 0.15])
     taucls_str = ["protected", "vegetation", "good clay", "moderate/bad clay", "sand"]
+    if classes:
+        banktype = get_parameter(config, "General", "Banktype", bank_km, default = 0, ext = ".btp")
+        tauc = [None] * len(banktype)
+        for ib in range(len(banktype)):
+            tauc[ib] = taucls[banktype[ib]]
+    else:
+        tauc = get_parameter(config, "General", "Banktype", bank_km, default = 0, ext = ".btp")
+        thr = (taucls[:-1] + taucls[1:])/2
+        banktype = [None] * len(thr)
+        for ib in range(len(tauc)):
+            bt = numpy.zeros(tauc[ib].size)
+            for thr_i in thr:
+                bt[tauc[ib] > thr_i] += 1
+            banktype[ib] = bt
     # plot bank strength 
     # read bank protectlevel zss
-    # if zss undefined, zss = zfw_ini - 1
+    zss = get_parameter(config, "General", "protectlevel", bank_km, default = -1000, ext = ".bpl")
+    # if zss undefined, set zss equal to zfw_ini - 1
+    for ib in range(len(zss)):
+        mask = zss[ib] == -999
+        zss[ib][mask] = zfw_ini[ib][mask] - 1
 
     # get pdischarges
+    mytimer = timer(mytimer)
     logging.info("processing level information ...")
     num_levels = get_int(config, "General", "NLevel")
     ref_level = get_int(config, "General", "RefLevel") - 1
@@ -331,84 +259,430 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     velocity = [None] * num_levels
     bankheight = [None] * num_levels
     linesize = [None] * num_levels
+    dn_flow_tot = [None] * n_banklines
+    dn_ship_tot = [None] * n_banklines
+    dn_tot = [None] * n_banklines
+    dv_tot = [None] * n_banklines
+    dn_eq = [None] * n_banklines
+    dv_eq = [None] * n_banklines
     for iq in range(num_levels):
+        mytimer = timer(mytimer)
         logging.info("processing level {} of {} ...".format(iq+1, num_levels))
+        iq_str = "{}".format(iq+1)
+
+        mytimer = timer(mytimer)
+        logging.info("  reading parameters ...")
+        # read vship, nship, nwave, draught, shiptype, slope, reed, fairwaydepth, ... (level specific values)
+        vship = get_parameter(config, "General", "vship" + iq_str, bank_km, default = vship0, positive = True, onefile = True)
+        Nship = get_parameter(config, "General", "Nship" + iq_str, bank_km, default = Nship0, positive = True, onefile = True)
+        nwave = get_parameter(config, "General", "nwave" + iq_str, bank_km, default = nwave0, positive = True, onefile = True)
+        Tship = get_parameter(config, "General", "Draught" + iq_str, bank_km, default = Tship0, positive = True, onefile = True)
+        ship = get_parameter(config, "General", "shiptype" + iq_str, bank_km, default = ship0, valid = [1, 2, 3], onefile = True)
+
+        parslope = get_parameter(config, "General", "slope" + iq_str, bank_km, default = parslope0, positive = True, ext = "slp")
+        parreed = get_parameter(config, "General", "reed" + iq_str, bank_km, default = parreed0, positive = True, ext = "rdd")
+        mu_slope = [None] * n_banklines
+        mu_reed = [None] * n_banklines
+        for ib in range(n_banklines):
+            mus = parslope[ib].copy()
+            mus[mus > 0] = 1 / mus[mus > 0]
+            mu_slope[ib] = mus
+            mu_reed[ib] = 8.5e-4 * parreed[ib]**0.8
+
+        mytimer = timer(mytimer)
+        logging.info("  reading simulation data ...")
+        sim, dh0 = get_simdata(simfiles[iq])
+        fnc = sim["facenode"]
+
+        mytimer = timer(mytimer)
+        logging.info("  computing bank erosion ...")
         velocity[iq] = [None] * n_banklines
         bankheight[iq] = [None] * n_banklines
         linesize[iq] = [None] * n_banklines
 
-        sim, dh0 = get_simdata(simfiles[iq])
-        # v1 = sim["v1"]
-        for ib, b in enumerate(banklines.geometry):
-            pass
-            # velocity[iq][ib] = sum ( v1[bank_index] * direction_bankline ) / linesize
-            # bankheight[iq][ib] = zw_face[bank_index] - zb_node[fnc[bank_index,:]].min(axis = 1) # maximum water depth per cell
-            # linesize[iq][ib] = length of segments within cell
+        vol = numpy.zeros(len(km))
+        for ib, bcrds in enumerate(bank_crds):
+            # determine velocity and bankheight along banks ...
+            dx = numpy.diff(bcrds[:, 0])
+            dy = numpy.diff(bcrds[:, 1])
+            linesize[iq][ib] = numpy.sqrt(dx**2 + dy**2)
 
-            # read vship, nship, nwave, draught, shiptype, slope, reed, fairwaydepth, ... (level specific values)
+            idx = bank_idx[ib]
+            bank_index = idx[1:]
+            velocity[iq][ib] = (sim["ucx_face"][bank_index] * dx + sim["ucy_face"][bank_index] * dy) / linesize[iq][ib]
+            # bankheight = maximum water depth per cell
+            if sim["zb_location"] == "node":
+                bankheight[iq][ib] = sim["zw_face"][bank_index] - sim["zb_val"][fnc[bank_index,:]].min(axis = 1)
+            else:
+                bankheight[iq][ib] = (sim["zw_face"] - sim["zb_val"])[bank_index]
+
             # [hfw,zfw,chezy] = fairwaydepth(mnfwfile,sim,nbank,xlines,ylines,x_fw,y_fw,mlim,nlim);
             ii = fairway_index[ifw[ib]]
-            hfw = h1[ii]
-            zfw = s1[ii]
-            chezy = chz[ii]
-            chezy = chez.mean() # TODO: curious ... MATLAB: chezy{j} = 0*chezy{j}+mchez
+            hfw = sim["h_face"][ii]
+            zfw = sim["zw_face"][ii]
+            chez = sim["chz_face"][ii]
+            chezy = 0 * chez + chez.mean() # TODO: curious ... MATLAB: chezy{j} = 0*chezy{j}+mchez
 
             # compute ship induced wave height h0 at bank
             # TODO: obtain from comp_erosion call?
             # H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, shiptype, Tship, vship, g)
 
-            if iq == iq_ref:
-                # TODO: reference discharge
-                # zfw_mid = 0.5*(zfw_ini{j}(1:end-1)+zfw_ini{j}(2:end));
-                # zssline = 0.5*(zss{j}(1:end-1)+zss{j}(2:end));
-                # H0_mid  = 0.5*(H0(1:end-1)+H0(2:end))
-                # mu_mid  = 0.5.*(mu_slope{j}(1:end-1)+mu_slope{j}(2:end));
-                # zup = min(Q(n).bankheight{j},zfw_mid+2*H0_mid);
-                # zdo = max(zfw_mid-2*H0_mid, zssline);
-                # ht  = max(zup-zdo,0)
-                # hs = max(Q(n).bankheight{j}-zfw_mid+2*H0_mid,0);
-                # dn_eq{j} = ht./mu_mid;
-                # erov_eq{j} = (0.5*ht+hs).*dn_eq{j}.*Q(n).linesize{j};
-                pass
+            if iq == ref_level:
+                dn_eq[ib], dv_eq[ib] = comp_erosion_eq(bankheight[iq][ib],
+                    linesize[iq][ib],
+                    zfw_ini[ib],
+                    vship[ib],
+                    ship[ib],
+                    Tship[ib],
+                    mu_slope[ib],
+                    distance_fw[ib],
+                    dfw0[ib],
+                    dfw1[ib],
+                    hfw,
+                    zss[ib],
+                    g)
 
-            dn, erov, dnship, dnflow = comp_erosion(velocity[iq][ib],
+            displ_tauc = False # TODO: input parameter (True for Delft3D, False otherwise)
+            dn, dv, dnship, dnflow = comp_erosion(velocity[iq][ib],
                 bankheight[iq][ib],
                 linesize[iq][ib],
                 zfw,
-                zfw_ini,
-                tauc,
-                Nship,
-                vship,
-                nwave,
-                ship,
-                Tship,
-                Teros_dis,
-                mu_slope,
-                mu_reed,
-                distance_fw,
-                dfw0,
-                dfw1,
+                zfw_ini[ib],
+                tauc[ib],
+                Nship[ib],
+                vship[ib],
+                nwave[ib],
+                ship[ib],
+                Tship[ib],
+                Teros * pdischarge[iq],
+                mu_slope[ib],
+                mu_reed[ib],
+                distance_fw[ib],
+                dfw0[ib],
+                dfw1[ib],
                 hfw,
                 chezy,
-                zss,
+                zss[ib],
                 filter,
+                rho,
                 g,
                 displ_tauc)
 
             # shift bank lines
-            xlines_new, ylines_new = move_line(xlines, ylines, dn)
+            xlines_new, ylines_new = move_line(bcrds[:,0], bcrds[:,1], dn)
 
-            # compute and write eroded volumes (total and per km)
+            if dn_tot[ib] is None:
+                dn_flow_tot[ib] = dnflow.copy()
+                dn_ship_tot[ib] = dnship.copy()
+                dn_tot[ib] = dn.copy()
+                dv_tot[ib] = dv.copy()
+            else:
+                dn_flow_tot[ib] += dnflow
+                dn_ship_tot[ib] += dnship
+                dn_tot[ib] += dn
+                dv_tot[ib] += dv
 
-    # [xlines_new{i},ylines_new{i}] = moveLine(xlines{i},ylines{i},dn_tot{i});
-    # [xlines_eq{i},ylines_eq{i}] = moveLine(xlines{i},ylines{i},dn_eq{i});
+            # accumulate eroded volumes per km
+            vol = get_km_eroded_volume(bank_km[ib], dv, km_bin, vol)
+
+        erovol_file = get_str(config, "General", "erovol" + iq_str, default = "erovolQ" + iq_str + ".evo")
+        print("  saving eroded volume in file: {}".format(erovol_file))
+        write_km_eroded_volumes(km, vol, outputdir + os.sep + erovol_file)
+
+    print("=====================================================")
+    dnav = numpy.zeros(n_banklines)
+    dnmax = numpy.zeros(n_banklines)
+    dnavflow = numpy.zeros(n_banklines)
+    dnavship = numpy.zeros(n_banklines)
+    dnaveq = numpy.zeros(n_banklines)
+    dnmaxeq = numpy.zeros(n_banklines)
+    vol_eq = numpy.zeros(len(km))
+    vol_tot = numpy.zeros(len(km))
+    for ib, bcrds in enumerate(bank_crds):
+        dnav[ib] = dn_tot[ib].mean()
+        dnmax[ib] = dn_tot[ib].max()
+        dnavflow[ib]= dn_flow_tot[ib].mean()
+        dnavship[ib]= dn_ship_tot[ib].mean()
+        dnaveq[ib] = dn_eq[ib].mean()
+        dnmaxeq[ib] = dn_eq[ib].max()
+
+        print("average erosion distance for bank line {} : {:6.2f} m".format(ib + 1, dnav[ib]))
+        print("average erosion distance through flow    : {:6.2f} m".format(dnavflow[ib]))
+        print("average erosion distance through ships   : {:6.2f} m".format(dnavship[ib]))
+        print("maximal erosion distance                 : {:6.2f} m".format(dnmax[ib]))
+        print("average equilibrium erosion distance     : {:6.2f} m".format(dnaveq[ib]))
+        print("maximal equilibrium erosion distance     : {:6.2f} m".format(dnmaxeq[ib]))
+
+        xlines_new, ylines_new = move_line(bcrds[:,0], bcrds[:,1], dn_tot[ib])
+        xlines_eq, ylines_eq = move_line(bcrds[:,0], bcrds[:,1], dn_eq[ib])
+
+        vol_eq = get_km_eroded_volume(bank_km[ib], dv_eq[ib], km_bin, vol_eq)
+        vol_tot = get_km_eroded_volume(bank_km[ib], dv_tot[ib], km_bin, vol_tot)
+        if ib < n_banklines - 1:
+            print("-----------------------------------------------------")
+
     # write bank line files
     # write eroded volumes per km
+
+    # compute and write eroded volumes per km
+    erovol_file = get_str(config, "General", "erovol", default = "erovol.evo")
+    print("saving eroded volume in file: {}".format(erovol_file))
+    write_km_eroded_volumes(km, vol_tot, outputdir + os.sep + erovol_file)
 
     # create various plots
 
     log_text("end_bankerosion")
     return True
+
+
+def get_km_bins(km_bin):
+    km_step = km_bin[2]
+    # km = km_bin[0] + numpy.arange(0, int(round((km_bin[1] - km_bin[0]) / km_bin[2]) + 1)) * km_bin[2] # bin bounds
+    km = km_bin[0] + km_bin[2]/2 + numpy.arange(0, int(round((km_bin[1] - km_bin[0]) / km_bin[2]))) * km_bin[2] # bin midpoints
+
+    return km
+
+
+def get_km_eroded_volume(bank_km, dv, km_bin, vol):
+    bank_km_mid = (bank_km[:-1] + bank_km[1:])/2
+    bin_idx = numpy.rint((bank_km_mid - km_bin[0] - km_bin[2]/2) / km_bin[2]).astype(numpy.int64)
+    dvol = numpy.bincount(bin_idx, weights = dv)
+    nbin = len(dvol)
+    vol[:nbin] += dvol
+    return vol
+
+
+def write_km_eroded_volumes(km, vol, filename):
+    with open(filename, "w") as erofile:
+        for i in range(len(km)):
+            erofile.write("{:.2f} {:.2f}\n".format(km[i], vol[i]))
+
+
+def get_km(line_xy, xykm_numpy):
+    line_km = numpy.zeros(line_xy.shape[0])
+    xykm_numpy2 = xykm_numpy[:,:2]
+    last_xykm = xykm_numpy.shape[0] - 1
+    for i, rp_numpy in enumerate(line_xy):
+        # find closest point to rp on xykm
+        imin = numpy.argmin(((rp_numpy - xykm_numpy2)**2).sum(axis = 1))
+        p0 = xykm_numpy2[imin]
+        dist2 = ((rp_numpy - p0)**2).sum()
+        # print(i, rp_numpy, imin, dist2)
+        km = xykm_numpy[imin, 2]
+        
+        # check if closest point is on left link, right link, or node
+        if imin > 0:
+            p1 = xykm_numpy2[imin - 1]
+            alpha = ((p1[0] - p0[0]) + (p1[1] - p0[1])) / ((p1[0] - p0[0])**2 + (p1[1] - p0[1])**2)
+            if alpha > 0 and alpha < 1:
+                dist2link = (rp_numpy[0] - p0[0] - alpha * (p1[0] - p0[0]))**2 + (rp_numpy[1] - p0[1] - alpha * (p1[1] - p0[1]))**2
+                if dist2link < dist2:
+                    dist2 = dist2link
+                    km = xykm_numpy[imin, 2] + alpha * (xykm_numpy[imin - 1, 2] - xykm_numpy[imin, 2]) 
+        if imin < last_xykm:
+            p1 = xykm_numpy2[imin + 1]
+            alpha = ((p1[0] - p0[0]) + (p1[1] - p0[1])) / ((p1[0] - p0[0])**2 + (p1[1] - p0[1])**2)
+            if alpha > 0 and alpha < 1:
+                dist2link = (rp_numpy[0] - p0[0] - alpha * (p1[0] - p0[0]))**2 + (rp_numpy[1] - p0[1] - alpha * (p1[1] - p0[1]))**2
+                if dist2link < dist2:
+                    dist2 = dist2link
+                    km = xykm_numpy[imin, 2] + alpha * (xykm_numpy[imin + 1, 2] - xykm_numpy[imin, 2]) 
+        line_km[i] = km
+    return line_km
+
+
+def intersect_line_mesh(bp, xf, yf, xe, ye, fe, ef, boundary_edge_nrs, d_thresh = 0.001):
+    crds = numpy.zeros((len(bp),2))
+    idx  = numpy.zeros(len(bp), dtype = numpy.int64)
+    l = 0
+    #
+    for j, bpj in enumerate(bp):
+        if j == 0:
+            # first bp inside or outside?
+            dx = xf - bpj[0]
+            dy = yf - bpj[1]
+            possible_cells = numpy.nonzero(~((dx < 0).all(axis = 1) | (dx > 0).all(axis = 1) | (dy < 0).all(axis = 1) | (dy > 0).all(axis = 1)))[0]
+            if len(possible_cells) == 0:
+                # no cells found ... it must be outside
+                index = -1
+                # print("Starting outside mesh")
+            else:
+                # one or more possible cells, check whether it's really inside one of them
+                # using numpy math might be faster, but since it's should only be for a few points let's using shapely
+                pnt = shapely.geometry.Point(bp[0])
+                for k in possible_cells:
+                    polygon_k = shapely.geometry.Polygon(numpy.concatenate((xf[k:k+1], yf[k:k+1]), axis = 0).T)
+                    if polygon_k.contains(pnt):
+                        index = k
+                        # print("Starting in {}".format(index))
+                        break
+                else:
+                    index = -1
+                    # print("Starting outside mesh")
+            crds[l,:] = bpj
+            idx[l] = index
+            l += 1
+        else:
+            # second or later point
+            bpj1 = bp[j - 1]
+            prev_b = 0
+            prev_pnt = bpj1
+            while True:
+                if index < 0:
+                    edges = boundary_edge_nrs
+                else:
+                    edges = fe[index]
+                X0 = xe[edges,0]
+                dX = xe[edges,1] - X0
+                Y0 = ye[edges,0]
+                dY = ye[edges,1] - Y0
+                xi0 = bpj1[0]
+                dxi = bpj[0] - xi0
+                yi0 = bpj1[1]
+                dyi = bpj[1] - yi0
+                det = dX * dyi - dY * dxi
+                a = (dyi * (xi0 - X0) - dxi * (yi0 - Y0)) / det # along mesh edge
+                b = (dY * (xi0 - X0) - dX * (yi0 - Y0)) / det # along bank line
+                slices = numpy.nonzero((b > prev_b) & (b <= 1) & (a >= 0) & (a <= 1))[0]
+                # print("number of slices: ", len(slices))
+                if len(slices) == 0:
+                    # rest of segment associated with same face
+                    # print("{}: -- no slice --".format(j))
+                    if l == crds.shape[0]:
+                        crds.resize((2*l,2))
+                        idx.resize(2*l)
+                    crds[l,:] = bpj
+                    idx[l] = index
+                    l += 1
+                    break
+                else:
+                    if len(slices) > 1:
+                        # crossing multiple edges, when and how?
+                        # - crossing at a corner point?
+                        # - going out and in again for cell seems unlogical
+                        # - going in and out again for boundary seems possible [check: encountered]
+                        # print("multiple intersections at ", b[slices])
+                        bmin = numpy.amin(b[slices])
+                        slices = slices[b[slices] == bmin]
+                    # len(slices) == 1
+                    edge = edges[slices[0]]
+                    faces = ef[edge]
+                    prev_b = b[slices[0]]
+                    if index < 0:
+                        index = faces[0]
+                        # print("{}: Moving into {} via edge {} at b = {}".format(j, index, edge, prev_b))
+                    else:
+                        if faces[0] == index:
+                            index = faces[1]
+                            # if index < 0:
+                            #     print("{}: Moving outside mesh via edge {} at b = {}".format(j, edge, prev_b))
+                            # else:
+                            #     print("{}: Moving to {} via edge {} at b = {}".format(j, index, edge, prev_b))
+                        elif faces[1] == index:
+                            index = faces[0]
+                            # print("{}: Moving to {} via edge {} at b = {}".format(j, index, edge, prev_b))
+                        else:
+                            raise Exception("Shouldn't come here .... index {} differs from both faces {} and {} associated with slicing edge {}".format(index, faces[0], faces[1], edge))
+                    if l == crds.shape[0]:
+                        crds.resize((2*l, 2))
+                        idx.resize(2*l)
+                    crds[l, :] = bpj1 + prev_b * (bpj - bpj1)
+                    idx[l] = index
+                    l += 1
+    # clip to actual length
+    crds = crds[:l, :]
+    idx = idx[:l]
+    # remove tiny segments (about 35% is less than 1 mm)
+    d = numpy.sqrt((numpy.diff(crds, axis = 0)**2).sum(axis = 1))
+    mask = numpy.concatenate((numpy.ones((1), dtype = 'bool'), d > d_thresh))
+    return crds[mask, :], idx[mask]
+
+
+def map_line_mesh(bp, xf, yf, xe, ye, fe, ef, boundary_edge_nrs):
+    idx  = numpy.zeros(len(bp), dtype = numpy.int64)
+    #
+    for j, bpj in enumerate(bp):
+        if j == 0:
+            # first bp inside or outside?
+            dx = xf - bpj[0]
+            dy = yf - bpj[1]
+            possible_cells = numpy.nonzero(~((dx < 0).all(axis = 1) | (dx > 0).all(axis = 1) | (dy < 0).all(axis = 1) | (dy > 0).all(axis = 1)))[0]
+            if len(possible_cells) == 0:
+                # no cells found ... it must be outside
+                index = -1
+                # print("Starting outside mesh")
+            else:
+                # one or more possible cells, check whether it's really inside one of them
+                # using numpy math might be faster, but since it's should only be for a few points let's using shapely
+                pnt = shapely.geometry.Point(bp[0])
+                for k in possible_cells:
+                    polygon_k = shapely.geometry.Polygon(numpy.concatenate((xf[k:k+1], yf[k:k+1]), axis = 0).T)
+                    if polygon_k.contains(pnt):
+                        index = k
+                        # print("Starting in {}".format(index))
+                        break
+                else:
+                    index = -1
+                    # print("Starting outside mesh")
+            idx[j] = index
+        else:
+            # second or later point
+            bpj1 = bp[j - 1]
+            prev_b = 0
+            prev_pnt = bpj1
+            while True:
+                if index < 0:
+                    edges = boundary_edge_nrs
+                else:
+                    edges = fe[index]
+                X0 = xe[edges,0]
+                dX = xe[edges,1] - X0
+                Y0 = ye[edges,0]
+                dY = ye[edges,1] - Y0
+                xi0 = bpj1[0]
+                dxi = bpj[0] - xi0
+                yi0 = bpj1[1]
+                dyi = bpj[1] - yi0
+                det = dX * dyi - dY * dxi
+                a = (dyi * (xi0 - X0) - dxi * (yi0 - Y0)) / det # along mesh edge
+                b = (dY * (xi0 - X0) - dX * (yi0 - Y0)) / det # along bank line
+                slices = numpy.nonzero((b > prev_b) & (b <= 1) & (a >= 0) & (a <= 1))[0]
+                # print("number of slices: ", len(slices))
+                if len(slices) == 0:
+                    # rest of segment associated with same face
+                    # print("{}: -- no slice --".format(j))
+                    idx[j] = index
+                    break
+                else:
+                    if len(slices) > 1:
+                        # crossing multiple edges, when and how?
+                        # - crossing at a corner point?
+                        # - going out and in again for cell seems unlogical
+                        # - going in and out again for boundary seems possible [check: encountered]
+                        # print("multiple intersections at ", b[slices])
+                        bmin = numpy.amin(b[slices])
+                        slices = slices[b[slices] == bmin]
+                    # len(slices) == 1
+                    edge = edges[slices[0]]
+                    faces = ef[edge]
+                    prev_b = b[slices[0]]
+                    if index < 0:
+                        index = faces[0]
+                        # print("{}: Moving into {} via edge {} at b = {}".format(j, index, edge, prev_b))
+                    else:
+                        if faces[0] == index:
+                            index = faces[1]
+                            # if index < 0:
+                            #     print("{}: Moving outside mesh via edge {} at b = {}".format(j, edge, prev_b))
+                            # else:
+                            #     print("{}: Moving to {} via edge {} at b = {}".format(j, index, edge, prev_b))
+                        elif faces[1] == index:
+                            index = faces[0]
+                            # print("{}: Moving to {} via edge {} at b = {}".format(j, index, edge, prev_b))
+                        else:
+                            raise Exception("Shouldn't come here .... index {} differs from both faces {} and {} associated with slicing edge {}".format(index, faces[0], faces[1], edge))
+    masked_idx = numpy.ma.masked_array(idx, mask = (idx == -1))
+    return masked_idx
 
 
 def move_line(xlines, ylines, dn):
@@ -451,6 +725,8 @@ def move_line(xlines, ylines, dn):
     beta  = ( - seg1dy * dsegx0 + seg1dx * dsegy0 ) / det
     alpha[alpha<0.5] = numpy.nan
     alpha[beta>0.5] = numpy.nan
+    # TODO: add limiter for sharp angles?
+    # TODO: make shift "area" conservative in general?
 
     # lenx - 1 segment midpoints
     # lenx - 2 internal nodes
@@ -471,15 +747,39 @@ def move_line(xlines, ylines, dn):
     ylines_new[-2] = seg2y0[-1] + 0.5 * seg2dy[-1]
     ylines_new[-1] = seg2y0[-1] + seg2dy[-1]
 
-    mask = numpy.invert(numpy.isnan(xlines_new))
+    mask = ~numpy.isnan(xlines_new)
     return xlines_new[mask], ylines_new[mask]
 
 
-def comp_erosion(velocity, bankheight, linesize, zfw, zfw_ini, tauc, Nship, vship, nwave, ship, Tship, Teros_dis, mu_slope, mu_reed, distance_fw, dfw0, dfw1, hfw, chezy, zss, filter, g, displ_tauc):
+def comp_erosion_eq(bankheight, linesize, zfw_ini, vship, ship_type, Tship, mu_slope, distance_fw, dfw0, dfw1, hfw, zss, g):
+    eps = sys.float_info.epsilon
+
+    muslope = edge_mean(mu_slope)
+    zssline = edge_mean(zss)
+    wlline = edge_mean(zfw_ini) # original water level at fairway
+
+    # ship induced wave height at the beginning of the foreshore
+    H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, ship_type, Tship, vship, g)
+    H0 = numpy.maximum(edge_mean(H0), eps)
+
+    zup = numpy.minimum(bankheight, wlline + 2 * H0)
+    zdo = numpy.maximum(wlline - 2 * H0, zssline)
+    ht  = numpy.maximum(zup - zdo, 0)
+    hs = numpy.maximum(bankheight - wlline + 2 * H0, 0)
+    dn_eq = ht / muslope
+    dv_eq = (0.5 * ht + hs) * dn_eq * linesize
+
+    return dn_eq, dv_eq
+
+
+def comp_erosion(velocity, bankheight, linesize, zfw, zfw_ini, tauc, Nship, vship, nwave, ship_type, Tship, Teros, mu_slope, mu_reed, distance_fw, dfw0, dfw1, hfw, chezy, zss, filter, rho, g, displ_tauc):
+    eps = sys.float_info.epsilon
+    sec_year = 3600 * 24 *365
+
     # period of ship waves [s]
     T = 0.51 * vship / g
     # [s]
-    ts = T * Nship * nwave
+    ts = (T * Nship * nwave)[:-1] # TODO: check for better solution to shorten ts by one ... edge_mean?
 
     # number of line segments
     xlen = len(velocity)
@@ -506,9 +806,9 @@ def comp_erosion(velocity, bankheight, linesize, zfw, zfw_ini, tauc, Nship, vshi
         vel = velocity
 
     # ship induced wave height at the beginning of the foreshore
-    H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, shiptype, Tship, vship, g)
-    H0 = edge_mean(H0)
-    
+    H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, ship_type, Tship, vship, g)
+    H0 = numpy.maximum(edge_mean(H0), eps)
+
     # compute erosion parameters for each line part
 
     # Erosion coefficient of linesegements
@@ -521,15 +821,15 @@ def comp_erosion(velocity, bankheight, linesize, zfw, zfw_ini, tauc, Nship, vshi
     cE = 1.85e-4 / taucline
 
     # total wavedamping coefficient
-    mu_tot = (muslope / H0)+ mureed
+    mu_tot = (muslope / H0) + mureed
     # water level along bank line
-    ho_line_ship = min(z_line - zssline, 2 * H0)
-    ho_line_flow = min(z_line - zssline, fwd)
-    h_line_ship = max(bankheight - z_line + ho_line_ship, 0)
-    h_line_flow = max(bankheight - z_line + ho_line_flow, 0)
+    ho_line_ship = numpy.minimum(z_line - zssline, 2 * H0)
+    ho_line_flow = numpy.minimum(z_line - zssline, fwd)
+    h_line_ship = numpy.maximum(bankheight - z_line + ho_line_ship, 0)
+    h_line_flow = numpy.maximum(bankheight - z_line + ho_line_flow, 0)
 
     # compute displacement due to flow
-    crit_ratio = numpy.zeros(velc.shape)
+    crit_ratio = numpy.ones(velc.shape)
     mask = (vel > velc) & (z_line > zssline)
     if displ_tauc:
         # displacement calculated based on critical shear stress
@@ -542,23 +842,27 @@ def comp_erosion(velocity, bankheight, linesize, zfw, zfw_ini, tauc, Nship, vshi
     # compute displacement due to shipwaves
     mask = ((z_line - 2 * H0) < wlline) & (wlline < (z_line + 0.5 * H0))
     # limit mu -> 0
+    
     dn_ship = cE * H0**2 * ts * Teros
-    dn_ship[numpy.invert(mask)] = 0
-    dn_ship = dn_ship[0] #TODO: this selects only the first value ... correct? MATLAB compErosion: dn_ship=dn_ship(1);
+    dn_ship[~mask] = 0
+    #dn_ship = dn_ship[0] #TODO: this selects only the first value ... correct? MATLAB compErosion: dn_ship=dn_ship(1);
 
     # compute erosion volume
     mask = (h_line_ship > 0) & (z_line > zssline)
     dv_ship = dn_ship * linesize * h_line_ship
-    dv_ship[numpy.invert(mask)] = 0
-    dn_ship[numpy.invert(mask)] = 0
+    dv_ship[~mask] = 0
+    dn_ship[~mask] = 0
 
     mask = (h_line_flow > 0) & (z_line > zssline)
     dv_flow = dn_flow * linesize * h_line_flow
-    dv_flow[numpy.invert(mask)] = 0
-    dn_flow[numpy.invert(mask)] = 0
+    dv_flow[~mask] = 0
+    dn_flow[~mask] = 0
 
     dn = dn_ship + dn_flow
     dv = dv_ship + dv_flow
+    
+    print("  dv_flow total = ", dv_flow.sum())
+    print("  dv_ship total = ", dv_ship.sum())
 
     return dn, dv, dn_ship, dn_flow
 
@@ -584,7 +888,7 @@ def comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, h_input, shiptype, Tship, vshi
     h[high_Froude] = ((vship[high_Froude] / Froude_limit)**2) / g
     Froude[high_Froude] = Froude_limit
 
-    A = 0.5 * (1 + cos((distance_fw - s1) / (s0 - s1) *  math.pi))
+    A = 0.5 * (1 + numpy.cos((distance_fw - dfw1) / (dfw0 - dfw1) * numpy.pi))
     A[distance_fw < dfw1] = 1
     A[distance_fw > dfw0] = 0
 
@@ -884,6 +1188,9 @@ def clipsimdata(sim, xykm, maxmaxd):
     sim["nnodes"] = sim["nnodes"][keepface]
     sim["zw_face"] = sim["zw_face"][keepface]
     sim["h_face"] = sim["h_face"][keepface]
+    sim["ucx_face"] = sim["ucx_face"][keepface]
+    sim["ucy_face"] = sim["ucy_face"][keepface]
+    sim["chz_face"] = sim["chz_face"][keepface]
 
     return sim
 
@@ -953,9 +1260,24 @@ def get_range(config, group, key):
     return val
 
 
-def get_int(config, group, key, default = None):
+def get_bool(config, group, key, default = None):
+    try:
+        str = config[group][key].lower()
+        val = (str == "yes") or (str == "y") or (str == "true") or (str == "t") or (str == "1")
+    except:
+        if not default is None:
+            val = default
+        else:
+            raise Exception('No integer value specified for required keyword "{}" in block "{}".'.format(key, group))
+    return val
+
+
+def get_int(config, group, key, default = None, positive = False):
     try:
         val = int(config[group][key])
+        if positive:
+            if val <= 0:
+                raise Exception('Value for "{}" in block "{}" must be positive, not {}.'.format(key, group, val))
     except:
         if not default is None:
             val = default
@@ -984,6 +1306,77 @@ def get_str(config, group, key, default = None):
         else:
             raise Exception('No value specified for required keyword "{}" in block "{}".'.format(key, group))
     return val
+
+
+def get_parameter(config, group, key, bank_km, default = None, ext = "", positive = False, valid = None, onefile = False):
+    try:
+        filename = config[group][key]
+        use_default = False
+    except:
+        if default is None:
+            raise Exception('No value specified for required keyword "{}" in block "{}".'.format(key, group))
+        use_default = True
+
+    # if val is value then use that value globally
+    parfield = [None] * len(bank_km)
+    try:
+        if use_default:
+            if default.__class__() == []:
+                return default
+            rval = default
+        else:
+            rval = float(filename)
+            if positive:
+                if rval < 0:
+                    raise Exception('Value of "{}" should be positive, not {}.'.format(key, rval))
+            if not valid is None:
+                if valid.count(rval) == 0:
+                    raise Exception('Value of "{}" should be in {}, not {}.'.format(key, valid, rval))
+        for ib, bkm in enumerate(bank_km):
+            parfield[ib] = numpy.zeros(len(bkm)) + rval
+    except:
+        if onefile:
+            km_thr, val = get_kmval(filename, key, positive, valid)
+        for ib, bkm in enumerate(bank_km):
+            if not onefile:
+                filename_i = filename + "_{}".format(ib+1) + ext
+                km_thr, val = get_kmval(filename_i, key, positive, valid)
+            if km_thr is None:
+                parfield[ib] = numpy.zeros(len(bkm)) + val[0]
+            else:
+                idx = numpy.zeros(len(bkm), dtype = numpy.int64)
+                for thr in km_thr:
+                    idx[bkm >= thr] += 1
+                parfield[ib] = val[idx]
+            #print("Min/max of data: ", parfield[ib].min(), parfield[ib].max())
+    return parfield
+
+
+def get_kmval(filename, key, positive, valid):
+    #print("Trying to read: ",filename)
+    P = pandas.read_csv(filename, names = ["Chainage", "Val"], skipinitialspace = True, delim_whitespace = True)
+    nPnts = len(P.Chainage)
+    km = P.Chainage.to_numpy()
+    val = P.Val.to_numpy()
+    if len(km.shape) == 0:
+        km = km[None]
+        val = val[None]
+    if positive:
+        if (val < 0).any():
+            raise Exception('Values of "{}" in "{}" should be positive. Negative value read for chainage(s): {}'.format(key, filename, km[val < 0]))
+    if not valid is None:
+        isvalid = False
+        for valid_val in valid:
+            isvalid = isvalid | (val == valid_val)
+        if not isvalid.all():
+            raise Exception('Value of "{}" in "{}" should be in {}. Invalid value read for chainage(s): {}.'.format(key, filename, km[~isvalid]))
+    if len(km) == 1:
+        km_thr = None
+    else:
+        if not (km[1:] > km[:-1]).all():
+            raise Exception('Chainage values are not increasing in the file "{}" read for "{}".'.format(filename, key))
+        km_thr = (km[:-1] + km[1:])/2
+    return km_thr, val
 
 
 def read_xyc(filename, ncol = 2):
@@ -1021,8 +1414,10 @@ def get_simdata(filename):
         sim["zb_location"] = "node"
         sim["zb_val"] = numpy.array([0.0, 1.0, 1.0, 0.0, 1.0])
         sim["zw_face"] = numpy.array([0.5, 0.5])
-        sim["h_face"] = [1, 2]
-        #sim["chez_face"] = [60, 60]
+        sim["h_face"] = numpy.array([1, 2])
+        sim["ucx_face"] = numpy.array([1, 0])
+        sim["ucy_face"] = numpy.array([0, 1])
+        sim["chz_face"] = numpy.array([60, 60])
         #sim["kfu_edge"] = [1, 1, 0, 0, 0]
         #sim["velo_edge"] = [1, 1, 0, 0, 0]
     elif name[-6:] == "map.nc":
@@ -1041,6 +1436,9 @@ def get_simdata(filename):
         sim["zb_val"] = dfastbe_io.read_fm_map(filename, "altitude", location = "node")
         sim["zw_face"] = dfastbe_io.read_fm_map(filename, "Water level")
         sim["h_face"] = dfastbe_io.read_fm_map(filename, "sea_floor_depth_below_sea_surface")
+        sim["ucx_face"] = dfastbe_io.read_fm_map(filename, "sea_water_x_velocity")
+        sim["ucy_face"] = dfastbe_io.read_fm_map(filename, "sea_water_y_velocity")
+        sim["chz_face"] = 0 * sim["ucy_face"] + 60 # TODO: read from file ... if written ...
         dh0 = 0.1 #TODO: should be derived from netCDF file ... for now WAQUA setting
     elif name[:3] == "SDS":
         dh0 = 0.1
@@ -1181,6 +1579,13 @@ def log_text(key, file=None, dict={}, repeat=1):
                 file.write(s.format(**dict) + "\n")
 
 
+def timer(last_time):
+    new_time = time.time()
+    if not last_time is None:
+        print(new_time - last_time)
+    return new_time
+
+
 def program_texts(key):
     try:
         str = PROGTEXTS[key]
@@ -1226,7 +1631,7 @@ if __name__ == "__main__":
     global PROGTEXTS
     progloc = str(pathlib.Path(__file__).parent.absolute())
     PROGTEXTS = dfastbe_io.read_program_texts(progloc + os.path.sep + "messages.NL.ini")
-    
+
     logging.info(sys.version)
     if mode == "banklines":
         banklines(configfile)

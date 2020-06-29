@@ -53,7 +53,7 @@ def read_program_texts(filename: str):
             text.append(line)
     if key in dict.keys():
         raise Exception('Duplicate entry for "{}" in "{}".'.format(key,filename))
-    dict[key] = str
+    dict[key] = text
     return dict
 
 
