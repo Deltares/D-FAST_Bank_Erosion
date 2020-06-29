@@ -6,33 +6,35 @@ simOrg = qpfopen(filename);
 switch simOrg.FileType
     case 'SIMONA SDS FILE'
         [xd,yd] = waquaio(simOrg,'','dgrid');
-        zb = waquaio(simOrg,'','height');
+        zb      = waquaio(simOrg,'','height');
         %
-        Info = waqua('read',simOrg,'','SOLUTION_FLOW_SEP',[]);
-        nTimes = length(Info.SimTime);
-        [zw,t] = waquaio(simOrg,'','wlvl',nTimes);
-        [h,t] = waquaio(simOrg,'','wdepth',nTimes);
-        [u,v,t] = waquaio(simOrg,'','veloc0',nTimes);
+        Info    = waqua('read',simOrg,'','SOLUTION_FLOW_SEP',[]);
+        nTimes  = length(Info.SimTime);
+        [zw,t]  = waquaio(simOrg,'','wlvl',nTimes);
+        [h,t]   = waquaio(simOrg,'','wdepth',nTimes);
+        [ucx,ucy,t] = waquaio(simOrg,'','xyveloc',nTimes);
         %
         node_active = ~isnan(xd(:));
-        xnode = xd(node_active);
-        ynode = yd(node_active);
-        zb = zb(node_active);
-        nnodes = length(xnode);
+        xnode   = xd(node_active);
+        ynode   = yd(node_active);
+        zb      = zb(node_active);
+        nnodes  = length(xnode);
         %
-        nodes = xd;
+        nodes   = xd;
         nodes(node_active) = 1:nnodes;
-        faces = cat(3, nodes([1 1:end-1],[1 1:end-1]), ...
-                       nodes(:,[1 1:end-1]), ...
-                       nodes, ...
-                       nodes([1 1:end-1],:));
+        faces   = cat(3, nodes([1 1:end-1],[1 1:end-1]), ...
+                         nodes(:,[1 1:end-1]), ...
+                         nodes, ...
+                         nodes([1 1:end-1],:));
         face_active = all(~isnan(faces),3) & ~isnan(zw);
-        zw = zw(face_active);
-        h = h(face_active);
+        zw      = zw(face_active);
+        h       = h(face_active);
+        ucx     = ucx(face_active);
+        ucy     = ucy(face_active);
         %
-        faces = reshape(faces,numel(xd),4);
-        faces = faces(face_active,:);
-        nfaces = size(faces,1);
+        faces   = reshape(faces,numel(xd),4);
+        faces   = faces(face_active,:);
+        nfaces  = size(faces,1);
 end
 %
 ncid = netcdf.create([filename '_map.nc'],'NETCDF4');
@@ -86,6 +88,20 @@ try
     netcdf.putAtt(ncid,izb,'mesh','mesh2d')
     netcdf.putAtt(ncid,izb,'location','node')
     netcdf.putVar(ncid,izb,zb)
+    %
+    iucx = netcdf.defVar(ncid,'mesh2d_ucx','NC_DOUBLE',ifaces);
+    netcdf.putAtt(ncid,iucx,'standard_name','sea_water_x_velocity')
+    netcdf.putAtt(ncid,iucx,'units','m s-1')
+    netcdf.putAtt(ncid,iucx,'mesh','mesh2d')
+    netcdf.putAtt(ncid,iucx,'location','face')
+    netcdf.putVar(ncid,iucx,ucx)
+    %
+    iucy = netcdf.defVar(ncid,'mesh2d_ucy','NC_DOUBLE',ifaces);
+    netcdf.putAtt(ncid,iucy,'standard_name','sea_water_y_velocity')
+    netcdf.putAtt(ncid,iucy,'units','m s-1')
+    netcdf.putAtt(ncid,iucy,'mesh','mesh2d')
+    netcdf.putAtt(ncid,iucy,'location','face')
+    netcdf.putVar(ncid,iucy,ucy)
 catch Err
 end
 netcdf.close(ncid)
