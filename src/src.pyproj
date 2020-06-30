@@ -22,7 +22,9 @@
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="dfastbe.py" />
+    <Compile Include="dfastbe_cli.py" />
+    <Compile Include="dfastbe_support.py" />
+    <Compile Include="dfastbe_io.py" />
     <Compile Include="dfastbe_kernel.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
