@@ -1,100 +1,170 @@
 # coding: utf-8
-import logging
-from configparser import ConfigParser
-#from ConfigParser import ConfigParser  # ver. < 3.0
 
+import numpy
+import sys
 
 def program_version():
     return 'PRE-ALPHA'
 
 
-def main_program(input_file):
-    # Report program name and version
-    program_header()
+def comp_erosion_eq(bankheight, linesize, zfw_ini, vship, ship_type, Tship, mu_slope, distance_fw, dfw0, dfw1, hfw, zss, g):
+    eps = sys.float_info.epsilon
 
-    # Reading configuration file
-    config = read_config(input_file)
-    verify_config(config,input_file)
+    muslope = edge_mean(mu_slope)
+    zssline = edge_mean(zss)
+    wlline = edge_mean(zfw_ini) # original water level at fairway
 
-    # Running analysis
-    results = run_analysis(config)
+    # ship induced wave height at the beginning of the foreshore
+    H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, ship_type, Tship, vship, g)
+    H0 = numpy.maximum(edge_mean(H0), eps)
 
-    # Writing results
-    write_results(results)
+    zup = numpy.minimum(bankheight, wlline + 2 * H0)
+    zdo = numpy.maximum(wlline - 2 * H0, zssline)
+    ht  = numpy.maximum(zup - zdo, 0)
+    hs = numpy.maximum(bankheight - wlline + 2 * H0, 0)
+    dn_eq = ht / muslope
+    dv_eq = (0.5 * ht + hs) * dn_eq * linesize
 
-    # Finished
-    logging.info('Finished')
-
-
-def program_header():
-    logging.critical('D-FAST Bank Erosion '+program_version())
-    logging.critical('Copyright (c) 2020 Deltares.')
-    logging.critical('')
-    logging.critical('This program is distributed under the terms of the')
-    logging.critical('GNU Lesser General Public License Version 2.1; see')
-    logging.critical('the LICENSE.md file for details.')
-    logging.critical('')
-    logging.info('Source code location:')
-    logging.info('https://github.com/Deltares/D-FAST_Bank_Erosion')
-    logging.info('')
+    return dn_eq, dv_eq
 
 
-def read_config(input_file):
-    logging.info('Reading configuration file '+input_file)
+def comp_erosion(velocity, bankheight, linesize, zfw, zfw_ini, tauc, Nship, vship, nwave, ship_type, Tship, Teros, mu_slope, mu_reed, distance_fw, dfw0, dfw1, hfw, chezy, zss, filter, rho, g, displ_tauc):
+    eps = sys.float_info.epsilon
+    sec_year = 3600 * 24 *365
 
-    # instantiate file parser
-    config = ConfigParser()
+    # period of ship waves [s]
+    T = 0.51 * vship / g
+    # [s]
+    ts = (T * Nship * nwave)[:-1] # TODO: check for better solution to shorten ts by one ... edge_mean?
 
-    # open the configuration file
-    fid = open(input_file,'r')
+    # number of line segments
+    xlen = len(velocity)
+    # total erosion per segment
+    dn = numpy.zeros(xlen)
+    # erosion volume per segment
+    dv = numpy.zeros(xlen)
+    # total wave damping coefficient
+    mu_tot = numpy.zeros(xlen)
 
-    # read and parse the configuration file
-    config.read_file(fid)
+    taucline = edge_mean(tauc)
+    muslope = edge_mean(mu_slope)
+    mureed = edge_mean(mu_reed)
+    fwd = edge_mean(hfw)
+    zssline = edge_mean(zss)
+    Cline = edge_mean(chezy)
+    wlline = edge_mean(zfw_ini) # original water level at fairway
+    z_line = edge_mean(zfw) # water level at fairway
 
-    # close the configuration file
-    fid.close()
-    return config
+    # Average velocity with values of neighbouring lines
+    if filter:
+        vel = numpy.concatenate((velocity[:1], 0.5 * velocity[1:-1] + 0.25 * velocity[:-2] + 0.25 * velocity[2:], velocity[-1:]))
+    else:
+        vel = velocity
+
+    # ship induced wave height at the beginning of the foreshore
+    H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, ship_type, Tship, vship, g)
+    H0 = numpy.maximum(edge_mean(H0), eps)
+
+    # compute erosion parameters for each line part
+
+    # Erosion coefficient of linesegements
+    E = 0.2 * numpy.sqrt(taucline) * 1e-6
+
+    # critical velocity along linesegements
+    velc = numpy.sqrt(taucline / rho * Cline**2 / g)
+
+    # strength of linesegements
+    cE = 1.85e-4 / taucline
+
+    # total wavedamping coefficient
+    mu_tot = (muslope / H0) + mureed
+    # water level along bank line
+    ho_line_ship = numpy.minimum(z_line - zssline, 2 * H0)
+    ho_line_flow = numpy.minimum(z_line - zssline, fwd)
+    h_line_ship = numpy.maximum(bankheight - z_line + ho_line_ship, 0)
+    h_line_flow = numpy.maximum(bankheight - z_line + ho_line_flow, 0)
+
+    # compute displacement due to flow
+    crit_ratio = numpy.ones(velc.shape)
+    mask = (vel > velc) & (z_line > zssline)
+    if displ_tauc:
+        # displacement calculated based on critical shear stress
+        crit_ratio[mask] = Cline[mask] / taucline[mask]
+    else:
+        # displacement calculated based on critical flow velocity
+        crit_ratio[mask] = (vel[mask] / velc[mask])**2
+    dn_flow = E * (crit_ratio - 1) * Teros * sec_year
+
+    # compute displacement due to shipwaves
+    mask = ((z_line - 2 * H0) < wlline) & (wlline < (z_line + 0.5 * H0))
+    # limit mu -> 0
+    
+    dn_ship = cE * H0**2 * ts * Teros
+    dn_ship[~mask] = 0
+    #dn_ship = dn_ship[0] #TODO: this selects only the first value ... correct? MATLAB compErosion: dn_ship=dn_ship(1);
+
+    # compute erosion volume
+    mask = (h_line_ship > 0) & (z_line > zssline)
+    dv_ship = dn_ship * linesize * h_line_ship
+    dv_ship[~mask] = 0
+    dn_ship[~mask] = 0
+
+    mask = (h_line_flow > 0) & (z_line > zssline)
+    dv_flow = dn_flow * linesize * h_line_flow
+    dv_flow[~mask] = 0
+    dn_flow[~mask] = 0
+
+    dn = dn_ship + dn_flow
+    dv = dv_ship + dv_flow
+    
+    #print("  dv_flow total = ", dv_flow.sum())
+    #print("  dv_ship total = ", dv_ship.sum())
+    return dn, dv, dn_ship, dn_flow
 
 
-def logkeyvalue(level,key,val):
-    logging.log(level,str.format('%-30s: %s' % (key,val)))
+def edge_mean(a):
+    return 0.5 * (a[:-1] + a[1:])
 
 
-def verify_config(config,input_file):
-    logging.info('Verifying configuration file')
-    try:
-        filename = config['General']['Discharge']
-        logkeyvalue(logging.DEBUG,'Discharges',filename)
-    except:
-        raise SystemExit('Unable to read General\Discharge from "'+input_file+'"!')
-    try:
-        filename = config['General']['FileX']
-        logkeyvalue(logging.DEBUG,'Input file',filename)
-    except:
-        raise SystemExit('Unable to read General\FileX from "'+input_file+'"!')
-    logging.debug('')
-    return
+def comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, h_input, shiptype, Tship, vship, g):
+    h = numpy.copy(h_input)
+
+    a1 = numpy.zeros(len(distance_fw))
+    # multiple barge convoy set
+    a1[shiptype == 1] = 0.5
+    # RHK ship / motorship
+    a1[shiptype == 2] = 0.28 * Tship[shiptype == 2]**1.25
+    # towboat
+    a1[shiptype == 3] = 1
+
+    Froude   = vship / numpy.sqrt(h * g)
+    Froude_limit = 0.8
+    high_Froude = Froude > Froude_limit
+    h[high_Froude] = ((vship[high_Froude] / Froude_limit)**2) / g
+    Froude[high_Froude] = Froude_limit
+
+    A = 0.5 * (1 + numpy.cos((distance_fw - dfw1) / (dfw0 - dfw1) * numpy.pi))
+    A[distance_fw < dfw1] = 1
+    A[distance_fw > dfw0] = 0
+
+    h0  = a1 * h * (distance_fw / h)**(-1/3) * Froude**4 * A
+    return h0
 
 
-def read_dflowfm(map_file):
-    logging.debug('Loading file "'+map_file+'"')
-    data = 1
-    return data
+def get_km_bins(km_bin):
+    km_step = km_bin[2]
+    # km = km_bin[0] + numpy.arange(0, int(round((km_bin[1] - km_bin[0]) / km_bin[2]) + 1)) * km_bin[2] # bin bounds
+    km = km_bin[0] + km_bin[2]/2 + numpy.arange(0, int(round((km_bin[1] - km_bin[0]) / km_bin[2]))) * km_bin[2] # bin midpoints
+
+    return km
 
 
-def run_analysis(config):
-    # Load data
-    logging.info('Loading data')
-    data1 = read_dflowfm(config['General']['Discharge'])
-    data2 = read_dflowfm(config['General']['FileX'])
-    logging.debug('')
-
-    # Do actual analysis
-    logging.info('Running analysis')
-    logging.debug('')
-    return 0
+def get_km_eroded_volume(bank_km, dv, km_bin, vol):
+    bank_km_mid = (bank_km[:-1] + bank_km[1:])/2
+    bin_idx = numpy.rint((bank_km_mid - km_bin[0] - km_bin[2]/2) / km_bin[2]).astype(numpy.int64)
+    dvol = numpy.bincount(bin_idx, weights = dv)
+    nbin = len(dvol)
+    vol[:nbin] += dvol
+    return vol
 
 
-def write_results(results):
-    logging.info('Writing results')
-    logging.debug('')
