@@ -2,8 +2,8 @@
 
 Since 2010 Deltares is working on a bank erosion module that can be used in combination with D-Flow FM.
 The module computes local erosion sensitivity, visualizes the bank movement and gives an estimation of the amount of bank material that is released in the first year and after the equilibrium is reached.
-D-FAST Bank Erosion can easily be used as a post processing tool of D-Flow FM-simulations.
-Some examples for which D-FAST Bank Erosion can compute bank erosion are:
+\dfastbe can easily be used as a post processing tool of D-Flow FM-simulations.
+Some examples for which \dfastbe can compute bank erosion are:
 
 \begin{itemize}
 \item Bank adjustments such as removal of bank protection
@@ -13,7 +13,7 @@ Some examples for which D-FAST Bank Erosion can compute bank erosion are:
 \end{itemize}
 
 \subsubsection*{Output}
-The output of D-FAST Bank Erosion is:
+The output of \dfastbe is:
 
 \begin{enumerate}
 \item Bank line movement after one year and when the final equilibrium state is reached.
@@ -23,34 +23,34 @@ The output of D-FAST Bank Erosion is:
 This output is presented in graphs / figures and written to text files.
 
 \subsubsection*{Input}
-The input of D-FAST Bank Erosion is:
+The input of \dfastbe is:
 
 \begin{enumerate}
 \item D-Flow FM results (NetCDF map-files)
 \item Local data: level of bank protection removal, subsoil characteristics, shipping information (quantity, location of fairway)
 \end{enumerate}
 
-The layout of this manual is as follows: In this chapter a description is given on how to use D-FAST Bank Erosion (installation, input, output).
-The background of D-FAST Bank Erosion is outlined in \autoref{Chp3} and \autoref{Chp4} (partly in Dutch).
+The layout of this manual is as follows: In this chapter a description is given on how to use \dfastbe (installation, input, output).
+The background of \dfastbe is outlined in \autoref{Chp3} and \autoref{Chp4} (partly in Dutch).
 
 \section{Installation}
 
-D-FAST Bank Erosion itself consists of 2 executables called 'BankLines.exe' and BankErosion.exe'.
+\dfastbe itself consists of 2 executables called 'BankLines.exe' and BankErosion.exe'.
 The first is needed to establish the initial bank lines and the second computes the bank line movement and eroded volume.
-Both executables of D-FAST Bank Erosion can be called from the DOS prompt.
+Both executables of \dfastbe can be called from the DOS prompt.
 
-To be able to run D-FAST Bank Erosion it is necessary to install MCRinstaller.
-The required version of the installer is standard provided with D-FAST Bank Erosion.
+To be able to run \dfastbe it is necessary to install MCRinstaller.
+The required version of the installer is standard provided with \dfastbe.
 
-By default D-FAST Bank Erosion is looking for the definition file deffile.def in the same directory as the executables.
+By default \dfastbe is looking for the definition file deffile.def in the same directory as the executables.
 When the definition file has another name or location, this should be passed when the modules are called.
 
 \section{Scenario plan}
 
-D-FAST Bank Erosion is not calibrated for local bank erosion\footnote{This is almost impossible, due to other uncertainties in bank properties, limited availability of field data of measured bank erosion and the fact that WAQUA computes longer river reaches.
-Locally D-FAST Bank Erosion could be calibrated when historical data of bank erosion is available.
-However, this does not automatically imply that a few kilometers downstream D-FAST Bank Erosion gives good results with the same settings, because the bank properties can be completely different.}.
-Therefore it is strongly advised to use D-FAST Bank Erosion only in a \emph{relative} way.
+\dfastbe is not calibrated for local bank erosion\footnote{This is almost impossible, due to other uncertainties in bank properties, limited availability of field data of measured bank erosion and the fact that WAQUA computes longer river reaches.
+Locally \dfastbe could be calibrated when historical data of bank erosion is available.
+However, this does not automatically imply that a few kilometers downstream \dfastbe gives good results with the same settings, because the bank properties can be completely different.}.
+Therefore it is strongly advised to use \dfastbe only in a \emph{relative} way.
 In this way an image can be formed of
 
 \begin{itemize}
@@ -64,17 +64,17 @@ This means that only the type of subsoil is changed and the other input remains 
 
 \section{D-Flow FM-computations}
 
-Before D-FAST Bank Erosion can be used, steady state D-Flow FM-computations\footnote{D-Flow FM-models and Baseline schematisations of the Dutch river system can be applied by Helpdeskwater.nl Onderwerpen > Applicaties en modellen > Water en ruimte > Gebiedsschematisaties > Servicedesk > Meldingsformulier} have to be performed for each discharge level.
+Before \dfastbe can be used, steady state D-Flow FM-computations\footnote{D-Flow FM-models and Baseline schematisations of the Dutch river system can be applied by Helpdeskwater.nl Onderwerpen > Applicaties en modellen > Water en ruimte > Gebiedsschematisaties > Servicedesk > Meldingsformulier} have to be performed for each discharge level.
 This first requires a schematisation of the discharge hydrograph in discharge levels and a probability per discharge step.
 The discretisation of the discharge hydrograph is not a trivial procedure.
 Deltares advises to use at least ten discharge levels.
 
-By default two figures are generated during D-FAST Bank Erosion computation which the user can use to check if the discharge levels are chosen properly.
+By default two figures are generated during \dfastbe computation which the user can use to check if the discharge levels are chosen properly.
 These are a figure with water levels and a figure with flow velocities.
 In both figures the area that is sensitive to erosion is indicated.
 Based on these figures it can be decided to include or remove discharge levels from the computation.
 For each discharge level an NetCDF map-file (D-Flow FM output file) must be provided.
-D-FAST Bank Erosion uses the water levels and flow velocities that are stored in the last time step.
+\dfastbe uses the water levels and flow velocities that are stored in the last time step.
 It is important that the D-Flow FM computations are in steady state.
 The probability (normalized weighting of the time period) per discharge level is defined by the user in the definition file.
 
@@ -139,7 +139,7 @@ SavePlots & O & Logical & [REMOVED] Saving plots (default: true) \\
 ClosePlots & O & Logical & [REMOVED] Close plots and close Quickplot when simulation is finished (default: false) \\
 Waqview & O & logical & [REMOVED] Generating output for Waqview (default: false) \\ \hline
 \end{tabular}
-\caption{Keywords in the definition file of D-FAST Bank Erosion}
+\caption{Keywords in the definition file of \dfastbe}
 \label{Tab2.2}
 \end{table}
 
@@ -250,7 +250,7 @@ Nwave & E & integer & Number of waves per ship (default 5) \\ \hline
     SDSfile10      = SDSfiles\SDS-q1500
     PDischarge10   =   0.0014
 \end{verbatim}
-\caption{Example of a definition file for D-FAST Bank Erosion}
+\caption{Example of a definition file for \dfastbe}
 \label{Fig2.1}
 \end{figure}
 

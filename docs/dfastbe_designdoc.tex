@@ -1,0 +1,54 @@
+\documentclass{deltares_manual}
+
+\usepackage{tikz}
+\usepackage[pipeTables=true]{markdown}
+
+%------------------------------------------------------------------------------
+\newcommand{\dfastbe}{\textrm{D-FAST~Bank~Erosion}\xspace}
+
+\hypersetup
+{
+    pdfauthor   = {Deltares},
+    pdftitle    = {\dfastbe},
+    pdfkeywords = {Deltares Design Document \dfastbe}
+}
+
+%------------------------------------------------------------------------------
+%
+
+%\makeindex
+
+%------------------------------------------------------------------------------
+%
+\begin{document}
+%\pagestyle{empty}
+%\includepdf[pages=1, offset=72 -70]{cover/d-fast-bank-erosion.pdf} % links-rechts past precies
+%\cleardoublepage
+\title{\dfastbe}
+\subtitle{}
+\manualtype{Design Document}
+\version{1.0}
+
+\author{Bert Jagers}
+
+\deltarestitle
+%
+\include{chapters/intro_tech}
+%\include{chapters/detection}
+%\include{chapters/concepts}
+
+%\nonumchapter{References}
+%\include{chapters/references}
+%\bibliography{../common/deltares_manual}
+
+%\appendix
+%\include{chapters/bankmaterial}
+%\include{chapters/shipwaves}
+%\chapter{Technical Reference Manual}
+\markdownInput{techref.md}
+
+%\pagestyle{empty}
+%\cleardoublepage
+%\mbox{}
+%\includepdf[pages=2, offset=-72 -70]{cover/d-fast-bank-erosion.pdf} % links-rechts past precies
+\end{document}

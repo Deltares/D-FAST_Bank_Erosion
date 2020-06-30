@@ -1,0 +1,17 @@
+\chapter{Introduction}
+
+This document describes the code design considerations for the development of \dfastbe.
+\dfastbe is the successor of WAQBANK.
+The purpose of these tools is to provide an estimate of the bank erosion due to currents and shipping.
+The conceptual WAQBANK framework was developed since 2010.
+To obtain the estimate of the bank erosion, the algorithm needs data on e.g.
+
+\begin{itemize}
+\item velocity distribution at a number of representative discharges,
+\item bank composition and protection, and
+\item shipping characteristics.
+\end{itemize}
+
+Based on these data the algorithm provides estimates of the average and maximum erosion distances along the studied reach after a characteristic period, and when the ultimate equilibrium conditions have been reached.
+The original WAQBANK tool performs the analysis based on results obtained from WAQUA or Delft3D 4 simulations.
+The new \dfastbe tool performs the analysis based on D-Flow FM simulation results.
