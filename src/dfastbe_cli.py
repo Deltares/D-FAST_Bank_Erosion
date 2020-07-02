@@ -395,7 +395,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
         bankheight[iq] = [None] * n_banklines
         linesize[iq] = [None] * n_banklines
 
-        vol = numpy.zeros(len(km))
+        vol = numpy.zeros((len(km),n_banklines))
         for ib, bcrds in enumerate(bank_crds):
             # determine velocity and bankheight along banks ...
             dx = numpy.diff(bcrds[:, 0])
@@ -474,7 +474,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
                 dv_tot[ib] += dv
 
             # accumulate eroded volumes per km
-            vol = dfastbe_kernel.get_km_eroded_volume(bank_km[ib], dv, km_bin, vol)
+            vol = dfastbe_kernel.get_km_eroded_volume(bank_km[ib], dv, km_bin, ib, vol)
 
         erovol_file = dfastbe_io.config_get_str(config, "General", "erovol" + iq_str, default = "erovolQ" + iq_str + ".evo")
         print("  saving eroded volume in file: {}".format(erovol_file))
@@ -487,8 +487,8 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     dnavship = numpy.zeros(n_banklines)
     dnaveq = numpy.zeros(n_banklines)
     dnmaxeq = numpy.zeros(n_banklines)
-    vol_eq = numpy.zeros(len(km))
-    vol_tot = numpy.zeros(len(km))
+    vol_eq = numpy.zeros((len(km), n_banklines))
+    vol_tot = numpy.zeros((len(km), n_banklines))
     for ib, bcrds in enumerate(bank_crds):
         dnav[ib] = dn_tot[ib].mean()
         dnmax[ib] = dn_tot[ib].max()
@@ -507,8 +507,8 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
         xlines_new, ylines_new = dfastbe_support.move_line(bcrds[:,0], bcrds[:,1], dn_tot[ib])
         xlines_eq, ylines_eq = dfastbe_support.move_line(bcrds[:,0], bcrds[:,1], dn_eq[ib])
 
-        vol_eq = dfastbe_kernel.get_km_eroded_volume(bank_km[ib], dv_eq[ib], km_bin, vol_eq)
-        vol_tot = dfastbe_kernel.get_km_eroded_volume(bank_km[ib], dv_tot[ib], km_bin, vol_tot)
+        vol_eq = dfastbe_kernel.get_km_eroded_volume(bank_km[ib], dv_eq[ib], km_bin, ib, vol_eq)
+        vol_tot = dfastbe_kernel.get_km_eroded_volume(bank_km[ib], dv_tot[ib], km_bin, ib, vol_tot)
         if ib < n_banklines - 1:
             print("-----------------------------------------------------")
 
@@ -537,16 +537,18 @@ def log_text(key, file=None, dict={}, repeat=1):
                 file.write(s.format(**dict) + "\n")
 
 def timedlogger(str):
-    timer()
-    logging.info(str)
+    logging.info(timer() + str)
 
 
 def timer():
     global LAST_TIME
     new_time = time.time()
     if "LAST_TIME" in globals():
-        print(new_time - LAST_TIME)
+        str = "{:6.2f} ".format(new_time - LAST_TIME)
+    else:
+        str = "       "
     LAST_TIME = new_time
+    return str
 
 
 def get_program_text(key):

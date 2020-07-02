@@ -87,7 +87,8 @@ def read_xyc(filename, ncol = 2):
 def write_km_eroded_volumes(km, vol, filename):
     with open(filename, "w") as erofile:
         for i in range(len(km)):
-            erofile.write("{:.2f} {:.2f}\n".format(km[i], vol[i]))
+            valstr = "\t".join(["{:.2f}".format(x) for x in vol[i,:]])
+            erofile.write("{:.2f}\t".format(km[i]) + valstr + "\n")
 
 
 def read_config(filename: str):

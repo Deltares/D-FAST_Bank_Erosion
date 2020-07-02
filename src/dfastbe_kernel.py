@@ -181,17 +181,16 @@ def comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, h_input, shiptype, Tship, vshi
 def get_km_bins(km_bin):
     km_step = km_bin[2]
     # km = km_bin[0] + numpy.arange(0, int(round((km_bin[1] - km_bin[0]) / km_bin[2]) + 1)) * km_bin[2] # bin bounds
-    km = km_bin[0] + km_bin[2]/2 + numpy.arange(0, int(round((km_bin[1] - km_bin[0]) / km_bin[2]))) * km_bin[2] # bin midpoints
+    km = km_bin[0] + numpy.arange(1, int(round((km_bin[1] - km_bin[0]) / km_bin[2]) + 1)) * km_bin[2] # bin upper bounds
+    # km = km_bin[0] + km_bin[2]/2 + numpy.arange(0, int(round((km_bin[1] - km_bin[0]) / km_bin[2]))) * km_bin[2] # bin midpoints
 
     return km
 
 
-def get_km_eroded_volume(bank_km, dv, km_bin, vol):
+def get_km_eroded_volume(bank_km, dv, km_bin, col, vol):
     bank_km_mid = (bank_km[:-1] + bank_km[1:])/2
     bin_idx = numpy.rint((bank_km_mid - km_bin[0] - km_bin[2]/2) / km_bin[2]).astype(numpy.int64)
     dvol = numpy.bincount(bin_idx, weights = dv)
     nbin = len(dvol)
-    vol[:nbin] += dvol
+    vol[:nbin, col] += dvol
     return vol
-
-
