@@ -46,7 +46,7 @@ def banklines(filename = "config.ini"): #, variable):
     log_text("header_banklines", dict = {"version": dfastbe_kernel.program_version(), "location": "https://github.com/Deltares/D-FAST_Bank_Erosion"})
 
     # read configuration file
-    simplelogger("reading configuration file ...")
+    timedlogger("reading configuration file ...")
     config = dfastbe_io.read_config(filename)
 
     # check bankdir for output
@@ -54,7 +54,7 @@ def banklines(filename = "config.ini"): #, variable):
 
 
     # read chainage file
-    simplelogger("reading chainage file and selecting range of interest ...")
+    timedlogger("reading chainage file and selecting range of interest ...")
     xykm = dfastbe_io.config_get_xykm(config)    
 
     # plot chainage line
@@ -62,7 +62,7 @@ def banklines(filename = "config.ini"): #, variable):
 
 
     # read guiding bank lines
-    simplelogger("reading guide lines for bank detection ...")
+    timedlogger("reading guide lines for bank detection ...")
     max_river_width = 1000
     guide_lines = dfastbe_io.config_get_bank_guidelines(config)
     guide_lines, maxmaxd = dfastbe_support.clip_bank_guidelines(guide_lines, xykm, max_river_width)
@@ -84,24 +84,24 @@ def banklines(filename = "config.ini"): #, variable):
     h0 = dfastbe_io.config_get_float(config, "General", "waterdepth", default = 0)
 
     # read simulation data and drying flooding threshold dh0
-    simplelogger("reading simulation data ...")
+    timedlogger("reading simulation data ...")
     sim, dh0 = dfastbe_io.read_simdata(simfile)
 
     # increase critical water depth h0 by flooding threshold dh0
     h0 = h0 + dh0
 
     # clip simulation data to boundaries ...
-    simplelogger("clipping simulation data ...")
+    timedlogger("clipping simulation data ...")
     sim = dfastbe_support.clip_simdata(sim, xykm, maxmaxd)
 
     
     # derive bank lines (getbanklines)
-    simplelogger("identifying bank lines ...")
+    timedlogger("identifying bank lines ...")
     banklines = dfastbe_support.get_banklines(sim, h0)
 
 
     # clip the set of detected bank lines to the bank areas
-    simplelogger("clipping, sorting and connecting bank lines ...")
+    timedlogger("clipping, sorting and connecting bank lines ...")
     bank = [None]*len(bankareas)
     for b, bankarea in enumerate(bankareas):
         print("bank line {}".format(b+1))
@@ -111,12 +111,12 @@ def banklines(filename = "config.ini"): #, variable):
         geopandas.GeoSeries(bank[b]).plot(ax = ax, color = "r")
 
     # save bankfile
-    simplelogger("saving clipped bank lines ...")
+    timedlogger("saving clipped bank lines ...")
     bankfile = "banks.shp"
     geopandas.GeoSeries(bank).to_file(bankfile)
     
     # save plot as "banklinedetection"
-    simplelogger("saving plot ...")
+    timedlogger("saving plot ...")
     bank_line_detection_figure = "banklinedetection.svg"
     ax.figure.savefig(bank_line_detection_figure)
 
@@ -133,7 +133,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     g = 9.81 # gravititional accelaration [m/s2]
 
     # read configuration file
-    simplelogger("reading configuration file ...")
+    timedlogger("reading configuration file ...")
     config = dfastbe_io.read_config(filename)
 
     # check bankdir for input
@@ -148,7 +148,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     print("Total simulation time: {:.2f} year".format(Teros))
     
     # read bank lines
-    simplelogger("reading bank lines ...")
+    timedlogger("reading bank lines ...")
     bankfile = "banks.shp"
     banklines = geopandas.read_file(bankfile)
     n_banklines = len(banklines)
@@ -156,7 +156,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     
     # check if simulation file exists
     # read simulation data (getsimdata)
-    simplelogger("reading simulation data ...")
+    timedlogger("reading simulation data ...")
     simfile = dfastbe_io.config_get_simfile(config, "General", "")
     sim, dh0 = dfastbe_io.read_simdata(simfile)
 
@@ -196,7 +196,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     ef[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
     
     # map bank lines to mesh cells
-    simplelogger("intersect bank lines with mesh ...")
+    timedlogger("intersect bank lines with mesh ...")
     bankline_faces = [None] * n_banklines
     xf = sim["x_node"][fn]
     yf = sim["y_node"][fn]
@@ -218,7 +218,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     # optional write banklines.deg for waqview (arcungenerate)
 
     # read river axis file
-    simplelogger("reading river axis file ...")
+    timedlogger("reading river axis file ...")
     river_axis_file = dfastbe_io.config_get_str(config, "General", "riveraxis")
     river_axis = dfastbe_io.read_xyc(river_axis_file)
     river_axis_numpy = numpy.array(river_axis)
@@ -232,12 +232,12 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
         # TODO: do sorting
 
     # read river km file
-    simplelogger("reading chainage file and selecting range of interest ...")
+    timedlogger("reading chainage file and selecting range of interest ...")
     xykm = dfastbe_io.config_get_xykm(config)
     xykm_numpy = numpy.array(xykm)
 
     # map km to axis points, further using axis
-    simplelogger("selecting river axis range of interest ...")
+    timedlogger("selecting river axis range of interest ...")
     river_axis_km = dfastbe_support.project_km_on_line(numpy.array(river_axis.coords), xykm_numpy)
     max_km = numpy.where(river_axis_km == river_axis_km.max())[0]
     min_km = numpy.where(river_axis_km == river_axis_km.min())[0]
@@ -262,24 +262,24 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     km = dfastbe_kernel.get_km_bins(km_bin)
 
     # read fairway file
-    simplelogger("reading fairway file ...")
+    timedlogger("reading fairway file ...")
     fairway_file = dfastbe_io.config_get_str(config, "General", "fairway")
     fairway = dfastbe_io.read_xyc(fairway_file)
     fairway_numpy = numpy.array(fairway)
     
     # optional write fairway,mnf file --> no M,N coordinates possible --> single M index or can we speed up such that there is no need to buffer?
     # map fairway to mesh cells
-    simplelogger("determine mesh cells for fairway nodes ... ({} nodes)".format(len(fairway_numpy)))
+    timedlogger("determine mesh cells for fairway nodes ... ({} nodes)".format(len(fairway_numpy)))
     fairway_index = dfastbe_support.map_line_mesh(fairway_numpy, xf, yf, xe, ye, fe, ef, boundary_edge_nrs)
 
     # linking bank lines to chainage
-    simplelogger("mapping chainage to bank segments ...")
+    timedlogger("mapping chainage to bank segments ...")
     bank_km = [None] * n_banklines
     for ib, bcrds in enumerate(bank_crds):
         bank_km[ib] = dfastbe_support.project_km_on_line(bcrds, xykm_numpy)
 
     # distance fairway-bankline (bankfairway)
-    simplelogger("computing distance between bank lines and fairway ...")
+    timedlogger("computing distance between bank lines and fairway ...")
     distance_fw = [None] * n_banklines
     ifw = [None] * n_banklines
     for ib, bcrds in enumerate(bank_crds):
@@ -345,7 +345,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
         zss[ib][mask] = zfw_ini[ib][mask] - 1
 
     # get pdischarges
-    simplelogger("processing level information ...")
+    timedlogger("processing level information ...")
     num_levels = dfastbe_io.config_get_int(config, "General", "NLevel")
     ref_level = dfastbe_io.config_get_int(config, "General", "RefLevel") - 1
     simfiles = [""]*num_levels
@@ -365,10 +365,10 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     dn_eq = [None] * n_banklines
     dv_eq = [None] * n_banklines
     for iq in range(num_levels):
-        simplelogger("processing level {} of {} ...".format(iq+1, num_levels))
+        timedlogger("processing level {} of {} ...".format(iq+1, num_levels))
         iq_str = "{}".format(iq+1)
 
-        simplelogger("  reading parameters ...")
+        timedlogger("  reading parameters ...")
         # read vship, nship, nwave, draught, shiptype, slope, reed, fairwaydepth, ... (level specific values)
         vship = dfastbe_io.config_get_parameter(config, "General", "vship" + iq_str, bank_km, default = vship0, positive = True, onefile = True)
         Nship = dfastbe_io.config_get_parameter(config, "General", "Nship" + iq_str, bank_km, default = Nship0, positive = True, onefile = True)
@@ -386,11 +386,11 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
             mu_slope[ib] = mus
             mu_reed[ib] = 8.5e-4 * parreed[ib]**0.8
 
-        simplelogger("  reading simulation data ...")
+        timedlogger("  reading simulation data ...")
         sim, dh0 = dfastbe_io.read_simdata(simfiles[iq])
         fnc = sim["facenode"]
 
-        simplelogger("  computing bank erosion ...")
+        timedlogger("  computing bank erosion ...")
         velocity[iq] = [None] * n_banklines
         bankheight[iq] = [None] * n_banklines
         linesize[iq] = [None] * n_banklines
@@ -536,7 +536,7 @@ def log_text(key, file=None, dict={}, repeat=1):
             for s in str:
                 file.write(s.format(**dict) + "\n")
 
-def simplelogger(str):
+def timedlogger(str):
     timer()
     logging.info(str)
 
@@ -568,8 +568,8 @@ def parse_arguments():
         dest="mode",
     )
     parser.add_argument(
-        "-f",
-        "--file",
+        "-i",
+        "--input_file",
         required=True,
         help="name of configuration file",
         dest="configfile",
