@@ -432,6 +432,9 @@ def load_configuration():
             setOptParam(dialog, "nShips" + istr, config, "Erosion", "NShip" + istr)
             setOptParam(dialog, "shipNWaves" + istr, config, "Erosion", "NWave" + istr)
             setOptParam(dialog, "shipDraught" + istr, config, "Erosion", "Draught" + istr)
+            setOptParam(dialog, "bankSlope" + istr, config, "Erosion", "Slope" + istr)
+            setOptParam(dialog, "bankReed" + istr, config, "Erosion", "Reed" + istr)
+
     else:
         showError("Unsupported version number {} in the file!".format(version))
 
@@ -446,9 +449,11 @@ def addTabForLevel(dialog, istr):
     dialog = optionalParLayout(newLayout, 2, "nShips" + istr, "# Ships [1/yr]", dialog)
     dialog = optionalParLayout(newLayout, 3, "shipNWaves" + istr, "# Waves [1/ship]", dialog)
     dialog = optionalParLayout(newLayout, 4, "shipDraught" + istr, "Draught [m]", dialog)
+    dialog = optionalParLayout(newLayout, 5, "bankSlope" + istr, "Slope [-]", dialog)
+    dialog = optionalParLayout(newLayout, 6, "bankReed" + istr, "Reed [-]", dialog)
 
     stretch = QtWidgets.QSpacerItem(10, 10, 13, 7)
-    newLayout.addItem(stretch, 5, 0)
+    newLayout.addItem(stretch, 7, 0)
 
 
 def optionalParLayout(gridLayout, row, key, labelString, dialog):
@@ -581,6 +586,10 @@ def save_configuration():
             config["Erosion"]["NWaves" + istr] = dialog["shipNWaves" + istr + "Edit"].text()
         if dialog["shipDraught" + istr + "Type"].currentText() != "Use Default":
             config["Erosion"]["Draught" + istr] = dialog["shipDraught" + istr + "Edit"].text()
+        if dialog["bankSlope" + istr + "Type"].currentText() != "Use Default":
+            config["Erosion"]["Slope" + istr] = dialog["bankSlope" + istr + "Edit"].text()
+        if dialog["bankReed" + istr + "Type"].currentText() != "Use Default":
+            config["Erosion"]["Reed" + istr] = dialog["bankReed" + istr + "Edit"].text()
 
     dfastbe_io.write_config(filename, config)
 
