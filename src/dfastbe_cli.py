@@ -68,20 +68,19 @@ def banklines(filename = "config.ini"): #, variable):
     guide_lines, maxmaxd = dfastbe_support.clip_bank_guidelines(guide_lines, xykm, max_river_width)
 
     # convert guide lines to bank polygons
-    bankareas = dfastbe_support.convert_guide_lines_to_bank_polygons(config, guide_lines)
+    dlines = dfastbe_io.config_get_bank_search_distances(config, len(guide_lines))
+    bankareas = dfastbe_support.convert_guide_lines_to_bank_polygons(guide_lines, dlines)
     
     for ba in bankareas:
         geopandas.GeoSeries(ba).plot(ax = ax, alpha = 0.2, color = "k")
 
-    # get dremove: ommiting coordinates of lines that are more than a certain distance "dremove" from neighbouring points (usually not necesary, so choose large value) (default = 5000 m)
-
 
     # get simulationfile
-    simfile = dfastbe_io.config_get_simfile(config, "General", "")
+    simfile = dfastbe_io.config_get_simfile(config, "Detect", "")
     # optional plot water depth
 
     # get critical water depth used for defining bank line (default = 0.0 m)
-    h0 = dfastbe_io.config_get_float(config, "General", "waterdepth", default = 0)
+    h0 = dfastbe_io.config_get_float(config, "Detect", "WaterDepth", default = 0)
 
     # read simulation data and drying flooding threshold dh0
     timedlogger("reading simulation data ...")
@@ -139,12 +138,12 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     # check bankdir for input
     # check localdir
     # check outputdir
-    outputdir = dfastbe_io.config_get_str(config, "General", "outputdir")
+    outputdir = dfastbe_io.config_get_str(config, "Erosion", "outputdir")
     if not os.path.exists(outputdir):
         os.makedirs(outputdir)
     
     # get simulation time terosion
-    Teros = dfastbe_io.config_get_int(config, "General", "Terosion", positive = True)
+    Teros = dfastbe_io.config_get_int(config, "Erosion", "Terosion", positive = True)
     print("Total simulation time: {:.2f} year".format(Teros))
     
     # read bank lines
@@ -157,7 +156,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     # check if simulation file exists
     # read simulation data (getsimdata)
     timedlogger("reading simulation data ...")
-    simfile = dfastbe_io.config_get_simfile(config, "General", "")
+    simfile = dfastbe_io.config_get_simfile(config, "Erosion", "")
     sim, dh0 = dfastbe_io.read_simdata(simfile)
 
     fn = sim["facenode"]
@@ -219,7 +218,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
 
     # read river axis file
     timedlogger("reading river axis file ...")
-    river_axis_file = dfastbe_io.config_get_str(config, "General", "riveraxis")
+    river_axis_file = dfastbe_io.config_get_str(config, "Erosion", "RiverAxis")
     river_axis = dfastbe_io.read_xyc(river_axis_file)
     river_axis_numpy = numpy.array(river_axis)
     # optional sorting --> see 04_Waal_D3D example
@@ -256,14 +255,14 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
         river_axis = shapely.geometry.LineString(river_axis_numpy)
 
     # get output interval
-    km_step = dfastbe_io.config_get_float(config, "General", "outputinterval", 1.0)
+    km_step = dfastbe_io.config_get_float(config, "Erosion", "OutputInterval", 1.0)
     # map to output interval
     km_bin = (river_axis_km.min(), river_axis_km.max(), km_step)
     km = dfastbe_kernel.get_km_bins(km_bin)
 
     # read fairway file
     timedlogger("reading fairway file ...")
-    fairway_file = dfastbe_io.config_get_str(config, "General", "fairway")
+    fairway_file = dfastbe_io.config_get_str(config, "Erosion", "Fairway")
     fairway = dfastbe_io.read_xyc(fairway_file)
     fairway_numpy = numpy.array(fairway)
     
@@ -304,31 +303,31 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
         zfw_ini[ib] = sim["zw_face"][ii]
 
     # wave reduction s0, s1
-    dfw0  = dfastbe_io.config_get_parameter(config, "General", "wave0", bank_km, default = 200, positive = True, onefile = True)
-    dfw1  = dfastbe_io.config_get_parameter(config, "General", "wave1", bank_km, default = 150, positive = True, onefile = True)
+    dfw0  = dfastbe_io.config_get_parameter(config, "Erosion", "Wave0", bank_km, default = 200, positive = True, onefile = True)
+    dfw1  = dfastbe_io.config_get_parameter(config, "Erosion", "Wave1", bank_km, default = 150, positive = True, onefile = True)
 
     # save 1_banklines
     
     # read vship, nship, nwave, draught (tship), shiptype (ship) ... independent of level number
-    vship0 = dfastbe_io.config_get_parameter(config, "General", "vship", bank_km, positive = True, onefile = True)
-    Nship0 = dfastbe_io.config_get_parameter(config, "General", "Nship", bank_km, positive = True, onefile = True)
-    nwave0 = dfastbe_io.config_get_parameter(config, "General", "nwave", bank_km, default = 5, positive = True, onefile = True)
-    Tship0 = dfastbe_io.config_get_parameter(config, "General", "Draught", bank_km, positive = True, onefile = True)
-    ship0 = dfastbe_io.config_get_parameter(config, "General", "shiptype", bank_km, valid = [1, 2, 3], onefile = True)
-    parslope0 = dfastbe_io.config_get_parameter(config, "General", "slope", bank_km, default = 20, positive = True, ext = "slp")
-    parreed0 = dfastbe_io.config_get_parameter(config, "General", "reed", bank_km, default = 0, positive = True, ext = "rdd")
+    vship0 = dfastbe_io.config_get_parameter(config, "Erosion", "VShip", bank_km, positive = True, onefile = True)
+    Nship0 = dfastbe_io.config_get_parameter(config, "Erosion", "NShip", bank_km, positive = True, onefile = True)
+    nwave0 = dfastbe_io.config_get_parameter(config, "Erosion", "NWave", bank_km, default = 5, positive = True, onefile = True)
+    Tship0 = dfastbe_io.config_get_parameter(config, "Erosion", "Draught", bank_km, positive = True, onefile = True)
+    ship0 = dfastbe_io.config_get_parameter(config, "Erosion", "ShipType", bank_km, valid = [1, 2, 3], onefile = True)
+    parslope0 = dfastbe_io.config_get_parameter(config, "Erosion", "Slope", bank_km, default = 20, positive = True, ext = "slp")
+    parreed0 = dfastbe_io.config_get_parameter(config, "Erosion", "Reed", bank_km, default = 0, positive = True, ext = "rdd")
     
     # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
-    classes = dfastbe_io.config_get_bool(config, "General", "Classes")
+    classes = dfastbe_io.config_get_bool(config, "Erosion", "Classes")
     taucls = numpy.array([1e20, 95, 3.0, 0.95, 0.15])
     taucls_str = ["protected", "vegetation", "good clay", "moderate/bad clay", "sand"]
     if classes:
-        banktype = dfastbe_io.config_get_parameter(config, "General", "Banktype", bank_km, default = 0, ext = ".btp")
+        banktype = dfastbe_io.config_get_parameter(config, "Erosion", "BankType", bank_km, default = 0, ext = ".btp")
         tauc = [None] * len(banktype)
         for ib in range(len(banktype)):
             tauc[ib] = taucls[banktype[ib]]
     else:
-        tauc = dfastbe_io.config_get_parameter(config, "General", "Banktype", bank_km, default = 0, ext = ".btp")
+        tauc = dfastbe_io.config_get_parameter(config, "Erosion", "BankType", bank_km, default = 0, ext = ".btp")
         thr = (taucls[:-1] + taucls[1:])/2
         banktype = [None] * len(thr)
         for ib in range(len(tauc)):
@@ -338,7 +337,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
             banktype[ib] = bt
     # plot bank strength 
     # read bank protectlevel zss
-    zss = dfastbe_io.config_get_parameter(config, "General", "protectlevel", bank_km, default = -1000, ext = ".bpl")
+    zss = dfastbe_io.config_get_parameter(config, "Erosion", "ProtectLevel", bank_km, default = -1000, ext = ".bpl")
     # if zss undefined, set zss equal to zfw_ini - 1
     for ib in range(len(zss)):
         mask = zss[ib] == -999
@@ -346,14 +345,14 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
 
     # get pdischarges
     timedlogger("processing level information ...")
-    num_levels = dfastbe_io.config_get_int(config, "General", "NLevel")
-    ref_level = dfastbe_io.config_get_int(config, "General", "RefLevel") - 1
+    num_levels = dfastbe_io.config_get_int(config, "Erosion", "NLevel")
+    ref_level = dfastbe_io.config_get_int(config, "Erosion", "RefLevel") - 1
     simfiles = [""]*num_levels
     pdischarge = [0]*num_levels
     for iq in range(num_levels):
         iq_str = str(iq + 1)
-        simfiles[iq] = dfastbe_io.config_get_simfile(config, "General", iq_str)
-        pdischarge[iq] = dfastbe_io.config_get_float(config, "General", "PDischarge" + iq_str)
+        simfiles[iq] = dfastbe_io.config_get_simfile(config, "Erosion", iq_str)
+        pdischarge[iq] = dfastbe_io.config_get_float(config, "Erosion", "PDischarge" + iq_str)
 
     velocity = [None] * num_levels
     bankheight = [None] * num_levels
@@ -370,14 +369,14 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
 
         timedlogger("  reading parameters ...")
         # read vship, nship, nwave, draught, shiptype, slope, reed, fairwaydepth, ... (level specific values)
-        vship = dfastbe_io.config_get_parameter(config, "General", "vship" + iq_str, bank_km, default = vship0, positive = True, onefile = True)
-        Nship = dfastbe_io.config_get_parameter(config, "General", "Nship" + iq_str, bank_km, default = Nship0, positive = True, onefile = True)
-        nwave = dfastbe_io.config_get_parameter(config, "General", "nwave" + iq_str, bank_km, default = nwave0, positive = True, onefile = True)
-        Tship = dfastbe_io.config_get_parameter(config, "General", "Draught" + iq_str, bank_km, default = Tship0, positive = True, onefile = True)
-        ship = dfastbe_io.config_get_parameter(config, "General", "shiptype" + iq_str, bank_km, default = ship0, valid = [1, 2, 3], onefile = True)
+        vship = dfastbe_io.config_get_parameter(config, "Erosion", "VShip" + iq_str, bank_km, default = vship0, positive = True, onefile = True)
+        Nship = dfastbe_io.config_get_parameter(config, "Erosion", "NShip" + iq_str, bank_km, default = Nship0, positive = True, onefile = True)
+        nwave = dfastbe_io.config_get_parameter(config, "Erosion", "NWave" + iq_str, bank_km, default = nwave0, positive = True, onefile = True)
+        Tship = dfastbe_io.config_get_parameter(config, "Erosion", "Draught" + iq_str, bank_km, default = Tship0, positive = True, onefile = True)
+        ship = dfastbe_io.config_get_parameter(config, "Erosion", "ShipType" + iq_str, bank_km, default = ship0, valid = [1, 2, 3], onefile = True)
 
-        parslope = dfastbe_io.config_get_parameter(config, "General", "slope" + iq_str, bank_km, default = parslope0, positive = True, ext = "slp")
-        parreed = dfastbe_io.config_get_parameter(config, "General", "reed" + iq_str, bank_km, default = parreed0, positive = True, ext = "rdd")
+        parslope = dfastbe_io.config_get_parameter(config, "Erosion", "Slope" + iq_str, bank_km, default = parslope0, positive = True, ext = "slp")
+        parreed = dfastbe_io.config_get_parameter(config, "Erosion", "Reed" + iq_str, bank_km, default = parreed0, positive = True, ext = "rdd")
         mu_slope = [None] * n_banklines
         mu_reed = [None] * n_banklines
         for ib in range(n_banklines):
@@ -476,7 +475,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
             # accumulate eroded volumes per km
             vol = dfastbe_kernel.get_km_eroded_volume(bank_km[ib], dv, km_bin, ib, vol)
 
-        erovol_file = dfastbe_io.config_get_str(config, "General", "erovol" + iq_str, default = "erovolQ" + iq_str + ".evo")
+        erovol_file = dfastbe_io.config_get_str(config, "Erosion", "EroVol" + iq_str, default = "erovolQ" + iq_str + ".evo")
         print("  saving eroded volume in file: {}".format(erovol_file))
         dfastbe_io.write_km_eroded_volumes(km, vol, outputdir + os.sep + erovol_file)
 
@@ -516,7 +515,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     # write eroded volumes per km
 
     # compute and write eroded volumes per km
-    erovol_file = dfastbe_io.config_get_str(config, "General", "erovol", default = "erovol.evo")
+    erovol_file = dfastbe_io.config_get_str(config, "Erosion", "EroVol", default = "erovol.evo")
     print("saving eroded volume in file: {}".format(erovol_file))
     dfastbe_io.write_km_eroded_volumes(km, vol_tot, outputdir + os.sep + erovol_file)
 

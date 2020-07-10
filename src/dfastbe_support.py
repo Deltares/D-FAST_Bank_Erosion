@@ -433,20 +433,7 @@ def clip_bank_guidelines(line, xykm = None, max_river_width = 1000):
     return line, maxmaxd
 
 
-def convert_guide_lines_to_bank_polygons(config, guide_lines):
-    nbank = len(guide_lines)
-    # get dlines: distance from pre defined lines used for determining bank lines (default = 50 m)
-    dlines = config["General"].get("dlines", None)
-    if dlines is None:
-        dlines = [50]*nbank
-    elif dlines[0] == "[" and dlines[-1] == "]":
-        dlines = dlines[1:-1].split(",")
-        dlines = [float(d) for d in dlines]
-        if not all([d > 0 for d in dlines]):
-            raise Exception("keyword DLINES should contain positive values in file: {}".format(filename))
-        if len(dlines) != nbank:
-            raise Exception("keyword DLINES should contain NBANK values in file: {}".format(filename))
-    
+def convert_guide_lines_to_bank_polygons(guide_lines, dlines):
     nbank = len(guide_lines)
     bankareas = [None]*nbank
     for b, distance in enumerate(dlines):

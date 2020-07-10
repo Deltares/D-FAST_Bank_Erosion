@@ -113,7 +113,87 @@ def read_config(filename: str):
             data = line.split()
             if len(data) >= 3:
                 config["General"][data[0]] = data[2]
+    return upgrade_config(config)
+
+
+def upgrade_config(config):
+    try:
+        version = config["General"]["Version"]
+    except:
+        version = "0.1"
+
+    if version == "0.1":
+        config["General"]["Version"] = "1.0"
+
+        config["Detect"] = {}
+        config = movepar(config, "General", "Delft3Dfile", "Detect", "SimFile")
+        config = movepar(config, "General", "SDSfile", "Detect", "SimFile")
+        config = movepar(config, "General", "SimFile", "Detect")
+        config = movepar(config, "General", "NBank", "Detect")
+        NBank = config_get_int(config, "Detect", "NBank", default = 0, positive = True)
+        for i in range(NBank):
+            istr = str(i+1)
+            config = movepar(config, "General", "Line"+istr, "Detect")
+        config = movepar(config, "General", "WaterDepth", "Detect")
+        config = movepar(config, "General", "DLines", "Detect")
+
+        config["Erosion"] = {}
+        config = movepar(config, "General", "TErosion", "Erosion")
+        config = movepar(config, "General", "RiverAxis", "Erosion")
+        config = movepar(config, "General", "Fairway", "Erosion")
+        config = movepar(config, "General", "RefLevel", "Erosion")
+        config = movepar(config, "General", "OutputInterval", "Erosion")
+        config = movepar(config, "General", "OutputDir", "Erosion")
+        config = movepar(config, "General", "BankNew", "Erosion")
+        config = movepar(config, "General", "BankEq", "Erosion")
+        config = movepar(config, "General", "EroVol", "Erosion")
+        config = movepar(config, "General", "NLevel", "Erosion")
+        NLevel = config_get_int(config, "Erosion", "NLevel", default = 0, positive = True)
+        for i in range(NLevel):
+            istr = str(i+1)
+            config = movepar(config, "General", "Delft3Dfile"+istr, "Erosion", "SimFile"+istr)
+            config = movepar(config, "General", "SDSfile"+istr, "Erosion", "SimFile"+istr)
+            config = movepar(config, "General", "SimFile"+istr, "Erosion")
+            config = movepar(config, "General", "PDischarge"+istr, "Erosion")
+
+        config = movepar(config, "General", "ShipType", "Erosion")
+        config = movepar(config, "General", "VShip", "Erosion")
+        config = movepar(config, "General", "NShip", "Erosion")
+        config = movepar(config, "General", "NWave", "Erosion")
+        config = movepar(config, "General", "Draught", "Erosion")
+        config = movepar(config, "General", "Wave0", "Erosion")
+        config = movepar(config, "General", "Wave1", "Erosion")
+
+        config = movepar(config, "General", "Classes", "Erosion")
+        config = movepar(config, "General", "BankType", "Erosion")
+        config = movepar(config, "General", "ProtectLevel", "Erosion")
+        config = movepar(config, "General", "Slope", "Erosion")
+        config = movepar(config, "General", "Reed", "Erosion")
+        config = movepar(config, "General", "VelFilter", "Erosion")
+
+        for i in range(NLevel):
+            istr = str(i+1)
+            config = movepar(config, "General", "ShipType"+istr, "Erosion")
+            config = movepar(config, "General", "VShip"+istr, "Erosion")
+            config = movepar(config, "General", "NShip"+istr, "Erosion")
+            config = movepar(config, "General", "NWave"+istr, "Erosion")
+            config = movepar(config, "General", "Draught"+istr, "Erosion")
+
     return config
+
+
+def movepar(config, group1, key1, group2, key2 = None):
+    if group1 in config.sections() and key1 in config[group1]:
+        if key2 is None:
+            key2 = key1
+        config[group2][key2] = config[group1][key1]
+        config[group1].pop(key1)
+    return config
+    simfile = config[group].get("Delft3Dfile"+istr, "")
+    simfile = config[group].get("SDSfile"+istr, simfile)
+    simfile = config[group].get("simfile"+istr, simfile)
+    return simfile
+
 
 
 def write_config(filename: str, config):
@@ -216,13 +296,28 @@ def clip_chainage_path(xykm, kmbounds):
 
 def config_get_bank_guidelines(config):
     # read guiding bank line
-    nbank = config_get_int(config, "General", "NBank")
+    nbank = config_get_int(config, "Detect", "NBank")
     line = [None] * nbank
     for b in range(nbank):
-        bankfile = config["General"]["Line{}".format(b+1)]
+        bankfile = config["Detect"]["Line{}".format(b+1)]
         line[b] = read_xyc(bankfile)
     return line
     
+
+
+def config_get_bank_search_distances(config, nbank):
+    dlines = config["Detect"].get("DLines", None)
+    if dlines is None:
+        dlines = [50]*nbank
+    elif dlines[0] == "[" and dlines[-1] == "]":
+        dlines = dlines[1:-1].split(",")
+        dlines = [float(d) for d in dlines]
+        if not all([d > 0 for d in dlines]):
+            raise Exception("keyword DLINES should contain positive values in file: {}".format(filename))
+        if len(dlines) != nbank:
+            raise Exception("keyword DLINES should contain NBANK values in file: {}".format(filename))
+    return dlines
+
 
 def config_get_simfile(config, group, istr):
     simfile = config[group].get("Delft3Dfile"+istr, "")
