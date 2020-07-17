@@ -147,6 +147,7 @@ def upgrade_config(config):
         config = movepar(config, "General", "BankNew", "Erosion")
         config = movepar(config, "General", "BankEq", "Erosion")
         config = movepar(config, "General", "EroVol", "Erosion")
+        config = movepar(config, "General", "EroVolEqui", "Erosion")
         config = movepar(config, "General", "NLevel", "Erosion")
         NLevel = config_get_int(config, "Erosion", "NLevel", default = 0, positive = True)
         for i in range(NLevel):
@@ -178,6 +179,9 @@ def upgrade_config(config):
             config = movepar(config, "General", "NShip"+istr, "Erosion")
             config = movepar(config, "General", "NWave"+istr, "Erosion")
             config = movepar(config, "General", "Draught"+istr, "Erosion")
+            config = movepar(config, "General", "Slope"+istr, "Erosion")
+            config = movepar(config, "General", "Reed"+istr, "Erosion")
+            config = movepar(config, "General", "EroVol"+istr, "Erosion")
 
     return config
 
@@ -189,11 +193,6 @@ def movepar(config, group1, key1, group2, key2 = None):
         config[group2][key2] = config[group1][key1]
         config[group1].pop(key1)
     return config
-    simfile = config[group].get("Delft3Dfile"+istr, "")
-    simfile = config[group].get("SDSfile"+istr, simfile)
-    simfile = config[group].get("simfile"+istr, simfile)
-    return simfile
-
 
 
 def write_config(filename: str, config):
@@ -396,7 +395,7 @@ def config_get_parameter(config, group, key, bank_km, default = None, ext = "", 
     parfield = [None] * len(bank_km)
     try:
         if use_default:
-            if default.__class__() == []:
+            if isinstance(default, list):
                 return default
             rval = default
         else:
@@ -476,7 +475,7 @@ def read_simdata(filename):
         sim["h_face"] = read_fm_map(filename, "sea_floor_depth_below_sea_surface")
         sim["ucx_face"] = read_fm_map(filename, "sea_water_x_velocity")
         sim["ucy_face"] = read_fm_map(filename, "sea_water_y_velocity")
-        sim["chz_face"] = 0 * sim["ucy_face"] + 60 # TODO: read from file ... if written ...
+        sim["chz_face"] = read_fm_map(filename, "Chezy roughness")
         dh0 = 0.1 #TODO: should be derived from netCDF file ... for now WAQUA setting
     elif name[:3] == "SDS":
         dh0 = 0.1

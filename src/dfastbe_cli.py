@@ -156,7 +156,7 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     # check if simulation file exists
     # read simulation data (getsimdata)
     timedlogger("reading simulation data ...")
-    simfile = dfastbe_io.config_get_simfile(config, "Erosion", "")
+    simfile = dfastbe_io.config_get_simfile(config, "Erosion", "1")
     sim, dh0 = dfastbe_io.read_simdata(simfile)
 
     fn = sim["facenode"]
@@ -403,12 +403,14 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
 
             idx = bank_idx[ib]
             bank_index = idx[1:]
-            velocity[iq][ib] = (sim["ucx_face"][bank_index] * dx + sim["ucy_face"][bank_index] * dy) / linesize[iq][ib]
-            # bankheight = maximum water depth per cell
+            velocity[iq][ib] = numpy.absolute(sim["ucx_face"][bank_index] * dx + sim["ucy_face"][bank_index] * dy) / linesize[iq][ib]
+            # bankheight = maximum bed elevation per cell
             if sim["zb_location"] == "node":
-                bankheight[iq][ib] = sim["zw_face"][bank_index] - sim["zb_val"][fnc[bank_index,:]].min(axis = 1)
+                bankheight[iq][ib] = sim["zb_val"][fnc[bank_index,:]].max(axis = 1)
             else:
-                bankheight[iq][ib] = (sim["zw_face"] - sim["zb_val"])[bank_index]
+                # don't know ... need to check neighbouring cells ...
+                pass
+                #bankheight[iq][ib] = (sim["zw_face"] - sim["zb_val"])[bank_index]
 
             # [hfw,zfw,chezy] = fairwaydepth(mnfwfile,sim,nbank,xlines,ylines,x_fw,y_fw,mlim,nlim);
             ii = fairway_index[ifw[ib]]
@@ -433,6 +435,29 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
                     g)
 
             displ_tauc = False # TODO: input parameter (True for Delft3D, False otherwise)
+            qstr = str(iq+1)
+            bstr = str(ib+1)
+            debug_file(velocity[iq][ib], "velocity.Q"+qstr+".B"+bstr+".txt")
+            debug_file(bankheight[iq][ib], "bankheight.Q"+qstr+".B"+bstr+".txt")
+            debug_file(linesize[iq][ib], "linesize.Q"+qstr+".B"+bstr+".txt")
+            debug_file(zfw, "zfw.Q"+qstr+".B"+bstr+".txt")
+            debug_file(zfw_ini[ib], "zfw_ini.B"+bstr+".txt")
+            debug_file(tauc[ib], "tauc.Q"+qstr+".B"+bstr+".txt")
+            debug_file(Nship[ib], "Nship.Q"+qstr+".B"+bstr+".txt")
+            debug_file(vship[ib], "vship.Q"+qstr+".B"+bstr+".txt")
+            debug_file(nwave[ib], "nwave.Q"+qstr+".B"+bstr+".txt")
+            debug_file(ship[ib], "ship.Q"+qstr+".B"+bstr+".txt")
+            debug_file(Tship[ib], "Tship.Q"+qstr+".B"+bstr+".txt")
+            debug_file(pdischarge[ib], "pdischarge.Q"+qstr+".txt")
+            debug_file(mu_slope[ib], "mu_slope.Q"+qstr+".B"+bstr+".txt")
+            debug_file(mu_reed[ib], "mu_reed.Q"+qstr+".B"+bstr+".txt")
+            debug_file(distance_fw[ib], "distance_fw.Q"+qstr+".B"+bstr+".txt")
+            debug_file(dfw0[ib], "dfw0.Q"+qstr+".B"+bstr+".txt")
+            debug_file(dfw1[ib], "dfw1.Q"+qstr+".B"+bstr+".txt")
+            debug_file(hfw, "hfw.Q"+qstr+".B"+bstr+".txt")
+            debug_file(chezy, "chezy.Q"+qstr+".B"+bstr+".txt")
+            debug_file(zss[ib], "zss.Q"+qstr+".B"+bstr+".txt")
+            debug_file(filter, "filter.Q"+qstr+".txt")
             dn, dv, dnship, dnflow = dfastbe_kernel.comp_erosion(velocity[iq][ib],
                 bankheight[iq][ib],
                 linesize[iq][ib],
@@ -457,6 +482,12 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
                 rho,
                 g,
                 displ_tauc)
+            debug_file(dn, "dn.Q"+qstr+".B"+bstr+".txt")
+            debug_file(dv, "dv.Q"+qstr+".B"+bstr+".txt")
+            debug_file(dnship, "dnship.Q"+qstr+".B"+bstr+".txt")
+            debug_file(dnflow, "dnflow.Q"+qstr+".B"+bstr+".txt")
+            debug_file(bank_crds[ib][:,0], "x.B"+bstr+".txt")
+            debug_file(bank_crds[ib][:,1], "y.B"+bstr+".txt")
 
             # shift bank lines
             xlines_new, ylines_new = dfastbe_support.move_line(bcrds[:,0], bcrds[:,1], dn)
@@ -489,11 +520,14 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
     vol_eq = numpy.zeros((len(km), n_banklines))
     vol_tot = numpy.zeros((len(km), n_banklines))
     for ib, bcrds in enumerate(bank_crds):
-        dnav[ib] = dn_tot[ib].mean()
+        print(instance(dv_tot[ib]))
+        print(instance(linesize[ib]))
+        dnav[ib] = dv_tot[ib].sum()/linesize[ib].sum() #dn_tot[ib].mean()
         dnmax[ib] = dn_tot[ib].max()
         dnavflow[ib]= dn_flow_tot[ib].mean()
         dnavship[ib]= dn_ship_tot[ib].mean()
-        dnaveq[ib] = dn_eq[ib].mean()
+        print(instance(dv_eq[ib]))
+        dnaveq[ib] = dv_eq[ib].sum()/linesize[ib].sum() #dn_eq[ib].mean()
         dnmaxeq[ib] = dn_eq[ib].max()
 
         print("average erosion distance for bank line {} : {:6.2f} m".format(ib + 1, dnav[ib]))
@@ -512,17 +546,32 @@ def bankerosion(filename = "config.ini"): #, variable, variable2):
             print("-----------------------------------------------------")
 
     # write bank line files
-    # write eroded volumes per km
 
-    # compute and write eroded volumes per km
+    # write eroded volumes per km (total)
     erovol_file = dfastbe_io.config_get_str(config, "Erosion", "EroVol", default = "erovol.evo")
     print("saving eroded volume in file: {}".format(erovol_file))
     dfastbe_io.write_km_eroded_volumes(km, vol_tot, outputdir + os.sep + erovol_file)
+
+    # write eroded volumes per km (equilibrium)
+    erovol_file = dfastbe_io.config_get_str(config, "Erosion", "EroVolEqui", default = "erovol_eq.evo")
+    print("saving eroded volume in file: {}".format(erovol_file))
+    dfastbe_io.write_km_eroded_volumes(km, vol_eq, outputdir + os.sep + erovol_file)
 
     # create various plots
 
     log_text("end_bankerosion")
     return True
+
+
+def debug_file(val, filename):
+    with open(filename, "w") as newfile:
+        if isinstance(val, numpy.ndarray):
+            for i in range(len(val)):
+                newfile.write("{:g}\n".format(val[i]))
+        elif isinstance(val, int) or isinstance(val, float) or isinstance(val, bool):
+            newfile.write("{:g}\n".format(val))
+        else:
+            newfile.write("Unsupported quantity type ({}) for generating debug files.\n".format(str(type(val))))
 
 
 def log_text(key, file=None, dict={}, repeat=1):

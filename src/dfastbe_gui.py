@@ -39,8 +39,6 @@ from functools import partial
 
 
 def create_dialog():
-    dialog = {}
-
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle("fusion")
     dialog["application"] = app
@@ -51,21 +49,7 @@ def create_dialog():
     dialog["window"] = win
 
     menubar = win.menuBar()
-
-    menu = menubar.addMenu("&File")
-    item = menu.addAction("&Open...")
-    item.triggered.connect(load_configuration)
-    item = menu.addAction("&Save As...")
-    item.triggered.connect(save_configuration)
-    menu.addSeparator()
-    item = menu.addAction("&Close")
-    item.triggered.connect(close_dialog)
-
-    menu = menubar.addMenu("&Help")
-    item = menu.addAction("Version")
-    item.triggered.connect(menu_about_self)
-    item = menu.addAction("About Qt")
-    item.triggered.connect(menu_about_qt)
+    createMenus(menubar)
 
     centralWidget = QtWidgets.QWidget()
     layout = QtWidgets.QBoxLayout(2, centralWidget)
@@ -92,15 +76,38 @@ def create_dialog():
     done.clicked.connect(close_dialog)
     buttonBarLayout.addWidget(done)
 
-    #------
+    addGeneralTab(tabs, win)
+    addDetectTab(tabs, win, app)
+    addErosionTab(tabs, win, app)
+    addShippingTab(tabs, win)
+    addBankTab(tabs, win)
 
+
+def createMenus(menubar):
+    menu = menubar.addMenu("&File")
+    item = menu.addAction("&Open...")
+    item.triggered.connect(load_configuration)
+    item = menu.addAction("&Save As...")
+    item.triggered.connect(save_configuration)
+    menu.addSeparator()
+    item = menu.addAction("&Close")
+    item.triggered.connect(close_dialog)
+
+    menu = menubar.addMenu("&Help")
+    item = menu.addAction("Version")
+    item.triggered.connect(menu_about_self)
+    item = menu.addAction("About Qt")
+    item.triggered.connect(menu_about_qt)
+
+
+def addGeneralTab(tabs, win):
     generalWidget = QtWidgets.QWidget()
     generalLayout = QtWidgets.QFormLayout(generalWidget)
     tabs.addTab(generalWidget, "General")
 
     chainFile = QtWidgets.QLineEdit(win)
     dialog["chainFile"] = chainFile
-    dialog = addOpenFileRow(generalLayout, dialog, "chainFile", "Chain File")
+    addOpenFileRow(generalLayout, "chainFile", "Chain File")
 
     chainRange = QtWidgets.QWidget()
     gridly = QtWidgets.QGridLayout(chainRange)
@@ -125,23 +132,18 @@ def create_dialog():
     dialog["bankFileName"] = bankFileName
     generalLayout.addRow("Bank File Name", bankFileName)
 
-    #model = QtWidgets.QFileSystemModel()
-    #model.setRootPath("d:\\")
-    #tree = QtWidgets.QTreeView()
-    #tree.setModel(model)
-    #generalLayout.addRow("FileTree", tree)
 
-    #------
-
+def addDetectTab(tabs, win, app):
     detectWidget = QtWidgets.QWidget()
     detectLayout = QtWidgets.QFormLayout(detectWidget)
     tabs.addTab(detectWidget, "Detection")
 
     simFile = QtWidgets.QLineEdit(win)
     dialog["simFile"] = simFile
-    dialog = addOpenFileRow(detectLayout, dialog, "simFile", "Simulation File")
+    addOpenFileRow(detectLayout, "simFile", "Simulation File")
 
     waterDepth = QtWidgets.QLineEdit(win)
+    waterDepth.setValidator(validator("positive_real"))
     dialog["waterDepth"] = waterDepth
     detectLayout.addRow("Water Depth [m]", waterDepth)
 
@@ -149,43 +151,47 @@ def create_dialog():
     bankLines.setHeaderLabels(["Index", "FileName", "Search Distance [m]"])
     bankLines.setFont(app.font())
     bankLines.setColumnWidth(0,50)
-    bankLines.setColumnWidth(1,250)
+    bankLines.setColumnWidth(1,200)
     #c1 = QtWidgets.QTreeWidgetItem(bankLines, ["0", "test\\filename", "50"])
-    dialog["bankLines"] = bankLines
-    detectLayout.addRow("Bank Lines", bankLines)
 
-    #------
+    blLayout = addRemoveEditLayout(bankLines, "bankLines")
+    detectLayout.addRow("Bank Lines", blLayout)
 
+
+def addErosionTab(tabs, win, app):
     erosionWidget = QtWidgets.QWidget()
     erosionLayout = QtWidgets.QFormLayout(erosionWidget)
     tabs.addTab(erosionWidget, "Erosion")
 
     tErosion = QtWidgets.QLineEdit(win)
+    tErosion.setValidator(validator("positive_real"))
     dialog["tErosion"] = tErosion
     erosionLayout.addRow("Simulation Time [yr]", tErosion)
 
     riverAxis = QtWidgets.QLineEdit(win)
     dialog["riverAxis"] = riverAxis
-    dialog = addOpenFileRow(erosionLayout, dialog, "riverAxis", "River Axis File")
+    addOpenFileRow(erosionLayout, "riverAxis", "River Axis File")
 
     fairway = QtWidgets.QLineEdit(win)
     dialog["fairway"] = fairway
-    dialog = addOpenFileRow(erosionLayout, dialog, "fairway", "Fairway File")
+    addOpenFileRow(erosionLayout, "fairway", "Fairway File")
 
     discharges = QtWidgets.QTreeWidget(win)
-    discharges.setHeaderLabels(["Level", "FileName", "Probabily [-]"])
+    discharges.setHeaderLabels(["Level", "FileName", "Probability [-]"])
     discharges.setFont(app.font())
     discharges.setColumnWidth(0,50)
     discharges.setColumnWidth(1,250)
     #c1 = QtWidgets.QTreeWidgetItem(discharges, ["0", "test\\filename", "0.5"])
-    dialog["discharges"] = discharges
-    erosionLayout.addRow("Discharges", discharges)
+
+    disLayout = addRemoveEditLayout(discharges, "discharges")
+    erosionLayout.addRow("Discharges", disLayout)
 
     refLevel = QtWidgets.QLineEdit(win)
     dialog["refLevel"] = refLevel
     erosionLayout.addRow("Reference Level", refLevel)
     
     chainageOutStep = QtWidgets.QLineEdit(win)
+    chainageOutStep.setValidator(validator("positive_real"))
     dialog["chainageOutStep"] = chainageOutStep
     erosionLayout.addRow("Chainage Output Step [km]", chainageOutStep)
 
@@ -205,25 +211,29 @@ def create_dialog():
     dialog["eroVol"] = eroVol
     erosionLayout.addRow("EroVol File Name", eroVol)
 
-    #------
+    eroVolEqui = QtWidgets.QLineEdit(win)
+    dialog["eroVolEqui"] = eroVolEqui
+    erosionLayout.addRow("EroVolEqui File Name", eroVolEqui)
 
+
+def addShippingTab(tabs, win):
     eParamsWidget = QtWidgets.QWidget()
     eParamsLayout = QtWidgets.QGridLayout(eParamsWidget)
     tabs.addTab(eParamsWidget, "Shipping Parameters")
 
-    dialog = generalParLayout(eParamsLayout, 0, "shipType", "Ship Type", dialog)
-    dialog = generalParLayout(eParamsLayout, 1, "shipVeloc", "Velocity [m/s]", dialog)
-    dialog = generalParLayout(eParamsLayout, 2, "nShips", "# Ships [1/yr]", dialog)
-    dialog = generalParLayout(eParamsLayout, 3, "shipNWaves", "# Waves [1/ship]", dialog)
-    dialog = generalParLayout(eParamsLayout, 4, "shipDraught", "Draught [m]", dialog)
-    dialog = generalParLayout(eParamsLayout, 5, "wavePar0", "Wave0 [m]", dialog)
-    dialog = generalParLayout(eParamsLayout, 6, "wavePar1", "Wave1 [m]", dialog)
+    generalParLayout(eParamsLayout, 0, "shipType", "Ship Type")
+    generalParLayout(eParamsLayout, 1, "shipVeloc", "Velocity [m/s]")
+    generalParLayout(eParamsLayout, 2, "nShips", "# Ships [1/yr]")
+    generalParLayout(eParamsLayout, 3, "shipNWaves", "# Waves [1/ship]")
+    generalParLayout(eParamsLayout, 4, "shipDraught", "Draught [m]")
+    generalParLayout(eParamsLayout, 5, "wavePar0", "Wave0 [m]")
+    generalParLayout(eParamsLayout, 6, "wavePar1", "Wave1 [m]")
 
     stretch = QtWidgets.QSpacerItem(10, 10, 13, 7)
     eParamsLayout.addItem(stretch, 7, 0)
 
-    #------
 
+def addBankTab(tabs, win):
     eParamsWidget = QtWidgets.QWidget()
     eParamsLayout = QtWidgets.QGridLayout(eParamsWidget)
     tabs.addTab(eParamsWidget, "Bank Parameters")
@@ -232,33 +242,60 @@ def create_dialog():
     eParamsLayout.addWidget(strength, 0, 0)
     strengthPar = QtWidgets.QComboBox()
     strengthPar.addItems(("Bank Type", "Critical Shear Stress"))
+    strengthPar.currentIndexChanged.connect(bankStrengthSwitch)
     dialog["strengthPar"] = strengthPar
     eParamsLayout.addWidget(strengthPar, 0, 2)
 
-    dialog = generalParLayout(eParamsLayout, 1, "bankType", "Bank Type", dialog)
-    dialog = generalParLayout(eParamsLayout, 2, "bankShear", "Critical Shear Stress [N/m2]", dialog)
-    dialog["bankShear"].setEnabled(False)
-    dialog["bankShearType"].setEnabled(False)
-    dialog["bankShearEdit"].setEnabled(False)
-    dialog["bankShearEditFile"].setEnabled(False)
-    dialog = generalParLayout(eParamsLayout, 3, "bankProtect", "Protection [m]", dialog)
-    dialog = generalParLayout(eParamsLayout, 4, "bankSlope", "Slope [-]", dialog)
-    dialog = generalParLayout(eParamsLayout, 5, "bankReed", "Reed [-]", dialog)
+    generalParLayout(eParamsLayout, 1, "bankType", "Bank Type")
+    generalParLayout(eParamsLayout, 2, "bankShear", "Critical Shear Stress [N/m2]")
+    bankStrengthSwitch()
+    generalParLayout(eParamsLayout, 3, "bankProtect", "Protection [m]")
+    generalParLayout(eParamsLayout, 4, "bankSlope", "Slope [-]")
+    generalParLayout(eParamsLayout, 5, "bankReed", "Reed [-]")
 
     stretch = QtWidgets.QSpacerItem(10, 10, 13, 7)
     eParamsLayout.addItem(stretch, 6, 0)
 
-    return dialog
+
+def bankStrengthSwitch():
+    type = dialog["strengthPar"].currentText()
+    if type == "Bank Type":
+        dialog["bankType"].setEnabled(True)
+        dialog["bankTypeType"].setEnabled(True)
+        dialog["bankTypeEdit"].setEnabled(True)
+        typeUpdateGenPar("bankType")
+        dialog["bankShear"].setEnabled(False)
+        dialog["bankShearType"].setEnabled(False)
+        dialog["bankShearEdit"].setText("")
+        dialog["bankShearEdit"].setEnabled(False)
+        dialog["bankShearEditFile"].setEnabled(False)
+    elif type == "Critical Shear Stress":
+        dialog["bankShear"].setEnabled(True)
+        dialog["bankShearType"].setEnabled(True)
+        dialog["bankShearEdit"].setEnabled(True)
+        typeUpdateGenPar("bankShear")
+        dialog["bankType"].setEnabled(False)
+        dialog["bankTypeType"].setEnabled(False)
+        dialog["bankTypeEdit"].setText("")
+        dialog["bankTypeEdit"].setEnabled(False)
+        dialog["bankTypeEditFile"].setEnabled(False)
 
 
-def activate_dialog(dialog):
+def validator(str):
+    if str == "positive_real":
+        validator = PyQt5.QtGui.QDoubleValidator()
+        validator.setBottom(0)
+    return validator
+
+
+def activate_dialog():
     app = dialog["application"]
     win = dialog["window"]
     win.show()
     sys.exit(app.exec_())
 
 
-def generalParLayout(gridLayout, row, key, labelString, dialog):
+def generalParLayout(gridLayout, row, key, labelString):
     Label = QtWidgets.QLabel(labelString)
     dialog[key] = Label
     gridLayout.addWidget(Label, row, 0)
@@ -266,24 +303,35 @@ def generalParLayout(gridLayout, row, key, labelString, dialog):
     paramTypes = ("Constant", "Variable")
     Type = QtWidgets.QComboBox()
     Type.addItems(paramTypes)
-    dialog[key+"Type"] = Type
+    Type.currentIndexChanged.connect(partial(typeUpdateGenPar,key))
+    dialog[key + "Type"] = Type
     gridLayout.addWidget(Type, row, 1)
 
     Edit = QtWidgets.QLineEdit()
-    dialog[key+"Edit"] = Edit
-    dialog, fLayout = openFileLayout(dialog, Edit, key+"Edit", enabled = False)
+    dialog[key + "Edit"] = Edit
+    fLayout = openFileLayout(Edit, key+"Edit", enabled = False)
     gridLayout.addWidget(fLayout, row, 2)
 
-    return dialog
+    typeUpdateGenPar(key)
 
 
-def addOpenFileRow(formLayout, dialog, key, label):
-    dialog, fLayout = openFileLayout(dialog, dialog[key], key)
+def typeUpdateGenPar(key):
+    type = dialog[key + "Type"].currentText()
+    dialog[key + "Edit"].setText("")
+    if type == "Constant":
+        dialog[key + "EditFile"].setEnabled(False)
+        dialog[key + "Edit"].setValidator(validator("positive_real"))
+    elif type == "Variable":
+        dialog[key + "EditFile"].setEnabled(True)
+        dialog[key + "Edit"].setValidator(None)
+
+
+def addOpenFileRow(formLayout, key, label):
+    fLayout = openFileLayout(dialog[key], key)
     formLayout.addRow(label, fLayout)
-    return dialog
 
 
-def openFileLayout(dialog, myWidget, key, enabled = True):
+def openFileLayout(myWidget, key, enabled = True):
     parent = QtWidgets.QWidget()
     gridly = QtWidgets.QGridLayout(parent)
     gridly.setContentsMargins(0, 0, 0, 0)
@@ -295,7 +343,79 @@ def openFileLayout(dialog, myWidget, key, enabled = True):
     dialog[key+"File"] = openFile
     gridly.addWidget(openFile, 0, 2)
 
-    return dialog, parent
+    return parent
+
+
+def addRemoveEditLayout(mainWidget, key):
+    parent = QtWidgets.QWidget()
+    gridly = QtWidgets.QGridLayout(parent)
+    gridly.setContentsMargins(0, 0, 0, 0)
+
+    dialog[key] = mainWidget
+    gridly.addWidget(mainWidget,0,0)
+
+    buttonBar = QtWidgets.QWidget()
+    buttonBarLayout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.TopToBottom, buttonBar)
+    buttonBarLayout.setContentsMargins(0, 0, 0, 0)
+    gridly.addWidget(buttonBar,0,1)
+
+    addBtn = QtWidgets.QPushButton(PyQt5.QtGui.QIcon("add.png"), "")
+    addBtn.clicked.connect(partial(addAnItem, key))
+    dialog[key + "Add"] = addBtn
+    buttonBarLayout.addWidget(addBtn)
+    
+    delBtn = QtWidgets.QPushButton(PyQt5.QtGui.QIcon("remove.png"), "")
+    delBtn.clicked.connect(partial(removeAnItem, key))
+    delBtn.setEnabled(False)
+    dialog[key + "Remove"] = delBtn
+    buttonBarLayout.addWidget(delBtn)
+    
+    stretch = QtWidgets.QSpacerItem(10, 10, 13, 7)
+    buttonBarLayout.addItem(stretch)
+
+    return parent
+
+
+def addAnItem(key):
+    nItems = dialog[key].invisibleRootItem().childCount()
+    istr = str(nItems + 1)
+    if key == "bankLines":
+        fileName = "Y"
+        dist = "Z"
+        c1 = QtWidgets.QTreeWidgetItem(dialog["bankLines"],
+            [istr, fileName, dist]
+        )
+    elif key == "discharges":
+        fileName = "Y"
+        prob = "Z"
+        c1 = QtWidgets.QTreeWidgetItem(dialog["discharges"],
+            [istr, fileName, prob]
+        )
+        addTabForLevel(istr)
+    dialog[key + "Remove"].setEnabled(True)
+
+
+def removeAnItem(key):
+    selected = dialog[key].selectedItems()
+    root = dialog[key].invisibleRootItem()
+    if len(selected)>0:
+        istr = selected[0].text(0)
+        root.removeChild(selected[0])
+        i = int(istr) - 1
+        for j in range(i, root.childCount()):
+           root.child(j).setText(0, str(j+1))
+    if key == "bankLines":
+        pass
+    elif key == "discharges":
+        tabs = dialog["tabs"]
+        renumber = False
+        for j in range(tabs.count()):
+            if renumber:
+                tabs.setTabText(j - 1, "Level " + str(j + dj))
+            elif tabs.tabText(j) == "Level " + istr:
+                tabs.removeTab(j)
+                renumber = True
+                dj = i - j
 
 
 def selectFile(key):
@@ -362,7 +482,7 @@ def load_configuration():
         dialog["waterDepth"].setText(section["WaterDepth"])
         NBank = dfastbe_io.config_get_int(config, "Detect", "NBank", default = 0, positive = True)
         DLines = dfastbe_io.config_get_bank_search_distances(config, NBank)
-        dialog["bankLines"].invisibleRootItem().takeChildren() # sufficient to destroy items?
+        dialog["bankLines"].invisibleRootItem().takeChildren()
         for i in range(NBank):
             istr =str(i+1)
             fileName = dfastbe_io.config_get_str(config, "Detect", "Line" + istr)
@@ -378,10 +498,13 @@ def load_configuration():
         dialog["outDir"].setText(section["OutputDir"])
         dialog["newBankFile"].setText(section["BankNew"])
         dialog["newEqBankFile"].setText(section["BankEq"])
-        dialog["eroVol"].setText(section["EroVol"])
+        txt = dfastbe_io.config_get_str(config, "Erosion", "EroVol", default = "erovol_standard.evo")
+        dialog["eroVol"].setText(txt)
+        txt = dfastbe_io.config_get_str(config, "Erosion", "EroVolEqui", default = "erovol_eq.evo")
+        dialog["eroVolEqui"].setText(txt)
 
         NLevel = dfastbe_io.config_get_int(config, "Erosion", "NLevel", default = 0, positive = True)
-        dialog["discharges"].invisibleRootItem().takeChildren() # sufficient to destroy items?
+        dialog["discharges"].invisibleRootItem().takeChildren()
         for i in range(NLevel):
             istr = str(i+1)
             fileName = dfastbe_io.config_get_str(config, "Erosion", "SimFile" + istr)
@@ -391,14 +514,14 @@ def load_configuration():
             )
         dialog["refLevel"].setText(section["RefLevel"])
 
-        setParam(dialog, "shipType", config, "Erosion", "ShipType")
-        setParam(dialog, "shipVeloc", config, "Erosion", "VShip")
-        setParam(dialog, "nShips", config, "Erosion", "NShip")
-        setParam(dialog, "shipNWaves", config, "Erosion", "NWave", "5")
-        setParam(dialog, "shipDraught", config, "Erosion", "Draught")
-        setParam(dialog, "wavePar0", config, "Erosion", "Wave0", "200.0")
+        setParam("shipType", config, "Erosion", "ShipType")
+        setParam("shipVeloc", config, "Erosion", "VShip")
+        setParam("nShips", config, "Erosion", "NShip")
+        setParam("shipNWaves", config, "Erosion", "NWave", "5")
+        setParam("shipDraught", config, "Erosion", "Draught")
+        setParam("wavePar0", config, "Erosion", "Wave0", "200.0")
         wave0 = dfastbe_io.config_get_str(config, "Erosion", "Wave0", "200.0")
-        setParam(dialog, "wavePar1", config, "Erosion", "Wave1", wave0)
+        setParam("wavePar1", config, "Erosion", "Wave1", wave0)
 
         useBankType = dfastbe_io.config_get_bool(config, "Erosion", "Classes", default = True)
         dialog["bankType"].setEnabled(useBankType)
@@ -411,52 +534,63 @@ def load_configuration():
         dialog["bankShearEditFile"].setEnabled(not useBankType)
         if useBankType:
             dialog["strengthPar"].setCurrentText("Bank Type")
-            setParam(dialog, "bankType", config, "Erosion", "BankType")
+            bankStrengthSwitch()
+            setParam("bankType", config, "Erosion", "BankType")
         else:
             dialog["strengthPar"].setCurrentText("Critical Shear Stress")
-            setParam(dialog, "bankShear", config, "Erosion", "BankType")
-        setParam(dialog, "bankProtect", config, "Erosion", "ProtectLevel", "-1000")
-        setParam(dialog, "bankSlope", config, "Erosion", "Slope", "20.0")
-        setParam(dialog, "bankReed", config, "Erosion", "Reed", "0.0")
+            bankStrengthSwitch()
+            setParam("bankShear", config, "Erosion", "BankType")
+        setParam("bankProtect", config, "Erosion", "ProtectLevel", "-1000")
+        setParam("bankSlope", config, "Erosion", "Slope", "20.0")
+        setParam("bankReed", config, "Erosion", "Reed", "0.0")
 
         tabs = dialog["tabs"]
         for i in range(tabs.count()-1,4,-1):
-            tabs.removeTab(i) # Is this enough to destroy the objects?
-            # at leat old dialog entries persist
+            #tab = tabs.widget(i)
+            tabs.removeTab(i)
 
         for i in range(NLevel):
             istr = str(i+1)
-            addTabForLevel(dialog, istr)
-            setOptParam(dialog, "shipType" + istr, config, "Erosion", "ShipType" + istr)
-            setOptParam(dialog, "shipVeloc" + istr, config, "Erosion", "VShip" + istr)
-            setOptParam(dialog, "nShips" + istr, config, "Erosion", "NShip" + istr)
-            setOptParam(dialog, "shipNWaves" + istr, config, "Erosion", "NWave" + istr)
-            setOptParam(dialog, "shipDraught" + istr, config, "Erosion", "Draught" + istr)
-            setOptParam(dialog, "bankSlope" + istr, config, "Erosion", "Slope" + istr)
-            setOptParam(dialog, "bankReed" + istr, config, "Erosion", "Reed" + istr)
+            addTabForLevel(istr)
+            setOptParam("shipType" + istr, config, "Erosion", "ShipType" + istr)
+            setOptParam("shipVeloc" + istr, config, "Erosion", "VShip" + istr)
+            setOptParam("nShips" + istr, config, "Erosion", "NShip" + istr)
+            setOptParam("shipNWaves" + istr, config, "Erosion", "NWave" + istr)
+            setOptParam("shipDraught" + istr, config, "Erosion", "Draught" + istr)
+            setOptParam("bankSlope" + istr, config, "Erosion", "Slope" + istr)
+            setOptParam("bankReed" + istr, config, "Erosion", "Reed" + istr)
+            txt = dfastbe_io.config_get_str(config, "Erosion", "EroVol" + istr, default = "erovolQ" + istr + ".evo")
+            dialog["eroVol" + istr + "Edit"].setText(txt)
 
     else:
         showError("Unsupported version number {} in the file!".format(version))
 
 
-def addTabForLevel(dialog, istr):
+def addTabForLevel(istr):
     newWidget = QtWidgets.QWidget()
     newLayout = QtWidgets.QGridLayout(newWidget)
-    dialog["tabs"].addTab(newWidget, "Level" + istr)
+    dialog["tabs"].addTab(newWidget, "Level " + istr)
 
-    dialog = optionalParLayout(newLayout, 0, "shipType" + istr, "Ship Type", dialog)
-    dialog = optionalParLayout(newLayout, 1, "shipVeloc" + istr, "Velocity [m/s]", dialog)
-    dialog = optionalParLayout(newLayout, 2, "nShips" + istr, "# Ships [1/yr]", dialog)
-    dialog = optionalParLayout(newLayout, 3, "shipNWaves" + istr, "# Waves [1/ship]", dialog)
-    dialog = optionalParLayout(newLayout, 4, "shipDraught" + istr, "Draught [m]", dialog)
-    dialog = optionalParLayout(newLayout, 5, "bankSlope" + istr, "Slope [-]", dialog)
-    dialog = optionalParLayout(newLayout, 6, "bankReed" + istr, "Reed [-]", dialog)
+    optionalParLayout(newLayout, 0, "shipType" + istr, "Ship Type")
+    optionalParLayout(newLayout, 1, "shipVeloc" + istr, "Velocity [m/s]")
+    optionalParLayout(newLayout, 2, "nShips" + istr, "# Ships [1/yr]")
+    optionalParLayout(newLayout, 3, "shipNWaves" + istr, "# Waves [1/ship]")
+    optionalParLayout(newLayout, 4, "shipDraught" + istr, "Draught [m]")
+    optionalParLayout(newLayout, 5, "bankSlope" + istr, "Slope [-]")
+    optionalParLayout(newLayout, 6, "bankReed" + istr, "Reed [-]")
+
+    Label = QtWidgets.QLabel("EroVol File Name")
+    dialog["eroVol" + istr] = Label
+    newLayout.addWidget(Label, 7, 0)
+    Edit = QtWidgets.QLineEdit()
+    dialog["eroVol" + istr + "Edit"] = Edit
+    newLayout.addWidget(Edit, 7, 2)
 
     stretch = QtWidgets.QSpacerItem(10, 10, 13, 7)
-    newLayout.addItem(stretch, 7, 0)
+    newLayout.addItem(stretch, 8, 0)
 
 
-def optionalParLayout(gridLayout, row, key, labelString, dialog):
+def optionalParLayout(gridLayout, row, key, labelString):
     Label = QtWidgets.QLabel(labelString)
     dialog[key] = Label
     gridLayout.addWidget(Label, row, 0)
@@ -464,32 +598,48 @@ def optionalParLayout(gridLayout, row, key, labelString, dialog):
     paramTypes = ("Use Default", "Constant", "Variable")
     Type = QtWidgets.QComboBox()
     Type.addItems(paramTypes)
+    Type.currentIndexChanged.connect(partial(typeUpdateOptPar,key))
     dialog[key+"Type"] = Type
     gridLayout.addWidget(Type, row, 1)
 
     Edit = QtWidgets.QLineEdit()
     Edit.setEnabled(False)
     dialog[key+"Edit"] = Edit
-    dialog, fLayout = openFileLayout(dialog, Edit, key+"Edit", enabled = False)
+    fLayout = openFileLayout(Edit, key+"Edit", enabled = False)
     gridLayout.addWidget(fLayout, row, 2)
 
-    return dialog
 
+def typeUpdateOptPar(key):
+    type = dialog[key + "Type"].currentText()
+    dialog[key + "Edit"].setText("")
+    if type == "Use Default":
+        dialog[key + "Edit"].setValidator(None)
+        dialog[key + "Edit"].setEnabled(False)
+        dialog[key + "EditFile"].setEnabled(False)
+    elif type == "Constant":
+        dialog[key + "Edit"].setValidator(validator("positive_real"))
+        dialog[key + "Edit"].setEnabled(True)
+        dialog[key + "EditFile"].setEnabled(False)
+    elif type == "Variable":
+        dialog[key + "Edit"].setEnabled(True)
+        dialog[key + "Edit"].setValidator(None)
+        dialog[key + "EditFile"].setEnabled(True)
+        
 
-def setParam(dialog, field, config, group, key, default = "??"):
+def setParam(field, config, group, key, default = "??"):
     str = dfastbe_io.config_get_str(config, group, key, default)
     try:
         val = float(str)
         dialog[field + "Type"].setCurrentText("Constant")
         dialog[field + "Edit"].setText(str)
-        dialog[field + "EditFile"].setEnabled(False)
+        #dialog[field + "EditFile"].setEnabled(False)
     except:
         dialog[field + "Type"].setCurrentText("Variable")
         dialog[field + "Edit"].setText(str)
-        dialog[field + "EditFile"].setEnabled(True)
+        #dialog[field + "EditFile"].setEnabled(True)
 
 
-def setOptParam(dialog, field, config, group, key):
+def setOptParam(field, config, group, key):
     str = dfastbe_io.config_get_str(config, group, key, "")
     if str == "":
         dialog[field + "Type"].setCurrentText("Use Default")
@@ -550,6 +700,7 @@ def save_configuration():
     config["Erosion"]["BankNew"] = dialog["newBankFile"].text()
     config["Erosion"]["BankEq"] = dialog["newEqBankFile"].text()
     config["Erosion"]["EroVol"] = dialog["eroVol"].text()
+    config["Erosion"]["EroVolEqui"] = dialog["eroVolEqui"].text()
 
     config["Erosion"]["ShipType"] = dialog["shipTypeEdit"].text()
     config["Erosion"]["VShip"] = dialog["shipVelocEdit"].text()
@@ -590,6 +741,7 @@ def save_configuration():
             config["Erosion"]["Slope" + istr] = dialog["bankSlope" + istr + "Edit"].text()
         if dialog["bankReed" + istr + "Type"].currentText() != "Use Default":
             config["Erosion"]["Reed" + istr] = dialog["bankReed" + istr + "Edit"].text()
+        config["Erosion"]["EroVol" + istr] = dialog["eroVol" + istr + "Edit"].text()
 
     dfastbe_io.write_config(filename, config)
 
@@ -613,6 +765,7 @@ def menu_about_self():
     )
     msg.setWindowTitle("About ...")
     msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+    msg.setStyleSheet("QDialogButtonBox{min-width: 400px;}");
     msg.exec_()
 
 
@@ -622,8 +775,9 @@ def menu_about_qt():
 
 if __name__ == "__main__":
     global dialog
+    dialog = {}
     progloc = str(pathlib.Path(__file__).parent.absolute())
-    dialog = create_dialog()
+    create_dialog()
     #dialog["branch"].addItems(rivers["branches"])
     #dialog["reach"].addItems(rivers["reaches"][0])
-    activate_dialog(dialog)
+    activate_dialog()

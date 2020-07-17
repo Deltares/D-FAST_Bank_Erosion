@@ -121,6 +121,17 @@ def comp_erosion(velocity, bankheight, linesize, zfw, zfw_ini, tauc, Nship, vshi
         # displacement calculated based on critical flow velocity
         crit_ratio[mask] = (vel[mask] / velc[mask])**2
     dn_flow = E * (crit_ratio - 1) * Teros * sec_year
+    print("----")
+    print("E[1559] = {}".format(E[1559]))
+    print("crit_ratio[1559] = {}".format(crit_ratio[1559]))
+    print(" displ_tauc = {}".format(displ_tauc))
+    print(" *:mask[1559] = {}".format(mask[1559]))
+    print(" T:Cline[1559] = {}".format(Cline[1559]))
+    print(" T:taucline[1559] = {}".format(taucline[1559]))
+    print(" F:vel[1559] = {}".format(vel[1559]))
+    print(" F:velc[1559] = {}".format(velc[1559]))
+    print("dn_flow[1559] = {}".format(dn_flow[1559]))
+    print("linesize[1559] = {}".format(linesize[1559]))
 
     # compute displacement due to shipwaves
     mask = ((z_line - 2 * H0) < wlline) & (wlline < (z_line + 0.5 * H0))
