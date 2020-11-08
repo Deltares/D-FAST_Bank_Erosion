@@ -120,10 +120,11 @@ try
     netcdf.putAtt(ncid, iczs, 'location', 'face')
     netcdf.putVar(ncid, iczs, czs)
     %
+    iglobal = netcdf.getConstant('GLOBAL');
     history = [sprintf('%s: sim2ugrid.m "%s"', datestr(now, dateformat), protect(filename)), prehistory];
-    netcdf.putAtt(ncid, 0, 'history', history)
-    netcdf.putAtt(ncid, 0, 'converted_from', modelname)
-    netcdf.putAtt(ncid, 0, 'Conventions', 'CF-1.8 UGRID-1.0 Deltares-0.10')
+    netcdf.putAtt(ncid, iglobal, 'history', history)
+    netcdf.putAtt(ncid, iglobal, 'converted_from', modelname)
+    netcdf.putAtt(ncid, iglobal, 'Conventions', 'CF-1.8 UGRID-1.0 Deltares-0.10')
 catch Err
 end
 netcdf.close(ncid)
