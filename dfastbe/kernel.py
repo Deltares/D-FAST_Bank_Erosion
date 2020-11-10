@@ -1,4 +1,4 @@
-# coding: utf-8
+# -*- coding: utf-8 -*-
 """
 Copyright (C) 2020 Stichting Deltares.
 
@@ -30,16 +30,27 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 import numpy
 import sys
 
-def program_version():
-    return 'PRE-ALPHA'
 
-
-def comp_erosion_eq(bankheight, linesize, zfw_ini, vship, ship_type, Tship, mu_slope, distance_fw, dfw0, dfw1, hfw, zss, g):
+def comp_erosion_eq(
+    bankheight,
+    linesize,
+    zfw_ini,
+    vship,
+    ship_type,
+    Tship,
+    mu_slope,
+    distance_fw,
+    dfw0,
+    dfw1,
+    hfw,
+    zss,
+    g,
+):
     eps = sys.float_info.epsilon
 
     muslope = edge_mean(mu_slope)
     zssline = edge_mean(zss)
-    wlline = edge_mean(zfw_ini) # original water level at fairway
+    wlline = edge_mean(zfw_ini)  # original water level at fairway
 
     # ship induced wave height at the beginning of the foreshore
     H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, ship_type, Tship, vship, g)
@@ -47,7 +58,7 @@ def comp_erosion_eq(bankheight, linesize, zfw_ini, vship, ship_type, Tship, mu_s
 
     zup = numpy.minimum(bankheight, wlline + 2 * H0)
     zdo = numpy.maximum(wlline - 2 * H0, zssline)
-    ht  = numpy.maximum(zup - zdo, 0)
+    ht = numpy.maximum(zup - zdo, 0)
     hs = numpy.maximum(bankheight - wlline + 2 * H0, 0)
     dn_eq = ht / muslope
     dv_eq = (0.5 * ht + hs) * dn_eq * linesize
@@ -55,14 +66,41 @@ def comp_erosion_eq(bankheight, linesize, zfw_ini, vship, ship_type, Tship, mu_s
     return dn_eq, dv_eq
 
 
-def comp_erosion(velocity, bankheight, linesize, zfw, zfw_ini, tauc, Nship, vship, nwave, ship_type, Tship, Teros, mu_slope, mu_reed, distance_fw, dfw0, dfw1, hfw, chezy, zss, filter, rho, g, displ_tauc):
+def comp_erosion(
+    velocity,
+    bankheight,
+    linesize,
+    zfw,
+    zfw_ini,
+    tauc,
+    Nship,
+    vship,
+    nwave,
+    ship_type,
+    Tship,
+    Teros,
+    mu_slope,
+    mu_reed,
+    distance_fw,
+    dfw0,
+    dfw1,
+    hfw,
+    chezy,
+    zss,
+    filter,
+    rho,
+    g,
+    displ_tauc,
+):
     eps = sys.float_info.epsilon
-    sec_year = 3600 * 24 *365
+    sec_year = 3600 * 24 * 365
 
     # period of ship waves [s]
     T = 0.51 * vship / g
     # [s]
-    ts = (T * Nship * nwave)[:-1] # TODO: check for better solution to shorten ts by one ... edge_mean?
+    ts = (T * Nship * nwave)[
+        :-1
+    ]  # TODO: check for better solution to shorten ts by one ... edge_mean?
 
     # number of line segments
     xlen = len(velocity)
@@ -79,12 +117,18 @@ def comp_erosion(velocity, bankheight, linesize, zfw, zfw_ini, tauc, Nship, vshi
     fwd = edge_mean(hfw)
     zssline = edge_mean(zss)
     Cline = edge_mean(chezy)
-    wlline = edge_mean(zfw_ini) # original water level at fairway
-    z_line = edge_mean(zfw) # water level at fairway
+    wlline = edge_mean(zfw_ini)  # original water level at fairway
+    z_line = edge_mean(zfw)  # water level at fairway
 
     # Average velocity with values of neighbouring lines
     if filter:
-        vel = numpy.concatenate((velocity[:1], 0.5 * velocity[1:-1] + 0.25 * velocity[:-2] + 0.25 * velocity[2:], velocity[-1:]))
+        vel = numpy.concatenate(
+            (
+                velocity[:1],
+                0.5 * velocity[1:-1] + 0.25 * velocity[:-2] + 0.25 * velocity[2:],
+                velocity[-1:],
+            )
+        )
     else:
         vel = velocity
 
@@ -98,7 +142,7 @@ def comp_erosion(velocity, bankheight, linesize, zfw, zfw_ini, tauc, Nship, vshi
     E = 0.2 * numpy.sqrt(taucline) * 1e-6
 
     # critical velocity along linesegements
-    velc = numpy.sqrt(taucline / rho * Cline**2 / g)
+    velc = numpy.sqrt(taucline / rho * Cline ** 2 / g)
 
     # strength of linesegements
     cE = 1.85e-4 / taucline
@@ -119,7 +163,7 @@ def comp_erosion(velocity, bankheight, linesize, zfw, zfw_ini, tauc, Nship, vshi
         crit_ratio[mask] = Cline[mask] / taucline[mask]
     else:
         # displacement calculated based on critical flow velocity
-        crit_ratio[mask] = (vel[mask] / velc[mask])**2
+        crit_ratio[mask] = (vel[mask] / velc[mask]) ** 2
     dn_flow = E * (crit_ratio - 1) * Teros * sec_year
     print("----")
     print("E[1559] = {}".format(E[1559]))
@@ -136,10 +180,10 @@ def comp_erosion(velocity, bankheight, linesize, zfw, zfw_ini, tauc, Nship, vshi
     # compute displacement due to shipwaves
     mask = ((z_line - 2 * H0) < wlline) & (wlline < (z_line + 0.5 * H0))
     # limit mu -> 0
-    
-    dn_ship = cE * H0**2 * ts * Teros
+
+    dn_ship = cE * H0 ** 2 * ts * Teros
     dn_ship[~mask] = 0
-    #dn_ship = dn_ship[0] #TODO: this selects only the first value ... correct? MATLAB compErosion: dn_ship=dn_ship(1);
+    # dn_ship = dn_ship[0] #TODO: this selects only the first value ... correct? MATLAB compErosion: dn_ship=dn_ship(1);
 
     # compute erosion volume
     mask = (h_line_ship > 0) & (z_line > zssline)
@@ -154,9 +198,9 @@ def comp_erosion(velocity, bankheight, linesize, zfw, zfw_ini, tauc, Nship, vshi
 
     dn = dn_ship + dn_flow
     dv = dv_ship + dv_flow
-    
-    #print("  dv_flow total = ", dv_flow.sum())
-    #print("  dv_ship total = ", dv_ship.sum())
+
+    # print("  dv_flow total = ", dv_flow.sum())
+    # print("  dv_ship total = ", dv_ship.sum())
     return dn, dv, dn_ship, dn_flow
 
 
@@ -171,37 +215,43 @@ def comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, h_input, shiptype, Tship, vshi
     # multiple barge convoy set
     a1[shiptype == 1] = 0.5
     # RHK ship / motorship
-    a1[shiptype == 2] = 0.28 * Tship[shiptype == 2]**1.25
+    a1[shiptype == 2] = 0.28 * Tship[shiptype == 2] ** 1.25
     # towboat
     a1[shiptype == 3] = 1
 
-    Froude   = vship / numpy.sqrt(h * g)
+    Froude = vship / numpy.sqrt(h * g)
     Froude_limit = 0.8
     high_Froude = Froude > Froude_limit
-    h[high_Froude] = ((vship[high_Froude] / Froude_limit)**2) / g
+    h[high_Froude] = ((vship[high_Froude] / Froude_limit) ** 2) / g
     Froude[high_Froude] = Froude_limit
 
     A = 0.5 * (1 + numpy.cos((distance_fw - dfw1) / (dfw0 - dfw1) * numpy.pi))
     A[distance_fw < dfw1] = 1
     A[distance_fw > dfw0] = 0
 
-    h0  = a1 * h * (distance_fw / h)**(-1/3) * Froude**4 * A
+    h0 = a1 * h * (distance_fw / h) ** (-1 / 3) * Froude ** 4 * A
     return h0
 
 
 def get_km_bins(km_bin):
     km_step = km_bin[2]
     # km = km_bin[0] + numpy.arange(0, int(round((km_bin[1] - km_bin[0]) / km_bin[2]) + 1)) * km_bin[2] # bin bounds
-    km = km_bin[0] + numpy.arange(1, int(round((km_bin[1] - km_bin[0]) / km_bin[2]) + 1)) * km_bin[2] # bin upper bounds
+    km = (
+        km_bin[0]
+        + numpy.arange(1, int(round((km_bin[1] - km_bin[0]) / km_bin[2]) + 1))
+        * km_bin[2]
+    )  # bin upper bounds
     # km = km_bin[0] + km_bin[2]/2 + numpy.arange(0, int(round((km_bin[1] - km_bin[0]) / km_bin[2]))) * km_bin[2] # bin midpoints
 
     return km
 
 
 def get_km_eroded_volume(bank_km, dv, km_bin, col, vol):
-    bank_km_mid = (bank_km[:-1] + bank_km[1:])/2
-    bin_idx = numpy.rint((bank_km_mid - km_bin[0] - km_bin[2]/2) / km_bin[2]).astype(numpy.int64)
-    dvol = numpy.bincount(bin_idx, weights = dv)
+    bank_km_mid = (bank_km[:-1] + bank_km[1:]) / 2
+    bin_idx = numpy.rint((bank_km_mid - km_bin[0] - km_bin[2] / 2) / km_bin[2]).astype(
+        numpy.int64
+    )
+    dvol = numpy.bincount(bin_idx, weights=dv)
     nbin = len(dvol)
     vol[:nbin, col] += dvol
     return vol
