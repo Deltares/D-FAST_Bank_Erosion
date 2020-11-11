@@ -27,6 +27,8 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
+from typing import Dict, List, Tuple
+from dfastbe.io import SimulationObject
 
 import numpy
 import shapely
@@ -34,7 +36,29 @@ import geopandas
 import sys
 
 
-def project_km_on_line(line_xy, xykm_numpy):
+def project_km_on_line(
+    line_xy: numpy.ndarray, xykm_numpy: numpy.ndarray
+) -> numpy.ndarray:
+    """
+    Project chainage values onto another line.
+
+    The chainage values are giving along a line. For each node of the line the
+    closest chainage value is located and subsequently the exact chainage is
+    obtained by means of interpolation between that value and the neighbouring
+    values.
+
+    Arguments
+    ---------
+    line_xy : numpy.ndarray
+        Array containing the x,y coordinates of a line.
+    xykm_numpy : numpy.ndarray
+        Array containing the x,y,chainage data.
+
+    Results
+    -------
+    line_km : numpy.ndarray
+        Array containing the chainage for every coordinate specified in line_xy.
+    """
     line_km = numpy.zeros(line_xy.shape[0])
     xykm_numpy2 = xykm_numpy[:, :2]
     last_xykm = xykm_numpy.shape[0] - 1
@@ -79,7 +103,36 @@ def project_km_on_line(line_xy, xykm_numpy):
     return line_km
 
 
-def intersect_line_mesh(bp, xf, yf, xe, ye, fe, ef, boundary_edge_nrs, d_thresh=0.001):
+def intersect_line_mesh(bp: numpy.ndarray, xf: numpy.ndarray, yf: numpy.ndarray, xe: numpy.ndarray, ye: numpy.ndarray, fe: numpy.ndarray, ef: numpy.ndarray, boundary_edge_nrs: numpy.ndarray, d_thresh: float = 0.001) -> Tuple[numpy.ndarray, numpy.ndarray]:
+    """
+    Intersect a (bank) line with an unstructured mesh and return the intersection coordinates and mesh face indices.
+
+    Arguments
+    ---------
+    bp : numpy.ndarray
+        Array containing the x,y-coordinates of the (bank) line.
+    xf : numpy.ndarray
+        Array containing the x-coordinates of the corner points of each mesh face.
+    yf : numpy.ndarray
+        Array containing the y-coordinates of the corner points of each mesh face.
+    xe : numpy.ndarray
+        Array containing the x-coordinates of the end points of each mesh edge.
+    ye : numpy.ndarray
+        Array containing the y-coordinates of the end points of each mesh edge.
+    ef : numpy.ndarray
+        Array containg the mesh edge-face connectivity.
+    boundary_edge_nrs : numpy.ndarray
+        Array containing the indices of the domain boundary edges.
+    d_thresh : float
+        Distance threshold.
+        
+    Returns
+    -------
+    crds : numpy.ndarray
+        Array containing the x,y-coordinates of the (bank) line intersected by the mesh.
+    idx : numpy.ndarray
+        Array containing the indices of the mesh faces in which each line segment of crds is located.
+    """
     crds = numpy.zeros((len(bp), 2))
     idx = numpy.zeros(len(bp), dtype=numpy.int64)
     l = 0
@@ -199,7 +252,34 @@ def intersect_line_mesh(bp, xf, yf, xe, ye, fe, ef, boundary_edge_nrs, d_thresh=
     return crds[mask, :], idx[mask]
 
 
-def map_line_mesh(bp, xf, yf, xe, ye, fe, ef, boundary_edge_nrs):
+def map_line_mesh(bp: numpy.ndarray, xf: numpy.ndarray, yf: numpy.ndarray, xe: numpy.ndarray, ye: numpy.ndarray, fe: numpy.ndarray, ef: numpy.ndarray, boundary_edge_nrs: numpy.ndarray) -> numpy.ndarray:
+    """
+    Determine for each point of a line in which mesh face it is located.
+
+    Arguments
+    ---------
+    bp : numpy.ndarray
+        Array containing the x,y-coordinates of the (bank) line.
+    xf : numpy.ndarray
+        Array containing the x-coordinates of the corner points of each mesh face.
+    yf : numpy.ndarray
+        Array containing the y-coordinates of the corner points of each mesh face.
+    xe : numpy.ndarray
+        Array containing the x-coordinates of the end points of each mesh edge.
+    ye : numpy.ndarray
+        Array containing the y-coordinates of the end points of each mesh edge.
+    fe : numpy.ndarray
+        Array containg the mesh face-edge connectivity.
+    ef : numpy.ndarray
+        Array containg the mesh edge-face connectivity.
+    boundary_edge_nrs : numpy.ndarray
+        Array containing the indices of the domain boundary edges.
+    
+    Returns
+    -------
+    masked_idx : numpy.ndarray
+        Array containing the indices of the mesh faces in which each point of bp is located.
+    """
     idx = numpy.zeros(len(bp), dtype=numpy.int64)
     #
     for j, bpj in enumerate(bp):
@@ -299,7 +379,27 @@ def map_line_mesh(bp, xf, yf, xe, ye, fe, ef, boundary_edge_nrs):
     return masked_idx
 
 
-def move_line(xlines, ylines, dn):
+def move_line(xlines: numpy.ndarray, ylines: numpy.ndarray, dn: numpy.ndarray) -> Tuple[numpy.ndarray, numpy.ndarray]:
+    """
+    Shift a line of a variable distance sideways (positive shift towards the right).
+
+    Arguments
+    ---------
+    xlines : numpy.ndarray
+        Array containing the x-coordinates of the line to be moved.
+    ylines : numpy.ndarray
+        Array containing the y-coordinates of the line to be moved.
+    dn : numpy.ndarray
+        Distance over which to move the line sideways. A positive shift is
+        defined towards the right when looking along the line.
+        
+    Returns
+    -------
+    xlines_new : umpy.ndarray
+        Array containing the x-coordinates of the moved line.
+    ylines : numpy.ndarray
+        Array containing the y-coordinates of the moved line.
+    """
     eps = sys.float_info.epsilon
     lenx = len(xlines)
 
@@ -366,6 +466,24 @@ def move_line(xlines, ylines, dn):
 
 
 def clip_sort_connect_bank_lines(banklines, bankarea, xykm):
+    """
+    Connect the bank line segments to bank lines and clip to the area of interest.
+
+    Arguments
+    ---------
+    banklines : 
+        Unordered set of bank line segments.
+    bankarea : List[]
+        A list of search areas surrounding the bank guide lines.
+    xykm : numpy.ndarray
+        Array containing x,y,chainage values.
+    
+    Returns
+    -------
+    bank : 
+        The detected bank lines.
+        
+    """
     clipped_banklines = banklines.intersection(bankarea)[
         0
     ]  # one MultiLineString object
@@ -466,7 +584,23 @@ def clip_sort_connect_bank_lines(banklines, bankarea, xykm):
     return bank
 
 
-def clip_bank_guidelines(line, xykm=None, max_river_width=1000):
+def clip_bank_guidelines(line, xykm, max_river_width: float = 1000):
+    """
+
+    Arguments
+    ---------
+    line
+        ...
+    xykm
+        ...
+    
+    Returns
+    -------
+    line
+        ...
+    maxmaxd
+        ...
+    """
     nbank = len(line)
     # clip guiding bank lines to area of interest
     # using simplified geometries to speed up identifying the appropriate buffer size
@@ -493,7 +627,22 @@ def clip_bank_guidelines(line, xykm=None, max_river_width=1000):
     return line, maxmaxd
 
 
-def convert_guide_lines_to_bank_polygons(guide_lines, dlines):
+def convert_guide_lines_to_bank_polygons(guide_lines: List[numpy.ndarray], dlines: List[float]):
+    """
+    Construct a series of polygons surrounding the bank guide lines.
+
+    Arguments
+    ---------
+    guide_lines : List[numpy.ndarray]
+        List of arrays containing the x,y-coordinates of a bank guide lines.
+    dlines : List[float]
+        Array containing the search distance value per bank line.
+        
+    Results
+    -------
+    bankareas
+        Array containing the areas of interest surrounding the bank guide lines.
+    """
     nbank = len(guide_lines)
     bankareas = [None] * nbank
     for b, distance in enumerate(dlines):
@@ -502,7 +651,26 @@ def convert_guide_lines_to_bank_polygons(guide_lines, dlines):
     return bankareas
 
 
-def clip_simdata(sim, xykm, maxmaxd):
+def clip_simdata(sim: SimulationObject, xykm: numpy.ndarray, maxmaxd: float) -> SimulationObject:
+    """
+    Clip the simulation mesh and data to the area of interest sufficiently close to the reference line.
+
+    Arguments
+    ---------
+    sim : SimulationObject
+        Simulation data: mesh, bed levels, water levels, velocities, etc.
+    xykm : numpy.ndarray
+        Reference line.
+    maxmaxd : float
+        Maximum distance between the reference line and a point in the area of
+        interest defined based on the guide lines for the banks and the search
+        distance.
+    
+    Returns
+    -------
+    sim1 : SimulationObject
+        Clipped simulation data: mesh, bed levels, water levels, velocities, etc.
+    """
     maxdx = maxmaxd
     xybuffer = xykm.buffer(maxmaxd + maxdx)
     bbox = xybuffer.envelope.exterior
@@ -543,7 +711,22 @@ def clip_simdata(sim, xykm, maxmaxd):
     return sim
 
 
-def get_banklines(sim, h0):
+def get_banklines(sim: SimulationObject, h0: float) -> geopandas.GeoSeries:
+    """
+    Detect the bank lines based on a simulation and critical water depth h0.
+
+    Arguments
+    ---------
+    sim : SimulationObject
+        Simulation data: mesh, bed levels, water levels, velocities, etc.
+    h0 : float
+        Critical water depth for determining the banks.
+    
+    Returns
+    -------
+    banklines : geopandas.GeoSeries
+        The collection of all detected bank segments in the remaining model area.
+    """
     FNC = sim["facenode"]
     NNODES = sim["nnodes"]
     max_nnodes = FNC.shape[1]
@@ -599,7 +782,30 @@ def get_banklines(sim, h0):
     return geopandas.GeoSeries(merged_line)
 
 
-def poly_to_line(nnodes, x, y, wet_node, h_node, h0):
+def poly_to_line(nnodes: int, x: numpy.ndarray, y: numpy.ndarray, wet_node: numpy.ndarray, h_node: numpy.ndarray, h0: float):
+    """
+    Detect the bank line segments inside an individual mesh face.
+
+    Arguments
+    ---------
+    nnode : int
+        Number of nodes of mesh face.
+    x : numpy.ndarray
+        Array of x-coordinates of the nodes making up the mesh face.
+    y : numpy.ndarray
+        Array of y-coordinates of the nodes making up the mesh face.
+    wet_node : numpy.ndarray
+        Array of booleans indicating whether nodes are wet.
+    h_node : numpy.ndarray
+        Array of water depths (negative for dry) at the mesh nodes.
+    h0 : float
+        Critical water depth for determining the banks.
+    
+    Results
+    -------
+    lines : Optional[...]
+        Optional bank line segments detected within the mesh face.
+    """
     Lines = [None] * (nnodes - 2)
     for i in range(nnodes - 2):
         iv = [0, i + 1, i + 2]
@@ -616,7 +822,28 @@ def poly_to_line(nnodes, x, y, wet_node, h_node, h0):
         return merged_line
 
 
-def tri_to_line(x, y, wet_node, h_node, h0):
+def tri_to_line(x: numpy.ndarray, y: numpy.ndarray, wet_node: numpy.ndarray, h_node: numpy.ndarray, h0: float):
+    """
+    Detect the bank line segments inside an individual triangle.
+
+    Arguments
+    ---------
+    x : numpy.ndarray
+        Array of x-coordinates of the nodes making up the mesh face.
+    y : numpy.ndarray
+        Array of y-coordinates of the nodes making up the mesh face.
+    wet_node : numpy.ndarray
+        Array of booleans indicating whether nodes are wet.
+    h_node : numpy.ndarray
+        Array of water depths (negative for dry) at the mesh nodes.
+    h0 : float
+        Critical water depth for determining the banks.
+        
+    Returns
+    -------
+    Line : Optional[]
+        Optional bank line segment detected within the triangle.
+    """
     if wet_node[0] and wet_node[1]:
         A = 0
         B = 2
@@ -654,7 +881,7 @@ def tri_to_line(x, y, wet_node, h_node, h0):
     xr = x[C] + facCD * (x[D] - x[C])
     yr = y[C] + facCD * (y[D] - y[C])
     if xl == xr and yl == yr:
-        Lines = None
+        Line = None
     else:
-        Lines = shapely.geometry.asLineString([[xl, yl], [xr, yr]])
-    return Lines
+        Line = shapely.geometry.asLineString([[xl, yl], [xr, yr]])
+    return Line

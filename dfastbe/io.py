@@ -28,7 +28,10 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 from typing import Union, Dict, List, Optional, Tuple
+
 import numpy
+SimulationObject = Dict[str, numpy.ndarray]
+
 import netCDF4
 import configparser
 import os
@@ -490,7 +493,7 @@ def clip_chainage_path(xykm, kmfile: str, kmbounds: Tuple[float, float]):
     return xykm
 
 
-def config_get_bank_guidelines(config: configparser.ConfigParser):
+def config_get_bank_guidelines(config: configparser.ConfigParser) -> List[numpy.ndarray]:
     """
     Get the guide lines for the bank lines from the analysis settings.
 
@@ -501,8 +504,8 @@ def config_get_bank_guidelines(config: configparser.ConfigParser):
 
     Returns
     -------
-    line
-
+    line : List[numpy.ndarray]
+        List of arrays containing the x,y-coordinates of a bank guide lines.
     """
     # read guiding bank line
     nbank = config_get_int(config, "Detect", "NBank")
@@ -967,7 +970,7 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
     return km_thr, val
 
 
-def read_simdata(filename: str) -> Tuple[Dict[str, numpy.ndarray], float]:
+def read_simdata(filename: str) -> Tuple[SimulationObject, float]:
     """
     Read a deault set of quantities from a UGRID netCDF file coming from D-Flow FM (or similar).
 
@@ -983,8 +986,10 @@ def read_simdata(filename: str) -> Tuple[Dict[str, numpy.ndarray], float]:
 
     Returns
     -------
-    sim : Dict[str, numpy.ndarray]
+    sim : SimulationObject
         Dictionary containing the data read from the simulation output file.
+    dh0 : float
+        Threshold depth for detecting drying and flooding.
     """
     sim = {}
     # determine file type
@@ -1337,7 +1342,7 @@ def ugrid_add(
     dst.close()
 
 
-def read_waqua_xyz(filename: str, cols: Tuple[int] = (2,)) -> numpy.ndarray:
+def read_waqua_xyz(filename: str, cols: Tuple[int, ...] = (2,)) -> numpy.ndarray:
     """
     Read data columns from a SIMONA XYZ file.
 
@@ -1391,7 +1396,7 @@ def write_simona_box(
         boxfile.write(boxheader.format(m1=firstm + 1, n1=j + 1, m2=mmax, n2=k))
         nvalues = (mmax - firstm) * (k - j)
         boxdata = ("   " + "{:12.3f}" * (k - j) + "\n") * (mmax - firstm)
-        values = tuple(rdata[:, j:k].reshape(nvalues))
+        values = tuple(rdata[firstm:mmax, j:k].reshape(nvalues))
         boxfile.write(boxdata.format(*values))
 
     # close the file
