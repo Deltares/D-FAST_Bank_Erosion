@@ -39,6 +39,7 @@ import pathlib
 import sys
 import os
 import configparser
+import matplotlib.pyplot
 from functools import partial
 
 DialogObject = Dict[str, PyQt5.QtCore.QObject]
@@ -68,7 +69,7 @@ def gui_text(key: str, prefix: str = "gui_", dict: Dict[str, Any] = {}):
     -------
         The first line of the text in the dictionary expanded with the keys.
     """
-    cstr = dfastbe.io.program_texts(prefix + key)
+    cstr = dfastbe.io.get_text(prefix + key)
     str = cstr[0].format(**dict)
     return str
 
@@ -196,7 +197,29 @@ def addGeneralTab(
     dialog["bankFileName"] = bankFileName
     generalLayout.addRow("Bank File Name", bankFileName)
 
+    plotting = QtWidgets.QCheckBox("", win)
+    plotting.setChecked(True)
+    plotting.stateChanged.connect(updatePlotting)
+    dialog["plotting"] = plotting
+    generalLayout.addRow("Plotting", plotting)
 
+    savePlots = QtWidgets.QCheckBox("", win)
+    savePlots.setChecked(True)
+    savePlots.stateChanged.connect(updatePlotting)
+    dialog["savePlotsEdit"] = savePlots
+    savePlotsTxt = QtWidgets.QLabel("Save plots")
+    dialog["savePlots"] = savePlotsTxt
+    generalLayout.addRow(savePlotsTxt, savePlots)
+
+    addOpenFileRow(generalLayout, "figureDir", "Figure Directory")
+
+    closePlots = QtWidgets.QCheckBox("", win)
+    closePlots.setChecked(False)
+    dialog["closePlotsEdit"] = closePlots
+    closePlotsTxt = QtWidgets.QLabel("Close plots")
+    dialog["closePlots"] = closePlotsTxt
+    generalLayout.addRow(closePlotsTxt, closePlots)
+    
 def addDetectTab(
     tabs: PyQt5.QtWidgets.QTabWidget,
     win: PyQt5.QtWidgets.QMainWindow,
@@ -225,15 +248,15 @@ def addDetectTab(
     dialog["waterDepth"] = waterDepth
     detectLayout.addRow("Water Depth [m]", waterDepth)
 
-    bankLines = QtWidgets.QTreeWidget(win)
-    bankLines.setHeaderLabels(["Index", "FileName", "Search Distance [m]"])
-    bankLines.setFont(app.font())
-    bankLines.setColumnWidth(0, 50)
-    bankLines.setColumnWidth(1, 200)
-    # c1 = QtWidgets.QTreeWidgetItem(bankLines, ["0", "test\\filename", "50"])
+    searchLines = QtWidgets.QTreeWidget(win)
+    searchLines.setHeaderLabels(["Index", "FileName", "Search Distance [m]"])
+    searchLines.setFont(app.font())
+    searchLines.setColumnWidth(0, 50)
+    searchLines.setColumnWidth(1, 200)
+    # c1 = QtWidgets.QTreeWidgetItem(searchLines, ["0", "test\\filename", "50"])
 
-    blLayout = addRemoveEditLayout(bankLines, "bankLines")
-    detectLayout.addRow("Bank Lines", blLayout)
+    slLayout = addRemoveEditLayout(searchLines, "searchLines")
+    detectLayout.addRow("Search Lines", slLayout)
 
 
 def addErosionTab(
@@ -446,6 +469,8 @@ def validator(validstr: str) -> PyQt5.QtGui.QValidator:
     if validstr == "positive_real":
         validator = PyQt5.QtGui.QDoubleValidator()
         validator.setBottom(0)
+    else:
+        raise Exception("Unknown validator type: {}".format(validstr))
     return validator
 
 
@@ -511,7 +536,7 @@ def generalParLayout(
 
 
 def addOpenFileRow(
-    formLayout: PyQt5.QtWidgets.QFormLayout, key: str, label: str
+    formLayout: PyQt5.QtWidgets.QFormLayout, key: str, labelString: str
 ) -> None:
     """
     Add a line of controls for selecting a file or folder in a form layout.
@@ -525,8 +550,10 @@ def addOpenFileRow(
     labelString : str
         String describing the parameter to be displayed as label.
     """
-    fLayout = openFileLayout(key)
-    formLayout.addRow(label, fLayout)
+    Label = QtWidgets.QLabel(labelString)
+    dialog[key] = Label
+    fLayout = openFileLayout(key + "Edit")
+    formLayout.addRow(Label, fLayout)
 
 
 def getIcon(filename: str) -> PyQt5.QtGui.QIcon:
@@ -628,6 +655,25 @@ def addRemoveEditLayout(
     return parent
 
 
+def updatePlotting() -> None:
+    """
+    Update the plotting flags.
+    
+    Arguments
+    ---------
+    None
+    """
+    plotFlag = dialog["plotting"].isChecked()
+    dialog["savePlots"].setEnabled(plotFlag)
+    dialog["savePlotsEdit"].setEnabled(plotFlag)
+    saveFlag = dialog["savePlotsEdit"].isChecked()
+    dialog["figureDir"].setEnabled(plotFlag and saveFlag)
+    dialog["figureDirEdit"].setEnabled(plotFlag and saveFlag)
+    dialog["figureDirEditFile"].setEnabled(plotFlag and saveFlag)
+    dialog["closePlots"].setEnabled(plotFlag)
+    dialog["closePlotsEdit"].setEnabled(plotFlag)
+    
+
 def addAnItem(key: str) -> None:
     """
     Implements the actions for the add item button.
@@ -640,9 +686,9 @@ def addAnItem(key: str) -> None:
     nItems = dialog[key].invisibleRootItem().childCount()
     i = nItems + 1
     istr = str(i)
-    if key == "bankLines":
-        fileName, dist = editABankLine(key, istr)
-        c1 = QtWidgets.QTreeWidgetItem(dialog["bankLines"], [istr, fileName, dist])
+    if key == "searchLines":
+        fileName, dist = editASearchLine(key, istr)
+        c1 = QtWidgets.QTreeWidgetItem(dialog["searchLines"], [istr, fileName, dist])
     elif key == "discharges":
         prob = str(1 / (nItems + 1))
         fileName, prob = editADischarge(key, istr, prob=prob)
@@ -653,42 +699,64 @@ def addAnItem(key: str) -> None:
     dialog[key + "Remove"].setEnabled(True)
 
 
-def editABankLine(
+def setDialogSize(editDialog: PyQt5.QtWidgets.QDialog, width: int, height: int) -> None:
+    """
+    Set the width and height of a dialog and position it centered relative to the main window.
+    
+    Arguments
+    ---------
+    editDialog : QtWidgets.QDialog
+        Dialog object to be positioned correctly.
+    width : int
+        Desired width of the dialog.
+    height : int
+        Desired height of the dialog.
+    """
+    parent = dialog["window"]
+    x = parent.x()
+    y = parent.y()
+    pw = parent.width()
+    ph = parent.height()
+    editDialog.setGeometry(x + pw/2 - width/2, y + ph/2 - height/2, width, height)
+
+
+def editASearchLine(
     key: str, istr: str, fileName: str = "", dist: str = "50"
 ) -> Tuple[str, str]:
     """
-    Create an edit dialog for the bank lines list.
+    Create an edit dialog for the search lines list.
 
     Arguments
     ---------
     key : str
         Short name of the parameter.
     istr : str
-        String representation of the bank line in the list.
+        String representation of the search line in the list.
     fileName : str
-        Name of the bank line file.
+        Name of the search line file.
     dist : str
         String representation of the search distance.
 
     Returns
     -------
     fileName1 : str
-        Updated name of the bank line file.
+        Updated name of the search line file.
     dist1 : str
         Updated string representation of the search distance.
     """
     editDialog = QtWidgets.QDialog()
+    setDialogSize(editDialog, 600, 100)
     editDialog.setWindowFlags(
         PyQt5.QtCore.Qt.WindowTitleHint | PyQt5.QtCore.Qt.WindowSystemMenuHint
     )
-    editDialog.setWindowTitle("Edit Bank Line")
+    editDialog.setWindowTitle("Edit Search Line")
     editLayout = QtWidgets.QFormLayout(editDialog)
 
     label = QtWidgets.QLabel(istr)
-    editLayout.addRow("Bank Line Nr", label)
+    editLayout.addRow("Search Line Nr", label)
 
-    addOpenFileRow(editLayout, "editBankLine", "Bank Line File")
-    dialog["editBankLine"].setText(fileName)
+    addOpenFileRow(editLayout, "editSearchLine", "Search Line File")
+    dialog["editSearchLineEdit"].setText(fileName)
 
     searchDistance = QtWidgets.QLineEdit()
     searchDistance.setText(dist)
@@ -702,7 +770,7 @@ def editABankLine(
 
     editDialog.exec()
 
-    fileName = dialog["editBankLine"].text()
+    fileName = dialog["editSearchLine"].text()
     dist = searchDistance.text()
     return fileName, dist
 
@@ -723,6 +791,7 @@ def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
         String representation of the weight for this simulation.
     """
     editDialog = QtWidgets.QDialog()
+    setDialogSize(editDialog, 600, 100)
     editDialog.setWindowFlags(
         PyQt5.QtCore.Qt.WindowTitleHint | PyQt5.QtCore.Qt.WindowSystemMenuHint
     )
@@ -733,7 +802,7 @@ def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
     editLayout.addRow("Level Nr", label)
 
     addOpenFileRow(editLayout, "editDischarge", "Simulation File")
-    dialog["editDischarge"].setText(fileName)
+    dialog["editDischargeEdit"].setText(fileName)
 
     probability = QtWidgets.QLineEdit()
     probability.setText(prob)
@@ -779,10 +848,10 @@ def editAnItem(key: str) -> None:
     root = dialog[key].invisibleRootItem()
     if len(selected) > 0:
         istr = selected[0].text(0)
-        if key == "bankLines":
+        if key == "searchLines":
             fileName = selected[0].text(1)
             dist = selected[0].text(2)
-            fileName, dist = editABankLine(key, istr, fileName=fileName, dist=dist)
+            fileName, dist = editASearchLine(key, istr, fileName=fileName, dist=dist)
             selected[0].setText(1, fileName)
             selected[0].setText(2, dist)
         elif key == "discharges":
@@ -817,7 +886,7 @@ def removeAnItem(key: str) -> None:
         dialog[key + "Remove"].setEnabled(False)
     if istr == "":
         pass
-    elif key == "bankLines":
+    elif key == "searchLines":
         pass
     elif key == "discharges":
         tabs = dialog["tabs"]
@@ -867,46 +936,48 @@ def selectFile(key: str) -> None:
     key : str
         Short name of the parameter.
     """
+    dnm: str
     if not dialog[key + "File"].hasFocus():
         # in the add/edit dialogs, the selectFile is triggered when the user presses enter in one of the lineEdit boxes ...
         # don't trigger the actual selectFile
-        fil = [""]
-    elif key == "simFile":
-        fil = QtWidgets.QFileDialog.getOpenFileName(
+        fil = ""
+    elif key == "simFileEdit":
+        fil,fltr = QtWidgets.QFileDialog.getOpenFileName(
             caption="Select D-Flow FM Map File", filter="D-Flow FM Map Files (*map.nc)"
         )
         # getOpenFileName returns a tuple van file name and active file filter.
-    elif key == "chainFile":
-        fil = QtWidgets.QFileDialog.getOpenFileName(
+    elif key == "chainFileEdit":
+        fil,fltr = QtWidgets.QFileDialog.getOpenFileName(
             caption="Select Chainage File", filter="Chainage Files (*.xyc)"
         )
-    elif key == "riverAxis":
-        fil = QtWidgets.QFileDialog.getOpenFileName(
+    elif key == "riverAxisEdit":
+        fil,fltr = QtWidgets.QFileDialog.getOpenFileName(
             caption="Select River Axis File", filter="River Axis Files (*.xyc)"
         )
-    elif key == "fairway":
-        fil = QtWidgets.QFileDialog.getOpenFileName(
+    elif key == "fairwayEdit":
+        fil,fltr = QtWidgets.QFileDialog.getOpenFileName(
             caption="Select Fairway File", filter="Fairway Files (*.xyc)"
         )
-    elif key == "editBankLine":
-        fil = QtWidgets.QFileDialog.getOpenFileName(
-            caption="Select Bank Line File", filter="Bank Line Files (*.xyc)"
+    elif key == "editSearchLine":
+        fil,fltr = QtWidgets.QFileDialog.getOpenFileName(
+            caption="Select Search Line File", filter="Search Line Files (*.xyc)"
         )
     elif key == "editDischarge":
-        fil = QtWidgets.QFileDialog.getOpenFileName(
+        fil,fltr = QtWidgets.QFileDialog.getOpenFileName(
             caption="Select Simulation File", filter="Simulation File (*map.nc)"
         )
-    elif key == "bankDir":
+    elif key == "bankDirEdit":
         fil = QtWidgets.QFileDialog.getExistingDirectory(
             caption="Select Bank Directory"
         )
-        # getExistingDirectory just returns the folder name; make consistent with getOpenFileName.
-        fil = fil
-    elif key == "outDir":
+    elif key == "figureDirEdit":
+        fil = QtWidgets.QFileDialog.getExistingDirectory(
+            caption="Select Figure Output Directory"
+        )
+    elif key == "outDirEdit":
         fil = QtWidgets.QFileDialog.getExistingDirectory(
             caption="Select Output Directory"
         )
-        fil = fil
     else:
         if key[-4:] == "Edit":
             rkey = key[:-4]
@@ -916,14 +987,14 @@ def selectFile(key: str) -> None:
                 rkey = rkey[1:]
             if not nr == "":
                 nr = " for Level " + nr
-            fil = QtWidgets.QFileDialog.getOpenFileName(
+            fil,fltr = QtWidgets.QFileDialog.getOpenFileName(
                 caption="Select Parameter File" + nr, filter="Parameter File (*.)"
             )
         else:
             print(key)
-            fil = [""]
-    if fil[0] != "":
-        dialog[key].setText(fil[0])
+            fil = ""
+    if fil != "":
+        dialog[key].setText(fil)
 
 
 def selectFolder(key: str) -> None:
@@ -948,25 +1019,49 @@ def selectFolder(key: str) -> None:
 def run_detection() -> None:
     """
     Run the bank line detection based on settings in the GUI.
+    
+    Use a dummy configuration name in the current work directory to create
+    relative paths.
 
     Arguments
     ---------
     None
     """
     config = get_configuration()
-    dfastbe.cli.banklines_core(config)
+    rootdir = os.getcwd()
+    config = dfastbe.cli.config_to_relative_paths(rootdir, config)
+    dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
+    matplotlib.pyplot.close("all")
+    # should maybe use a separate thread for this ...
+    #try:
+    dfastbe.cli.banklines_core(config, rootdir, True)
+    #except:
+    #    pass
+    dialog["application"].restoreOverrideCursor()
 
 
 def run_erosion() -> None:
     """
     Run the D-FAST Bank Erosion analysis based on settings in the GUI.
 
+    Use a dummy configuration name in the current work directory to create
+    relative paths.
+
     Arguments
     ---------
     None
     """
     config = get_configuration()
-    dfastbe.cli.bankerosion_core(config)
+    rootdir = os.getcwd()
+    config = dfastbe.cli.config_to_relative_paths(rootdir, config)
+    dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
+    matplotlib.pyplot.close("all")
+    # should maybe use a separate thread for this ...
+    #try:
+    dfastbe.cli.bankerosion_core(config, rootdir, True)
+    #except:
+    #    pass
+    dialog["application"].restoreOverrideCursor()
 
 
 def close_dialog() -> None:
@@ -977,6 +1072,7 @@ def close_dialog() -> None:
     ---------
     None
     """
+    matplotlib.pyplot.close("all")
     dialog["window"].close()
 
 
@@ -1008,8 +1104,9 @@ def load_configuration(filename: str) -> None:
     filename : str
         Name of the configuration file to be opened.
     """
+    rootdir = os.path.dirname(filename)
     config = dfastbe.io.read_config(filename)
-    config = config_to_absolute_paths(filename, config)
+    config = dfastbe.cli.config_to_absolute_paths(rootdir, config)
     try:
         version = config["General"]["Version"]
     except:
@@ -1017,34 +1114,53 @@ def load_configuration(filename: str) -> None:
         return
     if version == "1.0":
         section = config["General"]
-        dialog["chainFile"].setText(section["RiverKM"])
+        dialog["chainFileEdit"].setText(section["RiverKM"])
         studyRange = dfastbe.io.config_get_range(config, "General", "Boundaries")
         dialog["startRange"].setText(str(studyRange[0]))
         dialog["endRange"].setText(str(studyRange[1]))
-        dialog["bankDir"].setText(section["BankDir"])
+        dialog["bankDirEdit"].setText(section["BankDir"])
         dialog["bankFileName"].setText(section["BankFile"])
+        flag = dfastbe.io.config_get_bool(
+            config, "General", "Plotting", default=True
+        )
+        dialog["plotting"].setChecked(flag)
+        flag = dfastbe.io.config_get_bool(
+            config, "General", "SavePlots", default=True
+        )
+        dialog["savePlotsEdit"].setChecked(flag)
+        figDir = dfastbe.io.config_get_str(
+            config, "General", "FigureDir", default=dfastbe.io.absolute_path(rootdir, "figures")
+        )
+        dialog["figureDirEdit"].setText(figDir)
+        flag = dfastbe.io.config_get_bool(
+            config, "General", "ClosePlots", default=False
+        )
+        dialog["closePlotsEdit"].setChecked(flag)
 
         section = config["Detect"]
-        dialog["simFile"].setText(section["SimFile"])
+        dialog["simFileEdit"].setText(section["SimFile"])
         dialog["waterDepth"].setText(section["WaterDepth"])
         NBank = dfastbe.io.config_get_int(
             config, "Detect", "NBank", default=0, positive=True
         )
         DLines = dfastbe.io.config_get_bank_search_distances(config, NBank)
-        dialog["bankLines"].invisibleRootItem().takeChildren()
+        dialog["searchLines"].invisibleRootItem().takeChildren()
         for i in range(NBank):
             istr = str(i + 1)
             fileName = dfastbe.io.config_get_str(config, "Detect", "Line" + istr)
             c1 = QtWidgets.QTreeWidgetItem(
-                dialog["bankLines"], [istr, fileName, str(DLines[i])]
+                dialog["searchLines"], [istr, fileName, str(DLines[i])]
             )
+        if NBank > 0:
+            dialog["searchLinesEdit"].setEnabled(True)
+            dialog["searchLinesRemove"].setEnabled(True)
 
         section = config["Erosion"]
         dialog["tErosion"].setText(section["TErosion"])
-        dialog["riverAxis"].setText(section["RiverAxis"])
-        dialog["fairway"].setText(section["Fairway"])
+        dialog["riverAxisEdit"].setText(section["RiverAxis"])
+        dialog["fairwayEdit"].setText(section["Fairway"])
         dialog["chainageOutStep"].setText(section["OutputInterval"])
-        dialog["outDir"].setText(section["OutputDir"])
+        dialog["outDirEdit"].setText(section["OutputDir"])
         dialog["newBankFile"].setText(section["BankNew"])
         dialog["newEqBankFile"].setText(section["BankEq"])
         txt = dfastbe.io.config_get_str(
@@ -1065,6 +1181,9 @@ def load_configuration(filename: str) -> None:
             fileName = dfastbe.io.config_get_str(config, "Erosion", "SimFile" + istr)
             prob = dfastbe.io.config_get_str(config, "Erosion", "PDischarge" + istr)
             c1 = QtWidgets.QTreeWidgetItem(dialog["discharges"], [istr, fileName, prob])
+        if NLevel > 0:
+            dialog["dischargesEdit"].setEnabled(True)
+            dialog["dischargesRemove"].setEnabled(True)
         dialog["refLevel"].validator().setTop(NLevel)
         dialog["refLevel"].setText(section["RefLevel"])
 
@@ -1122,103 +1241,6 @@ def load_configuration(filename: str) -> None:
 
     else:
         showError("Unsupported version number {} in the file!".format(version))
-
-
-def config_to_absolute_paths(
-    filename: str, config: configparser.ConfigParser
-) -> configparser.ConfigParser:
-    """
-    Convert a configuration object to contain absolute paths (for editing).
-
-    Arguments
-    ---------
-    filename : str
-        The name of the file: all relative paths in the configuration will be assumed relative to this.
-    config : configparser.ConfigParser
-        Configuration for the D-FAST Bank Erosion analysis with absolute or relative paths.
-
-    Returns
-    -------
-    config1 : configparser.ConfigParser
-        Configuration for the D-FAST Bank Erosion analysis with only absolute paths.
-    """
-    rootdir = os.path.dirname(filename)
-
-    if "General" in config:
-        config = parameter_absolute_path(config, "General", "RiverKM", rootdir)
-        config = parameter_absolute_path(config, "General", "BankDir", rootdir)
-
-    if "Detect" in config:
-        config = parameter_absolute_path(config, "Detect", "SimFile", rootdir)
-        i = 0
-        while True:
-            i = i + 1
-            Line = "Line" + str(i)
-            if Line in config["Detect"]:
-                config = parameter_absolute_path(config, "Detect", Line, rootdir)
-            else:
-                break
-
-    if "Erosion" in config:
-        config = parameter_absolute_path(config, "Erosion", "RiverAxis", rootdir)
-        config = parameter_absolute_path(config, "Erosion", "Fairway", rootdir)
-        config = parameter_absolute_path(config, "Erosion", "OutputDir", rootdir)
-        config = parameter_absolute_path(config, "Erosion", "ShipType", rootdir)
-        config = parameter_absolute_path(config, "Erosion", "VShip", rootdir)
-        config = parameter_absolute_path(config, "Erosion", "NWave", rootdir)
-        config = parameter_absolute_path(config, "Erosion", "Draught", rootdir)
-        config = parameter_absolute_path(config, "Erosion", "Wave0", rootdir)
-        config = parameter_absolute_path(config, "Erosion", "Wave1", rootdir)
-        NLevel = dfastbe.io.config_get_int(config, "Erosion", "NLevel", default=0)
-        for i in range(NLevel):
-            istr = str(i + 1)
-            config = parameter_absolute_path(
-                config, "Erosion", "ShipType" + istr, rootdir
-            )
-            config = parameter_absolute_path(config, "Erosion", "VShip" + istr, rootdir)
-            config = parameter_absolute_path(config, "Erosion", "NShip" + istr, rootdir)
-            config = parameter_absolute_path(config, "Erosion", "NWave" + istr, rootdir)
-            config = parameter_absolute_path(
-                config, "Erosion", "Draught" + istr, rootdir
-            )
-            config = parameter_absolute_path(config, "Erosion", "Slope" + istr, rootdir)
-            config = parameter_absolute_path(config, "Erosion", "Reed" + istr, rootdir)
-
-    return config
-
-
-def parameter_absolute_path(
-    config: configparser.ConfigParser, group: str, key: str, rootdir: str
-) -> configparser.ConfigParser:
-    """
-    Convert a parameter value to contain an absolute path.
-
-    Determine whether the string represents a number.
-    If not, try to convert to an absolute path.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Configuration for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group in the configuration.
-    key : str
-        Name of the key in the configuration.
-    rootdir : str
-        The path to be used as base for the absolute paths.
-
-    Returns
-    -------
-    config1 : configparser.ConfigParser
-        Updated configuration for the D-FAST Bank Erosion analysis.
-    """
-    if key in config[group]:
-        valstr = config[group][key]
-        try:
-            val = float(valstr)
-        except:
-            config[group][key] = dfastbe.io.absolute_path(rootdir, valstr)
-    return config
 
 
 def addTabForLevel(istr: str) -> None:
@@ -1420,7 +1442,8 @@ def menu_save_configuration() -> None:
     filename = fil[0]
     if filename != "":
         config = get_configuration()
-        config = config_to_relative_paths(filename, config)
+        rootdir = os.path.dirname(filename)
+        config = dfastbe.cli.config_to_relative_paths(rootdir, config)
         dfastbe.io.write_config(filename, config)
 
 
@@ -1442,39 +1465,43 @@ def get_configuration() -> configparser.ConfigParser:
 
     config.add_section("General")
     config["General"]["Version"] = "1.0"
-    config["General"]["RiverKM"] = dialog["chainFile"].text()
+    config["General"]["RiverKM"] = dialog["chainFileEdit"].text()
     config["General"]["Boundaries"] = (
         dialog["startRange"].text() + ":" + dialog["endRange"].text()
     )
-    config["General"]["BankDir"] = dialog["bankDir"].text()
+    config["General"]["BankDir"] = dialog["bankDirEdit"].text()
     config["General"]["BankFile"] = dialog["bankFileName"].text()
+    config["General"]["Plotting"] = str(dialog["plotting"].isChecked())
+    config["General"]["SavePlots"] = str(dialog["savePlotsEdit"].isChecked())
+    config["General"]["FigureDir"] = dialog["figureDirEdit"].text()
+    config["General"]["ClosePlots"] = str(dialog["closePlotsEdit"].isChecked())
 
     config.add_section("Detect")
-    config["Detect"]["SimFile"] = dialog["simFile"].text()
+    config["Detect"]["SimFile"] = dialog["simFileEdit"].text()
     config["Detect"]["WaterDepth"] = dialog["waterDepth"].text()
-    nbank = dialog["bankLines"].topLevelItemCount()
+    nbank = dialog["searchLines"].topLevelItemCount()
     config["Detect"]["NBank"] = str(nbank)
     dlines = "[ "
     for i in range(nbank):
         istr = str(i + 1)
-        config["Detect"]["Line" + istr] = dialog["bankLines"].topLevelItem(i).text(1)
-        dlines += dialog["bankLines"].topLevelItem(i).text(2) + ", "
+        config["Detect"]["Line" + istr] = dialog["searchLines"].topLevelItem(i).text(1)
+        dlines += dialog["searchLines"].topLevelItem(i).text(2) + ", "
     dlines = dlines[:-2] + " ]"
     config["Detect"]["DLines"] = dlines
 
     config.add_section("Erosion")
     config["Erosion"]["TErosion"] = dialog["tErosion"].text()
-    config["Erosion"]["RiverAxis"] = dialog["riverAxis"].text()
-    config["Erosion"]["Fairway"] = dialog["fairway"].text()
+    config["Erosion"]["RiverAxis"] = dialog["riverAxisEdit"].text()
+    config["Erosion"]["Fairway"] = dialog["fairwayEdit"].text()
     config["Erosion"]["OutputInterval"] = dialog["chainageOutStep"].text()
-    config["Erosion"]["OutputDir"] = dialog["outDir"].text()
+    config["Erosion"]["OutputDir"] = dialog["outDirEdit"].text()
     config["Erosion"]["BankNew"] = dialog["newBankFile"].text()
     config["Erosion"]["BankEq"] = dialog["newEqBankFile"].text()
     config["Erosion"]["EroVol"] = dialog["eroVol"].text()
     config["Erosion"]["EroVolEqui"] = dialog["eroVolEqui"].text()
 
     if dialog["shipTypeType"].currentText() == "Constant":
-        config["Erosion"]["ShipType"] = (
+        config["Erosion"]["ShipType"] = str(
             dialog["shipTypeSelect"].currentIndex() + 1
         )  # index 0 -> shipType 1
     else:
@@ -1535,103 +1562,6 @@ def get_configuration() -> configparser.ConfigParser:
             config["Erosion"]["Reed" + istr] = dialog[istr + "_bankReedEdit"].text()
         if dialog[istr + "_eroVolEdit"].text() != "":
             config["Erosion"]["EroVol" + istr] = dialog[istr + "_eroVolEdit"].text()
-    return config
-
-
-def config_to_relative_paths(
-    filename: str, config: configparser.ConfigParser
-) -> configparser.ConfigParser:
-    """
-    Convert a configuration object to contain relative paths (for saving).
-
-    Arguments
-    ---------
-    filename : str
-        The name of the file: all paths will be defined relative to this.
-    config : configparser.ConfigParser
-        Configuration for the D-FAST Bank Erosion analysis with only absolute paths.
-
-    Returns
-    -------
-    config1 : configparser.ConfigParser
-        Updated configuration for D-FAST Bank Erosion analysis with as much as possible relative paths.
-    """
-    rootdir = os.path.dirname(filename)
-
-    if "General" in config:
-        config = parameter_relative_path(config, "General", "RiverKM", rootdir)
-        config = parameter_relative_path(config, "General", "BankDir", rootdir)
-
-    if "Detect" in config:
-        config = parameter_relative_path(config, "Detect", "SimFile", rootdir)
-        i = 0
-        while True:
-            i = i + 1
-            Line = "Line" + str(i)
-            if Line in config["Detect"]:
-                config = parameter_relative_path(config, "Detect", Line, rootdir)
-            else:
-                break
-
-    if "Erosion" in config:
-        config = parameter_relative_path(config, "Erosion", "RiverAxis", rootdir)
-        config = parameter_relative_path(config, "Erosion", "Fairway", rootdir)
-        config = parameter_relative_path(config, "Erosion", "OutputDir", rootdir)
-        config = parameter_relative_path(config, "Erosion", "ShipType", rootdir)
-        config = parameter_relative_path(config, "Erosion", "VShip", rootdir)
-        config = parameter_relative_path(config, "Erosion", "NWave", rootdir)
-        config = parameter_relative_path(config, "Erosion", "Draught", rootdir)
-        config = parameter_relative_path(config, "Erosion", "Wave0", rootdir)
-        config = parameter_relative_path(config, "Erosion", "Wave1", rootdir)
-        NLevel = dfastbe.io.config_get_int(config, "Erosion", "NLevel", default=0)
-        for i in range(NLevel):
-            istr = str(i + 1)
-            config = parameter_relative_path(
-                config, "Erosion", "ShipType" + istr, rootdir
-            )
-            config = parameter_relative_path(config, "Erosion", "VShip" + istr, rootdir)
-            config = parameter_relative_path(config, "Erosion", "NShip" + istr, rootdir)
-            config = parameter_relative_path(config, "Erosion", "NWave" + istr, rootdir)
-            config = parameter_relative_path(
-                config, "Erosion", "Draught" + istr, rootdir
-            )
-            config = parameter_relative_path(config, "Erosion", "Slope" + istr, rootdir)
-            config = parameter_relative_path(config, "Erosion", "Reed" + istr, rootdir)
-
-    return config
-
-
-def parameter_relative_path(
-    config: configparser.ConfigParser, group: str, key: str, rootdir: str
-) -> configparser.ConfigParser:
-    """
-    Convert a parameter value to contain a relative path.
-
-    Determine whether the string represents a number.
-    If not, try to convert to a relative path.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Configuration for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group in the configuration.
-    key : str
-        Name of the key in the configuration.
-    rootdir : str
-        The path to be used as base for the relative paths.
-
-    Returns
-    -------
-    config1 : configparser.ConfigParser
-        Updated configuration for the D-FAST Bank Erosion analysis.
-    """
-    if key in config[group]:
-        valstr = config[group][key]
-        try:
-            val = float(valstr)
-        except:
-            config[group][key] = dfastbe.io.relative_path(rootdir, valstr)
     return config
 
 

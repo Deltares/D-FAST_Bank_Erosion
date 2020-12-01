@@ -27,10 +27,11 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 from dfastbe.io import SimulationObject
 
 import numpy
+import math
 import shapely
 import geopandas
 import sys
@@ -40,12 +41,14 @@ def project_km_on_line(
     line_xy: numpy.ndarray, xykm_numpy: numpy.ndarray
 ) -> numpy.ndarray:
     """
-    Project chainage values onto another line.
+    Project chainage values from source line L1 onto another line L2.
 
-    The chainage values are giving along a line. For each node of the line the
-    closest chainage value is located and subsequently the exact chainage is
-    obtained by means of interpolation between that value and the neighbouring
-    values.
+    The chainage values are giving along a line L1 (xykm_numpy). For each node
+    of the line L2 (line_xy) on which we would like to know the chainage, first
+    the closest node (discrete set of nodes) on L1 is determined and
+    subsequently the exact chainage isobtained by determining the closest point
+    (continuous line) on L1 for which the chainage is determined using by means
+    of interpolation.
 
     Arguments
     ---------
@@ -59,51 +62,175 @@ def project_km_on_line(
     line_km : numpy.ndarray
         Array containing the chainage for every coordinate specified in line_xy.
     """
+    # pre-allocate the array for the mapped chainage values
     line_km = numpy.zeros(line_xy.shape[0])
-    xykm_numpy2 = xykm_numpy[:, :2]
+    
+    # get an array with only the x,y coordinates of line L1
+    xy_numpy = xykm_numpy[:, :2]
     last_xykm = xykm_numpy.shape[0] - 1
+    
+    # for each node rp on line L2 get the chainage ...
     for i, rp_numpy in enumerate(line_xy):
-        # find closest point to rp on xykm
-        imin = numpy.argmin(((rp_numpy - xykm_numpy2) ** 2).sum(axis=1))
-        p0 = xykm_numpy2[imin]
+        # find the node on L1 closest to rp
+        imin = numpy.argmin(((rp_numpy - xy_numpy) ** 2).sum(axis=1))
+        p0 = xy_numpy[imin]
+        
+        # determine the distance between that node and rp
         dist2 = ((rp_numpy - p0) ** 2).sum()
-        # print(i, rp_numpy, imin, dist2)
+        
+        # chainage value of that node
         km = xykm_numpy[imin, 2]
 
-        # check if closest point is on left link, right link, or node
+        # if we didn't get the first node
         if imin > 0:
-            p1 = xykm_numpy2[imin - 1]
+            # project rp onto the line segment before this node
+            p1 = xy_numpy[imin - 1]
             alpha = ((p1[0] - p0[0]) + (p1[1] - p0[1])) / (
                 (p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2
             )
+            # if there is a closest point not coinciding with the nodes ...
             if alpha > 0 and alpha < 1:
                 dist2link = (rp_numpy[0] - p0[0] - alpha * (p1[0] - p0[0])) ** 2 + (
                     rp_numpy[1] - p0[1] - alpha * (p1[1] - p0[1])
                 ) ** 2
+                # if it's actually closer than the node ...
                 if dist2link < dist2:
+                    # update the closest point information
                     dist2 = dist2link
                     km = xykm_numpy[imin, 2] + alpha * (
                         xykm_numpy[imin - 1, 2] - xykm_numpy[imin, 2]
                     )
+        
+        # if we didn't get the last node
         if imin < last_xykm:
-            p1 = xykm_numpy2[imin + 1]
+            # project rp onto the line segment after this node
+            p1 = xy_numpy[imin + 1]
             alpha = ((p1[0] - p0[0]) + (p1[1] - p0[1])) / (
                 (p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2
             )
+            # if there is a closest point not coinciding with the nodes ...
             if alpha > 0 and alpha < 1:
                 dist2link = (rp_numpy[0] - p0[0] - alpha * (p1[0] - p0[0])) ** 2 + (
                     rp_numpy[1] - p0[1] - alpha * (p1[1] - p0[1])
                 ) ** 2
+                # if it's actually closer than the previous value ...
                 if dist2link < dist2:
+                    # update the closest point information
                     dist2 = dist2link
                     km = xykm_numpy[imin, 2] + alpha * (
                         xykm_numpy[imin + 1, 2] - xykm_numpy[imin, 2]
                     )
+
+        # store the chainage value, loop ... and return
         line_km[i] = km
     return line_km
 
 
-def intersect_line_mesh(bp: numpy.ndarray, xf: numpy.ndarray, yf: numpy.ndarray, xe: numpy.ndarray, ye: numpy.ndarray, fe: numpy.ndarray, ef: numpy.ndarray, boundary_edge_nrs: numpy.ndarray, d_thresh: float = 0.001) -> Tuple[numpy.ndarray, numpy.ndarray]:
+def on_right_side(
+    line_xy: numpy.ndarray, ref_xy: numpy.ndarray
+) -> bool:
+    """
+    Determine whether line_xy is to the left or right of ref_xy.
+
+    Left and right are relative to the path along ref_xy from the first to the
+    last node. It is assumed that line_xy can be uniquely identified as on the
+    left or right side of ref_xy, i.e. the lines may not cross each other or
+    themselves. Also line_xy should be alongside ref_xy and not "before" or
+    "after" ref_xy. The typical use case is to relate a bank line line_xy to a
+    centre line ref_xy.
+
+    Arguments
+    ---------
+    line_xy : numpy.ndarray
+        Array containing the x,y coordinates of a line.
+    ref_xy : numpy.ndarray
+        Array containing the x,y,chainage data.
+
+    Results
+    -------
+    right_side : bool
+        Flag indicating whether line is on the right side.
+    """
+    
+    # determine the mid-point hpxy of line_xy
+    npnt = line_xy.shape[0]
+    hpnt = int(npnt/2)
+    hpxy = line_xy[hpnt, :]
+    
+    # find the node on ref_xy closest to hpxy
+    imin = numpy.argmin(((hpxy - ref_xy) ** 2).sum(axis=1))
+    p0 = ref_xy[imin]
+    
+    # direction to the midpoint of line_xy
+    theta = math.atan2(hpxy[1] - p0[1], hpxy[0] - p0[0])
+    
+    # direction from which ref_xy comes
+    if ref_xy.shape[0] == 1:
+        raise Exception("One point is not a reference line.")
+    elif imin > 0:
+        phi1 = math.atan2(ref_xy[imin-1, 1] - p0[1], ref_xy[imin-1, 0] - p0[0])
+        # direction to which ref_xy goes
+        if imin < ref_xy.shape[0]-1:
+            phi2 = math.atan2(ref_xy[imin+1, 1] - p0[1], ref_xy[imin+1, 0] - p0[0])
+        else:
+            phi2 = -phi1
+    else:
+        # direction to which ref_xy goes
+        phi2 = math.atan2(ref_xy[imin+1, 1] - p0[1], ref_xy[imin+1, 0] - p0[0])
+        phi1 = -phi2
+    
+    # adjust the directions of ref_xy such that both are larger than the
+    # angle of the direction towards the midpoint of line_xy
+    if phi1 < theta:
+        phi1 = phi1 + 2*math.pi
+    if phi2 < theta:
+        phi2 = phi2 + 2*math.pi
+    
+    # theta points to the right relative to a line coming from phi1 and going
+    # to phi2 if we encounter the to direction phi2 before the from direction
+    # phi1 when searching from theta in counter clockwise direction.
+    right_side = phi2 < phi1
+    
+    return right_side
+
+
+def xykm_bin(xykm: numpy.ndarray, km_bin: Tuple[float, float, float]) -> numpy.ndarray:
+    """
+    Resample a georeferenced chainage line to bin boundaries. 
+    
+    Arguments
+    ---------
+    xykm : numpy.ndarray
+        N x 3 array representing the basic georeferenced chainage information.
+    km_bin : Tuple[float, float, float]
+        Tuple containing start, end, and step for chainage bins.
+        
+    Returns
+    -------
+    xykm1 : numpy.ndarray
+        M x 3 array representing the resampled georeferenced chainage information.
+    """
+    length = xykm.shape[0]
+    length1 = int((km_bin[1] - km_bin[0])/km_bin[2]) + 1
+    xykm1 = numpy.zeros((length1,3))
+    j = 0
+    for i in range(length1):
+        km = km_bin[0] + i * km_bin[2]
+        while xykm[j, 2] < km:
+            j = j + 1
+            if j == length:
+                break
+        if j == 0:
+            xykm1[i, :] = xykm[0, :]
+        elif j == length:
+            xykm1[i, :] = xykm[-1, :]
+        else:
+            alpha = (km - xykm[j-1, 2])/(xykm[j, 2] - xykm[j-1, 2])
+            xykm1[i, :] = (1 - alpha) * xykm[j-1, :] + alpha * xykm[j, :]
+    return xykm1
+        
+
+def intersect_line_mesh(bp: numpy.ndarray, xf: numpy.ndarray, yf: numpy.ndarray, xe: numpy.ndarray, ye: numpy.ndarray, fe: numpy.ndarray, ef: numpy.ndarray, fn: numpy.ndarray, en: numpy.ndarray, boundary_edge_nrs: numpy.ndarray, d_thresh: float = 0.001) -> Tuple[numpy.ndarray, numpy.ndarray]:
     """
     Intersect a (bank) line with an unstructured mesh and return the intersection coordinates and mesh face indices.
 
@@ -121,6 +248,8 @@ def intersect_line_mesh(bp: numpy.ndarray, xf: numpy.ndarray, yf: numpy.ndarray,
         Array containing the y-coordinates of the end points of each mesh edge.
     ef : numpy.ndarray
         Array containg the mesh edge-face connectivity.
+    en : numpy.ndarray
+        Array containg the mesh edge-node connectivity.
     boundary_edge_nrs : numpy.ndarray
         Array containing the indices of the domain boundary edges.
     d_thresh : float
@@ -135,8 +264,11 @@ def intersect_line_mesh(bp: numpy.ndarray, xf: numpy.ndarray, yf: numpy.ndarray,
     """
     crds = numpy.zeros((len(bp), 2))
     idx = numpy.zeros(len(bp), dtype=numpy.int64)
+    verbose = False
     l = 0
     #
+    index: int
+    vindex: numpy.ndarray
     for j, bpj in enumerate(bp):
         if j == 0:
             # first bp inside or outside?
@@ -153,10 +285,13 @@ def intersect_line_mesh(bp: numpy.ndarray, xf: numpy.ndarray, yf: numpy.ndarray,
             if len(possible_cells) == 0:
                 # no cells found ... it must be outside
                 index = -1
-                # print("Starting outside mesh")
+                if verbose:
+                    print("starting outside mesh")
             else:
                 # one or more possible cells, check whether it's really inside one of them
-                # using numpy math might be faster, but since it's should only be for a few points let's using shapely
+                # using numpy math might be faster, but since it's should only be for a few points let's use Shapely
+                # a point on the edge of a polygon is not contained in the polygon.
+                # a point on the edge of two polygons will thus be considered outside the mesh whereas it actually isn't.
                 pnt = shapely.geometry.Point(bp[0])
                 for k in possible_cells:
                     polygon_k = shapely.geometry.Polygon(
@@ -164,13 +299,36 @@ def intersect_line_mesh(bp: numpy.ndarray, xf: numpy.ndarray, yf: numpy.ndarray,
                     )
                     if polygon_k.contains(pnt):
                         index = k
-                        # print("Starting in {}".format(index))
+                        if verbose:
+                            print("starting in {}".format(index))
                         break
                 else:
-                    index = -1
-                    # print("Starting outside mesh")
+                    on_edge: List[int] = []
+                    for k in possible_cells:
+                        nd = numpy.concatenate((xf[k : k + 1], yf[k : k + 1]), axis=0).T
+                        line_k = shapely.geometry.LineString(
+                            numpy.concatenate(nd, nd[0:1], axis=0)
+                        )
+                        if line_k.contains(pnt):
+                            on_edge.append(k)
+                    if on_edge == []:
+                        index = -1
+                        if verbose:
+                            print("starting outside mesh")
+                    else:
+                        if len(on_edge) == 1:
+                            index = on_edge[0]
+                        else:
+                            index = -2
+                            vindex = on_edge
+                        if verbose:
+                            print("starting on edge of {}".format(on_edge))
+                        raise Exception("determine direction!")
             crds[l, :] = bpj
-            idx[l] = index
+            if index == -2:
+                idx[l] = vindex[0]
+            else:
+                idx[l] = index
             l += 1
         else:
             # second or later point
@@ -178,26 +336,39 @@ def intersect_line_mesh(bp: numpy.ndarray, xf: numpy.ndarray, yf: numpy.ndarray,
             prev_b = 0
             prev_pnt = bpj1
             while True:
-                if index < 0:
-                    edges = boundary_edge_nrs
+                if index == -2:
+                    b = numpy.zeros(0)
+                    edges = numpy.zeros(0, dtype=numpy.int64)
+                    nodes = numpy.zeros(0, dtype=numpy.int64)
+                    index_src = numpy.zeros(0, dtype=numpy.int64)
+                    for i in vindex:
+                        b1, edges1, nodes1 = get_slices(i, prev_b, bpj, bpj1, xe, ye, fe, en, boundary_edge_nrs)
+                        b = numpy.concatenate((b, b1), axis=0)
+                        edges = numpy.concatenate((edges, edges1), axis=0)
+                        nodes = numpy.concatenate((nodes, nodes1), axis=0)
+                        index_src = numpy.concatenate((index_src, i + 0*edges1), axis=0)
+                    edges, id_edges = numpy.unique(edges, return_index=True)
+                    b = b[id_edges]
+                    nodes = nodes[id_edges]
+                    index_src = index_src[id_edges]
+                    if len(index_src) == 1:
+                        index = index_src[0]
                 else:
-                    edges = fe[index]
-                X0 = xe[edges, 0]
-                dX = xe[edges, 1] - X0
-                Y0 = ye[edges, 0]
-                dY = ye[edges, 1] - Y0
-                xi0 = bpj1[0]
-                dxi = bpj[0] - xi0
-                yi0 = bpj1[1]
-                dyi = bpj[1] - yi0
-                det = dX * dyi - dY * dxi
-                a = (dyi * (xi0 - X0) - dxi * (yi0 - Y0)) / det  # along mesh edge
-                b = (dY * (xi0 - X0) - dX * (yi0 - Y0)) / det  # along bank line
-                slices = numpy.nonzero((b > prev_b) & (b <= 1) & (a >= 0) & (a <= 1))[0]
-                # print("number of slices: ", len(slices))
-                if len(slices) == 0:
+                    b, edges, nodes = get_slices(index, prev_b, bpj, bpj1, xe, ye, fe, en, boundary_edge_nrs)
+                if len(edges) == 0:
                     # rest of segment associated with same face
-                    # print("{}: -- no slice --".format(j))
+                    if verbose:
+                        if prev_b > 0:
+                            print("{}: -- no further slices along this segment --".format(j))
+                        else:
+                            print("{}: -- no slices along this segment --".format(j))
+                        if index >= 0:
+                            pnt = shapely.geometry.Point(bpj)
+                            polygon_k = shapely.geometry.Polygon(
+                                numpy.concatenate((xf[index : index + 1], yf[index : index + 1]), axis=0).T
+                            )
+                            if not polygon_k.contains(pnt):
+                                raise Exception("{}: ERROR: point actually not contained within {}!".format(j, index))
                     if l == crds.shape[0]:
                         crds.resize((2 * l, 2))
                         idx.resize(2 * l)
@@ -206,50 +377,336 @@ def intersect_line_mesh(bp: numpy.ndarray, xf: numpy.ndarray, yf: numpy.ndarray,
                     l += 1
                     break
                 else:
-                    if len(slices) > 1:
-                        # crossing multiple edges, when and how?
-                        # - crossing at a corner point?
-                        # - going out and in again for cell seems unlogical
-                        # - going in and out again for boundary seems possible [check: encountered]
-                        # print("multiple intersections at ", b[slices])
-                        bmin = numpy.amin(b[slices])
-                        slices = slices[b[slices] == bmin]
-                    # len(slices) == 1
-                    edge = edges[slices[0]]
+                    index0 = None
+                    if len(edges) > 1:
+                        # line segment crosses the edge list multiple times
+                        # - moving out of a cell at a corner node
+                        # - moving into and out of the mesh from outside
+                        # select first crossing ...
+                        bmin = b == numpy.amin(b)
+                        b = b[bmin]
+                        edges = edges[bmin]
+                        nodes = nodes[bmin]
+                    
+                    # slice location identified ...
+                    node = nodes[0]
+                    edge = edges[0]
                     faces = ef[edge]
-                    prev_b = b[slices[0]]
-                    if index < 0:
-                        index = faces[0]
-                        # print("{}: Moving into {} via edge {} at b = {}".format(j, index, edge, prev_b))
-                    else:
-                        if faces[0] == index:
-                            index = faces[1]
-                            # if index < 0:
-                            #     print("{}: Moving outside mesh via edge {} at b = {}".format(j, edge, prev_b))
-                            # else:
-                            #     print("{}: Moving to {} via edge {} at b = {}".format(j, index, edge, prev_b))
-                        elif faces[1] == index:
-                            index = faces[0]
-                            # print("{}: Moving to {} via edge {} at b = {}".format(j, index, edge, prev_b))
+                    prev_b = b[0]
+                    
+                    if node >= 0:
+                        # if we slice at a node ...
+                        if verbose:
+                            print("{}: moving via node {} on edges {} at {}".format(j, node, edges, b[0]))
+                        # figure out where we will be heading afterwards ...
+                        all_node_edges = numpy.nonzero((en == node).any(axis=1))[0]
+                        all_node_faces = numpy.unique(ef[all_node_edges])
+                        if b[0] < 1.0:
+                            # segment passes through node and enter non-neighbouring cell ...
+                            # direction of current segment from bpj1 to bpj
+                            theta = math.atan2(bpj[1] - bpj1[1], bpj[0] - bpj1[0])
                         else:
-                            raise Exception(
-                                "Shouldn't come here .... index {} differs from both faces {} and {} associated with slicing edge {}".format(
-                                    index, faces[0], faces[1], edge
+                            if b[0] == 1.0 and j == len(bp)-1:
+                                # catch case of last segment
+                                if verbose:
+                                    print("{}: last point ends in a node".format(j))
+                                if l == crds.shape[0]:
+                                    crds.resize((l+1, 2))
+                                    idx.resize(l+1)
+                                crds[l, :] = bpj
+                                if index == -2:
+                                    idx[l] = vindex[0]
+                                else:
+                                    idx[l] = index
+                                l += 1
+                                break
+                            else:
+                                # this segment ends in the node, so check next segment ...
+                                # direction of next segment from bpj to bp[j+1]
+                                theta = math.atan2(bp[j+1][1] - bpj[1], bp[j+1][0] - bp[j][0])
+                        if verbose:
+                            print("{}: moving in direction theta = {}".format(j, theta))
+                        twopi = 2 * math.pi
+                        left_edge    = -1
+                        left_dtheta  = twopi
+                        right_edge   = -1
+                        right_dtheta = twopi
+                        for ie in all_node_edges:
+                            if en[ie,0] == node:
+                                theta_edge = math.atan2(ye[ie,1] - ye[ie,0], xe[ie,1] - xe[ie,0])
+                            else:
+                                theta_edge = math.atan2(ye[ie,0] - ye[ie,1], xe[ie,0] - xe[ie,1])
+                            dtheta = theta_edge - theta
+                            if dtheta > 0:
+                                if dtheta < left_dtheta:
+                                    left_edge   = ie
+                                    left_dtheta = dtheta
+                                if twopi - dtheta < right_dtheta:
+                                    right_edge   = ie
+                                    right_dtheta = twopi - dtheta
+                            elif dtheta < 0:
+                                dtheta = -dtheta
+                                if twopi - dtheta < left_dtheta:
+                                    left_edge   = ie
+                                    left_dtheta = twopi - dtheta
+                                if dtheta < right_dtheta:
+                                    right_edge   = ie
+                                    right_dtheta = dtheta
+                            else:
+                                # aligned with edge
+                                left_edge    = ie
+                                right_edge   = ie
+                                break
+                        if left_edge == right_edge:
+                            if verbose:
+                                print("{}: continue along edge {}".format(j, left_edge))
+                            index0 = ef[left_edge, :]
+                        else:
+                            if verbose:
+                                print("{}: continue between edges {} and {}".format(j, left_edge, right_edge))
+                            left_faces = ef[left_edge,:]
+                            right_faces = ef[right_edge,:]
+                            if left_faces[0] in right_faces and left_faces[1] in right_faces:
+                                # the two edges are shared by two faces ... check first face
+                                fn1 = fn[left_faces[0]]
+                                fe1 = fe[left_faces[0]]
+                                # assuming nodes are in clockwise order and edges[i] is the edge connecting node[i] with node[i+1]
+                                if fe1[fn1 == node] == left_edge:
+                                    index0 = left_faces[0]
+                                else:
+                                    index0 = left_faces[1]
+                            elif left_faces[0] in right_faces:
+                                index0 = left_faces[0]
+                            elif left_faces[1] in right_faces:
+                                index0 = left_faces[1]
+                            else:
+                                raise Exception(
+                                    "Shouldn't come here .... left edge {} and right edge {} don't share any face".format(
+                                        left_edge, right_edge
+                                    )
                                 )
+
+                    elif b[0] == 1:
+                        # ending at slice point, so ending on an edge ...
+                        if verbose:
+                            print("{}: ending on edge {} at {}".format(j, edge, b[0]))
+                        # figure out where we will be heading afterwards ...
+                        if j == len(bp)-1:
+                            # catch case of last segment
+                            if verbose:
+                                print("{}: last point ends on an edge".format(j))
+                            if l == crds.shape[0]:
+                                crds.resize((l+1, 2))
+                                idx.resize(l+1)
+                            crds[l, :] = bpj
+                            if index == -2:
+                                idx[l] = vindex[0]
+                            else:
+                                idx[l] = index
+                            l += 1
+                            break
+                        else:
+                            # this segment ends on the edge, so check next segment ...
+                            # direction of next segment from bpj to bp[j+1]
+                            theta = math.atan2(bp[j+1][1] - bpj[1], bp[j+1][0] - bp[j][0])
+                        if verbose:
+                            print("{}: moving in direction theta = {}".format(j, theta))
+                        theta_edge = math.atan2(ye[edge,1] - ye[edge,0], xe[edge,1] - xe[edge,0])
+                        if theta == theta_edge or theta == -theta_edge:
+                            # aligned with edge
+                            if verbose:
+                                print("{}: continue along edge {}".format(j, edge))
+                            index0 = faces
+                        else:
+                            # check whether the (extended) segment slices any edge of faces[0]
+                            fe1 = fe[faces[0]]
+                            a, b, edges = get_slices_core(fe1, xe, ye, bpj, bp[j+1], 0.0, False)
+                            if len(edges) > 0:
+                                # yes, a slice (typically 1, but could be 2 if it slices at a node
+                                # but that doesn't matter) ... so, we continue towards faces[0]
+                                index0 = faces[0]
+                            else:
+                                # no slice for faces[0], so we must be going in the other direction
+                                index0 = faces[1]
+
+                    if not index0 is None:
+                        if verbose:
+                            print("{}: moving from {} via node {} to {} at b = {}".format(j, index, node, index0, prev_b))
+                        if type(index0) == int or type(index0) == numpy.int64:
+                            index = index0
+                        elif len(index0) == 1:
+                            index = index0[0]
+                        else:
+                            index = -2
+                            vindex = index0
+                    elif faces[0] == index:
+                        if verbose:
+                            print("{}: moving from {} via edge {} to {} at b = {}".format(j, index, edge, faces[1], prev_b))
+                        index = faces[1]
+                    elif faces[1] == index:
+                        if verbose:
+                            print("{}: moving from {} via edge {} to {} at b = {}".format(j, index, edge, faces[0], prev_b))
+                        index = faces[0]
+                    else:
+                        raise Exception(
+                            "Shouldn't come here .... index {} differs from both faces {} and {} associated with slicing edge {}".format(
+                                index, faces[0], faces[1], edge
                             )
+                        )
                     if l == crds.shape[0]:
                         crds.resize((2 * l, 2))
                         idx.resize(2 * l)
                     crds[l, :] = bpj1 + prev_b * (bpj - bpj1)
-                    idx[l] = index
+                    if index == -2:
+                        idx[l] = vindex[0]
+                    else:
+                        idx[l] = index
                     l += 1
+                    if prev_b == 1:
+                        break
+    
     # clip to actual length
     crds = crds[:l, :]
     idx = idx[:l]
+    
     # remove tiny segments (about 35% is less than 1 mm)
     d = numpy.sqrt((numpy.diff(crds, axis=0) ** 2).sum(axis=1))
     mask = numpy.concatenate((numpy.ones((1), dtype="bool"), d > d_thresh))
     return crds[mask, :], idx[mask]
+
+
+def get_slices(index: int, prev_b: float, bpj: numpy.ndarray, bpj1: numpy.ndarray, xe: numpy.ndarray, ye: numpy.ndarray, fe: numpy.ndarray, en: numpy.ndarray, boundary_edge_nrs: numpy.ndarray) -> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]:
+    """
+    Intersect a (bank) line with an unstructured mesh and return the intersection coordinates and mesh face indices.
+
+    Arguments
+    ---------
+    index : int
+        index of the current face.
+    prev_b : float
+        offset of previous slice.
+    bpj : numpy.ndarray
+        1x2 array containing the x,y-coordinates of a bank point.
+    bpj : numpy.ndarray
+        1x2 array containing the x,y-coordinates of the previous bank point.
+    xe : numpy.ndarray
+        Array containing the x-coordinates of the end points of each mesh edge.
+    ye : numpy.ndarray
+        Array containing the y-coordinates of the end points of each mesh edge.
+    ef : numpy.ndarray
+        Array containg the mesh edge-face connectivity.
+    en : numpy.ndarray
+        Array containg the mesh edge-node connectivity.
+    boundary_edge_nrs : numpy.ndarray
+        Array containing the indices of the domain boundary edges.
+        
+    Returns
+    -------
+    b : numpy.ndarray
+        Array containing relative distance along the segment bpj1-bpj at which the slice occurs.
+    edges : numpy.ndarray
+        Array containing all considered edges.
+    nodes : numpu.ndarray
+        Array containing flags indicating whether the slices was at a node.
+    """
+    if index < 0:
+        edges = boundary_edge_nrs
+    else:
+        edges = fe[index]
+    a, b, edges = get_slices_core(edges, xe, ye, bpj1, bpj, prev_b, True)
+    nodes = -numpy.ones(a.shape, dtype=numpy.int64)
+    nodes[a == 0] = en[edges[a == 0], 0]
+    nodes[a == 1] = en[edges[a == 1], 1]
+    return b, edges, nodes
+
+
+def get_slices_core(edges: numpy.ndarray, xe: numpy.ndarray, ye: numpy.ndarray, bpj1: numpy.ndarray, bpj: numpy.ndarray, bmin: float, bmax1: bool = True) -> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]:
+    """
+    Intersect a (bank) line with an unstructured mesh and return the intersection coordinates and mesh face indices.
+
+    Arguments
+    ---------
+    edges : numpy.ndarray
+        Array containing indices of the edges to check for slicing.
+    xe : numpy.ndarray
+        Array containing the x-coordinates of the end points of each mesh edge.
+    ye : numpy.ndarray
+        Array containing the y-coordinates of the end points of each mesh edge.
+    bpj1 : numpy.ndarray
+        1x2 array containing the x,y-coordinates of the previous bank point.
+    bpj : numpy.ndarray
+        1x2 array containing the x,y-coordinates of a bank point.
+    bmin : float
+        Minimum relative distance from bpj1 at which slice should occur.
+    bmax1 : bool
+        Flag indicating whether the the relative distance along the segment bpj1-bpj should be limited to 1.
+        
+    Returns
+    -------
+    a : numpy.ndarray
+        Array containing relative distance along the edges at which the slice occurs.
+    b : numpy.ndarray
+        Array containing relative distance along the segment bpj1-bpj at which the slice occurs.
+    edges : numpy.ndarray
+        Reduced array containing only the indices of the sliced edges.
+    """
+    a, b, slices = get_slices_ab(xe[edges, 0], ye[edges, 0], xe[edges, 1], ye[edges, 1], bpj1[0], bpj1[1], bpj[0], bpj[1], bmin, bmax1)
+    edges = edges[slices]
+    return a, b, edges
+
+
+def get_slices_ab(X0: numpy.ndarray, Y0: numpy.ndarray, X1: numpy.ndarray, Y1: numpy.ndarray, xi0: float, yi0: float, xi1: float, yi1: float, bmin: float, bmax1: bool = True) -> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]:
+    """
+    Get the relative locations a and b at which a segment intersects/slices a number of edges.
+
+    Arguments
+    ---------
+    X0 : numpy.ndarray
+        Array containing the x-coordinates of the start point of each edge.
+    X1 : numpy.ndarray
+        Array containing the x-coordinates of the end point of each edge.
+    Y0 : numpy.ndarray
+        Array containing the y-coordinates of the start point of each edge.
+    Y1 : numpy.ndarray
+        Array containing the y-coordinates of the end point of each edge.
+    xi0 : float
+        x-coordinate of start point of the segment.
+    xi1 : float
+        x-coordinate of end point of the segment.
+    yi0 : float
+        y-coordinate of start point of the segment.
+    yi1 : float
+        y-coordinate of end point of the segment.
+    bmin : float
+        Minimum relative distance from bpj1 at which slice should occur.
+    bmax1 : bool
+        Flag indicating whether the the relative distance along the segment bpj1-bpj should be limited to 1.
+        
+    Returns
+    -------
+    a : numpy.ndarray
+        Array containing relative distance along each edge.
+    b : numpy.ndarray
+        Array containing relative distance along the segment for each edge.
+    slices : numpy.ndarray
+        Array containing a flag indicating whether the edge is sliced at a valid location.
+    """
+    dX = X1 - X0
+    dY = Y1 - Y0
+    dxi = xi1 - xi0
+    dyi = yi1 - yi0
+    det = dX * dyi - dY * dxi
+    det[det == 0] = 1e-10
+    a = (dyi * (xi0 - X0) - dxi * (yi0 - Y0)) / det  # along mesh edge
+    b = (dY * (xi0 - X0) - dX * (yi0 - Y0)) / det  # along bank line
+    # eps = numpy.finfo(float).eps
+    if bmax1:
+        slices = numpy.nonzero((b > bmin) & (b <= 1) & (a >= 0) & (a <= 1))[0]
+    else:
+        slices = numpy.nonzero((b > bmin) & (a >= 0) & (a <= 1))[0]
+    a = a[slices]
+    b = b[slices]
+    return a, b, slices
 
 
 def map_line_mesh(bp: numpy.ndarray, xf: numpy.ndarray, yf: numpy.ndarray, xe: numpy.ndarray, ye: numpy.ndarray, fe: numpy.ndarray, ef: numpy.ndarray, boundary_edge_nrs: numpy.ndarray) -> numpy.ndarray:
@@ -379,93 +836,268 @@ def map_line_mesh(bp: numpy.ndarray, xf: numpy.ndarray, yf: numpy.ndarray, xe: n
     return masked_idx
 
 
-def move_line(xlines: numpy.ndarray, ylines: numpy.ndarray, dn: numpy.ndarray) -> Tuple[numpy.ndarray, numpy.ndarray]:
+def move_line(xylines: numpy.ndarray, dn: numpy.ndarray, to_right: bool) -> numpy.ndarray:
     """
-    Shift a line of a variable distance sideways (positive shift towards the right).
+    Shift a line of a variable distance sideways (positive shift away from centre line).
 
+    Chainage is increasing along all lines. For a bank on the right side a
+    positive shift will move the line to the right. For a bank on the left side
+    a positive shift will move the line to the left.
+    
     Arguments
     ---------
-    xlines : numpy.ndarray
-        Array containing the x-coordinates of the line to be moved.
-    ylines : numpy.ndarray
-        Array containing the y-coordinates of the line to be moved.
+    xylines : numpy.ndarray
+        Nx2 array containing the x- and y-coordinates of the line to be moved.
     dn : numpy.ndarray
         Distance over which to move the line sideways. A positive shift is
-        defined towards the right when looking along the line.
+        defined towards the right for the right bank, and towards the left for
+        the left bank.
+    to_right : bool
+        Flag indicating whether line is on the right (or not).
         
     Returns
     -------
-    xlines_new : umpy.ndarray
-        Array containing the x-coordinates of the moved line.
-    ylines : numpy.ndarray
-        Array containing the y-coordinates of the moved line.
+    xylines_new : umpy.ndarray
+        Nx2 array containing the x- and y-coordinates of the moved line.
     """
-    eps = sys.float_info.epsilon
-    lenx = len(xlines)
-
-    seg1x0 = xlines[:-2]
-    seg1y0 = ylines[:-2]
-    seg1dx = xlines[1:-1] - seg1x0
-    seg1dy = ylines[1:-1] - seg1y0
-    seg1mg = numpy.sqrt(seg1dx ** 2 + seg1dy ** 2)
-    seg1x0 = seg1x0 + dn[:-1] * seg1dy / seg1mg
-    seg1y0 = seg1y0 - dn[:-1] * seg1dx / seg1mg
-
-    seg2x0 = xlines[1:-1]
-    seg2y0 = ylines[1:-1]
-    seg2dx = xlines[2:] - seg2x0
-    seg2dy = ylines[2:] - seg2y0
-    seg2mg = numpy.sqrt(seg2dx ** 2 + seg2dy ** 2)
-    seg2x0 = seg2x0 + dn[1:] * seg2dy / seg2mg
-    seg2y0 = seg2y0 - dn[1:] * seg2dx / seg2mg
-
-    dsegx0 = seg2x0 - seg1x0
-    dsegy0 = seg2y0 - seg1y0
-
-    # seg1x0 + alpda * seg1dx = seg2x0 + beta * seg2dx
-    # seg1y0 + alpda * seg1dy = seg2y0 + beta * seg2dy
-
-    # alpda * seg1dx - beta * seg2dx = seg2x0 - seg1x0 = dsegx0
-    # alpda * seg1dy - beta * seg2dy = seg2y0 - seg1y0 = dsegy0
-
-    # [ seg1dx   - seg2dx ] [ alpha ] = [ dsegx0 ]
-    # [ seg1dy   - seg2dy ] [ beta  ] = [ dsegy0 ]
-    det = numpy.maximum(-seg2dy * seg1dx + seg2dx * seg1dy, eps)
-
-    # [ alpha ] = [- seg2dy  seg2dx ] [ dsegx0 ]
-    # [ beta  ] = [- seg1dy  seg1dx ] [ dsegy0 ] / det
-
-    alpha = (-seg2dy * dsegx0 + seg2dx * dsegy0) / det
-    beta = (-seg1dy * dsegx0 + seg1dx * dsegy0) / det
-    alpha[alpha < 0.5] = numpy.nan
-    alpha[beta > 0.5] = numpy.nan
-    # TODO: add limiter for sharp angles?
-    # TODO: make shift "area" conservative in general?
-
-    # lenx - 1 segment midpoints
-    # lenx - 2 internal nodes
-    # 2 end nodes
-    # total: 2 * lenx - 1
-
-    xlines_new = numpy.zeros(2 * lenx - 1)  # lenx = 50 -> length = 99 -> 0:98
-    xlines_new[0] = seg1x0[0]
-    xlines_new[1:-2:2] = seg1x0 + 0.5 * seg1dx
-    xlines_new[2:-2:2] = seg1x0 + alpha * seg1dx
-    xlines_new[-2] = seg2x0[-1] + 0.5 * seg2dx[-1]
-    xlines_new[-1] = seg2x0[-1] + seg2dx[-1]
-
-    ylines_new = numpy.zeros(2 * lenx - 1)
-    ylines_new[0] = seg1y0[0]
-    ylines_new[1:-2:2] = seg1y0 + 0.5 * seg1dy
-    ylines_new[2:-2:2] = seg1y0 + alpha * seg1dy
-    ylines_new[-2] = seg2y0[-1] + 0.5 * seg2dy[-1]
-    ylines_new[-1] = seg2y0[-1] + seg2dy[-1]
-
-    mask = ~numpy.isnan(xlines_new)
-    return xlines_new[mask], ylines_new[mask]
+    if to_right:
+        xylines_new = move_line_right(xylines, dn)
+    else:
+        xylines_rev = xylines[::-1, :]
+        dn_rev = dn[::-1]
+        xylines_new_rev = move_line_right(xylines_rev, dn_rev)
+        xylines_new = xylines_new_rev[::-1, :]
+    return xylines_new
 
 
-def clip_sort_connect_bank_lines(banklines, bankarea, xykm):
+def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
+    """
+    Shift a line of a variable distance sideways (positive shift to the right).
+
+    Arguments
+    ---------
+    xylines : numpy.ndarray
+        Nx2 array containing the x- and y-coordinates of the line to be moved.
+    dn0 : numpy.ndarray
+        Distance over which to move the line sideways. A positive shift is
+        defined towards the right when looking along the line.
+    to_right : bool
+        Flag indicating whether line is on the right (or not).
+        
+    Returns
+    -------
+    xylines_new : umpy.ndarray
+        Nx2 array containing the x- and y-coordinates of the moved line.
+    """
+    nsegments = len(dn)
+    colvec = (nsegments, 1)
+    
+    # determine segment angle
+    dxy = xylines[1:, :] - xylines[:-1, :]
+    theta = numpy.arctan2(dxy[:, 1], dxy[:, 0])
+    
+    # determine shift vector nxy for each segment
+    ds = numpy.sqrt((dxy**2).sum(axis=1))
+    nxy = dxy[:,::-1] * [1, -1] * (dn/ds).reshape(colvec)
+    
+    xylines_new = numpy.zeros((100,2)) #xylines.shape)
+    xylines_new[0] = xylines[0] + nxy[0]
+    ixy, xylines_new = add_point(0, xylines_new, xylines[1] + nxy[0])
+    ixy, xylines_new = add_point(ixy, xylines_new, xylines[1])
+    
+    # isegstop = -1
+    prec = 0.000001
+    ixy1: int
+    for iseg in range(1, nsegments):
+        # print("iseg = ",iseg)
+        dtheta = theta[iseg] - theta[iseg-1]
+        if dtheta < 0:
+            dtheta = dtheta + 2 * math.pi
+
+        # if iseg == isegstop:
+        #     ax.plot(xylines_new[:ixy+1,0], xylines_new[:ixy+1,1], marker=".", color="m", linewidth=3)
+
+        if dtheta >= math.pi:
+            # right bend (or straight)
+            poly = numpy.row_stack([xylines[iseg+1], xylines[iseg+1] + nxy[iseg], xylines[iseg] + nxy[iseg], xylines[iseg]])
+        else:
+            # left bend
+            poly = numpy.row_stack([xylines[iseg+1], xylines[iseg+1] + nxy[iseg], xylines[iseg] + nxy[iseg], xylines[iseg] + nxy[iseg-1], xylines[iseg-1]])
+
+        # ax.plot(poly[:,0], poly[:,1], marker=".", color="g")
+        # ax.text(poly[:,0].mean(), poly[:,1].mean(), str(iseg))
+        nedges = poly.shape[0] - 1
+        
+        if ixy > 20:
+            X0 = xylines_new[(ixy-20):ixy, 0].copy()
+            Y0 = xylines_new[(ixy-20):ixy, 1].copy()
+            X1 = xylines_new[(ixy-19):(ixy+1), 0].copy()
+            Y1 = xylines_new[(ixy-19):(ixy+1), 1].copy()
+            ixy0 = ixy-20
+        else:
+            X0 = xylines_new[:ixy, 0].copy()
+            Y0 = xylines_new[:ixy, 1].copy()
+            X1 = xylines_new[1:ixy+1, 0].copy()
+            Y1 = xylines_new[1:ixy+1, 1].copy()
+            ixy0 = 0
+
+        a = []
+        b = []
+        slices = []
+        n = []
+        for i in range(nedges):
+            if (poly[i+1] == poly[i]).all():
+                pass
+            else:
+                a2, b2, slices2 = get_slices_ab(X0, Y0, X1, Y1, poly[i, 0], poly[i, 1], poly[i+1, 0], poly[i+1, 1], 0, True)
+                # since the last edge of poly has xylines[iseg] in common with the
+                # bankline sofar, check for this possible slice and exclude it.
+                if i == nedges-1:
+                    keep_mask = a2 < 1-prec
+                    a2 = a2[keep_mask]
+                    b2 = b2[keep_mask]
+                    slices2 = slices2[keep_mask]
+                a.append(a2)
+                b.append(b2)
+                slices.append(slices2)
+                n.append(slices2 * 0 + i)
+
+        s = numpy.concatenate(slices)
+        if len(s) == 0:
+            if dtheta > math.pi:
+                # right bend (not straight)
+                # thetap = numpy.arctan2(xylines_new[ixy, 1] - xylines_new[ixy-1, 1], xylines_new[ixy, 0] - xylines_new[ixy-1, 0])
+                # thetan = numpy.arctan2(dxy[iseg, 1], dxy[iseg, 0])
+                if dn[iseg]>0:
+                    cross = (xylines_new[ixy, 0] - xylines_new[ixy-1, 0]) * nxy[iseg, 1] - (xylines_new[ixy, 1] - xylines_new[ixy-1, 1]) * nxy[iseg, 0]
+                else:
+                    cross = (xylines_new[ixy, 0] - xylines_new[ixy-1, 0]) * dxy[iseg, 1] - (xylines_new[ixy, 1] - xylines_new[ixy-1, 1]) * dxy[iseg, 0]
+                if cross <= 0.0:
+                    # extended path turns right ... always add
+                    pass
+                else:
+                    # extended path turns left
+                    # we can probably ignore it, let's do so...
+                    # the only exception would be an eroded patch encompassing
+                    # all of the eroded bank line
+                    continue
+            else:
+                # left bend: always add ... just the rectangle of eroded material
+                pass
+            for n2 in range(2, -1, -1):
+                ixy1, xylines_new = add_point(ixy1, xylines_new, poly[n2])
+            ixy = ixy1
+        
+        else:
+            a = numpy.concatenate(a)
+            b = numpy.concatenate(b)
+            n = numpy.concatenate(n)
+
+            d = s + a
+            sorted = numpy.argsort(d)
+            s = s[sorted] + ixy0
+            a = a[sorted]
+            b = b[sorted]
+            d = d[sorted]
+            n = n[sorted]
+
+            ixy1 = s[0]
+            xytmp = xylines_new[ixy1:ixy+1].copy()
+            # ax.plot(xytmp[:,0], xytmp[:,1], color="k", marker=".")
+            ixytmp = ixy1
+    
+            inside = False
+            s_last = s[0]
+            n_last: int
+            for i in range(len(s)):
+                # print("- slice",i,"occurs at",d[i], "with edge",n[i])
+                if i == 0 or n[i] != nedges-1:
+                    if inside:
+                        for n2 in range(n_last, n[i], -1):
+                            ixy1, xylines_new = add_point(ixy1, xylines_new, poly[n2])
+                    else:
+                        for s2 in range(s_last, s[i]):
+                            ixy1, xylines_new = add_point(ixy1, xylines_new, xytmp[s2-ixytmp+1])
+                    ixy1, xylines_new = add_point(ixy1, xylines_new, poly[n[i]] + b[i] * (poly[n[i]+1] - poly[n[i]]))
+                    n_last = n[i]
+                    s_last = s[i]
+                    if a[i] < prec:
+                        # ax.plot(poly[n[i], 0], poly[n[i], 1], marker='o', color='r')
+                        # ax.plot(poly[n[i]+1, 0], poly[n[i]+1, 1],marker='+',color='r')
+                        dPy = poly[n[i]+1, 1] - poly[n[i], 1]
+                        dPx = poly[n[i]+1, 0] - poly[n[i], 0]
+                        s2 = s[i] - ixy0
+                        # ax.plot(X0[s2], Y0[s2],marker='o',color='k')
+                        # ax.plot(X1[s2], Y1[s2],marker='+',color='k')
+                        dBy = Y1[s2] - Y0[s2]
+                        dBx = X1[s2] - X0[s2]
+                        inside = dPy * dBx - dPx * dBy > 0
+                    elif a[i] > 1-prec:
+                        # ax.plot(poly[n[i], 0], poly[n[i], 1],marker='o',color='r')
+                        # ax.plot(poly[n[i]+1, 0], poly[n[i]+1, 1],marker='+',color='r')
+                        dPy = poly[n[i]+1, 1] - poly[n[i], 1]
+                        dPx = poly[n[i]+1, 0] - poly[n[i], 0]
+                        s2 = s[i] - ixy0 + 1
+                        if s2 > len(X0)-1:
+                            inside = True
+                        else:
+                            # ax.plot(X0[s2], Y0[s2],marker='o',color='k')
+                            # ax.plot(X1[s2], Y1[s2],marker='+',color='k')
+                            dBy = Y1[s2] - Y0[s2]
+                            dBx = X1[s2] - X0[s2]
+                            inside = dPy * dBx - dPx * dBy > 0
+                    else:
+                        # line segment slices the edge somewhere in the middle
+                        inside = not inside
+                    # print("-> inside =",inside)
+
+            if inside is False:
+                for s2 in range(s_last, len(xytmp)+ixytmp-1):
+                    ixy1, xylines_new = add_point(ixy1, xylines_new, xytmp[s2-ixytmp+1])
+            else:
+                for n2 in range(n_last, -1, -1):
+                    ixy1, xylines_new = add_point(ixy1, xylines_new, poly[n2])
+            ixy = ixy1
+        # if iseg == isegstop:
+        #     break
+    xylines_new = xylines_new[:ixy+1, :]
+    
+    return xylines_new
+
+
+def add_point(ixy1: int, xy_in: numpy.ndarray, point: numpy.ndarray) -> Tuple[int, numpy.ndarray]:
+    """
+    Add the x,y-coordinates of a point to an array of x,y-coordinates if it differs from the last point.
+    
+    Arguments
+    ---------
+    ixy1 : int
+        Index of last point in xy_in array
+    xy_in : numpy.ndarray
+        N x 2 array containing the x- and y-coordinates of points (partially filled)
+    point : numpy.ndarray
+        1 x 2 array containing the x- and y-coordinates of one point
+    
+    Results
+    -------
+    ixy1 : int
+        Index of the new point in the xy_out array
+    xy_out : numpy.ndarray
+        Possibly extended copy of xy_in that includes the coordinates of point at ixy1
+    """
+    if (xy_in[ixy1] - point != 0).any():
+        ixy1 = ixy1 + 1
+        if ixy1 >= len(xy_in):
+            xy_out = numpy.resize(xy_in, (2*ixy1, 2))
+        else:
+            xy_out = xy_in
+        xy_out[ixy1] = point
+    else:
+        xy_out = xy_in
+    return ixy1, xy_out
+
+
+def clip_sort_connect_bank_lines(banklines, bankarea, xykm: numpy.ndarray) -> shapely.geometry.LineString:
     """
     Connect the bank line segments to bank lines and clip to the area of interest.
 
@@ -473,23 +1105,22 @@ def clip_sort_connect_bank_lines(banklines, bankarea, xykm):
     ---------
     banklines : 
         Unordered set of bank line segments.
-    bankarea : List[]
-        A list of search areas surrounding the bank guide lines.
+    bankarea : 
+        A search area corresponding to one of the bank search lines.
     xykm : numpy.ndarray
         Array containing x,y,chainage values.
     
     Returns
     -------
-    bank : 
-        The detected bank lines.
-        
+    bank : shapely.geometry.LineString
+        The detected bank line.
     """
-    clipped_banklines = banklines.intersection(bankarea)[
-        0
-    ]  # one MultiLineString object
-    clipped_banklines = [
-        line for line in clipped_banklines
-    ]  # convert MultiLineString into list of LineStrings that can be modified later
+    # intersection returns one MultiLineString object
+    clipped_banklines = banklines.intersection(bankarea)[0]  
+    
+    # convert MultiLineString into list of LineStrings that can be modified later
+    clipped_banklines = [        line for line in clipped_banklines]
+    
     # loop over banklines and determine minimum/maximum projected length
     # print("numpy init")
     minlocs = numpy.zeros(len(clipped_banklines))
@@ -584,7 +1215,7 @@ def clip_sort_connect_bank_lines(banklines, bankarea, xykm):
     return bank
 
 
-def clip_bank_guidelines(line, xykm, max_river_width: float = 1000):
+def clip_search_lines(line, xykm, max_river_width: float = 1000):
     """
 
     Arguments
@@ -627,26 +1258,26 @@ def clip_bank_guidelines(line, xykm, max_river_width: float = 1000):
     return line, maxmaxd
 
 
-def convert_guide_lines_to_bank_polygons(guide_lines: List[numpy.ndarray], dlines: List[float]):
+def convert_search_lines_to_bank_polygons(search_lines: List[numpy.ndarray], dlines: List[float]):
     """
-    Construct a series of polygons surrounding the bank guide lines.
+    Construct a series of polygons surrounding the bank search lines.
 
     Arguments
     ---------
-    guide_lines : List[numpy.ndarray]
-        List of arrays containing the x,y-coordinates of a bank guide lines.
+    search_lines : List[numpy.ndarray]
+        List of arrays containing the x,y-coordinates of a bank search lines.
     dlines : List[float]
         Array containing the search distance value per bank line.
         
     Results
     -------
     bankareas
-        Array containing the areas of interest surrounding the bank guide lines.
+        Array containing the areas of interest surrounding the bank search lines.
     """
-    nbank = len(guide_lines)
+    nbank = len(search_lines)
     bankareas = [None] * nbank
     for b, distance in enumerate(dlines):
-        bankareas[b] = guide_lines[b].buffer(distance, cap_style=2)
+        bankareas[b] = search_lines[b].buffer(distance, cap_style=2)
 
     return bankareas
 
@@ -663,7 +1294,7 @@ def clip_simdata(sim: SimulationObject, xykm: numpy.ndarray, maxmaxd: float) -> 
         Reference line.
     maxmaxd : float
         Maximum distance between the reference line and a point in the area of
-        interest defined based on the guide lines for the banks and the search
+        interest defined based on the search lines for the banks and the search
         distance.
     
     Returns

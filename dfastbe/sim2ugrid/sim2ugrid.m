@@ -8,43 +8,120 @@ simOrg = qpfopen(filename);
 switch simOrg.FileType
     case 'SIMONA SDS FILE'
         [xd, yd] = waquaio(simOrg, '', 'dgrid');
-        zb      = waquaio(simOrg, '', 'height');
+        zb = waquaio(simOrg, '', 'height');
         %
-        Info    = waqua('read', simOrg, '', 'SOLUTION_FLOW_SEP', []);
-        nTimes  = length(Info.SimTime);
-        [zw, t]  = waquaio(simOrg, '', 'wlvl', nTimes);
-        [h, t]   = waquaio(simOrg, '', 'wdepth', nTimes);
-        [ucx, ucy, t] = waquaio(simOrg, '', 'xyveloc', nTimes);
+        Info = waqua('read', simOrg, '', 'SOLUTION_FLOW_SEP', []);
+        last_time = length(Info.SimTime);
+        [zw, t] = waquaio(simOrg, '', 'wlvl', last_time);
+        [h, t] = waquaio(simOrg, '', 'wdepth', last_time);
+        [ucx, ucy, t] = waquaio(simOrg, '', 'xyveloc', last_time);
         [chu, chv] = waquaio(simOrg, '', 'chezy');
         czs = sqrt(4./(1./chu(:,[1 1:end-1]).^2 + 1./chu.^2 + 1./chv([1 1:end-1],:).^2 + 1./chv.^2));
         %
         node_active = ~isnan(xd(:));
-        xnode   = xd(node_active);
-        ynode   = yd(node_active);
-        zb      = zb(node_active);
-        nnodes  = length(xnode);
+        xnode = xd(node_active);
+        ynode = yd(node_active);
+        zb = zb(node_active);
+        nnodes = length(xnode);
         %
-        nodes   = xd;
+        nodes = xd;
         nodes(node_active) = 1:nnodes;
-        faces   = cat(3, nodes([1 1:end-1], [1 1:end-1]), ...
-                         nodes(:, [1 1:end-1]), ...
-                         nodes, ...
-                         nodes([1 1:end-1], :));
+        faces = cat(3, nodes([1 1:end-1], [1 1:end-1]), ...
+                       nodes(:, [1 1:end-1]), ...
+                       nodes, ...
+                       nodes([1 1:end-1], :));
         face_active = all(~isnan(faces), 3) & ~isnan(zw);
-        zw      = zw(face_active);
-        h       = h(face_active);
-        ucx     = ucx(face_active);
-        ucy     = ucy(face_active);
-        czs     = czs(face_active);
+        zw = zw(face_active);
+        h = h(face_active);
+        ucx = ucx(face_active);
+        ucy = ucy(face_active);
+        czs = czs(face_active);
         %
-        faces   = reshape(faces, numel(xd), 4);
-        faces   = faces(face_active, :);
-        nfaces  = size(faces, 1);
+        faces = reshape(faces, numel(xd), 4);
+        faces = faces(face_active, :);
+        nfaces = size(faces, 1);
         %
         modelname = 'SIMONA';
         for i = length(simOrg.WriteProg):-1:1
-            prehistory = [prehistory, '\n', datestr(simOrg.WriteProg(i).Date, dateformat), ': ', simOrg.WriteProg(i).Name];
+            new_entry = [datestr(simOrg.WriteProg(i).Date, dateformat), ': ', simOrg.WriteProg(i).Name];
+            if isempty(prehistory)
+                prehistory = new_entry;
+            else
+                prehistory = [prehistory, '\n', new_entry];
+            end
         end
+    case 'NEFIS'
+        switch simOrg.SubType
+            case 'Delft3D-trim'
+                xd = vs_get(simOrg, 'map-const', 'XCOR', 'quiet');
+                yd = vs_get(simOrg, 'map-const', 'YCOR', 'quiet');
+                node_active = xd~=0 & yd~=0;
+                %
+                Info = vs_disp(simOrg, 'map-series', []);
+                last_time = Info.SizeDim;
+                %
+                [dps, success] = vs_get(simOrg, 'map-sed-series', {last_time}, 'DPS', 'quiet');
+                if success
+                    zb = -dps;
+                    zb_loc = 'face';
+                else
+                    dp = vs_get(simOrg, 'map-const', 'DP0', 'quiet');
+                    zb = -dp;
+                    dpsopt = vs_get(simOrg, 'map-const', 'DRYFLP', 'quiet');
+                    if isequal(lower(deblank(dpsopt)), 'dp')
+                        zb_loc = 'face';
+                    else
+                        zb_loc = 'node';
+                    end
+                end
+                %
+                zw = vs_get(simOrg, 'map-series', {last_time}, 'S1', 'quiet');
+                h = qpread(simOrg, 'water depth', 'data', last_time);
+                h = h.Val;
+                u = qpread(simOrg, 'depth averaged velocity', 'data', last_time);
+                ucx = u.XComp;
+                ucy = u.YComp;
+                %
+                error('CFUROU required. Please add Chezy = true to the mdf-file.')
+                czs = sqrt(4./(1./chu(:,[1 1:end-1]).^2 + 1./chu.^2 + 1./chv([1 1:end-1],:).^2 + 1./chv.^2));
+                %
+                xnode = xd(node_active);
+                ynode = yd(node_active);
+                nnodes = length(xnode);
+                %
+                nodes = xd;
+                nodes(node_active) = 1:nnodes;
+                faces = cat(3, nodes([1 1:end-1], [1 1:end-1]), ...
+                    nodes(:, [1 1:end-1]), ...
+                    nodes, ...
+                    nodes([1 1:end-1], :));
+                face_active = all(~isnan(faces), 3) & ~isnan(zw);
+                zw = zw(face_active);
+                h = h(face_active);
+                ucx = ucx(face_active);
+                ucy = ucy(face_active);
+                czs = czs(face_active);
+                %
+                switch zb_loc
+                    case 'face'
+                        zb = zb(face_active);
+                    case 'node'
+                        zb = zb(node_active);
+                end
+                %
+                faces   = reshape(faces, numel(xd), 4);
+                faces   = faces(face_active, :);
+                nfaces  = size(faces, 1);
+                %
+                modelname = 'Delft3D';
+                simdat = vs_get(simOrg, 'map-version', 'FLOW_SIMDAT', 'quiet');
+                simdat = datenum(sscanf(simdat,'%4d%2d%2d %2d%2d%2d',[1 6]));
+                prehistory = [datestr(simdat, dateformat), ': Delft3D-FLOW'];
+            otherwise
+                error('NEFIS %s files are not (yet) supported by SIM2UGRID.', simOrg.SubType)
+        end
+    otherwise
+        error('%s files are not (yet) supported by SIM2UGRID.', simOrg.FileType)
 end
 %
 ncid = netcdf.create([filename '_map.nc'], 'NETCDF4');

@@ -27,7 +27,7 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Union, Dict, List, Optional, Tuple
+from typing import Tuple, Any, List, Union, Dict, Optional, TextIO
 
 import numpy
 SimulationObject = Dict[str, numpy.ndarray]
@@ -49,11 +49,11 @@ def load_program_texts(filename: str) -> None:
     This routine reads the text file "filename", and detects the keywords
     indicated by lines starting with [ and ending with ]. The content is
     placed in a global dictionary PROGTEXTS which may be queried using the
-    routine "program_texts". These routines are used to implement multi-
+    routine "get_text". These routines are used to implement multi-
     language support.
 
-    Parameters
-    ----------
+    Arguments
+    ---------
     filename : str
         The name of the file to be read and parsed.
     """
@@ -82,7 +82,61 @@ def load_program_texts(filename: str) -> None:
     PROGTEXTS = dict
 
 
-def program_texts(key: str) -> List[str]:
+def log_text(
+    key: str, file: Optional[TextIO] = None, dict: Dict[str, Any] = {}, repeat: int = 1, indent: str = ""
+) -> None:
+    """
+    Write a text to standard out or file.
+
+    Arguments
+    ---------
+    key : str
+        The key for the text to show to the user.
+    file : Optional[TextIO]
+        The file to write to (None for writing to standard out).
+    dict : Dict[str, Any]
+        A dictionary used for placeholder expansions (default empty).
+    repeat : int
+        The number of times that the same text should be repeated (default 1).
+    indent : str
+        String to use for each line as indentation (default empty).
+
+    Returns
+    -------
+    None
+    """
+    str = get_text(key)
+    for r in range(repeat):
+        for s in str:
+            sexp = s.format(**dict)
+            if file is None:
+                print(indent + sexp)
+            else:
+                file.write(indent + sexp + "\n")
+
+
+def get_filename(key: str) -> str:
+    """
+    Query the global dictionary of texts for a file name.
+
+    The file name entries in the global dictionary have a prefix "filename_"
+    which will be added to the key by this routine.
+
+    Arguments
+    ---------
+    key : str
+        The key string used to query the dictionary.
+
+    Results
+    -------
+    filename : str
+        File name.
+    """
+    filename = get_text("filename_" + key)[0]
+    return filename
+
+
+def get_text(key: str) -> List[str]:
     """
     Query the global dictionary of texts via a string key.
 
@@ -112,8 +166,446 @@ def program_texts(key: str) -> List[str]:
     return str
 
 
+def write_config(filename: str, config: configparser.ConfigParser) -> None:
+    """Pretty print a configParser object (configuration file) to file.
+
+    This function ...
+        aligns the equal signs for all keyword/value pairs.
+        adds a two space indentation to all keyword lines.
+        adds an empty line before the start of a new block.
+
+    Arguments
+    ---------
+    filename : str
+        Name of the configuration file to be written.
+    config : configparser.ConfigParser
+        The variable containing the configuration.
+    """
+    sections = config.sections()
+    ml = 0
+    for s in sections:
+        options = config.options(s)
+        if len(options) > 0:
+            ml = max(ml, max([len(x) for x in options]))
+
+    OPTIONLINE = "  {{:{}s}} = {{}}\n".format(ml)
+    with open(filename, "w") as configfile:
+        first = True
+        for s in sections:
+            if first:
+                first = False
+            else:
+                configfile.write("\n")
+            configfile.write("[{}]\n".format(s))
+            options = config.options(s)
+            for o in options:
+                configfile.write(OPTIONLINE.format(o, config[s][o]))
+
+
+def read_fm_map(filename: str, varname: str, location: str = "face") -> numpy.ndarray:
+    """
+    Read the last time step of any quantity defined at faces from a D-Flow FM map-file.
+
+    Arguments
+    ---------
+    filename : str
+        Name of the D-Flow FM map.nc file to read the data.
+    varname : str
+        Name of the netCDF variable to be read.
+    location : str
+        Name of the stagger location at which the data should be located
+        (default is "face")
+
+    Raises
+    ------
+    Exception
+        If the data file doesn't include a 2D mesh.
+        If it cannot uniquely identify the variable to be read.
+
+    Returns
+    -------
+    data
+        Data of the requested variable (for the last time step only if the variable is
+        time dependent).
+    """
+    # open file
+    rootgrp = netCDF4.Dataset(filename)
+
+    # locate 2d mesh variable
+    mesh2d = rootgrp.get_variables_by_attributes(
+        cf_role="mesh_topology", topology_dimension=2
+    )
+    if len(mesh2d) != 1:
+        raise Exception(
+            "Currently only one 2D mesh supported ... this file contains {} 2D meshes.".format(
+                len(mesh2d)
+            )
+        )
+    meshname = mesh2d[0].name
+
+    # define a default start_index
+    start_index = 0
+
+    # locate the requested variable ... start with some special cases
+    if varname == "x":
+        # the x-coordinate or longitude
+        crdnames = mesh2d[0].getncattr(location + "_coordinates").split()
+        for n in crdnames:
+            stdname = rootgrp.variables[n].standard_name
+            if stdname == "projection_x_coordinate" or stdname == "longitude":
+                var = rootgrp.variables[n]
+                break
+
+    elif varname == "y":
+        # the y-coordinate or latitude
+        crdnames = mesh2d[0].getncattr(location + "_coordinates").split()
+        for n in crdnames:
+            stdname = rootgrp.variables[n].standard_name
+            if stdname == "projection_y_coordinate" or stdname == "latitude":
+                var = rootgrp.variables[n]
+                break
+
+    elif varname[-12:] == "connectivity":
+        # a mesh connectivity variable with corrected index
+        varname = mesh2d[0].getncattr(varname)
+        var = rootgrp.variables[varname]
+        if "start_index" in var.ncattrs():
+            start_index = var.getncattr("start_index")
+
+    else:
+        # find any other variable by standard_name or long_name
+        var = rootgrp.get_variables_by_attributes(
+            standard_name=varname, mesh=meshname, location=location
+        )
+        if len(var) == 0:
+            var = rootgrp.get_variables_by_attributes(
+                long_name=varname, mesh=meshname, location=location
+            )
+        if len(var) != 1:
+            raise Exception(
+                'Expected one variable for "{}", but obtained {}.'.format(
+                    varname, len(var)
+                )
+            )
+        var = var[0]
+
+    # read data checking for time dimension
+    dims = var.dimensions
+    if var.get_dims()[0].isunlimited():
+        # assume that time dimension is unlimited and is the first dimension
+        # slice to obtain last time step
+        data = var[-1, :]
+    else:
+        data = var[...] - start_index
+
+    # close file
+    rootgrp.close()
+
+    # return data
+    return data
+
+
+def get_mesh_and_facedim_names(filename: str) -> Tuple[str, str]:
+    """
+    Obtain the names of 2D mesh and face dimension from netCDF UGRID file.
+
+    Arguments
+    ---------
+    filename : str
+        Name of the netCDF file.
+
+    Raises
+    ------
+    Exception
+        If there is not one mesh in the netCDF file.
+
+    Returns
+    -------
+    tuple : Tuple[str, str]
+        Name of the 2D mesh variable
+        Name of the face dimension of that 2D mesh
+    """
+    # open file
+    rootgrp = netCDF4.Dataset(filename)
+
+    # locate 2d mesh variable
+    mesh2d = rootgrp.get_variables_by_attributes(
+        cf_role="mesh_topology", topology_dimension=2
+    )
+    if len(mesh2d) != 1:
+        raise Exception(
+            "Currently only one 2D mesh supported ... this file contains {} 2D meshes.".format(
+                len(mesh2d)
+            )
+        )
+
+    #
+    facenodeconnect_varname = mesh2d[0].face_node_connectivity
+    fnc = rootgrp.get_variables_by_attributes(name=facenodeconnect_varname)[0]
+
+    # default
+    facedim = fnc.dimensions[0]
+    return mesh2d[0].name, facedim
+
+
+def copy_ugrid(srcname: str, meshname: str, dstname: str) -> None:
+    """
+    Copy UGRID mesh data from one netCDF file to another.
+
+    Copy UGRID mesh data (mesh variable, all attributes, all variables that the
+    UGRID attributes depend on) from source file to destination file.
+
+    Arguments
+    ---------
+    srcname : str
+        Name of source file.
+    meshname : str
+        Name of the UGRID mesh to be copied from source to destination.
+    dstname : str
+        Name of destination file, or dataset object representing the destination
+        file.
+    """
+    # open source and destination files
+    src = netCDF4.Dataset(srcname)
+    dst = netCDF4.Dataset(dstname, "w", format="NETCDF4")
+
+    # locate source mesh
+    mesh = src.variables[meshname]
+
+    # copy mesh variable
+    copy_var(src, meshname, dst)
+    atts = [
+        "face_node_connectivity",
+        "edge_node_connectivity",
+        "edge_face_connectivity",
+        "face_coordinates",
+        "edge_coordinates",
+        "node_coordinates",
+    ]
+    for att in atts:
+        try:
+            varlist = mesh.getncattr(att).split()
+        except:
+            varlist = []
+        for varname in varlist:
+            copy_var(src, varname, dst)
+
+            # check if variable has bounds attribute, if so copy those as well
+            var = src.variables[varname]
+            atts2 = ["bounds"]
+            for att2 in atts2:
+                try:
+                    varlist2 = var.getncattr(att2).split()
+                except:
+                    varlist2 = []
+                for varname2 in varlist2:
+                    copy_var(src, varname2, dst)
+
+    # close files
+    src.close()
+    dst.close()
+
+
+def copy_var(src: netCDF4.Dataset, varname: str, dst: netCDF4.Dataset) -> None:
+    """
+    Copy a single variable from one netCDF file to another.
+
+    Copy a single netCDF variable including all attributes from source file to
+    destination file. Create dimensions as necessary.
+
+    Arguments
+    ---------
+    src : netCDF4.Dataset
+        Dataset object representing the source file.
+    varname : str
+        Name of the netCDF variable to be copied from source to destination.
+    dst : netCDF4.Dataset
+        Dataset object representing the destination file.
+    """
+    # locate the variable to be copied
+    srcvar = src.variables[varname]
+
+    # copy dimensions
+    for name in srcvar.dimensions:
+        dimension = src.dimensions[name]
+        if name not in dst.dimensions.keys():
+            dst.createDimension(
+                name, (len(dimension) if not dimension.isunlimited() else None)
+            )
+
+    # copy variable
+    dstvar = dst.createVariable(varname, srcvar.datatype, srcvar.dimensions)
+
+    # copy variable attributes all at once via dictionary
+    dstvar.setncatts(srcvar.__dict__)
+    dstvar[:] = srcvar[:]
+
+
+def ugrid_add(
+    dstfile: str,
+    varname: str,
+    ldata: numpy.array,
+    meshname: str,
+    facedim: str,
+    long_name: str = "None",
+    units: str = "None",
+) -> None:
+    """
+    Add a new variable defined at faces to an existing UGRID netCDF file
+
+    Arguments
+    ---------
+    dstfile : str
+        Name of netCDF file to write data to.
+    varname : str
+        Name of netCDF variable to be written.
+    ldata : numpy.array
+        Linear array containing the data to be written.
+    meshname : str
+        Name of mesh variable in the netCDF file.
+    facedim : str
+        Name of the face dimension of the selected mesh.
+    long_name : str
+        Long descriptive name for the variable ("None" if no long name attribute
+        should be written).
+    units : str
+        String indicating the unit ("None" if no unit attribute should be written).
+    """
+    # open destination file
+    dst = netCDF4.Dataset(dstfile, "a")
+
+    # check if face dimension exists
+    dim = dst.dimensions[facedim]
+
+    # add variable and write data
+    var = dst.createVariable(varname, "f8", (facedim,))
+    var.mesh = meshname
+    var.location = "face"
+    if long_name != "None":
+        var.long_name = long_name
+    if units != "None":
+        var.units = units
+    var[:] = ldata[:]
+
+    # close destination file
+    dst.close()
+
+
+def read_waqua_xyz(filename: str, cols: Tuple[int, ...] = (2,)) -> numpy.ndarray:
+    """
+    Read data columns from a SIMONA XYZ file.
+
+    Arguments
+    ---------
+    filename : str
+        Name of file to be read.
+    cols : Tuple[int]
+        List of column numbers for which to return the data.
+
+    Returns
+    -------
+    data : numpy.ndarray
+        Data read from the file.
+    """
+    data = numpy.genfromtxt(filename, delimiter=",", skip_header=1, usecols=cols)
+    return data
+
+
+def write_simona_box(
+    filename: str, rdata: numpy.ndarray, firstm: int, firstn: int
+) -> None:
+    """
+    Write a SIMONA BOX file.
+
+    Arguments
+    ---------
+    filename : str
+        Name of the file to be written.
+    rdata : numpy.ndarray
+        Two-dimensional NumPy array containing the data to be written.
+    firstm : int
+        Firt M index to be written.
+    firstn : int
+        First N index to be written.
+    """
+    # open the data file
+    boxfile = open(filename, "w")
+
+    # get shape and prepare block header; data will be written in blocks of 10
+    # N-lines
+    shp = numpy.shape(rdata)
+    mmax = shp[0]
+    nmax = shp[1]
+    boxheader = "      BOX MNMN=({m1:4d},{n1:5d},{m2:5d},{n2:5d}), VARIABLE_VAL=\n"
+    nstep = 10
+
+    # Loop over all N-blocks and write data to file
+    for j in range(firstn, nmax, nstep):
+        k = min(nmax, j + nstep)
+        boxfile.write(boxheader.format(m1=firstm + 1, n1=j + 1, m2=mmax, n2=k))
+        nvalues = (mmax - firstm) * (k - j)
+        boxdata = ("   " + "{:12.3f}" * (k - j) + "\n") * (mmax - firstm)
+        values = tuple(rdata[firstm:mmax, j:k].reshape(nvalues))
+        boxfile.write(boxdata.format(*values))
+
+    # close the file
+    boxfile.close()
+
+
+def absolute_path(rootdir: str, file: str) -> str:
+    """
+    Convert a relative path to an absolute path.
+
+    Arguments
+    ---------
+    rootdir : str
+        Any relative paths should be given relative to this location.
+    file : str
+        A relative or absolute location.
+
+    Returns
+    -------
+    afile : str
+        An absolute location.
+    """
+    if file == "":
+        return file
+    else:
+        try:
+            return os.path.normpath(os.path.join(rootdir, file))
+        except:
+            return file
+
+
+def relative_path(rootdir: str, file: str) -> str:
+    """
+    Convert an absolute path to a relative path.
+
+    Arguments
+    ---------
+    rootdir : str
+        Any relative paths will be given relative to this location.
+    file : str
+        An absolute location.
+
+    Returns
+    -------
+    rfile : str
+        An absolute or relative location (relative only if it's on the same drive as rootdir).
+    """
+    if file == "":
+        return file
+    else:
+        try:
+            rfile = os.path.relpath(file, rootdir)
+            return rfile
+        except:
+            return file
+
+
 def read_xyc(filename: str, ncol: int = 2):
     """
+    Read lines from a file.
 
     Arguments
     ---------
@@ -151,7 +643,7 @@ def read_xyc(filename: str, ncol: int = 2):
     return L
 
 
-def write_km_eroded_volumes(km, vol, filename):
+def write_km_eroded_volumes(km: numpy.ndarray, vol: numpy.ndarray, filename: str) -> None:
     """
     Write a text file with eroded volume data binned per kilometre.
 
@@ -333,42 +825,6 @@ def movepar(
     return config
 
 
-def write_config(filename: str, config: configparser.ConfigParser) -> None:
-    """Pretty print a configParser object (configuration file) to file.
-
-    This function ...
-        aligns the equal signs for all keyword/value pairs.
-        adds a two space indentation to all keyword lines.
-        adds an empty line before the start of a new block.
-
-    Arguments
-    ---------
-    filename : str
-        Name of the configuration file to bewritten.
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    """
-    sections = config.sections()
-    ml = 0
-    for s in sections:
-        options = config.options(s)
-        if len(options) > 0:
-            ml = max(ml, max([len(x) for x in options]))
-
-    OPTIONLINE = "  {{:{}s}} = {{}}\n".format(ml)
-    with open(filename, "w") as configfile:
-        first = True
-        for s in sections:
-            if first:
-                first = False
-            else:
-                configfile.write("\n")
-            configfile.write("[{}]\n".format(s))
-            options = config.options(s)
-            for o in options:
-                configfile.write(OPTIONLINE.format(o, config[s][o]))
-
-
 def config_get_xykm(config: configparser.ConfigParser):
     """
 
@@ -389,6 +845,7 @@ def config_get_xykm(config: configparser.ConfigParser):
 
     # get the chainage file
     kmfile = config_get_str(config, "General", "RiverKM")
+    log_text("read_chainage", dict={"file": kmfile})
     xykm = read_xyc(kmfile, ncol=3)
 
     # make sure that chainage is increasing with node index
@@ -396,6 +853,7 @@ def config_get_xykm(config: configparser.ConfigParser):
         xykm = shapely.geometry.asLineString(xykm.coords[::-1])
 
     # clip the chainage path to the range of chainages of interest
+    log_text("clip_chainage", dict={"low": kmbounds[0], "high": kmbounds[1]})
     xykm = clip_chainage_path(xykm, kmfile, kmbounds)
 
     return xykm
@@ -493,9 +951,9 @@ def clip_chainage_path(xykm, kmfile: str, kmbounds: Tuple[float, float]):
     return xykm
 
 
-def config_get_bank_guidelines(config: configparser.ConfigParser) -> List[numpy.ndarray]:
+def config_get_search_lines(config: configparser.ConfigParser) -> List[numpy.ndarray]:
     """
-    Get the guide lines for the bank lines from the analysis settings.
+    Get the search lines for the bank lines from the analysis settings.
 
     Arguments
     ---------
@@ -505,16 +963,58 @@ def config_get_bank_guidelines(config: configparser.ConfigParser) -> List[numpy.
     Returns
     -------
     line : List[numpy.ndarray]
-        List of arrays containing the x,y-coordinates of a bank guide lines.
+        List of arrays containing the x,y-coordinates of a bank search lines.
     """
     # read guiding bank line
     nbank = config_get_int(config, "Detect", "NBank")
     line = [None] * nbank
     for b in range(nbank):
         bankfile = config["Detect"]["Line{}".format(b + 1)]
+        log_text("read_search_line", dict={"nr": b+1, "file": bankfile})
         line[b] = read_xyc(bankfile)
     return line
 
+
+def config_get_bank_lines(config: configparser.ConfigParser, bankdir: str) -> List[numpy.ndarray]:
+    """
+    Get the bank lines from the detection step.
+
+    Arguments
+    ---------
+    config : configparser.ConfigParser
+        Settings for the D-FAST Bank Erosion analysis.
+    bankdir : str
+        Name of directory in which the bank lines files are located.
+
+    Returns
+    -------
+    line : List[numpy.ndarray]
+        List of arrays containing the x,y-coordinates of a bank lines.
+    """
+    bankname = config_get_str(config, "General", "BankFile", "bankfile")
+    bankfile = bankdir + os.sep + bankname + ".shp"
+    if os.path.exists(bankfile):
+        log_text("read_banklines", dict={"file": bankfile})
+        banklines = geopandas.read_file(bankfile)
+        # -> geopandas.geodataframe.GeoDataFrame
+        # banklines.geometry[0] -> shapely.geometry.linestring.LineString
+    else:
+        bankfile = bankdir + os.sep + bankname + "_#.xyc"
+        log_text("read_banklines", dict={"file": bankfile})
+        bankline_list = []
+        b = 1
+        while True:
+            bankfile = bankdir + os.sep + bankname + "_" + str(b) + ".xyc"
+            if os.path.exists(bankfile):
+                xy_numpy = read_xyc(bankfile)
+                bankline_list.append(shapely.geometry.LineString(xy_numpy))
+                b = b + 1
+            else:
+                break
+        bankline_series = geopandas.geoseries.GeoSeries(bankline_list)
+        banklines = geopandas.geodataframe.GeoDataFrame.from_features(bankline_series)
+    return banklines
+    
 
 def config_get_bank_search_distances(
     config: configparser.ConfigParser, nbank: int
@@ -527,7 +1027,7 @@ def config_get_bank_search_distances(
     config : configparser.ConfigParser
         Settings for the D-FAST Bank Erosion analysis.
     nbank : int
-        Number of bank (guide) lines.
+        Number of bank search lines.
 
     Returns
     -------
@@ -569,9 +1069,7 @@ def config_get_simfile(config: configparser.ConfigParser, group: str, istr: str)
     simfile : str
         Name of the simulation file (empty string if keywords are not found).
     """
-    simfile = config[group].get("Delft3Dfile" + istr, "")
-    simfile = config[group].get("SDSfile" + istr, simfile)
-    simfile = config[group].get("simfile" + istr, simfile)
+    simfile = config[group].get("SimFile" + istr, "")
     return simfile
 
 
@@ -886,10 +1384,12 @@ def config_get_parameter(
             parfield[ib] = numpy.zeros(len(bkm)) + rval
     except:
         if onefile:
+            log_text("read_param", dict={"param": key, "file": filename})
             km_thr, val = get_kmval(filename, key, positive, valid)
         for ib, bkm in enumerate(bank_km):
             if not onefile:
                 filename_i = filename + "_{}".format(ib + 1) + ext
+                log_text("read_param_one_bank", dict={"param": key, "i": ib + 1, "file": filename_i})
                 km_thr, val = get_kmval(filename_i, key, positive, valid)
             if km_thr is None:
                 parfield[ib] = numpy.zeros(len(bkm)) + val[0]
@@ -970,7 +1470,7 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
     return km_thr, val
 
 
-def read_simdata(filename: str) -> Tuple[SimulationObject, float]:
+def read_simdata(filename: str, indent: str = "") -> Tuple[SimulationObject, float]:
     """
     Read a deault set of quantities from a UGRID netCDF file coming from D-Flow FM (or similar).
 
@@ -978,6 +1478,8 @@ def read_simdata(filename: str) -> Tuple[SimulationObject, float]:
     ---------
     filename : str
         Name of the simulation output file to be read.
+    indent : str
+        String to use for each line as indentation (default empty).
 
     Raises
     ------
@@ -995,6 +1497,7 @@ def read_simdata(filename: str) -> Tuple[SimulationObject, float]:
     # determine file type
     path, name = os.path.split(filename)
     if name[-6:] == "map.nc":
+        log_text("read_grid", indent=indent)
         sim["x_node"] = read_fm_map(filename, "x", location="node")
         sim["y_node"] = read_fm_map(filename, "y", location="node")
         FNC = read_fm_map(filename, "face_node_connectivity")
@@ -1008,14 +1511,20 @@ def read_simdata(filename: str) -> Tuple[SimulationObject, float]:
             sim["nnodes"] = FNC.mask.shape[1] - FNC.mask.sum(axis=1)
         FNC.data[FNC.mask] = 0
         sim["facenode"] = FNC.data
+        log_text("read_bathymetry", indent=indent)
         sim["zb_location"] = "node"
         sim["zb_val"] = read_fm_map(filename, "altitude", location="node")
+        log_text("read_water_level", indent=indent)
         sim["zw_face"] = read_fm_map(filename, "Water level")
-        sim["h_face"] = read_fm_map(filename, "sea_floor_depth_below_sea_surface")
+        log_text("read_water_depth", indent=indent)
+        sim["h_face"] = numpy.maximum(read_fm_map(filename, "sea_floor_depth_below_sea_surface"), 0.0)
+        log_text("read_velocity", indent=indent)
         sim["ucx_face"] = read_fm_map(filename, "sea_water_x_velocity")
         sim["ucy_face"] = read_fm_map(filename, "sea_water_y_velocity")
+        log_text("read_chezy", indent=indent)
         sim["chz_face"] = read_fm_map(filename, "Chezy roughness")
 
+        log_text("read_drywet", indent=indent)
         rootgrp = netCDF4.Dataset(filename)
         try:
             filesource = rootgrp.converted_from
@@ -1039,416 +1548,3 @@ def read_simdata(filename: str) -> Tuple[SimulationObject, float]:
     else:
         raise Exception('Unable to determine file type for "{}"'.format(name))
     return sim, dh0
-
-
-def read_fm_map(filename: str, varname: str, location: str = "face") -> numpy.ndarray:
-    """
-    Read the last time step of any quantity defined at faces from a D-Flow FM map-file.
-
-    Arguments
-    ---------
-    filename : str
-        Name of the D-Flow FM map.nc file to read the data.
-    varname : str
-        Name of the netCDF variable to be read.
-    location : str
-        Name of the stagger location at which the data should be located
-        (default is "face")
-
-    Raises
-    ------
-    Exception
-        If the data file doesn't include a 2D mesh.
-        If it cannot uniquely identify the variable to be read.
-
-    Returns
-    -------
-    data
-        Data of the requested variable (for the last time step only if the variable is
-        time dependent).
-    """
-    # open file
-    rootgrp = netCDF4.Dataset(filename)
-
-    # locate 2d mesh variable
-    mesh2d = rootgrp.get_variables_by_attributes(
-        cf_role="mesh_topology", topology_dimension=2
-    )
-    if len(mesh2d) != 1:
-        raise Exception(
-            "Currently only one 2D mesh supported ... this file contains {} 2D meshes.".format(
-                len(mesh2d)
-            )
-        )
-    meshname = mesh2d[0].name
-
-    # define a default start_index
-    start_index = 0
-
-    # locate the requested variable ... start with some special cases
-    if varname == "x":
-        # the x-coordinate or longitude
-        crdnames = mesh2d[0].getncattr(location + "_coordinates").split()
-        for n in crdnames:
-            stdname = rootgrp.variables[n].standard_name
-            if stdname == "projection_x_coordinate" or stdname == "longitude":
-                var = rootgrp.variables[n]
-                break
-
-    elif varname == "y":
-        # the y-coordinate or latitude
-        crdnames = mesh2d[0].getncattr(location + "_coordinates").split()
-        for n in crdnames:
-            stdname = rootgrp.variables[n].standard_name
-            if stdname == "projection_y_coordinate" or stdname == "latitude":
-                var = rootgrp.variables[n]
-                break
-
-    elif varname[-12:] == "connectivity":
-        # a mesh connectivity variable with corrected index
-        varname = mesh2d[0].getncattr(varname)
-        var = rootgrp.variables[varname]
-        if "start_index" in var.ncattrs():
-            start_index = var.getncattr("start_index")
-
-    else:
-        # find any other variable by standard_name or long_name
-        var = rootgrp.get_variables_by_attributes(
-            standard_name=varname, mesh=meshname, location=location
-        )
-        if len(var) == 0:
-            var = rootgrp.get_variables_by_attributes(
-                long_name=varname, mesh=meshname, location=location
-            )
-        if len(var) != 1:
-            raise Exception(
-                'Expected one variable for "{}", but obtained {}.'.format(
-                    varname, len(var)
-                )
-            )
-        var = var[0]
-
-    # read data checking for time dimension
-    dims = var.dimensions
-    if var.get_dims()[0].isunlimited():
-        # assume that time dimension is unlimited and is the first dimension
-        # slice to obtain last time step
-        data = var[-1, :]
-    else:
-        data = var[...] - start_index
-
-    # close file
-    rootgrp.close()
-
-    # return data
-    return data
-
-
-def get_mesh_and_facedim_names(filename: str) -> Tuple[str, str]:
-    """
-    Obtain the names of 2D mesh and face dimension from netCDF UGRID file.
-
-    Arguments
-    ---------
-    filename : str
-        Name of the netCDF file.
-
-    Raises
-    ------
-    Exception
-        If there is not one mesh in the netCDF file.
-
-    Returns
-    -------
-    tuple : Tuple[str, str]
-        Name of the 2D mesh variable
-        Name of the face dimension of that 2D mesh
-    """
-    # open file
-    rootgrp = netCDF4.Dataset(filename)
-
-    # locate 2d mesh variable
-    mesh2d = rootgrp.get_variables_by_attributes(
-        cf_role="mesh_topology", topology_dimension=2
-    )
-    if len(mesh2d) != 1:
-        raise Exception(
-            "Currently only one 2D mesh supported ... this file contains {} 2D meshes.".format(
-                len(mesh2d)
-            )
-        )
-
-    #
-    facenodeconnect_varname = mesh2d[0].face_node_connectivity
-    fnc = rootgrp.get_variables_by_attributes(name=facenodeconnect_varname)[0]
-
-    # default
-    facedim = fnc.dimensions[0]
-    return mesh2d[0].name, facedim
-
-
-def copy_ugrid(src: netCDF4.Dataset, meshname: str, dst: netCDF4.Dataset):
-    """
-    Copy UGRID mesh data from one netCDF file to another.
-
-    Copy UGRID mesh data (mesh variable, all attributes, all variables that the
-    UGRID attributes depend on) from source file to destination file.
-
-    Arguments
-    ---------
-    src : UNION[str, netCDF4.Dataset]
-        Name of source file, or dataset object representing the source file.
-    meshname : str
-        Name of the UGRID mesh to be copied from source to destination.
-    dst : UNION[str, netCDF4.Dataset]
-        Name of destination file, or dataset object representing the destination
-        file.
-    """
-    # if src is string, then open the file
-    if isinstance(src, str):
-        src = netCDF4.Dataset(src)
-        srcclose = True
-    else:
-        srcclose = False
-
-    # locate source mesh
-    mesh = src.variables[meshname]
-
-    # if dst is string, then open the file
-    if isinstance(dst, str):
-        dst = netCDF4.Dataset(dst, "w", format="NETCDF4")
-        dstclose = True
-    else:
-        dstclose = False
-
-    # copy mesh variable
-    copy_var(src, meshname, dst)
-    atts = [
-        "face_node_connectivity",
-        "edge_node_connectivity",
-        "edge_face_connectivity",
-        "face_coordinates",
-        "edge_coordinates",
-        "node_coordinates",
-    ]
-    for att in atts:
-        try:
-            varlist = mesh.getncattr(att).split()
-        except:
-            varlist = []
-        for varname in varlist:
-            copy_var(src, varname, dst)
-
-            # check if variable has bounds attribute, if so copy those as well
-            var = src.variables[varname]
-            atts2 = ["bounds"]
-            for att2 in atts2:
-                try:
-                    varlist2 = var.getncattr(att2).split()
-                except:
-                    varlist2 = []
-                for varname2 in varlist2:
-                    copy_var(src, varname2, dst)
-
-    # close files if strings where provided
-    if srcclose:
-        src.close()
-    if dstclose:
-        dst.close()
-
-
-def copy_var(src: netCDF4.Dataset, varname: str, dst: netCDF4.Dataset) -> None:
-    """
-    Copy a single variable from one netCDF file to another.
-
-    Copy a single netCDF variable including all attributes from source file to
-    destination file. Create dimensions as necessary.
-
-    Arguments
-    ---------
-    src : netCDF4.Dataset
-        Dataset object representing the source file.
-    varname : str
-        Name of the netCDF variable to be copied from source to destination.
-    dst : netCDF4.Dataset
-        Dataset object representing the destination file.
-    """
-    # locate the
-    srcvar = src.variables[varname]
-
-    # copy dimensions
-    for name in srcvar.dimensions:
-        dimension = src.dimensions[name]
-        if name not in dst.dimensions.keys():
-            dst.createDimension(
-                name, (len(dimension) if not dimension.isunlimited() else None)
-            )
-
-    # copy variable
-    dstvar = dst.createVariable(varname, srcvar.datatype, srcvar.dimensions)
-
-    # copy variable attributes all at once via dictionary
-    dstvar.setncatts(srcvar.__dict__)
-    dstvar[:] = srcvar[:]
-
-
-def ugrid_add(
-    dstfile: str,
-    varname: str,
-    ldata: numpy.array,
-    meshname: str,
-    facedim: str,
-    long_name: str = "None",
-    units: str = "None",
-) -> None:
-    """
-    Add a new variable defined at faces to an existing UGRID netCDF file
-
-    Arguments
-    ---------
-    dstfile : str
-        Name of netCDF file to write data to.
-    varname : str
-        Name of netCDF variable to be written.
-    ldata : numpy.array
-        Linear array containing the data to be written.
-    meshname : str
-        Name of mesh variable in the netCDF file.
-    facedim : str
-        Name of the face dimension of the selected mesh.
-    long_name : str
-        Long descriptive name for the variable ("None" if no long name attribute
-        should be written).
-    units : str
-        String indicating the unit ("None" if no unit attribute should be written).
-    """
-    # open destination file
-    dst = netCDF4.Dataset(dstfile, "a")
-
-    # check if face dimension exists
-    dim = dst.dimensions[facedim]
-
-    # add variable and write data
-    var = dst.createVariable(varname, "f8", (facedim,))
-    var.mesh = meshname
-    var.location = "face"
-    if long_name != "None":
-        var.long_name = long_name
-    if units != "None":
-        var.units = units
-    var[:] = ldata[:]
-
-    # close destination file
-    dst.close()
-
-
-def read_waqua_xyz(filename: str, cols: Tuple[int, ...] = (2,)) -> numpy.ndarray:
-    """
-    Read data columns from a SIMONA XYZ file.
-
-    Arguments
-    ---------
-    filename : str
-        Name of file to be read.
-    cols : Tuple[int]
-        List of column numbers for which to return the data.
-
-    Returns
-    -------
-    data : numpy.ndarray
-        Data read from the file.
-    """
-    data = numpy.genfromtxt(filename, delimiter=",", skip_header=1, usecols=cols)
-    return data
-
-
-def write_simona_box(
-    filename: str, rdata: numpy.ndarray, firstm: int, firstn: int
-) -> None:
-    """
-    Write a SIMONA BOX file.
-
-    Arguments
-    ---------
-    filename : str
-        Name of the file to be written.
-    rdata : numpy.ndarray
-        Two-dimensional NumPy array containing the data to be written.
-    firstm : int
-        Firt M index to be written.
-    firstn : int
-        First N index to be written.
-    """
-    # open the data file
-    boxfile = open(filename, "w")
-
-    # get shape and prepare block header; data will be written in blocks of 10
-    # N-lines
-    shp = numpy.shape(rdata)
-    mmax = shp[0]
-    nmax = shp[1]
-    boxheader = "      BOX MNMN=({m1:4d},{n1:5d},{m2:5d},{n2:5d}), VARIABLE_VAL=\n"
-    nstep = 10
-
-    # Loop over all N-blocks and write data to file
-    for j in range(firstn, nmax, nstep):
-        k = min(nmax, j + nstep)
-        boxfile.write(boxheader.format(m1=firstm + 1, n1=j + 1, m2=mmax, n2=k))
-        nvalues = (mmax - firstm) * (k - j)
-        boxdata = ("   " + "{:12.3f}" * (k - j) + "\n") * (mmax - firstm)
-        values = tuple(rdata[firstm:mmax, j:k].reshape(nvalues))
-        boxfile.write(boxdata.format(*values))
-
-    # close the file
-    boxfile.close()
-
-
-def absolute_path(rootdir: str, file: str) -> str:
-    """
-    Convert a relative path to an absolute path.
-
-    Arguments
-    ---------
-    rootdir : str
-        Any relative paths should be given relative to this location.
-    file : str
-        A relative or absolute location.
-
-    Returns
-    -------
-    afile : str
-        An absolute location.
-    """
-    if file == "":
-        return file
-    else:
-        try:
-            return os.path.normpath(os.path.join(rootdir, file))
-        except:
-            return file
-
-
-def relative_path(rootdir: str, file: str) -> str:
-    """
-    Convert an absolute path to a relative path.
-
-    Arguments
-    ---------
-    rootdir : str
-        Any relative paths will be given relative to this location.
-    file : str
-        An absolute location.
-
-    Returns
-    -------
-    rfile : str
-        An absolute or relative location (relative only if it's on the same drive as rootdir).
-    """
-    if file == "":
-        return file
-    else:
-        try:
-            rfile = os.path.relpath(file, rootdir)
-            return rfile
-        except:
-            return file
