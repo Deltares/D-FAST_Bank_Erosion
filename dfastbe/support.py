@@ -30,6 +30,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from typing import Dict, List, Tuple, Union
 from dfastbe.io import SimulationObject
 
+#import pandas._libs.tslibs.base # for Nuitka compilation
+#import pyproj._compat # for Nuitka compilation
 import numpy
 import math
 import shapely
@@ -1215,26 +1217,29 @@ def clip_sort_connect_bank_lines(banklines, bankarea, xykm: numpy.ndarray) -> sh
     return bank
 
 
-def clip_search_lines(line, xykm, max_river_width: float = 1000):
+def clip_search_lines(line: List[shapely.geometry.linestring.LineStringAdapter], xykm: shapely.geometry.linestring.LineStringAdapter, max_river_width: float = 1000) -> Tuple[List[shapely.geometry.linestring.LineStringAdapter], float]:
     """
+    Clip ta list of lines to the envelope of certain size surrounding a reference line.
 
     Arguments
     ---------
-    line
-        ...
-    xykm
-        ...
+    line : List[shapely.geometry.linestring.LineStringAdapter]
+        List of lines to be clipped.
+    xykm : shapely.geometry.linestring.LineStringAdapter
+        Reference line.
+    max_river_width: float
+        Maximum distance away from xykm.
     
     Returns
     -------
-    line
-        ...
-    maxmaxd
-        ...
+    line : List[shapely.geometry.linestring.LineStringAdapter]
+        List of clipped line.
+    maxmaxd: float
+        Maximum distance from any point within line to reference line.
     """
     nbank = len(line)
-    # clip guiding bank lines to area of interest
     # using simplified geometries to speed up identifying the appropriate buffer size
+    # stay accurate to within about 1 m
     xy_simplified = xykm.simplify(1)
     maxmaxd = 0
     for b in range(nbank):
@@ -1246,6 +1251,9 @@ def clip_search_lines(line, xykm, max_river_width: float = 1000):
             for i in range(len(line[b])):
                 L.extend(line[b][i].coords)
             line[b] = shapely.geometry.LineString(L)
+            
+        # determine the maximum distance from this line to the reference line
+        # use a simplified line to speed up the computation
         line_simplified = line[b].simplify(1)
         maxd = max(
             [
@@ -1253,6 +1261,9 @@ def clip_search_lines(line, xykm, max_river_width: float = 1000):
                 for c in line_simplified.coords
             ]
         )
+        
+        # increase maxd by 2 to account for error introduced by using
+        # simplified lines
         maxmaxd = max(maxmaxd, maxd + 2)
 
     return line, maxmaxd
@@ -1344,7 +1355,9 @@ def clip_simdata(sim: SimulationObject, xykm: numpy.ndarray, maxmaxd: float) -> 
 
 def get_banklines(sim: SimulationObject, h0: float) -> geopandas.GeoSeries:
     """
-    Detect the bank lines based on a simulation and critical water depth h0.
+    Detect all possible bank line segments based on simulation data.
+    
+    Use a critical water depth h0 as water depth threshold for dry/wet boundary.
 
     Arguments
     ---------
@@ -1415,7 +1428,7 @@ def get_banklines(sim: SimulationObject, h0: float) -> geopandas.GeoSeries:
 
 def poly_to_line(nnodes: int, x: numpy.ndarray, y: numpy.ndarray, wet_node: numpy.ndarray, h_node: numpy.ndarray, h0: float):
     """
-    Detect the bank line segments inside an individual mesh face.
+    Detect the bank line segments inside an individual face of arbitrary (convex) polygonal shape.
 
     Arguments
     ---------

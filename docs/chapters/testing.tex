@@ -1,0 +1,76 @@
+\chapter{Testing} \label{Chp:Test}
+
+\section{Test plan}
+
+\subsection{Acceptance testing}
+
+In \autoref{Sec:FuncReq} the 10 functional requirements were listed.
+They are repeated below and for every requirement it is indicated how it is tested.
+
+\begin{enumerate}
+\item The results of this program must match those of WAQBANK given the same input data.
+\item Users must be able to run this program in batch mode from the command line.
+\item Users must be able to run the analysis based on \dflowfm results.
+\item Users must be able to provide all data via an input file, similar to the ini-file like file of WAQBANK.
+\item The input files must be consistent with those of WAQBANK, or aligned with open standards or the \dflowfm modeling system.
+\item The output files must be consistent with those of WAQBANK, or aligned with open standards or the \dflowfm modeling system.
+
+\item The should read relevant data directly from \dflowfm map-files similarly to WAQBANK reading data directly from SIMONA and Delft3D 4 result files.
+
+\item A simple graphical user interface could support users in process of creating the input file.
+
+\item It would be nice if the software would be more generally applicable than just the Dutch rivers.
+\item It would be nice if the software would be able to run besides English also in Dutch.
+\end{enumerate}
+
+\subsection{System testing}
+
+\subsection{Integration testing}
+
+\subsection{Unit testing}
+
+\section{Test report}
+
+Automated TeamCity projects will be set up for testing the Python code, for building (and optionally signing of) binaries, and testing of the binaries.
+In this way the formal release process can be easily aligned with the other products.
+This is ongoing work; the test and build steps are currently run locally
+
+\begin{Verbatim}[fontsize=\tiny]
+=============================================== test session starts ================================================
+platform win32 -- Python 3.8.2, pytest-6.1.2, py-1.9.0, pluggy-0.13.1
+rootdir: D:\checkouts\D-FAST\D-FAST_Morphological_Impact
+collected 65 items
+
+tests\test_batch.py ...                                                                                       [  4%]
+tests\test_cli.py ..                                                                                          [  7%]
+tests\test_io.py ........................................                                                     [ 69%]
+tests\test_kernel.py ....................                                                                     [100%]
+
+================================================ 65 passed in 1.43s ================================================
+\end{Verbatim}
+
+The results of the software is verified by means of
+
+\begin{itemize}
+\item Unit testing at the level of functions, such as reading and writing of files, and basic testing of the algorithms.
+All functions included in \keyw{io.py} and \keyw{kernel.py} are covered by unit tests.
+These tests are carried out by means of the \keyw{pytest} framework.
+\item Regression tests have been set up to verify that the results of the command line interactive mode (with redirected standard in input for files coming from WAQUA) and the batch mode (with configuration file input for files coming from either WAQUA or \dflowfm) remain unchanged under further code developments.
+\end{itemize}
+
+For the regression tests three sets of input files have been selected:
+
+\begin{enumerate}
+\item Convert one or two sets of legacy input files (SIMONA and/or Delft3D 4) to \dflowfm like netCDF files.
+Running \dfastbe on those converted files should give results that are very similar to those obtained from a WAQBANK run on the original files.
+\item Run \dflowfm simulations using the same curvilinear mesh as was used in WAQUA/Delft3D 4.
+Running \dfastbe on the new files will give different results than those obtained from the WAQUA/Delft3D 4 results since a different hydrodynamic solver was used, but the differences are expected to be small.
+They will be quantified and reported.
+\item Run \dflowfm simulations using a new unstructured mesh.
+Running \dfastbe on those new unstructured model results will give different results than those obtained using the curvilinear model, but the differences are expected to be small.
+They will be quantified and reported.
+\end{enumerate}
+
+For the automated testing, unit tests and regression tests based on known input/output combinations will be used.
+These tests will be executed on the original Python code and to the degree possible on the compiled binaries as well.
+Details of the various tests implemented will be documented as the project progresses and full documentation will be included in the final project documentation.

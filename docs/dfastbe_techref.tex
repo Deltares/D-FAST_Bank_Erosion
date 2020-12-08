@@ -4,7 +4,8 @@
 \usepackage[pipeTables=true]{markdown}
 
 %------------------------------------------------------------------------------
-\newcommand{\dfastbe}{\textrm{D-FAST~Bank~Erosion}\xspace}
+\newcommand{\dfastbe}{\textrm{D-FAST~Bank Erosion}\xspace}
+\newcommand{\dflowfm}{\textrm{D-Flow~FM}\xspace}
 
 \hypersetup
 {
@@ -34,18 +35,18 @@
 \deltarestitle
 %
 \include{chapters/intro_tech}
-%\include{chapters/detection}
-%\include{chapters/concepts}
+
+\include{chapters/requirements}
+\include{chapters/code_structure}
+\include{chapters/software_maintenance}
+\include{chapters/testing}
+%\markdownInput{techref.md}
 
 %\nonumchapter{References}
-%\include{chapters/references}
-%\bibliography{../common/deltares_manual}
+%\bibliography{dfastbe}
 
-%\appendix
-%\include{chapters/bankmaterial}
-%\include{chapters/shipwaves}
-%\chapter{Technical Reference Manual}
-\markdownInput{techref.md}
+\appendix
+\include{chapters/file_formats}
 
 %\pagestyle{empty}
 %\cleardoublepage

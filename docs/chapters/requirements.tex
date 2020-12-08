@@ -1,0 +1,51 @@
+\chapter{Software Requirements}
+
+\section{Introduction}
+
+The new program is to replace WAQBANK which was developed for the SIMONA system.
+The essence of the requirements is that the new code should be consistent with the WAQBANK version except for the fact that it supports new \dflowfm map-files.
+
+WAQBANK consists of two components:
+
+\begin{enumerate}
+\item the first component to determine the location of bank lines based on simulation results and a reference bank line (e.g.~from Baseline)
+\item the second component to determine the bank erosion along that line based on simulation results and user input.
+\end{enumerate}
+
+The input of WAQBANK consists of one configuration using an ini-file like syntax which includes references to SIMONA or Delft3D 4 simulation files, and various simple ASCII files containing analysis parameters varying along the river reach.
+The output of WAQBANK consists of a number of simple ASCII files reporting on the erosion volumes per reach segment (e.g.~per km) and a number of files listing the new coordinates of the bank lines after erosion.
+Finally, the WAQBANK program may write some data in file formats suitable for visualization in WAQVIEW and generate a number of figures.
+
+\section{Functional Requirements} \label{Sec:FuncReq}
+
+\begin{enumerate}
+\item The results of this program must match those of WAQBANK given the same input data.
+\item Users must be able to run this program in batch mode from the command line.
+\item Users must be able to run the analysis based on \dflowfm results.
+\item Users must be able to provide all data via an input file, similar to the ini-file like file of WAQBANK.
+\item The input files must be consistent with those of WAQBANK, or aligned with open standards or the \dflowfm modeling system.
+\item The output files must be consistent with those of WAQBANK, or aligned with open standards or the \dflowfm modeling system.
+
+\item The should read relevant data directly from \dflowfm map-files similarly to WAQBANK reading data directly from SIMONA and Delft3D 4 result files.
+
+\item A simple graphical user interface could support users in process of creating the input file.
+
+\item It would be nice if the software would be more generally applicable than just the Dutch rivers.
+\item It would be nice if the software would be able to run besides English also in Dutch.
+\end{enumerate}
+
+\section{Non-functional requirements}
+
+\begin{enumerate}
+\item The performance of the tools must be similar to that of WAQBANK, i.e.~it must run within about an hour.
+\item The software must be version controlled.
+\item The software must have formal testing and support.
+\item The software must run on Windows.
+\item The software must be easy to distribute.
+\item The software must have a user manual.
+\item The software must have technical documentation.
+\item The software must meet the conditions described in \href{http://publicaties.minienm.nl/documenten/rijkswaterstaat-informatievoorziening-aansluitvoorwaarden-riva-2017}{Rijkswaterstaat Informatievoorziening Aansluitvoorwaarden}.
+
+\item The software should run on any common operating system.
+\item The software should be available as open source.
+\end{enumerate}

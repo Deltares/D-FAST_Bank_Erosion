@@ -2,9 +2,9 @@
 """
 D-FAST Bank Erosion package
 
-A Python to perform a morphological impact analysis based on a number of D-Flow FM simulations.
+A Python package to perform a bank erosion analysis based on a number of D-Flow FM simulations.
 The source code of this tool is located at
-https://github.com/Deltares/D-FAST_Morphological_Impact
+https://github.com/Deltares/D-FAST_Bank_Erosion
 
 License:
 

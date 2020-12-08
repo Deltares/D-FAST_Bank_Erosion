@@ -30,7 +30,6 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from typing import Union, Dict, Any, Tuple, List
 
 import time
-import logging
 import argparse
 import dfastbe.kernel
 import dfastbe.support
@@ -48,7 +47,7 @@ import configparser
 FIRST_TIME: float
 LAST_TIME: float
 
-def banklines(filename: str = "config.ini") -> None:
+def banklines(filename: str = "dfastbe.cfg") -> None:
     """
     Run the bank line detection analysis using a configuration specified by file name.
 
@@ -66,7 +65,7 @@ def banklines(filename: str = "config.ini") -> None:
 
 def adjust_filenames(filename: str, config: configparser.ConfigParser) -> Tuple[str, configparser.ConfigParser]:
     """
-    Convert all paths to relative to current working directory
+    Convert all paths to relative to current working directory.
 
     Arguments
     ---------
@@ -223,7 +222,7 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
     timedlogger("-- stop analysis --")
 
 
-def bankerosion(filename="config.ini") -> None:
+def bankerosion(filename="dfastbe.cfg") -> None:
     """
     Run the bank erosion analysis using a configuration specified by file name.
 
@@ -919,6 +918,25 @@ def get_bbox(xykm: numpy.ndarray, buffer: float = 0.1) -> Tuple[float, float, fl
 
 
 def derive_topology_arrays(fn: numpy.ndarray) -> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray]:
+    """
+    Derive the secondary topology arrays from the face_node_connectivity.
+    
+    Arguments
+    ---------
+    fn : numpy.ndarray
+        An N x M array containing the node indices (max M) for each of the N mesh faces.
+    
+    Results
+    -------
+    en : numpy.ndarray
+        An L x 2 array containing the node indices (2) for each of the L mesh edges.
+    ef : numpy.ndarray
+        An L x 2 array containing the face indices (max 2) for each of the L mesh edges.
+    fe : numpy.ndarray
+        An N x M array containing the edge indices (max M) for each of the N mesh faces.
+    boundary_edge : numpy.ndarray
+        A K array containing the edge indices making the mesh outer (or inner) boundary.
+    """
     n_faces = fn.shape[0]
     max_n_nodes = fn.shape[1]
     tmp = numpy.repeat(fn, 2, axis=1)
@@ -997,7 +1015,7 @@ def timedlogger(label: str) -> None:
         Message string.
     """
     time, diff = timer()
-    logging.info(time + diff + label)
+    print(time + diff + label)
 
 
 def timer() -> Tuple[str, str]:

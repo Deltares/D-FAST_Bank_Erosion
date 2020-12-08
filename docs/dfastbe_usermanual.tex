@@ -5,6 +5,8 @@
 
 %------------------------------------------------------------------------------
 \newcommand{\dfastbe}{\textrm{D-FAST~Bank~Erosion}\xspace}
+\newcommand{\dflowfm}{\textrm{D-Flow~FM}\xspace}
+\newcommand{\dflow}{\textrm{Delft3D-FLOW}\xspace}
 
 \hypersetup
 {
@@ -34,18 +36,20 @@
 \deltarestitle
 %
 \include{chapters/introduction}
+\include{chapters/get_started}
 \include{chapters/detection}
 \include{chapters/concepts}
 
 \nonumchapter{References}
+\bibliography{dfastbe}
 \include{chapters/references}
-%\bibliography{../common/deltares_manual}
 
 \appendix
 \include{chapters/bankmaterial}
 \include{chapters/shipwaves}
-\chapter{Technical Reference Manual}
-\markdownInput[shiftHeadings=1]{techref.md}
+\include{chapters/file_formats}
+%\chapter{Technical Reference Manual}
+%\markdownInput[shiftHeadings=1]{techref.md}
 
 \pagestyle{empty}
 \cleardoublepage

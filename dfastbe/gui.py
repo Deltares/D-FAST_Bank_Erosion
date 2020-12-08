@@ -929,7 +929,7 @@ def updateTabKeys(i: int) -> None:
 
 def selectFile(key: str) -> None:
     """
-    Select a file via a file selection dialog.
+    Select a file or directory via a selection dialog.
 
     Arguments
     ---------
@@ -996,24 +996,6 @@ def selectFile(key: str) -> None:
     if fil != "":
         dialog[key].setText(fil)
 
-
-def selectFolder(key: str) -> None:
-    """
-    Select a folder via a folder selection dialog.
-
-    Arguments
-    ---------
-    key : str
-        Short name of the parameter.
-    """
-    if not dialog[key + "Folder"].hasFocus():
-        # in the add/edit dialogs, the selectFolder is triggered when the user presses enter in one of the lineEdit boxes ...
-        # don't trigger the actual selectFile
-        folder = [""]
-    else:
-        folder = QtWidgets.QFileDialog.getExistingDirectory(caption="Select Folder")
-    if folder[0] != "":
-        dialog[key].setText(folder[0])
 
 
 def run_detection() -> None:
@@ -1085,7 +1067,7 @@ def menu_load_configuration() -> None:
     None
     """
     fil = QtWidgets.QFileDialog.getOpenFileName(
-        caption="Select Configuration File", filter="Config Files (*.ini)"
+        caption="Select Configuration File", filter="Config Files (*.cfg)"
     )
     filename = fil[0]
     if filename != "":
@@ -1104,6 +1086,10 @@ def load_configuration(filename: str) -> None:
     filename : str
         Name of the configuration file to be opened.
     """
+    if not os.path.exists(filename):
+       if filename != "dfastbe.cfg":
+           showError("The file '{}' does not exist!".format(filename))
+       return 
     rootdir = os.path.dirname(filename)
     config = dfastbe.io.read_config(filename)
     config = dfastbe.cli.config_to_absolute_paths(rootdir, config)
@@ -1437,7 +1423,7 @@ def menu_save_configuration() -> None:
     None
     """
     fil = QtWidgets.QFileDialog.getSaveFileName(
-        caption="Save Configuration As", filter="Config Files (*.ini)"
+        caption="Save Configuration As", filter="Config Files (*.cfg)"
     )
     filename = fil[0]
     if filename != "":

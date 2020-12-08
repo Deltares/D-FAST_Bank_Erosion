@@ -603,7 +603,7 @@ def relative_path(rootdir: str, file: str) -> str:
             return file
 
 
-def read_xyc(filename: str, ncol: int = 2):
+def read_xyc(filename: str, ncol: int = 2) -> shapely.geometry.linestring.LineStringAdapter:
     """
     Read lines from a file.
 
@@ -616,8 +616,8 @@ def read_xyc(filename: str, ncol: int = 2):
 
     Returns
     -------
-    L :
-        Line string.
+    L : shapely.geometry.linestring.LineStringAdapter
+        Line strings.
     """
     fileroot, ext = os.path.splitext(filename)
     if ext.lower() == ".xyc":
@@ -636,10 +636,10 @@ def read_xyc(filename: str, ncol: int = 2):
             LC = numpy.concatenate((x, y, z), axis=1)
         else:
             LC = numpy.concatenate((x, y), axis=1)
-        L = shapely.geometry.asLineString(LC)
+        L = shapely.geometry.LineString(LC)
     else:
         GEO = geopandas.read_file(filename)["geometry"]
-        L = [object for object in GEO]
+        L = GEO[0]
     return L
 
 
@@ -667,7 +667,8 @@ def write_km_eroded_volumes(km: numpy.ndarray, vol: numpy.ndarray, filename: str
 
 
 def read_config(filename: str) -> configparser.ConfigParser:
-    """Read a configParser object (configuration file).
+    """
+    Read a configParser object (configuration file).
 
     This function ...
         reads the config file using the standard configParser.
@@ -825,7 +826,7 @@ def movepar(
     return config
 
 
-def config_get_xykm(config: configparser.ConfigParser):
+def config_get_xykm(config: configparser.ConfigParser) -> shapely.geometry.linestring.LineStringAdapter:
     """
 
     Arguments
@@ -835,7 +836,7 @@ def config_get_xykm(config: configparser.ConfigParser):
 
     Returns
     -------
-    xykm :
+    xykm : shapely.geometry.linestring.LineStringAdapter
 
     """
     # get km bounds
@@ -859,13 +860,13 @@ def config_get_xykm(config: configparser.ConfigParser):
     return xykm
 
 
-def clip_chainage_path(xykm, kmfile: str, kmbounds: Tuple[float, float]):
+def clip_chainage_path(xykm: shapely.geometry.linestring.LineStringAdapter, kmfile: str, kmbounds: Tuple[float, float]) -> shapely.geometry.linestring.LineStringAdapter:
     """
     Clip a chainage line to the relevant reach.
 
     Arguments
     ---------
-    xykm :
+    xykm : shapely.geometry.linestring.LineStringAdapter
         Original river chainage line.
     kmfile : str
         Name of chainage file (from which xykm was obtained).
@@ -951,7 +952,7 @@ def clip_chainage_path(xykm, kmfile: str, kmbounds: Tuple[float, float]):
     return xykm
 
 
-def config_get_search_lines(config: configparser.ConfigParser) -> List[numpy.ndarray]:
+def config_get_search_lines(config: configparser.ConfigParser) -> List[shapely.geometry.linestring.LineStringAdapter]:
     """
     Get the search lines for the bank lines from the analysis settings.
 
@@ -1006,8 +1007,8 @@ def config_get_bank_lines(config: configparser.ConfigParser, bankdir: str) -> Li
         while True:
             bankfile = bankdir + os.sep + bankname + "_" + str(b) + ".xyc"
             if os.path.exists(bankfile):
-                xy_numpy = read_xyc(bankfile)
-                bankline_list.append(shapely.geometry.LineString(xy_numpy))
+                xy_bank = read_xyc(bankfile)
+                bankline_list.append(shapely.geometry.LineString(xy_bank))
                 b = b + 1
             else:
                 break

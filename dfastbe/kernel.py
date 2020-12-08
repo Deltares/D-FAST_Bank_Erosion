@@ -319,7 +319,7 @@ def edge_mean(a_pnt: numpy.ndarray) -> numpy.ndarray:
 
 def comp_hw_ship_at_bank(distance_fw: numpy.ndarray, dfw0: numpy.ndarray, dfw1: numpy.ndarray, h_input: numpy.ndarray, shiptype: numpy.ndarray, Tship: numpy.ndarray, vship: numpy.ndarray, g: float) -> numpy.ndarray:
     """
-    Compute ...
+    Compute wave heights at bank due to passing ships.
     
     Arguments
     ---------
@@ -416,6 +416,7 @@ def get_km_bins(km_bin: Tuple[float, float, float], type: int = 2) -> numpy.ndar
 
 def get_km_eroded_volume(bank_km: numpy.ndarray, dv: numpy.ndarray, km_bin: Tuple[float, float, float]) -> numpy.ndarray:
     """
+    Accumulate the erosion volumes per chainage bin.
     
     Arguments
     ---------
@@ -425,6 +426,11 @@ def get_km_eroded_volume(bank_km: numpy.ndarray, dv: numpy.ndarray, km_bin: Tupl
         Array containing the eroded volume per bank segment [m3]
     km_bin : Tuple[float, float, float]
         Tuple containing (start, end, step) for the chainage bins
+        
+    Returns
+    -------
+    dvol : numpy.ndarray
+        Array containing the accumulated eroded volume per chainage bin.
     """
     bank_km_mid = (bank_km[:-1] + bank_km[1:]) / 2
     bin_idx = numpy.rint((bank_km_mid - km_bin[0] - km_bin[2] / 2) / km_bin[2]).astype(

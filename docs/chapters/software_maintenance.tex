@@ -1,0 +1,329 @@
+\chapter{Software maintenance}
+
+\section{Coding guidelines}
+
+This program has been implemented following the Python PEP 8 style guide using Python 3.8.
+The code has been documented using standard Python docstrings and type hinting.
+For the static type checker \emph{mypy} is used.
+
+\begin{Verbatim}
+    > pip install mypy
+    > mypy dfastbe
+\end{Verbatim}
+
+Variables associated with NumPy, netCDF4 and PyQt5 are not yet properly type checked.
+
+\begin{Verbatim}[fontsize=\tiny]
+> mypy dfastbe
+dfastbe\plotting.py:31: error: Skipping analyzing 'shapely': found module but no type hints or library stubs
+dfastbe\plotting.py:33: error: Skipping analyzing 'matplotlib': found module but no type hints or library stubs
+dfastbe\plotting.py:34: error: Skipping analyzing 'matplotlib.pyplot': found module but no type hints or library stubs
+dfastbe\plotting.py:35: error: Skipping analyzing 'geopandas': found module but no type hints or library stubs
+dfastbe\plotting.py:36: error: Skipping analyzing 'numpy': found module but no type hints or library stubs
+dfastbe\kernel.py:32: error: Skipping analyzing 'numpy': found module but no type hints or library stubs
+dfastbe\io.py:32: error: Skipping analyzing 'numpy': found module but no type hints or library stubs
+dfastbe\io.py:35: error: Skipping analyzing 'netCDF4': found module but no type hints or library stubs
+dfastbe\io.py:38: error: Skipping analyzing 'pandas': found module but no type hints or library stubs
+dfastbe\io.py:39: error: Skipping analyzing 'geopandas': found module but no type hints or library stubs
+dfastbe\io.py:40: error: Skipping analyzing 'shapely': found module but no type hints or library stubs
+dfastbe\support.py:33: error: Skipping analyzing 'numpy': found module but no type hints or library stubs
+dfastbe\support.py:35: error: Skipping analyzing 'shapely': found module but no type hints or library stubs
+dfastbe\support.py:36: error: Skipping analyzing 'geopandas': found module but no type hints or library stubs
+dfastbe\cli.py:40: error: Skipping analyzing 'geopandas': found module but no type hints or library stubs
+dfastbe\cli.py:40: note: See https://mypy.readthedocs.io/en/latest/running_mypy.html#missing-imports
+dfastbe\cli.py:41: error: Skipping analyzing 'shapely': found module but no type hints or library stubs
+dfastbe\cli.py:43: error: Skipping analyzing 'numpy': found module but no type hints or library stubs
+dfastbe\cli.py:44: error: Skipping analyzing 'matplotlib': found module but no type hints or library stubs
+dfastbe\gui.py:32: error: Skipping analyzing 'PyQt5': found module but no type hints or library stubs
+dfastbe\gui.py:34: error: Skipping analyzing 'PyQt5.QtGui': found module but no type hints or library stubs
+dfastbe\gui.py:42: error: Skipping analyzing 'matplotlib.pyplot': found module but no type hints or library stubs
+dfastbe\gui.py:42: error: Skipping analyzing 'matplotlib': found module but no type hints or library stubs
+dfastbe\gui.py:1468: error: Cannot assign to a method
+dfastbe\gui.py:1468: error: Incompatible types in assignment (expression has type "Type[str]", variable has type "Callable[[str], str]")
+dfastbe\cmd.py:32: error: Skipping analyzing 'matplotlib.pyplot': found module but no type hints or library stubs
+dfastbe\cmd.py:32: error: Skipping analyzing 'matplotlib': found module but no type hints or library stubs
+dfastbe\cmd.py:37: error: Skipping analyzing 'numpy': found module but no type hints or library stubs
+Found 27 errors in 7 files (checked 8 source files)
+\end{Verbatim}
+
+The final two errors reported for \keyw{dfastbe\textbackslash{}gui.py} (line: 1468) are caused by a statement to switch the configparser to case sensitive mode while creating the data structure to be saved to file; most likely the data type is not properly set in the configparser definition.
+That code line conforms to the configparser documentation and works properly as is.
+
+A consistent coding style is enforced by means of the \emph{Black Code Formatter}.
+
+\begin{Verbatim}
+    > pip install black
+    > black dfastbe
+\end{Verbatim}
+
+\section{Version control}
+
+GitHub is currently used for software version control.
+The repository is located at \url{https://github.com/Deltares/D-FAST_Bank_Erosion}.
+Since \dfastbe builds on WAQBANK, the initial release of the new Python product is labeled as version 2.0.0.
+%We may switch to GitLab in line with \href{http://publicaties.minienm.nl/documenten/rijkswaterstaat-informatievoorziening-aansluitvoorwaarden-riva-2017}{RIVA (2020)}.
+
+\section{Automated building of code}
+
+An automated TeamCity project will be set up for building and signing of binaries.
+This is ongoing work; the build steps are currently run locally.
+The Nuitka compiler is used to build a binary by means of the following command
+
+\begin{Verbatim}
+nuitka --standalone --python-flag=no_site --show-progress
+    --plugin-enable=numpy --plugin-enable=qt-plugins
+    --file-reference-choice=runtime dfastbe
+\end{Verbatim}
+
+Unfortunately, this doesn't automatically build a binary that works out of the box.
+A number of explicit module imports and environmental settings had to be added to \keyw{\_\_main\_\_} which the Nuitka compiler didn't automatically resolve.
+
+\begin{Verbatim}
+#------------------------------------------------------------------------------
+# Needed for Nuitka compilation
+#------------------------------------------------------------------------------
+import os
+import pathlib
+
+is_nuitka = "__compiled__" in globals()
+if is_nuitka:
+    root = str(pathlib.Path(__file__).parent)
+    os.environ["GDAL_DATA"] = root + os.sep + "gdal"
+    os.environ["PROJ_LIB"] = root + os.sep + "proj"
+    os.environ["MATPLOTLIBDATA"] = root + os.sep + "matplotlib" + os.sep + "mpl-data"
+    os.environ["TCL_LIBRARY"] = root + os.sep + "lib" + os.sep + "tcl8.6"
+    proj_lib_dirs = os.environ.get("PROJ_LIB", "")
+    import pyproj.datadir
+    pyproj.datadir.set_data_dir(root + os.sep + "proj")
+    import pyproj
+
+import fiona.ogrext
+import fiona._shim
+import fiona.schema
+import _ctypes
+import pandas._libs.tslibs.base
+import pyproj._compat
+import netCDF4.utils
+import cftime
+#------------------------------------------------------------------------------
+\end{Verbatim}
+
+If these import statements are not included, you will sooner or later get a runtime error such as
+
+\begin{Verbatim}
+File "netCDF4\_netCDF4.pyx", line 1196, in init netCDF4._netCDF4
+ ModuleNotFoundError: No module named 'netCDF4.utils'
+\end{Verbatim}
+
+Finally, the a number of directory creation and copy statements had to be executed to complete the build process where the Python environment was installed in \keyw{\%ENV\%}.
+The message "The code execution connot proceed because python38.dll was not found. Reinstalling the program may fix this problem." is solved by executing
+
+\begin{Verbatim}
+copy %ENV%\python38.dll dfastbe.dist
+\end{Verbatim}
+
+The error "FileNotFoundError: [Errno 2] No such file or directory: '...\textbackslash{}dfastbe.dist\textbackslash{}certifi\textbackslash{}cacert.pem'" in the open\_binary routine within "importlib\textbackslash{}resources.py", line 97, is solved by
+
+\begin{Verbatim}
+mkdir dfastbe.dist\certifi
+copy %ENV%\Lib\site-packages\certifi\cacert.pem dfastbe.dist\certifi
+\end{Verbatim}
+
+The error "pyproj.exceptions.DataDirError: Valid PROJ data directory not found. Either set the path using the environmental variable PROJ\_LIB or with `pyproj.datadir.set\_data\_dir`." in the get\_data\_dir function within "pyproj\textbackslash{}datadir.py", line 109, is solved by
+
+\begin{Verbatim}
+mkdir dfastbe.dist\proj
+copy %ENV%\Lib\site-packages\pyproj\proj_dir\share\proj\* dfastbe.dist\proj
+\end{Verbatim}
+
+When the error "OSError: Could not find lib geos\_c.dll or load any of its variants []." is encountered in the load\_dll routine within "shapely\textbackslash{}geos.py", line 60, the following lines are needed
+
+\begin{Verbatim}
+mkdir dfastbe.dist\shapely\DLLs
+copy %ENV%\Lib\site-packages\shapely\DLLs\* dfastbe.dist\shapely\DLLs
+\end{Verbatim}
+
+The message "StopIteration" in the file "geopandas\textbackslash{}datasets\textbackslash{}\_\_init\_\_.py", line 6, is caused by missing geopandas datasets and it is resolve by
+
+\begin{Verbatim}
+mkdir dfastbe.dist\geopandas\datasets
+copy %ENV%\Lib\site-packages\geopandas\datasets\natural* dfastbe.dist\geopandas\datasets
+\end{Verbatim}
+
+The error "ImportError: unable to find Qt5Core.dll on PATH" in the find\_qt routine within "PyQt5\textbackslash{}\_\_init\_\_.py", line 33, is resolved by
+
+\begin{Verbatim}
+mkdir dfastbe.dist\PyQt5\Qt\bin
+copy %ENV%\Library\bin\Qt5Core* dfastbe.dist\PyQt5\Qt\bin
+\end{Verbatim}
+
+The import error "LoadLibraryExW 'fiona\textbackslash{}ogrext.pyd' failed: The specified module could not be found." in "fiona\textbackslash{}collection.py", line 9, whereas the ogrext.pyd is exactly where the program indicates, is caused by a large number of missing library dependencies
+
+\begin{Verbatim}
+copy %ENV%\Library\bin\*.dll dfastbe.dist
+\end{Verbatim}
+
+The import error "LoadLibraryExW '\_ctypes.pyd' failed: The specified module could not be found." is solved by adding one more library from another folder
+
+\begin{Verbatim}
+copy %ENV%\DLLs\libffi-7.dll dfastbe.dist
+\end{Verbatim}
+
+The runtime error "Could not find the matplotlib data files" in the \_get\_data\_path function within "matplotlib\textbackslash{}\_\_init\_\_.py", line 772, is solved by running
+
+\begin{Verbatim}
+mkdir dfastbe.dist\matplotlib\mpl-data
+xcopy /s %ENV%\Lib\site-packages\matplotlib\mpl-data\* dfastbe.dist\matplotlib\mpl-data
+\end{Verbatim}
+
+The operating system error "could not find or load spatialindex\_c-64.dll" in "rtree\textbackslash{}core.py", line 126, is solved by two libraries with similar names
+
+\begin{Verbatim}
+mkdir dfastbe.dist\Library\bin
+copy %ENV%\Library\bin\spatialindex* dfastbe.dist\Library\bin
+\end{Verbatim}
+
+The import error "LoadLibraryExW 'PyQt5\textbackslash{}QtWidgets.pyd' failed: The specified module could not be found." in "dfastbe\textbackslash{}gui.py", line 32, is caused by a large number of missing libraries for PyQt5
+
+\begin{Verbatim}
+copy %ENV%\python3.dll dfastbe.dist\PyQt5
+copy dfastbe.dist\*.dll dfastbe.dist\PyQt5
+\end{Verbatim}
+
+The runtime error "Unable to load language file 'messages.UK.ini'." (and the lack of icons in the dialog) is simply solved by adding the configuration files to a new subdirectory dfastbe as
+
+\begin{Verbatim}
+mkdir dfastbe.dist\dfastbe
+copy dfastbe\messages.*.ini dfastbe.dist\dfastbe
+copy dfastbe\*.png dfastbe.dist\dfastbe
+\end{Verbatim}
+
+The message "rem qt.qpa.plugin: Could not find the Qt platform plugin 'windows' in ''. This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem." is solved by adding the platforms folder to the distribution
+
+\begin{Verbatim}
+mkdir dfastbe.dist\platforms
+xcopy /s %ENV%\Library\plugins\platforms\* dfastbe.dist\platforms
+\end{Verbatim}
+
+The message "\_tkinter.TclError: Can't find a usable init.tcl in the following directories: <directory list> This probably means that Tcl wasn't installed properly." is solved by
+
+\begin{Verbatim}
+mkdir dfasstbe.dist\lib\tcl8.6
+xcopy /s %ENV%\Library\lib\tcl8.6\* dfasstbe.dist\lib\tcl8.6
+\end{Verbatim}
+
+and the related message "\_tkinter.TclError: Can't find a usable tk.tcl in the following directories: <directory list> rem This probably means that tk wasn't installed properly."'in "tkinter\textbackslash{}\_\_init\_\_.py", line 2261, is solved by the similar lines
+
+\begin{Verbatim}
+mkdir dfasstbe.dist\lib\tk8.6
+xcopy /s %ENV%\Library\lib\tk8.6\* dfasstbe.dist\lib\tk8.6
+\end{Verbatim}
+
+\section{Listing of modules}
+
+The code has been developed in an Anaconda Python environment including the following modules and versions.
+
+\begin{Verbatim}
+Package                   Version
+------------------------- -------------------
+altgraph                  0.17
+appdirs                   1.4.4
+atomicwrites              1.4.0
+attrs                     19.3.0
+black                     20.8b1
+certifi                   2020.6.20
+cftime                    1.1.3
+chardet                   3.0.4
+click                     7.1.2
+click-plugins             1.1.1
+cligj                     0.5.0
+colorama                  0.4.4
+cycler                    0.10.0
+descartes                 1.1.0
+docopt                    0.6.2
+docspec                   0.2.0
+docspec-python            0.0.7
+Fiona                     1.8.13
+Flask                     1.1.2
+future                    0.18.2
+GDAL                      3.0.4
+geopandas                 0.7.0
+grip                      4.5.2
+idna                      2.10
+iniconfig                 1.1.1
+itsdangerous              1.1.0
+Jinja2                    2.11.2
+kiwisolver                1.2.0
+Mako                      1.1.3
+Markdown                  3.1.1
+MarkupSafe                1.1.1
+matplotlib                2.2.5
+munch                     2.5.0
+mypy                      0.790
+mypy-extensions           0.4.3
+netCDF4                   1.5.4
+nr.collections            0.0.1
+nr.databind.core          0.0.21
+nr.databind.json          0.0.13
+nr.fs                     1.6.2
+nr.interface              0.0.3
+nr.metaclass              0.0.5
+nr.parsing.date           0.4.2
+nr.pylang.utils           0.0.3
+nr.stream                 0.0.4
+nr.sumtype                0.0.3
+nr.utils.re               0.1.0
+Nuitka                    0.6.9.6
+numpy                     1.18.4
+packaging                 20.4
+pandas                    1.1.4
+path-and-address          2.0.1
+pathspec                  0.8.1
+pathtools                 0.1.2
+pdoc3                     0.7.2
+pefile                    2019.4.18
+Pillow                    8.0.1
+pip                       20.1
+pluggy                    0.13.1
+py                        1.9.0
+pydoc-markdown            3.8.0
+Pygments                  2.6.1
+pyinstaller               4.0
+pyinstaller-hooks-contrib 2020.10
+pyparsing                 2.4.7
+pyproj                    3.0.0.post1
+PyQt5                     5.12.3
+PyQt5-sip                 4.19.18
+PyQtChart                 5.12
+PyQtWebEngine             5.12.1
+pytest                    6.1.2
+python-dateutil           2.8.1
+pythonnet                 2.5.1
+pytz                      2020.1
+pywin32-ctypes            0.2.0
+PyYAML                    5.3.1
+regex                     2020.10.28
+requests                  2.24.0
+Rtree                     0.9.4
+setuptools                50.3.0.post20201006
+Shapely                   1.7.1
+six                       1.14.0
+toml                      0.10.2
+tornado                   6.0.4
+typed-ast                 1.4.1
+typing-extensions         3.7.4.3
+urllib3                   1.25.9
+watchdog                  0.10.3
+Werkzeug                  1.0.1
+wheel                     0.35.1
+wincertstore              0.2
+\end{Verbatim}
+
+\section{Automated testing of code}
+
+See \autoref{Chp:Test}.
+
+\section{Automated generation of documentation}
+
+The documentation has been written in a combination of LaTeX and markdown files which are maintained in the GitHub repository alongside the source code.
+The PDF version of the user manual and this technical reference manual are generated automatically as part of the daily cycle of building all manuals on the Deltares TeamCity server.
