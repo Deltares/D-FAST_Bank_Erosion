@@ -219,7 +219,8 @@ def addGeneralTab(
     closePlotsTxt = QtWidgets.QLabel("Close plots")
     dialog["closePlots"] = closePlotsTxt
     generalLayout.addRow(closePlotsTxt, closePlots)
-    
+
+
 def addDetectTab(
     tabs: PyQt5.QtWidgets.QTabWidget,
     win: PyQt5.QtWidgets.QMainWindow,
@@ -672,7 +673,7 @@ def updatePlotting() -> None:
     dialog["figureDirEditFile"].setEnabled(plotFlag and saveFlag)
     dialog["closePlots"].setEnabled(plotFlag)
     dialog["closePlotsEdit"].setEnabled(plotFlag)
-    
+
 
 def addAnItem(key: str) -> None:
     """
@@ -717,7 +718,9 @@ def setDialogSize(editDialog: PyQt5.QtWidgets.QDialog, width: int, height: int) 
     y = parent.y()
     pw = parent.width()
     ph = parent.height()
-    editDialog.setGeometry(x + pw/2 - width/2, y + ph/2 - height/2, width, height)
+    editDialog.setGeometry(
+        x + pw / 2 - width / 2, y + ph / 2 - height / 2, width, height
+    )
 
 
 def editASearchLine(
@@ -942,28 +945,28 @@ def selectFile(key: str) -> None:
         # don't trigger the actual selectFile
         fil = ""
     elif key == "simFileEdit":
-        fil,fltr = QtWidgets.QFileDialog.getOpenFileName(
+        fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
             caption="Select D-Flow FM Map File", filter="D-Flow FM Map Files (*map.nc)"
         )
         # getOpenFileName returns a tuple van file name and active file filter.
     elif key == "chainFileEdit":
-        fil,fltr = QtWidgets.QFileDialog.getOpenFileName(
+        fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
             caption="Select Chainage File", filter="Chainage Files (*.xyc)"
         )
     elif key == "riverAxisEdit":
-        fil,fltr = QtWidgets.QFileDialog.getOpenFileName(
+        fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
             caption="Select River Axis File", filter="River Axis Files (*.xyc)"
         )
     elif key == "fairwayEdit":
-        fil,fltr = QtWidgets.QFileDialog.getOpenFileName(
+        fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
             caption="Select Fairway File", filter="Fairway Files (*.xyc)"
         )
     elif key == "editSearchLine":
-        fil,fltr = QtWidgets.QFileDialog.getOpenFileName(
+        fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
             caption="Select Search Line File", filter="Search Line Files (*.xyc)"
         )
     elif key == "editDischarge":
-        fil,fltr = QtWidgets.QFileDialog.getOpenFileName(
+        fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
             caption="Select Simulation File", filter="Simulation File (*map.nc)"
         )
     elif key == "bankDirEdit":
@@ -987,7 +990,7 @@ def selectFile(key: str) -> None:
                 rkey = rkey[1:]
             if not nr == "":
                 nr = " for Level " + nr
-            fil,fltr = QtWidgets.QFileDialog.getOpenFileName(
+            fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
                 caption="Select Parameter File" + nr, filter="Parameter File (*.)"
             )
         else:
@@ -995,7 +998,6 @@ def selectFile(key: str) -> None:
             fil = ""
     if fil != "":
         dialog[key].setText(fil)
-
 
 
 def run_detection() -> None:
@@ -1015,11 +1017,14 @@ def run_detection() -> None:
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
     matplotlib.pyplot.close("all")
     # should maybe use a separate thread for this ...
-    #try:
-    dfastbe.cli.banklines_core(config, rootdir, True)
-    #except:
-    #    pass
+    msg = ""
+    try:
+        dfastbe.cli.banklines_core(config, rootdir, True)
+    except Exception as Ex:
+        msg = str(Ex)
     dialog["application"].restoreOverrideCursor()
+    if msg != "":
+        showError(msg)
 
 
 def run_erosion() -> None:
@@ -1039,11 +1044,14 @@ def run_erosion() -> None:
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
     matplotlib.pyplot.close("all")
     # should maybe use a separate thread for this ...
-    #try:
-    dfastbe.cli.bankerosion_core(config, rootdir, True)
-    #except:
-    #    pass
+    msg = ""
+    try:
+        dfastbe.cli.bankerosion_core(config, rootdir, True)
+    except Exception as Ex:
+        msg = str(Ex)
     dialog["application"].restoreOverrideCursor()
+    if msg != "":
+        showError(msg)
 
 
 def close_dialog() -> None:
@@ -1087,11 +1095,12 @@ def load_configuration(filename: str) -> None:
         Name of the configuration file to be opened.
     """
     if not os.path.exists(filename):
-       if filename != "dfastbe.cfg":
-           showError("The file '{}' does not exist!".format(filename))
-       return 
-    rootdir = os.path.dirname(filename)
-    config = dfastbe.io.read_config(filename)
+        if filename != "dfastbe.cfg":
+            showError("The file '{}' does not exist!".format(filename))
+        return
+    absfilename = dfastbe.io.absolute_path(os.getcwd(), filename)
+    rootdir = os.path.dirname(absfilename)
+    config = dfastbe.io.read_config(absfilename)
     config = dfastbe.cli.config_to_absolute_paths(rootdir, config)
     try:
         version = config["General"]["Version"]
@@ -1105,17 +1114,19 @@ def load_configuration(filename: str) -> None:
         dialog["startRange"].setText(str(studyRange[0]))
         dialog["endRange"].setText(str(studyRange[1]))
         dialog["bankDirEdit"].setText(section["BankDir"])
-        dialog["bankFileName"].setText(section["BankFile"])
-        flag = dfastbe.io.config_get_bool(
-            config, "General", "Plotting", default=True
+        bankFile =  dfastbe.io.config_get_str(
+            config, "General", "BankFile", default="bankfile",
         )
+        dialog["bankFileName"].setText(bankFile)
+        flag = dfastbe.io.config_get_bool(config, "General", "Plotting", default=True)
         dialog["plotting"].setChecked(flag)
-        flag = dfastbe.io.config_get_bool(
-            config, "General", "SavePlots", default=True
-        )
+        flag = dfastbe.io.config_get_bool(config, "General", "SavePlots", default=True)
         dialog["savePlotsEdit"].setChecked(flag)
         figDir = dfastbe.io.config_get_str(
-            config, "General", "FigureDir", default=dfastbe.io.absolute_path(rootdir, "figures")
+            config,
+            "General",
+            "FigureDir",
+            default=dfastbe.io.absolute_path(rootdir, "figures"),
         )
         dialog["figureDirEdit"].setText(figDir)
         flag = dfastbe.io.config_get_bool(
@@ -1125,7 +1136,10 @@ def load_configuration(filename: str) -> None:
 
         section = config["Detect"]
         dialog["simFileEdit"].setText(section["SimFile"])
-        dialog["waterDepth"].setText(section["WaterDepth"])
+        waterDepth = dfastbe.io.config_get_float(
+            config, "Detect", "WaterDepth", default=0.0,
+        )
+        dialog["waterDepth"].setText(str(waterDepth))
         NBank = dfastbe.io.config_get_int(
             config, "Detect", "NBank", default=0, positive=True
         )
@@ -1147,8 +1161,14 @@ def load_configuration(filename: str) -> None:
         dialog["fairwayEdit"].setText(section["Fairway"])
         dialog["chainageOutStep"].setText(section["OutputInterval"])
         dialog["outDirEdit"].setText(section["OutputDir"])
-        dialog["newBankFile"].setText(section["BankNew"])
-        dialog["newEqBankFile"].setText(section["BankEq"])
+        bankNew = dfastbe.io.config_get_float(
+            config, "Erosion", "BankNew", default="banknew",
+        )
+        dialog["newBankFile"].setText(bankNew)
+        bankEq = dfastbe.io.config_get_float(
+            config, "Erosion", "BankEq", default="bankeq",
+        )
+        dialog["newEqBankFile"].setText(bankEq)
         txt = dfastbe.io.config_get_str(
             config, "Erosion", "EroVol", default="erovol_standard.evo"
         )

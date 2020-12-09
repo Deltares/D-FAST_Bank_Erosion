@@ -1,12 +1,5 @@
-rem nuitka --verbose --standalone --python-flag=no_site --plugin-enable=numpy --plugin-enable=qt-plugins --include-package=netCDF4 --include-package=matplotlib --include-package=pandas --include-module=pyproj  --include-package=fiona --include-package=gdal --include-module=cftime --file-reference-choice=runtime dfastbe > dfastbe.build.log
-rem --plugin-enable=pylint-warnings
-rem --show-scons
-rem --trace-execution
-rem --graph
-rem --standalone -> --recurse-all (same as --follow-imports); you may want to add --python-flag=no_site
-rem --verbose versus --show-progress
-nuitka --standalone --python-flag=no_site --show-progress --plugin-enable=numpy --plugin-enable=qt-plugins --file-reference-choice=runtime dfastbe > dfastbe.build.log 2>&1
-
+nuitka --standalone --python-flag=no_site --show-progress --plugin-enable=numpy --plugin-enable=qt-plugins --plugin-enable=tk-inter --file-reference-choice=runtime dfastbe > dfastbe.build.log 2>&1
+rem pause
 
 rem The code execution connot proceed because python38.dll was not found. Reinstalling the program may fix this problem.
 copy ..\envs\dfastbe\python38.dll dfastbe.dist
@@ -21,7 +14,7 @@ copy ..\envs\dfastbe\Lib\site-packages\certifi\cacert.pem dfastbe.dist\certifi
 rem File "d:\checkouts\D-FAST\D-FAST_Bank_Erosion\dfastbe.dist\pyproj\datadir.py", line 109, in get_data_dir
 rem  pyproj.exceptions.DataDirError: Valid PROJ data directory not found. Either set the path using the environmental variable PROJ_LIB or with `pyproj.datadir.set_data_dir`.
 mkdir dfastbe.dist\proj
-copy ..\envs\dfastbe\Lib\site-packages\pyproj\proj_dir\share\proj\* dfastbe.dist\proj
+copy ..\envs\dfastbe\Library\share\proj\* dfastbe.dist\proj
 
 
 rem File "d:\checkouts\D-FAST\D-FAST_Bank_Erosion\dfastbe.dist\shapely\geos.py", line 60, in load_dll
@@ -38,13 +31,15 @@ copy ..\envs\dfastbe\Lib\site-packages\geopandas\datasets\natural* dfastbe.dist\
 
 rem File "d:\checkouts\D-FAST\D-FAST_Bank_Erosion\dfastbe.dist\PyQt5\__init__.py", line 33, in find_qt
 rem  ImportError: unable to find Qt5Core.dll on PATH
-mkdir dfastbe.dist\PyQt5\Qt\bin
-copy ..\envs\dfastbe\Library\bin\Qt5Core* dfastbe.dist\PyQt5\Qt\bin
+rem mkdir dfastbe.dist\PyQt5\Qt\bin
+rem copy ..\envs\dfastbe\Library\bin\Qt5Core* dfastbe.dist\PyQt5\Qt\bin
 
 
 rem File "d:\checkouts\D-FAST\D-FAST_Bank_Erosion\dfastbe.dist\fiona\collection.py", line 9, in <module fiona.collection>
 rem  ImportError: LoadLibraryExW 'd:\checkouts\D-FAST\D-FAST_Bank_Erosion\dfastbe.dist\fiona\ogrext.pyd' failed: The specified module could not be found.
 copy ..\envs\dfastbe\Library\bin\*.dll dfastbe.dist
+rem don't need the boost libraries and maybe some other ...
+del /y dfastbe.dist/boost*.dll
 
 
 rem ImportError: LoadLibraryExW 'd:\checkouts\D-FAST\D-FAST_Bank_Erosion\dfastbe.dist\_ctypes.pyd' failed: The specified module could not be found.
@@ -53,8 +48,9 @@ copy ..\envs\dfastbe\DLLs\libffi-7.dll dfastbe.dist
 
 rem File "d:\checkouts\D-FAST\D-FAST_Bank_Erosion\dfastbe.dist\matplotlib\__init__.py", line 772, in _get_data_path
 rem RuntimeError: Could not find the matplotlib data files
+del /s /y dfastbe.dist\mpl-data
 mkdir dfastbe.dist\matplotlib\mpl-data
-xcopy /s ..\envs\dfastbe\Lib\site-packages\matplotlib\mpl-data\* dfastbe.dist\matplotlib\mpl-data
+xcopy /s /y ..\envs\dfastbe\Lib\site-packages\matplotlib\mpl-data\* dfastbe.dist\matplotlib\mpl-data
 
 
 rem File "d:\checkouts\D-FAST\D-FAST_Bank_Erosion\dfastbe.dist\rtree\core.py", line 126, in <module rtree.core>
@@ -65,8 +61,8 @@ copy ..\envs\dfastbe\Library\bin\spatialindex* dfastbe.dist\Library\bin
 
 rem File "d:\checkouts\D-FAST\D-FAST_Bank_Erosion\dfastbe.dist\dfastbe\gui.py", line 32, in <module dfastbe.gui>
 rem  ImportError: LoadLibraryExW 'd:\checkouts\D-FAST\D-FAST_Bank_Erosion\dfastbe.dist\PyQt5\QtWidgets.pyd' failed: The specified module could not be found.
-copy ..\envs\dfastbe\python3.dll dfastbe.dist\PyQt5
-copy dfastbe.dist\*.dll dfastbe.dist\PyQt5
+rem copy ..\envs\dfastbe\python3.dll dfastbe.dist\PyQt5
+rem copy dfastbe.dist\*.dll dfastbe.dist\PyQt5
 
 
 rem Unable to load language file 'messages.UK.ini'
@@ -78,20 +74,22 @@ copy dfastbe\*.png dfastbe.dist\dfastbe
 rem qt.qpa.plugin: Could not find the Qt platform plugin "windows" in ""
 rem  This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
 mkdir dfastbe.dist\platforms
-xcopy /s ..\envs\dfastbe\Library\plugins\platforms\* dfastbe.dist\platforms
+xcopy /s /y ..\envs\dfastbe\Library\plugins\platforms\* dfastbe.dist\platforms
 
 
 rem File "d:\checkouts\D-FAST\D-FAST_Bank_Erosion\dfastbe.dist\tkinter\__init__.py", line 2261, in __init__
 rem  _tkinter.TclError: Can't find a usable init.tcl in the following directories:
 rem   d:/checkouts/D-FAST/D-FAST_Bank_Erosion/lib/tcl8.6 ...
 rem This probably means that Tcl wasn't installed properly.
-mkdir dfasstbe.dist\lib\tcl8.6
-xcopy /s ..\envs\dfastbe\Library\lib\tcl8.6\* dfasstbe.dist\lib\tcl8.6
+del /s /y dfastbe.dist\tcl
+mkdir dfastbe.dist\lib\tcl8.6
+xcopy /s /y ..\envs\dfastbe\Library\lib\tcl8.6\* dfastbe.dist\lib\tcl8.6
 
 
 rem File "d:\checkouts\D-FAST\D-FAST_Bank_Erosion\dfastbe.dist\tkinter\__init__.py", line 2261, in __init__
 rem  _tkinter.TclError: Can't find a usable tk.tcl in the following directories:
 rem  d:/checkouts/D-FAST/D-FAST_Bank_Erosion/lib/tcl8.6/tk8.6 d:/checkouts/D-FAST/D-FAST_Bank_Erosion/lib/tk8.6 ...
 rem This probably means that tk wasn't installed properly.
-mkdir dfasstbe.dist\lib\tk8.6
-xcopy /s ..\envs\dfastbe\Library\lib\tk8.6\* dfasstbe.dist\lib\tk8.6
+del /s /y dfastbe.dist\tk
+mkdir dfastbe.dist\lib\tk8.6
+xcopy /s /y ..\envs\dfastbe\Library\lib\tk8.6\* dfastbe.dist\lib\tk8.6

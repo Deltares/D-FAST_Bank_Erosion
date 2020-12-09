@@ -47,6 +47,7 @@ import configparser
 FIRST_TIME: float
 LAST_TIME: float
 
+
 def banklines(filename: str = "dfastbe.cfg") -> None:
     """
     Run the bank line detection analysis using a configuration specified by file name.
@@ -63,7 +64,9 @@ def banklines(filename: str = "dfastbe.cfg") -> None:
     banklines_core(config, rootdir, False)
 
 
-def adjust_filenames(filename: str, config: configparser.ConfigParser) -> Tuple[str, configparser.ConfigParser]:
+def adjust_filenames(
+    filename: str, config: configparser.ConfigParser
+) -> Tuple[str, configparser.ConfigParser]:
     """
     Convert all paths to relative to current working directory.
 
@@ -86,9 +89,9 @@ def adjust_filenames(filename: str, config: configparser.ConfigParser) -> Tuple[
     config = config_to_absolute_paths(rootdir, config)
     config = config_to_relative_paths(cwd, config)
     rootdir = dfastbe.io.relative_path(cwd, rootdir)
-    
+
     return rootdir, config
-    
+
 
 def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -> None:
     """
@@ -115,7 +118,7 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
     dfastbe.io.log_text("-")
 
     # check output dir for bank lines
-    bankdir = dfastbe.io.config_get_str(config,"General", "BankDir")
+    bankdir = dfastbe.io.config_get_str(config, "General", "BankDir")
     dfastbe.io.log_text("bankdir_out", dict={"dir": bankdir})
     if os.path.exists(bankdir):
         dfastbe.io.log_text("overwrite_dir", dict={"dir": bankdir})
@@ -130,16 +133,18 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
     else:
         saveplot = False
         closeplot = False
-    
+
     # as appropriate check output dir for figures and file format
     if saveplot:
-        figdir = dfastbe.io.config_get_str(config,"General", "FigureDir", rootdir + os.sep + "figure")
+        figdir = dfastbe.io.config_get_str(
+            config, "General", "FigureDir", rootdir + os.sep + "figure"
+        )
         dfastbe.io.log_text("figure_dir", dict={"dir": figdir})
         if os.path.exists(figdir):
             dfastbe.io.log_text("overwrite_dir", dict={"dir": figdir})
         else:
             os.makedirs(figdir)
-        plot_ext = dfastbe.io.config_get_str(config,"General", "FigureExt", ".png")
+        plot_ext = dfastbe.io.config_get_str(config, "General", "FigureExt", ".png")
 
     # read chainage file
     xykm = dfastbe.io.config_get_xykm(config)
@@ -204,11 +209,26 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
         dfastbe.io.log_text("create_figures")
         ifig = 0
         bbox = get_bbox(xykm_numpy)
-        
+
         hmax = 0.5 * sim["h_face"].max()
-        fig = dfastbe.plotting.plot_detect1(bbox, xykm_numpy, bankareas, bank, sim["facenode"], sim["nnodes"], sim["x_node"], sim["y_node"], sim["h_face"], hmax, "x-coordinate [m]", "y-coordinate [m]", "water depth and detected bank lines", "water depth [m]")
+        fig = dfastbe.plotting.plot_detect1(
+            bbox,
+            xykm_numpy,
+            bankareas,
+            bank,
+            sim["facenode"],
+            sim["nnodes"],
+            sim["x_node"],
+            sim["y_node"],
+            sim["h_face"],
+            hmax,
+            "x-coordinate [m]",
+            "y-coordinate [m]",
+            "water depth and detected bank lines",
+            "water depth [m]",
+        )
         if saveplot:
-            ifig = ifig + 1        
+            ifig = ifig + 1
             figfile = figdir + os.sep + str(ifig) + "_banklinedetection" + plot_ext
             dfastbe.plotting.savefig(fig, figfile)
 
@@ -238,7 +258,9 @@ def bankerosion(filename="dfastbe.cfg") -> None:
     bankerosion_core(config, rootdir, False)
 
 
-def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -> None:
+def bankerosion_core(
+    config: configparser.ConfigParser, rootdir: str, gui: bool
+) -> None:
     """
     Run the bank erosion analysis for a specified configuration.
 
@@ -264,9 +286,9 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
         },
     )
     dfastbe.io.log_text("-")
-	
+
     # check bankdir for input
-    bankdir = dfastbe.io.config_get_str(config,"General", "BankDir")
+    bankdir = dfastbe.io.config_get_str(config, "General", "BankDir")
     dfastbe.io.log_text("bankdir_in", dict={"dir": bankdir})
     if not os.path.exists(bankdir):
         dfastbe.io.log_text("missing_dir", dict={"dir": bankdir})
@@ -288,16 +310,18 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
     else:
         saveplot = False
         closeplot = False
-    
+
     # as appropriate check output dir for figures and file format
     if saveplot:
-        figdir = dfastbe.io.config_get_str(config,"General", "FigureDir", rootdir + os.sep + "figure")
+        figdir = dfastbe.io.config_get_str(
+            config, "General", "FigureDir", rootdir + os.sep + "figure"
+        )
         dfastbe.io.log_text("figure_dir", dict={"dir": figdir})
         if os.path.exists(figdir):
             dfastbe.io.log_text("overwrite_dir", dict={"dir": figdir})
         else:
             os.makedirs(figdir)
-        plot_ext = dfastbe.io.config_get_str(config,"General", "FigureExt", ".png")
+        plot_ext = dfastbe.io.config_get_str(config, "General", "FigureExt", ".png")
 
     # get simulation time terosion
     Teros = dfastbe.io.config_get_int(config, "Erosion", "TErosion", positive=True)
@@ -317,7 +341,7 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
     # read river km file
     xykm = dfastbe.io.config_get_xykm(config)
     xykm_numpy = numpy.array(xykm)
-    xy_numpy = xykm_numpy[:,:2]
+    xy_numpy = xykm_numpy[:, :2]
 
     # read bank lines
     banklines = dfastbe.io.config_get_bank_lines(config, bankdir)
@@ -335,7 +359,7 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
     bank_idx = []
     for ib in range(n_banklines):
         bp = numpy.array(banklines.geometry[ib])
-        dfastbe.io.log_text("bank_nodes", dict={"ib": ib+1, "n": len(bp)})
+        dfastbe.io.log_text("bank_nodes", dict={"ib": ib + 1, "n": len(bp)})
 
         crds, idx = dfastbe.support.intersect_line_mesh(
             bp, xf, yf, xe, ye, fe, ef, fn, en, boundary_edge_nrs
@@ -351,18 +375,20 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
         bank_km[ib] = dfastbe.support.project_km_on_line(bcrds, xykm_numpy)
         to_right[ib] = dfastbe.support.on_right_side(bcrds, xy_numpy)
         if to_right[ib]:
-            dfastbe.io.log_text("right_side_bank", dict={"ib": ib+1})
+            dfastbe.io.log_text("right_side_bank", dict={"ib": ib + 1})
         else:
-            dfastbe.io.log_text("left_side_bank", dict={"ib": ib+1})
-    
+            dfastbe.io.log_text("left_side_bank", dict={"ib": ib + 1})
+
     # read river axis file
     river_axis_file = dfastbe.io.config_get_str(config, "Erosion", "RiverAxis")
     dfastbe.io.log_text("read_river_axis", dict={"file": river_axis_file})
     river_axis = dfastbe.io.read_xyc(river_axis_file)
     river_axis_numpy = numpy.array(river_axis)
     # optional sorting --> see 04_Waal_D3D example
-    # check: sum all distances and determine maximum distance ... if maximum > alpha * sum then perform sort
-    # Waal OK: 0.0082 ratio max/sum, Waal NotOK: 0.13 - Waal: 2500 points, so even when OK still some 21 times more than 1/2500 = 0.0004
+    # check: sum all distances and determine maximum distance ...
+    # if maximum > alpha * sum then perform sort
+    # Waal OK: 0.0082 ratio max/sum, Waal NotOK: 0.13 - Waal: 2500 points,
+    # so even when OK still some 21 times more than 1/2500 = 0.0004
     dist2 = (numpy.diff(river_axis_numpy, axis=0) ** 2).sum(axis=1)
     alpha = dist2.max() / dist2.sum()
     if alpha > 0.03:
@@ -394,7 +420,7 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
     km_step = dfastbe.io.config_get_float(config, "Erosion", "OutputInterval", 1.0)
     # map to output interval
     km_bin = (river_axis_km.min(), river_axis_km.max(), km_step)
-    km = dfastbe.kernel.get_km_bins(km_bin)
+    km_mid = dfastbe.kernel.get_km_bins(km_bin, type = 3) # get mid points
     xykm_bin_numpy = dfastbe.support.xykm_bin(xykm_numpy, km_bin)
 
     # read fairway file
@@ -402,7 +428,7 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
     dfastbe.io.log_text("read_fairway", dict={"file": fairway_file})
     fairway = dfastbe.io.read_xyc(fairway_file)
     fairway_numpy = numpy.array(fairway)
-    fw_used = numpy.zeros( (len(fairway_numpy),), dtype=bool )
+    fw_used = numpy.zeros((len(fairway_numpy),), dtype=bool)
 
     # distance fairway-bankline (bankfairway)
     dfastbe.io.log_text("bank_distance_fairway")
@@ -427,7 +453,7 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
 
     # map fairway to mesh cells
     dfastbe.io.log_text("fairway_to_mesh", dict={"nnodes": fw_used.sum()})
-    fwi = -numpy.ones( (len(fairway_numpy),), dtype=numpy.int64)
+    fwi = -numpy.ones((len(fairway_numpy),), dtype=numpy.int64)
     fairway_index = numpy.ma.masked_array(fwi, mask=(fwi == -1))
     fairway_index[fw_used] = dfastbe.support.map_line_mesh(
         fairway_numpy[fw_used], xf, yf, xe, ye, fe, ef, boundary_edge_nrs
@@ -495,7 +521,7 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
             for thr_i in thr:
                 bt[tauc[ib] < thr_i] += 1
             banktype[ib] = bt
-    
+
     # read bank protectlevel zss
     zss_miss = -1000
     zss = dfastbe.io.config_get_parameter(
@@ -505,7 +531,7 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
     for ib in range(len(zss)):
         mask = zss[ib] == zss_miss
         zss[ib][mask] = zfw_ini[ib][mask] - 1
-    
+
     # get pdischarges
     dfastbe.io.log_text("get_levels")
     num_levels = dfastbe.io.config_get_int(config, "Erosion", "NLevel")
@@ -524,7 +550,7 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
     waterlevel: List[List[numpy.ndarray]] = []
     chezy: List[List[numpy.ndarray]] = []
     dv: List[List[numpy.ndarray]] = []
-    
+
     linesize: List[numpy.ndarray] = []
     dn_flow_tot: List[numpy.ndarray] = []
     dn_ship_tot: List[numpy.ndarray] = []
@@ -533,8 +559,11 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
     dn_eq: List[numpy.ndarray] = []
     dv_eq: List[numpy.ndarray] = []
     for iq in range(num_levels):
-        dfastbe.io.log_text("discharge_header", dict={"i": iq + 1, "p": pdischarge[iq], "t": pdischarge[iq]*Teros})
-        
+        dfastbe.io.log_text(
+            "discharge_header",
+            dict={"i": iq + 1, "p": pdischarge[iq], "t": pdischarge[iq] * Teros},
+        )
+
         iq_str = "{}".format(iq + 1)
 
         dfastbe.io.log_text("read_q_params", indent="  ")
@@ -624,7 +653,7 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
         chezy.append([])
         dv.append([])
 
-        dvol_bank = numpy.zeros((len(km), n_banklines))
+        dvol_bank = numpy.zeros((len(km_mid), n_banklines))
         hfw_max = 0
         for ib, bcrds in enumerate(bank_crds):
             # determine velocity along banks ...
@@ -643,14 +672,14 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
             )
             #
             if iq == 0:
-                # determine velocity and bankheight along banks ...            
+                # determine velocity and bankheight along banks ...
                 # bankheight = maximum bed elevation per cell
                 if sim["zb_location"] == "node":
                     bankheight.append(sim["zb_val"][fnc[bank_index, :]].max(axis=1))
                 else:
                     # don't know ... need to check neighbouring cells ...
-                   bankheight.append(None)
-                   pass
+                    bankheight.append(None)
+                    pass
 
             # get water depth along fairway
             ii = fairway_index[ifw[ib]]
@@ -660,7 +689,7 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
             chez = sim["chz_face"][ii]
             # TODO: curious ... MATLAB: chezy{j} = 0*chezy{j}+mchez
             chezy[iq].append(0 * chez + chez.mean())
-            
+
             if iq == ref_level:
                 dn_eq1, dv_eq1 = dfastbe.kernel.comp_erosion_eq(
                     bankheight[ib],
@@ -682,7 +711,7 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
 
             displ_tauc = False  # True for Delft3D, False otherwise
             filter = False
-            
+
             qstr = str(iq + 1)
             bstr = str(ib + 1)
             dniqib, dviqib, dnship, dnflow = dfastbe.kernel.comp_erosion(
@@ -735,7 +764,9 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
             config, "Erosion", "EroVol" + iq_str, default="erovolQ" + iq_str + ".evo"
         )
         dfastbe.io.log_text("save_erovol", dict={"file": erovol_file}, indent="  ")
-        dfastbe.io.write_km_eroded_volumes(km, dvol_bank, outputdir + os.sep + erovol_file)
+        dfastbe.io.write_km_eroded_volumes(
+            km_mid, dvol_bank, outputdir + os.sep + erovol_file
+        )
 
     dfastbe.io.log_text("=")
     dnav = numpy.zeros(n_banklines)
@@ -744,8 +775,8 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
     dnavship = numpy.zeros(n_banklines)
     dnaveq = numpy.zeros(n_banklines)
     dnmaxeq = numpy.zeros(n_banklines)
-    vol_eq = numpy.zeros((len(km), n_banklines))
-    vol_tot = numpy.zeros((len(km), n_banklines))
+    vol_eq = numpy.zeros((len(km_mid), n_banklines))
+    vol_tot = numpy.zeros((len(km_mid), n_banklines))
     xyline_new_list = []
     bankline_new_list = []
     xyline_eq_list = []
@@ -778,7 +809,7 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
         xyline_new = dfastbe.support.move_line(bcrds, dn_tot[ib], to_right[ib])
         xyline_new_list.append(xyline_new)
         bankline_new_list.append(shapely.geometry.LineString(xyline_new))
-        
+
         xyline_eq = dfastbe.support.move_line(bcrds, dn_eq[ib], to_right[ib])
         xyline_eq_list.append(xyline_eq)
         bankline_eq_list.append(shapely.geometry.LineString(xyline_eq))
@@ -792,12 +823,14 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
 
     # write bank line files
     bankline_new_series = geopandas.geoseries.GeoSeries(bankline_new_list)
-    banklines_new = geopandas.geodataframe.GeoDataFrame.from_features(bankline_new_series)
+    banklines_new = geopandas.geodataframe.GeoDataFrame.from_features(
+        bankline_new_series
+    )
     bankname = dfastbe.io.config_get_str(config, "General", "BankFile", "bankfile")
     bankfile = outputdir + os.sep + bankname + "_new.shp"
     dfastbe.io.log_text("save_banklines", dict={"file": bankfile})
     banklines_new.to_file(bankfile)
-    
+
     bankline_eq_series = geopandas.geoseries.GeoSeries(bankline_eq_list)
     banklines_eq = geopandas.geodataframe.GeoDataFrame.from_features(bankline_eq_series)
     bankfile = outputdir + os.sep + bankname + "_eq.shp"
@@ -809,14 +842,14 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
         config, "Erosion", "EroVol", default="erovol.evo"
     )
     print("saving eroded volume in file: {}".format(erovol_file))
-    dfastbe.io.write_km_eroded_volumes(km, vol_tot, outputdir + os.sep + erovol_file)
+    dfastbe.io.write_km_eroded_volumes(km_mid, vol_tot, outputdir + os.sep + erovol_file)
 
     # write eroded volumes per km (equilibrium)
     erovol_file = dfastbe.io.config_get_str(
         config, "Erosion", "EroVolEqui", default="erovol_eq.evo"
     )
     print("saving eroded volume in file: {}".format(erovol_file))
-    dfastbe.io.write_km_eroded_volumes(km, vol_eq, outputdir + os.sep + erovol_file)
+    dfastbe.io.write_km_eroded_volumes(km_mid, vol_eq, outputdir + os.sep + erovol_file)
 
     # create various plots
     if plotting:
@@ -824,63 +857,177 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
         dfastbe.io.log_text("create_figures")
         ifig = 0
         bbox = get_bbox(xykm_numpy)
-        
-        fig = dfastbe.plotting.plot1_waterdepth_and_banklines(bbox, xykm_numpy, banklines, fn, sim["nnodes"], sim["x_node"], sim["y_node"], sim["h_face"], hfw_max, "x-coordinate [km]", "y-coordinate [km]", "water depth and initial bank lines", "water depth [m]")
+
+        fig = dfastbe.plotting.plot1_waterdepth_and_banklines(
+            bbox,
+            xykm_numpy,
+            banklines,
+            fn,
+            sim["nnodes"],
+            sim["x_node"],
+            sim["y_node"],
+            sim["h_face"],
+            hfw_max,
+            "x-coordinate [km]",
+            "y-coordinate [km]",
+            "water depth and initial bank lines",
+            "water depth [m]",
+        )
         if saveplot:
-            ifig = ifig + 1        
+            ifig = ifig + 1
             figfile = figdir + os.sep + str(ifig) + "_banklines" + plot_ext
             dfastbe.plotting.savefig(fig, figfile)
-        
-        fig = dfastbe.plotting.plot2_eroded_distance_and_equilibrium(bbox, xykm_numpy, bank_crds, dn_tot, to_right, dnav, xyline_eq_list, xe, ye, "x-coordinate [km]", "y-coordinate [km]", "eroded distance ({t} year)\n and equilibrium banks".format(t=Teros))
+
+        fig = dfastbe.plotting.plot2_eroded_distance_and_equilibrium(
+            bbox,
+            xykm_numpy,
+            bank_crds,
+            dn_tot,
+            to_right,
+            dnav,
+            xyline_eq_list,
+            xe,
+            ye,
+            "x-coordinate [km]",
+            "y-coordinate [km]",
+            "eroded distance ({t} year)\n and equilibrium banks".format(t=Teros),
+        )
         if saveplot:
-            ifig = ifig + 1        
+            ifig = ifig + 1
             figfile = figdir + os.sep + str(ifig) + "_erosion_sensitivity" + plot_ext
             dfastbe.plotting.savefig(fig, figfile)
-        
-        fig = dfastbe.plotting.plot3_eroded_volume_subdivided_1(km, km_step, "river chainage [km]", dv, "eroded volume [m^3]", "eroded volume per {ds} chainage km ({t} years)".format(ds=km_step, t=Teros), "Q{iq}")
+
+        fig = dfastbe.plotting.plot3_eroded_volume_subdivided_1(
+            km_mid,
+            km_step,
+            "river chainage [km]",
+            dv,
+            "eroded volume [m^3]",
+            "eroded volume per {ds} chainage km ({t} years)".format(
+                ds=km_step, t=Teros
+            ),
+            "Q{iq}",
+        )
         if saveplot:
-            ifig = ifig + 1        
-            figfile = figdir + os.sep + str(ifig) + "_eroded_volume_per_discharge" + plot_ext
+            ifig = ifig + 1
+            figfile = (
+                figdir + os.sep + str(ifig) + "_eroded_volume_per_discharge" + plot_ext
+            )
             dfastbe.plotting.savefig(fig, figfile)
-        
-        fig = dfastbe.plotting.plot3_eroded_volume_subdivided_2(km, km_step, "river chainage [km]", dv, "eroded volume [m^3]", "eroded volume per {ds} chainage km ({t} years)".format(ds=km_step, t=Teros), "Bank {ib}")
+
+        fig = dfastbe.plotting.plot3_eroded_volume_subdivided_2(
+            km_mid,
+            km_step,
+            "river chainage [km]",
+            dv,
+            "eroded volume [m^3]",
+            "eroded volume per {ds} chainage km ({t} years)".format(
+                ds=km_step, t=Teros
+            ),
+            "Bank {ib}",
+        )
         if saveplot:
-            ifig = ifig + 1        
+            ifig = ifig + 1
             figfile = figdir + os.sep + str(ifig) + "_eroded_volume_per_bank" + plot_ext
             dfastbe.plotting.savefig(fig, figfile)
-        
-        fig = dfastbe.plotting.plot4_eroded_volume_eq(km, km_step, "river chainage [km]", vol_eq, "eroded volume [m^3]", "eroded volume per {ds} chainage km (equilibrium)".format(ds=km_step))
+
+        fig = dfastbe.plotting.plot4_eroded_volume_eq(
+            km_mid,
+            km_step,
+            "river chainage [km]",
+            vol_eq,
+            "eroded volume [m^3]",
+            "eroded volume per {ds} chainage km (equilibrium)".format(ds=km_step),
+        )
         if saveplot:
-            ifig = ifig + 1        
+            ifig = ifig + 1
             figfile = figdir + os.sep + str(ifig) + "_eroded_volume_eq" + plot_ext
             dfastbe.plotting.savefig(fig, figfile)
-        
-        figlist = dfastbe.plotting.plot5series_waterlevels_per_bank(bank_km, "river chainage [km]", waterlevel, "water level at Q{iq}", "average water level", bankheight, "level of bank", zss, "bank protection level", "elevation", "(water)levels along bank line {ib}", "[m NAP]")
+
+        figlist = dfastbe.plotting.plot5series_waterlevels_per_bank(
+            bank_km,
+            "river chainage [km]",
+            waterlevel,
+            "water level at Q{iq}",
+            "average water level",
+            bankheight,
+            "level of bank",
+            zss,
+            "bank protection level",
+            "elevation",
+            "(water)levels along bank line {ib}",
+            "[m NAP]",
+        )
         if saveplot:
-            for ib,fig in enumerate(figlist):
-                ifig = ifig + 1        
-                figfile = figdir + os.sep + str(ifig) + "_levels_bank_" + str(ib+1) + plot_ext
+            for ib, fig in enumerate(figlist):
+                ifig = ifig + 1
+                figfile = (
+                    figdir
+                    + os.sep
+                    + str(ifig)
+                    + "_levels_bank_"
+                    + str(ib + 1)
+                    + plot_ext
+                )
                 dfastbe.plotting.savefig(fig, figfile)
 
-        figlist = dfastbe.plotting.plot6series_velocity_per_bank(bank_km, "river chainage [km]", velocity, "velocity at Q{iq}", tauc, chezy[0], rho, g, "critical velocity", "velocity", "velocity along bank line {ib}", "[m/s]")
+        figlist = dfastbe.plotting.plot6series_velocity_per_bank(
+            bank_km,
+            "river chainage [km]",
+            velocity,
+            "velocity at Q{iq}",
+            tauc,
+            chezy[0],
+            rho,
+            g,
+            "critical velocity",
+            "velocity",
+            "velocity along bank line {ib}",
+            "[m/s]",
+        )
         if saveplot:
-            for ib,fig in enumerate(figlist):
-                ifig = ifig + 1        
-                figfile = figdir + os.sep + str(ifig) + "_velocity_bank_" + str(ib+1) + plot_ext
+            for ib, fig in enumerate(figlist):
+                ifig = ifig + 1
+                figfile = (
+                    figdir
+                    + os.sep
+                    + str(ifig)
+                    + "_velocity_bank_"
+                    + str(ib + 1)
+                    + plot_ext
+                )
                 dfastbe.plotting.savefig(fig, figfile)
 
-        fig = dfastbe.plotting.plot7_banktype(bbox, xykm_numpy, bank_crds, banktype, taucls_str, "x-coordinate [km]", "y-coordinate [km]", "bank type")
+        fig = dfastbe.plotting.plot7_banktype(
+            bbox,
+            xykm_numpy,
+            bank_crds,
+            banktype,
+            taucls_str,
+            "x-coordinate [km]",
+            "y-coordinate [km]",
+            "bank type",
+        )
         if saveplot:
-            ifig = ifig + 1        
+            ifig = ifig + 1
             figfile = figdir + os.sep + str(ifig) + "_banktype" + plot_ext
             dfastbe.plotting.savefig(fig, figfile)
-        
-        fig = dfastbe.plotting.plot8_eroded_distance(bank_km, "river chainage [km]", dn_tot, "Bank {ib}", dn_eq, "Bank {ib} (eq)", "eroded distance", "[m]")
+
+        fig = dfastbe.plotting.plot8_eroded_distance(
+            bank_km,
+            "river chainage [km]",
+            dn_tot,
+            "Bank {ib}",
+            dn_eq,
+            "Bank {ib} (eq)",
+            "eroded distance",
+            "[m]",
+        )
         if saveplot:
-            ifig = ifig + 1        
+            ifig = ifig + 1
             figfile = figdir + os.sep + str(ifig) + "_erodis" + plot_ext
             dfastbe.plotting.savefig(fig, figfile)
-    
+
         if closeplot:
             matplotlib.pyplot.close("all")
         else:
@@ -890,7 +1037,9 @@ def bankerosion_core(config: configparser.ConfigParser, rootdir: str, gui: bool)
     timedlogger("-- end analysis --")
 
 
-def get_bbox(xykm: numpy.ndarray, buffer: float = 0.1) -> Tuple[float, float, float, float]:
+def get_bbox(
+    xykm: numpy.ndarray, buffer: float = 0.1
+) -> Tuple[float, float, float, float]:
     """
     Derive the bounding box from a line.
     
@@ -906,8 +1055,8 @@ def get_bbox(xykm: numpy.ndarray, buffer: float = 0.1) -> Tuple[float, float, fl
     bbox : Tuple[float, float, float, float]
         Tuple bounding box consisting of [min x, min y, max x, max y)
     """
-    x = xykm[:,0]
-    y = xykm[:,1]
+    x = xykm[:, 0]
+    y = xykm[:, 1]
     xmin = x.min()
     ymin = y.min()
     xmax = x.max()
@@ -917,7 +1066,9 @@ def get_bbox(xykm: numpy.ndarray, buffer: float = 0.1) -> Tuple[float, float, fl
     return bbox
 
 
-def derive_topology_arrays(fn: numpy.ndarray) -> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray]:
+def derive_topology_arrays(
+    fn: numpy.ndarray,
+) -> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray]:
     """
     Derive the secondary topology arrays from the face_node_connectivity.
     
@@ -976,7 +1127,7 @@ def derive_topology_arrays(fn: numpy.ndarray) -> Tuple[numpy.ndarray, numpy.ndar
     ef = -numpy.ones((n_unique_edges, 2), dtype=numpy.int64)
     ef[edge_nr[new_edge], 0] = face_nr[new_edge]
     ef[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
-    
+
     return en, ef, fe, boundary_edge
 
 
@@ -1088,7 +1239,7 @@ def config_to_absolute_paths(
         config = parameter_absolute_path(config, "Erosion", "RiverAxis", rootdir)
         config = parameter_absolute_path(config, "Erosion", "Fairway", rootdir)
         config = parameter_absolute_path(config, "Erosion", "OutputDir", rootdir)
-        
+
         config = parameter_absolute_path(config, "Erosion", "ShipType", rootdir)
         config = parameter_absolute_path(config, "Erosion", "VShip", rootdir)
         config = parameter_absolute_path(config, "Erosion", "NShip", rootdir)
@@ -1096,16 +1247,18 @@ def config_to_absolute_paths(
         config = parameter_absolute_path(config, "Erosion", "Draught", rootdir)
         config = parameter_absolute_path(config, "Erosion", "Wave0", rootdir)
         config = parameter_absolute_path(config, "Erosion", "Wave1", rootdir)
-        
+
         config = parameter_absolute_path(config, "Erosion", "BankType", rootdir)
         config = parameter_absolute_path(config, "Erosion", "ProtectLevel", rootdir)
         config = parameter_absolute_path(config, "Erosion", "Slope", rootdir)
         config = parameter_absolute_path(config, "Erosion", "Reed", rootdir)
-        
+
         NLevel = dfastbe.io.config_get_int(config, "Erosion", "NLevel", default=0)
         for i in range(NLevel):
             istr = str(i + 1)
-            config = parameter_absolute_path(config, "Erosion", "SimFile" + istr, rootdir)
+            config = parameter_absolute_path(
+                config, "Erosion", "SimFile" + istr, rootdir
+            )
             config = parameter_absolute_path(
                 config, "Erosion", "ShipType" + istr, rootdir
             )
@@ -1167,16 +1320,18 @@ def config_to_relative_paths(
         config = parameter_relative_path(config, "Erosion", "Draught", rootdir)
         config = parameter_relative_path(config, "Erosion", "Wave0", rootdir)
         config = parameter_relative_path(config, "Erosion", "Wave1", rootdir)
-        
+
         config = parameter_relative_path(config, "Erosion", "BankType", rootdir)
         config = parameter_relative_path(config, "Erosion", "ProtectLevel", rootdir)
         config = parameter_relative_path(config, "Erosion", "Slope", rootdir)
         config = parameter_relative_path(config, "Erosion", "Reed", rootdir)
-        
+
         NLevel = dfastbe.io.config_get_int(config, "Erosion", "NLevel", default=0)
         for i in range(NLevel):
             istr = str(i + 1)
-            config = parameter_relative_path(config, "Erosion", "SimFile" + istr, rootdir)
+            config = parameter_relative_path(
+                config, "Erosion", "SimFile" + istr, rootdir
+            )
             config = parameter_relative_path(
                 config, "Erosion", "ShipType" + istr, rootdir
             )

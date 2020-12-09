@@ -40,7 +40,11 @@ import dfastbe.io
 import pathlib
 
 
-def run(language: str = "UK", runmode: str = "GUI", configfile: Optional[str] = "dfastbe.cfg") -> None:
+def run(
+    language: str = "UK",
+    runmode: str = "GUI",
+    configfile: Optional[str] = "dfastbe.cfg",
+) -> None:
     """
     Main routine initializing the language file and starting the chosen run mode.
     

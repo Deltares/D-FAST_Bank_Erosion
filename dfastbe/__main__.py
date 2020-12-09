@@ -29,9 +29,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
 from typing import Optional, Tuple
 
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # Needed for Nuitka compilation
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 import os
 import pathlib
 
@@ -44,6 +44,7 @@ if is_nuitka:
     os.environ["TCL_LIBRARY"] = root + os.sep + "lib" + os.sep + "tcl8.6"
     proj_lib_dirs = os.environ.get("PROJ_LIB", "")
     import pyproj.datadir
+
     pyproj.datadir.set_data_dir(root + os.sep + "proj")
     import pyproj
 
@@ -52,13 +53,20 @@ import fiona._shim
 import fiona.schema
 import _ctypes
 import pandas._libs.tslibs.base
-import pyproj._compat
+
+# import pyproj._compat
 import netCDF4.utils
 import cftime
-#------------------------------------------------------------------------------
+import matplotlib.backends.backend_qt5
+
+# ------------------------------------------------------------------------------
+import matplotlib
+
+matplotlib.use("Qt5Agg")
 
 import argparse
 import dfastbe.cmd
+
 
 def parse_arguments() -> Tuple[str, str, Optional[str]]:
     """

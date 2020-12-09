@@ -317,7 +317,16 @@ def edge_mean(a_pnt: numpy.ndarray) -> numpy.ndarray:
     return a_sgm
 
 
-def comp_hw_ship_at_bank(distance_fw: numpy.ndarray, dfw0: numpy.ndarray, dfw1: numpy.ndarray, h_input: numpy.ndarray, shiptype: numpy.ndarray, Tship: numpy.ndarray, vship: numpy.ndarray, g: float) -> numpy.ndarray:
+def comp_hw_ship_at_bank(
+    distance_fw: numpy.ndarray,
+    dfw0: numpy.ndarray,
+    dfw1: numpy.ndarray,
+    h_input: numpy.ndarray,
+    shiptype: numpy.ndarray,
+    Tship: numpy.ndarray,
+    vship: numpy.ndarray,
+    g: float,
+) -> numpy.ndarray:
     """
     Compute wave heights at bank due to passing ships.
     
@@ -390,11 +399,11 @@ def get_km_bins(km_bin: Tuple[float, float, float], type: int = 2) -> numpy.ndar
         Array containing the chainage bin upper bounds
     """
     km_step = km_bin[2]
-    
+
     lb = 0
     ub = int(round((km_bin[1] - km_bin[0]) / km_bin[2])) + 1
     dx = 0.0
-    
+
     if type == 0:
         # all bounds
         pass
@@ -407,14 +416,16 @@ def get_km_bins(km_bin: Tuple[float, float, float], type: int = 2) -> numpy.ndar
     elif type == 3:
         # midpoint values
         ub = ub - 1
-        dx = km_bin[2]/2
-    
+        dx = km_bin[2] / 2
+
     km = km_bin[0] + dx + numpy.arange(lb, ub) * km_bin[2]
 
     return km
 
 
-def get_km_eroded_volume(bank_km: numpy.ndarray, dv: numpy.ndarray, km_bin: Tuple[float, float, float]) -> numpy.ndarray:
+def get_km_eroded_volume(
+    bank_km: numpy.ndarray, dv: numpy.ndarray, km_bin: Tuple[float, float, float]
+) -> numpy.ndarray:
     """
     Accumulate the erosion volumes per chainage bin.
     
@@ -437,6 +448,6 @@ def get_km_eroded_volume(bank_km: numpy.ndarray, dv: numpy.ndarray, km_bin: Tupl
         numpy.int64
     )
     dvol = numpy.bincount(bin_idx, weights=dv)
-    length = int((km_bin[1]-km_bin[0])/km_bin[2])
+    length = int((km_bin[1] - km_bin[0]) / km_bin[2])
     dvol.resize((length,))
     return dvol

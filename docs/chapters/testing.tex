@@ -2,26 +2,65 @@
 
 \section{Test plan}
 
+The testing is based on the pytest framework.
+
+\begin{Verbatim}
+    > conda install pytest
+    > pytest
+\end{Verbatim}
+
 \subsection{Acceptance testing}
 
 In \autoref{Sec:FuncReq} the 10 functional requirements were listed.
 They are repeated below and for every requirement it is indicated how it is tested.
 
 \begin{enumerate}
-\item The results of this program must match those of WAQBANK given the same input data.
+\item The results of \dfastbe must match those of WAQBANK given the same input data.
+This is tested by means of a number of comparison studies, and subsequently tested using regression tests.
+
 \item Users must be able to run this program in batch mode from the command line.
+This has been implemented as run modes \keyw{--mode banklines} and \keyw{--mode bankerosion}.
+The proper functioning of these options is tested by means of regression testing.
+
 \item Users must be able to run the analysis based on \dflowfm results.
+This is tested by means of regression testing using result files of \dflowfm version X.
+
 \item Users must be able to provide all data via an input file, similar to the ini-file like file of WAQBANK.
+This testing is included in the regression testing of the batch mode, and may in the future be included in the gui testing.
+
 \item The input files must be consistent with those of WAQBANK, or aligned with open standards or the \dflowfm modeling system.
+The \dfastbe configuration file is identical to the WAQBANK definition file except for the fact that the new file contains three sections \keyw{[General]}, \keyw{[Detect]} and \keyw{[Erosion]} to give a bit more context for the purpose of each keyword.
+\dfastbe accepts old WAQBANK input files, but writes the data in the new format.
+The format of the other input files is not adjusted, but for line geometries \dfastbe also accepts shape files besides the original \file{.xyc} files.
+There are unit and integration tests addressing the reading of the input files.
+
 \item The output files must be consistent with those of WAQBANK, or aligned with open standards or the \dflowfm modeling system.
+The ascii files containing the bank erosion volumes are identical to those of WAQBANK.
+The shifted bank lines are exported as Shape files instead of \file{.xyc} files to align with common GIS standards.
+The figures are now saved as \file{.png} files instead of MATLAB specific \file{.fig} files.
+There are unit and integration tests addressing the writing of the output files.
 
 \item The should read relevant data directly from \dflowfm map-files similarly to WAQBANK reading data directly from SIMONA and Delft3D 4 result files.
+All quantities previously read from the SIMONA SDS-files and Delft3D-FLOW trim-files is now read from the \dflowfm map.nc files.
 
 \item A simple graphical user interface could support users in process of creating the input file.
+The graphical user interface that you get by running \dfastbe in default mode or by explicitly specifying \keyw{--mode gui} has been tested manually as described in \autoref{Sec:GuiTests}.
 
 \item It would be nice if the software would be more generally applicable than just the Dutch rivers.
+The code does not include specific knowledge of the Dutch rivers except for the fact that some of the rules of thumb have been derived using Dutch river data.
+The original WAQBANK code was already applied to foreign rivers such as the Donau.
+No special testing carried out for this requirement.
+
 \item It would be nice if the software would be able to run besides English also in Dutch.
+All texts shown by \dfastbe are read from a language configuration file.
+An English and a Dutch version of that configuration file are provided.
+A most system tests are carried out using the default English configuration, but one test is carried out using the Dutch configuration.
+
 \end{enumerate}
+
+\subsubsection{Manual testing of the user interface} \label{Sec:GuiTests}
+
+\subsubsection{Test 1}
 
 \subsection{System testing}
 
@@ -37,16 +76,13 @@ This is ongoing work; the test and build steps are currently run locally
 
 \begin{Verbatim}[fontsize=\tiny]
 =============================================== test session starts ================================================
-platform win32 -- Python 3.8.2, pytest-6.1.2, py-1.9.0, pluggy-0.13.1
-rootdir: D:\checkouts\D-FAST\D-FAST_Morphological_Impact
-collected 65 items
+platform win32 -- Python 3.8.5, pytest-6.1.2, py-1.9.0, pluggy-0.13.1
+rootdir: D:\checkouts\D-FAST\D-FAST_Bank_Erosion
+collected 33 items
 
-tests\test_batch.py ...                                                                                       [  4%]
-tests\test_cli.py ..                                                                                          [  7%]
-tests\test_io.py ........................................                                                     [ 69%]
-tests\test_kernel.py ....................                                                                     [100%]
+tests\test_io.py .................................                                                            [100%]
 
-================================================ 65 passed in 1.43s ================================================
+=============================================== 33 passed in 11.79s ================================================
 \end{Verbatim}
 
 The results of the software is verified by means of

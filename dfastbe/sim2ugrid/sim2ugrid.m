@@ -5,8 +5,10 @@ function sim2ugrid(filename)
 dateformat = 'yyyy-mm-ddTHH:MM:SS';
 prehistory = '';
 simOrg = qpfopen(filename);
+ncfile = 'undefined';
 switch simOrg.FileType
     case 'SIMONA SDS FILE'
+        ncfile = [filename, '_map.nc'];
         [xd, yd] = waquaio(simOrg, '', 'dgrid');
         zb = waquaio(simOrg, '', 'height');
         %
@@ -53,6 +55,8 @@ switch simOrg.FileType
     case 'NEFIS'
         switch simOrg.SubType
             case 'Delft3D-trim'
+                [p,f,e] = fileparts(filname);
+                ncfile = [p, filesep, f, '_map.nc'];
                 xd = vs_get(simOrg, 'map-const', 'XCOR', 'quiet');
                 yd = vs_get(simOrg, 'map-const', 'YCOR', 'quiet');
                 node_active = xd~=0 & yd~=0;
@@ -124,7 +128,7 @@ switch simOrg.FileType
         error('%s files are not (yet) supported by SIM2UGRID.', simOrg.FileType)
 end
 %
-ncid = netcdf.create([filename '_map.nc'], 'NETCDF4');
+ncid = netcdf.create(ncfile, 'NETCDF4');
 Err = [];
 try
     inodes = netcdf.defDim(ncid, 'mesh2d_nnodes', nnodes);

@@ -27,14 +27,16 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Tuple, Any, List, Union, Dict, Optional, TextIO
+from typing import Tuple, Any, List, Union, Dict, Optional, TextIO, Callable
 
 import numpy
+
 SimulationObject = Dict[str, numpy.ndarray]
 
 import netCDF4
 import configparser
 import os
+import os.path
 import pandas
 import geopandas
 import shapely
@@ -83,7 +85,11 @@ def load_program_texts(filename: str) -> None:
 
 
 def log_text(
-    key: str, file: Optional[TextIO] = None, dict: Dict[str, Any] = {}, repeat: int = 1, indent: str = ""
+    key: str,
+    file: Optional[TextIO] = None,
+    dict: Dict[str, Any] = {},
+    repeat: int = 1,
+    indent: str = "",
 ) -> None:
     """
     Write a text to standard out or file.
@@ -603,7 +609,9 @@ def relative_path(rootdir: str, file: str) -> str:
             return file
 
 
-def read_xyc(filename: str, ncol: int = 2) -> shapely.geometry.linestring.LineStringAdapter:
+def read_xyc(
+    filename: str, ncol: int = 2
+) -> shapely.geometry.linestring.LineStringAdapter:
     """
     Read lines from a file.
 
@@ -643,7 +651,9 @@ def read_xyc(filename: str, ncol: int = 2) -> shapely.geometry.linestring.LineSt
     return L
 
 
-def write_km_eroded_volumes(km: numpy.ndarray, vol: numpy.ndarray, filename: str) -> None:
+def write_km_eroded_volumes(
+    km: numpy.ndarray, vol: numpy.ndarray, filename: str
+) -> None:
     """
     Write a text file with eroded volume data binned per kilometre.
 
@@ -726,8 +736,8 @@ def upgrade_config(config: configparser.ConfigParser):
         config["General"]["Version"] = "1.0"
 
         config["Detect"] = {}
-        config = movepar(config, "General", "Delft3Dfile", "Detect", "SimFile")
-        config = movepar(config, "General", "SDSfile", "Detect", "SimFile")
+        config = movepar(config, "General", "Delft3Dfile", "Detect", "SimFile", convert=sim2nc)
+        config = movepar(config, "General", "SDSfile", "Detect", "SimFile", convert=sim2nc)
         config = movepar(config, "General", "SimFile", "Detect")
         config = movepar(config, "General", "NBank", "Detect")
         NBank = config_get_int(config, "Detect", "NBank", default=0, positive=True)
@@ -753,10 +763,10 @@ def upgrade_config(config: configparser.ConfigParser):
         for i in range(NLevel):
             istr = str(i + 1)
             config = movepar(
-                config, "General", "Delft3Dfile" + istr, "Erosion", "SimFile" + istr
+                config, "General", "Delft3Dfile" + istr, "Erosion", "SimFile" + istr, convert=sim2nc
             )
             config = movepar(
-                config, "General", "SDSfile" + istr, "Erosion", "SimFile" + istr
+                config, "General", "SDSfile" + istr, "Erosion", "SimFile" + istr, convert=sim2nc
             )
             config = movepar(config, "General", "SimFile" + istr, "Erosion")
             config = movepar(config, "General", "PDischarge" + istr, "Erosion")
@@ -796,6 +806,7 @@ def movepar(
     key1: str,
     group2: str,
     key2: Optional[str] = None,
+    convert: Optional[Callable[[str], str]] = None,
 ) -> configparser.ConfigParser:
     """
     Move a parameter from one group/keyword to another.
@@ -812,21 +823,58 @@ def movepar(
         Name of the group in the target configuration.
     key2 : Optional[str]
         Name of the keyword in the target configuration (can be None if equal to the keyword in the original file).
+    convert: Optional[Callable[[str], str]]
+        Function to convert the original value into new value.
 
     Results
     -------
     config1 : configparser.ConfigParser
         Updated settings for the D-FAST Bank Erosion analysis.
     """
+    val2: str
     if group1 in config.sections() and key1 in config[group1]:
         if key2 is None:
             key2 = key1
-        config[group2][key2] = config[group1][key1]
+        val1 = config[group1][key1]
+        if convert is None:
+            val2 = val1
+        else:
+            val2 = convert(val1)
+        config[group2][key2] = val2
         config[group1].pop(key1)
     return config
 
 
-def config_get_xykm(config: configparser.ConfigParser) -> shapely.geometry.linestring.LineStringAdapter:
+def sim2nc(oldfile: str) -> str:
+    """
+    Convert an SDS file name to an NC file (mirrors sim2ugrid.m).
+
+    Arguments
+    ---------
+    oldfile : str
+        Name of the original SIMONA SDS or Delft3D-FLOW TRIM file.
+
+    Results
+    -------
+    ncfile : str
+        Name of the netCDF file as created by sim2ugrid.m.
+    """
+    path, name = os.path.split(oldfile)
+    if name[:3] == "SDS":
+        # SDS-case_map.nc
+        ncfile = oldfile + "_map.nc"
+    elif name[:4] == "trim":
+        # trim-case_map.nc
+        basename, ext = os.path.splitext(oldfile)
+        ncfile = basename + "_map.nc"
+    else:
+        raise Exception('Unable to determine file type for "{}"'.format(oldfile))
+    return ncfile
+
+
+def config_get_xykm(
+    config: configparser.ConfigParser,
+) -> shapely.geometry.linestring.LineStringAdapter:
     """
 
     Arguments
@@ -860,7 +908,11 @@ def config_get_xykm(config: configparser.ConfigParser) -> shapely.geometry.lines
     return xykm
 
 
-def clip_chainage_path(xykm: shapely.geometry.linestring.LineStringAdapter, kmfile: str, kmbounds: Tuple[float, float]) -> shapely.geometry.linestring.LineStringAdapter:
+def clip_chainage_path(
+    xykm: shapely.geometry.linestring.LineStringAdapter,
+    kmfile: str,
+    kmbounds: Tuple[float, float],
+) -> shapely.geometry.linestring.LineStringAdapter:
     """
     Clip a chainage line to the relevant reach.
 
@@ -952,7 +1004,9 @@ def clip_chainage_path(xykm: shapely.geometry.linestring.LineStringAdapter, kmfi
     return xykm
 
 
-def config_get_search_lines(config: configparser.ConfigParser) -> List[shapely.geometry.linestring.LineStringAdapter]:
+def config_get_search_lines(
+    config: configparser.ConfigParser,
+) -> List[shapely.geometry.linestring.LineStringAdapter]:
     """
     Get the search lines for the bank lines from the analysis settings.
 
@@ -971,12 +1025,14 @@ def config_get_search_lines(config: configparser.ConfigParser) -> List[shapely.g
     line = [None] * nbank
     for b in range(nbank):
         bankfile = config["Detect"]["Line{}".format(b + 1)]
-        log_text("read_search_line", dict={"nr": b+1, "file": bankfile})
+        log_text("read_search_line", dict={"nr": b + 1, "file": bankfile})
         line[b] = read_xyc(bankfile)
     return line
 
 
-def config_get_bank_lines(config: configparser.ConfigParser, bankdir: str) -> List[numpy.ndarray]:
+def config_get_bank_lines(
+    config: configparser.ConfigParser, bankdir: str
+) -> List[numpy.ndarray]:
     """
     Get the bank lines from the detection step.
 
@@ -1015,7 +1071,7 @@ def config_get_bank_lines(config: configparser.ConfigParser, bankdir: str) -> Li
         bankline_series = geopandas.geoseries.GeoSeries(bankline_list)
         banklines = geopandas.geodataframe.GeoDataFrame.from_features(bankline_series)
     return banklines
-    
+
 
 def config_get_bank_search_distances(
     config: configparser.ConfigParser, nbank: int
@@ -1390,7 +1446,10 @@ def config_get_parameter(
         for ib, bkm in enumerate(bank_km):
             if not onefile:
                 filename_i = filename + "_{}".format(ib + 1) + ext
-                log_text("read_param_one_bank", dict={"param": key, "i": ib + 1, "file": filename_i})
+                log_text(
+                    "read_param_one_bank",
+                    dict={"param": key, "i": ib + 1, "file": filename_i},
+                )
                 km_thr, val = get_kmval(filename_i, key, positive, valid)
             if km_thr is None:
                 parfield[ib] = numpy.zeros(len(bkm)) + val[0]
@@ -1518,7 +1577,9 @@ def read_simdata(filename: str, indent: str = "") -> Tuple[SimulationObject, flo
         log_text("read_water_level", indent=indent)
         sim["zw_face"] = read_fm_map(filename, "Water level")
         log_text("read_water_depth", indent=indent)
-        sim["h_face"] = numpy.maximum(read_fm_map(filename, "sea_floor_depth_below_sea_surface"), 0.0)
+        sim["h_face"] = numpy.maximum(
+            read_fm_map(filename, "sea_floor_depth_below_sea_surface"), 0.0
+        )
         log_text("read_velocity", indent=indent)
         sim["ucx_face"] = read_fm_map(filename, "sea_water_x_velocity")
         sim["ucy_face"] = read_fm_map(filename, "sea_water_y_velocity")

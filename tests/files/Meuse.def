@@ -1,0 +1,65 @@
+% General input parameters bank erosion module
+NBank = 2
+GridFile = inputfiles\maas40m_1.rgf
+RiverKM = inputfiles\rivkm_20m.xyc
+Boundaries = 123:128
+
+Plotting = true
+%
+% Input parameters bank line detection
+Bankdir = output\banklines
+SDSfile = inputfiles\SDS-q272
+Line1 = inputfiles\oeverlijn_links_mod.xyc
+Line2 = inputfiles\oeverlijn_rechts_mod.xyc
+%
+% Input parameters bank erosion module
+OutputDir = output\bankerosion
+Terosion = 1
+RiverAxis = inputfiles\maas_rivieras_mod.xyc
+Fairway = inputfiles\maas_rivieras_mod.xyc
+BankType = inputfiles\bankstrength_tauc
+Vship = 5.0
+Nship = inputfiles\nships_totaal
+ShipType = 2
+Draught = 1.2
+Classes = false
+FairwayMN = fairway.mnf
+ProtectLevel = inputfiles\stortsteen
+Slope = inputfiles\slope
+BankEq = bankequi
+EroVol = erovol_standard.evo
+OutputInterval = 0.1
+Revert = [1,0]
+Wave0 = 150.0
+Wave1 = 110.0
+Nwave = 5
+%
+% Discharge dependent parameters
+NLevel = 13
+RefLevel = 3
+SDSfile1 = SDSfiles\SDS-q75
+PDischarge1 = 0.3110
+SDSfile2 = SDSfiles\SDS-q150
+PDischarge2 = 0.2329
+SDSfile3 = SDSfiles\SDS-q270
+PDischarge3 = 0.2055
+SDSfile4 = SDSfiles\SDS-q400
+PDischarge4 = 0.0685
+SDSfile5 = SDSfiles\SDS-q500
+PDischarge5 = 0.0959
+SDSfile6 = SDSfiles\SDS-q750
+PDischarge6 = 0.0548
+SDSfile7 = SDSfiles\SDS-q900
+PDischarge7 = 0.0164
+SDSfile8 = SDSfiles\SDS-q1100
+PDischarge8 = 0.0055
+SDSfile9 = SDSfiles\SDS-q1300
+PDischarge9 = 0.0021
+SDSfile10 = SDSfiles\SDS-q1500
+PDischarge10 = 0.0021
+SDSfile11 = SDSfiles\SDS-q1700
+PDischarge11 = 0.0021
+SDSfile12 = SDSfiles\SDS-q1900
+PDischarge12 = 0.0021
+SDSfile13 = SDSfiles\SDS-q2300
+PDischarge13 = 0.0014

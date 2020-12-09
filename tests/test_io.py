@@ -28,7 +28,7 @@ class Test_load_program_texts():
         Testing load_program_texts.
         """
         print("current work directory: ", os.getcwd())
-        assert dfastbe.io.load_program_texts("dfastbe/messages.UK.ini") == None
+        assert dfastbe.io.load_program_texts("tests/files/messages.UK.ini") == None
 
 class Test_log_text():
     def test_log_text_01(self):
