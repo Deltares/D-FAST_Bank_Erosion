@@ -1,15 +1,27 @@
-\chapter{Testing} \label{Chp:Test}
+\chapter{Test Plan} \label{Chp:TestPlan}
 
-\section{Test plan}
+The results of the software is verified by means of
 
-The testing is based on the pytest framework.
+\begin{itemize}
+\item Unit testing at the level of functions, such as reading and writing of files, and basic testing of the algorithms.
+Currently about half of the functions included in \keyw{io.py} are covered by unit tests; more to be added.
+These tests are carried out by means of the \keyw{pytest} framework.
+\item Regression tests have to configured to verify that the results of the batch mode remain unchanged under further code developments.
+\end{itemize}
 
-\begin{Verbatim}
-    > conda install pytest
-    > pytest
-\end{Verbatim}
+For the verification of \dfastbe three sets of input files for the Meuse River have been used:
 
-\subsection{Acceptance testing}
+\begin{enumerate}
+\item One set of WAQUA result files converted using \keyw{sim2ugrid.m} to \dflowfm like netCDF files.
+\item One set of \dflowfm result files of simulations using the same curvilinear mesh as was used in WAQUA.
+\item One set of \dflowfm result files of simulations using a new unstructured mesh.
+\end{enumerate}
+
+Each configuration gives slightly different results; for further regression testing in particular the first and last one will be used.
+For the automated testing, unit tests and regression tests based on known input/output combinations will be used.
+These tests will be executed on the original Python code (i.e. in source code form) and to the degree possible on the compiled binaries as well.
+
+\section{Acceptance testing}
 
 In \autoref{Sec:FuncReq} the 10 functional requirements were listed.
 They are repeated below and for every requirement it is indicated how it is tested.
@@ -35,7 +47,7 @@ The format of the other input files is not adjusted, but for line geometries \df
 There are unit and integration tests addressing the reading of the input files.
 
 \item The output files must be consistent with those of WAQBANK, or aligned with open standards or the \dflowfm modeling system.
-The ascii files containing the bank erosion volumes are identical to those of WAQBANK.
+The ASCII files containing the bank erosion volumes are identical to those of WAQBANK.
 The shifted bank lines are exported as Shape files instead of \file{.xyc} files to align with common GIS standards.
 The figures are now saved as \file{.png} files instead of MATLAB specific \file{.fig} files.
 There are unit and integration tests addressing the writing of the output files.
@@ -48,31 +60,93 @@ The graphical user interface that you get by running \dfastbe in default mode or
 
 \item It would be nice if the software would be more generally applicable than just the Dutch rivers.
 The code does not include specific knowledge of the Dutch rivers except for the fact that some of the rules of thumb have been derived using Dutch river data.
-The original WAQBANK code was already applied to foreign rivers such as the Donau.
+The original WAQBANK code was already applied to foreign rivers such as the Danube.
 No special testing carried out for this requirement.
 
 \item It would be nice if the software would be able to run besides English also in Dutch.
 All texts shown by \dfastbe are read from a language configuration file.
 An English and a Dutch version of that configuration file are provided.
 A most system tests are carried out using the default English configuration, but one test is carried out using the Dutch configuration.
-
 \end{enumerate}
 
-\subsubsection{Manual testing of the user interface} \label{Sec:GuiTests}
+\section{System testing}
 
-\subsubsection{Test 1}
+The whole system is tested via the command line (entry via \keyw{\_\_main\_\_}) and via Python calls to the \keyw{run} function in the \keyw{cmd} module.
+These tests are repeated for the standalone compiled \dfastbe executable.
+For the system testing a limited number of regression tests are carried out comparing the latest results against previously accepted results.
 
-\subsection{System testing}
+Since the testing of the graphical user interface is not included in the automated testing, a test protocol for manual tests has been defined.
+These tests are described in the following section.
 
-\subsection{Integration testing}
+\subsection{Manual testing of the user interface} \label{Sec:GuiTests}
 
-\subsection{Unit testing}
+\subsubsection{Test 1: starting blank}
+\subsubsection{Test 2: save default configuration file}
+\subsubsection{Test 3: modify general settings}
+\subsubsection{Test 4: modify detection settings}
+\subsubsection{Test 5: modify erosion settings}
+\subsubsection{Test 6: save modified configuration file}
+\subsubsection{Test 7: load default configuration file}
+\subsubsection{Test 8: load modified configuration file}
+\subsubsection{Test 9: run detection analysis}
+\subsubsection{Test 10: run erosion analysis}
+\subsubsection{Test 11: view manual and about Windows}
 
-\section{Test report}
+\section{Integration testing}
+
+The \keyw{batch} module builds on the functionality of the \keyw{io}, \keyw{support}, \keyw{kernel} and \keyw{plotting} modules to provide the bank line detection and erosion analysis functionality as main routines.
+The main routines \keyw{banklines} and \keyw{bankerosion} are tested at this level via regression tests, the other routines in \keyw{batch} are tested as part of the unit testing.
+
+\section{Unit testing}
+
+Since the modules \keyw{io}, \keyw{support}, \keyw{kernel} and \keyw{plotting} only depend on third party modules, they are ideally suited for unit testing.
+Most of the routines in \keyw{batch} can be addressed by means of unit testing as well.
+An initial number of unit tests have been set up for \keyw{io} routines, more unit tests should be added.
+
+All routines inside \keyw{gui} are interacting with the graphical user interface (either by extracting data from the state of the controls, or by setting the state of the controls).
+These routines cannot be tested using the pytest framework, and are therefore tested by means of the manual system tests.
+
+\section{Automated testing}
 
 Automated TeamCity projects will be set up for testing the Python code, for building (and optionally signing of) binaries, and testing of the binaries.
 In this way the formal release process can be easily aligned with the other products.
-This is ongoing work; the test and build steps are currently run locally
+This is ongoing work; the test and build steps are currently run locally.
+
+For all automated unit and regression tests the pytest framework is used.
+
+\begin{Verbatim}
+    > conda install pytest
+    > pytest
+\end{Verbatim}
+
+%-------------------------------
+\chapter{Test Report} \label{Chp:TestReport}
+
+The test plan describes manual tests (the graphical user interface tests as part of the system testing) and automated testing (unit and regression testing).
+
+\section{Manual tests}
+
+This section summarizes the results of the manual testing of the graphical user interface.
+
+\begin{tabular}{ll|l}
+Test & Description & Success / Comments \\ \hline
+1 & starting blank & OK \\
+2 & save default configuration file & OK \\
+3 & modify general settings & OK \\
+4 & modify detection settings & OK \\
+5 & modify erosion settings & OK \\
+6 & save modified configuration file & OK \\
+7 & load default configuration file & OK \\
+8 & load modified configuration file & OK \\
+9 & run detection analysis & OK \\
+10 & run erosion analysis & OK \\
+11 & view manual and about Windows & OK \\
+\end{tabular}
+
+\section{Automated tests}
+
+Below a brief pytest report of the automated regression and unit testing is included.
+Each period following a module name represents one successful test; failed test would be indicated by an F and a subsequent error report.
 
 \begin{Verbatim}[fontsize=\tiny]
 =============================================== test session starts ================================================
@@ -84,29 +158,3 @@ tests\test_io.py .................................                              
 
 =============================================== 33 passed in 11.79s ================================================
 \end{Verbatim}
-
-The results of the software is verified by means of
-
-\begin{itemize}
-\item Unit testing at the level of functions, such as reading and writing of files, and basic testing of the algorithms.
-All functions included in \keyw{io.py} and \keyw{kernel.py} are covered by unit tests.
-These tests are carried out by means of the \keyw{pytest} framework.
-\item Regression tests have been set up to verify that the results of the command line interactive mode (with redirected standard in input for files coming from WAQUA) and the batch mode (with configuration file input for files coming from either WAQUA or \dflowfm) remain unchanged under further code developments.
-\end{itemize}
-
-For the regression tests three sets of input files have been selected:
-
-\begin{enumerate}
-\item Convert one or two sets of legacy input files (SIMONA and/or Delft3D 4) to \dflowfm like netCDF files.
-Running \dfastbe on those converted files should give results that are very similar to those obtained from a WAQBANK run on the original files.
-\item Run \dflowfm simulations using the same curvilinear mesh as was used in WAQUA/Delft3D 4.
-Running \dfastbe on the new files will give different results than those obtained from the WAQUA/Delft3D 4 results since a different hydrodynamic solver was used, but the differences are expected to be small.
-They will be quantified and reported.
-\item Run \dflowfm simulations using a new unstructured mesh.
-Running \dfastbe on those new unstructured model results will give different results than those obtained using the curvilinear model, but the differences are expected to be small.
-They will be quantified and reported.
-\end{enumerate}
-
-For the automated testing, unit tests and regression tests based on known input/output combinations will be used.
-These tests will be executed on the original Python code and to the degree possible on the compiled binaries as well.
-Details of the various tests implemented will be documented as the project progresses and full documentation will be included in the final project documentation.

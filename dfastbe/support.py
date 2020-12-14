@@ -230,14 +230,15 @@ def xykm_bin(xykm: numpy.ndarray, km_bin: Tuple[float, float, float]) -> numpy.n
 
 def intersect_line_mesh(
     bp: numpy.ndarray,
-    xf: numpy.ndarray,
-    yf: numpy.ndarray,
+    xf: numpy.ma.masked_array,
+    yf: numpy.ma.masked_array,
     xe: numpy.ndarray,
     ye: numpy.ndarray,
-    fe: numpy.ndarray,
+    fe: numpy.ma.masked_array,
     ef: numpy.ndarray,
-    fn: numpy.ndarray,
+    fn: numpy.ma.masked_array,
     en: numpy.ndarray,
+    nnodes: numpy.ndarray,
     boundary_edge_nrs: numpy.ndarray,
     d_thresh: float = 0.001,
 ) -> Tuple[numpy.ndarray, numpy.ndarray]:
@@ -248,18 +249,24 @@ def intersect_line_mesh(
     ---------
     bp : numpy.ndarray
         Array containing the x,y-coordinates of the (bank) line.
-    xf : numpy.ndarray
+    xf : numpy.ma.masked_array
         Array containing the x-coordinates of the corner points of each mesh face.
-    yf : numpy.ndarray
+    yf : numpy.ma.masked_array
         Array containing the y-coordinates of the corner points of each mesh face.
     xe : numpy.ndarray
         Array containing the x-coordinates of the end points of each mesh edge.
     ye : numpy.ndarray
         Array containing the y-coordinates of the end points of each mesh edge.
+    fe : numpy.ma.masked_array
+        Array containg the mesh face-edge connectivity.
     ef : numpy.ndarray
         Array containg the mesh edge-face connectivity.
+    fn : numpy.ma.masked_array
+        Array containg the mesh face-node connectivity.
     en : numpy.ndarray
         Array containg the mesh edge-node connectivity.
+    nnodes : numpy.ndarray
+        Array containg the number of nodes/edges per face.
     boundary_edge_nrs : numpy.ndarray
         Array containing the indices of the domain boundary edges.
     d_thresh : float
@@ -305,7 +312,10 @@ def intersect_line_mesh(
                 pnt = shapely.geometry.Point(bp[0])
                 for k in possible_cells:
                     polygon_k = shapely.geometry.Polygon(
-                        numpy.concatenate((xf[k : k + 1], yf[k : k + 1]), axis=0).T
+                        numpy.concatenate(
+                            (xf[k : k + 1, : nnodes[k]], yf[k : k + 1, : nnodes[k]]),
+                            axis=0,
+                        ).T
                     )
                     if polygon_k.contains(pnt):
                         index = k
@@ -315,7 +325,10 @@ def intersect_line_mesh(
                 else:
                     on_edge: List[int] = []
                     for k in possible_cells:
-                        nd = numpy.concatenate((xf[k : k + 1], yf[k : k + 1]), axis=0).T
+                        nd = numpy.concatenate(
+                            (xf[k : k + 1, : nnodes[k]], yf[k : k + 1, : nnodes[k]]),
+                            axis=0,
+                        ).T
                         line_k = shapely.geometry.LineString(
                             numpy.concatenate(nd, nd[0:1], axis=0)
                         )
@@ -353,7 +366,16 @@ def intersect_line_mesh(
                     index_src = numpy.zeros(0, dtype=numpy.int64)
                     for i in vindex:
                         b1, edges1, nodes1 = get_slices(
-                            i, prev_b, bpj, bpj1, xe, ye, fe, en, boundary_edge_nrs
+                            i,
+                            prev_b,
+                            bpj,
+                            bpj1,
+                            xe,
+                            ye,
+                            fe,
+                            nnodes,
+                            en,
+                            boundary_edge_nrs,
                         )
                         b = numpy.concatenate((b, b1), axis=0)
                         edges = numpy.concatenate((edges, edges1), axis=0)
@@ -369,7 +391,16 @@ def intersect_line_mesh(
                         index = index_src[0]
                 else:
                     b, edges, nodes = get_slices(
-                        index, prev_b, bpj, bpj1, xe, ye, fe, en, boundary_edge_nrs
+                        index,
+                        prev_b,
+                        bpj,
+                        bpj1,
+                        xe,
+                        ye,
+                        fe,
+                        nnodes,
+                        en,
+                        boundary_edge_nrs,
                     )
                 if len(edges) == 0:
                     # rest of segment associated with same face
@@ -386,7 +417,10 @@ def intersect_line_mesh(
                             pnt = shapely.geometry.Point(bpj)
                             polygon_k = shapely.geometry.Polygon(
                                 numpy.concatenate(
-                                    (xf[index : index + 1], yf[index : index + 1]),
+                                    (
+                                        xf[index : index + 1, : nnodes[index]],
+                                        yf[index : index + 1, : nnodes[index]],
+                                    ),
                                     axis=0,
                                 ).T
                             )
@@ -631,10 +665,14 @@ def intersect_line_mesh(
     crds = crds[:l, :]
     idx = idx[:l]
 
-    # remove tiny segments (about 35% is less than 1 mm)
+    # remove tiny segments
     d = numpy.sqrt((numpy.diff(crds, axis=0) ** 2).sum(axis=1))
     mask = numpy.concatenate((numpy.ones((1), dtype="bool"), d > d_thresh))
-    return crds[mask, :], idx[mask]
+    crds = crds[mask, :]
+    idx = idx[mask]
+
+    # since index refers to segments, don't return the first one
+    return crds, idx[1:]
 
 
 def get_slices(
@@ -645,6 +683,7 @@ def get_slices(
     xe: numpy.ndarray,
     ye: numpy.ndarray,
     fe: numpy.ndarray,
+    nnodes: numpy.ndarray,
     en: numpy.ndarray,
     boundary_edge_nrs: numpy.ndarray,
 ) -> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]:
@@ -665,8 +704,10 @@ def get_slices(
         Array containing the x-coordinates of the end points of each mesh edge.
     ye : numpy.ndarray
         Array containing the y-coordinates of the end points of each mesh edge.
-    ef : numpy.ndarray
-        Array containg the mesh edge-face connectivity.
+    fe : numpy.ndarray
+        Array containg the mesh face-edge connectivity.
+    nnodes: numpy.ndarray
+        Array containing the number of nodes per face.
     en : numpy.ndarray
         Array containg the mesh edge-node connectivity.
     boundary_edge_nrs : numpy.ndarray
@@ -684,7 +725,7 @@ def get_slices(
     if index < 0:
         edges = boundary_edge_nrs
     else:
-        edges = fe[index]
+        edges = fe[index, : nnodes[index]]
     a, b, edges = get_slices_core(edges, xe, ye, bpj1, bpj, prev_b, True)
     nodes = -numpy.ones(a.shape, dtype=numpy.int64)
     nodes[a == 0] = en[edges[a == 0], 0]
@@ -813,11 +854,12 @@ def get_slices_ab(
 
 def map_line_mesh(
     bp: numpy.ndarray,
-    xf: numpy.ndarray,
-    yf: numpy.ndarray,
+    xf: numpy.ma.masked_array,
+    yf: numpy.ma.masked_array,
+    nnodes: numpy.ndarray,
     xe: numpy.ndarray,
     ye: numpy.ndarray,
-    fe: numpy.ndarray,
+    fe: numpy.ma.masked_array,
     ef: numpy.ndarray,
     boundary_edge_nrs: numpy.ndarray,
 ) -> numpy.ndarray:
@@ -828,15 +870,17 @@ def map_line_mesh(
     ---------
     bp : numpy.ndarray
         Array containing the x,y-coordinates of the (bank) line.
-    xf : numpy.ndarray
+    xf : numpy.ma.masked_array
         Array containing the x-coordinates of the corner points of each mesh face.
-    yf : numpy.ndarray
+    yf : numpy.ma.masked_array
         Array containing the y-coordinates of the corner points of each mesh face.
+    nnodes : numpy.ndarray
+        Array containing the number of nodes/edges per mesh face.
     xe : numpy.ndarray
         Array containing the x-coordinates of the end points of each mesh edge.
     ye : numpy.ndarray
         Array containing the y-coordinates of the end points of each mesh edge.
-    fe : numpy.ndarray
+    fe : numpy.ma.masked_array
         Array containg the mesh face-edge connectivity.
     ef : numpy.ndarray
         Array containg the mesh edge-face connectivity.
@@ -873,7 +917,10 @@ def map_line_mesh(
                 pnt = shapely.geometry.Point(bp[0])
                 for k in possible_cells:
                     polygon_k = shapely.geometry.Polygon(
-                        numpy.concatenate((xf[k : k + 1], yf[k : k + 1]), axis=0).T
+                        numpy.concatenate(
+                            (xf[k : k + 1, : nnodes[k]], yf[k : k + 1, : nnodes[k]]),
+                            axis=0,
+                        ).T
                     )
                     if polygon_k.contains(pnt):
                         index = k
@@ -892,7 +939,7 @@ def map_line_mesh(
                 if index < 0:
                     edges = boundary_edge_nrs
                 else:
-                    edges = fe[index]
+                    edges = fe[index, : nnodes[k]]
                 X0 = xe[edges, 0]
                 dX = xe[edges, 1] - X0
                 Y0 = ye[edges, 0]
@@ -1127,6 +1174,7 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
             else:
                 # left bend: always add ... just the rectangle of eroded material
                 pass
+            ixy1 = ixy
             for n2 in range(2, -1, -1):
                 ixy1, xylines_new = add_point(ixy1, xylines_new, poly[n2])
             ixy = ixy1
@@ -1211,7 +1259,7 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
             ixy = ixy1
         # if iseg == isegstop:
         #     break
-    xylines_new = xylines_new[: ixy + 1, :]
+    xylines_new = xylines_new[:ixy, :]
 
     return xylines_new
 

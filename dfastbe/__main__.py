@@ -68,7 +68,7 @@ import argparse
 import dfastbe.cmd
 
 
-def parse_arguments() -> Tuple[str, str, Optional[str]]:
+def parse_arguments() -> Tuple[str, str, str]:
     """
     Parse the command line arguments.
 
@@ -86,9 +86,9 @@ def parse_arguments() -> Tuple[str, str, Optional[str]]:
     language : str
         Language identifier ("NL" or "UK").
     runmode : str
-        Specification of the run mode ("BATCH", "CLI" or "GUI")
-    config_name : Optional[str]
-        Name of the configuration file (optional).
+        Specification of the run mode ("BANKLINES", "BANKEROSION" or "GUI")
+    config_name : str
+        Name of the configuration file.
     """
     parser = argparse.ArgumentParser(description="D-FAST Morphological Impact.")
     parser.add_argument(

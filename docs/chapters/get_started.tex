@@ -4,7 +4,7 @@
 
 \dfastbe has been developed using Python, but it's distributed as a binary.
 It consists of one executable called 'dfastbe.exe' and a large number of supporting libraries and some configuration files.
-The program can be run as a command line tool performing either the bank line detection step (see \autoref{Sec:rundetect}) or the bank erosion (see \autoref{Sec:runbank}) step, or in a graphical mode which can be used to edit the analysis settings and run the analysis.
+The program can be run as a command line tool performing either the bank line detection step (see \autoref{Sec:rundetect}) or the bank erosion (see \autoref{Sec:runerosion}) step, or in a graphical mode which can be used to edit the analysis settings and run the analysis.
 
 By default \dfastbe is looking for the definition file 'dfastbe.cfg' in the current work directory.
 When the definition file has another name or location, this should be passed when the modules are called.
@@ -222,7 +222,7 @@ All tabs except for the second (Detection) tab are relevant for the bank erosion
 \Note The program does not verify or validate the content of the files.
 This is only verified by the kernel during the analysis.
 
-\section{Run mode 'banklines'}
+\section{Run mode 'banklines'} \label{Sec:rundetect}
 
 When \dfastbe is run in this mode, it determines the representative bank lines within the area of interest; for background information see \autoref{Chp3}.
 The input is given through the analysis configuration file, see \autoref{Sec2.4}.
@@ -323,7 +323,7 @@ saving figure output\figures\1_banklinedetection.png
 =====================================================
 \end{Verbatim}
 
-\section{Run mode 'bankerosion'}
+\section{Run mode 'bankerosion'} \label{Sec:runerosion}
 
 When \dfastbe is run in this mode, it determines the expected bank erosion within the area of interest; for background information see \autoref{Chp4}.
 The input is given through the analysis configuration file, see \autoref{Sec2.4}.
@@ -583,7 +583,7 @@ saving figure output\figures\11_erodis.png
 In that case the program can be started from the command prompt as
 
 \begin{Verbatim}
-python -m dfastbe.cmd ...options...
+python -m dfastbe ...options...
 \end{Verbatim}
 
 or from within a running Python environment as

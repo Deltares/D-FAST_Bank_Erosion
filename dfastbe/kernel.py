@@ -89,19 +89,15 @@ def comp_erosion_eq(
     """
     eps = sys.float_info.epsilon
 
-    muslope = edge_mean(mu_slope)
-    zssline = edge_mean(zss)
-    wlline = edge_mean(zfw_ini)  # original water level at fairway
-
     # ship induced wave height at the beginning of the foreshore
     H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, ship_type, Tship, vship, g)
-    H0 = numpy.maximum(edge_mean(H0), eps)
+    H0 = numpy.maximum(H0, eps)
 
-    zup = numpy.minimum(bankheight, wlline + 2 * H0)
-    zdo = numpy.maximum(wlline - 2 * H0, zssline)
+    zup = numpy.minimum(bankheight, zfw_ini + 2 * H0)
+    zdo = numpy.maximum(zfw_ini - 2 * H0, zss)
     ht = numpy.maximum(zup - zdo, 0)
-    hs = numpy.maximum(bankheight - wlline + 2 * H0, 0)
-    dn_eq = ht / muslope
+    hs = numpy.maximum(bankheight - zfw_ini + 2 * H0, 0)
+    dn_eq = ht / mu_slope
     dv_eq = (0.5 * ht + hs) * dn_eq * linesize
 
     return dn_eq, dv_eq
@@ -131,7 +127,7 @@ def comp_erosion(
     filter: bool,
     rho: float,
     g: float,
-    displ_tauc: bool,
+    tauc_iso_velc: bool,
 ):
     """
     Compute the bank erosion during a specific discharge level.
@@ -184,7 +180,7 @@ def comp_erosion(
         Water density [kg/m3]
     g : float
         Gravitational acceleration [m/s2]
-    displ_tauc : bool
+    tauc_iso_velc : bool
         Flag indicating whether displacement should be calculated based on critical shear stress (True) or velocity (False)
         
     Returns
@@ -204,9 +200,7 @@ def comp_erosion(
     # period of ship waves [s]
     T = 0.51 * vship / g
     # [s]
-    ts = (T * Nship * nwave)[
-        :-1
-    ]  # TODO: check for better solution to shorten ts by one ... edge_mean?
+    ts = T * Nship * nwave
 
     # number of line segments
     xlen = len(velocity)
@@ -216,15 +210,6 @@ def comp_erosion(
     dv = numpy.zeros(xlen)
     # total wave damping coefficient
     mu_tot = numpy.zeros(xlen)
-
-    taucline = edge_mean(tauc)
-    muslope = edge_mean(mu_slope)
-    mureed = edge_mean(mu_reed)
-    fwd = edge_mean(hfw)
-    zssline = edge_mean(zss)
-    Cline = edge_mean(chezy)
-    wlline = edge_mean(zfw_ini)  # original water level at fairway
-    z_line = edge_mean(zfw)  # water level at fairway
 
     # Average velocity with values of neighbouring lines
     if filter:
@@ -240,40 +225,40 @@ def comp_erosion(
 
     # ship induced wave height at the beginning of the foreshore
     H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, ship_type, Tship, vship, g)
-    H0 = numpy.maximum(edge_mean(H0), eps)
+    H0 = numpy.maximum(H0, eps)
 
     # compute erosion parameters for each line part
 
     # Erosion coefficient of linesegements
-    E = 0.2 * numpy.sqrt(taucline) * 1e-6
+    E = 0.2 * numpy.sqrt(tauc) * 1e-6
 
     # critical velocity along linesegements
-    velc = numpy.sqrt(taucline / rho * Cline ** 2 / g)
+    velc = numpy.sqrt(tauc / rho * chezy ** 2 / g)
 
     # strength of linesegements
-    cE = 1.85e-4 / taucline
+    cE = 1.85e-4 / tauc
 
     # total wavedamping coefficient
-    mu_tot = (muslope / H0) + mureed
+    mu_tot = (mu_slope / H0) + mu_reed
     # water level along bank line
-    ho_line_ship = numpy.minimum(z_line - zssline, 2 * H0)
-    ho_line_flow = numpy.minimum(z_line - zssline, fwd)
-    h_line_ship = numpy.maximum(bankheight - z_line + ho_line_ship, 0)
-    h_line_flow = numpy.maximum(bankheight - z_line + ho_line_flow, 0)
+    ho_line_ship = numpy.minimum(zfw - zss, 2 * H0)
+    ho_line_flow = numpy.minimum(zfw - zss, distance_fw)  # hfw)
+    h_line_ship = numpy.maximum(bankheight - zfw + ho_line_ship, 0)
+    h_line_flow = numpy.maximum(bankheight - zfw + ho_line_flow, 0)
 
     # compute displacement due to flow
     crit_ratio = numpy.ones(velc.shape)
-    mask = (vel > velc) & (z_line > zssline)
-    if displ_tauc:
+    mask = (vel > velc) & (zfw > zss)
+    if tauc_iso_velc:
         # displacement calculated based on critical shear stress
-        crit_ratio[mask] = Cline[mask] / taucline[mask]
+        crit_ratio[mask] = chezy[mask] / tauc[mask]
     else:
         # displacement calculated based on critical flow velocity
         crit_ratio[mask] = (vel[mask] / velc[mask]) ** 2
     dn_flow = E * (crit_ratio - 1) * Teros * sec_year
 
     # compute displacement due to shipwaves
-    mask = ((z_line - 2 * H0) < wlline) & (wlline < (z_line + 0.5 * H0))
+    mask = ((zfw - 2 * H0) < zfw_ini) & (zfw_ini < (zfw + 0.5 * H0))
     # limit mu -> 0
 
     dn_ship = cE * H0 ** 2 * ts * Teros
@@ -281,12 +266,12 @@ def comp_erosion(
     # dn_ship = dn_ship[0] #TODO: this selects only the first value ... correct? MATLAB compErosion: dn_ship=dn_ship(1);
 
     # compute erosion volume
-    mask = (h_line_ship > 0) & (z_line > zssline)
+    mask = (h_line_ship > 0) & (zfw > zss)
     dv_ship = dn_ship * linesize * h_line_ship
     dv_ship[~mask] = 0
     dn_ship[~mask] = 0
 
-    mask = (h_line_flow > 0) & (z_line > zssline)
+    mask = (h_line_flow > 0) & (zfw > zss)
     dv_flow = dn_flow * linesize * h_line_flow
     dv_flow[~mask] = 0
     dn_flow[~mask] = 0
@@ -299,30 +284,12 @@ def comp_erosion(
     return dn, dv, dn_ship, dn_flow
 
 
-def edge_mean(a_pnt: numpy.ndarray) -> numpy.ndarray:
-    """
-    Average values from bank points to bank segments.
-    
-    Arguments
-    ---------
-    a_pnt : numpy.ndarray
-        Array containing N values for each bank point
-    
-    Returns
-    -------
-    a_sgm : numpy.ndarray
-        Array containing N-1 values for each bank segment
-    """
-    a_sgm = 0.5 * (a_pnt[:-1] + a_pnt[1:])
-    return a_sgm
-
-
 def comp_hw_ship_at_bank(
     distance_fw: numpy.ndarray,
     dfw0: numpy.ndarray,
     dfw1: numpy.ndarray,
     h_input: numpy.ndarray,
-    shiptype: numpy.ndarray,
+    ship_type: numpy.ndarray,
     Tship: numpy.ndarray,
     vship: numpy.ndarray,
     g: float,
@@ -340,7 +307,7 @@ def comp_hw_ship_at_bank(
         Array containing distance from fairway at which all waves are gone [m]
     h_input : numpy.ndarray
         Array containing the water depth at the fairway [m]
-    shiptype : numpy.ndarray
+    ship_type : numpy.ndarray
         Array containing the ship type [-]
     Tship : numpy.ndarray
         Array containing draught of the ships [m]
@@ -358,11 +325,11 @@ def comp_hw_ship_at_bank(
 
     a1 = numpy.zeros(len(distance_fw))
     # multiple barge convoy set
-    a1[shiptype == 1] = 0.5
+    a1[ship_type == 1] = 0.5
     # RHK ship / motorship
-    a1[shiptype == 2] = 0.28 * Tship[shiptype == 2] ** 1.25
+    a1[ship_type == 2] = 0.28 * Tship[ship_type == 2] ** 1.25
     # towboat
-    a1[shiptype == 3] = 1
+    a1[ship_type == 3] = 1
 
     Froude = vship / numpy.sqrt(h * g)
     Froude_limit = 0.8
@@ -424,15 +391,15 @@ def get_km_bins(km_bin: Tuple[float, float, float], type: int = 2) -> numpy.ndar
 
 
 def get_km_eroded_volume(
-    bank_km: numpy.ndarray, dv: numpy.ndarray, km_bin: Tuple[float, float, float]
+    bank_km_mid: numpy.ndarray, dv: numpy.ndarray, km_bin: Tuple[float, float, float]
 ) -> numpy.ndarray:
     """
     Accumulate the erosion volumes per chainage bin.
     
     Arguments
     ---------
-    bank_km : numpy.ndarray
-        Array containing the chainage per bank point [km]
+    bank_km_mid : numpy.ndarray
+        Array containing the chainage per bank segment [km]
     dv : numpy.ndarray
         Array containing the eroded volume per bank segment [m3]
     km_bin : Tuple[float, float, float]
@@ -443,7 +410,6 @@ def get_km_eroded_volume(
     dvol : numpy.ndarray
         Array containing the accumulated eroded volume per chainage bin.
     """
-    bank_km_mid = (bank_km[:-1] + bank_km[1:]) / 2
     bin_idx = numpy.rint((bank_km_mid - km_bin[0] - km_bin[2] / 2) / km_bin[2]).astype(
         numpy.int64
     )

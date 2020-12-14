@@ -27,11 +27,24 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Tuple, Any, List, Union, Dict, Optional, TextIO, Callable
+from typing import Tuple, Any, List, Union, Dict, Optional, TextIO, Callable, TypedDict
 
 import numpy
 
-SimulationObject = Dict[str, numpy.ndarray]
+
+class SimulationObject(TypedDict):
+    x_node: numpy.ndarray
+    y_node: numpy.ndarray
+    nnodes: numpy.ndarray
+    facenode: numpy.ma.masked_array
+    zb_location: numpy.ndarray
+    zb_val: numpy.ndarray
+    zw_face: numpy.ndarray
+    h_face: numpy.ndarray
+    ucx_face: numpy.ndarray
+    ucy_face: numpy.ndarray
+    chz_face: numpy.ndarray
+
 
 import netCDF4
 import configparser
@@ -40,6 +53,7 @@ import os.path
 import pandas
 import geopandas
 import shapely
+import pathlib
 
 PROGTEXTS: Dict[str, List[str]]
 
@@ -736,8 +750,12 @@ def upgrade_config(config: configparser.ConfigParser):
         config["General"]["Version"] = "1.0"
 
         config["Detect"] = {}
-        config = movepar(config, "General", "Delft3Dfile", "Detect", "SimFile", convert=sim2nc)
-        config = movepar(config, "General", "SDSfile", "Detect", "SimFile", convert=sim2nc)
+        config = movepar(
+            config, "General", "Delft3Dfile", "Detect", "SimFile", convert=sim2nc
+        )
+        config = movepar(
+            config, "General", "SDSfile", "Detect", "SimFile", convert=sim2nc
+        )
         config = movepar(config, "General", "SimFile", "Detect")
         config = movepar(config, "General", "NBank", "Detect")
         NBank = config_get_int(config, "Detect", "NBank", default=0, positive=True)
@@ -763,10 +781,20 @@ def upgrade_config(config: configparser.ConfigParser):
         for i in range(NLevel):
             istr = str(i + 1)
             config = movepar(
-                config, "General", "Delft3Dfile" + istr, "Erosion", "SimFile" + istr, convert=sim2nc
+                config,
+                "General",
+                "Delft3Dfile" + istr,
+                "Erosion",
+                "SimFile" + istr,
+                convert=sim2nc,
             )
             config = movepar(
-                config, "General", "SDSfile" + istr, "Erosion", "SimFile" + istr, convert=sim2nc
+                config,
+                "General",
+                "SDSfile" + istr,
+                "Erosion",
+                "SimFile" + istr,
+                convert=sim2nc,
             )
             config = movepar(config, "General", "SimFile" + istr, "Erosion")
             config = movepar(config, "General", "PDischarge" + istr, "Erosion")
@@ -1553,7 +1581,20 @@ def read_simdata(filename: str, indent: str = "") -> Tuple[SimulationObject, flo
     dh0 : float
         Threshold depth for detecting drying and flooding.
     """
-    sim = {}
+    dum = numpy.array([])
+    sim: SimulationObject = {
+        "x_node": dum,
+        "y_node": dum,
+        "nnodes": dum,
+        "facenode": dum,
+        "zb_location": dum,
+        "zb_val": dum,
+        "zw_face": dum,
+        "h_face": dum,
+        "ucx_face": dum,
+        "ucy_face": dum,
+        "chz_face": dum,
+    }
     # determine file type
     path, name = os.path.split(filename)
     if name[-6:] == "map.nc":
@@ -1570,7 +1611,8 @@ def read_simdata(filename: str, indent: str = "") -> Tuple[SimulationObject, flo
             # varying number of nodes
             sim["nnodes"] = FNC.mask.shape[1] - FNC.mask.sum(axis=1)
         FNC.data[FNC.mask] = 0
-        sim["facenode"] = FNC.data
+        # sim["facenode"] = FNC.data
+        sim["facenode"] = FNC
         log_text("read_bathymetry", indent=indent)
         sim["zb_location"] = "node"
         sim["zb_val"] = read_fm_map(filename, "altitude", location="node")
@@ -1610,3 +1652,15 @@ def read_simdata(filename: str, indent: str = "") -> Tuple[SimulationObject, flo
     else:
         raise Exception('Unable to determine file type for "{}"'.format(name))
     return sim, dh0
+
+
+def get_progloc() -> str:
+    """
+    Get the location of the program.
+
+    Arguments
+    ---------
+    None
+    """
+    progloc = str(pathlib.Path(__file__).parent.absolute())
+    return progloc

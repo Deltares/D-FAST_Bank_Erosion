@@ -93,3 +93,6 @@ rem This probably means that tk wasn't installed properly.
 del /s /y dfastbe.dist\tk
 mkdir dfastbe.dist\lib\tk8.6
 xcopy /s /y ..\envs\dfastbe\Library\lib\tk8.6\* dfastbe.dist\lib\tk8.6
+
+rem '...\dfastbe_usermanual.pdf' is not recognized as an internal or external command, operable program or batch file.
+copy docs\dfastbe_usermanual.pdf dfastbe.dist\dfastbe

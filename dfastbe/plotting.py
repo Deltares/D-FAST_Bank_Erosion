@@ -27,7 +27,7 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 import shapely
 
 import matplotlib
@@ -49,7 +49,7 @@ def savefig(fig: matplotlib.figure.Figure, filename: str) -> None:
     """
     print("saving figure {file}".format(file=filename))
     matplotlib.pyplot.show(block=False)
-    fig.savefig(filename, dpi=600)
+    fig.savefig(filename, dpi=300)
 
 
 def setsize(fig: matplotlib.figure.Figure) -> None:
@@ -154,8 +154,10 @@ def plot_mesh(
 
     # to avoid OverflowError: In draw_path: Exceeded cell block limit
     # plot the data in chunks ...
-    matplotlib.rcParams["agg.path.chunksize"] = 10000
-    ax.plot(xev, yev, color=(0.5, 0.5, 0.5), linewidth=0.25)
+    for i in range(0, len(xev), 3000):
+        ax.plot(
+            xev[i : i + 3000], yev[i : i + 3000], color=(0.5, 0.5, 0.5), linewidth=0.25
+        )
 
 
 def plot_mesh_patches(
@@ -165,8 +167,8 @@ def plot_mesh_patches(
     xn: numpy.ndarray,
     yn: numpy.ndarray,
     val: numpy.ndarray,
-    minval: float,
-    maxval: float,
+    minval: Optional[float] = None,
+    maxval: Optional[float] = None,
     scale: float = 1000,
 ) -> matplotlib.collections.PolyCollection:
     """
@@ -186,9 +188,9 @@ def plot_mesh_patches(
         Y-coordinates of the mesh nodes.
     val : numpy.ndarray
         Array of length N containing the value per face.
-    minval : float
+    minval : Optional[float]
         Lower limit for the color scale.
-    maxval : float
+    maxval : Optional[float]
         Upper limit for the color scale.
     scale : float
         Indicates whether the axes are in m (1) or km (1000).
@@ -208,6 +210,10 @@ def plot_mesh_patches(
     tfn = numpy.concatenate(tfn_list, axis=0)
     tval = numpy.concatenate(tval_list, axis=0)
     # cmap = matplotlib.pyplot.get_cmap('Spectral')
+    if minval is None:
+        minval = numpy.min(tval)
+    if maxval is None:
+        maxval = numpy.max(tval)
     p = ax.tripcolor(
         xn / scale,
         yn / scale,
@@ -425,7 +431,7 @@ def plot2_eroded_distance_and_equilibrium(
     setsize(fig)
     ax.set_aspect(1)
     #
-    # plot_mesh(ax, xe, ye)
+    # plot_mesh(ax, xe, ye, scale=scale)
     chainage_markers(xykm, ax, ndec=0, scale=scale)
     dnav_max = dnav.max()
     for ib in range(len(xy_eq)):
@@ -688,7 +694,7 @@ def plot4_eroded_volume_eq(
 
 
 def plot5series_waterlevels_per_bank(
-    bank_km: List[numpy.ndarray],
+    bank_km_mid: List[numpy.ndarray],
     chainage_txt: str,
     waterlevel: List[List[numpy.ndarray]],
     waterlevelq_txt: str,
@@ -706,8 +712,8 @@ def plot5series_waterlevels_per_bank(
     
     Arguments
     ---------
-    bank_km : List[numpy.ndarray]
-        List of arrays containing the chainage values per bank (point) [km].
+    bank_km_mid : List[numpy.ndarray]
+        List of arrays containing the chainage values per bank (segment) [km].
     chainage_txt : str
         Label for the horizontal chainage axes.
     waterlevel : List[List[numpy.ndarray]]
@@ -736,14 +742,14 @@ def plot5series_waterlevels_per_bank(
     fig : List[matplotlib.figure.Figure]
         List of figure object, one per bank.
     """
-    n_banklines = len(bank_km)
+    n_banklines = len(bank_km_mid)
     n_levels = len(waterlevel)
     figlist = []
     clrs = get_colors("Blues", n_levels + 1)
     for ib in range(n_banklines):
         fig, ax = matplotlib.pyplot.subplots()
         setsize(fig)
-        bk = (bank_km[ib][:-1] + bank_km[ib][1:]) / 2
+        bk = bank_km_mid[ib]
         #
         for iq in range(n_levels):
             if iq == 0:
@@ -752,14 +758,14 @@ def plot5series_waterlevels_per_bank(
                 wl_avg = wl_avg + waterlevel[iq][ib]
         wl_avg = wl_avg / n_levels
         ax.plot(
-            bank_km[ib],
+            bank_km_mid[ib],
             wl_avg,
             color=(0.5, 0.5, 0.5),
             linewidth=2,
             label=avg_waterlevel_txt,
         )
         ax.plot(
-            bank_km[ib],
+            bank_km_mid[ib],
             bankprotect[ib],
             color=(0.5, 0.5, 0.5),
             linestyle="--",
@@ -769,7 +775,7 @@ def plot5series_waterlevels_per_bank(
         #
         for iq in range(n_levels):
             ax.plot(
-                bank_km[ib],
+                bank_km_mid[ib],
                 waterlevel[iq][ib],
                 color=clrs[iq + 1],
                 label=waterlevelq_txt.format(iq=iq + 1),
@@ -784,7 +790,7 @@ def plot5series_waterlevels_per_bank(
 
 
 def plot6series_velocity_per_bank(
-    bank_km: List[numpy.ndarray],
+    bank_km_mid: List[numpy.ndarray],
     chainage_txt: str,
     veloc: List[List[numpy.ndarray]],
     velocq_txt: str,
@@ -802,8 +808,8 @@ def plot6series_velocity_per_bank(
     
     Arguments
     ---------
-    bank_km : List[numpy.ndarray]
-        List of arrays containing the chainage values per bank (point) [km].
+    bank_km_mid : List[numpy.ndarray]
+        List of arrays containing the chainage values per bank (segment) [km].
     chainage_txt : str
         Label for the horizontal chainage axes.
     veloc: List[List[numpy.ndarray]]
@@ -832,17 +838,17 @@ def plot6series_velocity_per_bank(
     fig : List[matplotlib.figure.Figure]
         List of figure object, one per bank.
     """
-    n_banklines = len(bank_km)
+    n_banklines = len(bank_km_mid)
     n_levels = len(veloc)
     figlist = []
     clrs = get_colors("Blues", n_levels + 1)
     for ib in range(n_banklines):
         fig, ax = matplotlib.pyplot.subplots()
         setsize(fig)
-        bk = (bank_km[ib][:-1] + bank_km[ib][1:]) / 2
+        bk = bank_km_mid[ib]
         #
         velc = numpy.sqrt(tauc[ib] * chezy[ib] ** 2 / (rho * g))
-        ax.plot(bank_km[ib], velc, color="k", label=ucrit_txt)
+        ax.plot(bank_km_mid[ib], velc, color="k", label=ucrit_txt)
         for iq in range(n_levels):
             ax.plot(
                 bk,
@@ -907,13 +913,16 @@ def plot7_banktype(
     clrs = get_colors("plasma", len(taucls_str) + 1)
     for ib in range(len(bank_crds)):
         for ibt in range(len(taucls_str)):
-            isbanktype = numpy.nonzero(banktype[ib] == ibt)[0]
-            if isbanktype.any():
-                x = bank_crds[ib][:, 0].copy() / scale
-                y = bank_crds[ib][:, 1].copy() / scale
-                #
-                x[banktype[ib] != ibt] = numpy.nan
-                y[banktype[ib] != ibt] = numpy.nan
+            ibtEdges = numpy.nonzero(banktype[ib] == ibt)[0]
+            if len(ibtEdges) > 0:
+                nedges = len(ibtEdges)
+                nx = max(3 * nedges - 1, 0)
+                x = numpy.zeros((nx,)) + numpy.nan
+                y = x.copy()
+                x[0::3] = bank_crds[ib][ibtEdges, 0].copy() / scale
+                y[0::3] = bank_crds[ib][ibtEdges, 1].copy() / scale
+                x[1::3] = bank_crds[ib][ibtEdges + 1, 0].copy() / scale
+                y[1::3] = bank_crds[ib][ibtEdges + 1, 1].copy() / scale
                 #
                 if ib == 0:
                     ax.plot(x, y, color=clrs[ibt], label=taucls_str[ibt])
@@ -935,7 +944,7 @@ def plot7_banktype(
 
 
 def plot8_eroded_distance(
-    bank_km: List[numpy.ndarray],
+    bank_km_mid: List[numpy.ndarray],
     chainage_txt: str,
     dn_tot: List[numpy.ndarray],
     dn_tot_txt: str,
@@ -949,8 +958,8 @@ def plot8_eroded_distance(
     
     Arguments
     ---------
-    bank_km : List[numpy.ndarray]
-        List of arrays containing the chainage values per bank (point) [km].
+    bank_km_mid : List[numpy.ndarray]
+        List of arrays containing the chainage values per bank (segment) [km].
     chainage_txt : str
         Label for the horizontal chainage axes.
     dn_tot : List[numpy.ndarray]
@@ -977,7 +986,7 @@ def plot8_eroded_distance(
     n_banklines = len(dn_tot)
     clrs = get_colors("plasma", n_banklines + 1)
     for ib in range(n_banklines):
-        bk = (bank_km[ib][:-1] + bank_km[ib][1:]) / 2
+        bk = bank_km_mid[ib]
         ax.plot(bk, dn_tot[ib], color=clrs[ib], label=dn_tot_txt.format(ib=ib + 1))
         ax.plot(
             bk,

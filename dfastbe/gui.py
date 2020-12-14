@@ -32,14 +32,14 @@ from typing import Dict, Any, Optional, Tuple
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import PyQt5.QtGui
-import dfastbe.cli
+import dfastbe.batch
 import dfastbe.io
-import dfastbe.kernel
 import pathlib
 import sys
 import os
 import configparser
 import matplotlib.pyplot
+import subprocess
 from functools import partial
 
 DialogObject = Dict[str, PyQt5.QtCore.QObject]
@@ -148,6 +148,9 @@ def createMenus(menubar: PyQt5.QtWidgets.QMenuBar) -> None:
     item.triggered.connect(close_dialog)
 
     menu = menubar.addMenu(gui_text("Help"))
+    item = menu.addAction(gui_text("Manual"))
+    item.triggered.connect(menu_open_manual)
+    menu.addSeparator()
     item = menu.addAction(gui_text("Version"))
     item.triggered.connect(menu_about_self)
     item = menu.addAction(gui_text("AboutQt"))
@@ -1013,17 +1016,18 @@ def run_detection() -> None:
     """
     config = get_configuration()
     rootdir = os.getcwd()
-    config = dfastbe.cli.config_to_relative_paths(rootdir, config)
+    config = dfastbe.batch.config_to_relative_paths(rootdir, config)
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
     matplotlib.pyplot.close("all")
     # should maybe use a separate thread for this ...
     msg = ""
     try:
-        dfastbe.cli.banklines_core(config, rootdir, True)
+        dfastbe.batch.banklines_core(config, rootdir, True)
     except Exception as Ex:
         msg = str(Ex)
     dialog["application"].restoreOverrideCursor()
     if msg != "":
+        print(msg)
         showError(msg)
 
 
@@ -1040,18 +1044,19 @@ def run_erosion() -> None:
     """
     config = get_configuration()
     rootdir = os.getcwd()
-    config = dfastbe.cli.config_to_relative_paths(rootdir, config)
+    config = dfastbe.batch.config_to_relative_paths(rootdir, config)
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
     matplotlib.pyplot.close("all")
     # should maybe use a separate thread for this ...
     msg = ""
-    try:
-        dfastbe.cli.bankerosion_core(config, rootdir, True)
-    except Exception as Ex:
-        msg = str(Ex)
+    # try:
+    dfastbe.batch.bankerosion_core(config, rootdir, True)
+    # except Exception as Ex:
+    #    msg = str(Ex)
     dialog["application"].restoreOverrideCursor()
-    if msg != "":
-        showError(msg)
+    # if msg != "":
+    #    print(msg)
+    #    showError(msg)
 
 
 def close_dialog() -> None:
@@ -1101,7 +1106,7 @@ def load_configuration(filename: str) -> None:
     absfilename = dfastbe.io.absolute_path(os.getcwd(), filename)
     rootdir = os.path.dirname(absfilename)
     config = dfastbe.io.read_config(absfilename)
-    config = dfastbe.cli.config_to_absolute_paths(rootdir, config)
+    config = dfastbe.batch.config_to_absolute_paths(rootdir, config)
     try:
         version = config["General"]["Version"]
     except:
@@ -1114,7 +1119,7 @@ def load_configuration(filename: str) -> None:
         dialog["startRange"].setText(str(studyRange[0]))
         dialog["endRange"].setText(str(studyRange[1]))
         dialog["bankDirEdit"].setText(section["BankDir"])
-        bankFile =  dfastbe.io.config_get_str(
+        bankFile = dfastbe.io.config_get_str(
             config, "General", "BankFile", default="bankfile",
         )
         dialog["bankFileName"].setText(bankFile)
@@ -1161,11 +1166,11 @@ def load_configuration(filename: str) -> None:
         dialog["fairwayEdit"].setText(section["Fairway"])
         dialog["chainageOutStep"].setText(section["OutputInterval"])
         dialog["outDirEdit"].setText(section["OutputDir"])
-        bankNew = dfastbe.io.config_get_float(
+        bankNew = dfastbe.io.config_get_str(
             config, "Erosion", "BankNew", default="banknew",
         )
         dialog["newBankFile"].setText(bankNew)
-        bankEq = dfastbe.io.config_get_float(
+        bankEq = dfastbe.io.config_get_str(
             config, "Erosion", "BankEq", default="bankeq",
         )
         dialog["newEqBankFile"].setText(bankEq)
@@ -1449,7 +1454,7 @@ def menu_save_configuration() -> None:
     if filename != "":
         config = get_configuration()
         rootdir = os.path.dirname(filename)
-        config = dfastbe.cli.config_to_relative_paths(rootdir, config)
+        config = dfastbe.batch.config_to_relative_paths(rootdir, config)
         dfastbe.io.write_config(filename, config)
 
 
@@ -1616,6 +1621,19 @@ def menu_about_qt():
     None
     """
     QtWidgets.QApplication.aboutQt()
+
+
+def menu_open_manual():
+    """
+    Open the user manual.
+
+    Arguments
+    ---------
+    None
+    """
+    progloc = dfastbe.io.get_progloc()
+    filename = progloc + os.path.sep + "dfastbe_usermanual.pdf"
+    subprocess.Popen(filename, shell=True)
 
 
 def main(config: Optional[str] = None) -> None:

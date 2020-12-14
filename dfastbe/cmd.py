@@ -34,16 +34,13 @@ import matplotlib.pyplot
 import sys
 import os
 import numpy
-import dfastbe.cli
+import dfastbe.batch
 import dfastbe.gui
 import dfastbe.io
-import pathlib
 
 
 def run(
-    language: str = "UK",
-    runmode: str = "GUI",
-    configfile: Optional[str] = "dfastbe.cfg",
+    language: str = "UK", runmode: str = "GUI", configfile: str = "dfastbe.cfg",
 ) -> None:
     """
     Main routine initializing the language file and starting the chosen run mode.
@@ -54,10 +51,10 @@ def run(
         Display language 'NL' or 'UK' ('UK' is default)
     runmode: str
         Run mode 'BANKLINES', 'BANKEROSION' or 'GUI' ('GUI' is default)
-    configfile: Optional[str]
+    configfile: str
         Configuration file ('dfastbe.cfg' is default)
     """
-    progloc = str(pathlib.Path(__file__).parent.absolute())
+    progloc = dfastbe.io.get_progloc()
     LANGUAGE = language.upper()
     try:
         dfastbe.io.load_program_texts(
@@ -75,15 +72,9 @@ def run(
     else:
         RUNMODE = runmode.upper()
         if RUNMODE == "BANKLINES":
-            if configfile is None:
-                pass
-            else:
-                dfastbe.cli.banklines(configfile)
+            dfastbe.batch.banklines(configfile)
         elif RUNMODE == "BANKEROSION":
-            if configfile is None:
-                pass
-            else:
-                dfastbe.cli.bankerosion(configfile)
+            dfastbe.batch.bankerosion(configfile)
         elif RUNMODE == "GUI":
             dfastbe.gui.main(configfile)
         else:

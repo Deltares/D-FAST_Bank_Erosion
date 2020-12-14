@@ -191,9 +191,9 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
     # clip the set of detected bank lines to the bank areas
     dfastbe.io.log_text("simplify_banklines")
     bank = [None] * n_searchlines
-    for b, bankarea in enumerate(bankareas):
-        print("bank line {}".format(b + 1))
-        bank[b] = dfastbe.support.clip_sort_connect_bank_lines(
+    for ib, bankarea in enumerate(bankareas):
+        dfastbe.io.log_text("bank_lines", dict={"ib": ib + 1})
+        bank[ib] = dfastbe.support.clip_sort_connect_bank_lines(
             banklines, bankarea, xykm
         )
     dfastbe.io.log_text("-")
@@ -335,8 +335,10 @@ def bankerosion_core(
     sim, dh0 = dfastbe.io.read_simdata(simfile)
     dfastbe.io.log_text("-")
 
+    dfastbe.io.log_text("derive_topology")
     fn = sim["facenode"]
-    en, ef, fe, boundary_edge = derive_topology_arrays(fn)
+    nnodes = sim["nnodes"]
+    en, ef, fe, boundary_edge_nrs = derive_topology_arrays(fn, nnodes)
 
     # read river km file
     xykm = dfastbe.io.config_get_xykm(config)
@@ -350,11 +352,10 @@ def bankerosion_core(
     # map bank lines to mesh cells
     dfastbe.io.log_text("intersect_bank_mesh")
     bankline_faces = [None] * n_banklines
-    xf = sim["x_node"][fn]
-    yf = sim["y_node"][fn]
+    xf = masked_index(sim["x_node"], fn)
+    yf = masked_index(sim["y_node"], fn)
     xe = sim["x_node"][en]
     ye = sim["y_node"][en]
-    boundary_edge_nrs = numpy.nonzero(boundary_edge)[0]
     bank_crds = []
     bank_idx = []
     for ib in range(n_banklines):
@@ -362,17 +363,18 @@ def bankerosion_core(
         dfastbe.io.log_text("bank_nodes", dict={"ib": ib + 1, "n": len(bp)})
 
         crds, idx = dfastbe.support.intersect_line_mesh(
-            bp, xf, yf, xe, ye, fe, ef, fn, en, boundary_edge_nrs
+            bp, xf, yf, xe, ye, fe, ef, fn, en, nnodes, boundary_edge_nrs
         )
         bank_crds.append(crds)
         bank_idx.append(idx)
 
     # linking bank lines to chainage
     dfastbe.io.log_text("chainage_to_banks")
-    bank_km = [None] * n_banklines
+    bank_km_mid = [None] * n_banklines
     to_right = [True] * n_banklines
     for ib, bcrds in enumerate(bank_crds):
-        bank_km[ib] = dfastbe.support.project_km_on_line(bcrds, xykm_numpy)
+        bcrds_mid = (bcrds[:-1, :] + bcrds[1:, :]) / 2
+        bank_km_mid[ib] = dfastbe.support.project_km_on_line(bcrds_mid, xykm_numpy)
         to_right[ib] = dfastbe.support.on_right_side(bcrds, xy_numpy)
         if to_right[ib]:
             dfastbe.io.log_text("right_side_bank", dict={"ib": ib + 1})
@@ -420,7 +422,7 @@ def bankerosion_core(
     km_step = dfastbe.io.config_get_float(config, "Erosion", "OutputInterval", 1.0)
     # map to output interval
     km_bin = (river_axis_km.min(), river_axis_km.max(), km_step)
-    km_mid = dfastbe.kernel.get_km_bins(km_bin, type = 3) # get mid points
+    km_mid = dfastbe.kernel.get_km_bins(km_bin, type=3)  # get mid points
     xykm_bin_numpy = dfastbe.support.xykm_bin(xykm_numpy, km_bin)
 
     # read fairway file
@@ -435,10 +437,11 @@ def bankerosion_core(
     distance_fw = []
     ifw = []
     for ib, bcrds in enumerate(bank_crds):
-        distance_fw.append(numpy.zeros(len(bcrds)))
-        ifw.append(numpy.zeros(len(bcrds), dtype=numpy.int64))
+        bcrds_mid = (bcrds[:-1, :] + bcrds[1:, :]) / 2
+        distance_fw.append(numpy.zeros(len(bcrds_mid)))
+        ifw.append(numpy.zeros(len(bcrds_mid), dtype=numpy.int64))
         ifw_last = None
-        for ip, bp in enumerate(bcrds):
+        for ip, bp in enumerate(bcrds_mid):
             # check only fairway points starting from latest match (in MATLAB code +/-10 from latest match)
             if ifw_last is None:
                 ifw[ib][ip] = numpy.argmin(((bp - fairway_numpy) ** 2).sum(axis=1))
@@ -456,7 +459,7 @@ def bankerosion_core(
     fwi = -numpy.ones((len(fairway_numpy),), dtype=numpy.int64)
     fairway_index = numpy.ma.masked_array(fwi, mask=(fwi == -1))
     fairway_index[fw_used] = dfastbe.support.map_line_mesh(
-        fairway_numpy[fw_used], xf, yf, xe, ye, fe, ef, boundary_edge_nrs
+        fairway_numpy[fw_used], xf, yf, nnodes, xe, ye, fe, ef, boundary_edge_nrs
     )
 
     # water level at fairway
@@ -468,35 +471,47 @@ def bankerosion_core(
 
     # wave reduction s0, s1
     dfw0 = dfastbe.io.config_get_parameter(
-        config, "Erosion", "Wave0", bank_km, default=200, positive=True, onefile=True
+        config,
+        "Erosion",
+        "Wave0",
+        bank_km_mid,
+        default=200,
+        positive=True,
+        onefile=True,
     )
     dfw1 = dfastbe.io.config_get_parameter(
-        config, "Erosion", "Wave1", bank_km, default=150, positive=True, onefile=True
+        config,
+        "Erosion",
+        "Wave1",
+        bank_km_mid,
+        default=150,
+        positive=True,
+        onefile=True,
     )
 
     # save 1_banklines
 
-    # read vship, nship, nwave, draught (tship), shiptype (ship) ... independent of level number
+    # read vship, nship, nwave, draught (tship), shiptype ... independent of level number
     vship0 = dfastbe.io.config_get_parameter(
-        config, "Erosion", "VShip", bank_km, positive=True, onefile=True
+        config, "Erosion", "VShip", bank_km_mid, positive=True, onefile=True
     )
     Nship0 = dfastbe.io.config_get_parameter(
-        config, "Erosion", "NShip", bank_km, positive=True, onefile=True
+        config, "Erosion", "NShip", bank_km_mid, positive=True, onefile=True
     )
     nwave0 = dfastbe.io.config_get_parameter(
-        config, "Erosion", "NWave", bank_km, default=5, positive=True, onefile=True
+        config, "Erosion", "NWave", bank_km_mid, default=5, positive=True, onefile=True
     )
     Tship0 = dfastbe.io.config_get_parameter(
-        config, "Erosion", "Draught", bank_km, positive=True, onefile=True
+        config, "Erosion", "Draught", bank_km_mid, positive=True, onefile=True
     )
     ship0 = dfastbe.io.config_get_parameter(
-        config, "Erosion", "ShipType", bank_km, valid=[1, 2, 3], onefile=True
+        config, "Erosion", "ShipType", bank_km_mid, valid=[1, 2, 3], onefile=True
     )
     parslope0 = dfastbe.io.config_get_parameter(
-        config, "Erosion", "Slope", bank_km, default=20, positive=True, ext="slp"
+        config, "Erosion", "Slope", bank_km_mid, default=20, positive=True, ext="slp"
     )
     parreed0 = dfastbe.io.config_get_parameter(
-        config, "Erosion", "Reed", bank_km, default=0, positive=True, ext="rdd"
+        config, "Erosion", "Reed", bank_km_mid, default=0, positive=True, ext="rdd"
     )
 
     # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
@@ -505,14 +520,14 @@ def bankerosion_core(
     taucls_str = ["protected", "vegetation", "good clay", "moderate/bad clay", "sand"]
     if classes:
         banktype = dfastbe.io.config_get_parameter(
-            config, "Erosion", "BankType", bank_km, default=0, ext=".btp"
+            config, "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
         )
         tauc = []
         for ib in range(len(banktype)):
             tauc.append(taucls[banktype[ib]])
     else:
         tauc = dfastbe.io.config_get_parameter(
-            config, "Erosion", "BankType", bank_km, default=0, ext=".btp"
+            config, "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
         )
         thr = (taucls[:-1] + taucls[1:]) / 2
         banktype = [None] * len(thr)
@@ -525,7 +540,7 @@ def bankerosion_core(
     # read bank protectlevel zss
     zss_miss = -1000
     zss = dfastbe.io.config_get_parameter(
-        config, "Erosion", "ProtectLevel", bank_km, default=zss_miss, ext=".bpl"
+        config, "Erosion", "ProtectLevel", bank_km_mid, default=zss_miss, ext=".bpl"
     )
     # if zss undefined, set zss equal to zfw_ini - 1
     for ib in range(len(zss)):
@@ -572,7 +587,7 @@ def bankerosion_core(
             config,
             "Erosion",
             "VShip" + iq_str,
-            bank_km,
+            bank_km_mid,
             default=vship0,
             positive=True,
             onefile=True,
@@ -581,7 +596,7 @@ def bankerosion_core(
             config,
             "Erosion",
             "NShip" + iq_str,
-            bank_km,
+            bank_km_mid,
             default=Nship0,
             positive=True,
             onefile=True,
@@ -590,7 +605,7 @@ def bankerosion_core(
             config,
             "Erosion",
             "NWave" + iq_str,
-            bank_km,
+            bank_km_mid,
             default=nwave0,
             positive=True,
             onefile=True,
@@ -599,16 +614,16 @@ def bankerosion_core(
             config,
             "Erosion",
             "Draught" + iq_str,
-            bank_km,
+            bank_km_mid,
             default=Tship0,
             positive=True,
             onefile=True,
         )
-        ship = dfastbe.io.config_get_parameter(
+        ship_type = dfastbe.io.config_get_parameter(
             config,
             "Erosion",
             "ShipType" + iq_str,
-            bank_km,
+            bank_km_mid,
             default=ship0,
             valid=[1, 2, 3],
             onefile=True,
@@ -618,7 +633,7 @@ def bankerosion_core(
             config,
             "Erosion",
             "Slope" + iq_str,
-            bank_km,
+            bank_km_mid,
             default=parslope0,
             positive=True,
             ext="slp",
@@ -627,7 +642,7 @@ def bankerosion_core(
             config,
             "Erosion",
             "Reed" + iq_str,
-            bank_km,
+            bank_km_mid,
             default=parreed0,
             positive=True,
             ext="rdd",
@@ -662,8 +677,7 @@ def bankerosion_core(
             if iq == 0:
                 linesize.append(numpy.sqrt(dx ** 2 + dy ** 2))
 
-            idx = bank_idx[ib]
-            bank_index = idx[1:]
+            bank_index = bank_idx[ib]
             velocity[iq].append(
                 numpy.absolute(
                     sim["ucx_face"][bank_index] * dx + sim["ucy_face"][bank_index] * dy
@@ -675,7 +689,10 @@ def bankerosion_core(
                 # determine velocity and bankheight along banks ...
                 # bankheight = maximum bed elevation per cell
                 if sim["zb_location"] == "node":
-                    bankheight.append(sim["zb_val"][fnc[bank_index, :]].max(axis=1))
+                    zb = sim["zb_val"]
+                    zb_all_nodes = masked_index(zb, fnc[bank_index, :])
+                    zb_bank = zb_all_nodes.max(axis=1)
+                    bankheight.append(zb_bank)
                 else:
                     # don't know ... need to check neighbouring cells ...
                     bankheight.append(None)
@@ -687,7 +704,6 @@ def bankerosion_core(
             hfw_max = max(hfw_max, hfw.max())
             waterlevel[iq].append(sim["zw_face"][ii])
             chez = sim["chz_face"][ii]
-            # TODO: curious ... MATLAB: chezy{j} = 0*chezy{j}+mchez
             chezy[iq].append(0 * chez + chez.mean())
 
             if iq == ref_level:
@@ -696,7 +712,7 @@ def bankerosion_core(
                     linesize[ib],
                     zfw_ini[ib],
                     vship[ib],
-                    ship[ib],
+                    ship_type[ib],
                     Tship[ib],
                     mu_slope[ib],
                     distance_fw[ib],
@@ -709,11 +725,9 @@ def bankerosion_core(
                 dn_eq.append(dn_eq1)
                 dv_eq.append(dv_eq1)
 
-            displ_tauc = False  # True for Delft3D, False otherwise
+            tauc_iso_velc = False  # True for Delft3D, False otherwise
             filter = False
 
-            qstr = str(iq + 1)
-            bstr = str(ib + 1)
             dniqib, dviqib, dnship, dnflow = dfastbe.kernel.comp_erosion(
                 velocity[iq][ib],
                 bankheight[ib],
@@ -724,7 +738,7 @@ def bankerosion_core(
                 Nship[ib],
                 vship[ib],
                 nwave[ib],
-                ship[ib],
+                ship_type[ib],
                 Tship[ib],
                 Teros * pdischarge[iq],
                 mu_slope[ib],
@@ -738,8 +752,43 @@ def bankerosion_core(
                 filter,
                 rho,
                 g,
-                displ_tauc,
+                tauc_iso_velc,
             )
+
+            if True:
+                bcrds_mid = (bcrds[:-1, :] + bcrds[1:, :]) / 2
+                debug_file(
+                    {
+                        "km": bank_km_mid[ib],
+                        "x": bcrds_mid[:, 0],
+                        "y": bcrds_mid[:, 1],
+                        "idx": bank_index,
+                        "u": velocity[iq][ib],
+                        "zb": bankheight[ib],
+                        "len": linesize[ib],
+                        "zw": waterlevel[iq][ib],
+                        "zw0": zfw_ini[ib],
+                        "tauc": tauc[ib],
+                        "nship": Nship[ib],
+                        "vship": vship[ib],
+                        "nwave": nwave[ib],
+                        "shiptype": ship_type[ib],
+                        "draught": Tship[ib],
+                        "mu_slp": mu_slope[ib],
+                        "mu_reed": mu_reed[ib],
+                        "dist_fw": distance_fw[ib],
+                        "dfw0": dfw0[ib],
+                        "dfw1": dfw1[ib],
+                        "hfw": hfw,
+                        "chez": chezy[iq][ib],
+                        "zss": zss[ib],
+                        "dn": dniqib,
+                        "dv": dviqib,
+                        "dnship": dnship,
+                        "dnflow": dnflow,
+                    },
+                    outputdir + os.sep + "debug.Q{}.B{}.csv".format(iq + 1, ib + 1),
+                )
 
             # shift bank lines
             # xylines_new = dfastbe.support.move_line(bcrds, dniqib, to_right[ib])
@@ -756,7 +805,7 @@ def bankerosion_core(
                 dv_tot[ib] += dviqib
 
             # accumulate eroded volumes per km
-            dvol = dfastbe.kernel.get_km_eroded_volume(bank_km[ib], dviqib, km_bin)
+            dvol = dfastbe.kernel.get_km_eroded_volume(bank_km_mid[ib], dviqib, km_bin)
             dv[iq].append(dvol)
             dvol_bank[:, ib] += dvol
 
@@ -788,23 +837,12 @@ def bankerosion_core(
         dnavship[ib] = (dn_ship_tot[ib] * linesize[ib]).sum() / linesize[ib].sum()
         dnaveq[ib] = (dn_eq[ib] * linesize[ib]).sum() / linesize[ib].sum()
         dnmaxeq[ib] = dn_eq[ib].max()
-
-        print(
-            "average erosion distance for bank line {} : {:6.2f} m".format(
-                ib + 1, dnav[ib]
-            )
-        )
-        print(
-            "average erosion distance through flow    : {:6.2f} m".format(dnavflow[ib])
-        )
-        print(
-            "average erosion distance through ships   : {:6.2f} m".format(dnavship[ib])
-        )
-        print("maximal erosion distance                 : {:6.2f} m".format(dnmax[ib]))
-        print("average equilibrium erosion distance     : {:6.2f} m".format(dnaveq[ib]))
-        print(
-            "maximal equilibrium erosion distance     : {:6.2f} m".format(dnmaxeq[ib])
-        )
+        dfastbe.io.log_text("bank_dnav", dict={"ib": ib + 1, "v": dnav[ib]})
+        dfastbe.io.log_text("bank_dnavflow", dict={"v": dnavflow[ib]})
+        dfastbe.io.log_text("bank_dnavship", dict={"v": dnavship[ib]})
+        dfastbe.io.log_text("bank_dnmax", dict={"v": dnmax[ib]})
+        dfastbe.io.log_text("bank_dnaveq", dict={"v": dnaveq[ib]})
+        dfastbe.io.log_text("bank_dnmaxeq", dict={"v": dnmaxeq[ib]})
 
         xyline_new = dfastbe.support.move_line(bcrds, dn_tot[ib], to_right[ib])
         xyline_new_list.append(xyline_new)
@@ -814,9 +852,13 @@ def bankerosion_core(
         xyline_eq_list.append(xyline_eq)
         bankline_eq_list.append(shapely.geometry.LineString(xyline_eq))
 
-        dvol_eq = dfastbe.kernel.get_km_eroded_volume(bank_km[ib], dv_eq[ib], km_bin)
+        dvol_eq = dfastbe.kernel.get_km_eroded_volume(
+            bank_km_mid[ib], dv_eq[ib], km_bin
+        )
         vol_eq[:, ib] = dvol_eq
-        dvol_tot = dfastbe.kernel.get_km_eroded_volume(bank_km[ib], dv_tot[ib], km_bin)
+        dvol_tot = dfastbe.kernel.get_km_eroded_volume(
+            bank_km_mid[ib], dv_tot[ib], km_bin
+        )
         vol_tot[:, ib] = dvol_tot
         if ib < n_banklines - 1:
             dfastbe.io.log_text("-")
@@ -841,14 +883,16 @@ def bankerosion_core(
     erovol_file = dfastbe.io.config_get_str(
         config, "Erosion", "EroVol", default="erovol.evo"
     )
-    print("saving eroded volume in file: {}".format(erovol_file))
-    dfastbe.io.write_km_eroded_volumes(km_mid, vol_tot, outputdir + os.sep + erovol_file)
+    dfastbe.io.log_text("save_tot_erovol", dict={"file": erovol_file})
+    dfastbe.io.write_km_eroded_volumes(
+        km_mid, vol_tot, outputdir + os.sep + erovol_file
+    )
 
     # write eroded volumes per km (equilibrium)
     erovol_file = dfastbe.io.config_get_str(
         config, "Erosion", "EroVolEqui", default="erovol_eq.evo"
     )
-    print("saving eroded volume in file: {}".format(erovol_file))
+    dfastbe.io.log_text("save_eq_erovol", dict={"file": erovol_file})
     dfastbe.io.write_km_eroded_volumes(km_mid, vol_eq, outputdir + os.sep + erovol_file)
 
     # create various plots
@@ -945,7 +989,7 @@ def bankerosion_core(
             dfastbe.plotting.savefig(fig, figfile)
 
         figlist = dfastbe.plotting.plot5series_waterlevels_per_bank(
-            bank_km,
+            bank_km_mid,
             "river chainage [km]",
             waterlevel,
             "water level at Q{iq}",
@@ -972,7 +1016,7 @@ def bankerosion_core(
                 dfastbe.plotting.savefig(fig, figfile)
 
         figlist = dfastbe.plotting.plot6series_velocity_per_bank(
-            bank_km,
+            bank_km_mid,
             "river chainage [km]",
             velocity,
             "velocity at Q{iq}",
@@ -1014,7 +1058,7 @@ def bankerosion_core(
             dfastbe.plotting.savefig(fig, figfile)
 
         fig = dfastbe.plotting.plot8_eroded_distance(
-            bank_km,
+            bank_km_mid,
             "river chainage [km]",
             dn_tot,
             "Bank {ib}",
@@ -1035,6 +1079,28 @@ def bankerosion_core(
 
     dfastbe.io.log_text("end_bankerosion")
     timedlogger("-- end analysis --")
+
+
+def masked_index(x0: numpy.array, idx: numpy.ma.masked_array) -> numpy.ma.masked_array:
+    """
+    Index one array by another transferring the mask.
+    
+    Arguments
+    ---------
+    x0 : numpy.ndarray
+        A linear array.
+    idx : numpy.ma.masked_array
+        An index array with possibly masked indices.
+    
+    Results
+    -------
+    x1: numpy.ma.masked_array
+        An array with same shape as idx, with mask.
+    """
+    idx_safe = idx.copy()
+    idx_safe.data[numpy.ma.getmask(idx)] = 0
+    x1 = numpy.ma.masked_where(numpy.ma.getmask(idx), x0[idx_safe])
+    return x1
 
 
 def get_bbox(
@@ -1067,7 +1133,7 @@ def get_bbox(
 
 
 def derive_topology_arrays(
-    fn: numpy.ndarray,
+    fn: numpy.ndarray, n_nodes: numpy.ndarray
 ) -> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray]:
     """
     Derive the secondary topology arrays from the face_node_connectivity.
@@ -1076,6 +1142,8 @@ def derive_topology_arrays(
     ---------
     fn : numpy.ndarray
         An N x M array containing the node indices (max M) for each of the N mesh faces.
+    n_nodes: numpy.ndarray
+        A array of length N containing the number of nodes for each one of the N mesh faces.
     
     Results
     -------
@@ -1085,75 +1153,97 @@ def derive_topology_arrays(
         An L x 2 array containing the face indices (max 2) for each of the L mesh edges.
     fe : numpy.ndarray
         An N x M array containing the edge indices (max M) for each of the N mesh faces.
-    boundary_edge : numpy.ndarray
-        A K array containing the edge indices making the mesh outer (or inner) boundary.
+    boundary_edge_nrs : numpy.ndarray
+        A array of length K containing the edge indices making the mesh outer (or inner) boundary.
     """
+
+    # get a sorted list of edge node connections (shared edges occur twice)
+    # face_nr contains the face index to which the edge belongs
     n_faces = fn.shape[0]
     max_n_nodes = fn.shape[1]
-    tmp = numpy.repeat(fn, 2, axis=1)
-    tmp = numpy.concatenate((tmp[:, 1:], tmp[:, :1]), axis=1)
-    n_edges = int(tmp.size / 2)
-    en = tmp.reshape(n_edges, 2)
+    n_edges = sum(n_nodes)
+    en = numpy.zeros((n_edges, 2), dtype=numpy.int64)
+    face_nr = numpy.zeros((n_edges,), dtype=numpy.int64)
+    i = 0
+    for iFace in range(n_faces):
+        nEdges = n_nodes[iFace]  # note: nEdges = nNodes
+        for iEdge in range(nEdges):
+            if iEdge == 0:
+                en[i, 1] = fn[iFace, nEdges - 1]
+            else:
+                en[i, 1] = fn[iFace, iEdge - 1]
+            en[i, 0] = fn[iFace, iEdge]
+            face_nr[i] = iFace
+            i = i + 1
     en.sort(axis=1)
     i2 = numpy.argsort(en[:, 1], kind="stable")
     i1 = numpy.argsort(en[i2, 0], kind="stable")
     i12 = i2[i1]
     en = en[i12, :]
-
-    face_nr = numpy.repeat(
-        numpy.arange(n_faces).reshape((n_faces, 1)), max_n_nodes, axis=1
-    ).reshape((max_n_nodes * n_faces))
     face_nr = face_nr[i12]
 
+    # detect which edges are equal to the previous edge, and get a list of all unique edges
     numpy_true = numpy.array([True])
     equal_to_previous = numpy.concatenate(
         (~numpy_true, (numpy.diff(en, axis=0) == 0).all(axis=1))
     )
-    new_edge = ~equal_to_previous
-    boundary_edge = new_edge & numpy.concatenate((new_edge[1:], numpy_true))
-    boundary_edge = boundary_edge[new_edge]
+    unique_edge = ~equal_to_previous
+    n_unique_edges = numpy.sum(unique_edge)
+    # reduce the edge node connections to only the unique edges
+    en = en[unique_edge, :]
 
-    n_unique_edges = numpy.sum(new_edge)
+    # number the edges
     edge_nr = numpy.zeros(n_edges, dtype=numpy.int64)
-    edge_nr[new_edge] = numpy.arange(n_unique_edges, dtype=numpy.int64)
+    edge_nr[unique_edge] = numpy.arange(n_unique_edges, dtype=numpy.int64)
     edge_nr[equal_to_previous] = edge_nr[
         numpy.concatenate((equal_to_previous[1:], equal_to_previous[:1]))
     ]
-    edge_nr_unsorted = numpy.zeros(n_edges, dtype=numpy.int64)
-    edge_nr_unsorted[i12] = edge_nr
-    fe = edge_nr_unsorted.reshape(fn.shape)
-    en = en[new_edge, :]
 
+    # if two consecutive edges are unique, the first one occurs only once and represents a boundary edge
+    is_boundary_edge = unique_edge & numpy.concatenate((unique_edge[1:], numpy_true))
+    boundary_edge_nrs = edge_nr[is_boundary_edge]
+
+    # go back to the original face order
+    edge_nr_in_face_order = numpy.zeros(n_edges, dtype=numpy.int64)
+    edge_nr_in_face_order[i12] = edge_nr
+    # create the face edge connectivity array
+    fe = numpy.zeros(fn.shape, dtype=numpy.int64)
+    i = 0
+    for iFace in range(n_faces):
+        nEdges = n_nodes[iFace]  # note: nEdges = nNodes
+        for iEdge in range(nEdges):
+            fe[iFace, iEdge] = edge_nr_in_face_order[i]
+            i = i + 1
+
+    # determine the edge face connectivity
     ef = -numpy.ones((n_unique_edges, 2), dtype=numpy.int64)
-    ef[edge_nr[new_edge], 0] = face_nr[new_edge]
+    ef[edge_nr[unique_edge], 0] = face_nr[unique_edge]
     ef[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
 
-    return en, ef, fe, boundary_edge
+    return en, ef, fe, boundary_edge_nrs
 
 
-def debug_file(val: Union[numpy.ndarray, int, float, bool], filename: str) -> None:
+def debug_file(dict: Dict[str, numpy.ndarray], filename: str) -> None:
     """
     Write a text file for debugging.
 
     Arguments
     ---------
-    val : Union[numpy.ndarray, int, float, bool]
+    dict : Dict[str, numpy.ndarray]
         Value(s) to be written.
     filename : str
         Name of the file to be written.
     """
-    with open(filename, "w") as newfile:
-        if isinstance(val, numpy.ndarray):
-            for i in range(len(val)):
-                newfile.write("{:g}\n".format(val[i]))
-        elif isinstance(val, int) or isinstance(val, float) or isinstance(val, bool):
-            newfile.write("{:g}\n".format(val))
+    keys = [key for key in dict.keys()]
+    header = ""
+    for i in range(len(keys)):
+        if i < len(keys) - 1:
+            header = header + '"' + keys[i] + '", '
         else:
-            newfile.write(
-                "Unsupported quantity type ({}) for generating debug files.\n".format(
-                    str(type(val))
-                )
-            )
+            header = header + '"' + keys[i] + '"'
+
+    data = numpy.column_stack([array for array in dict.values()])
+    numpy.savetxt(filename, data, delimiter=", ", header=header, comments="")
 
 
 def timedlogger(label: str) -> None:
