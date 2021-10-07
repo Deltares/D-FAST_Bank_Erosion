@@ -124,10 +124,8 @@ def comp_erosion(
     hfw: numpy.ndarray,
     chezy: numpy.ndarray,
     zss: numpy.ndarray,
-    filter: bool,
     rho: float,
     g: float,
-    tauc_iso_velc: bool,
 ):
     """
     Compute the bank erosion during a specific discharge level.
@@ -174,14 +172,10 @@ def comp_erosion(
         Array containing Chezy values [m0.5/s]
     zss : numpy.ndarray
         Array containing bank protection height [m]
-    filter : bool
-        Flag indicating whether velocities should be smoothened slightly
     rho : float
         Water density [kg/m3]
     g : float
         Gravitational acceleration [m/s2]
-    tauc_iso_velc : bool
-        Flag indicating whether displacement should be calculated based on critical shear stress (True) or velocity (False)
         
     Returns
     -------
@@ -211,17 +205,7 @@ def comp_erosion(
     # total wave damping coefficient
     mu_tot = numpy.zeros(xlen)
 
-    # Average velocity with values of neighbouring lines
-    if filter:
-        vel = numpy.concatenate(
-            (
-                velocity[:1],
-                0.5 * velocity[1:-1] + 0.25 * velocity[:-2] + 0.25 * velocity[2:],
-                velocity[-1:],
-            )
-        )
-    else:
-        vel = velocity
+    vel = velocity
 
     # ship induced wave height at the beginning of the foreshore
     H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, ship_type, Tship, vship, g)
@@ -229,13 +213,13 @@ def comp_erosion(
 
     # compute erosion parameters for each line part
 
-    # Erosion coefficient of linesegements
+    # erosion coefficient
     E = 0.2 * numpy.sqrt(tauc) * 1e-6
 
-    # critical velocity along linesegements
+    # critical velocity
     velc = numpy.sqrt(tauc / rho * chezy ** 2 / g)
 
-    # strength of linesegements
+    # strength
     cE = 1.85e-4 / tauc
 
     # total wavedamping coefficient
@@ -249,12 +233,7 @@ def comp_erosion(
     # compute displacement due to flow
     crit_ratio = numpy.ones(velc.shape)
     mask = (vel > velc) & (zfw > zss)
-    if tauc_iso_velc:
-        # displacement calculated based on critical shear stress
-        crit_ratio[mask] = chezy[mask] / tauc[mask]
-    else:
-        # displacement calculated based on critical flow velocity
-        crit_ratio[mask] = (vel[mask] / velc[mask]) ** 2
+    crit_ratio[mask] = (vel[mask] / velc[mask]) ** 2
     dn_flow = E * (crit_ratio - 1) * Teros * sec_year
 
     # compute displacement due to shipwaves
@@ -263,7 +242,6 @@ def comp_erosion(
 
     dn_ship = cE * H0 ** 2 * ts * Teros
     dn_ship[~mask] = 0
-    # dn_ship = dn_ship[0] #TODO: this selects only the first value ... correct? MATLAB compErosion: dn_ship=dn_ship(1);
 
     # compute erosion volume
     mask = (h_line_ship > 0) & (zfw > zss)
@@ -417,3 +395,62 @@ def get_km_eroded_volume(
     length = int((km_bin[1] - km_bin[0]) / km_bin[2])
     dvol.resize((length,))
     return dvol
+
+
+def moving_avg(xi: numpy.ndarray, yi: numpy.ndarray, dx: float) -> numpy.ndarray:
+    """
+    Perform a moving average for given averaging distance.
+    
+    Arguments
+    ---------
+    xi : numpy.ndarray
+        Array containing the distance - should be monotonically increasing or decreasing [m or equivalent]
+    yi : numpy.ndarray
+        Array containing the values to be average [arbitrary]
+    dx: float
+        Averaging distance [same unit as x]
+        
+    Returns
+    -------
+    yo : numpy.ndarray
+        Array containing the averaged values [same unit as y].
+    """
+    dx2 = dx / 2.0
+    nx = len(xi)
+    if xi[0] < xi[-1]:
+        x = xi
+        y = yi
+    else:
+        x = xi[::-1]
+        y = yi[::-1]
+    ym = numpy.zeros(y.shape)
+    di = numpy.zeros(y.shape)
+    j0 = 1
+    for i in range(nx):
+        for j in range(j0, nx):
+            dxj = x[j] - x[j - 1]
+            if x[i] - x[j] > dx2:
+                # point j is too far back for point i and further
+                j0 = j + 1
+            elif x[j] - x[i] > dx2:
+                # point j is too far ahead; wrap up and continue
+                d0 = (x[i] + dx2) - x[j - 1]
+                ydx2 = y[j - 1] + (y[j] - y[j - 1]) * d0 / dxj
+                ym[i] += (y[j - 1] + ydx2) / 2.0 * d0
+                di[i] += d0
+                break
+            elif x[i] - x[j - 1] > dx2:
+                # point j is ok, but j-1 is too far back, so let's start
+                d0 = x[j] - (x[i] - dx2)
+                ydx2 = y[j] + (y[j - 1] - y[j]) * d0 / dxj
+                ym[i] += (y[j] + ydx2) / 2.0 * d0
+                di[i] += d0
+            else:
+                # segment right in the middle
+                ym[i] += (y[j] + y[j - 1]) / 2.0 * dxj
+                di[i] += dxj
+    yo = ym / di
+    if xi[0] < xi[-1]:
+        return yo
+    else:
+        return yo[::-1]

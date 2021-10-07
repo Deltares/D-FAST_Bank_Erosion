@@ -276,11 +276,13 @@ Large distances between the points -- and thus large deviations from the actual 
 =====================================================
 Determine bank lines
 =====================================================
-version: D-FAST Bank Erosion 2.0.0
+version: D-FAST Bank Erosion 2.1.0
 source: https://github.com/Deltares/D-FAST_Bank_Erosion
 -----------------------------------------------------
 saving output in directory: output\banklines
+WARNING: directory 'output\banklines' already exists...=> overwriting directory
 saving figures in directory: output\figures
+WARNING: directory 'output\figures' already exists...=> overwriting directory
 reading chainage information from file : inputfiles\rivkm_20m.xyc
 clipping chainage to the range 123.0 to 128.0 km
 reading search line 1 from file : inputfiles\oeverlijn_links_mod.xyc
@@ -310,8 +312,8 @@ defining coordinates of bank lines ...
 90%
 100%
 clipping, sorting and connecting bank lines ...
-bank line 1
-bank line 2
+- bank line 1
+- bank line 2
 -----------------------------------------------------
 saving bank lines to file: output\banklines\bankfile.shp
 =====================================================
@@ -462,7 +464,7 @@ The listing of the screen output of \dfastbe during the bank erosion analysis is
 =====================================================
 Compute bank erosion
 =====================================================
-version: D-FAST Bank Erosion 2.0.0
+version: D-FAST Bank Erosion 2.1.0
 source: https://github.com/Deltares/D-FAST_Bank_Erosion
 -----------------------------------------------------
 getting input from directory: output\banklines
@@ -482,6 +484,7 @@ importing velocity ...
 importing Chezy ...
 importing dry/wet information ...
 -----------------------------------------------------
+deriving mesh topology arrays ...
 reading chainage information from file : inputfiles\rivkm_20m.xyc
 clipping chainage to the range 123.0 to 128.0 km
 reading bank lines from file: output\banklines\bankfile.shp
@@ -494,11 +497,14 @@ mapping chainage to bank segments ...
 reading location of river axis from file: inputfiles\maas_rivieras_mod.xyc
 selecting river axis range of interest ...
 reading location of fairway from file: inputfiles\maas_rivieras_mod.xyc
+selecting fairway range of interest ...
+intersect fairway with mesh (362 nodes) ...
 computing distance between bank lines and fairway ...
-determine mesh cells for fairway nodes ... (298 nodes)
 reading NShip from file: inputfiles\nships_totaal
 reading BankType of bank 1 from file: inputfiles\bankstrength_tauc_1.btp
 reading BankType of bank 2 from file: inputfiles\bankstrength_tauc_2.btp
+reading ProtectionLevel of bank 1 from file: inputfiles\stortsteen_1.bpl
+reading ProtectionLevel of bank 2 from file: inputfiles\stortsteen_2.bpl
 processing level information ...
 #####################
 ### Discharge   1 ###
@@ -520,7 +526,7 @@ processing level information ...
   computing bank erosion ...
   saving eroded volume in file: erovolQ1.evo
 
----- repetative mid section skipped ----
+---- repetitive mid section skipped ----
 
 #####################
 ### Discharge  13 ###
@@ -542,23 +548,23 @@ processing level information ...
   computing bank erosion ...
   saving eroded volume in file: erovolQ13.evo
 =====================================================
-average erosion distance for bank line 1 :   0.14 m
-average erosion distance through flow    :   0.04 m
-average erosion distance through ships   :   0.10 m
-maximal erosion distance                 :   0.62 m
-average equilibrium erosion distance     :  11.50 m
-maximal equilibrium erosion distance     :  13.89 m
+average erosion distance for bank line  1 :   0.15 m
+average erosion distance through flow     :   0.05 m
+average erosion distance through ships    :   0.10 m
+maximum erosion distance                  :   0.64 m
+average equilibrium erosion distance      :  11.59 m
+maximum equilibrium erosion distance      :  14.02 m
 -----------------------------------------------------
-average erosion distance for bank line 2 :   1.20 m
-average erosion distance through flow    :   0.58 m
-average erosion distance through ships   :   0.63 m
-maximal erosion distance                 :   4.56 m
-average equilibrium erosion distance     :  12.71 m
-maximal equilibrium erosion distance     :  14.20 m
+average erosion distance for bank line  2 :   1.25 m
+average erosion distance through flow     :   0.62 m
+average erosion distance through ships    :   0.63 m
+maximum erosion distance                  :   4.59 m
+average equilibrium erosion distance      :  12.69 m
+maximum equilibrium erosion distance      :  14.52 m
 saving bank lines to file: output\bankerosion\bankfile_new.shp
 saving bank lines to file: output\bankerosion\bankfile_eq.shp
-saving eroded volume in file: erovol_standard.evo
-saving eroded volume in file: erovol_eq.evo
+saving total eroded volume in file: erovol_standard.evo
+saving equilibrium eroded volume in file: erovol_eq.evo
 =====================================================
 generating figures ...
 saving figure output\figures\1_banklines.png

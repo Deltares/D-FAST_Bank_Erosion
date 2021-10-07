@@ -30,6 +30,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from typing import Tuple, Any, List, Union, Dict, Optional, TextIO, Callable, TypedDict
 
 import numpy
+import pandas
+import geopandas
+import shapely
 
 
 class SimulationObject(TypedDict):
@@ -665,6 +668,109 @@ def read_xyc(
     return L
 
 
+def write_xyc(xy: numpy.ndarray, val: numpy.ndarray, filename: str) -> None:
+    """
+    Write a text file with x, y, and values.
+
+    Arguments
+    ---------
+    xy : numpy.ndarray
+        N x 2 array containing x and y coordinates.
+    val : numpy.ndarray
+        N x k array containing values.
+    filename : str
+        Name of the file to be written.
+
+    Returns
+    -------
+    None
+    """
+    with open(filename, "w") as xyc:
+        if val.ndim == 1:
+            for i in range(len(val)):
+                valstr = "{:.2f}".format(val[i])
+                xyc.write("{:.2f}\t{:.2f}\t".format(xy[i, 0], xy[i, 1]) + valstr + "\n")
+        else:
+            for i in range(len(val)):
+                valstr = "\t".join(["{:.2f}".format(x) for x in val[i, :]])
+                xyc.write("{:.2f}\t{:.2f}\t".format(xy[i, 0], xy[i, 1]) + valstr + "\n")
+
+
+def write_shp_pnt(
+    xy: numpy.ndarray, dict: Dict[str, numpy.ndarray], filename: str
+) -> None:
+    """
+    Write a shape point file with x, y, and values.
+
+    Arguments
+    ---------
+    xy : numpy.ndarray
+        N x 2 array containing x and y coordinates.
+    dict : Dict[str, numpy.ndarray]
+        Dictionary of quantities to be written, each NumPy array should have length k.
+    filename : str
+        Name of the file to be written.
+
+    Returns
+    -------
+    None
+    """
+    xy_Points = [shapely.geometry.Point(xy1) for xy1 in xy]
+    geom = geopandas.geoseries.GeoSeries(xy_Points)
+    write_shp(geom, dict, filename)
+
+
+def write_shp(
+    geom: geopandas.geoseries.GeoSeries, dict: Dict[str, numpy.ndarray], filename: str
+) -> None:
+    """
+    Write a shape file for a given GeoSeries and dictionary of NumPy arrays.
+    The GeoSeries and all NumPy should have equal length.
+
+    Arguments
+    ---------
+    geom : geopandas.geoseries.GeoSeries
+        geopandas GeoSeries containing k geometries.
+    dict : Dict[str, numpy.ndarray]
+        Dictionary of quantities to be written, each NumPy array should have length k.
+    filename : str
+        Name of the file to be written.
+
+    Returns
+    -------
+    None
+    """
+    val_DataFrame = pandas.DataFrame(dict)
+    geopandas.GeoDataFrame(val_DataFrame, geometry=geom).to_file(filename)
+
+
+def write_csv(dict: Dict[str, numpy.ndarray], filename: str) -> None:
+    """
+    Write a data to csv file.
+
+    Arguments
+    ---------
+    dict : Dict[str, numpy.ndarray]
+        Value(s) to be written.
+    filename : str
+        Name of the file to be written.
+
+    Returns
+    -------
+    None
+    """
+    keys = [key for key in dict.keys()]
+    header = ""
+    for i in range(len(keys)):
+        if i < len(keys) - 1:
+            header = header + '"' + keys[i] + '", '
+        else:
+            header = header + '"' + keys[i] + '"'
+
+    data = numpy.column_stack([array for array in dict.values()])
+    numpy.savetxt(filename, data, delimiter=", ", header=header, comments="")
+
+
 def write_km_eroded_volumes(
     km: numpy.ndarray, vol: numpy.ndarray, filename: str
 ) -> None:
@@ -809,7 +915,9 @@ def upgrade_config(config: configparser.ConfigParser):
 
         config = movepar(config, "General", "Classes", "Erosion")
         config = movepar(config, "General", "BankType", "Erosion")
-        config = movepar(config, "General", "ProtectLevel", "Erosion")
+        config = movepar(
+            config, "General", "ProtectLevel", "Erosion", "ProtectionLevel"
+        )
         config = movepar(config, "General", "Slope", "Erosion")
         config = movepar(config, "General", "Reed", "Erosion")
         config = movepar(config, "General", "VelFilter", "Erosion")
@@ -900,6 +1008,25 @@ def sim2nc(oldfile: str) -> str:
     return ncfile
 
 
+def config_get_kmbounds(config: configparser.ConfigParser,) -> Tuple[float, float]:
+    """
+
+    Arguments
+    ---------
+    config : configparser.ConfigParser
+        Settings for the D-FAST Bank Erosion analysis.
+
+    Returns
+    -------
+    kmbounds : Tuple[float, float]
+        Lower and upper limit for the chainage.
+    """
+    # get km bounds
+    kmbounds = config_get_range(config, "General", "Boundaries")
+
+    return kmbounds
+
+
 def config_get_xykm(
     config: configparser.ConfigParser,
 ) -> shapely.geometry.linestring.LineStringAdapter:
@@ -917,8 +1044,6 @@ def config_get_xykm(
     """
     # get km bounds
     kmbounds = config_get_range(config, "General", "Boundaries")
-    if kmbounds[0] > kmbounds[1]:
-        kmbounds = kmbounds[::-1]
 
     # get the chainage file
     kmfile = config_get_str(config, "General", "RiverKM")
@@ -929,17 +1054,11 @@ def config_get_xykm(
     if xykm.coords[0][2] > xykm.coords[1][2]:
         xykm = shapely.geometry.asLineString(xykm.coords[::-1])
 
-    # clip the chainage path to the range of chainages of interest
-    log_text("clip_chainage", dict={"low": kmbounds[0], "high": kmbounds[1]})
-    xykm = clip_chainage_path(xykm, kmfile, kmbounds)
-
     return xykm
 
 
-def clip_chainage_path(
-    xykm: shapely.geometry.linestring.LineStringAdapter,
-    kmfile: str,
-    kmbounds: Tuple[float, float],
+def clip_path_to_kmbounds(
+    xykm: shapely.geometry.linestring.LineStringAdapter, kmbounds: Tuple[float, float],
 ) -> shapely.geometry.linestring.LineStringAdapter:
     """
     Clip a chainage line to the relevant reach.
@@ -948,14 +1067,12 @@ def clip_chainage_path(
     ---------
     xykm : shapely.geometry.linestring.LineStringAdapter
         Original river chainage line.
-    kmfile : str
-        Name of chainage file (from which xykm was obtained).
-    kmbounds : Tuple(float, float)
+    kmbounds : Tuple[float, float]
         Lower and upper limit for the chainage.
-
+        
     Returns
     -------
-    xykm1 :
+    xykm1 : shapely.geometry.linestring.LineStringAdapter
         Clipped river chainage line.
     """
     start_i = None
@@ -970,16 +1087,16 @@ def clip_chainage_path(
 
     if start_i is None:
         raise Exception(
-            'Start chainage {} is larger than the maximum chainage {} listed in "{}"'.format(
-                kmbounds[0], xykm.coords[-1][2], kmfile
+            "Lower chainage bound {} is larger than the maximum chainage {} available".format(
+                kmbounds[0], xykm.coords[-1][2]
             )
         )
     elif start_i == 0:
         # lower bound (potentially) clipped to available reach
         if xykm.coords[0][2] - kmbounds[0] > 0.1:
             raise Exception(
-                'Start chainage {} is smaller than the minimum chainage {} listed in "{}"'.format(
-                    kmbounds[0], xykm.coords[0][2], kmfile
+                "Lower chainage bound {} is smaller than the minimum chainage {} available".format(
+                    kmbounds[0], xykm.coords[0][2]
                 )
             )
         x0 = None
@@ -998,8 +1115,8 @@ def clip_chainage_path(
     if end_i is None:
         if kmbounds[1] - xykm.coords[-1][2] > 0.1:
             raise Exception(
-                'End chainage {} is larger than the maximum chainage {} listed in "{}"'.format(
-                    kmbounds[1], xykm.coords[-1][2], kmfile
+                "Upper chainage bound {} is larger than the maximum chainage {} available".format(
+                    kmbounds[1], xykm.coords[-1][2]
                 )
             )
         # else kmbounds[1] matches chainage of last point
@@ -1010,8 +1127,8 @@ def clip_chainage_path(
             xykm = shapely.geometry.LineString([x0] + xykm.coords[start_i:])
     elif end_i == 0:
         raise Exception(
-            'End chainage {} is smaller than the minimum chainage {} listed in "{}"'.format(
-                kmbounds[1], xykm.coords[0][2], kmfile
+            "Upper chainage bound {} is smaller than the minimum chainage {} available".format(
+                kmbounds[1], xykm.coords[0][2]
             )
         )
     else:
@@ -1180,12 +1297,19 @@ def config_get_range(
     """
     str = config_get_str(config, group, key)
     try:
+        obrack = str.find("[")
+        cbrack = str.find("]")
+        if obrack >= 0 and cbrack >= 0:
+            str = str[obrack + 1 : cbrack - 1]
         vallist = [float(fstr) for fstr in str.split(":")]
-        val = (vallist[0], vallist[1])
+        if vallist[0] > vallist[1]:
+            val = (vallist[1], vallist[0])
+        else:
+            val = (vallist[0], vallist[1])
     except:
         raise Exception(
-            'No range specified for required keyword "{}" in block "{}".'.format(
-                key, group
+            'Invalid range specification "{}" for required keyword "{}" in block "{}".'.format(
+                str, key, group
             )
         )
     return val
@@ -1278,13 +1402,6 @@ def config_get_int(
     """
     try:
         val = int(config[group][key])
-        if positive:
-            if val <= 0:
-                raise Exception(
-                    'Value for "{}" in block "{}" must be positive, not {}.'.format(
-                        key, group, val
-                    )
-                )
     except:
         if not default is None:
             val = default
@@ -1292,6 +1409,13 @@ def config_get_int(
             raise Exception(
                 'No integer value specified for required keyword "{}" in block "{}".'.format(
                     key, group
+                )
+            )
+    if positive:
+        if val <= 0:
+            raise Exception(
+                'Value for "{}" in block "{}" must be positive, not {}.'.format(
+                    key, group, val
                 )
             )
     return val
@@ -1302,6 +1426,7 @@ def config_get_float(
     group: str,
     key: str,
     default: Optional[float] = None,
+    positive: bool = False,
 ) -> float:
     """
     Get a floating point value from a selected group and keyword in the analysis settings.
@@ -1316,11 +1441,14 @@ def config_get_float(
         Name of the keyword from which to read.
     default : Optional[float]
         Optional default value.
+    positive : bool
+        Flag specifying whether all floats are accepted (if False), or only positive floats (if True).
 
     Raises
     ------
     Exception
         If the keyword isn't specified and no default value is given.
+        If a negative value is specified when a positive value is required.
 
     Returns
     -------
@@ -1336,6 +1464,13 @@ def config_get_float(
             raise Exception(
                 'No floating point value specified for required keyword "{}" in block "{}".'.format(
                     key, group
+                )
+            )
+    if positive:
+        if val < 0.0:
+            raise Exception(
+                'Value for "{}" in block "{}" must be positive, not {}.'.format(
+                    key, group, val
                 )
             )
     return val

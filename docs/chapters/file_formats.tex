@@ -1,6 +1,6 @@
 \chapter{File formats} \label{Chp:FileFormats}
 
-The software distinguishes 7 files:
+The software distinguishes 9 files:
 
 \begin{itemize}
 \item The \emph{analysis configuration file} defines the settings that are relevant for the execution of the software, it will point to other data files for bulk data.
@@ -10,9 +10,12 @@ The software distinguishes 7 files:
 \item The \emph{simulation result files} define the spatial variations in the velocities and water depths as needed by the algorithm.
 \item The \emph{eroded volume file} reports on the eroded volumes along the analyzed river reach per chainage bin.
 \item The \emph{dialog text file} defines all strings to be used in the interaction with the users (GUI, report, or error messages).
+\item The \emph{shape file} specify the detected and shifted bank lines; this format is also used for various debug output.
+\item The \emph{image file} stores the figures created by the software; by default the PNG format is used.
 \end{itemize}
 
 Each file type is addressed separately in the following subsections.
+The shape and image files follow commonly used formats and are hence not explained.
 
 \section{analysis configuration file} \label{Sec:cfg}
 
@@ -39,6 +42,7 @@ Block & Keyword & Description \\ \hline
 & \keyw{ClosePlots} & Flag indicating whether figures should be closed when the run ends (default: false) \\
 & \keyw{FigureDir} & Directory for storing figures (default relative to work dir: figure) \\
 & \keyw{FigureExt} & String indicating the file extension and type to be used for the figures saved (default: .png) \\
+& \keyw{DebugOutput} & Flag indicating whether additional debug output should be written; this includes various shape and csv files with intermediate results (default: false) \\
 
 \keyw{Detect} & \keyw{SimFile} & Name of simulation output file to be used for determining representative bank line \\
 & \keyw{WaterDepth} & Water depth used for defining bank line (default: 0.0) \\
@@ -67,10 +71,11 @@ Block & Keyword & Description \\ \hline
 & \keyw{Wave1} & Distance from fairway axis at which reduction of wave height to zero starts (default Wave0-50 m) \\
 & \keyw{Classes} & Use classes (true) or critical shear stress (false) in \keyw{BankType} (default: true) \\
 & \keyw{BankType} & Bank strength definition (for each bank line per river-km) \\
-& \keyw{ProtectLevel} & Text file(s) with level of bank protection for each bank line per river-km (default: -1000) \\
+& \keyw{ProtectionLevel} & Text file(s) with level of bank protection for each bank line per river-km (default: -1000) \\
 & \keyw{Slope} & Text file(s) with equilibrium slope for each bank line per river-km  (default: 20) \\
 & \keyw{Reed} & Text file(s) with reed wave damping coefficient for each bank line per river-km  (default: 0) \\
-& \keyw{VelFilter} & Filtering velocity along bank lines (default: true)
+& \keyw{VelFilterDist} & Specifies the distance/width of a moving average filter for the near bank velocities \unitbrackets{km} (default 0, meaning no filter applied) \\
+& \keyw{BedFilterDist} & Specifies the distance/width of a moving average filter for the bank levels \unitbrackets{km} (default 0, meaning no filter applied)
 %\end{tabular}
 \end{longtable}
 
@@ -78,45 +83,45 @@ Block & Keyword & Description \\ \hline
 
 \begin{Verbatim}
 [General]
-  Version        = 1.0
-  RiverKM        = inputfiles\rivkm_20m.xyc
-  Boundaries     = 68:230
-  BankDir        = files\outputbanklines
-  BankFile       = bankline
+  Version         = 1.0
+  RiverKM         = inputfiles\rivkm_20m.xyc
+  Boundaries      = 68:230
+  BankDir         = files\outputbanklines
+  BankFile        = bankline
 
 [Detect]
-  SimFile        = inputfiles\SDS-krw3_00-q0075_map.nc
-  WaterDepth     = 0.0
-  NBank          = 2
-  Line1          = inputfiles\oeverlijn_links_mod.xyc
-  Line2          = inputfiles\oeverlijn_rechts_mod.xyc
-  DLines         = [20,20]
+  SimFile         = inputfiles\SDS-krw3_00-q0075_map.nc
+  WaterDepth      = 0.0
+  NBank           = 2
+  Line1           = inputfiles\oeverlijn_links_mod.xyc
+  Line2           = inputfiles\oeverlijn_rechts_mod.xyc
+  DLines          = [20,20]
 
 [Erosion]
-  TErosion       = 1
-  RiverAxis      = inputfiles\maas_rivieras_mod.xyc
-  Fairway        = inputfiles\maas_rivieras_mod.xyc
-  NLevel         = 2
-  RefLevel       = 1
-  SimFile1       = inputfiles\SDS-krw3_00-q0075_map.nc
-  PDischarge1    = 0.25
-  SimFile2       = inputfiles\SDS-krw3_00-q1500_map.nc
-  PDischarge2    = 0.75
-  OutputDir      = files\outputbankerosion
-  BankNew        = banknew
-  BankEq         = bankeq
-  EroVol         = erovol_standard.evo
-  OutputInterval = 0.1
-  ShipType       = 2
-  Vship          = 5.0
-  Nship          = inputfiles\nships_totaal
-  Nwave          = 5
-  Draught        = 1.2
-  Wave0          = 150.0
-  Wave1          = 110.0
-  Classes        = false
-  BankType       = inputfiles\bankstrength_tauc
-  ProtectLevel   = inputfiles\stortsteen
+  TErosion        = 1
+  RiverAxis       = inputfiles\maas_rivieras_mod.xyc
+  Fairway         = inputfiles\maas_rivieras_mod.xyc
+  NLevel          = 2
+  RefLevel        = 1
+  SimFile1        = inputfiles\SDS-krw3_00-q0075_map.nc
+  PDischarge1     = 0.25
+  SimFile2        = inputfiles\SDS-krw3_00-q1500_map.nc
+  PDischarge2     = 0.75
+  OutputDir       = files\outputbankerosion
+  BankNew         = banknew
+  BankEq          = bankeq
+  EroVol          = erovol_standard.evo
+  OutputInterval  = 0.1
+  ShipType        = 2
+  Vship           = 5.0
+  Nship           = inputfiles\nships_totaal
+  Nwave           = 5
+  Draught         = 1.2
+  Wave0           = 150.0
+  Wave1           = 110.0
+  Classes         = false
+  BankType        = inputfiles\bankstrength_tauc
+  ProtectionLevel = inputfiles\stortsteen
 \end{Verbatim}
 
 \section{line geometry files}
@@ -127,7 +132,7 @@ It is used to specify
 \begin{itemize}
 \item RiverAxis
 \item Fairway
-\item Original or moved bank lines
+\item Initial bank (search) lines
 \end{itemize}
 
 The file format is equal to the file format used by WAQBANK.
@@ -148,6 +153,8 @@ It consists of two data columns: the first column specifies the x-coordinate and
 
 ...continued...
 \end{Verbatim}
+
+Shape files are used for all geospatial output, such as the detected bank lines and the shifted bank lines.
 
 \section{chainage file}
 
@@ -183,7 +190,7 @@ Many parameters may be varied along the analyzed river reach.
 \item slope
 \item reed
 \item banktype
-\item protectlevel
+\item protectionlevel
 \end{itemize}
 
 The file format is independent of the parameter for which it's used.

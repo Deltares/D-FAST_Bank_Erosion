@@ -146,9 +146,15 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
             os.makedirs(figdir)
         plot_ext = dfastbe.io.config_get_str(config, "General", "FigureExt", ".png")
 
-    # read chainage file
+    # read chainage path
     xykm = dfastbe.io.config_get_xykm(config)
+
+    # clip the chainage path to the range of chainages of interest
+    kmbounds = dfastbe.io.config_get_kmbounds(config)
+    dfastbe.io.log_text("clip_chainage", dict={"low": kmbounds[0], "high": kmbounds[1]})
+    xykm = dfastbe.io.clip_path_to_kmbounds(xykm, kmbounds)
     xykm_numpy = numpy.array(xykm)
+    xy_numpy = xykm_numpy[:, :2]
 
     # read bank search lines
     max_river_width = 1000
@@ -163,6 +169,13 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
     bankareas = dfastbe.support.convert_search_lines_to_bank_polygons(
         search_lines, dlines
     )
+
+    # determine whet`her search lines are located on left or right
+    to_right = [True] * n_searchlines
+    for ib in range(n_searchlines):
+        to_right[ib] = dfastbe.support.on_right_side(
+            numpy.array(search_lines[ib]), xy_numpy
+        )
 
     # get simulation file name
     simfile = dfastbe.io.config_get_simfile(config, "Detect", "")
@@ -187,15 +200,22 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
     # derive bank lines (getbanklines)
     dfastbe.io.log_text("identify_banklines")
     banklines = dfastbe.support.get_banklines(sim, h0)
+    banklines.to_file(bankdir + os.sep + "raw_detected_bankline_fragments.shp")
+    geopandas.GeoSeries(bankareas).to_file(bankdir + os.sep + "bank_areas.shp")
 
     # clip the set of detected bank lines to the bank areas
     dfastbe.io.log_text("simplify_banklines")
     bank = [None] * n_searchlines
+    clipped_banklines = [None] * n_searchlines
     for ib, bankarea in enumerate(bankareas):
         dfastbe.io.log_text("bank_lines", dict={"ib": ib + 1})
-        bank[ib] = dfastbe.support.clip_sort_connect_bank_lines(
-            banklines, bankarea, xykm
+        clipped_banklines[ib] = dfastbe.support.clip_bank_lines(banklines, bankarea)
+        bank[ib] = dfastbe.support.sort_connect_bank_lines(
+            clipped_banklines[ib], xykm, to_right[ib]
         )
+    geopandas.GeoSeries(clipped_banklines).to_file(
+        bankdir + os.sep + "bankline_fragments_per_bank_area.shp"
+    )
     dfastbe.io.log_text("-")
 
     # save bankfile
@@ -287,6 +307,9 @@ def bankerosion_core(
     )
     dfastbe.io.log_text("-")
 
+    # check if additional debug output is requested
+    debug = dfastbe.io.config_get_bool(config, "General", "DebugOutput", False)
+
     # check bankdir for input
     bankdir = dfastbe.io.config_get_str(config, "General", "BankDir")
     dfastbe.io.log_text("bankdir_in", dict={"dir": bankdir})
@@ -327,6 +350,14 @@ def bankerosion_core(
     Teros = dfastbe.io.config_get_int(config, "Erosion", "TErosion", positive=True)
     dfastbe.io.log_text("total_time", dict={"t": Teros})
 
+    # get filter settings for bank levels and flow velocities along banks
+    zb_dx = dfastbe.io.config_get_float(
+        config, "Erosion", "BedFilterDist", 0.0, positive=True
+    )
+    vel_dx = dfastbe.io.config_get_float(
+        config, "Erosion", "VelFilterDist", 0.0, positive=True
+    )
+
     # read simulation data (getsimdata)
     simfile = dfastbe.io.config_get_simfile(config, "Erosion", "1")
     dfastbe.io.log_text("-")
@@ -340,8 +371,14 @@ def bankerosion_core(
     nnodes = sim["nnodes"]
     en, ef, fe, boundary_edge_nrs = derive_topology_arrays(fn, nnodes)
 
-    # read river km file
+    # read chainage path
     xykm = dfastbe.io.config_get_xykm(config)
+
+    # clip the chainage path to the range of chainages of interest
+    kmbounds = dfastbe.io.config_get_kmbounds(config)
+    dfastbe.io.log_text("clip_chainage", dict={"low": kmbounds[0], "high": kmbounds[1]})
+    xykm_numpy = numpy.array(xykm)
+    xykm = dfastbe.io.clip_path_to_kmbounds(xykm, kmbounds)
     xykm_numpy = numpy.array(xykm)
     xy_numpy = xykm_numpy[:, :2]
 
@@ -374,7 +411,19 @@ def bankerosion_core(
     to_right = [True] * n_banklines
     for ib, bcrds in enumerate(bank_crds):
         bcrds_mid = (bcrds[:-1, :] + bcrds[1:, :]) / 2
-        bank_km_mid[ib] = dfastbe.support.project_km_on_line(bcrds_mid, xykm_numpy)
+        km_mid = dfastbe.support.project_km_on_line(bcrds_mid, xykm_numpy)
+
+        # check if bank line is defined from low chainage to high chainage
+        if km_mid[0] > km_mid[-1]:
+            # if not, flip the bank line and all associated data
+            km_mid = km_mid[::-1]
+            bank_crds[ib] = bank_crds[ib][::-1, :]
+            bank_idx[ib] = bank_idx[ib][::-1]
+            
+        bank_km_mid[ib] = km_mid
+
+        # check if bank line is left or right bank
+        # when looking from low to high chainage
         to_right[ib] = dfastbe.support.on_right_side(bcrds, xy_numpy)
         if to_right[ib]:
             dfastbe.io.log_text("right_side_bank", dict={"ib": ib + 1})
@@ -399,24 +448,24 @@ def bankerosion_core(
 
     # map km to axis points, further using axis
     dfastbe.io.log_text("chainage_to_axis")
-    river_axis_km = dfastbe.support.project_km_on_line(
-        numpy.array(river_axis.coords), xykm_numpy
+    river_axis_km = dfastbe.support.project_km_on_line(river_axis_numpy, xykm_numpy)
+    dfastbe.io.write_shp_pnt(
+        river_axis_numpy,
+        {"chainage": river_axis_km},
+        outputdir + os.sep + "river_axis_chainage.shp",
     )
-    max_km = numpy.where(river_axis_km == river_axis_km.max())[0]
-    min_km = numpy.where(river_axis_km == river_axis_km.min())[0]
-    if max_km.max() < min_km.min():
-        # reverse river axis
-        imin = max_km.max()
-        imax = min_km.min()
-        river_axis_km = river_axis_km[imin : imax + 1][::-1]
-        river_axis_numpy = river_axis_numpy[imin : imax + 1, :][::-1, :]
-        river_axis = shapely.geometry.LineString(river_axis_numpy)
+
+    # clip river axis to reach of interest
+    i1 = numpy.argmin(((xy_numpy[0] - river_axis_numpy) ** 2).sum(axis=1))
+    i2 = numpy.argmin(((xy_numpy[-1] - river_axis_numpy) ** 2).sum(axis=1))
+    if i1 < i2:
+        river_axis_km = river_axis_km[i1 : i2 + 1]
+        river_axis_numpy = river_axis_numpy[i1 : i2 + 1]
     else:
-        imin = min_km.max()
-        imax = max_km.min()
-        river_axis_km = river_axis_km[imin : imax + 1]
-        river_axis_numpy = river_axis_numpy[imin : imax + 1, :]
-        river_axis = shapely.geometry.LineString(river_axis_numpy)
+        # reverse river axis
+        river_axis_km = river_axis_km[i2 : i1 + 1][::-1]
+        river_axis_numpy = river_axis_numpy[i2 : i1 + 1][::-1]
+    river_axis = shapely.geometry.LineString(river_axis_numpy)
 
     # get output interval
     km_step = dfastbe.io.config_get_float(config, "Erosion", "OutputInterval", 1.0)
@@ -429,44 +478,119 @@ def bankerosion_core(
     fairway_file = dfastbe.io.config_get_str(config, "Erosion", "Fairway")
     dfastbe.io.log_text("read_fairway", dict={"file": fairway_file})
     fairway = dfastbe.io.read_xyc(fairway_file)
-    fairway_numpy = numpy.array(fairway)
-    fw_used = numpy.zeros((len(fairway_numpy),), dtype=bool)
+
+    # map km to fairway points, further using axis
+    dfastbe.io.log_text("chainage_to_fairway")
+    fairway_numpy = numpy.array(river_axis.coords)
+    fairway_km = dfastbe.support.project_km_on_line(fairway_numpy, xykm_numpy)
+    dfastbe.io.write_shp_pnt(
+        fairway_numpy,
+        {"chainage": fairway_km},
+        outputdir + os.sep + "fairway_chainage.shp",
+    )
+
+    # clip fairway to reach of interest
+    i1 = numpy.argmin(((xy_numpy[0] - fairway_numpy) ** 2).sum(axis=1))
+    i2 = numpy.argmin(((xy_numpy[-1] - fairway_numpy) ** 2).sum(axis=1))
+    if i1 < i2:
+        fairway_km = fairway_km[i1 : i2 + 1]
+        fairway_numpy = fairway_numpy[i1 : i2 + 1]
+    else:
+        # reverse fairway
+        fairway_km = fairway_km[i2 : i1 + 1][::-1]
+        fairway_numpy = fairway_numpy[i2 : i1 + 1][::-1]
+    fairway = shapely.geometry.LineString(fairway_numpy)
+
+    # intersect fairway and mesh
+    dfastbe.io.log_text("intersect_fairway_mesh", dict={"n": len(fairway_numpy)})
+    ifw_numpy, ifw_face_idx = dfastbe.support.intersect_line_mesh(
+        fairway_numpy, xf, yf, xe, ye, fe, ef, fn, en, nnodes, boundary_edge_nrs
+    )
+    if debug:
+        dfastbe.io.write_shp_pnt(
+            (ifw_numpy[:-1] + ifw_numpy[1:]) / 2,
+            {"iface": ifw_face_idx},
+            outputdir + os.sep + "fairway_face_indices.shp",
+        )
 
     # distance fairway-bankline (bankfairway)
     dfastbe.io.log_text("bank_distance_fairway")
     distance_fw = []
-    ifw = []
+    bp_fw_face_idx = []
+    nfw = len(ifw_face_idx)
     for ib, bcrds in enumerate(bank_crds):
-        bcrds_mid = (bcrds[:-1, :] + bcrds[1:, :]) / 2
+        bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
         distance_fw.append(numpy.zeros(len(bcrds_mid)))
-        ifw.append(numpy.zeros(len(bcrds_mid), dtype=numpy.int64))
-        ifw_last = None
+        bp_fw_face_idx.append(numpy.zeros(len(bcrds_mid), dtype=numpy.int64))
         for ip, bp in enumerate(bcrds_mid):
-            # check only fairway points starting from latest match (in MATLAB code +/-10 from latest match)
-            if ifw_last is None:
-                ifw[ib][ip] = numpy.argmin(((bp - fairway_numpy) ** 2).sum(axis=1))
-            else:
-                ifw_min = max(0, ifw_last - 10)
-                ifw[ib][ip] = ifw_min + numpy.argmin(
-                    ((bp - fairway_numpy[ifw_min : ifw_last + 10, :]) ** 2).sum(axis=1)
+            # find closest fairway support node
+            ifw = numpy.argmin(((bp - ifw_numpy) ** 2).sum(axis=1))
+            fwp = ifw_numpy[ifw]
+            dbfw = ((bp - fwp) ** 2).sum() ** 0.5
+            # If fairway support node is also the closest projected fairway point, then it likely
+            # that that point is one of the original support points (a corner) of the fairway path
+            # and located inside a grid cell. The segments before and after that point will then
+            # both be located inside that same grid cell, so let's pick the segment before the point.
+            # If the point happens to coincide with a grid edge and the two segments are located
+            # in different grid cells, then we could either simply choose one or add complexity to
+            # average the values of the two grid cells. Let's go for the simplest approach ...
+            iseg = max(ifw - 1, 0)
+            if ifw > 0:
+                alpha = (
+                    (ifw_numpy[ifw, 0] - ifw_numpy[ifw - 1, 0])
+                    * (bp[0] - ifw_numpy[ifw - 1, 0])
+                    + (ifw_numpy[ifw, 1] - ifw_numpy[ifw - 1, 1])
+                    * (bp[1] - ifw_numpy[ifw - 1, 1])
+                ) / (
+                    (ifw_numpy[ifw, 0] - ifw_numpy[ifw - 1, 0]) ** 2
+                    + (ifw_numpy[ifw, 1] - ifw_numpy[ifw - 1, 1]) ** 2
                 )
-            ifw_last = ifw[ib][ip]
-            distance_fw[ib][ip] = ((bp - fairway_numpy[ifw_last]) ** 2).sum() ** 0.5
-        fw_used[ifw[ib]] = True
+                if alpha > 0 and alpha < 1:
+                    fwp1 = ifw_numpy[ifw - 1] + alpha * (
+                        ifw_numpy[ifw] - ifw_numpy[ifw - 1]
+                    )
+                    d1 = ((bp - fwp1) ** 2).sum() ** 0.5
+                    if d1 < dbfw:
+                        fwp = fwp1
+                        dbfw = d1
+                        # projected point located on segment before, which corresponds to initial choice: iseg = ifw - 1
+            if ifw < nfw:
+                alpha = (
+                    (ifw_numpy[ifw + 1, 0] - ifw_numpy[ifw, 0])
+                    * (bp[0] - ifw_numpy[ifw, 0])
+                    + (ifw_numpy[ifw + 1, 1] - ifw_numpy[ifw, 1])
+                    * (bp[1] - ifw_numpy[ifw, 1])
+                ) / (
+                    (ifw_numpy[ifw + 1, 0] - ifw_numpy[ifw, 0]) ** 2
+                    + (ifw_numpy[ifw + 1, 1] - ifw_numpy[ifw, 1]) ** 2
+                )
+                if alpha > 0 and alpha < 1:
+                    fwp1 = ifw_numpy[ifw] + alpha * (
+                        ifw_numpy[ifw + 1] - ifw_numpy[ifw]
+                    )
+                    d1 = ((bp - fwp1) ** 2).sum() ** 0.5
+                    if d1 < dbfw:
+                        fwp = fwp1
+                        dbfw = d1
+                        iseg = ifw
 
-    # map fairway to mesh cells
-    dfastbe.io.log_text("fairway_to_mesh", dict={"nnodes": fw_used.sum()})
-    fwi = -numpy.ones((len(fairway_numpy),), dtype=numpy.int64)
-    fairway_index = numpy.ma.masked_array(fwi, mask=(fwi == -1))
-    fairway_index[fw_used] = dfastbe.support.map_line_mesh(
-        fairway_numpy[fw_used], xf, yf, nnodes, xe, ye, fe, ef, boundary_edge_nrs
-    )
+            bp_fw_face_idx[ib][ip] = ifw_face_idx[iseg]
+            distance_fw[ib][ip] = dbfw
+
+        if debug:
+            dfastbe.io.write_shp_pnt(
+                bcrds_mid,
+                {"chainage": bank_km_mid[ib], "iface_fw": bp_fw_face_idx[ib]},
+                outputdir
+                + os.sep
+                + "bank_{}_chainage_and_fairway_face_idx.shp".format(ib + 1),
+            )
 
     # water level at fairway
     # s1 = sim["zw_face"]
     zfw_ini = []
     for ib in range(n_banklines):
-        ii = fairway_index[ifw[ib]]
+        ii = bp_fw_face_idx[ib]
         zfw_ini.append(sim["zw_face"][ii])
 
     # wave reduction s0, s1
@@ -537,10 +661,10 @@ def bankerosion_core(
                 bt[tauc[ib] < thr_i] += 1
             banktype[ib] = bt
 
-    # read bank protectlevel zss
+    # read bank protection level zss
     zss_miss = -1000
     zss = dfastbe.io.config_get_parameter(
-        config, "Erosion", "ProtectLevel", bank_km_mid, default=zss_miss, ext=".bpl"
+        config, "Erosion", "ProtectionLevel", bank_km_mid, default=zss_miss, ext=".bpl"
     )
     # if zss undefined, set zss equal to zfw_ini - 1
     for ib in range(len(zss)):
@@ -678,12 +802,19 @@ def bankerosion_core(
                 linesize.append(numpy.sqrt(dx ** 2 + dy ** 2))
 
             bank_index = bank_idx[ib]
-            velocity[iq].append(
+            vel_bank = (
                 numpy.absolute(
                     sim["ucx_face"][bank_index] * dx + sim["ucy_face"][bank_index] * dy
                 )
                 / linesize[ib]
             )
+            if vel_dx > 0.0:
+                if ib == 0:
+                    dfastbe.io.log_text(
+                        "apply_velocity_filter", indent="  ", dict={"dx": vel_dx}
+                    )
+                vel_bank = dfastbe.kernel.moving_avg(bank_km_mid[ib], vel_bank, vel_dx)
+            velocity[iq].append(vel_bank)
             #
             if iq == 0:
                 # determine velocity and bankheight along banks ...
@@ -692,6 +823,16 @@ def bankerosion_core(
                     zb = sim["zb_val"]
                     zb_all_nodes = masked_index(zb, fnc[bank_index, :])
                     zb_bank = zb_all_nodes.max(axis=1)
+                    if zb_dx > 0.0:
+                        if ib == 0:
+                            dfastbe.io.log_text(
+                                "apply_banklevel_filter",
+                                indent="  ",
+                                dict={"dx": zb_dx},
+                            )
+                        zb_bank = dfastbe.kernel.moving_avg(
+                            bank_km_mid[ib], zb_bank, zb_dx
+                        )
                     bankheight.append(zb_bank)
                 else:
                     # don't know ... need to check neighbouring cells ...
@@ -699,7 +840,7 @@ def bankerosion_core(
                     pass
 
             # get water depth along fairway
-            ii = fairway_index[ifw[ib]]
+            ii = bp_fw_face_idx[ib]
             hfw = sim["h_face"][ii]
             hfw_max = max(hfw_max, hfw.max())
             waterlevel[iq].append(sim["zw_face"][ii])
@@ -725,8 +866,40 @@ def bankerosion_core(
                 dn_eq.append(dn_eq1)
                 dv_eq.append(dv_eq1)
 
-            tauc_iso_velc = False  # True for Delft3D, False otherwise
-            filter = False
+                if debug:
+                    bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
+                    bcrds_pnt = [shapely.geometry.Point(xy1) for xy1 in bcrds_mid]
+                    bcrds_geo = geopandas.geoseries.GeoSeries(bcrds_pnt)
+                    params = {
+                        "chainage": bank_km_mid[ib],
+                        "x": bcrds_mid[:, 0],
+                        "y": bcrds_mid[:, 1],
+                        "iface_fw": bp_fw_face_idx[ib],  # ii
+                        "iface_bank": bank_idx[ib],  # bank_index
+                        "zb": bankheight[ib],
+                        "len": linesize[ib],
+                        "zw0": zfw_ini[ib],
+                        "vship": vship[ib],
+                        "shiptype": ship_type[ib],
+                        "draught": Tship[ib],
+                        "mu_slp": mu_slope[ib],
+                        "dist_fw": distance_fw[ib],
+                        "dfw0": dfw0[ib],
+                        "dfw1": dfw1[ib],
+                        "hfw": hfw,
+                        "zss": zss[ib],
+                        "dn": dn_eq1,
+                        "dv": dv_eq1,
+                    }
+
+                    dfastbe.io.write_shp(
+                        bcrds_geo,
+                        params,
+                        outputdir + os.sep + "debug.EQ.B{}.shp".format(ib + 1),
+                    )
+                    dfastbe.io.write_csv(
+                        params, outputdir + os.sep + "debug.EQ.B{}.csv".format(ib + 1),
+                    )
 
             dniqib, dviqib, dnship, dnflow = dfastbe.kernel.comp_erosion(
                 velocity[iq][ib],
@@ -749,44 +922,52 @@ def bankerosion_core(
                 hfw,
                 chezy[iq][ib],
                 zss[ib],
-                filter,
                 rho,
                 g,
-                tauc_iso_velc,
             )
 
-            if True:
-                bcrds_mid = (bcrds[:-1, :] + bcrds[1:, :]) / 2
-                debug_file(
-                    {
-                        "km": bank_km_mid[ib],
-                        "x": bcrds_mid[:, 0],
-                        "y": bcrds_mid[:, 1],
-                        "idx": bank_index,
-                        "u": velocity[iq][ib],
-                        "zb": bankheight[ib],
-                        "len": linesize[ib],
-                        "zw": waterlevel[iq][ib],
-                        "zw0": zfw_ini[ib],
-                        "tauc": tauc[ib],
-                        "nship": Nship[ib],
-                        "vship": vship[ib],
-                        "nwave": nwave[ib],
-                        "shiptype": ship_type[ib],
-                        "draught": Tship[ib],
-                        "mu_slp": mu_slope[ib],
-                        "mu_reed": mu_reed[ib],
-                        "dist_fw": distance_fw[ib],
-                        "dfw0": dfw0[ib],
-                        "dfw1": dfw1[ib],
-                        "hfw": hfw,
-                        "chez": chezy[iq][ib],
-                        "zss": zss[ib],
-                        "dn": dniqib,
-                        "dv": dviqib,
-                        "dnship": dnship,
-                        "dnflow": dnflow,
-                    },
+            if debug:
+                bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
+
+                bcrds_pnt = [shapely.geometry.Point(xy1) for xy1 in bcrds_mid]
+                bcrds_geo = geopandas.geoseries.GeoSeries(bcrds_pnt)
+                params = {
+                    "chainage": bank_km_mid[ib],
+                    "x": bcrds_mid[:, 0],
+                    "y": bcrds_mid[:, 1],
+                    "iface_fw": bp_fw_face_idx[ib],  # ii
+                    "iface_bank": bank_idx[ib],  # bank_index
+                    "u": velocity[iq][ib],
+                    "zb": bankheight[ib],
+                    "len": linesize[ib],
+                    "zw": waterlevel[iq][ib],
+                    "zw0": zfw_ini[ib],
+                    "tauc": tauc[ib],
+                    "nship": Nship[ib],
+                    "vship": vship[ib],
+                    "nwave": nwave[ib],
+                    "shiptype": ship_type[ib],
+                    "draught": Tship[ib],
+                    "mu_slp": mu_slope[ib],
+                    "mu_reed": mu_reed[ib],
+                    "dist_fw": distance_fw[ib],
+                    "dfw0": dfw0[ib],
+                    "dfw1": dfw1[ib],
+                    "hfw": hfw,
+                    "chez": chezy[iq][ib],
+                    "zss": zss[ib],
+                    "dn": dniqib,
+                    "dv": dviqib,
+                    "dnship": dnship,
+                    "dnflow": dnflow,
+                }
+                dfastbe.io.write_shp(
+                    bcrds_geo,
+                    params,
+                    outputdir + os.sep + "debug.Q{}.B{}.shp".format(iq + 1, ib + 1),
+                )
+                dfastbe.io.write_csv(
+                    params,
                     outputdir + os.sep + "debug.Q{}.B{}.csv".format(iq + 1, ib + 1),
                 )
 
@@ -1223,29 +1404,6 @@ def derive_topology_arrays(
     return en, ef, fe, boundary_edge_nrs
 
 
-def debug_file(dict: Dict[str, numpy.ndarray], filename: str) -> None:
-    """
-    Write a text file for debugging.
-
-    Arguments
-    ---------
-    dict : Dict[str, numpy.ndarray]
-        Value(s) to be written.
-    filename : str
-        Name of the file to be written.
-    """
-    keys = [key for key in dict.keys()]
-    header = ""
-    for i in range(len(keys)):
-        if i < len(keys) - 1:
-            header = header + '"' + keys[i] + '", '
-        else:
-            header = header + '"' + keys[i] + '"'
-
-    data = numpy.column_stack([array for array in dict.values()])
-    numpy.savetxt(filename, data, delimiter=", ", header=header, comments="")
-
-
 def timedlogger(label: str) -> None:
     """
     Write message with time information.
@@ -1339,7 +1497,7 @@ def config_to_absolute_paths(
         config = parameter_absolute_path(config, "Erosion", "Wave1", rootdir)
 
         config = parameter_absolute_path(config, "Erosion", "BankType", rootdir)
-        config = parameter_absolute_path(config, "Erosion", "ProtectLevel", rootdir)
+        config = parameter_absolute_path(config, "Erosion", "ProtectionLevel", rootdir)
         config = parameter_absolute_path(config, "Erosion", "Slope", rootdir)
         config = parameter_absolute_path(config, "Erosion", "Reed", rootdir)
 
@@ -1412,7 +1570,7 @@ def config_to_relative_paths(
         config = parameter_relative_path(config, "Erosion", "Wave1", rootdir)
 
         config = parameter_relative_path(config, "Erosion", "BankType", rootdir)
-        config = parameter_relative_path(config, "Erosion", "ProtectLevel", rootdir)
+        config = parameter_relative_path(config, "Erosion", "ProtectionLevel", rootdir)
         config = parameter_relative_path(config, "Erosion", "Slope", rootdir)
         config = parameter_relative_path(config, "Erosion", "Reed", rootdir)
 

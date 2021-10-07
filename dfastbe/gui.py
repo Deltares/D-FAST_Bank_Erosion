@@ -27,7 +27,7 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple, List
 
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
@@ -200,28 +200,44 @@ def addGeneralTab(
     dialog["bankFileName"] = bankFileName
     generalLayout.addRow("Bank File Name", bankFileName)
 
-    plotting = QtWidgets.QCheckBox("", win)
-    plotting.setChecked(True)
-    plotting.stateChanged.connect(updatePlotting)
-    dialog["plotting"] = plotting
-    generalLayout.addRow("Plotting", plotting)
+    addCheckBox(generalLayout, "makePlots", "Create Figures", True)
+    dialog["makePlotsEdit"].stateChanged.connect(updatePlotting)
 
-    savePlots = QtWidgets.QCheckBox("", win)
-    savePlots.setChecked(True)
-    savePlots.stateChanged.connect(updatePlotting)
-    dialog["savePlotsEdit"] = savePlots
-    savePlotsTxt = QtWidgets.QLabel("Save plots")
-    dialog["savePlots"] = savePlotsTxt
-    generalLayout.addRow(savePlotsTxt, savePlots)
+    addCheckBox(generalLayout, "savePlots", "Save Figures", True)
+    dialog["savePlotsEdit"].stateChanged.connect(updatePlotting)
 
     addOpenFileRow(generalLayout, "figureDir", "Figure Directory")
+    addCheckBox(generalLayout, "closePlots", "Close Figures")
+    addCheckBox(generalLayout, "debugOutput", "Debug Output")
 
-    closePlots = QtWidgets.QCheckBox("", win)
-    closePlots.setChecked(False)
-    dialog["closePlotsEdit"] = closePlots
-    closePlotsTxt = QtWidgets.QLabel("Close plots")
-    dialog["closePlots"] = closePlotsTxt
-    generalLayout.addRow(closePlotsTxt, closePlots)
+
+def addCheckBox(
+    formLayout: PyQt5.QtWidgets.QFormLayout,
+    key: str,
+    labelString: str,
+    isChecked: bool = False,
+) -> None:
+    """
+    Add a line of with checkbox control to a form layout.
+
+    Arguments
+    ---------
+    formLayout : PyQt5.QtWidgets.QFormLayout
+        Form layout object in which to position the edit controls.
+    key : str
+        Short name of the parameter.
+    labelString : str
+        String describing the parameter to be displayed as label.
+    isChecked : bool
+        Initial state of the check box.
+    """
+    checkBox = QtWidgets.QCheckBox("")
+    checkBox.setChecked(isChecked)
+    dialog[key + "Edit"] = checkBox
+
+    checkTxt = QtWidgets.QLabel(labelString)
+    dialog[key] = checkTxt
+    formLayout.addRow(checkTxt, checkBox)
 
 
 def addDetectTab(
@@ -361,7 +377,7 @@ def addShippingTab(
     eParamsLayout.addItem(stretch, 8, 0)
 
 
-def shipTypes() -> Tuple[str, str, str]:
+def shipTypes() -> List[str]:
     """
     Return the tuple of ship types.
 
@@ -371,10 +387,10 @@ def shipTypes() -> Tuple[str, str, str]:
 
     Returns
     -------
-    types : Tuple[str, str, str]
-        Tuple of three ship types.
+    types : List[str]
+        List of three ship types.
     """
-    return ("1 (multiple barge convoy set)", "2 (RHK ship / motorship)", "3 (towboat)")
+    return ["1 (multiple barge convoy set)", "2 (RHK ship / motorship)", "3 (towboat)"]
 
 
 def addBankTab(
@@ -407,13 +423,13 @@ def addBankTab(
         1,
         "bankType",
         "Bank Type",
-        selectList=(
+        selectList=[
             "0 (Beschermde oeverlijn)",
             "1 (Begroeide oeverlijn)",
             "2 (Goede klei)",
             "3 (Matig / slechte klei)",
             "4 (Zand)",
-        ),
+        ],
     )
     generalParLayout(eParamsLayout, 3, "bankShear", "Critical Shear Stress [N/m2]")
     bankStrengthSwitch()
@@ -421,8 +437,62 @@ def addBankTab(
     generalParLayout(eParamsLayout, 5, "bankSlope", "Slope [-]")
     generalParLayout(eParamsLayout, 6, "bankReed", "Reed [-]")
 
+    addFilter(eParamsLayout, 7, "velFilter", "Velocity Filter [km]")
+    addFilter(eParamsLayout, 8, "bedFilter", "Bank Elevation Filter [km]")
+
     stretch = QtWidgets.QSpacerItem(10, 10, 13, 7)
-    eParamsLayout.addItem(stretch, 7, 0)
+    eParamsLayout.addItem(stretch, 9, 0)
+
+
+def addFilter(
+    gridLayout: PyQt5.QtWidgets.QGridLayout, row: int, key: str, labelString: str
+) -> None:
+    """
+    Add a line of controls for a filter
+
+    Arguments
+    ---------
+    gridLayout : PyQt5.QtWidgets.QGridLayout
+        Grid layout object in which to position the edit controls.
+    row : int
+        Grid row number to be used for this parameter.
+    key : str
+        Short name of the parameter.
+    labelString : str
+        String describing the parameter to be displayed as label.
+    """
+
+    widthEdit = QtWidgets.QLineEdit("0.3")
+    widthEdit.setValidator(validator("positive_real"))
+    gridLayout.addWidget(widthEdit, row, 2)
+    dialog[key + "Width"] = widthEdit
+
+    useFilter = QtWidgets.QCheckBox("")
+    useFilter.setChecked(False)
+    useFilter.stateChanged.connect(partial(updateFilter, key))
+    gridLayout.addWidget(useFilter, row, 1)
+    dialog[key + "Active"] = useFilter
+
+    filterTxt = QtWidgets.QLabel(labelString)
+    gridLayout.addWidget(filterTxt, row, 0)
+    dialog[key + "Txt"] = filterTxt
+
+    updateFilter(key)
+
+
+def updateFilter(key: str) -> None:
+    """
+    Implements the dialog setting switching for both general and optional parameters.
+
+    Arguments
+    ---------
+    key : str
+        Short name of the parameter.
+    """
+    if dialog[key + "Active"].isChecked():
+        dialog[key + "Width"].setEnabled(True)
+    else:
+        dialog[key + "Width"].setEnabled(False)
 
 
 def bankStrengthSwitch() -> None:
@@ -493,7 +563,11 @@ def activate_dialog() -> None:
 
 
 def generalParLayout(
-    gridLayout: PyQt5.QtWidgets.QGridLayout, row: int, key, labelString, selectList=None
+    gridLayout: PyQt5.QtWidgets.QGridLayout,
+    row: int,
+    key: str,
+    labelString: str,
+    selectList: Optional[List[str]] = None,
 ) -> None:
     """
     Add a line of controls for editing a general parameter.
@@ -667,7 +741,7 @@ def updatePlotting() -> None:
     ---------
     None
     """
-    plotFlag = dialog["plotting"].isChecked()
+    plotFlag = dialog["makePlotsEdit"].isChecked()
     dialog["savePlots"].setEnabled(plotFlag)
     dialog["savePlotsEdit"].setEnabled(plotFlag)
     saveFlag = dialog["savePlotsEdit"].isChecked()
@@ -1124,7 +1198,7 @@ def load_configuration(filename: str) -> None:
         )
         dialog["bankFileName"].setText(bankFile)
         flag = dfastbe.io.config_get_bool(config, "General", "Plotting", default=True)
-        dialog["plotting"].setChecked(flag)
+        dialog["makePlotsEdit"].setChecked(flag)
         flag = dfastbe.io.config_get_bool(config, "General", "SavePlots", default=True)
         dialog["savePlotsEdit"].setChecked(flag)
         figDir = dfastbe.io.config_get_str(
@@ -1138,6 +1212,10 @@ def load_configuration(filename: str) -> None:
             config, "General", "ClosePlots", default=False
         )
         dialog["closePlotsEdit"].setChecked(flag)
+        flag = dfastbe.io.config_get_bool(
+            config, "General", "DebugOutput", default=False
+        )
+        dialog["debugOutputEdit"].setChecked(flag)
 
         section = config["Detect"]
         dialog["simFileEdit"].setText(section["SimFile"])
@@ -1226,9 +1304,12 @@ def load_configuration(filename: str) -> None:
             dialog["strengthPar"].setCurrentText("Critical Shear Stress")
             bankStrengthSwitch()
             setParam("bankShear", config, "Erosion", "BankType")
-        setParam("bankProtect", config, "Erosion", "ProtectLevel", "-1000")
+        setParam("bankProtect", config, "Erosion", "ProtectionLevel", "-1000")
         setParam("bankSlope", config, "Erosion", "Slope", "20.0")
         setParam("bankReed", config, "Erosion", "Reed", "0.0")
+
+        setFilter("velFilter", config, "Erosion", "VelFilterDist")
+        setFilter("bedFilter", config, "Erosion", "BedFilterDist")
 
         tabs = dialog["tabs"]
         for i in range(tabs.count() - 1, 4, -1):
@@ -1361,7 +1442,8 @@ def typeUpdatePar(key: str) -> None:
             dialog[key + "Select"].setEnabled(True)
             dialog[key + "Edit"].setEnabled(False)
         else:
-            dialog[key + "Edit"].setValidator(validator("positive_real"))
+            if key != "bankProtect":
+                dialog[key + "Edit"].setValidator(validator("positive_real"))
             dialog[key + "Edit"].setEnabled(True)
         dialog[key + "EditFile"].setEnabled(False)
     elif type == "Variable":
@@ -1404,6 +1486,30 @@ def setParam(field: str, config, group: str, key: str, default: str = "??") -> N
     except:
         dialog[field + "Type"].setCurrentText("Variable")
         dialog[field + "Edit"].setText(str)
+
+
+def setFilter(field: str, config, group: str, key: str) -> None:
+    """
+    Update the dialog for a filter based on configuration file.
+
+    Arguments
+    ---------
+    field : str
+        Short name of the parameter.
+    config : configparser.ConfigParser
+        Configuration for the D-FAST Bank Erosion analysis with absolute or relative paths.
+    group : str
+        Name of the group in the configuration.
+    key : str
+        Name of the key in the configuration group.
+
+    """
+    val = dfastbe.io.config_get_float(config, group, key, 0.0)
+    if val > 0.0:
+        dialog[field + "Active"].setChecked(True)
+        dialog[field + "Width"].setText(str(val))
+    else:
+        dialog[field + "Active"].setChecked(False)
 
 
 def setOptParam(field: str, config, group: str, key: str) -> None:
@@ -1482,10 +1588,11 @@ def get_configuration() -> configparser.ConfigParser:
     )
     config["General"]["BankDir"] = dialog["bankDirEdit"].text()
     config["General"]["BankFile"] = dialog["bankFileName"].text()
-    config["General"]["Plotting"] = str(dialog["plotting"].isChecked())
+    config["General"]["Plotting"] = str(dialog["makePlotsEdit"].isChecked())
     config["General"]["SavePlots"] = str(dialog["savePlotsEdit"].isChecked())
     config["General"]["FigureDir"] = dialog["figureDirEdit"].text()
     config["General"]["ClosePlots"] = str(dialog["closePlotsEdit"].isChecked())
+    config["General"]["DebugOutput"] = str(dialog["debugOutputEdit"].isChecked())
 
     config.add_section("Detect")
     config["Detect"]["SimFile"] = dialog["simFileEdit"].text()
@@ -1524,7 +1631,7 @@ def get_configuration() -> configparser.ConfigParser:
     config["Erosion"]["Wave0"] = dialog["wavePar0Edit"].text()
     config["Erosion"]["Wave1"] = dialog["wavePar1Edit"].text()
 
-    if dialog["strengthPar"].currentText == "Bank Type":
+    if dialog["strengthPar"].currentText() == "Bank Type":
         config["Erosion"]["Classes"] = "true"
         if dialog["bankTypeType"].currentText() == "Constant":
             config["Erosion"]["BankType"] = dialog["bankTypeSelect"].currentIndex()
@@ -1536,6 +1643,11 @@ def get_configuration() -> configparser.ConfigParser:
     config["Erosion"]["ProtectionLevel"] = dialog["bankProtectEdit"].text()
     config["Erosion"]["Slope"] = dialog["bankSlopeEdit"].text()
     config["Erosion"]["Reed"] = dialog["bankReedEdit"].text()
+
+    if dialog["velFilterActive"].isChecked():
+        config["Erosion"]["VelFilterDist"] = dialog["velFilterWidth"].text()
+    if dialog["bedFilterActive"].isChecked():
+        config["Erosion"]["BedFilterDist"] = dialog["bedFilterWidth"].text()
 
     nlevel = dialog["discharges"].topLevelItemCount()
     config["Erosion"]["NLevel"] = str(nlevel)

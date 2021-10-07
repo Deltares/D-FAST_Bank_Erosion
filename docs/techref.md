@@ -93,88 +93,88 @@ The initial version number will be `1.0`.
 
 Details on the other keywords supported are given below.
 
-| Block          | Keyword        | Description |
-|----------------|----------------|-------------|
-| General        | Version        | Version number. Must be `1.0` |
-|                | RiverKM        | Textfile with riverkilometres and correspondig xy-coordinates |
-|                | Boundaries     | River chainage of the region of interest specified as rkm-start:rkm-end, e.g. 81:100 (default: all) |
-| Detect         | SimFile        | Name of simulation output file to be used for determining representative bank line |
-|                | NBank          | Number of bank lines, (default: 2) |
-|                | Line _i_       | Textfile with xy-coordinates of search line _i_ |
-|                | BankDir        | Directory for storing bank lines (default: current directory) |
-|                | BankFile       | Text file(s) in which xy-coordinates of bank lines are stored (default 'bankfile') |
-|                | LocalDir       | Directory for storing local output (default: 'local') |
-|                | Waterdepth     | Water depth used for defining bank line (default: 0.0) |
-|                | Dlines         | Distance from pre-defined lines used for determining bank lines (default: 50) |
-| Erosion        | TErosion       | Simulation period  [years] |
-|                | RiverAxis      | Textfile with xy-coordinates of river axis |
-|                | Fairway        | Textfile with xy-coordinates of fairway axis |
-|                | NLevel         | Number of discharge levels |
-|                | RefLevel       | Reference level: discharge level with SimFile_i_ that is equal to 'SimFile' (only used when 'Nlevel'>1)  (default: 1) |
-|                | SimFile _i_    | NetCDF map-file for computing bank erosion for discharge _i_ (only used when 'Nlevel'>1) |
-|                | PDischarge _i_ | Probability of discharge _i_ (sum of probabilities should be 1) |
-|                | OutputDir      | Directory for storing output files |
-|                | BankNew        | Text file(s) in which new xy-coordinates of bank lines are stored (default 'banknew') |
-|                | BankEq         | Text file(s) in which xy-coordinates of equilibrium bank lines are stored (default: 'bankeq') |
-|                | EroVol         | Text file in which eroded volume per river-km is stored (default: 'erovol.evo') |
-|                | OutputInterval | Bin size for which the eroded volume output is given (default: 1 km) [km] |
-|                | ShipType       | Type of ship (per river-km) |
-|                | Vship          | Relative velocity of the ships (per river-km) [m/s] |
-|                | Nship          | Number of ships per year (per river-km) |
-|                | Nwave          | Number of waves per ship (default 5) |
-|                | Draught        | Draught of the ships (per river-km) [m] |
-|                | Wave0          | Distance from fairway axis at which waveheight is zero (default 200 m) |
-|                | Wave1          | Distance from fairway axis at which reduction of waveheigth to zero starts (default Wave0-50 m) |
-|                | Classes        | Use classes (true) or critical shear stress (false) in 'BankType' (default: true) |
-|                | BankType       | Bank strength definition (for each bank line per river-km) |
-|                | ProtectLevel   | Text file(s) with level of bank protection for each bank line per river-km (default: -1000) |
-|                | Slope          | Text file(s) with equilibrium slope for each bank line per river-km  (default: 20) |
-|                | Reed           | Text file(s) with reed wave damping coefficient for each bank line per river-km  (default: 0) |
-|                | VelFilter      | Filtering velocity along bank lines (default: true) |
+| Block          | Keyword         | Description |
+|----------------|-----------------|-------------|
+| General        | Version         | Version number. Must be `1.0` |
+|                | RiverKM         | Textfile with riverkilometres and correspondig xy-coordinates |
+|                | Boundaries      | River chainage of the region of interest specified as rkm-start:rkm-end, e.g. 81:100 (default: all) |
+| Detect         | SimFile         | Name of simulation output file to be used for determining representative bank line |
+|                | NBank           | Number of bank lines, (default: 2) |
+|                | Line _i_        | Textfile with xy-coordinates of search line _i_ |
+|                | BankDir         | Directory for storing bank lines (default: current directory) |
+|                | BankFile        | Text file(s) in which xy-coordinates of bank lines are stored (default 'bankfile') |
+|                | LocalDir        | Directory for storing local output (default: 'local') |
+|                | Waterdepth      | Water depth used for defining bank line (default: 0.0) |
+|                | Dlines          | Distance from pre-defined lines used for determining bank lines (default: 50) |
+| Erosion        | TErosion        | Simulation period  [years] |
+|                | RiverAxis       | Textfile with xy-coordinates of river axis |
+|                | Fairway         | Textfile with xy-coordinates of fairway axis |
+|                | NLevel          | Number of discharge levels |
+|                | RefLevel        | Reference level: discharge level with SimFile_i_ that is equal to 'SimFile' (only used when 'Nlevel'>1)  (default: 1) |
+|                | SimFile _i_     | NetCDF map-file for computing bank erosion for discharge _i_ (only used when 'Nlevel'>1) |
+|                | PDischarge _i_  | Probability of discharge _i_ (sum of probabilities should be 1) |
+|                | OutputDir       | Directory for storing output files |
+|                | BankNew         | Text file(s) in which new xy-coordinates of bank lines are stored (default 'banknew') |
+|                | BankEq          | Text file(s) in which xy-coordinates of equilibrium bank lines are stored (default: 'bankeq') |
+|                | EroVol          | Text file in which eroded volume per river-km is stored (default: 'erovol.evo') |
+|                | OutputInterval  | Bin size for which the eroded volume output is given (default: 1 km) [km] |
+|                | ShipType        | Type of ship (per river-km) |
+|                | Vship           | Relative velocity of the ships (per river-km) [m/s] |
+|                | Nship           | Number of ships per year (per river-km) |
+|                | Nwave           | Number of waves per ship (default 5) |
+|                | Draught         | Draught of the ships (per river-km) [m] |
+|                | Wave0           | Distance from fairway axis at which waveheight is zero (default 200 m) |
+|                | Wave1           | Distance from fairway axis at which reduction of waveheigth to zero starts (default Wave0-50 m) |
+|                | Classes         | Use classes (true) or critical shear stress (false) in 'BankType' (default: true) |
+|                | BankType        | Bank strength definition (for each bank line per river-km) |
+|                | ProtectionLevel | Text file(s) with level of bank protection for each bank line per river-km (default: -1000) |
+|                | Slope           | Text file(s) with equilibrium slope for each bank line per river-km  (default: 20) |
+|                | Reed            | Text file(s) with reed wave damping coefficient for each bank line per river-km  (default: 0) |
+|                | VelFilter       | Filtering velocity along bank lines (default: true) |
 
 **Example**
 
     [General]
-      Version        = 1.0
-      RiverKM        = inputfiles\rivkm_20m.xyc
-      Boundaries     = 68:230
+      Version         = 1.0
+      RiverKM         = inputfiles\rivkm_20m.xyc
+      Boundaries      = 68:230
 
     [Detect]
-      SimFile        = inputfiles\SDS-krw3_00-q0075_map.nc
-      NBank          = 2
-      Line1          = inputfiles\oeverlijn_links_mod.xyc
-      Line2          = inputfiles\oeverlijn_rechts_mod.xyc
-      BankDir        = files\outputbanklines
-      BankFile       = bankline
-      LocalDir       = local
-      Waterdepth     = 0.0
-      Dlines         = [20,20]
+      SimFile         = inputfiles\SDS-krw3_00-q0075_map.nc
+      NBank           = 2
+      Line1           = inputfiles\oeverlijn_links_mod.xyc
+      Line2           = inputfiles\oeverlijn_rechts_mod.xyc
+      BankDir         = files\outputbanklines
+      BankFile        = bankline
+      LocalDir        = local
+      Waterdepth      = 0.0
+      Dlines          = [20,20]
 
     [Erosion]
-      Terosion       = 1
-      RiverAxis      = inputfiles\maas_rivieras_mod.xyc
-      Fairway        = inputfiles\maas_rivieras_mod.xyc
-      NLevel         = 2
-      RefLevel       = 1
-      SimFile1       = inputfiles\SDS-krw3_00-q0075_map.nc
-      PDischarge1    = 0.25
-      SimFile2       = inputfiles\SDS-krw3_00-q1500_map.nc
-      PDischarge2    = 0.75
-      OutputDir      = files\outputbankerosion
-      BankNew        = banknew
-      BankEq         = bankeq
-      EroVol         = erovol_standard.evo
-      OutputInterval = 0.1
-      ShipType       = 2
-      Vship          = 5.0
-      Nship          = inputfiles\nships_totaal
-      Nwave          = 5
-      Draught        = 1.2
-      Wave0          = 150.0
-      Wave1          = 110.0
-      Classes        = false
-      BankType       = inputfiles\bankstrength_tauc
-      ProtectLevel   = inputfiles\stortsteen
+      Terosion        = 1
+      RiverAxis       = inputfiles\maas_rivieras_mod.xyc
+      Fairway         = inputfiles\maas_rivieras_mod.xyc
+      NLevel          = 2
+      RefLevel        = 1
+      SimFile1        = inputfiles\SDS-krw3_00-q0075_map.nc
+      PDischarge1     = 0.25
+      SimFile2        = inputfiles\SDS-krw3_00-q1500_map.nc
+      PDischarge2     = 0.75
+      OutputDir       = files\outputbankerosion
+      BankNew         = banknew
+      BankEq          = bankeq
+      EroVol          = erovol_standard.evo
+      OutputInterval  = 0.1
+      ShipType        = 2
+      Vship           = 5.0
+      Nship           = inputfiles\nships_totaal
+      Nwave           = 5
+      Draught         = 1.2
+      Wave0           = 150.0
+      Wave1           = 110.0
+      Classes         = false
+      BankType        = inputfiles\bankstrength_tauc
+      ProtectionLevel = inputfiles\stortsteen
 
 
 ### line geometry files
@@ -235,7 +235,7 @@ Many parameters may be varied along the analyzed river reach.
 1. slope
 1. reed
 1. banktype
-1. protectlevel
+1. protectionlevel
 
 The file format is independent of the parameter for which it's used.
 The file format is equal to the file format used by WAQBANK.

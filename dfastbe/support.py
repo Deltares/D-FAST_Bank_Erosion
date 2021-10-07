@@ -30,6 +30,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from typing import Dict, List, Tuple, Union
 from dfastbe.io import SimulationObject
 
+# import matplotlib
+# import matplotlib.pyplot
+
 import numpy
 import math
 import shapely
@@ -80,14 +83,16 @@ def project_km_on_line(
 
         # chainage value of that node
         km = xykm_numpy[imin, 2]
+        # print("chainage closest node: ", km)
 
         # if we didn't get the first node
         if imin > 0:
             # project rp onto the line segment before this node
             p1 = xy_numpy[imin - 1]
-            alpha = ((p1[0] - p0[0]) + (p1[1] - p0[1])) / (
-                (p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2
-            )
+            alpha = (
+                (p1[0] - p0[0]) * (rp_numpy[0] - p0[0])
+                + (p1[1] - p0[1]) * (rp_numpy[1] - p0[1])
+            ) / ((p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2)
             # if there is a closest point not coinciding with the nodes ...
             if alpha > 0 and alpha < 1:
                 dist2link = (rp_numpy[0] - p0[0] - alpha * (p1[0] - p0[0])) ** 2 + (
@@ -100,14 +105,16 @@ def project_km_on_line(
                     km = xykm_numpy[imin, 2] + alpha * (
                         xykm_numpy[imin - 1, 2] - xykm_numpy[imin, 2]
                     )
+                    # print("chainage of projection 1: ", km)
 
         # if we didn't get the last node
         if imin < last_xykm:
             # project rp onto the line segment after this node
             p1 = xy_numpy[imin + 1]
-            alpha = ((p1[0] - p0[0]) + (p1[1] - p0[1])) / (
-                (p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2
-            )
+            alpha = (
+                (p1[0] - p0[0]) * (rp_numpy[0] - p0[0])
+                + (p1[1] - p0[1]) * (rp_numpy[1] - p0[1])
+            ) / ((p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2)
             # if there is a closest point not coinciding with the nodes ...
             if alpha > 0 and alpha < 1:
                 dist2link = (rp_numpy[0] - p0[0] - alpha * (p1[0] - p0[0])) ** 2 + (
@@ -120,6 +127,7 @@ def project_km_on_line(
                     km = xykm_numpy[imin, 2] + alpha * (
                         xykm_numpy[imin + 1, 2] - xykm_numpy[imin, 2]
                     )
+                    # print("chainage of projection 2: ", km)
 
         # store the chainage value, loop ... and return
         line_km[i] = km
@@ -150,14 +158,36 @@ def on_right_side(line_xy: numpy.ndarray, ref_xy: numpy.ndarray) -> bool:
         Flag indicating whether line is on the right side.
     """
 
-    # determine the mid-point hpxy of line_xy
+    # determine the reference point based on the line with the fewest points
+    ref_npnt = ref_xy.shape[0]
     npnt = line_xy.shape[0]
-    hpnt = int(npnt / 2)
-    hpxy = line_xy[hpnt, :]
+    if ref_npnt < npnt:
+        # determine the mid-point p0 of ref_xy
+        p0 = (ref_xy[0] + ref_xy[1]) / 2
+        if ref_npnt == 2:
+            imin = 0
+            imind = 0
+            iminu = 1
+            p0 = (ref_xy[0] + ref_xy[1]) / 2
+        else:
+            imin = int(ref_npnt / 2)
+            imind = imin - 1
+            iminu = imin + 1
+            p0 = ref_xy[imin]
 
-    # find the node on ref_xy closest to hpxy
-    imin = numpy.argmin(((hpxy - ref_xy) ** 2).sum(axis=1))
-    p0 = ref_xy[imin]
+        # find the node on line_xy closest to p0
+        hpnt = numpy.argmin(((p0 - line_xy) ** 2).sum(axis=1))
+        hpxy = line_xy[hpnt]
+    else:
+        # determine the mid-point hpxy of line_xy
+        hpnt = int(npnt / 2)
+        hpxy = line_xy[hpnt]
+
+        # find the node on ref_xy closest to hpxy
+        imin = numpy.argmin(((hpxy - ref_xy) ** 2).sum(axis=1))
+        imind = imin - 1
+        iminu = imin + 1
+        p0 = ref_xy[imin]
 
     # direction to the midpoint of line_xy
     theta = math.atan2(hpxy[1] - p0[1], hpxy[0] - p0[0])
@@ -166,15 +196,15 @@ def on_right_side(line_xy: numpy.ndarray, ref_xy: numpy.ndarray) -> bool:
     if ref_xy.shape[0] == 1:
         raise Exception("One point is not a reference line.")
     elif imin > 0:
-        phi1 = math.atan2(ref_xy[imin - 1, 1] - p0[1], ref_xy[imin - 1, 0] - p0[0])
+        phi1 = math.atan2(ref_xy[imind, 1] - p0[1], ref_xy[imind, 0] - p0[0])
         # direction to which ref_xy goes
         if imin < ref_xy.shape[0] - 1:
-            phi2 = math.atan2(ref_xy[imin + 1, 1] - p0[1], ref_xy[imin + 1, 0] - p0[0])
+            phi2 = math.atan2(ref_xy[iminu, 1] - p0[1], ref_xy[iminu, 0] - p0[0])
         else:
             phi2 = -phi1
     else:
         # direction to which ref_xy goes
-        phi2 = math.atan2(ref_xy[imin + 1, 1] - p0[1], ref_xy[imin + 1, 0] - p0[0])
+        phi2 = math.atan2(ref_xy[iminu, 1] - p0[1], ref_xy[iminu, 0] - p0[0])
         phi1 = -phi2
 
     # adjust the directions of ref_xy such that both are larger than the
@@ -286,7 +316,10 @@ def intersect_line_mesh(
     #
     index: int
     vindex: numpy.ndarray
+    nprint = 0
     for j, bpj in enumerate(bp):
+        if verbose:
+            print("Current location: {}, {}".format(bpj[0], bpj[1]))
         if j == 0:
             # first bp inside or outside?
             dx = xf - bpj[0]
@@ -347,7 +380,7 @@ def intersect_line_mesh(
                         if verbose:
                             print("starting on edge of {}".format(on_edge))
                         raise Exception("determine direction!")
-            crds[l, :] = bpj
+            crds[l] = bpj
             if index == -2:
                 idx[l] = vindex[0]
             else:
@@ -389,6 +422,10 @@ def intersect_line_mesh(
                     index_src = index_src[id_edges]
                     if len(index_src) == 1:
                         index = index_src[0]
+                        vindex = index_src[0:1]
+                elif (bpj == bpj1).all():
+                    # this is a segment of length 0, skip it since it takes us nowhere
+                    break
                 else:
                     b, edges, nodes = get_slices(
                         index,
@@ -402,6 +439,7 @@ def intersect_line_mesh(
                         en,
                         boundary_edge_nrs,
                     )
+
                 if len(edges) == 0:
                     # rest of segment associated with same face
                     if verbose:
@@ -433,7 +471,7 @@ def intersect_line_mesh(
                     if l == crds.shape[0]:
                         crds.resize((2 * l, 2))
                         idx.resize(2 * l)
-                    crds[l, :] = bpj
+                    crds[l] = bpj
                     idx[l] = index
                     l += 1
                     break
@@ -478,7 +516,7 @@ def intersect_line_mesh(
                                 if l == crds.shape[0]:
                                     crds.resize((l + 1, 2))
                                     idx.resize(l + 1)
-                                crds[l, :] = bpj
+                                crds[l] = bpj
                                 if index == -2:
                                     idx[l] = vindex[0]
                                 else:
@@ -498,6 +536,12 @@ def intersect_line_mesh(
                         left_dtheta = twopi
                         right_edge = -1
                         right_dtheta = twopi
+                        if verbose:
+                            print(
+                                "{}: the edges connected to node {} are {}".format(
+                                    j, node, all_node_edges
+                                )
+                            )
                         for ie in all_node_edges:
                             if en[ie, 0] == node:
                                 theta_edge = math.atan2(
@@ -506,6 +550,13 @@ def intersect_line_mesh(
                             else:
                                 theta_edge = math.atan2(
                                     ye[ie, 0] - ye[ie, 1], xe[ie, 0] - xe[ie, 1]
+                                )
+                            if verbose:
+                                print(
+                                    "{}: edge {} connects {}".format(j, ie, en[ie, :])
+                                )
+                                print(
+                                    "{}: edge {} theta is {}".format(j, ie, theta_edge)
                                 )
                             dtheta = theta_edge - theta
                             if dtheta > 0:
@@ -525,9 +576,24 @@ def intersect_line_mesh(
                                     right_dtheta = dtheta
                             else:
                                 # aligned with edge
+                                if verbose:
+                                    print(
+                                        "{}: line is aligned with edge {}".format(j, ie)
+                                    )
                                 left_edge = ie
                                 right_edge = ie
                                 break
+                        if verbose:
+                            print(
+                                "{}: the edge to the left is edge {}".format(
+                                    j, left_edge
+                                )
+                            )
+                            print(
+                                "{}: the edge to the right is edge {}".format(
+                                    j, left_edge
+                                )
+                            )
                         if left_edge == right_edge:
                             if verbose:
                                 print("{}: continue along edge {}".format(j, left_edge))
@@ -535,7 +601,7 @@ def intersect_line_mesh(
                         else:
                             if verbose:
                                 print(
-                                    "{}: continue between edges {} and {}".format(
+                                    "{}: continue between edges {} on the left and {} on the right".format(
                                         j, left_edge, right_edge
                                     )
                                 )
@@ -548,8 +614,26 @@ def intersect_line_mesh(
                                 # the two edges are shared by two faces ... check first face
                                 fn1 = fn[left_faces[0]]
                                 fe1 = fe[left_faces[0]]
-                                # assuming nodes are in clockwise order and edges[i] is the edge connecting node[i] with node[i+1]
-                                if fe1[fn1 == node] == left_edge:
+                                if verbose:
+                                    print(
+                                        "{}: those edges are shared by two faces: {}".format(
+                                            j, left_faces
+                                        )
+                                    )
+                                    print(
+                                        "{}: face {} has nodes: {}".format(
+                                            j, left_faces[0], fn1
+                                        )
+                                    )
+                                    print(
+                                        "{}: face {} has edges: {}".format(
+                                            j, left_faces[0], fe1
+                                        )
+                                    )
+                                # here we need that the nodes of the face are listed in clockwise order
+                                # and that edges[i] is the edge connecting node[i-1] with node[i]
+                                # the latter is guaranteed by batch.derive_topology_arrays
+                                if fe1[fn1 == node] == right_edge:
                                     index0 = left_faces[0]
                                 else:
                                     index0 = left_faces[1]
@@ -576,7 +660,7 @@ def intersect_line_mesh(
                             if l == crds.shape[0]:
                                 crds.resize((l + 1, 2))
                                 idx.resize(l + 1)
-                            crds[l, :] = bpj
+                            crds[l] = bpj
                             if index == -2:
                                 idx[l] = vindex[0]
                             else:
@@ -615,11 +699,24 @@ def intersect_line_mesh(
 
                     if not index0 is None:
                         if verbose:
-                            print(
-                                "{}: moving from {} via node {} to {} at b = {}".format(
-                                    j, index, node, index0, prev_b
+                            if index == -1:
+                                print(
+                                    "{}: moving from outside via node {} to {} at b = {}".format(
+                                        j, node, index0, prev_b
+                                    )
                                 )
-                            )
+                            elif index == -2:
+                                print(
+                                    "{}: moving from edge between {} via node {} to {} at b = {}".format(
+                                        j, vindex, node, index0, prev_b
+                                    )
+                                )
+                            else:
+                                print(
+                                    "{}: moving from {} via node {} to {} at b = {}".format(
+                                        j, index, node, index0, prev_b
+                                    )
+                                )
                         if type(index0) == int or type(index0) == numpy.int64:
                             index = index0
                         elif len(index0) == 1:
@@ -652,7 +749,7 @@ def intersect_line_mesh(
                     if l == crds.shape[0]:
                         crds.resize((2 * l, 2))
                         idx.resize(2 * l)
-                    crds[l, :] = bpj1 + prev_b * (bpj - bpj1)
+                    crds[l] = bpj1 + prev_b * (bpj - bpj1)
                     if index == -2:
                         idx[l] = vindex[0]
                     else:
@@ -661,18 +758,18 @@ def intersect_line_mesh(
                     if prev_b == 1:
                         break
 
-    # clip to actual length
-    crds = crds[:l, :]
-    idx = idx[:l]
+    # clip to actual length (idx refers to segments, so we can ignore the last value)
+    crds = crds[:l]
+    idx = idx[: l - 1]
 
     # remove tiny segments
     d = numpy.sqrt((numpy.diff(crds, axis=0) ** 2).sum(axis=1))
     mask = numpy.concatenate((numpy.ones((1), dtype="bool"), d > d_thresh))
     crds = crds[mask, :]
-    idx = idx[mask]
+    idx = idx[mask[1:]]
 
     # since index refers to segments, don't return the first one
-    return crds, idx[1:]
+    return crds, idx
 
 
 def get_slices(
@@ -995,12 +1092,12 @@ def map_line_mesh(
 
 
 def move_line(
-    xylines: numpy.ndarray, dn: numpy.ndarray, to_right: bool
+    xylines: numpy.ndarray, dn: numpy.ndarray, right_bank: bool
 ) -> numpy.ndarray:
     """
     Shift a line of a variable distance sideways (positive shift away from centre line).
 
-    Chainage is increasing along all lines. For a bank on the right side a
+    Chainage must be increasing along all lines. For a bank on the right side a
     positive shift will move the line to the right. For a bank on the left side
     a positive shift will move the line to the left.
     
@@ -1012,7 +1109,7 @@ def move_line(
         Distance over which to move the line sideways. A positive shift is
         defined towards the right for the right bank, and towards the left for
         the left bank.
-    to_right : bool
+    right_bank : bool
         Flag indicating whether line is on the right (or not).
         
     Returns
@@ -1020,7 +1117,7 @@ def move_line(
     xylines_new : umpy.ndarray
         Nx2 array containing the x- and y-coordinates of the moved line.
     """
-    if to_right:
+    if right_bank:
         xylines_new = move_line_right(xylines, dn)
     else:
         xylines_rev = xylines[::-1, :]
@@ -1041,8 +1138,6 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
     dn0 : numpy.ndarray
         Distance over which to move the line sideways. A positive shift is
         defined towards the right when looking along the line.
-    to_right : bool
-        Flag indicating whether line is on the right (or not).
         
     Returns
     -------
@@ -1060,25 +1155,74 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
     ds = numpy.sqrt((dxy ** 2).sum(axis=1))
     nxy = dxy[:, ::-1] * [1, -1] * (dn / ds).reshape(colvec)
 
-    xylines_new = numpy.zeros((100, 2))  # xylines.shape)
+    xylines_new = numpy.zeros((100, 2))
     xylines_new[0] = xylines[0] + nxy[0]
     ixy, xylines_new = add_point(0, xylines_new, xylines[1] + nxy[0])
     ixy, xylines_new = add_point(ixy, xylines_new, xylines[1])
 
-    # isegstop = -1
+    verbose = False
     prec = 0.000001
     ixy1: int
     for iseg in range(1, nsegments):
-        # print("iseg = ",iseg)
         dtheta = theta[iseg] - theta[iseg - 1]
-        if dtheta < 0:
-            dtheta = dtheta + 2 * math.pi
+        if dtheta > math.pi:
+            dtheta = dtheta - 2 * math.pi
+        if verbose:
+            print("{}: current length of new bankline is {}".format(iseg, ixy))
+            print(
+                "{}: segment starting at {} to be shifted by {}".format(
+                    iseg, xylines[iseg], dn[iseg]
+                )
+            )
+            print("{}: change in direction quantified as {}".format(iseg, dtheta))
 
-        # if iseg == isegstop:
-        #     ax.plot(xylines_new[:ixy+1,0], xylines_new[:ixy+1,1], marker=".", color="m", linewidth=3)
-
-        if dtheta >= math.pi:
-            # right bend (or straight)
+        # create a polyline for the outline of the new segment
+        if dn[iseg] < prec:
+            # no erosion, so just a linear extension
+            if verbose:
+                print("{}: no shifting, just linear extension".format(iseg))
+            poly = numpy.row_stack([xylines[iseg + 1], xylines[iseg],])
+        elif dtheta <= 0:
+            # right bend
+            if -0.001 * math.pi < dtheta:
+                # almost straight
+                if verbose:
+                    print("{}: slight bend to right".format(iseg))
+                if dn[iseg] > dn[iseg]:
+                    poly = numpy.row_stack(
+                        [
+                            xylines[iseg + 1],
+                            xylines[iseg + 1] + nxy[iseg],
+                            xylines[iseg] + nxy[iseg],
+                            xylines[iseg] + nxy[iseg - 1],
+                            xylines[iseg - 1],
+                        ]
+                    )
+                else:
+                    poly = numpy.row_stack(
+                        [
+                            xylines[iseg + 1],
+                            xylines[iseg + 1] + nxy[iseg],
+                            xylines[iseg] + nxy[iseg],
+                            xylines[iseg - 1],
+                        ]
+                    )
+            else:
+                # more significant bend
+                if verbose:
+                    print("{}: bend to right".format(iseg))
+                poly = numpy.row_stack(
+                    [
+                        xylines[iseg + 1],
+                        xylines[iseg + 1] + nxy[iseg],
+                        xylines[iseg] + nxy[iseg],
+                        xylines[iseg],
+                    ]
+                )
+        elif dn[iseg - 1] < prec:
+            # left bend: previous segment isn't eroded, so nothing to connect to
+            if verbose:
+                print("{}: bend to left".format(iseg))
             poly = numpy.row_stack(
                 [
                     xylines[iseg + 1],
@@ -1088,7 +1232,9 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
                 ]
             )
         else:
-            # left bend
+            # left bend: connect it to the previous segment to avoid non eroded wedges
+            if verbose:
+                print("{}: bend to left".format(iseg))
             poly = numpy.row_stack(
                 [
                     xylines[iseg + 1],
@@ -1099,10 +1245,9 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
                 ]
             )
 
-        # ax.plot(poly[:,0], poly[:,1], marker=".", color="g")
-        # ax.text(poly[:,0].mean(), poly[:,1].mean(), str(iseg))
         nedges = poly.shape[0] - 1
 
+        # make a temporary copy of the last 20 nodes of the already shifted bankline
         if ixy > 20:
             X0 = xylines_new[(ixy - 20) : ixy, 0].copy()
             Y0 = xylines_new[(ixy - 20) : ixy, 1].copy()
@@ -1120,10 +1265,14 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
         b = []
         slices = []
         n = []
+        # for each edge of the new polyline collect all intersections with the
+        # already shifted bankline ...
         for i in range(nedges):
             if (poly[i + 1] == poly[i]).all():
+                # polyline segment has no actual length, so skip it
                 pass
             else:
+                # check for intersection
                 a2, b2, slices2 = get_slices_ab(
                     X0,
                     Y0,
@@ -1136,8 +1285,8 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
                     0,
                     True,
                 )
-                # since the last edge of poly has xylines[iseg] in common with the
-                # bankline sofar, check for this possible slice and exclude it.
+                # exclude the intersection if it's only at the very last point
+                # of the last segment
                 if i == nedges - 1:
                     keep_mask = a2 < 1 - prec
                     a2 = a2[keep_mask]
@@ -1149,11 +1298,12 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
                 n.append(slices2 * 0 + i)
 
         s = numpy.concatenate(slices)
+        if verbose:
+            print("{}: {} intersections detected".format(iseg, len(s)))
         if len(s) == 0:
-            if dtheta > math.pi:
+            # no intersections found
+            if dtheta < 0:
                 # right bend (not straight)
-                # thetap = numpy.arctan2(xylines_new[ixy, 1] - xylines_new[ixy-1, 1], xylines_new[ixy, 0] - xylines_new[ixy-1, 0])
-                # thetan = numpy.arctan2(dxy[iseg, 1], dxy[iseg, 0])
                 if dn[iseg] > 0:
                     cross = (xylines_new[ixy, 0] - xylines_new[ixy - 1, 0]) * nxy[
                         iseg, 1
@@ -1170,20 +1320,26 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
                     # we can probably ignore it, let's do so...
                     # the only exception would be an eroded patch encompassing
                     # all of the eroded bank line
+                    if verbose:
+                        print("{}: ignoring segment".format(iseg))
                     continue
             else:
-                # left bend: always add ... just the rectangle of eroded material
+                # left bend or straight: always add ... just the rectangle of eroded material
                 pass
             ixy1 = ixy
-            for n2 in range(2, -1, -1):
+            for n2 in range(min(nedges, 2), -1, -1):
+                if verbose:
+                    print("  adding point {}".format(poly[n2]))
                 ixy1, xylines_new = add_point(ixy1, xylines_new, poly[n2])
             ixy = ixy1
 
         else:
+            # one or more intersections found
             a = numpy.concatenate(a)
             b = numpy.concatenate(b)
             n = numpy.concatenate(n)
 
+            # sort the intersections by distance along the already shifted bank line
             d = s + a
             sorted = numpy.argsort(d)
             s = s[sorted] + ixy0
@@ -1193,69 +1349,92 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
             n = n[sorted]
 
             ixy1 = s[0]
+            if verbose:
+                print("{}: continuing new path at point {}".format(iseg, ixy1))
             xytmp = xylines_new[ixy1 : ixy + 1].copy()
-            # ax.plot(xytmp[:,0], xytmp[:,1], color="k", marker=".")
             ixytmp = ixy1
 
             inside = False
             s_last = s[0]
-            n_last: int
+            n_last = nedges
             for i in range(len(s)):
-                # print("- slice",i,"occurs at",d[i], "with edge",n[i])
+                if verbose:
+                    print(
+                        "- intersection {}: new polyline edge {} crosses segment {} at {}".format(
+                            i, n[i], s[i], a[i]
+                        )
+                    )
                 if i == 0 or n[i] != nedges - 1:
                     if inside:
+                        if verbose:
+                            print("  existing line is inside the new polygon")
                         for n2 in range(n_last, n[i], -1):
+                            if verbose:
+                                print("  adding new point {}".format(poly[n2]))
                             ixy1, xylines_new = add_point(ixy1, xylines_new, poly[n2])
                     else:
+                        if verbose:
+                            print("  existing line is outside the new polygon")
                         for s2 in range(s_last, s[i]):
+                            if verbose:
+                                print(
+                                    "  re-adding old point {}".format(
+                                        xytmp[s2 - ixytmp + 1]
+                                    )
+                                )
                             ixy1, xylines_new = add_point(
                                 ixy1, xylines_new, xytmp[s2 - ixytmp + 1]
                             )
-                    ixy1, xylines_new = add_point(
-                        ixy1,
-                        xylines_new,
-                        poly[n[i]] + b[i] * (poly[n[i] + 1] - poly[n[i]]),
-                    )
+                    pnt_intersect = poly[n[i]] + b[i] * (poly[n[i] + 1] - poly[n[i]])
+                    if verbose:
+                        print("  adding intersection point {}".format(pnt_intersect))
+                    ixy1, xylines_new = add_point(ixy1, xylines_new, pnt_intersect,)
                     n_last = n[i]
                     s_last = s[i]
                     if a[i] < prec:
-                        # ax.plot(poly[n[i], 0], poly[n[i], 1], marker='o', color='r')
-                        # ax.plot(poly[n[i]+1, 0], poly[n[i]+1, 1],marker='+',color='r')
                         dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
                         dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
                         s2 = s[i] - ixy0
-                        # ax.plot(X0[s2], Y0[s2],marker='o',color='k')
-                        # ax.plot(X1[s2], Y1[s2],marker='+',color='k')
                         dBy = Y1[s2] - Y0[s2]
                         dBx = X1[s2] - X0[s2]
                         inside = dPy * dBx - dPx * dBy > 0
                     elif a[i] > 1 - prec:
-                        # ax.plot(poly[n[i], 0], poly[n[i], 1],marker='o',color='r')
-                        # ax.plot(poly[n[i]+1, 0], poly[n[i]+1, 1],marker='+',color='r')
                         dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
                         dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
                         s2 = s[i] - ixy0 + 1
                         if s2 > len(X0) - 1:
                             inside = True
                         else:
-                            # ax.plot(X0[s2], Y0[s2],marker='o',color='k')
-                            # ax.plot(X1[s2], Y1[s2],marker='+',color='k')
                             dBy = Y1[s2] - Y0[s2]
                             dBx = X1[s2] - X0[s2]
                             inside = dPy * dBx - dPx * dBy > 0
                     else:
                         # line segment slices the edge somewhere in the middle
                         inside = not inside
-                    # print("-> inside =",inside)
+                    if verbose:
+                        if inside:
+                            print("  existing line continues inside")
+                        else:
+                            print("  existing line continues outside")
 
-            if inside is False:
+            if verbose:
+                print("- wrapping up after last intersection")
+            if inside:
+                if verbose:
+                    print("  existing line is inside the new polygon")
+                for n2 in range(n_last, -1, -1):
+                    if verbose:
+                        print("  adding new point {}".format(poly[n2]))
+                    ixy1, xylines_new = add_point(ixy1, xylines_new, poly[n2])
+            else:
+                if verbose:
+                    print("  existing line is inside the new polygon")
                 for s2 in range(s_last, len(xytmp) + ixytmp - 1):
+                    if verbose:
+                        print("  re-adding old point {}".format(xytmp[s2 - ixytmp + 1]))
                     ixy1, xylines_new = add_point(
                         ixy1, xylines_new, xytmp[s2 - ixytmp + 1]
                     )
-            else:
-                for n2 in range(n_last, -1, -1):
-                    ixy1, xylines_new = add_point(ixy1, xylines_new, poly[n2])
             ixy = ixy1
         # if iseg == isegstop:
         #     break
@@ -1298,40 +1477,64 @@ def add_point(
     return ixy1, xy_out
 
 
-def clip_sort_connect_bank_lines(
-    banklines, bankarea, xykm: numpy.ndarray
-) -> shapely.geometry.LineString:
+def clip_bank_lines(
+    banklines: geopandas.geoseries.GeoSeries, bankarea: shapely.geometry.polygon.Polygon
+) -> shapely.geometry.multilinestring.MultiLineString:
     """
-    Connect the bank line segments to bank lines and clip to the area of interest.
+    Clip the bank line segments to the area of interest.
 
     Arguments
     ---------
-    banklines : 
+    banklines : geopandas.geoseries.GeoSeries
         Unordered set of bank line segments.
-    bankarea : 
+    bankarea : shapely.geometry.polygon.Polygon
         A search area corresponding to one of the bank search lines.
-    xykm : numpy.ndarray
-        Array containing x,y,chainage values.
     
     Returns
     -------
-    bank : shapely.geometry.LineString
-        The detected bank line.
+    clipped_banklines : shapely.geometry.multilinestring.MultiLineString
+        Unordered set of bank line segments, clipped to bank area.
     """
     # intersection returns one MultiLineString object
     clipped_banklines = banklines.intersection(bankarea)[0]
 
+    return clipped_banklines
+
+
+def sort_connect_bank_lines(
+    banklines: shapely.geometry.multilinestring.MultiLineString,
+    xykm: shapely.geometry.linestring.LineString,
+    right_bank: bool,
+) -> shapely.geometry.LineString:
+    """
+    Connect the bank line segments to bank lines.
+
+    Arguments
+    ---------
+    banklines : shapely.geometry.multilinestring.MultiLineString
+        Unordered set of bank line segments.
+    xykm : shapely.geometry.linestring.LineString
+        Array containing x,y,chainage values.
+    right_bank : bool
+        Flag indicating whether line is on the right (or not).
+    
+    Returns
+    -------
+    bank : shapely.geometry.linestring.LineString
+        The detected bank line.
+    """
+
     # convert MultiLineString into list of LineStrings that can be modified later
-    clipped_banklines = [line for line in clipped_banklines]
+    banklines_list = [line for line in banklines]
 
     # loop over banklines and determine minimum/maximum projected length
     # print("numpy init")
-    minlocs = numpy.zeros(len(clipped_banklines))
-    maxlocs = numpy.zeros(len(clipped_banklines))
-    lengths = numpy.zeros(len(clipped_banklines))
+    minlocs = numpy.zeros(len(banklines_list))
+    maxlocs = numpy.zeros(len(banklines_list))
+    lengths = numpy.zeros(len(banklines_list))
     keep = lengths == 1
-    # print("loop {} bank lines".format(len(clipped_banklines)))
-    for i, bl in enumerate(clipped_banklines):
+    # print("loop {} bank lines".format(len(banklines_list)))
+    for i, bl in enumerate(banklines_list):
         minloc = 1e20
         maxloc = -1
         for j, p in enumerate(bl.coords):
@@ -1344,17 +1547,42 @@ def clip_sort_connect_bank_lines(
                 maxj = j
         minlocs[i] = minloc  # at minj
         maxlocs[i] = maxloc  # at maxj
-        if minj < maxj:
-            clipped_banklines[i] = shapely.geometry.LineString(
-                bl.coords[minj : maxj + 1]
-            )
-        elif minj > maxj:
-            clipped_banklines[i] = shapely.geometry.LineString(
-                bl.coords[maxj : minj + 1][::-1]
-            )
-        else:
+        if minj == maxj:
             pass  # if minj == maxj then minloc == maxloc and thus lengths == 0 and will be removed anyway
+        elif bl.coords[0] == bl.coords[-1]:
+            # print(i,"cyclic", minloc, maxloc)
+            crd_numpy = numpy.array(bl.coords)
+            ncrd = len(crd_numpy)
+            if minj < maxj:
+                op1 = numpy.array(bl.coords[minj : maxj + 1])
+                op2 = numpy.zeros((ncrd + minj - maxj, 2))
+                op2[0 : ncrd - maxj - 1] = crd_numpy[maxj:-1]
+                op2[ncrd - maxj - 1 : ncrd - maxj + minj] = crd_numpy[: minj + 1]
+                op2 = op2[::-1]
+            else:  # minj > maxj
+                op1 = numpy.array(bl.coords[maxj : minj + 1][::-1])
+                op2 = numpy.zeros((ncrd + maxj - minj, 2))
+                op2[0 : ncrd - minj - 1] = crd_numpy[minj:-1]
+                op2[ncrd - minj - 1 : ncrd - minj + maxj] = crd_numpy[: maxj + 1]
+            op1_right_of_op2 = on_right_side(op1, op2)
+            if (right_bank and op1_right_of_op2) or (
+                (not right_bank) and (not op1_right_of_op2)
+            ):
+                op = op2
+            else:
+                op = op1
+            banklines_list[i] = shapely.geometry.LineString(op)
+        else:
+            if minj < maxj:
+                banklines_list[i] = shapely.geometry.LineString(
+                    bl.coords[minj : maxj + 1]
+                )
+            else:  # minj > maxj
+                banklines_list[i] = shapely.geometry.LineString(
+                    bl.coords[maxj : minj + 1][::-1]
+                )
         lengths[i] = maxloc - minloc
+
     # print("select lines by length")
     while True:
         maxl = lengths.max()
@@ -1373,7 +1601,7 @@ def clip_sort_connect_bank_lines(
         )[0]
         if jarray.size > 0:
             for j in jarray:
-                bl = clipped_banklines[j]
+                bl = banklines_list[j]
                 kmax = len(bl.coords) - 1
                 for k, p in enumerate(bl.coords):
                     if k == kmax:
@@ -1382,9 +1610,7 @@ def clip_sort_connect_bank_lines(
                         break
                     loc = xykm.project(shapely.geometry.Point(p))
                     if loc >= maxlocs[i]:
-                        clipped_banklines[j] = shapely.geometry.LineString(
-                            bl.coords[k:]
-                        )
+                        banklines_list[j] = shapely.geometry.LineString(bl.coords[k:])
                         minlocs[j] = loc
                         break
         # if line partially overlaps ... but stick out on the low side
@@ -1393,7 +1619,7 @@ def clip_sort_connect_bank_lines(
         )[0]
         if jarray.size > 0:
             for j in jarray:
-                bl = clipped_banklines[j]
+                bl = banklines_list[j]
                 kmax = len(bl.coords) - 1
                 for k, p in zip(range(-1, -kmax, -1), bl.coords[:-1][::-1]):
                     if k == kmax + 1:
@@ -1402,17 +1628,16 @@ def clip_sort_connect_bank_lines(
                         break
                     loc = xykm.project(shapely.geometry.Point(p))
                     if loc <= minlocs[i]:
-                        clipped_banklines[j] = shapely.geometry.LineString(
-                            bl.coords[:k]
-                        )
+                        banklines_list[j] = shapely.geometry.LineString(bl.coords[:k])
                         maxlocs[j] = loc
                         break
+
     # select banks in order of projected length
     idx = numpy.argsort(minlocs[keep])
     idx2 = numpy.nonzero(keep)[0]
     new_bank_coords = []
     for i in idx2[idx]:
-        new_bank_coords.extend(clipped_banklines[i].coords)
+        new_bank_coords.extend(banklines_list[i].coords)
     bank = shapely.geometry.LineString(new_bank_coords)
 
     return bank
@@ -1424,12 +1649,12 @@ def clip_search_lines(
     max_river_width: float = 1000,
 ) -> Tuple[List[shapely.geometry.linestring.LineStringAdapter], float]:
     """
-    Clip ta list of lines to the envelope of certain size surrounding a reference line.
+    Clip the list of lines to the envelope of certain size surrounding a reference line.
 
     Arguments
     ---------
     line : List[shapely.geometry.linestring.LineStringAdapter]
-        List of lines to be clipped.
+        List of search lines to be clipped.
     xykm : shapely.geometry.linestring.LineStringAdapter
         Reference line.
     max_river_width: float
@@ -1438,27 +1663,35 @@ def clip_search_lines(
     Returns
     -------
     line : List[shapely.geometry.linestring.LineStringAdapter]
-        List of clipped line.
+        List of clipped search lines.
     maxmaxd: float
         Maximum distance from any point within line to reference line.
     """
     nbank = len(line)
-    # using simplified geometries to speed up identifying the appropriate buffer size
-    # stay accurate to within about 1 m
+    kmbuffer = xykm.buffer(max_river_width, cap_style=2)
+
+    # The algorithm uses simplified geometries for determining the distance between lines for speed.
+    # Stay accurate to within about 1 m
     xy_simplified = xykm.simplify(1)
+
     maxmaxd = 0
     for b in range(nbank):
-        # bank lines will probably extend beyond the xykm reach of interest, so clip them since points (far) beyond the end will ruin the computation of maxd below
-        # computing the distance from xykm to the bank line may not detect local maxima in bank distance
-        line[b] = line[b].intersection(xykm.buffer(max_river_width, cap_style=2))
-        if line[b].geom_type == "MultiLineString":
-            L = []
-            for i in range(len(line[b])):
-                L.extend(line[b][i].coords)
-            line[b] = shapely.geometry.LineString(L)
+        # Clip the bank search lines to the reach of interest (indicated by the reference line).
+        line[b] = line[b].intersection(kmbuffer)
 
-        # determine the maximum distance from this line to the reference line
-        # use a simplified line to speed up the computation
+        # If the bank search line breaks into multiple parts, select the part closest to the reference line.
+        if line[b].geom_type == "MultiLineString":
+            dmin = max_river_width
+            imin = 0
+            for i in range(len(line[b])):
+                line_simplified = line[b][i].simplify(1)
+                dmin_i = line_simplified.distance(xy_simplified)
+                if dmin_i < dmin:
+                    dmin = dmin_i
+                    imin = i
+            line[b] = line[b][imin]
+
+        # Determine the maximum distance from a point on this line to the reference line.
         line_simplified = line[b].simplify(1)
         maxd = max(
             [
@@ -1467,8 +1700,7 @@ def clip_search_lines(
             ]
         )
 
-        # increase maxd by 2 to account for error introduced by using
-        # simplified lines
+        # Increase the value of maxd by 2 to account for error introduced by using simplified lines.
         maxmaxd = max(maxmaxd, maxd + 2)
 
     return line, maxmaxd
