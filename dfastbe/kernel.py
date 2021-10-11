@@ -226,7 +226,7 @@ def comp_erosion(
     mu_tot = (mu_slope / H0) + mu_reed
     # water level along bank line
     ho_line_ship = numpy.minimum(zfw - zss, 2 * H0)
-    ho_line_flow = numpy.minimum(zfw - zss, distance_fw)  # hfw)
+    ho_line_flow = numpy.minimum(zfw - zss, hfw)
     h_line_ship = numpy.maximum(bankheight - zfw + ho_line_ship, 0)
     h_line_flow = numpy.maximum(bankheight - zfw + ho_line_flow, 0)
 
@@ -246,13 +246,13 @@ def comp_erosion(
     # compute erosion volume
     mask = (h_line_ship > 0) & (zfw > zss)
     dv_ship = dn_ship * linesize * h_line_ship
-    dv_ship[~mask] = 0
-    dn_ship[~mask] = 0
+    dv_ship[~mask] = 0.0
+    dn_ship[~mask] = 0.0
 
     mask = (h_line_flow > 0) & (zfw > zss)
     dv_flow = dn_flow * linesize * h_line_flow
-    dv_flow[~mask] = 0
-    dn_flow[~mask] = 0
+    dv_flow[~mask] = 0.0
+    dn_flow[~mask] = 0.0
 
     dn = dn_ship + dn_flow
     dv = dv_ship + dv_flow

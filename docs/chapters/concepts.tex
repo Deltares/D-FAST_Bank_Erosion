@@ -21,56 +21,62 @@ The bank erosion formula due to ship waves has been copied from the BEM module (
 \end{figure}
 
 Based on large scale Delta flume experiments, in which slopes of various materials were subject to perpendicular waves, it has been derived that the erosion rate increases quadratically as function of the wave height at the bank
-
+%
 \begin{equation}
 \diff{y}{t} = c_E H^2
 \label{Eq1.1}
 \end{equation}
-
+%
 where
-
+%
 \begin{symbollist}
 \item[$y$] width of the bank area \unitbrackets{m}
 \item[$c_E$] strength coefficient of the bank material \unitbrackets{m\textsuperscript{-1}s\textsuperscript{-1}}
 \item[$H$] wave height at the bank \unitbrackets{m}
 \end{symbollist}
-
+%
 Generally, it's assumed that the wave height decreases negative exponentially as function of the width of the bank area
-
+%
 \begin{equation}
 H = H_0 e^{-\mu y}
 \label{Eq1.2}
 \end{equation}
-
+%
 where
-
+%
 \begin{symbollist}
 \item[$H_0$] initial wave height at the toe of the foreshore \unitbrackets{m}
 \item[$\mu$] wave damping parameter \unitbrackets{m\textsuperscript{-1}}
 \end{symbollist}
-
+%
 Substitution of \autoref{Eq1.2} in \autoref{Eq1.1} results in a differential equation with general solution
-
+%
 \begin{equation}
 \Delta n_\text{wave} = \frac{1}{2 \mu} ln ( 2 \mu c_E H_0^2 t + 1 )
 \end{equation}
-
+%
 where
-
+%
 \begin{symbollist}
 \item[$\Delta n_\text{wave}$] distance of bank line shift \unitbrackets{m}
 \item[$t$] time \unitbrackets{s}
 \end{symbollist}
-
+%
 This equation can be used for waves due to both wind and ships.
+Since $\mu$ is typically small, the equation is linearized to
+%
+\begin{equation}
+\Delta n_\text{wave} = c_E H_0^2 t
+\end{equation}
+%
 In the latter case the time $t$ can be expressed as
-
+%
 \begin{equation}
 t = T N n t_\text{eros} = 0.51 \frac{v_s}{g} N n t_\text{eros}
 \end{equation}
-
+%
 where
-
+%
 \begin{symbollist}
 \item[$T$] period of the ship waves \unitbrackets{s}
 \item[$N$] number of empty ships per year \unitbrackets{-}
@@ -79,17 +85,17 @@ where
 \item[$g$] gravitational acceleration, i.e. 9.81 \unitbrackets{m/s\textsuperscript{2}}
 \item[$t_\text{eros}$] total duration \unitbrackets{year}
 \end{symbollist}
-
+%
 The value of the initial wave height $H_0$ at the toe of the foreshore can be computed using equations such as included in DIPRO based on the characteristic vessel type, its sailing speed and draught, the distance between the navigation channel and the bank and the water depth (see \autoref{Chp:shipwaves}).
 
 The parameter $\mu$ can be used to account for not only the effect of the shape of the foreshore on wave damping, but also for the wave damping effect of foreshore constructions, vegetation, and deposits of bank material.
 The bank erosion module includes the effect of the slope of the foreshore and the vegetation on the wave damping.
 The wave damping due to a gently sloping foreshore is given by \citet{Verheij00} as
-
+%
 \begin{equation}
 \mu_\text{fs} = \frac{\tan \alpha}{H_0}
 \end{equation}
-
+%
 where $\tan \alpha = \frac{1}{n}$ for a foreshore with 1:$n$ slope (see also \autoref{Fig4.1}).
 For an initial wave height $H_0 = 0.4$ a slope between 1:100 and 1:20 results in values for $\mu_\text{fs}$ between 0.025 and 0.125.
 \autoref{Fig4.2} shows an example of the influence of the wave damping parameter $\mu_\text{fs}$ on the bank erosion due to waves.
@@ -102,22 +108,22 @@ For an initial wave height $H_0 = 0.4$ a slope between 1:100 and 1:20 results in
 
 Besides wave damping due to foreshore slope, the incoming waves can also be dampened by the presence of vegetation.
 The following equation can be used to estimate the wave damping due to reed
-
+%
 \begin{equation}
 \mu_r = 8.5 \cdot 10^{-4} N_r^{0.8}
 \end{equation}
-
+%
 where $N_r$ is the reed stem density (number of stems per square metre).
 The combined wave damping effect due to foreshore slope and reed is given by
-
+%
 \begin{equation}
 \mu_\text{tot} = \mu_\text{fs} + \mu_r
 \end{equation}
-
+%
 The value $c_E$ representing the bank strength depends on the composition of the bank and can thus vary spatially.
 The $c_E$ values for the five supported bank compositions classes are given in \autoref{Tab4.1}; for additional values see \autoref{bankcomp}.
 For the computations, the user specifies the bank composition class in a simple text file along the analyzed reach.
-
+%
 \begin{table}
 \center
 \begin{tabular}{llll}
@@ -134,17 +140,16 @@ Class & Bank composition & $c_E$ \unitbrackets{m\textsuperscript{-1} s\textsuper
 
 \section{Determining potential erosion by currents} \label{Sec4.2}
 
-
 Bank erosion can besides by ship waves also be caused by a strong current along the bank.
 This mechanism is also included in the \dfastbe analysis.
 For a bank line the potential for bank erosion due to currents at a certain discharge $Q$ can be determined by means of
-
+%
 \begin{equation}
 \Delta n_\text{flow} = E \left ( \frac{u_b^2}{u_c^2} - 1 \right ) t_\text{eros}
 \end{equation}
-
+%
 where
-
+%
 \begin{symbollist}
 \item[$\Delta n_\text{flow}$] bank line shift over a period $t_\text{eros}$ \unitbrackets{m}
 \item[$E$] erosion coefficient \unitbrackets{m/s}
@@ -152,24 +157,24 @@ where
 \item[$u_c$] critical flow velocity for erosion \unitbrackets{m/s}
 \item[$t_\text{eros}$] analysis period \unitbrackets{s}
 \end{symbollist}
-
+%
 The erosion coefficient $E$ can be determined as
-
+%
 \begin{equation}
 E = \alpha \sqrt{\tau_c}
 \end{equation}
-
+%
 where $\alpha$ = 2 10\textsuperscript{-7} \unitbrackets{m\textsuperscript{-3/2} kg\textsuperscript{1/2}} and $\tau_c$ \unitbrackets{N/m\textsuperscript{2}} the critical shear stress for erosion.
 This value for the erosion coefficient is similar to values for erosion coefficients found in literature, e.g.~\citet{Crosato07}.
 
 However, this relationship between the critical shear stress for erosion and the erosion coefficient is not universally valid and the user may, therefore, also specify its value directly in the input.
 
 The critical flow velocity for erosion is related to the critical shear stress for erosion as
-
+%
 \begin{equation}
 u_c = \sqrt{\frac{\tau_c}{\rho} \frac{C^2}{g}}
 \end{equation}
-
+%
 where $C$ \unitbrackets{m\textsuperscript{1/2}/s} is the Ch\'ezy coefficient representing the hydraulic roughness.
 The Ch\'ezy value is copied from the \dflowfm calculation.
 
@@ -179,11 +184,11 @@ The value of the critical shear stress for erosion, $\tau_c$, is linked to the s
 \section{Total bank shift} \label{Sec4.3}
 
 The total bank line shift is determined by adding the contributions of the bank line shifts due to waves and currents
-
+%
 \begin{equation}
 \Delta n = \Delta n_\text{flow} + \Delta n_\text{wave}
 \end{equation}
-
+%
 The new location of the bank line is determined by shifting each bank line segment individually by its local erosion distance.
 In the case of a concave bend the eroding segments move apart; a new bank segment is inserted connecting the two end points of the previously connected segments.
 In case of a convex bend the eroding segments overlap; in this case the new bank line follows the outline of furthest erosion.

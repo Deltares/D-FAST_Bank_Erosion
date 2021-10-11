@@ -358,8 +358,21 @@ def bankerosion_core(
         config, "Erosion", "VelFilterDist", 0.0, positive=True
     )
 
+    # get pdischarges
+    dfastbe.io.log_text("get_levels")
+    num_levels = dfastbe.io.config_get_int(config, "Erosion", "NLevel")
+    ref_level = dfastbe.io.config_get_int(config, "Erosion", "RefLevel") - 1
+    simfiles = []
+    pdischarge = []
+    for iq in range(num_levels):
+        iq_str = str(iq + 1)
+        simfiles.append(dfastbe.io.config_get_simfile(config, "Erosion", iq_str))
+        pdischarge.append(
+            dfastbe.io.config_get_float(config, "Erosion", "PDischarge" + iq_str)
+        )
+
     # read simulation data (getsimdata)
-    simfile = dfastbe.io.config_get_simfile(config, "Erosion", "1")
+    simfile = dfastbe.io.config_get_simfile(config, "Erosion", str(ref_level+1))
     dfastbe.io.log_text("-")
     dfastbe.io.log_text("read_simdata", dict={"file": simfile})
     dfastbe.io.log_text("-")
@@ -671,19 +684,7 @@ def bankerosion_core(
         mask = zss[ib] == zss_miss
         zss[ib][mask] = zfw_ini[ib][mask] - 1
 
-    # get pdischarges
-    dfastbe.io.log_text("get_levels")
-    num_levels = dfastbe.io.config_get_int(config, "Erosion", "NLevel")
-    ref_level = dfastbe.io.config_get_int(config, "Erosion", "RefLevel") - 1
-    simfiles = []
-    pdischarge = []
-    for iq in range(num_levels):
-        iq_str = str(iq + 1)
-        simfiles.append(dfastbe.io.config_get_simfile(config, "Erosion", iq_str))
-        pdischarge.append(
-            dfastbe.io.config_get_float(config, "Erosion", "PDischarge" + iq_str)
-        )
-
+    # initialize arrays for erosion loop over all discharges
     velocity: List[List[numpy.ndarray]] = []
     bankheight: List[numpy.ndarray] = []
     waterlevel: List[List[numpy.ndarray]] = []
@@ -847,7 +848,7 @@ def bankerosion_core(
             chez = sim["chz_face"][ii]
             chezy[iq].append(0 * chez + chez.mean())
 
-            if iq == ref_level:
+            if iq == num_levels - 1: #ref_level:
                 dn_eq1, dv_eq1 = dfastbe.kernel.comp_erosion_eq(
                     bankheight[ib],
                     linesize[ib],

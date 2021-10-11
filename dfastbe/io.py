@@ -1689,7 +1689,8 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
                     filename, key
                 )
             )
-        km_thr = (km[:-1] + km[1:]) / 2
+        # km_thr = (km[:-1] + km[1:]) / 2
+        km_thr = km[1:]
     return km_thr, val
 
 

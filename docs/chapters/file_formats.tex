@@ -196,6 +196,10 @@ Many parameters may be varied along the analyzed river reach.
 The file format is independent of the parameter for which it's used.
 The file format is equal to the file format used by WAQBANK.
 It consists of two data columns: the first column specifies the chainage and the second column the value at that location.
+The chainage values should be increasing.
+The values are used from the chainage specified on that line until the chainage specified on the next line.
+The first value is also used before the chainage specified on the first line.
+The last value is use for all chainages larger than the chainage specified on the last line.
 
 \subsubsection*{Example}
 
