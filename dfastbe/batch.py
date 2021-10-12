@@ -372,7 +372,7 @@ def bankerosion_core(
         )
 
     # read simulation data (getsimdata)
-    simfile = dfastbe.io.config_get_simfile(config, "Erosion", str(ref_level+1))
+    simfile = dfastbe.io.config_get_simfile(config, "Erosion", str(ref_level + 1))
     dfastbe.io.log_text("-")
     dfastbe.io.log_text("read_simdata", dict={"file": simfile})
     dfastbe.io.log_text("-")
@@ -432,7 +432,7 @@ def bankerosion_core(
             km_mid = km_mid[::-1]
             bank_crds[ib] = bank_crds[ib][::-1, :]
             bank_idx[ib] = bank_idx[ib][::-1]
-            
+
         bank_km_mid[ib] = km_mid
 
         # check if bank line is left or right bank
@@ -848,7 +848,7 @@ def bankerosion_core(
             chez = sim["chz_face"][ii]
             chezy[iq].append(0 * chez + chez.mean())
 
-            if iq == num_levels - 1: #ref_level:
+            if iq == num_levels - 1:  # ref_level:
                 dn_eq1, dv_eq1 = dfastbe.kernel.comp_erosion_eq(
                     bankheight[ib],
                     linesize[ib],

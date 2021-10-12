@@ -752,34 +752,37 @@ def plot5series_waterlevels_per_bank(
         bk = bank_km_mid[ib]
         #
         for iq in range(n_levels):
+            ax.plot(
+                bk,
+                waterlevel[iq][ib],
+                color=clrs[iq + 1],
+                label=waterlevelq_txt.format(iq=iq + 1),
+            )
             if iq == 0:
                 wl_avg = waterlevel[iq][ib].copy()
             else:
                 wl_avg = wl_avg + waterlevel[iq][ib]
+        #
         wl_avg = wl_avg / n_levels
         ax.plot(
-            bank_km_mid[ib],
-            wl_avg,
-            color=(0.5, 0.5, 0.5),
-            linewidth=2,
-            label=avg_waterlevel_txt,
+            bk, wl_avg, color=(0.5, 0.5, 0.5), linewidth=2, label=avg_waterlevel_txt,
         )
+        ax.plot(bk, bankheight[ib], color=(0.5, 0.5, 0.5), label=bankheight_txt)
+        ymin, ymax = ax.get_ylim()
+        #
+        # bank protection is only visually included in the plot
+        # if it is in the same range as the other quantities
+        # don't stretch the vertical scale to squeeze in a very low value.
+        #
         ax.plot(
-            bank_km_mid[ib],
+            bk,
             bankprotect[ib],
             color=(0.5, 0.5, 0.5),
             linestyle="--",
             label=bankprotect_txt,
         )
-        ax.plot(bk, bankheight[ib], color=(0.5, 0.5, 0.5), label=bankheight_txt)
+        ax.set_ylim(ymin=ymin, ymax=ymax)
         #
-        for iq in range(n_levels):
-            ax.plot(
-                bank_km_mid[ib],
-                waterlevel[iq][ib],
-                color=clrs[iq + 1],
-                label=waterlevelq_txt.format(iq=iq + 1),
-            )
         ax.set_xlabel(chainage_txt)
         ax.set_ylabel(elevation_txt + " " + elevation_unit)
         ax.grid(True)
