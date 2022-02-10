@@ -1,4 +1,4 @@
-\chapter{Introduction}
+\chapter{Introduction} \label{Chp:Introduction}
 
 Since 2010 Deltares has been working on various bank erosion modules that can be used in combination with \dflow, WAQUA and \dflowfm.
 The \dfastbe tool described in this document is the \dflowfm compatible successor of WAQBANK developed for WAQUA and \dflow.
@@ -13,37 +13,26 @@ Some examples for which \dfastbe can compute bank erosion are:
 \item Changes in currents (e.g. due to construction of side channels)
 \end{itemize}
 
-\textbf{Output}
-
-The output of \dfastbe is:
-
-\begin{enumerate}
-\item Bank line movement after one year and when the final equilibrium state is reached.
-\item Amount of sediment that is released from the banks after one year and when the final equilibrium state is reached.
-\end{enumerate}
-
-This output is presented in graphs / figures and written to text files.
-
 \textbf{Input}
 
 The input of \dfastbe is:
 
 \begin{enumerate}
 \item \dflowfm results (netCDF map-files)
-\item initial bank lines or search lines for detecting bank lines
+\item Initial bank lines or search lines for detecting bank lines
 \item Local data: level of bank protection removal, subsoil characteristics, shipping information (quantity, location of fairway)
 \end{enumerate}
 
-This manual is split in the following sections
+\textbf{Output}
 
-\begin{itemize}
-\item \Autoref{GetStarted} describes briefly how to install and use \dfastbe,
-\item \Autoref{Chp3} describes the bank line detection algorithm,
-\item \Autoref{Chp4} describes the bank erosion concepts implemented,
-\item \Autoref{bankcomp} gives an overview of characteristic values representing different bank types,
-\item \Autoref{Chp:shipwaves} goes into more details with respect to ship waves, and finally
-\item \Autoref{Chp:FileFormats} describes the file formats used by the software.
-\end{itemize}
+The output of \dfastbe is:
+
+\begin{enumerate}
+\item The new bank line position after specified period, and the equilibrium position.
+\item Amount of sediment that is released from the banks over the specified period, and until the final equilibrium state is reached.
+\end{enumerate}
+
+This output is presented in graphs / figures and written to text files.
 
 \section{\dfastbe versus WAQBANK}
 

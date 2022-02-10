@@ -1,4 +1,9 @@
-\chapter{Detection of bank lines} \label{Chp3}
+\chapter{Detecting and shifting the bank lines} \label{Chp:BankDetect}
+
+This chapter describes the algorithms used for detecting (see \autoref{Sec:BankDetect}) and shifting (see \autoref{Sec:BankShift}) the bank lines.
+The former happens in the 'banklines' step, whereas the latter happens in the 'bankerosion' step after the local bank erosion rate has been computed.
+
+\section{Detecting the bank lines} \label{Sec:BankDetect}
 
 The location of bank lines is determined by looking at the transition of water to land (wet/dry) at a reference discharge computed using \dflowfm.
 The detection of the bank lines builds on the search lines provided as input to this step.
@@ -49,4 +54,36 @@ This is an advantage, since possible bank erosion only takes place in the groyne
 \caption{Detection of a bank line close to groynes.
 Red: Baseline 'oeverlijnen', Blue: detected bank line from WAQUA computation (Q=278,5 m\textsuperscript{3}/s, average discharge)}
 \label{Fig3.3}
+\end{figure}
+
+\section{Common issues with bank line detection} \label{Sec:DetectIssues}
+
+To be written ...
+
+\emph{`aantal voorbeeld figuren welke aangeven hoe de initi\"ele, door WAQBANK bepaalde oeverlijn gecontroleerd moet worden en hoe de invoer aangepast moet worden om een aantal typische situaties te verbeteren:
+•	Oeverlijn van naastgelegen plas/geul/kanaal wordt gevonden: 
+o	Op deze locatie meer punten opnemen in de oever invoer welke wordt gebruikt voor het zoeken van de oeverlijn
+o	De waterstand voor het bepalen van de oeverligging verlagen
+o	Een ander/lager referentieniveau kiezen
+o	De afstand/buffer voor de oeverlijnen verkleinen
+o	Handmatig een aantal punten verwijderen uit de BankLines uitvoer van WAQBANK voor de oevererosie wordt bepaald door BankErosion (deel 2 van de WAQBANK module) uit te voeren'}
+
+\section{Shifting the bank lines} \label{Sec:BankShift}
+
+The new location of the bank line is determined by shifting each bank line segment individually by its local erosion distance.
+In the case of a concave bend the eroding segments move apart; a new bank segment is inserted connecting the two end points of the previously connected segments.
+In case of a convex bend the eroding segments overlap; in this case the new bank line follows the outline of furthest erosion.
+
+\begin{figure}
+\includegraphics[width=6cm]{figures/Fig4-3.png}
+\caption{Het verschuiven van een oeverlijn gebaseerd op het snijpunt van twee lijnsegmenten.
+Blauw: oorspronkelijke locatie, Groen: nieuwe locatie}
+\label{Fig4.3}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=5cm]{figures/Fig4-4.png}
+\caption{Het verschuiven van een oeverlijn gebaseerd op de gemiddelde verplaatsing van twee lijnsegmenten.
+Blauw: oorspronkelijke locatie, Rood: nieuwe locatie gebaseerd op individuele segmenten, Groen: nieuwe locatie (gemiddelde van de rode punten).}
+\label{Fig4.4}
 \end{figure}

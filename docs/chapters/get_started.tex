@@ -1,28 +1,32 @@
-\chapter{Getting started} \label{GetStarted}
+\chapter{Getting started} \label{Chp:GetStarted}
 
 \section{Installation}
 
-\dfastbe has been developed using Python, but it's distributed as a binary.
-It consists of one executable called 'dfastbe.exe' and a large number of supporting libraries and some configuration files.
-The program can be run as a command line tool performing either the bank line detection step (see \autoref{Sec:rundetect}) or the bank erosion (see \autoref{Sec:runerosion}) step, or in a graphical mode which can be used to edit the analysis settings and run the analysis.
+\dfastbe has been developed using Python, but it's typically distributed as a zip-file containing binaries for use on Windows 10.
+Unpack the content of the zip-file to any (preferably local) folder and start the software via the executable 'dfastbe.exe'.
+The distribution includes besides this executable a large number of supporting libraries and some configuration files.
+Alternatively, the tool can be run directly from the Python source code (see \Autoref{Sec:Python} for more details).
 
-By default \dfastbe is looking for the definition file 'dfastbe.cfg' in the current work directory.
+The program can be run as a command line tool performing either the bank line detection step (see \autoref{Sec:rundetect}) or the bank erosion (see \autoref{Sec:runerosion}) step, or in a graphical mode which can be used to edit the analysis settings (see \autoref{Sec:Prepare}) and run the analysis.
+
+By default \dfastbe is looking for the definition file \file{dfastbe.cfg} in the current work directory.
 When the definition file has another name or location, this should be passed when the modules are called.
+See the command line option \emph{--config} described in sections \ref{Sec:rundetect} and \ref{Sec:runerosion}.
 
 \section{Scenario plan}
 
 \dfastbe is not calibrated for local bank erosion\footnote{This is almost impossible, due to other uncertainties in bank properties, limited availability of field data of measured bank erosion and the fact that the simulation models have been designed for longer river reaches.
 Locally \dfastbe could be calibrated when historical data of bank erosion is available.
-However, this does not automatically imply that \dfastbe would give good results a few kilometers further downstream with the same settings, because the bank properties can be completely different.}.
+However, this does not automatically imply that \dfastbe would give good results a few kilometres further downstream with the same settings, because the bank properties can be completely different.}.
 Therefore it is strongly advised to use \dfastbe only in a \emph{relative} way.
-In this way an image can be formed of
+In this way one can determine:
 
 \begin{itemize}
-\item at which locations the bank is most sensitive to erosion (by comparing different locations along the river)
-\item how sensitive a location is for certain measures (by comparing different scenarios at one location)
+\item The locations at which the bank is most sensitive to erosion (by comparing different locations along the river).
+\item The sensitivity of a location for certain measures (by comparing different scenarios at one location).
 \end{itemize}
 
-We advise to compute different scenarios and compare between them.
+We advise to compute different scenarios and compare the results.
 An example is: 1 scenario with a subsoil of sand and 1 scenario with a subsoil of clay.
 This means that only the type of subsoil is changed and the other input remains unchanged.
 
@@ -36,7 +40,9 @@ Deltares advises to use at least ten discharge levels.
 
 By default two figures are generated during \dfastbe computation which the user can use to check if the discharge levels are chosen properly.
 These are a figure with water levels and a figure with flow velocities.
+The figure showing the water levels highlights the elevation range at which one may expect bank erosion due to waves (water level $z_w$ plus/minus the effective wave height $H_0$).
 In both figures the area that is sensitive to erosion is indicated by means of bank levels and protection levels, and critical flow velocities respectively.
+The figure showing the velocities shows how these compare to the critical flow velocity for erosion.
 Based on these figures it can be decided to include or remove discharge levels from the computation.
 For each discharge level a netCDF map-file (\dflowfm output file) must be provided -- if \dflow or WAQUA simulation results are available the TRIM- or SDS-files need to be converted to a netCDF map-file mimicking the \dflowfm output.
 \dfastbe uses the water levels and flow velocities that are stored in the last time step.
@@ -46,6 +52,7 @@ The probability (normalized weighting of the time period) per discharge level is
 \Note It is of utmost importance that in the netCDF map-file with the reference (average) discharge (which is used to establish the initial bank lines) the water remains within the main channel during the whole computation.
 Practically this means that the simulation has to be started with a low initial water level with no (or as little as possible) water in the flood plains.
 When this criterion is not met, the bank line detection algorithm may incorrectly identify bank lines when water is unable to recede from depressions in the flood plain.
+\Autoref{Chp:BankDetect} describes how the bank lines are detected using the reference discharge, and it indicates common pitfalls and how to avoid them.
 
 An example of discharge levels for the river Meuse in combination with different probabilities for different scenarios (wet/dry/intermediate) is given in \autoref{Tab2.1}.
 
@@ -71,7 +78,7 @@ Dicharge level nr. & Discharge (m\textsuperscript{3}/s) & 1998-2002 (wet) & 2004
 \label{Tab2.1}
 \end{table}
 
-\section{Preparing the analysis configuration}\label{Sec2.4}
+\section{Preparing the analysis configuration} \label{Sec:Prepare}
 
 The configuration file contains input parameters for both 'banklines' (detection) and 'bankerosion' execution modes.
 It is a simple ASCII file using the ini-file format.
@@ -163,15 +170,15 @@ dfastbe --config D:\D-FAST_Bank_Erosion\Meuse\Meuse.cfg
 when opening a specific analysis configuration file.
 \autoref{guiGeneral} shows the graphical user interface with the tab for the general settings opened.
 These general settings are used by both the bank detection and bank erosion steps.
-\autoref{guiDetect} shows the settings specific for the detection step; all other tabs contain settings for the bank erosion step.
-First of all, \autoref{guiErode} shows the main settings for the erosion step such as the simulation period, the simulations and the associated weights.
-Subsequently, we get tabs for the shipping parameters (\autoref{guiShip}), bank parameters (\autoref{guiBank}) and shipping and bank parameters that may vary per discharge level (\autoref{guiLevelX}).
-All quantities in the first two parameter tabs must be specified either as constants or as file based (described in \autoref{Sec:parfile}).
-The quantities in the other level parameters tabs are optional; by default they will set to "Use Default" which means use the (discharge level independent) value(s) specified in the first two tabs.
+Further settings specific for these two steps can be specified in the other tabs described in the following two sections.
 The three buttons at the bottom of the dialog will run the bank detection ('banklines'), run the bank erosion ('bankerosion') and close the program, respectively.
 The two analysis steps will be run using the active settings selected in the user interface at that time.
 When one of these actions is chosen all open figures that were generated by a previous analysis step will be closed.
 If you close the program via the cross in the upper right corner, the open figures will not automatically be closed.
+
+\Note All files and paths are shown using absolute paths in the graphical user interface, but they will be converted as much as possible to relative paths when saving the configuration to file.
+The program does not verify or validate the content of the files.
+This is only verified by the kernel during the analysis.
 
 \begin{figure}
 \center
@@ -180,52 +187,10 @@ If you close the program via the cross in the upper right corner, the open figur
 \label{guiGeneral}
 \end{figure}
 
-\begin{figure}
-\center
-\includegraphics[width=\textwidth]{figures/gui2.png}
-\caption{Example of the Detection settings in the GUI}
-\label{guiDetect}
-\end{figure}
-
-\begin{figure}
-\center
-\includegraphics[width=\textwidth]{figures/gui3.png}
-\caption{Example of the Erosion settings in the GUI}
-\label{guiErode}
-\end{figure}
-
-\begin{figure}
-\center
-\includegraphics[width=\textwidth]{figures/gui4.png}
-\caption{Example of the Shipping Parameters in the GUI}
-\label{guiShip}
-\end{figure}
-
-\begin{figure}
-\center
-\includegraphics[width=\textwidth]{figures/gui5.png}
-\caption{Example of the Bank Parameters in the GUI}
-\label{guiBank}
-\end{figure}
-
-\begin{figure}
-\center
-\includegraphics[width=\textwidth]{figures/gui6.png}
-\caption{Example of the Discharge Level dependent parameters in the GUI}
-\label{guiLevelX}
-\end{figure}
-
-All files and paths are shown using absolute paths in the graphical user interface, but they will be converted as much as possible to relative paths when saving the configuration to file.
-The content of the first (General) and second (Detection) tabs is relevant for the bank line detection analysis.
-All tabs except for the second (Detection) tab are relevant for the bank erosion analysis.
-
-\Note The program does not verify or validate the content of the files.
-This is only verified by the kernel during the analysis.
-
 \section{Run mode 'banklines'} \label{Sec:rundetect}
 
-When \dfastbe is run in this mode, it determines the representative bank lines within the area of interest; for background information see \autoref{Chp3}.
-The input is given through the analysis configuration file, see \autoref{Sec2.4}.
+When \dfastbe is run in this mode, it determines the representative bank lines within the area of interest; for background information see \autoref{Chp:BankDetect}.
+The input is given through the analysis configuration file, see \autoref{Sec:Prepare}.
 
 When the configuration file has the name 'dfastbe.cfg' and is located in the work directory the program can be called as follows:
 
@@ -247,7 +212,7 @@ Required input parameters:
 \item \dflowfm output file (netCDF map-file) at representative discharge (\command{SimFile}),
 \item Number of bank Lines (\command{NBank} default two, the left and right bank),
 \item For each of the bank lines a file with xy-coordinates of the search lines i.e. the approximate location of the bank line (\command{Line1}, \command{Line2}, ..., \command{LineN}, with $N$ the number of bank lines)
-\item File which links river kilometres to xy-coordinates (\command{RiverKM}),
+\item Chainage file which links river kilometres to xy-coordinates (\command{RiverKM}),
 \end{itemize}
 
 Output:
@@ -257,14 +222,30 @@ Output:
 \item Plot of the bank lines (optional, \command{Plotting} and \command{SavePlots})
 \end{itemize}
 
+\autoref{guiDetect} shows the tab in the graphical user interface for the settings specific for the detection step.
+The content of the first (General) and second (Detection) tabs is relevant for the bank line detection analysis.
+All files and paths are shown using absolute paths in the graphical user interface, but they will be converted as much as possible to relative paths when saving the configuration to file.
+The program does not verify or validate the content of the files.
+This is only verified by the kernel during the analysis.
+
+\begin{figure}
+\center
+\includegraphics[width=\textwidth]{figures/gui2.png}
+\caption{Example of the Detection settings in the GUI}
+\label{guiDetect}
+\end{figure}
+
 An example of the graphical output of the 'banklines' mode is shown in \autoref{Fig2.2}.
-The water depth is given with colored surfaces (per grid cell) clipped to the area close to the area of interest (about twice the maximum distance of the bank lines from the fairway), the black lines are the determined bank lines and the river kilometers are displayed along the river axis.
+The water depth is given with colored surfaces (per grid cell) clipped to the area close to the area of interest (about twice the maximum distance of the bank lines from the fairway), the black lines are the determined bank lines and the river kilometres are displayed along the river axis.
 The computation has ended successfully when the message "BankLines ended successfully!" appears.
 A full listing of the screen output of \dfastbe during the bank line detection analysis is given below at the end of this section.
 
 \Note To obtain the correct results, the search lines for the banks given by \command{Line1}, \command{Line2}, ..., \command{LineN} (obtained for example from the 'oeverlijnen' from Baseline data) should follow the actual bank line (to be detected) within a distance indicated by \command{DLines} (default 50 \unitbrackets{m}).
 Large distances between the points -- and thus large deviations from the actual bank lines -- will result in inaccurate bank lines as the detection algorithm will not detect bank lines reaches outside the indicated area of interest.
 
+\Note The chainage file containing the river kilometres should have sufficient resolution since the all data will be projected onto that line.
+In the analysis, the reference points will be connected by straight lines with linearly interpolated chainage values.
+It is suggested to provide all lines with at least the resolution of the simulation model from which the data is used, or at least every 100 m.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{figures/1_banklinedetection.png}
@@ -327,8 +308,8 @@ saving figure output\figures\1_banklinedetection.png
 
 \section{Run mode 'bankerosion'} \label{Sec:runerosion}
 
-When \dfastbe is run in this mode, it determines the expected bank erosion within the area of interest; for background information see \autoref{Chp4}.
-The input is given through the analysis configuration file, see \autoref{Sec2.4}.
+When \dfastbe is run in this mode, it determines the expected bank erosion within the area of interest; for background information see \autoref{Chp:BankErosion}.
+The input is given through the analysis configuration file, see \autoref{Sec:Prepare}.
 
 When the configuration file has the name 'dfastbe.cfg' and is located in the work directory the program can be called as follows:
 
@@ -371,15 +352,20 @@ This can be done either with a fixed value for the whole track or in a file per 
   153.1        3
   206.9        2
 \end{Verbatim}
-\caption{Example of input file for bank strength classes per river kilometer: from 0.0 - 75.2 km class 1, from 75.2 - 90.3 km class 3, etc.
-When no information is available, the closest value will be used.}
+\caption{Example of input file for bank strength classes per river kilometer: from 0.0 - 75.2 km class 1, from 75.2 - 90.3 km class 3, etc.}
 \label{Fig2.3}
 \end{figure}
+
+\Note The chainage file and the river and fairway axis files should be provided with sufficient resolution.
+\dfastbe will use straight lines between the specified reference points which deviates from the natural curved channel planform.
+It is, therefore, suggested to provide all lines with at least the resolution of the simulation model from which the data is used, or at least every 100 m.
+
+\Note Even if default values or default files have been provided for input parameters, the user always needs to show whether those inputs given are appropriate for the intended application.
 
 Output:
 
 \begin{itemize}
-\item Map with water depth, initial bank lines, river kilometers and fairway axis (see \autoref{Fig2.4}),
+\item Map with water depth, initial bank lines, river kilometres and fairway axis (see \autoref{Fig2.4}),
 \item Map with erosion sensitivity of the banks based on computed bank retreat (see \autoref{Fig2.5}),
 \item The computed erosion volume during the simulation period split up per discharge level (see \autoref{Fig2.6a}) and per bank (see \autoref{Fig2.6b}),
 \item Total erosion volume based on equilibrium bank line (see \autoref{Fig2.7}),
@@ -390,13 +376,51 @@ Output:
 \item XY-coordinates of the computed bank lines at the end of the simulation period and of the equilibrium bank lines.
 \end{itemize}
 
+The settings for the bank erosion analysis are distributed over several tabs.
+All tabs except for the second (Detection) tab are relevant for the bank erosion analysis.
+First of all, \autoref{guiErode} shows the main settings for the erosion step such as the simulation period, the simulations and the associated weights.
+Subsequently, we get tabs for the shipping parameters (\autoref{guiShip}), bank parameters (\autoref{guiBank}) and shipping and bank parameters that may vary per discharge level (\autoref{guiLevelX}).
+All quantities in the first two parameter tabs must be specified either as constants or as file based (described in \autoref{Sec:parfile}).
+The quantities in the other level parameters tabs are optional; by default they will set to "Use Default" which means use the (discharge level independent) value(s) specified in the first two tabs.
+All files and paths are shown using absolute paths in the graphical user interface, but they will be converted as much as possible to relative paths when saving the configuration to file.
+The program does not verify or validate the content of the files.
+This is only verified by the kernel during the analysis.
+
+\begin{figure}
+\center
+\includegraphics[width=\textwidth]{figures/gui3.png}
+\caption{Example of the Erosion settings in the GUI}
+\label{guiErode}
+\end{figure}
+
+\begin{figure}
+\center
+\includegraphics[width=\textwidth]{figures/gui4.png}
+\caption{Example of the Shipping Parameters in the GUI}
+\label{guiShip}
+\end{figure}
+
+\begin{figure}
+\center
+\includegraphics[width=\textwidth]{figures/gui5.png}
+\caption{Example of the Bank Parameters in the GUI}
+\label{guiBank}
+\end{figure}
+
+\begin{figure}
+\center
+\includegraphics[width=\textwidth]{figures/gui6.png}
+\caption{Example of the Discharge Level dependent parameters in the GUI}
+\label{guiLevelX}
+\end{figure}
+
 The maps and graphs are only created when \command{Plotting} is on and written to file if \command{SavePlots} is on.
 The computation has ended successfully when the message "Bank line detection ended successfully!" appears.
 The listing of the screen output of \dfastbe during the bank erosion analysis is given below.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{figures/1_banklines.png}
-\caption{Map of water depth, initial bank lines, river kilometers and fairway axis}
+\caption{Map of water depth, initial bank lines, river kilometres and fairway axis}
 \label{Fig2.4}
 \end{figure}
 
@@ -584,9 +608,11 @@ saving figure output\figures\11_erodis.png
 =====================================================
 \end{Verbatim}
 
-\section{Running from Python source code}
+\section{Running from Python source code} \label{Sec:Python}
 \dfastbe can also be run directly from the Python source code.
-In that case the program can be started from the command prompt as
+For this you will need to download the source code as well as the correct version of several third party modules used by the tool.
+Please check the \dfastbe Technical Reference manual for details.
+When running the tool from Python source code, the program can be started from the command prompt as
 
 \begin{Verbatim}
 python -m dfastbe ...options...

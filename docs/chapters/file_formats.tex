@@ -180,17 +180,17 @@ These files may be used to define spatial variations in the input parameters nee
 Many parameters may be varied along the analyzed river reach.
 
 \begin{itemize}
-\item wave0
-\item wave1
-\item vship
-\item nship
-\item nwave
-\item draught
-\item shiptype
-\item slope
-\item reed
-\item banktype
-\item protectionlevel
+\item \keyw{wave0}: $s_0$ distance from ship at which the ship waves have reduced to zero \unitbrackets{m}
+\item \keyw{wave1}: $s_1$ distance from ship at which the ship waves start to reduce \unitbrackets{m}
+\item \keyw{vship}: $v_s$ ship sailing speed \unitbrackets{m/s}
+\item \keyw{nship}: $N$ number of empty ships per year \unitbrackets{1/year}
+\item \keyw{nwave}: $n$ number of waves per ship \unitbrackets{-}
+\item \keyw{draught}: $T_s$ draught of the ship \unitbrackets{m}
+\item \keyw{shiptype}: ship type \unitbrackets{-}
+\item \keyw{slope}: $\mu_\text{fs}$ wave damping due to sloping foreshore \unitbrackets{m\textsuperscript{-1}}
+\item \keyw{reed}: $\mu_r$ wave damping due to reed \unitbrackets{m\textsuperscript{-1}}
+\item \keyw{banktype}: bank type \unitbrackets{-}
+\item \keyw{protectionlevel}: top level of the bank protection \unitbrackets{m}
 \end{itemize}
 
 The file format is independent of the parameter for which it's used.
