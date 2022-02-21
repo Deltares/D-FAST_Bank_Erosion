@@ -17,7 +17,7 @@ See the command line option \emph{--config} described in sections \ref{Sec:runde
 
 \dfastbe is not calibrated for local bank erosion\footnote{This is almost impossible, due to other uncertainties in bank properties, limited availability of field data of measured bank erosion and the fact that the simulation models have been designed for longer river reaches.
 Locally \dfastbe could be calibrated when historical data of bank erosion is available.
-However, this does not automatically imply that \dfastbe would give good results a few kilometres further downstream with the same settings, because the bank properties can be completely different.}.
+However, this does not automatically imply that \dfastbe would give good results a few kilometers further downstream with the same settings, because the bank properties can be completely different.}.
 Therefore it is strongly advised to use \dfastbe only in a \emph{relative} way.
 In this way one can determine:
 
@@ -34,16 +34,10 @@ This means that only the type of subsoil is changed and the other input remains 
 
 Before \dfastbe can be used, steady state hydrodynamic computations have to be performed for each discharge level.
 \dfastbe supports results coming from \dflowfm and, after a conversion step, results coming from \dflow and WAQUA\footnote{\dflowfm and WAQUA models and Baseline schematisations of the Dutch river system can be requested via Helpdeskwater.nl Onderwerpen > Applicaties en modellen > Water en ruimte > Gebiedsschematisaties > Servicedesk > Meldingsformulier}.
-This first requires a schematisation of the discharge hydrograph in discharge levels and a probability per discharge step.
-The discretisation of the discharge hydrograph is not a trivial procedure.
-Deltares advises to use at least ten discharge levels.
 
-By default two figures are generated during \dfastbe computation which the user can use to check if the discharge levels are chosen properly.
-These are a figure with water levels and a figure with flow velocities.
-The figure showing the water levels highlights the elevation range at which one may expect bank erosion due to waves (water level $z_w$ plus/minus the effective wave height $H_0$).
-In both figures the area that is sensitive to erosion is indicated by means of bank levels and protection levels, and critical flow velocities respectively.
-The figure showing the velocities shows how these compare to the critical flow velocity for erosion.
-Based on these figures it can be decided to include or remove discharge levels from the computation.
+First the discharge hydrograph should be schematised in discharge levels and a probability per discharge step.
+The discretisation of the discharge hydrograph is not a trivial procedure. Deltares advises to use at least ten discharge levels.
+
 For each discharge level a netCDF map-file (\dflowfm output file) must be provided -- if \dflow or WAQUA simulation results are available the TRIM- or SDS-files need to be converted to a netCDF map-file mimicking the \dflowfm output.
 \dfastbe uses the water levels and flow velocities that are stored in the last time step.
 It is important that the hydrodynamic computations are in steady state -- only the last time step of each simulation output file is used.
@@ -54,12 +48,13 @@ Practically this means that the simulation has to be started with a low initial 
 When this criterion is not met, the bank line detection algorithm may incorrectly identify bank lines when water is unable to recede from depressions in the flood plain.
 \Autoref{Chp:BankDetect} describes how the bank lines are detected using the reference discharge, and it indicates common pitfalls and how to avoid them.
 
-An example of discharge levels for the river Meuse in combination with different probabilities for different scenarios (wet/dry/intermediate) is given in \autoref{Tab2.1}.
 
-\begin{table}
+An example of discharge levels in combination with probabilities for scenario's wet, dry or intermediate is given in \autoref{Tab2.1} for the river Meuse and in \autoref{Tab2.2} for the river Boven-Rijn.
+
+\begin{table}[h]
 \center
-\begin{tabular}{p{2cm}p{2cm}p{2cm}p{2cm}p{2cm}}
-Dicharge level nr. & Discharge (m\textsuperscript{3}/s) & 1998-2002 (wet) & 2004-2010 (dry) & 2008-2011 (intermediate) \\ \hline
+\begin{tabular}{p{2cm}p{2cm}p{2cm}p{2cm}p{2.5cm}}
+\makecell[l]{Dicharge\\level nr.} & \makecell[l]{Discharge\\(m\textsuperscript{3}/s)} &\makecell[l]{1998-2002\\(wet)} & \makecell[l]{2004-2010\\(dry)} & \makecell[l]{2008-2011\\(intermediate)} \\ \hline
 1 & 75 & 0.2932 & 0.1808 & 0.3110 \\
 2 & 150 & 0.1918 & 0.2466 & 0.2329 \\
 3 & 272 & 0.1918 & 0.2603 & 0.2055 \\
@@ -77,6 +72,34 @@ Dicharge level nr. & Discharge (m\textsuperscript{3}/s) & 1998-2002 (wet) & 2004
 \caption{Probabilities of a discharge level for different scenarios (De Vries, 2012)}
 \label{Tab2.1}
 \end{table}
+
+\begin{table}[h]
+\center
+\begin{tabular}{p{1.25cm}p{1.5cm}p{2cm}p{2.25cm}p{2.25cm}p{2.25cm}}
+\makecell[l]{Dicharge\\level nr.} & \makecell[l]{Discharge\\(m\textsuperscript{3}/s)} & \makecell[l]{average\\ } & \makecell[l]{16\% undershot\\(wet)} & \makecell[l]{50\% undershot\\(intermediate)} & \makecell[l]{84\% undershot\\(dry)}\\ \hline
+1 & 1020 & 0.062 & 0.000 & 0.022 & 0.135 \\
+2 & 1203 & 0.160 & 0.066 & 0.193 & 0.245 \\
+3 & 1635 & 0.115 & 0.101 & 0.121 & 0.151 \\
+4 & 2250 & 0.200 & 0.154 & 0.238 & 0.189 \\
+5 & 3053 & 0.253 & 0.326 & 0.258 & 0.170 \\
+6 & 3824 & 0.116 & 0.179 & 0.086 & 0.063 \\
+7 & 4717 & 0.058 & 0.094 & 0.046 & 0.042 \\
+8 & 6151 & 0.027 & 0.061 & 0.026 & 0.006 \\
+9 & 8592 & 0.010 & 0.020 & 0.010 & 0.000 \\
+\hline
+\end{tabular}
+\caption{Probabilities of discharge level in the Boven-Rijn (1989-2016) for different scenarios}
+\label{Tab2.2}
+\end{table}
+
+By default two figures are generated during \dfastbe computation which the user can use to check if the discharge levels are chosen properly.
+These are a figure with water levels and a figure with flow velocities.
+The figure showing the water levels highlights the elevation range at which one may expect bank erosion due to waves (water level $z_w$ plus/minus the effective wave height $H_0$).
+In both figures the area that is sensitive to erosion is indicated by means of bank levels and protection levels, and critical flow velocities respectively.
+The figure showing the velocities shows how these compare to the critical flow velocity for erosion.
+Based on these figures it can be decided to include or remove discharge levels from the computation.
+
+
 
 \section{Preparing the analysis configuration} \label{Sec:Prepare}
 
@@ -176,16 +199,16 @@ The two analysis steps will be run using the active settings selected in the use
 When one of these actions is chosen all open figures that were generated by a previous analysis step will be closed.
 If you close the program via the cross in the upper right corner, the open figures will not automatically be closed.
 
+\begin{figure}[!ht]
+	\center
+	\includegraphics[width=\textwidth,height=11.4cm]{figures/gui1.png}
+	\caption{Example of the General settings in the GUI}
+	\label{guiGeneral}
+\end{figure}
+
 \Note All files and paths are shown using absolute paths in the graphical user interface, but they will be converted as much as possible to relative paths when saving the configuration to file.
 The program does not verify or validate the content of the files.
 This is only verified by the kernel during the analysis.
-
-\begin{figure}
-\center
-\includegraphics[width=\textwidth]{figures/gui1.png}
-\caption{Example of the General settings in the GUI}
-\label{guiGeneral}
-\end{figure}
 
 \section{Run mode 'banklines'} \label{Sec:rundetect}
 
@@ -228,7 +251,7 @@ All files and paths are shown using absolute paths in the graphical user interfa
 The program does not verify or validate the content of the files.
 This is only verified by the kernel during the analysis.
 
-\begin{figure}
+\begin{figure}[!b]
 \center
 \includegraphics[width=\textwidth]{figures/gui2.png}
 \caption{Example of the Detection settings in the GUI}
@@ -238,7 +261,9 @@ This is only verified by the kernel during the analysis.
 An example of the graphical output of the 'banklines' mode is shown in \autoref{Fig2.2}.
 The water depth is given with colored surfaces (per grid cell) clipped to the area close to the area of interest (about twice the maximum distance of the bank lines from the fairway), the black lines are the determined bank lines and the river kilometres are displayed along the river axis.
 The computation has ended successfully when the message "BankLines ended successfully!" appears.
-A full listing of the screen output of \dfastbe during the bank line detection analysis is given below at the end of this section.
+A full listing of the screen output of \dfastbe during the bank line detection analysis is given below at the end of this section in \autoref{logbanklines}. An example of the graphical output of the 'banklines' mode is shown in \autoref{Fig2.2}. In this figure the water depth is given with colored surfaces (per grid cell) clipped to the area close to the area of interest (about twice the maximum distance of the bank lines from the fairway), the black lines are the determined bank lines and the river kilometers are displayed along the river axis. 
+
+\Note It is advised to check the detected banklines shown in the graphical output of the 'banklines'mode before continuing with the 'bankerosion' mode. Common issues with bank line detection and their solutions are described in \autoref{Sec4.2}.
 
 \Note To obtain the correct results, the search lines for the banks given by \command{Line1}, \command{Line2}, ..., \command{LineN} (obtained for example from the 'oeverlijnen' from Baseline data) should follow the actual bank line (to be detected) within a distance indicated by \command{DLines} (default 50 \unitbrackets{m}).
 Large distances between the points -- and thus large deviations from the actual bank lines -- will result in inaccurate bank lines as the detection algorithm will not detect bank lines reaches outside the indicated area of interest.
@@ -247,12 +272,18 @@ Large distances between the points -- and thus large deviations from the actual 
 In the analysis, the reference points will be connected by straight lines with linearly interpolated chainage values.
 It is suggested to provide all lines with at least the resolution of the simulation model from which the data is used, or at least every 100 m.
 
-\begin{figure}
+
+\begin{figure}[!t]
+\vspace*{-1cm} 
 \includegraphics[width=\textwidth]{figures/1_banklinedetection.png}
-\caption{Example of output of \dfastbe in 'banklines' mode}
+\vspace*{-1cm} 
+\caption{Example of output of \dfastbe in 'banklines' mode showing water depth, detected banklines (black lines), and river kilometers}
 \label{Fig2.2}
 \end{figure}
 
+\pagebreak 
+
+\begin{figure}[!ht]
 \begin{Verbatim}
 =====================================================
 Determine bank lines
@@ -305,6 +336,11 @@ saving figure output\figures\1_banklinedetection.png
 ===    Bank line detection ended successfully!    ===
 =====================================================
 \end{Verbatim}
+\caption{Example of the log for of \dfastbe in 'banklines' mode}
+\label{logbanklines}
+\end{figure}
+
+\pagebreak 
 
 \section{Run mode 'bankerosion'} \label{Sec:runerosion}
 
@@ -342,7 +378,8 @@ The bank strength information can be given either with a fixed value for the who
 This can be done either with a fixed value for the whole track or in a file per river kilometer (first column river-km, second column shipping information: similar to entering bank type, see \autoref{Fig2.3}).
 \end{itemize}
 
-\begin{figure}
+\begin{figure}[!hb]
+
 \begin{Verbatim}
   0.0          1
   75.2         3
@@ -352,75 +389,211 @@ This can be done either with a fixed value for the whole track or in a file per 
   153.1        3
   206.9        2
 \end{Verbatim}
-\caption{Example of input file for bank strength classes per river kilometer: from 0.0 - 75.2 km class 1, from 75.2 - 90.3 km class 3, etc.}
+\caption{Example of input file for bank strength classes per river kilometer: from 0.0 - 75.2 km class 1, from 75.2 - 90.3 km class 3, etc.
+When no information is available, the closest value will be used.}
 \label{Fig2.3}
 \end{figure}
 
+\clearpage
 \Note The chainage file and the river and fairway axis files should be provided with sufficient resolution.
 \dfastbe will use straight lines between the specified reference points which deviates from the natural curved channel planform.
 It is, therefore, suggested to provide all lines with at least the resolution of the simulation model from which the data is used, or at least every 100 m.
 
 \Note Even if default values or default files have been provided for input parameters, the user always needs to show whether those inputs given are appropriate for the intended application.
 
-Output:
-
-\begin{itemize}
-\item Map with water depth, initial bank lines, river kilometres and fairway axis (see \autoref{Fig2.4}),
-\item Map with erosion sensitivity of the banks based on computed bank retreat (see \autoref{Fig2.5}),
-\item The computed erosion volume during the simulation period split up per discharge level (see \autoref{Fig2.6a}) and per bank (see \autoref{Fig2.6b}),
-\item Total erosion volume based on equilibrium bank line (see \autoref{Fig2.7}),
-\item Control figures for water levels of each discharge (see \autoref{Fig2.8} and \autoref{Fig2.9}),
-\item Control figures for flow velocity of each discharge (see \autoref{Fig2.10} and \autoref{Fig2.11}),
-\item Map with indication of applied bank type (see \autoref{Fig2.12}),
-\item Bank retreat at the end of the simulation period and for the equilibrium situation (see \autoref{Fig2.13}),
-\item XY-coordinates of the computed bank lines at the end of the simulation period and of the equilibrium bank lines.
-\end{itemize}
-
 The settings for the bank erosion analysis are distributed over several tabs.
 All tabs except for the second (Detection) tab are relevant for the bank erosion analysis.
 First of all, \autoref{guiErode} shows the main settings for the erosion step such as the simulation period, the simulations and the associated weights.
-Subsequently, we get tabs for the shipping parameters (\autoref{guiShip}), bank parameters (\autoref{guiBank}) and shipping and bank parameters that may vary per discharge level (\autoref{guiLevelX}).
+Subsequently, there are tabs for the shipping parameters (\autoref{guiShip}), bank parameters (\autoref{guiBank}) and shipping and bank parameters that may vary per discharge level (\autoref{guiLevelX}).
 All quantities in the first two parameter tabs must be specified either as constants or as file based (described in \autoref{Sec:parfile}).
 The quantities in the other level parameters tabs are optional; by default they will set to "Use Default" which means use the (discharge level independent) value(s) specified in the first two tabs.
 All files and paths are shown using absolute paths in the graphical user interface, but they will be converted as much as possible to relative paths when saving the configuration to file.
 The program does not verify or validate the content of the files.
 This is only verified by the kernel during the analysis.
-
-\begin{figure}
+\begin{figure}[!hb]
 \center
-\includegraphics[width=\textwidth]{figures/gui3.png}
+\includegraphics[width=\textwidth,height=11.4cm]{figures/gui3.png}
 \caption{Example of the Erosion settings in the GUI}
 \label{guiErode}
 \end{figure}
 
-\begin{figure}
+\clearpage
+\begin{figure}[!ht]
 \center
-\includegraphics[width=\textwidth]{figures/gui4.png}
+\vspace{-0.75cm} 
+\includegraphics[width=\textwidth,height=11.4cm]{figures/gui4.png}
 \caption{Example of the Shipping Parameters in the GUI}
 \label{guiShip}
+\vspace{-0.25cm} 
 \end{figure}
 
-\begin{figure}
+\begin{figure}[!hb]
 \center
-\includegraphics[width=\textwidth]{figures/gui5.png}
+\includegraphics[width=\textwidth,height=11.4cm]{figures/gui5.png}
 \caption{Example of the Bank Parameters in the GUI}
 \label{guiBank}
+\vspace{-0.75cm} 
 \end{figure}
 
-\begin{figure}
+\clearpage
+\begin{figure}[!ht]
+\vspace{-0.75cm} 
 \center
-\includegraphics[width=\textwidth]{figures/gui6.png}
+\includegraphics[width=\textwidth,height=11.4cm]{figures/gui6.png}
 \caption{Example of the Discharge Level dependent parameters in the GUI}
 \label{guiLevelX}
+\vspace{-0.15cm} 
 \end{figure}
+
+Output:
+
+\begin{itemize}
+	\item Map with water depth, initial bank lines, river kilometers and fairway axis (see \autoref{Fig2.4}),
+	\item Map with erosion sensitivity of the banks based on computed bank retreat (see \autoref{Fig2.5}),
+	\item The computed erosion volume during the simulation period split up per discharge level (see \autoref{Fig2.6a}) and per bank (see \autoref{Fig2.6b}),
+	\item Total erosion volume based on equilibrium bank line (see \autoref{Fig2.7}),
+	\item Control figures for water levels of each discharge (see \autoref{Fig2.8} and \autoref{Fig2.9}),
+	\item Control figures for flow velocity of each discharge (see \autoref{Fig2.10} and \autoref{Fig2.11}),
+	\item Map with indication of applied bank type (see \autoref{Fig2.12}),
+	\item Bank retreat at the end of the simulation period and for the equilibrium situation (see \autoref{Fig2.13}),
+	\item XY-coordinates of the computed bank lines at the end of the simulation period and of the equilibrium bank lines.
+\end{itemize}
 
 The maps and graphs are only created when \command{Plotting} is on and written to file if \command{SavePlots} is on.
 The computation has ended successfully when the message "Bank line detection ended successfully!" appears.
 The listing of the screen output of \dfastbe during the bank erosion analysis is given below.
 
+\begin{Verbatim}
+	=====================================================
+	Compute bank erosion
+	=====================================================
+	version: D-FAST Bank Erosion 2.1.0
+	source: https://github.com/Deltares/D-FAST_Bank_Erosion
+	-----------------------------------------------------
+	getting input from directory: output\banklines
+	saving output in directory: output\bankerosion
+	WARNING: directory 'output\bankerosion' already exists...=> overwriting directory
+	saving figures in directory: output\figures
+	WARNING: directory 'output\figures' already exists...=> overwriting directory
+	total simulation time: 1.00 year
+	-----------------------------------------------------
+	reading simulation data from : sim075\SDS-j19_map.nc
+	-----------------------------------------------------
+	importing grid...
+	importing bathymetry ...
+	importing water level ...
+	importing water depth ...
+	importing velocity ...
+	importing Chezy ...
+	importing dry/wet information ...
+	-----------------------------------------------------
+	deriving mesh topology arrays ...
+	reading chainage information from file : inputfiles\rivkm_20m.xyc
+	clipping chainage to the range 123.0 to 128.0 km
+	reading bank lines from file: output\banklines\bankfile.shp
+	intersect bank lines with mesh ...
+	- bank line 1 (244 nodes)
+	- bank line 2 (263 nodes)
+	mapping chainage to bank segments ...
+	- bank line 1 on the left
+	- bank line 2 on the right
+	reading location of river axis from file: inputfiles\maas_rivieras_mod.xyc
+	selecting river axis range of interest ...
+	reading location of fairway from file: inputfiles\maas_rivieras_mod.xyc
+	selecting fairway range of interest ...
+	intersect fairway with mesh (362 nodes) ...
+	computing distance between bank lines and fairway ...
+	reading NShip from file: inputfiles\nships_totaal
+	reading BankType of bank 1 from file: inputfiles\bankstrength_tauc_1.btp
+	reading BankType of bank 2 from file: inputfiles\bankstrength_tauc_2.btp
+	reading ProtectionLevel of bank 1 from file: inputfiles\stortsteen_1.bpl
+	reading ProtectionLevel of bank 2 from file: inputfiles\stortsteen_2.bpl
+	processing level information ...
+	#####################
+	### Discharge   1 ###
+	#####################
+	Discharge probability: 0.31
+	Simulation time: 0.31 year
+	reading level specific parameters ...
+	-----------------------------------------------------
+	reading simulation data from : sim075\SDS-j19_map.nc
+	-----------------------------------------------------
+	importing grid...
+	importing bathymetry ...
+	importing water level ...
+	importing water depth ...
+	importing velocity ...
+	importing Chezy ...
+	importing dry/wet information ...
+	-----------------------------------------------------
+	computing bank erosion ...
+	saving eroded volume in file: erovolQ1.evo
+	
+	---- repetitive mid section skipped ----
+	
+	#####################
+	### Discharge  13 ###
+	#####################
+	Discharge probability: 0.00
+	Simulation time: 0.00 year
+	reading level specific parameters ...
+	-----------------------------------------------------
+	reading simulation data from : sim2300\SDS-j19_map.nc
+	-----------------------------------------------------
+	importing grid...
+	importing bathymetry ...
+	importing water level ...
+	importing water depth ...
+	importing velocity ...
+	importing Chezy ...
+	importing dry/wet information ...
+	-----------------------------------------------------
+	computing bank erosion ...
+	saving eroded volume in file: erovolQ13.evo
+	=====================================================
+	average erosion distance for bank line  1 :   0.15 m
+	average erosion distance through flow     :   0.05 m
+	average erosion distance through ships    :   0.10 m
+	maximum erosion distance                  :   0.64 m
+	average equilibrium erosion distance      :  11.59 m
+	maximum equilibrium erosion distance      :  14.02 m
+	-----------------------------------------------------
+	average erosion distance for bank line  2 :   1.25 m
+	average erosion distance through flow     :   0.62 m
+	average erosion distance through ships    :   0.63 m
+	maximum erosion distance                  :   4.59 m
+	average equilibrium erosion distance      :  12.69 m
+	maximum equilibrium erosion distance      :  14.52 m
+	saving bank lines to file: output\bankerosion\bankfile_new.shp
+	saving bank lines to file: output\bankerosion\bankfile_eq.shp
+	saving total eroded volume in file: erovol_standard.evo
+	saving equilibrium eroded volume in file: erovol_eq.evo
+	=====================================================
+	generating figures ...
+	saving figure output\figures\1_banklines.png
+	saving figure output\figures\2_erosion_sensitivity.png
+	saving figure output\figures\3_eroded_volume_per_discharge.png
+	saving figure output\figures\4_eroded_volume_per_bank.png
+	saving figure output\figures\5_eroded_volume_eq.png
+	saving figure output\figures\6_levels_bank_1.png
+	saving figure output\figures\7_levels_bank_2.png
+	saving figure output\figures\8_velocity_bank_1.png
+	saving figure output\figures\9_velocity_bank_2.png
+	saving figure output\figures\10_banktype.png
+	saving figure output\figures\11_erodis.png
+	
+	=====================================================
+	===   Bank erosion analysis ended successfully!   ===
+	=====================================================
+\end{Verbatim}
+\begin{figure}[!h]
+	\caption{Example of the log for of \dfastbe in 'bankerosion' mode}
+	\label{logbankerosion}
+\end{figure}
+
 \begin{figure}
 \includegraphics[width=\textwidth]{figures/1_banklines.png}
-\caption{Map of water depth, initial bank lines, river kilometres and fairway axis}
+\caption{Map of water depth, initial bank lines, river kilometers and fairway axis}
 \label{Fig2.4}
 \end{figure}
 
@@ -484,130 +657,9 @@ The listing of the screen output of \dfastbe during the bank erosion analysis is
 \label{Fig2.13}
 \end{figure}
 
-\begin{Verbatim}
-=====================================================
-Compute bank erosion
-=====================================================
-version: D-FAST Bank Erosion 2.1.0
-source: https://github.com/Deltares/D-FAST_Bank_Erosion
------------------------------------------------------
-getting input from directory: output\banklines
-saving output in directory: output\bankerosion
-WARNING: directory 'output\bankerosion' already exists...=> overwriting directory
-saving figures in directory: output\figures
-WARNING: directory 'output\figures' already exists...=> overwriting directory
-total simulation time: 1.00 year
------------------------------------------------------
-reading simulation data from : sim075\SDS-j19_map.nc
------------------------------------------------------
-importing grid...
-importing bathymetry ...
-importing water level ...
-importing water depth ...
-importing velocity ...
-importing Chezy ...
-importing dry/wet information ...
------------------------------------------------------
-deriving mesh topology arrays ...
-reading chainage information from file : inputfiles\rivkm_20m.xyc
-clipping chainage to the range 123.0 to 128.0 km
-reading bank lines from file: output\banklines\bankfile.shp
-intersect bank lines with mesh ...
-- bank line 1 (244 nodes)
-- bank line 2 (263 nodes)
-mapping chainage to bank segments ...
-- bank line 1 on the left
-- bank line 2 on the right
-reading location of river axis from file: inputfiles\maas_rivieras_mod.xyc
-selecting river axis range of interest ...
-reading location of fairway from file: inputfiles\maas_rivieras_mod.xyc
-selecting fairway range of interest ...
-intersect fairway with mesh (362 nodes) ...
-computing distance between bank lines and fairway ...
-reading NShip from file: inputfiles\nships_totaal
-reading BankType of bank 1 from file: inputfiles\bankstrength_tauc_1.btp
-reading BankType of bank 2 from file: inputfiles\bankstrength_tauc_2.btp
-reading ProtectionLevel of bank 1 from file: inputfiles\stortsteen_1.bpl
-reading ProtectionLevel of bank 2 from file: inputfiles\stortsteen_2.bpl
-processing level information ...
-#####################
-### Discharge   1 ###
-#####################
-  Discharge probability: 0.31
-  Simulation time: 0.31 year
-  reading level specific parameters ...
-  -----------------------------------------------------
-  reading simulation data from : sim075\SDS-j19_map.nc
-  -----------------------------------------------------
-  importing grid...
-  importing bathymetry ...
-  importing water level ...
-  importing water depth ...
-  importing velocity ...
-  importing Chezy ...
-  importing dry/wet information ...
-  -----------------------------------------------------
-  computing bank erosion ...
-  saving eroded volume in file: erovolQ1.evo
 
----- repetitive mid section skipped ----
 
-#####################
-### Discharge  13 ###
-#####################
-  Discharge probability: 0.00
-  Simulation time: 0.00 year
-  reading level specific parameters ...
-  -----------------------------------------------------
-  reading simulation data from : sim2300\SDS-j19_map.nc
-  -----------------------------------------------------
-  importing grid...
-  importing bathymetry ...
-  importing water level ...
-  importing water depth ...
-  importing velocity ...
-  importing Chezy ...
-  importing dry/wet information ...
-  -----------------------------------------------------
-  computing bank erosion ...
-  saving eroded volume in file: erovolQ13.evo
-=====================================================
-average erosion distance for bank line  1 :   0.15 m
-average erosion distance through flow     :   0.05 m
-average erosion distance through ships    :   0.10 m
-maximum erosion distance                  :   0.64 m
-average equilibrium erosion distance      :  11.59 m
-maximum equilibrium erosion distance      :  14.02 m
------------------------------------------------------
-average erosion distance for bank line  2 :   1.25 m
-average erosion distance through flow     :   0.62 m
-average erosion distance through ships    :   0.63 m
-maximum erosion distance                  :   4.59 m
-average equilibrium erosion distance      :  12.69 m
-maximum equilibrium erosion distance      :  14.52 m
-saving bank lines to file: output\bankerosion\bankfile_new.shp
-saving bank lines to file: output\bankerosion\bankfile_eq.shp
-saving total eroded volume in file: erovol_standard.evo
-saving equilibrium eroded volume in file: erovol_eq.evo
-=====================================================
-generating figures ...
-saving figure output\figures\1_banklines.png
-saving figure output\figures\2_erosion_sensitivity.png
-saving figure output\figures\3_eroded_volume_per_discharge.png
-saving figure output\figures\4_eroded_volume_per_bank.png
-saving figure output\figures\5_eroded_volume_eq.png
-saving figure output\figures\6_levels_bank_1.png
-saving figure output\figures\7_levels_bank_2.png
-saving figure output\figures\8_velocity_bank_1.png
-saving figure output\figures\9_velocity_bank_2.png
-saving figure output\figures\10_banktype.png
-saving figure output\figures\11_erodis.png
-
-=====================================================
-===   Bank erosion analysis ended successfully!   ===
-=====================================================
-\end{Verbatim}
-
+\clearpage
 \section{Running from Python source code} \label{Sec:Python}
 \dfastbe can also be run directly from the Python source code.
 For this you will need to download the source code as well as the correct version of several third party modules used by the tool.
