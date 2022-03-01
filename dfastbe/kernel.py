@@ -30,6 +30,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from typing import Tuple
 
 import numpy
+import math
 import sys
 
 
@@ -126,7 +127,7 @@ def comp_erosion(
     zss: numpy.ndarray,
     rho: float,
     g: float,
-):
+) -> [numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray]:
     """
     Compute the bank erosion during a specific discharge level.
     
@@ -187,6 +188,10 @@ def comp_erosion(
         Bank erosion distance due to shipping [m]
     dn_flow : numpy.ndarray
         Bank erosion distance due to current [m]
+    shipmwavemax : numpy.ndarray
+        Maximum bank level subject to ship waves [m]
+    shipwavemin : numpy.ndarray
+        Minimum bank level subject to ship waves [m]
     """
     eps = sys.float_info.epsilon
     sec_year = 3600 * 24 * 365
@@ -237,7 +242,9 @@ def comp_erosion(
     dn_flow = E * (crit_ratio - 1) * Teros * sec_year
 
     # compute displacement due to shipwaves
-    mask = ((zfw - 2 * H0) < zfw_ini) & (zfw_ini < (zfw + 0.5 * H0))
+    shipwavemax = zfw + 0.5 * H0
+    shipwavemin = zfw - 2 * H0
+    mask = (shipwavemin < zfw_ini) & (zfw_ini < shipwavemax)
     # limit mu -> 0
 
     dn_ship = cE * H0 ** 2 * ts * Teros
@@ -259,7 +266,7 @@ def comp_erosion(
 
     # print("  dv_flow total = ", dv_flow.sum())
     # print("  dv_ship total = ", dv_ship.sum())
-    return dn, dv, dn_ship, dn_flow
+    return dn, dv, dn_ship, dn_flow, shipwavemax, shipwavemin
 
 
 def comp_hw_ship_at_bank(
@@ -323,7 +330,7 @@ def comp_hw_ship_at_bank(
     return h0
 
 
-def get_km_bins(km_bin: Tuple[float, float, float], type: int = 2) -> numpy.ndarray:
+def get_km_bins(km_bin: Tuple[float, float, float], type: int = 2, adjust: bool = False) -> numpy.ndarray:
     """
     Get an array of representative chainage values.
     
@@ -337,6 +344,8 @@ def get_km_bins(km_bin: Tuple[float, float, float], type: int = 2) -> numpy.ndar
             1: lower bounds (N values)
             2: upper bounds (N values) - default
             3: mid points (N values)
+    adjust : bool
+        Flag indicating whether the step size should be adjusted to include an integer number of steps
     
     Returns
     -------
@@ -344,10 +353,14 @@ def get_km_bins(km_bin: Tuple[float, float, float], type: int = 2) -> numpy.ndar
         Array containing the chainage bin upper bounds
     """
     km_step = km_bin[2]
-
+    nbins = int(math.ceil((km_bin[1] - km_bin[0]) / km_step))
+    
     lb = 0
-    ub = int(round((km_bin[1] - km_bin[0]) / km_bin[2])) + 1
+    ub = nbins + 1
     dx = 0.0
+    
+    if adjust:
+        km_step = (km_bin[1] - km_bin[0]) / nbins
 
     if type == 0:
         # all bounds
@@ -363,7 +376,7 @@ def get_km_bins(km_bin: Tuple[float, float, float], type: int = 2) -> numpy.ndar
         ub = ub - 1
         dx = km_bin[2] / 2
 
-    km = km_bin[0] + dx + numpy.arange(lb, ub) * km_bin[2]
+    km = km_bin[0] + dx + numpy.arange(lb, ub) * km_step
 
     return km
 

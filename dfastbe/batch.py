@@ -129,9 +129,12 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
     plotting = dfastbe.io.config_get_bool(config, "General", "Plotting", True)
     if plotting:
         saveplot = dfastbe.io.config_get_bool(config, "General", "SavePlots", True)
+        saveplot_zoomed = dfastbe.io.config_get_bool(config, "General", "SaveZoomedPlots", True)
+        zoom_km_step = dfastbe.io.config_get_float(config, "General", "ZoomStepKM", 1.0)
         closeplot = dfastbe.io.config_get_bool(config, "General", "ClosePlots", False)
     else:
         saveplot = False
+        saveplot_zoomed = False
         closeplot = False
 
     # as appropriate check output dir for figures and file format
@@ -230,8 +233,17 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
         ifig = 0
         bbox = get_bbox(xykm_numpy)
 
-        hmax = 0.5 * sim["h_face"].max()
-        fig = dfastbe.plotting.plot_detect1(
+        if saveplot_zoomed:
+            bank_crds: List[numpy.ndarray] = []
+            bank_km: List[numpy.ndarray] = []
+            for ib in range(n_searchlines):
+                bcrds_numpy = numpy.array(bank[ib])
+                km_numpy = dfastbe.support.project_km_on_line(bcrds_numpy, xykm_numpy)
+                bank_crds.append(bcrds_numpy)
+                bank_km.append(km_numpy)
+            kmzoom, xyzoom = get_zoom_extends(kmbounds[0], kmbounds[1], zoom_km_step, bank_crds, bank_km)
+
+        fig, ax = dfastbe.plotting.plot_detect1(
             bbox,
             xykm_numpy,
             bankareas,
@@ -241,15 +253,20 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
             sim["x_node"],
             sim["y_node"],
             sim["h_face"],
-            hmax,
+            1.1 * sim["h_face"].max(),
             "x-coordinate [m]",
             "y-coordinate [m]",
             "water depth and detected bank lines",
             "water depth [m]",
+            "bank search area",
+            "detected bank line"
         )
         if saveplot:
             ifig = ifig + 1
-            figfile = figdir + os.sep + str(ifig) + "_banklinedetection" + plot_ext
+            figbase = figdir + os.sep + str(ifig) + "_banklinedetection"
+            if saveplot_zoomed:
+                dfastbe.plotting.zoom_xy_and_save(fig, ax, figbase, plot_ext, xyzoom, scale=1)
+            figfile = figbase + plot_ext
             dfastbe.plotting.savefig(fig, figfile)
 
     if plotting:
@@ -329,9 +346,12 @@ def bankerosion_core(
     plotting = dfastbe.io.config_get_bool(config, "General", "Plotting", True)
     if plotting:
         saveplot = dfastbe.io.config_get_bool(config, "General", "SavePlots", True)
+        saveplot_zoomed = dfastbe.io.config_get_bool(config, "General", "SaveZoomedPlots", True)
+        zoom_km_step = dfastbe.io.config_get_float(config, "General", "ZoomStepKM", 1.0)
         closeplot = dfastbe.io.config_get_bool(config, "General", "ClosePlots", False)
     else:
         saveplot = False
+        saveplot_zoomed = False
         closeplot = False
 
     # as appropriate check output dir for figures and file format
@@ -690,6 +710,8 @@ def bankerosion_core(
     waterlevel: List[List[numpy.ndarray]] = []
     chezy: List[List[numpy.ndarray]] = []
     dv: List[List[numpy.ndarray]] = []
+    shipwavemax: List[List[numpy.ndarray]] = []
+    shipwavemin: List[List[numpy.ndarray]] = []
 
     linesize: List[numpy.ndarray] = []
     dn_flow_tot: List[numpy.ndarray] = []
@@ -792,6 +814,8 @@ def bankerosion_core(
         waterlevel.append([])
         chezy.append([])
         dv.append([])
+        shipwavemax.append([])
+        shipwavemin.append([])
 
         dvol_bank = numpy.zeros((len(km_mid), n_banklines))
         hfw_max = 0
@@ -902,7 +926,7 @@ def bankerosion_core(
                         params, outputdir + os.sep + "debug.EQ.B{}.csv".format(ib + 1),
                     )
 
-            dniqib, dviqib, dnship, dnflow = dfastbe.kernel.comp_erosion(
+            dniqib, dviqib, dnship, dnflow, shipwavemax_ib, shipwavemin_ib = dfastbe.kernel.comp_erosion(
                 velocity[iq][ib],
                 bankheight[ib],
                 linesize[ib],
@@ -926,6 +950,8 @@ def bankerosion_core(
                 rho,
                 g,
             )
+            shipwavemax[iq].append(shipwavemax_ib)
+            shipwavemin[iq].append(shipwavemin_ib)
 
             if debug:
                 bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
@@ -1084,7 +1110,13 @@ def bankerosion_core(
         ifig = 0
         bbox = get_bbox(xykm_numpy)
 
-        fig = dfastbe.plotting.plot1_waterdepth_and_banklines(
+        if saveplot_zoomed:
+            bank_crds_mid = []
+            for ib in range(n_banklines):
+                bank_crds_mid.append((bank_crds[ib][:-1, :] + bank_crds[ib][1:, :]) / 2)
+            kmzoom, xyzoom = get_zoom_extends(river_axis_km.min(), river_axis_km.max(), zoom_km_step, bank_crds_mid, bank_km_mid)
+
+        fig, ax = dfastbe.plotting.plot1_waterdepth_and_banklines(
             bbox,
             xykm_numpy,
             banklines,
@@ -1093,7 +1125,7 @@ def bankerosion_core(
             sim["x_node"],
             sim["y_node"],
             sim["h_face"],
-            hfw_max,
+            1.1 * hfw_max,
             "x-coordinate [km]",
             "y-coordinate [km]",
             "water depth and initial bank lines",
@@ -1101,10 +1133,13 @@ def bankerosion_core(
         )
         if saveplot:
             ifig = ifig + 1
-            figfile = figdir + os.sep + str(ifig) + "_banklines" + plot_ext
+            figbase = figdir + os.sep + str(ifig) + "_banklines"
+            if saveplot_zoomed:
+                dfastbe.plotting.zoom_xy_and_save(fig, ax, figbase, plot_ext, xyzoom)
+            figfile = figbase + plot_ext
             dfastbe.plotting.savefig(fig, figfile)
 
-        fig = dfastbe.plotting.plot2_eroded_distance_and_equilibrium(
+        fig, ax = dfastbe.plotting.plot2_eroded_distance_and_equilibrium(
             bbox,
             xykm_numpy,
             bank_crds,
@@ -1116,14 +1151,40 @@ def bankerosion_core(
             ye,
             "x-coordinate [km]",
             "y-coordinate [km]",
-            "eroded distance ({t} year)\n and equilibrium banks".format(t=Teros),
+            "eroded distance and equilibrium bank location",
+            "eroded during {t} year".format(t=Teros),
+            "eroded distance [m]",
+            "equilibrium location",
         )
         if saveplot:
             ifig = ifig + 1
-            figfile = figdir + os.sep + str(ifig) + "_erosion_sensitivity" + plot_ext
+            figbase = figdir + os.sep + str(ifig) + "_erosion_sensitivity"
+            if saveplot_zoomed:
+                dfastbe.plotting.zoom_xy_and_save(fig, ax, figbase, plot_ext, xyzoom)
+            figfile = figbase + plot_ext
             dfastbe.plotting.savefig(fig, figfile)
 
-        fig = dfastbe.plotting.plot3_eroded_volume_subdivided_1(
+        fig, ax = dfastbe.plotting.plot3_eroded_volume(
+            km_mid,
+            km_step,
+            "river chainage [km]",
+            dv,
+            "eroded volume [m^3]",
+            "eroded volume per {ds} chainage km ({t} years)".format(
+                ds=km_step, t=Teros
+            ),
+            "Q{iq}",
+            "Bank {ib}",
+        )
+        if saveplot:
+            ifig = ifig + 1
+            figbase = figdir + os.sep + str(ifig) + "_eroded_volume"
+            if saveplot_zoomed:
+                dfastbe.plotting.zoom_x_and_save(fig, ax, figbase, plot_ext, kmzoom)
+            figfile = figbase + plot_ext
+            dfastbe.plotting.savefig(fig, figfile)
+
+        fig, ax = dfastbe.plotting.plot3_eroded_volume_subdivided_1(
             km_mid,
             km_step,
             "river chainage [km]",
@@ -1136,12 +1197,13 @@ def bankerosion_core(
         )
         if saveplot:
             ifig = ifig + 1
-            figfile = (
-                figdir + os.sep + str(ifig) + "_eroded_volume_per_discharge" + plot_ext
-            )
+            figbase = figdir + os.sep + str(ifig) + "_eroded_volume_per_discharge"
+            if saveplot_zoomed:
+                dfastbe.plotting.zoom_x_and_save(fig, ax, figbase, plot_ext, kmzoom)
+            figfile = figbase + plot_ext
             dfastbe.plotting.savefig(fig, figfile)
 
-        fig = dfastbe.plotting.plot3_eroded_volume_subdivided_2(
+        fig, ax = dfastbe.plotting.plot3_eroded_volume_subdivided_2(
             km_mid,
             km_step,
             "river chainage [km]",
@@ -1154,10 +1216,13 @@ def bankerosion_core(
         )
         if saveplot:
             ifig = ifig + 1
-            figfile = figdir + os.sep + str(ifig) + "_eroded_volume_per_bank" + plot_ext
+            figbase = figdir + os.sep + str(ifig) + "_eroded_volume_per_bank"
+            if saveplot_zoomed:
+                dfastbe.plotting.zoom_x_and_save(fig, ax, figbase, plot_ext, kmzoom)
+            figfile = figbase + plot_ext
             dfastbe.plotting.savefig(fig, figfile)
 
-        fig = dfastbe.plotting.plot4_eroded_volume_eq(
+        fig, ax = dfastbe.plotting.plot4_eroded_volume_eq(
             km_mid,
             km_step,
             "river chainage [km]",
@@ -1167,15 +1232,21 @@ def bankerosion_core(
         )
         if saveplot:
             ifig = ifig + 1
-            figfile = figdir + os.sep + str(ifig) + "_eroded_volume_eq" + plot_ext
+            figbase = figdir + os.sep + str(ifig) + "_eroded_volume_eq"
+            if saveplot_zoomed:
+                dfastbe.plotting.zoom_x_and_save(fig, ax, figbase, plot_ext, kmzoom)
+            figfile = figbase + plot_ext
             dfastbe.plotting.savefig(fig, figfile)
 
-        figlist = dfastbe.plotting.plot5series_waterlevels_per_bank(
+        figlist, axlist = dfastbe.plotting.plot5series_waterlevels_per_bank(
             bank_km_mid,
             "river chainage [km]",
             waterlevel,
+            shipwavemax,
+            shipwavemin,
             "water level at Q{iq}",
             "average water level",
+            "wave influenced range",
             bankheight,
             "level of bank",
             zss,
@@ -1187,17 +1258,19 @@ def bankerosion_core(
         if saveplot:
             for ib, fig in enumerate(figlist):
                 ifig = ifig + 1
-                figfile = (
+                figbase = (
                     figdir
                     + os.sep
                     + str(ifig)
                     + "_levels_bank_"
                     + str(ib + 1)
-                    + plot_ext
                 )
+                if saveplot_zoomed:
+                    dfastbe.plotting.zoom_x_and_save(fig, axlist[ib], figbase, plot_ext, kmzoom)
+                figfile = figbase + plot_ext
                 dfastbe.plotting.savefig(fig, figfile)
 
-        figlist = dfastbe.plotting.plot6series_velocity_per_bank(
+        figlist, axlist = dfastbe.plotting.plot6series_velocity_per_bank(
             bank_km_mid,
             "river chainage [km]",
             velocity,
@@ -1214,17 +1287,19 @@ def bankerosion_core(
         if saveplot:
             for ib, fig in enumerate(figlist):
                 ifig = ifig + 1
-                figfile = (
+                figbase = (
                     figdir
                     + os.sep
                     + str(ifig)
                     + "_velocity_bank_"
                     + str(ib + 1)
-                    + plot_ext
                 )
+                if saveplot_zoomed:
+                    dfastbe.plotting.zoom_x_and_save(fig, axlist[ib], figbase, plot_ext, kmzoom)
+                figfile = figbase + plot_ext
                 dfastbe.plotting.savefig(fig, figfile)
 
-        fig = dfastbe.plotting.plot7_banktype(
+        fig, ax = dfastbe.plotting.plot7_banktype(
             bbox,
             xykm_numpy,
             bank_crds,
@@ -1236,10 +1311,13 @@ def bankerosion_core(
         )
         if saveplot:
             ifig = ifig + 1
-            figfile = figdir + os.sep + str(ifig) + "_banktype" + plot_ext
+            figbase = figdir + os.sep + str(ifig) + "_banktype"
+            if saveplot_zoomed:
+                dfastbe.plotting.zoom_xy_and_save(fig, ax, figbase, plot_ext, xyzoom)
+            figfile = figbase + plot_ext
             dfastbe.plotting.savefig(fig, figfile)
 
-        fig = dfastbe.plotting.plot8_eroded_distance(
+        fig, ax = dfastbe.plotting.plot8_eroded_distance(
             bank_km_mid,
             "river chainage [km]",
             dn_tot,
@@ -1251,7 +1329,10 @@ def bankerosion_core(
         )
         if saveplot:
             ifig = ifig + 1
-            figfile = figdir + os.sep + str(ifig) + "_erodis" + plot_ext
+            figbase = figdir + os.sep + str(ifig) + "_erodis"
+            if saveplot_zoomed:
+                dfastbe.plotting.zoom_x_and_save(fig, ax, figbase, plot_ext, kmzoom)
+            figfile = figbase + plot_ext
             dfastbe.plotting.savefig(fig, figfile)
 
         if closeplot:
@@ -1662,3 +1743,58 @@ def parameter_relative_path(
         except:
             config[group][key] = dfastbe.io.relative_path(rootdir, valstr)
     return config
+
+
+def get_zoom_extends(km_min: float, km_max: float, zoom_km_step: float, bank_crds: List[numpy.ndarray], bank_km: List[numpy.ndarray]) -> [List[Tuple[float, float]], List[Tuple[float, float, float, float]]]:
+    """
+    Zoom .
+
+    Arguments
+    ---------
+    km_min : float
+        Minimum value for the chainage range of interest.
+    km_max : float
+        Maximum value for the chainage range of interest.
+    zoom_km_step : float
+        Preferred chainage length of zoom box.
+    bank_crds : List[numpy.ndarray]
+        List of N x 2 numpy arrays of coordinates per bank.
+    bank_km : List[numpy.ndarray]
+        List of N numpy arrays of chainage values per bank.
+
+    Returns
+    -------
+    kmzoom : List[Tuple[float, float]]
+        Zoom ranges for plots with chainage along x-axis.
+    xyzoom : List[Tuple[float, float, float, float]]
+        Zoom ranges for xy-plots.
+    """
+
+    zoom_km_bin = (km_min, km_max, zoom_km_step)
+    zoom_km_bnd = dfastbe.kernel.get_km_bins(zoom_km_bin, type=0, adjust=True)
+    eps = 0.1 * zoom_km_step
+
+    kmzoom: List[Tuple[float, float]] = []
+    xyzoom: List[Tuple[float, float, float, float]] = []
+    inf = float('inf')
+    for i in range(len(zoom_km_bnd)-1):
+        km_min = zoom_km_bnd[i] - eps
+        km_max = zoom_km_bnd[i + 1] + eps
+        kmzoom.append((km_min, km_max))
+        
+        xmin = inf
+        xmax = -inf
+        ymin = inf
+        ymax = -inf
+        for ib in range(len(bank_km)):
+            irange = (bank_km[ib] >= km_min) & (bank_km[ib] <= km_max)
+            range_crds = bank_crds[ib][irange, :]
+            x = range_crds[:, 0]
+            y = range_crds[:, 1]
+            xmin = min(xmin, min(x))
+            xmax = max(xmax, max(x))
+            ymin = min(ymin, min(y))
+            ymax = max(ymax, max(y))
+        xyzoom.append((xmin, xmax, ymin, ymax))
+
+    return kmzoom, xyzoom

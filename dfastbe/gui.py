@@ -206,6 +206,31 @@ def addGeneralTab(
     addCheckBox(generalLayout, "savePlots", "Save Figures", True)
     dialog["savePlotsEdit"].stateChanged.connect(updatePlotting)
 
+    zoomPlots = QtWidgets.QWidget()
+    gridly = QtWidgets.QGridLayout(zoomPlots)
+    gridly.setContentsMargins(0, 0, 0, 0)
+
+    saveZoomPlotsEdit = QtWidgets.QCheckBox("", win)
+    saveZoomPlotsEdit.stateChanged.connect(updatePlotting)
+    saveZoomPlotsEdit.setChecked(False)
+    gridly.addWidget(saveZoomPlotsEdit, 0, 0)
+    dialog["saveZoomPlotsEdit"] = saveZoomPlotsEdit
+
+    zoomPlotsRangeTxt = QtWidgets.QLabel("Zoom Range [km]", win)
+    zoomPlotsRangeTxt.setEnabled(False)
+    gridly.addWidget(zoomPlotsRangeTxt, 0, 1)
+    dialog["zoomPlotsRangeTxt"] = zoomPlotsRangeTxt
+
+    zoomPlotsRangeEdit = QtWidgets.QLineEdit("1.0",win)
+    zoomPlotsRangeEdit.setValidator(validator("positive_real"))
+    zoomPlotsRangeEdit.setEnabled(False)
+    gridly.addWidget(zoomPlotsRangeEdit, 0, 2)
+    dialog["zoomPlotsRangeEdit"] = zoomPlotsRangeEdit
+
+    saveZoomPlots = QtWidgets.QLabel("Save Zoomed Figures", win)
+    generalLayout.addRow(saveZoomPlots, zoomPlots)
+    dialog["saveZoomPlots"] = saveZoomPlots
+
     addOpenFileRow(generalLayout, "figureDir", "Figure Directory")
     addCheckBox(generalLayout, "closePlots", "Close Figures")
     addCheckBox(generalLayout, "debugOutput", "Debug Output")
@@ -744,10 +769,19 @@ def updatePlotting() -> None:
     plotFlag = dialog["makePlotsEdit"].isChecked()
     dialog["savePlots"].setEnabled(plotFlag)
     dialog["savePlotsEdit"].setEnabled(plotFlag)
-    saveFlag = dialog["savePlotsEdit"].isChecked()
-    dialog["figureDir"].setEnabled(plotFlag and saveFlag)
-    dialog["figureDirEdit"].setEnabled(plotFlag and saveFlag)
-    dialog["figureDirEditFile"].setEnabled(plotFlag and saveFlag)
+
+    saveFlag = dialog["savePlotsEdit"].isChecked() and plotFlag
+    dialog["saveZoomPlots"].setEnabled(saveFlag)
+    dialog["saveZoomPlotsEdit"].setEnabled(saveFlag)
+
+    saveZoomFlag = dialog["saveZoomPlotsEdit"].isChecked() and saveFlag
+    dialog["zoomPlotsRangeTxt"].setEnabled(saveZoomFlag)
+    dialog["zoomPlotsRangeEdit"].setEnabled(saveZoomFlag)
+
+    dialog["figureDir"].setEnabled(saveFlag)
+    dialog["figureDirEdit"].setEnabled(saveFlag)
+    dialog["figureDirEditFile"].setEnabled(saveFlag)
+
     dialog["closePlots"].setEnabled(plotFlag)
     dialog["closePlotsEdit"].setEnabled(plotFlag)
 
@@ -1201,6 +1235,10 @@ def load_configuration(filename: str) -> None:
         dialog["makePlotsEdit"].setChecked(flag)
         flag = dfastbe.io.config_get_bool(config, "General", "SavePlots", default=True)
         dialog["savePlotsEdit"].setChecked(flag)
+        flag = dfastbe.io.config_get_bool(config, "General", "SaveZoomPlots", default=False)
+        dialog["saveZoomPlotsEdit"].setChecked(flag)
+        zoomStepKM = dfastbe.io.config_get_float(config, "General", "ZoomStepKM", default=1.0)
+        dialog["zoomPlotsRangeEdit"].setText(str(zoomStepKM))
         figDir = dfastbe.io.config_get_str(
             config,
             "General",
@@ -1590,6 +1628,8 @@ def get_configuration() -> configparser.ConfigParser:
     config["General"]["BankFile"] = dialog["bankFileName"].text()
     config["General"]["Plotting"] = str(dialog["makePlotsEdit"].isChecked())
     config["General"]["SavePlots"] = str(dialog["savePlotsEdit"].isChecked())
+    config["General"]["SaveZoomPlots"] = str(dialog["saveZoomPlotsEdit"].isChecked())
+    config["General"]["ZoomStepKM"] = dialog["zoomPlotsRangeEdit"].text()
     config["General"]["FigureDir"] = dialog["figureDirEdit"].text()
     config["General"]["ClosePlots"] = str(dialog["closePlotsEdit"].isChecked())
     config["General"]["DebugOutput"] = str(dialog["debugOutputEdit"].isChecked())
