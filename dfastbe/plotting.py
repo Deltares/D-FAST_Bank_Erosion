@@ -512,7 +512,7 @@ def plot2_eroded_distance_and_equilibrium(
             tfn,
             facecolors=tval,
             edgecolors="face",
-            linewidth=2,
+            linewidth=0.5,
             cmap=cmap,
             vmin=0,
             vmax=2 * dnav_max,
@@ -522,7 +522,7 @@ def plot2_eroded_distance_and_equilibrium(
         p, ax=ax, shrink=0.5, drawedges=False, label=eroclr_txt
     )
     #
-    shaded = matplotlib.patches.Patch(color="gold", linewidth=2)
+    shaded = matplotlib.patches.Patch(color="gold", linewidth=0.5)
     eqbank = matplotlib.lines.Line2D([], [], color="k", linewidth=1)
     handles = [shaded, eqbank]
     labels = [erosion_txt, eqbank_txt]
