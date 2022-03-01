@@ -930,7 +930,7 @@ def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
 
     editDialog.exec()
 
-    fileName = dialog["editDischarge"].text()
+    fileName = dialog["editDischargeEdit"].text()
     prob = probability.text()
     return fileName, prob
 
