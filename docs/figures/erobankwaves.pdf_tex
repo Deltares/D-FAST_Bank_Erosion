@@ -38,7 +38,7 @@
   \newcommand*\fsize{\dimexpr\f@size pt\relax}%
   \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
   \ifx\svgwidth\undefined%
-    \setlength{\unitlength}{392.34042907bp}%
+    \setlength{\unitlength}{399.31816911bp}%
     \ifx\svgscale\undefined%
       \relax%
     \else%
@@ -50,29 +50,29 @@
   \global\let\svgwidth\undefined%
   \global\let\svgscale\undefined%
   \makeatother%
-  \begin{picture}(1,0.70445315)%
+  \begin{picture}(1,0.6990534)%
     \lineheight{1}%
     \setlength\tabcolsep{0pt}%
     \put(0,0){\includegraphics[width=\unitlength,page=1]{figures/erobankwaves.pdf}}%
-    \put(0.02386985,0.36089593){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}a)\end{tabular}}}}%
-    \put(0.57057271,0.36089587){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}b)\end{tabular}}}}%
-    \put(0.02386994,0.00643684){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}c)\end{tabular}}}}%
-    \put(0.5705726,0.00643673){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}d)\end{tabular}}}}%
-    \put(0.256078,0.49991285){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}bank line\end{tabular}}}}%
-    \put(0.80060772,0.50049346){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}bank line\end{tabular}}}}%
-    \put(0.25730673,0.14585845){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}bank line\end{tabular}}}}%
-    \put(0.80202624,0.14585845){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}bank line\end{tabular}}}}%
-    \put(0.13011672,0.43677208){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2H$\end{tabular}}}}%
-    \put(0.6780828,0.4668114){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2H$\end{tabular}}}}%
-    \put(0.12725685,0.16749944){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2H$\end{tabular}}}}%
-    \put(0.67197627,0.21998544){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2H$\end{tabular}}}}%
-    \put(0.12844407,0.48391587){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$^{1\!\!}/_{\!2}H$\end{tabular}}}}%
-    \put(0.67641012,0.51395516){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$^{1\!\!}/_{\!2}H$\end{tabular}}}}%
-    \put(0.12558411,0.21464317){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$^{1\!\!}/_{\!2}H$\end{tabular}}}}%
-    \put(0.67030359,0.26712917){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$^{1\!\!}/_{\!2}H$\end{tabular}}}}%
-    \put(0.0022476,0.4668639){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_w(Q_1)$\end{tabular}}}}%
-    \put(0.55021358,0.49690319){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_w(Q_2)$\end{tabular}}}}%
-    \put(-0.00061231,0.19759121){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_w(Q_3)$\end{tabular}}}}%
-    \put(0.54410704,0.25007721){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_w(Q_4)$\end{tabular}}}}%
+    \put(0.02345275,0.35458958){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}a)\end{tabular}}}}%
+    \put(0.56060244,0.35458953){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}b)\end{tabular}}}}%
+    \put(0.02345283,0.00632436){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}c)\end{tabular}}}}%
+    \put(0.56060233,0.00632426){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}d)\end{tabular}}}}%
+    \put(0.25160326,0.49117731){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}initial\\bank line\end{tabular}}}}%
+    \put(0.78661779,0.49174776){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}initial\\bank line\end{tabular}}}}%
+    \put(0.25281052,0.1433097){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}initial\\bank line\end{tabular}}}}%
+    \put(0.78801152,0.1433097){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}initial\\bank line\end{tabular}}}}%
+    \put(0.12784304,0.42913987){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2H$\end{tabular}}}}%
+    \put(0.66623389,0.45865427){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2H$\end{tabular}}}}%
+    \put(0.12503314,0.16457254){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2H$\end{tabular}}}}%
+    \put(0.66023406,0.21614139){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2H$\end{tabular}}}}%
+    \put(0.12619962,0.47545986){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$^{1\!\!}/_{\!2}H$\end{tabular}}}}%
+    \put(0.66459044,0.50497423){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$^{1\!\!}/_{\!2}H$\end{tabular}}}}%
+    \put(0.12338964,0.21089247){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$^{1\!\!}/_{\!2}H$\end{tabular}}}}%
+    \put(0.65859061,0.26246132){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$^{1\!\!}/_{\!2}H$\end{tabular}}}}%
+    \put(0.00220833,0.45870586){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_w(Q_1)$\end{tabular}}}}%
+    \put(0.54059907,0.48822023){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_w(Q_2)$\end{tabular}}}}%
+    \put(-0.00060161,0.19413847){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_w(Q_3)$\end{tabular}}}}%
+    \put(0.53459924,0.24570732){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_w(Q_4)$\end{tabular}}}}%
   \end{picture}%
 \endgroup%

@@ -38,7 +38,7 @@
   \newcommand*\fsize{\dimexpr\f@size pt\relax}%
   \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
   \ifx\svgwidth\undefined%
-    \setlength{\unitlength}{428.47553821bp}%
+    \setlength{\unitlength}{437.27291396bp}%
     \ifx\svgscale\undefined%
       \relax%
     \else%
@@ -50,17 +50,61 @@
   \global\let\svgwidth\undefined%
   \global\let\svgscale\undefined%
   \makeatother%
-  \begin{picture}(1,0.47262048)%
+  \begin{picture}(1,1.11502456)%
     \lineheight{1}%
     \setlength\tabcolsep{0pt}%
     \put(0,0){\includegraphics[width=\unitlength,page=1]{figures/equiprof.pdf}}%
-    \put(0.06212454,0.38559234){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_b$\end{tabular}}}}%
-    \put(0.0412272,0.23820086){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_\text{prot}$\end{tabular}}}}%
-    \put(-0.00056067,0.28286493){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_w(Q_\text{ref})$)\end{tabular}}}}%
-    \put(0.74384064,0.45407726){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\Delta n_\text{eq}$\end{tabular}}}}%
-    \put(0.84359038,0.3558163){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$h_s$\end{tabular}}}}%
-    \put(0.27204692,0.3073397){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2 H_0$\end{tabular}}}}%
-    \put(0.13750527,0.26936291){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$h_t$\end{tabular}}}}%
-    \put(0.63005,0.25653018){\color[rgb]{0,0,0}\rotatebox{8.5410294}{\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}1:20\end{tabular}}}}}%
+    \put(0.8938467,0.75007931){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_\text{up} = z_\text{bank}$\end{tabular}}}}%
+    \put(0.25719771,0.80669167){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}b)\end{tabular}}}}%
+    \put(0.25563558,0.72695801){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_w(Q_\text{ref})$\end{tabular}}}}%
+    \put(0.8938467,0.65993657){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_\text{prot}$\end{tabular}}}}%
+    \put(0.39644148,0.70458144){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$h_t$\end{tabular}}}}%
+    \put(0.67348781,0.81326018){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$\Delta n_\text{eq}$\end{tabular}}}}%
+    \put(0.68090373,0.6949975){\color[rgb]{0,0,0}\rotatebox{12.076239}{\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}1:20\end{tabular}}}}}%
+    \put(0.44668998,0.70290684){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2 H_0$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{figures/equiprof.pdf}}%
+    \put(0.44668998,0.7463577){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2 H_0$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{figures/equiprof.pdf}}%
+    \put(0.63766169,1.03367355){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_\text{up} = z_\text{bank}$\end{tabular}}}}%
+    \put(0.00101275,1.09028591){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}a)\end{tabular}}}}%
+    \put(-0.00054939,1.01055225){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_w(Q_\text{ref})$\end{tabular}}}}%
+    \put(0.63766169,0.98469508){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_\text{do} = z_\text{prot}$\end{tabular}}}}%
+    \put(0.14025649,0.98817568){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$h_t$\end{tabular}}}}%
+    \put(0.40148604,1.09685441){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$\Delta n_\text{eq}$\end{tabular}}}}%
+    \put(0.45930227,0.997873){\color[rgb]{0,0,0}\rotatebox{12.076239}{\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}1:20\end{tabular}}}}}%
+    \put(0.190505,0.98650109){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2 H_0$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{figures/equiprof.pdf}}%
+    \put(0.190505,1.02995194){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2 H_0$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{figures/equiprof.pdf}}%
+    \put(0.25719771,0.22071534){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}d)\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{figures/equiprof.pdf}}%
+    \put(0.08220023,0.47024671){\color[rgb]{0,0,0}\makebox(0,0)[rt]{\lineheight{1.25}\smash{\begin{tabular}[t]{r}$z_\text{up}$\end{tabular}}}}%
+    \put(0.00101276,0.50773996){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}c)\end{tabular}}}}%
+    \put(-0.00030106,0.42800634){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_w(Q_\text{ref})$\end{tabular}}}}%
+    \put(0.63421343,0.40557953){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_\text{do} = z_\text{prot}$\end{tabular}}}}%
+    \put(0.14025652,0.40562978){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$h_t$\end{tabular}}}}%
+    \put(0.43032014,0.52948974){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$\Delta n_\text{eq}$\end{tabular}}}}%
+    \put(0.46273258,0.41875748){\color[rgb]{0,0,0}\rotatebox{12.076239}{\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}1:20\end{tabular}}}}}%
+    \put(0.19050497,0.39023401){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2 H_0$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{figures/equiprof.pdf}}%
+    \put(0.19050497,0.43368481){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2 H_0$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=8]{figures/equiprof.pdf}}%
+    \put(0.8938467,0.22907522){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_\text{bank}$\end{tabular}}}}%
+    \put(0.25586393,0.15792904){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_w(Q_\text{ref})$\end{tabular}}}}%
+    \put(0.8938467,0.10805988){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_\text{prot}$\end{tabular}}}}%
+    \put(0.39680653,0.14686727){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$h_t$\end{tabular}}}}%
+    \put(0.68650514,0.25795244){\color[rgb]{0,0,0}\makebox(0,0)[t]{\lineheight{1.25}\smash{\begin{tabular}[t]{c}$\Delta n_\text{eq}$\end{tabular}}}}%
+    \put(0.71548721,0.14524983){\color[rgb]{0,0,0}\rotatebox{12.076239}{\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}1:20\end{tabular}}}}}%
+    \put(0.44778493,0.14716599){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2 H_0$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=9]{figures/equiprof.pdf}}%
+    \put(0.44778493,0.1760171){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$2 H_0$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=10]{figures/equiprof.pdf}}%
+    \put(0.87796159,0.2071873){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$h_s$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=11]{figures/equiprof.pdf}}%
+    \put(0.62009645,0.47671676){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$h_s$\end{tabular}}}}%
+    \put(0.63421343,0.49309372){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$z_{bank}$\end{tabular}}}}%
+    \put(0.33836521,0.1989296){\color[rgb]{0,0,0}\makebox(0,0)[rt]{\lineheight{1.25}\smash{\begin{tabular}[t]{r}$z_\text{up}$\end{tabular}}}}%
+    \put(0.33837391,0.13079481){\color[rgb]{0,0,0}\makebox(0,0)[rt]{\lineheight{1.25}\smash{\begin{tabular}[t]{r}$z_\text{do}$\end{tabular}}}}%
+    \put(0.33814557,0.6809481){\color[rgb]{0,0,0}\makebox(0,0)[rt]{\lineheight{1.25}\smash{\begin{tabular}[t]{r}$z_\text{do}$\end{tabular}}}}%
   \end{picture}%
 \endgroup%
