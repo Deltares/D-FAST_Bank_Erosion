@@ -67,7 +67,7 @@ Finally, a number of limitations of the software are listed in \autoref{Sec4.7}.
 Ship waves are one of the most important causes of bank erosion \citep{Verheij00} and they are therefore included as the first bank erosion mechanism in the \dfastbe.
 The bank erosion formula due to ship waves has been copied from the BEM module (\citet{Verheij00}, \citet{StolkerV01b}) and the quantities are defined by \autoref{Fig4.1}.
 
-\begin{figure}
+\begin{figure}[!h]
 \center
 \resizebox{10cm}{!}{
    \input{figures/crosssec.pdf_tex}
@@ -90,6 +90,25 @@ where
 \item[$c_E$] strength coefficient of the bank material \unitbrackets{m\textsuperscript{-1}s\textsuperscript{-1}}
 \item[$H$] wave height at the bank \unitbrackets{m}
 \end{symbollist}
+
+The value $c_E$ representing the bank strength depends on the composition of the bank and can thus vary spatially.
+The $c_E$ values for the five supported bank compositions classes are given in \autoref{Tab4.1}; for additional values see \autoref{bankcomp}.
+For the computations, the user specifies the bank composition class in a simple text file along the analyzed reach.
+%
+\clearpage
+\begin{table}[!h]
+	\center
+	\begin{tabular}{llll}
+		Class & Bank composition & $c_E$ \unitbrackets{m\textsuperscript{-1} s\textsuperscript{-1}} & $\tau_c$ \unitbrackets{Pa} \\ \hline
+		0 & Protected bank & 0 & $\infty$ \\
+		1 & Vegetated bank & 0.02 10\textsuperscript{-4} & 95 \\
+		2 & Good quality clay & 0.6 10\textsuperscript{-4} & 3 \\
+		3 & Medium to poor quality clay & 2 10\textsuperscript{-4} & 0.95 \\
+		4 & Sand & 12.5 10\textsuperscript{-4} & 0.15 \\ \hline
+	\end{tabular}
+	\caption{Bank composition classes supported by \dfastbe}
+	\label{Tab4.1}
+\end{table}
 %
 Generally, it's assumed that the wave height decreases negative exponentially as function of the width of the bank area
 %
@@ -101,7 +120,7 @@ H = H_0 e^{-\mu y}
 where
 %
 \begin{symbollist}
-\item[$H_0$] initial wave height at the toe of the foreshore \unitbrackets{m}
+\item[$H_0$] initial wave height at the toe of the foreshore \unitbrackets{m} (see \autoref{Sec:shipwaves})
 \item[$\mu$] wave damping parameter \unitbrackets{m\textsuperscript{-1}}
 \end{symbollist}
 %
@@ -156,9 +175,9 @@ where $\tan \alpha = \frac{1}{n}$ for a foreshore with 1:$n$ slope (see also \au
 For an initial wave height $H_0 = 0.4$ a slope between 1:100 and 1:20 results in values for $\mu_\text{fs}$ between 0.025 and 0.125.
 \autoref{Fig4.2} shows an example of the influence of the wave damping parameter $\mu_\text{fs}$ on the bank erosion due to waves.
 
-\begin{figure}
+\begin{figure}[!hb]
 \includegraphics[width=\textwidth]{figures/Fig4-2.png}
-\caption{Example of bank erosion due to waves for average to good clay.}
+\caption{Example of bank erosion due to waves for average to good clay with a bankstrenght coefficient ($c_E$ = 0.0001). An increase in the parameter $\mu_\text{fs}$ accounts for an increased effect of the shape of the foreshore on wave damping}
 \label{Fig4.2}
 \end{figure}
 
@@ -176,24 +195,7 @@ The combined wave damping effect due to foreshore slope and reed is given by
 \mu_\text{tot} = \mu_\text{fs} + \mu_r
 \end{equation}
 %
-The value $c_E$ representing the bank strength depends on the composition of the bank and can thus vary spatially.
-The $c_E$ values for the five supported bank compositions classes are given in \autoref{Tab4.1}; for additional values see \autoref{bankcomp}.
-For the computations, the user specifies the bank composition class in a simple text file along the analyzed reach.
-%
-\begin{table}
-\center
-\begin{tabular}{llll}
-Class & Bank composition & $c_E$ \unitbrackets{m\textsuperscript{-1} s\textsuperscript{-1}} & $\tau_c$ \unitbrackets{Pa} \\ \hline
-0 & Protected bank & 0 & $\infty$ \\
-1 & Vegetated bank & 0.02 10\textsuperscript{-4} & 95 \\
-2 & Good quality clay & 0.6 10\textsuperscript{-4} & 3 \\
-3 & Medium to poor quality clay & 2 10\textsuperscript{-4} & 0.95 \\
-4 & Sand & 12.5 10\textsuperscript{-4} & 0.15 \\ \hline
-\end{tabular}
-\caption{Bank composition classes supported by \dfastbe}
-\label{Tab4.1}
-\end{table}
-
+\clearpage
 \section{Determining ship induced wave height at the beginning of the foreshore} \label{Sec:shipwaves}
 
 To determine the ship induced wave height $H_0$ \unitbrackets{m} at the beginning of the foreshore, the following formula is used (source: Handleiding DIPRO, 1997)
@@ -211,7 +213,7 @@ with
 \item[$s$] distance from ship to shore \unitbrackets{m}
 \end{symbollist}
 %
-The Froude number is computed according to:
+The Froude number, a dimensionless quantity indicating the mean flow velocity relative to the speed of free surface waves, is computed as:
 %
 \begin{equation}
 \Frou = \frac{v_s}{\sqrt{g h}}
@@ -223,19 +225,27 @@ with
 \item[$g$] gravity acceleration 9.81 \unitbrackets{m/s\textsuperscript{2}}
 \item[$v_s$] ship velocity \unitbrackets{m/s}
 \end{symbollist}
-%
-The value of the Froude number is limited to values less or equal 0.8.
-For the coefficient $\alpha_1$ the following values are used depending on the selected ship type, with $T_s$ \unitbrackets{m} the draught of the ships:
 
-\begin{tabular}{lll}
-Ship type & Description & $\alpha_1$ \\ \hline
-1 & Push barge & 0.5 \\
-2 & RHK ship / Motorship & 0.28 $T_s^\text{1.25}$ \\
-3 & Towboat & 1.0 \\ \hline
-\end{tabular}
+The value of the Froude number is limited to 0.8 and \autoref{Tabships} shows the values used for the coefficient $\alpha_1$, with 
+\begin{symbollist}
+	\item[$T_s$]  the draught of the ships \unitbrackets{m}
+\end{symbollist}
 
-By using this formulas, the value of $H_0$ can be computed based on the dominant ship type, their velocity and draught, the distance between fairway and shore and the water depth.
 
+By using these formulas, the value of $H_0$ can be computed based on the dominant ship type, their velocity and draught, the distance between fairway and shore and the water depth.
+
+\begin{table}[!h]
+	\begin{tabular}{ll}
+		Ship type & $\alpha_1$ \\ \hline
+		Push barge & 0.5 \\
+		RHK ship / Motorship & 0.28 $T_s^\text{1.25}$ \\
+		Towboat & 1.0 \\ \hline
+	\end{tabular}
+	\caption{Ship-types supported by D-Fast Bank Erosion, with $T_s$ \unitbrackets{m} the draught of the ships}
+	\label{Tabships}
+\end{table}
+
+\clearpage
 To prevent wave load on smaller channels far from the main channel, the wave height is smoothly reduced to zero from distance $s_1$ to $s_0$ from the fairway.
 This is accomplished by multiplying $H_0$ with the following function:
 %
@@ -248,20 +258,22 @@ f(s) = \left \{ \begin{matrix}
 \end{equation}
 %
 The value for $s_0$ will be in the order of 150 - 200 m and for  the following relation is used: $s_1 = s_0 - 50$.
-In \autoref{Fig5.1} the wave height $H_0$ as function of the distance from the fairway $s$ is depicted for various values of the water depth $h$ for a motor ship with a draught of 1.2 m with a relative velocity of $v_s = 6$ m/s.
+In \autoref{Fig5.1} the wave height $H_0$ as function of the distance from the fairway $s$ is depicted for various values of the water depth $h$ for a moter ship with a draught of 1.2 m with a relative velocity of $v_s = 6$ m/s.
 The wave height is reduced to zero between $s_1 = 100$ m and $s_0 = 150$ m.
 
-\begin{figure}
+\begin{figure}[!hb]
 \includegraphics[width=\textwidth]{figures/Fig5-1.png}
 \caption{Wave height as function from the distance from the fairway for different values of the water depth.}
 \label{Fig5.1}
 \end{figure}
 
+
+\clearpage
 \section{Determining potential erosion by currents} \label{Sec4.2}
 
 Bank erosion can besides by ship waves also be caused by a strong current along the bank.
 This mechanism is also included in the \dfastbe analysis.
-For a bank line the potential for bank erosion due to currents at a certain discharge $Q$ can be determined by means of
+For a bank line the potential for bank erosion due to currents at a certain discharge $Q$-level can be determined by the flow velocities from the model results and:
 %
 \begin{equation}
 \Delta n_\text{flow} = E \left ( \frac{u_b^2}{u_c^2} - 1 \right ) N_\text{sec} t_\text{eros}
@@ -319,10 +331,14 @@ The potential volume of sediment released by the erosion can be estimated using
 \begin{equation}
 V_\text{erosion} = ( \delta h_\text{above} + \delta h_\text{below} ) \Delta n
 \end{equation}
-%
-where $\Delta n$ is the total bank line shift and $\delta h$ is the area influenced by the bank erosion (above and below the water surface).
-It's assumed that the bank recedes in its entirety and that's why the area of influence \emph{above} the water surface is determined by
-%
+
+where 
+\begin{symbollist}
+	\item[$\Delta n$] total shift of the bank line [m]
+	\item[$\delta h$] the area influenced by the bank erosion (above and below the water surface).
+\end{symbollist}
+It's assumed that the bank recedes in its entirety and that's why the area of influence above the water surface is determined by
+
 \begin{equation}
 \delta h_\text{above} = z_\text{bank} - z_w
 \end{equation}
@@ -365,12 +381,12 @@ Material deposited in front of the bank does influence subsequent erosion as it 
 However, this influence cannot be quantified based on just a sediment balance based on a sediment transport formula since sometimes large blocks of clay remain behind which first need to disintegrate before the current can transport it away.
 The influence of the eroded material on the wave height (and consequently on the erosion due to ship waves) can be included by increasing the parameter $\mu$ for wave damping.
 
-\section{Variable discharge} \label{Sec4.5}
+\section{Variable discharge}\label{Sec4.5}
 
 A variable discharge can be taken into account by schematizing the discharge distribution by means of hydrograph consisting of $n_Q$ discharge levels and their probability of occurrence.
 For every discharge level a separate \dflowfm simulation will be carried out.
 The flow velocities along the banks and the water levels will be extracted from these simulations.
-It's assumed that at least the discharge level which was used to detect the initial bank lines is included in this analysis (the mean discharge).
+The discharge level which was used to detect the initial bank lines should be included in this analysis (the mean discharge).
 
 Subsequently the bank line shifts for the individual discharge levels are determined and the overall bank line shift is determined by means of a weighted average of the individual shifts where the weights are determined by the occurrence probability of the various levels.
 Hence, first the total erosion $\Delta n ( Q_i )$ is determined for each individual discharge level $Q_i$ y summing up the contributions due to ship waves and currents.
@@ -429,7 +445,7 @@ The bank line is subsequently shifted using the same method described in \autore
 Analogous to the bank line shifting , the potential bank erosion volume is first determined for each discharge level individually (see \autoref{Sec4.4}).
 Thereafter, the total potential bank erosion volume is determined by a sum of those intermediate volumes weighted by the yearly occurrence probability of that discharge level (compare with \autoref{Eq1.3}).
 
-\section{Determining equilibrium bank} \label{Sec4.6}
+\section{Determining equilibrium bank}\label{Sec4.6}
 
 Chapter 3 of \citet{MarkSBMV11} describes an analysis of the most likely bank erosion along the River IJssel.
 The most probable equilibrium bank slope is 1:20.
@@ -439,17 +455,43 @@ Based on these numbers one can obtain an estimate of the erosion distance $\Delt
 \Delta n_\text{eq} = \frac{h_t}{\mu_\text{slope}}
 \end{equation}
 %
-where $\mu_\text{slope}$ is the inverse of the slope of the equilibrium bank (typically 1/20) and $h_t = \max (z_\text{up} - z_\text{do}, 0)$ with $z_\text{up} = \min [ h_\text{bank}, z_w(Q_\text{ref}) + 2 H_0]$ and $z_\text{do} = \max [ z_\text{prot}, z_w(Q_\text{ref}) - 2 H_0 ]$.
-The total eroded volume to reach the equilibrium bank will be equal to
-%
+where
+\begin{symbollist}
+\item[ $\mu_\text{slope}$] the inverse of the slope of the equilibrium bank (typically 1/20)
+\item[$h_t$] elevation range directly affected by equilibrium erosion [m]
+\end{symbollist}
+
+with 
+\begin{equation}
+h_t = \max (z_\text{up} - z_\text{do}, 0)
+\end{equation}
+
+where
+\begin{symbollist}
+\item[ $z_\text{up}$] top level of the range of influence for equilibrium erosion [m]
+\item[$z_\text{do}$] bottom level of the range of influence for equilibrium erosion [m]
+\end{symbollist}	
+
+The top level of the range of influence for equilibrium erosion is determined by the initial wave height at the toe of the foreshore($H_0$) and level of the top of the bank ($z_\text{bank}$):
+\begin{equation}	
+z_\text{up} = \min (z_\text{bank}, z_\text{w}(Q_\text{ref}) + 2 H_\text{0})
+\end{equation}
+
+The bottom level of the range of influence for equilibrium erosion is determined by the initial wave height at the toe of the foreshore ($H_0$) and the level up to where the stone protection stays in place ($z_\text{prot}$):
+\begin{equation}
+z_\text{do} = \max (z_\text{prot}, z_w(Q_\text{ref}) - 2 H_0 )
+\end{equation}	
+
+The total eroded volume to reach the equilibrium bank will be equal to:
 \begin{equation}
 V_\text{eq} = ( \frac{1}{2} h_t + h_s ) \Delta n_\text{eq}
 \end{equation}
-%
-where $h_s = \max [ z_\text{bank} - z_w(Q_\text{ref}) - 2 H_0, 0 ]$.
+where 
+\begin{equation}
+h_s = \max ( z_\text{bank} - z_w(Q_\text{ref}) - 2 H_0, 0)
+\end{equation}
 
-
-\begin{figure}
+\begin{figure}[!h]
 \center
 \resizebox{14cm}{!}{
    \input{figures/equiprof.pdf_tex}
@@ -490,12 +532,12 @@ c) erosion process in case of horizontal layers &
 \subsection{Only erosion along initial bank line}
 
 \dfastbe only estimates the bank erosion along the specified initial bank line (corresponding to the mean discharge).
-However, in reality bank erosion may also occur at different locations.
+However, in reality bank erosion may also occur at different heights.
 
 \subsection{Only erosion by ship waves and currents}
 
 \dfastbe only estimates the bank erosion due to the mechanisms of ship waves and currents.
-Other bank erosion mechanisms such as wind waves, ground water, freezing or trampling by cattle are currently no included.
+Other bank erosion mechanisms such as wind waves, ground water, freezing or trampling by cattle are currently not included.
 
 \subsection{Profile and bed level remain constant}
 
