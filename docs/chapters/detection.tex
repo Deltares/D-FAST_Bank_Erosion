@@ -27,7 +27,7 @@ The line marking the zero water depth is a straight line in a triangle.
 Cells with $N_c \ge 4$ corners are split in $N_c - 2$ triangles to arrive at a collection of only straight line segments.
 The collection of all these line segments forms the basis of the final bank line.
 
-The found locations of the bank lines will clearlu depend on the chosen discharge level.
+The found locations of the bank lines will clearly depend on the chosen discharge level.
 However, as long as the discharge is within the main channel, the locations will be fairly consistent.
 
 Generally, bank erosion only occurs along the main channel.
@@ -53,23 +53,36 @@ Red: Baseline 'section 1-2 boundary', Blue: detected bank line from WAQUA comput
 \begin{figure}[!hb]
 \includegraphics[width=\textwidth,height=7cm]{figures/Fig3-3.png}
 \caption{Detection of a bank line close to groynes.
-Red: Baseline 'oeverlijnen', Blue: detected bank line from WAQUA computation (Q=278,5 m\textsuperscript{3}/s, average discharge)}
+Red: detected bank line from WAQUA computation (Q=278,5 m\textsuperscript{3}/s, average discharge)}
 \label{Fig3.3}
 \vspace{-0.75cm} 
 \end{figure}
 \clearpage
 
 \section{Common issues with bank line detection} \label{Sec:DetectIssues}
+It is advised to check the detected banklines shown in the graphical output of the 'banklines'mode before continuing with the 'bankerosion'mode. This section describes some common issues and their solutions.
 
-To be written ...
+\subsection{Detection of adjacent water body}
+At some locations an adjacent water body is located within the given search distance from the pre-defined banklines (parameter Dlines). As a result the banklinke of the adjacent water body is found, instead of the bankline of the main river channel. As a result the initial bankline shows strange variations. This is the case between kilometer 20 and 21 in \autoref{Fig_issue_bankline}.
 
-\emph{`aantal voorbeeld figuren welke aangeven hoe de initi\"ele, door WAQBANK bepaalde oeverlijn gecontroleerd moet worden en hoe de invoer aangepast moet worden om een aantal typische situaties te verbeteren:
-•	Oeverlijn van naastgelegen plas/geul/kanaal wordt gevonden: 
-o	Op deze locatie meer punten opnemen in de oever invoer welke wordt gebruikt voor het zoeken van de oeverlijn
-o	De waterstand voor het bepalen van de oeverligging verlagen
-o	Een ander/lager referentieniveau kiezen
-o	De afstand/buffer voor de oeverlijnen verkleinen
-o	Handmatig een aantal punten verwijderen uit de BankLines uitvoer van WAQBANK voor de oevererosie wordt bepaald door BankErosion (deel 2 van de WAQBANK module) uit te voeren'}
+\begin{figure}[!hb]
+	\includegraphics[width=\textwidth]{figures/detection_issue.png}
+	\caption{Detection of the initial bank line close to adjacent water bodies (Q=278,5 m\textsuperscript{3}/s, average discharge)}
+	\label{Fig_issue_bankline}
+\end{figure}
+
+By decreasing the parameter Dlines you decrease the search distance from the pre-defined lines for determining the bank lines. As a result, you decrease the chance that the bankline of an adjacent water  body is found. However, you won't find a correct initial bankline if you make the parameter Dlines too small, this can be especially the case close to groins, at wide shallow areas or along banks with a relatively flat slope (see left bank between kilometer 22 and 23 in \autoref{Fig_issue_bankline}).
+
+Another option is to edit the initial bankline manually by removing the points that fall in the adjacent water body, so only the points along the main channel remain.
+
+\subsection{Irregularities in the detected bank line}
+\autoref{Fig_issue_bankline} shows at the right outer bank after kilometer 22.5 a strange irregularity in the detected initial bank line. This type of irregularities develop either by the detection of adjacent water body's, by the cut of of connections with side channels (see \autoref{Fig_issue_bankline2}) or harbours or other irregularities along the bank. It is advised to edit the initial bankline manually by removing some of the points so a smooth bankline along the main channel remains, because these irregularities influence the distance between the bank and the fairway and thus result in strange irregular patterns in wave heights and erosion along that bank.
+
+\begin{figure}[!h]
+	\includegraphics[width=\textwidth]{figures/detection_issue2.png}
+	\caption{Detection of the initial bank line at the connection with a side channel (Q=278,5 m\textsuperscript{3}/s, average discharge)}
+	\label{Fig_issue_bankline2}
+\end{figure}
 
 \section{Shifting the bank lines} \label{Sec:BankShift}
 
