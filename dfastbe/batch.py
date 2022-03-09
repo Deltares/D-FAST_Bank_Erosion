@@ -129,14 +129,16 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
     plotting = dfastbe.io.config_get_bool(config, "General", "Plotting", True)
     if plotting:
         saveplot = dfastbe.io.config_get_bool(config, "General", "SavePlots", True)
-        saveplot_zoomed = dfastbe.io.config_get_bool(config, "General", "SaveZoomedPlots", True)
+        saveplot_zoomed = dfastbe.io.config_get_bool(config, "General", "SaveZoomPlots", True)
         zoom_km_step = dfastbe.io.config_get_float(config, "General", "ZoomStepKM", 1.0)
+        if zoom_km_step < 0.01:
+            saveplot_zoomed = False
         closeplot = dfastbe.io.config_get_bool(config, "General", "ClosePlots", False)
     else:
         saveplot = False
         saveplot_zoomed = False
         closeplot = False
-
+    
     # as appropriate check output dir for figures and file format
     if saveplot:
         figdir = dfastbe.io.config_get_str(
@@ -346,8 +348,10 @@ def bankerosion_core(
     plotting = dfastbe.io.config_get_bool(config, "General", "Plotting", True)
     if plotting:
         saveplot = dfastbe.io.config_get_bool(config, "General", "SavePlots", True)
-        saveplot_zoomed = dfastbe.io.config_get_bool(config, "General", "SaveZoomedPlots", True)
+        saveplot_zoomed = dfastbe.io.config_get_bool(config, "General", "SaveZoomPlots", True)
         zoom_km_step = dfastbe.io.config_get_float(config, "General", "ZoomStepKM", 1.0)
+        if zoom_km_step < 0.01:
+            saveplot_zoomed = False
         closeplot = dfastbe.io.config_get_bool(config, "General", "ClosePlots", False)
     else:
         saveplot = False

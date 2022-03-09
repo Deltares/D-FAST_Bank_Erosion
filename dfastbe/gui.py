@@ -884,7 +884,7 @@ def editASearchLine(
 
     editDialog.exec()
 
-    fileName = dialog["editSearchLine"].text()
+    fileName = dialog["editSearchLineEdit"].text()
     dist = searchDistance.text()
     return fileName, dist
 
@@ -1072,11 +1072,11 @@ def selectFile(key: str) -> None:
         fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
             caption="Select Fairway File", filter="Fairway Files (*.xyc)"
         )
-    elif key == "editSearchLine":
+    elif key == "editSearchLineEdit":
         fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
             caption="Select Search Line File", filter="Search Line Files (*.xyc)"
         )
-    elif key == "editDischarge":
+    elif key == "editDischargeEdit":
         fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
             caption="Select Simulation File", filter="Simulation File (*map.nc)"
         )
@@ -1099,11 +1099,85 @@ def selectFile(key: str) -> None:
             while rkey[0] in "1234567890":
                 nr = nr + rkey[0]
                 rkey = rkey[1:]
+            if rkey[0] == "_":
+                rkey = rkey[1:]
             if not nr == "":
                 nr = " for Level " + nr
+            if rkey == "bankType":
+                ftype = "Bank Type"
+                ext = ".btp"
+                oneFile = False
+            elif rkey == "bankShear":
+                ftype = "Critical Shear"
+                ext = ".btp"
+                oneFile = False
+            elif rkey == "bankProtect":
+                ftype = "Protection Level"
+                ext = ".bpl"
+                oneFile = False
+            elif rkey == "bankSlope":
+                ftype = "Bank Slope"
+                ext = ".slp"
+                oneFile = False
+            elif rkey == "bankReed":
+                ftype = "Reed Fraction"
+                ext = ".rdd"
+                oneFile = False
+            elif rkey == "shipType":
+                ftype = "Ship Type"
+                ext = ""
+                oneFile = True
+            elif rkey == "shipVeloc":
+                ftype = "Ship Velocity"
+                ext = ""
+                oneFile = True
+            elif rkey == "nShips":
+                ftype = "Number of Ships"
+                ext = ""
+                oneFile = True
+            elif rkey == "shipNWaves":
+                ftype = "Number of Ship Waves"
+                ext = ""
+                oneFile = True
+            elif rkey == "shipDraught":
+                ftype = "Ship Draught"
+                ext = ""
+                oneFile = True
+            elif rkey == "wavePar0":
+                ftype = "Wave0"
+                ext = ""
+                oneFile = True
+            elif rkey == "wavePar1":
+                ftype = "Wave1"
+                ext = ""
+                oneFile = True
+            else:
+                ftype = "Parameter"
+                ext = "*"
+            ftype = ftype + " File"
             fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
-                caption="Select Parameter File" + nr, filter="Parameter File (*.)"
+                caption="Select " + ftype + nr, filter=ftype + " (*" + ext + ")"
             )
+            if fil != "":
+                fil, fext = os.path.splitext(fil)
+                if fext == ext:
+                    if not oneFile:
+                        # file should end on _<nr>
+                        nr = ""
+                        while fil[-1] in "1234567890":
+                             nr = rkey[-1] + nr
+                             fil = fil[:-1]
+                        if nr == "" or fil[-1] != "_":
+                            print("Missing bank number(s) at end of file name. Reference not updated.")
+                            fil = ""
+                        else:
+                            fil = fil[:-1]
+                else:
+                    if ext == "":
+                        print("Unsupported file extension {} while expecting no extension. Reference not updated.".format(fext))
+                    else:
+                        print("Unsupported file extension {} while expecting {}. Reference not updated.".format(fext,ext))
+                    fil = ""
         else:
             print(key)
             fil = ""
