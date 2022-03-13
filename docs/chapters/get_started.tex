@@ -17,7 +17,7 @@ See the command line option \emph{--config} described in sections \ref{Sec:runde
 
 \dfastbe is not calibrated for local bank erosion\footnote{This is almost impossible, due to other uncertainties in bank properties, limited availability of field data of measured bank erosion and the fact that the simulation models have been designed for longer river reaches.
 Locally \dfastbe could be calibrated when historical data of bank erosion is available.
-However, this does not automatically imply that \dfastbe would give good results a few kilometers further downstream with the same settings, because the bank properties can be completely different.}.
+However, this does not automatically imply that \dfastbe would give good results a few kilometres further downstream with the same settings, because the bank properties can be completely different.}.
 Therefore it is strongly advised to use \dfastbe only in a \emph{relative} way.
 In this way one can determine:
 
@@ -207,7 +207,7 @@ If you close the program via the cross in the upper right corner, the open figur
 \end{figure}
 
 \Note All files and paths are shown using absolute paths in the graphical user interface, but they will be converted as much as possible to relative paths when saving the configuration to file.
-The program does not verify or validate the content of the files.
+The user interface does not verify or validate the content of the files.
 This is only verified by the kernel during the analysis.
 
 \section{Run mode 'banklines'} \label{Sec:rundetect}
@@ -248,7 +248,7 @@ Output:
 \autoref{guiDetect} shows the tab in the graphical user interface for the settings specific for the detection step.
 The content of the first (General) and second (Detection) tabs is relevant for the bank line detection analysis.
 All files and paths are shown using absolute paths in the graphical user interface, but they will be converted as much as possible to relative paths when saving the configuration to file.
-The program does not verify or validate the content of the files.
+The user interface does not verify or validate the content of the files.
 This is only verified by the kernel during the analysis.
 
 \begin{figure}[!b]
@@ -261,7 +261,7 @@ This is only verified by the kernel during the analysis.
 An example of the graphical output of the 'banklines' mode is shown in \autoref{Fig2.2}.
 The water depth is given with colored surfaces (per grid cell) clipped to the area close to the area of interest (about twice the maximum distance of the bank lines from the fairway), the black lines are the determined bank lines and the river kilometres are displayed along the river axis.
 The computation has ended successfully when the message "BankLines ended successfully!" appears.
-A full listing of the screen output of \dfastbe during the bank line detection analysis is given below at the end of this section in \autoref{logbanklines}. An example of the graphical output of the 'banklines' mode is shown in \autoref{Fig2.2}. In this figure the water depth is given with colored surfaces (per grid cell) clipped to the area close to the area of interest (about twice the maximum distance of the bank lines from the fairway), the black lines are the determined bank lines and the river kilometers are displayed along the river axis. 
+A full listing of the screen output of \dfastbe during the bank line detection analysis is given below at the end of this section in \autoref{logbanklines}. An example of the graphical output of the 'banklines' mode is shown in \autoref{Fig2.2}. In this figure the water depth is given with colored surfaces (per grid cell) clipped to the area close to the area of interest (about twice the maximum distance of the bank lines from the fairway), the black lines are the determined bank lines and the river kilometres are displayed along the river axis. 
 
 \Note It is advised to check the detected banklines shown in the graphical output of the 'banklines'mode before continuing with the 'bankerosion' mode. Common issues with bank line detection and their solutions are described in \autoref{Sec4.2}.
 
@@ -277,7 +277,7 @@ It is suggested to provide all lines with at least the resolution of the simulat
 \vspace*{-1cm} 
 \includegraphics[width=\textwidth]{figures/1_banklinedetection.png}
 \vspace*{-1cm} 
-\caption{Example of output of \dfastbe in 'banklines' mode showing water depth, detected banklines (red lines), and river kilometers}
+\caption{Example of output of \dfastbe in 'banklines' mode showing water depth, detected banklines (red lines), and river kilometres}
 \label{Fig2.2}
 \end{figure}
 
@@ -367,34 +367,17 @@ Required input:
 \item The period during which the bank erosion acts (\command{TErosion}, default 1 year),
 \item The number of discharge levels (\command{NLevel}),
 \item \dflowfm files (netCDF map-files) for the different discharge levels and the corresponding probability distribution (\command{SimFile1}, \command{SimFile2}, ..., \command{FileN} and \command{PDischarge1}, \command{PDischarge2}, ..., \command{PDischargeN}, with $N$ the number of discharge levels),
-\item Number of bank Lines (\command{Nbank} default two, the left and right bank),
+\item Number of bank lines (\command{Nbank} default 2: the left and right bank),
 \item File which links river chainage (kilometres) to xy-coordinates (\command{RiverKM}),
 \item XY-coordinates of the river and fairway axis (\command{RiverAxis}, \command{Fairway}),
 \item Information about the strength or type of the soil of the banks (\command{BankType}).
 This can be done either in the form of classes or with a critical shear stress (see \autoref{Tab4.1}).
 In the first case \command{Classes} should be set to \command{true} and in the second case to \command{false} (default).
-The bank strength information can be given either with a fixed value for the whole track or in a ASCII-file per river kilometer (first column river-km, second column bank type, see \autoref{Fig2.3}),
+The bank strength information can be given either as a constant value for the whole track or as a river kilometre dependent quantity in a ASCII-file per bank (see \autoref{Sec:parfile}),
 \item Shipping information (\command{Vship}, \command{Nship}, \command{ShipType}, \command{Draught}).
-This can be done either with a fixed value for the whole track or in a file per river kilometer (first column river-km, second column shipping information: similar to entering bank type, see \autoref{Fig2.3}).
+This can again be given either as a constant value for the whole track or as a river kilometre dependent quantity in a single ASCII-file (see \autoref{Sec:parfile}).
 \end{itemize}
 
-\begin{figure}[!hb]
-
-\begin{Verbatim}
-  0.0          1
-  75.2         3
-  90.3         2
-  110.0        0
-  130.5        4
-  153.1        3
-  206.9        2
-\end{Verbatim}
-\caption{Example of input file for bank strength classes per river kilometer: from 0.0 - 75.2 km class 1, from 75.2 - 90.3 km class 3, etc.
-When no information is available, the closest value will be used.}
-\label{Fig2.3}
-\end{figure}
-
-\clearpage
 \Note The chainage file and the river and fairway axis files should be provided with sufficient resolution.
 \dfastbe will use straight lines between the specified reference points which deviates from the natural curved channel planform.
 It is, therefore, suggested to provide all lines with at least the resolution of the simulation model from which the data is used, or at least every 100 m.
@@ -408,8 +391,10 @@ Subsequently, there are tabs for the shipping parameters (\autoref{guiShip}), ba
 All quantities in the first two parameter tabs must be specified either as constants or as file based (described in \autoref{Sec:parfile}).
 The quantities in the other level parameters tabs are optional; by default they will set to "Use Default" which means use the (discharge level independent) value(s) specified in the first two tabs.
 All files and paths are shown using absolute paths in the graphical user interface, but they will be converted as much as possible to relative paths when saving the configuration to file.
-The program does not verify or validate the content of the files.
+The user interface does not verify or validate the content of the files.
 This is only verified by the kernel during the analysis.
+
+\Note When specifying chainage dependent values for \keyw{Slope}, \keyw{Reed}, \keyw{BankType} and \keyw{ProtectionLevel}, please follow the file name conventions listed in \autoref{Sec:parfile}.
 
 \begin{figure}[!hb]
 \center
@@ -449,7 +434,7 @@ This is only verified by the kernel during the analysis.
 Output:
 
 \begin{itemize}
-	\item Map with water depth, initial bank lines, river kilometers and fairway axis (see \autoref{Fig2.4}),
+	\item Map with water depth, initial bank lines, river kilometres and fairway axis (see \autoref{Fig2.4}),
 	\item Map with erosion sensitivity of the banks based on computed bank retreat (see \autoref{Fig2.5}),
 	\item The computed erosion volume during the simulation period split up per discharge level (see \autoref{Fig2.6a}) and per bank (see \autoref{Fig2.6b}),
 	\item Total erosion volume based on equilibrium bank line (see \autoref{Fig2.7}),
@@ -461,6 +446,7 @@ Output:
 \end{itemize}
 
 The maps and graphs are only created when \command{Plotting} is on and written to file if \command{SavePlots} is on.
+You may optionally request zoomed versions of these plots by switching on \command{SaveZoomPlots} and selecting the desired step size for the chainage.
 The computation has ended successfully when the message "Bank line detection ended successfully!" appears.
 The listing of the screen output of \dfastbe during the bank erosion analysis is given below.
 
@@ -594,7 +580,7 @@ The listing of the screen output of \dfastbe during the bank erosion analysis is
 
 \begin{figure}
 \includegraphics[width=\textwidth]{figures/1_banklines.png}
-\caption{Map of water depth, initial bank lines, river kilometers and fairway axis}
+\caption{Map of water depth, initial bank lines, river kilometres and fairway axis}
 \label{Fig2.4}
 \end{figure}
 

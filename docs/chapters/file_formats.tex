@@ -33,12 +33,14 @@ The order of the keywords in the file doesn't matter, but each block and each ke
 %\begin{tabular}{l|l|p{8cm}}
 Block & Keyword & Description \\ \hline
 \keyw{General} & \keyw{Version} & Version number. Must be \keyw{1.0} \\
-& \keyw{RiverKM} & Text file with river chainage (kilometres) and corresponding xy-coordinates \\
+& \keyw{RiverKM} & Name of file with river chainage (kilometres) and corresponding xy-coordinates \\
 & \keyw{Boundaries} & River chainage of the region of interest specified as rkm-start:rkm-end, e.g. 81:100 (default: all) \\
 & \keyw{BankDir} & Directory for storing bank lines (default: current directory) \\
-& \keyw{BankFile} & Text file(s) in which xy-coordinates of bank lines are stored (default 'bankfile') \\
+& \keyw{BankFile} & Name of file(s) in which xy-coordinates of bank lines are stored (default 'bankfile') \\
 & \keyw{Plotting} & Flag indicating whether figures should be created (default: true) \\
 & \keyw{SavePlots} & Flag indicating whether figures should be saved (default: true) \\
+& \keyw{SaveZoomPlots} & Flag indicating whether additional figures should be saved containing zoomed in versions of the standard plots per specified chainage step (default: false) \\
+& \keyw{ZoomStepKM} & Chainage step size for the zoom plots (default: 1) \unitbrackets{km} \\
 & \keyw{ClosePlots} & Flag indicating whether figures should be closed when the run ends (default: false) \\
 & \keyw{FigureDir} & Directory for storing figures (default relative to work dir: figure) \\
 & \keyw{FigureExt} & String indicating the file extension and type to be used for the figures saved (default: .png) \\
@@ -47,37 +49,39 @@ Block & Keyword & Description \\ \hline
 \keyw{Detect} & \keyw{SimFile} & Name of simulation output file to be used for determining representative bank line \\
 & \keyw{WaterDepth} & Water depth used for defining bank line (default: 0.0) \\
 & \keyw{NBank} & Number of bank lines, (default: 2) \\
-& \keyw{Line<$i$>} & Textfile with xy-coordinates of search line \keyw{<$i$>} \\
+& \keyw{Line<$i$>} & Name of file with xy-coordinates of search line \keyw{<$i$>} \\
 & \keyw{DLines} & Distance from pre-defined lines used for determining bank lines (default: 50) \\
 
 \keyw{Erosion} & \keyw{TErosion} & Simulation period \unitbrackets{years} \\
-& \keyw{RiverAxis} & Textfile with xy-coordinates of river axis \\
-& \keyw{Fairway} & Textfile with xy-coordinates of fairway axis \\
-& \keyw{OutputInterval} & Bin size for which the eroded volume output is given (default: 1 km) \unitbrackets{km} \\
+& \keyw{RiverAxis} & Name of file with xy-coordinates of river axis \\
+& \keyw{Fairway} & Name of file with xy-coordinates of fairway axis \\
+& \keyw{OutputInterval} & Bin size for which the eroded volume output is given (default: 1) \unitbrackets{km} \\
 & \keyw{NLevel} & Number of discharge levels \\
 & \keyw{RefLevel} & Reference level: discharge level with \keyw{SimFile<$i$>} that is equal to \keyw{SimFile} (only used when \keyw{Nlevel} > 1)  (default: 1) \\
 & \keyw{SimFile<$i$>} & NetCDF map-file for computing bank erosion for discharge \keyw{<$i$>} (only used when \keyw{Nlevel} > 1) \\
 & \keyw{PDischarge<$i$>} & Probability of discharge \keyw{<$i$>} (sum of probabilities should be 1) \\
 & \keyw{OutputDir} & Directory for storing output files \\
-& \keyw{BankNew} & Text file(s) in which new xy-coordinates of bank lines are stored (default 'banknew') \\
-& \keyw{BankEq} & Text file(s) in which xy-coordinates of equilibrium bank lines are stored (default: 'bankeq') \\
-& \keyw{EroVol} & Text file in which eroded volume per river-km is stored (default: 'erovol.evo') \\
-& \keyw{ShipType} & Type of ship (per river-km) \\
-& \keyw{Vship} & Relative velocity of the ships (per river-km) \unitbrackets{m/s} \\
-& \keyw{Nship} & Number of ships per year (per river-km) \\
-& \keyw{Nwave} & Number of waves per ship (default 5) \\
-& \keyw{Draught} & Draught of the ships (per river-km) \unitbrackets{m} \\
-& \keyw{Wave0} & Distance from fairway axis at which wave height is zero (default 200 m) \\
-& \keyw{Wave1} & Distance from fairway axis at which reduction of wave height to zero starts (default Wave0-50 m) \\
+& \keyw{BankNew} & Name of file(s) in which new xy-coordinates of bank lines are stored (default 'banknew') \\
+& \keyw{BankEq} & Name of file(s) in which xy-coordinates of equilibrium bank lines are stored (default: 'bankeq') \\
+& \keyw{EroVol} & Name of file in which eroded volume per river-km is stored (default: 'erovol.evo') \\
+& \keyw{ShipType} & Constant or name of file containing type of ship (per river-km) \\
+& \keyw{Vship} & Constant or name of file containing relative velocity of the ships (per river-km) \unitbrackets{m/s} \\
+& \keyw{Nship} & Constant or name of file containing number of ships per year (per river-km) \\
+& \keyw{Nwave} & Constant or name of file containing number of waves per ship (default 5) \\
+& \keyw{Draught} & Constant or name of file containing draught of the ships (per river-km) \unitbrackets{m} \\
+& \keyw{Wave0} & Constant or name of file containing distance from fairway axis at which wave height is zero (default 200) \unitbrackets{m} \\
+& \keyw{Wave1} & Constant or name of file containing distance from fairway axis at which reduction of wave height to zero starts (default \keyw{Wave0} minus 50) \unitbrackets{m} \\
 & \keyw{Classes} & Use classes (true) or critical shear stress (false) in \keyw{BankType} (default: true) \\
-& \keyw{BankType} & Bank strength definition (for each bank line per river-km) \\
-& \keyw{ProtectionLevel} & Text file(s) with level of bank protection for each bank line per river-km (default: -1000) \\
-& \keyw{Slope} & Text file(s) with equilibrium slope for each bank line per river-km  (default: 20) \\
-& \keyw{Reed} & Text file(s) with reed wave damping coefficient for each bank line per river-km  (default: 0) \\
+& \keyw{BankType} & Constant or \keyw{base} reference to files with bank strength definition (for each bank line per river-km) \\
+& \keyw{ProtectionLevel} & Constant or \keyw{base} reference to files with level of bank protection for each bank line per river-km (default: -1000) \\
+& \keyw{Slope} & Constant or \keyw{base} reference to files with equilibrium slope for each bank line per river-km  (default: 20) \\
+& \keyw{Reed} & Constant or \keyw{base} reference to files with reed wave damping coefficient for each bank line per river-km  (default: 0) \\
 & \keyw{VelFilterDist} & Specifies the distance/width of a moving average filter for the near bank velocities \unitbrackets{km} (default 0, meaning no filter applied) \\
 & \keyw{BedFilterDist} & Specifies the distance/width of a moving average filter for the bank levels \unitbrackets{km} (default 0, meaning no filter applied)
 %\end{tabular}
 \end{longtable}
+
+\Note When specifying chainage dependent values for \keyw{Slope}, \keyw{Reed}, \keyw{BankType} and \keyw{ProtectionLevel}, please follow the file name conventions listed in \autoref{Sec:parfile}.
 
 \subsubsection*{Example}
 
@@ -187,10 +191,10 @@ Many parameters may be varied along the analyzed river reach.
 \item \keyw{nwave}: $n$ number of waves per ship \unitbrackets{-}
 \item \keyw{draught}: $T_s$ draught of the ship \unitbrackets{m}
 \item \keyw{shiptype}: ship type \unitbrackets{-}
-\item \keyw{slope}: $\mu_\text{fs}$ wave damping due to sloping foreshore \unitbrackets{m\textsuperscript{-1}}
-\item \keyw{reed}: $\mu_r$ wave damping due to reed \unitbrackets{m\textsuperscript{-1}}
-\item \keyw{banktype}: bank type \unitbrackets{-}
-\item \keyw{protectionlevel}: top level of the bank protection \unitbrackets{m}
+\item \keyw{slope}: $\mu_\text{fs}$ wave damping due to sloping foreshore \unitbrackets{m\textsuperscript{-1}} per bank, file extension \keyw{.slp}
+\item \keyw{reed}: $\mu_r$ wave damping due to reed \unitbrackets{m\textsuperscript{-1}} per bank, file extension \keyw{.rdd}
+\item \keyw{banktype}: bank type \unitbrackets{-} per bank, file extension \keyw{.btp}
+\item \keyw{protectionlevel}: top level of the bank protection \unitbrackets{m} per bank, file extension \keyw{.bpl}
 \end{itemize}
 
 The file format is independent of the parameter for which it's used.
@@ -200,6 +204,11 @@ The chainage values should be increasing.
 The values are used from the chainage specified on that line until the chainage specified on the next line.
 The first value is also used before the chainage specified on the first line.
 The last value is used for all chainages larger than the chainage specified on the last line.
+
+\Note Some quantities (\keyw{Slope}, \keyw{Reed}, \keyw{BankType} and \keyw{ProtectionLevel}) need to be specified per bank.
+For these parameters the user has to specify a number of files equal to the number of bank lines; for all other parameters only one file is expected that is used for all banks.
+The names of the bank dependent files should equal \keyw{base\_1.ext}, \keyw{base\_2.ext}, {\it et cetera} where the user is free to choose \keyw{base} but the extension \keyw{.ext} depends on the quantity selected (see the list above).
+The file extension and number part \keyw{\_i} should \emph{not} be included when specifying the file name in the analysis configuration file (see \autoref{Sec:cfg}) or associated user interface field.
 
 \subsubsection*{Example}
 
