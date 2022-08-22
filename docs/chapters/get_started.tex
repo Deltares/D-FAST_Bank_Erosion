@@ -43,10 +43,11 @@ For each discharge level a netCDF map-file (\dflowfm output file) must be provid
 It is important that the hydrodynamic computations are in steady state -- only the last time step of each simulation output file is used.
 The probability (normalized weighting of the time period) per discharge level is defined by the user in the configuration file.
 
-\Note It is of utmost importance that in the netCDF map-file with the reference (average) discharge (which is used to establish the initial bank lines) the water remains within the main channel during the whole computation.
+\NumNote{It is of utmost importance that in the netCDF map-file with the reference (average) discharge (which is used to establish the initial bank lines) the water remains within the main channel during the whole computation.
 Practically this means that the simulation has to be started with a low initial water level with no (or as little as possible) water in the flood plains.
 When this criterion is not met, the bank line detection algorithm may incorrectly identify bank lines when water is unable to recede from depressions in the flood plain.
-\Autoref{Chp:BankDetect} describes how the bank lines are detected using the reference discharge, and it indicates common pitfalls and how to avoid them.
+\autoref{Chp:BankDetect} describes how the bank lines are detected using the reference discharge, and it indicates common pitfalls and how to avoid them.}
+%Using lower case \autoref in the line above since the upper case \Autoref fails when used within the NumNote command.
 
 
 An example of discharge levels in combination with probabilities for scenario's wet, dry or intermediate is given in \autoref{Tab2.1} for the river Meuse and in \autoref{Tab2.2} for the river Boven-Rijn.
@@ -206,9 +207,9 @@ If you close the program via the cross in the upper right corner, the open figur
 	\label{guiGeneral}
 \end{figure}
 
-\Note All files and paths are shown using absolute paths in the graphical user interface, but they will be converted as much as possible to relative paths when saving the configuration to file.
+\NumNote{All files and paths are shown using absolute paths in the graphical user interface, but they will be converted as much as possible to relative paths when saving the configuration to file.
 The user interface does not verify or validate the content of the files.
-This is only verified by the kernel during the analysis.
+This is only verified by the kernel during the analysis.}
 
 \section{Run mode 'banklines'} \label{Sec:rundetect}
 
@@ -263,14 +264,14 @@ The water depth is given with colored surfaces (per grid cell) clipped to the ar
 The computation has ended successfully when the message "BankLines ended successfully!" appears.
 A full listing of the screen output of \dfastbe during the bank line detection analysis is given below at the end of this section in \autoref{logbanklines}. An example of the graphical output of the 'banklines' mode is shown in \autoref{Fig2.2}. In this figure the water depth is given with colored surfaces (per grid cell) clipped to the area close to the area of interest (about twice the maximum distance of the bank lines from the fairway), the black lines are the determined bank lines and the river kilometres are displayed along the river axis. 
 
-\Note It is advised to check the detected banklines shown in the graphical output of the 'banklines'mode before continuing with the 'bankerosion' mode. Common issues with bank line detection and their solutions are described in \autoref{Sec4.2}.
+\NumNote{It is advised to check the detected banklines shown in the graphical output of the 'banklines'mode before continuing with the 'bankerosion' mode. Common issues with bank line detection and their solutions are described in \autoref{Sec4.2}.}
 
-\Note To obtain the correct results, the search lines for the banks given by \command{Line1}, \command{Line2}, ..., \command{LineN} (obtained for example from the 'oeverlijnen' from Baseline data) should follow the actual bank line (to be detected) within a distance indicated by \command{DLines} (default 50 \unitbrackets{m}).
-Large distances between the points -- and thus large deviations from the actual bank lines -- will result in inaccurate bank lines as the detection algorithm will not detect bank lines reaches outside the indicated area of interest.
+\NumNote{To obtain the correct results, the search lines for the banks given by \command{Line1}, \command{Line2}, ..., \command{LineN} (obtained for example from the 'oeverlijnen' from Baseline data) should follow the actual bank line (to be detected) within a distance indicated by \command{DLines} (default 50 \unitbrackets{m}).
+Large distances between the points -- and thus large deviations from the actual bank lines -- will result in inaccurate bank lines as the detection algorithm will not detect bank lines reaches outside the indicated area of interest.}
 
-\Note The chainage file containing the river kilometres should have sufficient resolution since the all data will be projected onto that line.
+\NumNote{The chainage file containing the river kilometres should have sufficient resolution since the all data will be projected onto that line.
 In the analysis, the reference points will be connected by straight lines with linearly interpolated chainage values.
-It is suggested to provide all lines with at least the resolution of the simulation model from which the data is used, or at least every 100 m.
+It is suggested to provide all lines with at least the resolution of the simulation model from which the data is used, or at least every 100 m.}
 
 
 \begin{figure}[!b]
@@ -378,11 +379,11 @@ The bank strength information can be given either as a constant value for the wh
 This can again be given either as a constant value for the whole track or as a river kilometre dependent quantity in a single ASCII-file (see \autoref{Sec:parfile}).
 \end{itemize}
 
-\Note The chainage file and the river and fairway axis files should be provided with sufficient resolution.
+\NumNote{The chainage file and the river and fairway axis files should be provided with sufficient resolution.
 \dfastbe will use straight lines between the specified reference points which deviates from the natural curved channel planform.
-It is, therefore, suggested to provide all lines with at least the resolution of the simulation model from which the data is used, or at least every 100 m.
+It is, therefore, suggested to provide all lines with at least the resolution of the simulation model from which the data is used, or at least every 100 m.}
 
-\Note Even if default values or default files have been provided for input parameters, the user always needs to show whether those inputs given are appropriate for the intended application.
+\NumNote{Even if default values or default files have been provided for input parameters, the user always needs to show whether those inputs given are appropriate for the intended application.}
 
 The settings for the bank erosion analysis are distributed over several tabs.
 All tabs except for the second (Detection) tab are relevant for the bank erosion analysis.
@@ -394,7 +395,7 @@ All files and paths are shown using absolute paths in the graphical user interfa
 The user interface does not verify or validate the content of the files.
 This is only verified by the kernel during the analysis.
 
-\Note When specifying chainage dependent values for \keyw{Slope}, \keyw{Reed}, \keyw{BankType} and \keyw{ProtectionLevel}, please follow the file name conventions listed in \autoref{Sec:parfile}.
+\NumNote{When specifying chainage dependent values for \keyw{Slope}, \keyw{Reed}, \keyw{BankType} and \keyw{ProtectionLevel}, please follow the file name conventions listed in \autoref{Sec:parfile}.}
 
 \begin{figure}[!hb]
 \center

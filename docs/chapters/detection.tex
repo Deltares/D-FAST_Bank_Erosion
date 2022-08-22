@@ -11,8 +11,8 @@ The detection of the bank lines builds on the search lines provided as input to 
 The model domain is first clipped to the area close to the search lines (i.e.~within the user specified search distance from the search line) to focus the bank detection algorithm on the areas of interest only.
 Identifying the exact location of the bank lines starts by determining for each grid cell in the area of interest whether it has one (or more) bed levels $z_b$ (defined at the mesh nodes) above the water level $z_w$ in the grid cell and one (or more) bed levels below the water level (see \autoref{Fig:detect_step}).
 
-\Note \dfastbe currently only supports results of hydrodynamic simulations which use bed levels $z_b$ defined at grid nodes.
-Simulations with bed levels defined in cell centres (tile depth) are thus not supported.
+\NumNote{\dfastbe currently only supports results of hydrodynamic simulations which use bed levels $z_b$ defined at grid nodes.
+Simulations with bed levels defined in cell centres (tile depth) are thus not supported.}
 
 \begin{figure}[!h]
 \center

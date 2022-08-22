@@ -81,7 +81,7 @@ Block & Keyword & Description \\ \hline
 %\end{tabular}
 \end{longtable}
 
-\Note When specifying chainage dependent values for \keyw{Slope}, \keyw{Reed}, \keyw{BankType} and \keyw{ProtectionLevel}, please follow the file name conventions listed in \autoref{Sec:parfile}.
+\NumNote{When specifying chainage dependent values for \keyw{Slope}, \keyw{Reed}, \keyw{BankType} and \keyw{ProtectionLevel}, please follow the file name conventions listed in \autoref{Sec:parfile}.}
 
 \subsubsection*{Example}
 
@@ -205,10 +205,10 @@ The values are used from the chainage specified on that line until the chainage 
 The first value is also used before the chainage specified on the first line.
 The last value is used for all chainages larger than the chainage specified on the last line.
 
-\Note Some quantities (\keyw{Slope}, \keyw{Reed}, \keyw{BankType} and \keyw{ProtectionLevel}) need to be specified per bank.
+\NumNote{Some quantities (\keyw{Slope}, \keyw{Reed}, \keyw{BankType} and \keyw{ProtectionLevel}) need to be specified per bank.
 For these parameters the user has to specify a number of files equal to the number of bank lines; for all other parameters only one file is expected that is used for all banks.
 The names of the bank dependent files should equal \keyw{base\_1.ext}, \keyw{base\_2.ext}, {\it et cetera} where the user is free to choose \keyw{base} but the extension \keyw{.ext} depends on the quantity selected (see the list above).
-The file extension and number part \keyw{\_i} should \emph{not} be included when specifying the file name in the analysis configuration file (see \autoref{Sec:cfg}) or associated user interface field.
+The file extension and number part \keyw{\_i} should \emph{not} be included when specifying the file name in the analysis configuration file (see \autoref{Sec:cfg}) or associated user interface field.}
 
 \subsubsection*{Example}
 
