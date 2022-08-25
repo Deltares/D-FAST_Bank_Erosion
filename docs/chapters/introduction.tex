@@ -33,10 +33,11 @@ The output of \dfastbe is:
 \end{enumerate}
 
 This output is presented in graphs / figures and written to text files.
+A further description and visualisation of the input and output files of \dfastbe is given in \Autoref{Chp:GetStarted}.
 
 \section{\dfastbe versus WAQBANK}
 
-\dfastbe will properly read the old analysis definition files of WAQBANK, but the new program is not able to read data directly from the WAQUA and \dflow output files.
+\dfastbe is the \dflowfm compatible successor of WAQBANK developed for WAQUA and \dflow. The \dfastbe  tool will properly read the old analysis definition files of WAQBANK, but the new program is not able to read data directly from the WAQUA and \dflow output files.
 These output files need to be converted to netCDF files that mimic the map-files written by \dflowfm; a small MATLAB based conversion 'sim2ugrid' is available for that purpose.
 Since the old WAQBANK code was quite slow, intermediate files were stored in local folders for caching.
 Since the algorithms of the new \dfastbe program are much faster, the caching step has been removed and \keyw{LocalDir} is ignored

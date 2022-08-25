@@ -1,4 +1,4 @@
-\chapter{Detecting and shifting the bank lines} \label{Chp:BankDetect}
+\chapter{Spatial algorithms and common issues for bank line detection} \label{Chp:BankDetect}
 
 This chapter describes the algorithms used for detecting (see \autoref{Sec:BankDetect}) and shifting (see \autoref{Sec:BankShift}) the bank lines.
 The former happens in the 'banklines' detection step, whereas the latter happens in the 'bankerosion' analysis step after the bank erosion rates have been computed.
@@ -6,7 +6,7 @@ It also lists issues that you may run into during the detection step (see \autor
 
 \section{Detecting the bank lines} \label{Sec:BankDetect}
 
-The location of bank lines is determined by identifying the boundary between water (wet) and land (dry) at a reference discharge computed using \dflowfm.
+The location of bank lines is determined by identifying the boundary between water (wet) and land (dry) at the representative discharge (\command{SimFile} computed using \dflowfm.
 The detection of the bank lines builds on the search lines provided as input to this step.
 The model domain is first clipped to the area close to the search lines (i.e.~within the user specified search distance from the search line) to focus the bank detection algorithm on the areas of interest only.
 Identifying the exact location of the bank lines starts by determining for each grid cell in the area of interest whether it has one (or more) bed levels $z_b$ (defined at the mesh nodes) above the water level $z_w$ in the grid cell and one (or more) bed levels below the water level (see \autoref{Fig:detect_step}).
