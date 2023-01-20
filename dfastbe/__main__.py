@@ -39,10 +39,10 @@ is_nuitka = "__compiled__" in globals()
 if is_nuitka:
     root = str(pathlib.Path(__file__).parent)
     os.environ["GDAL_DATA"] = root + os.sep + "gdal"
-    os.environ["PROJ_LIB"] = root + os.sep + "proj"
+    os.environ["PROJ_DATA"] = root + os.sep + "proj"
     os.environ["MATPLOTLIBDATA"] = root + os.sep + "matplotlib" + os.sep + "mpl-data"
     os.environ["TCL_LIBRARY"] = root + os.sep + "lib" + os.sep + "tcl8.6"
-    proj_lib_dirs = os.environ.get("PROJ_LIB", "")
+    proj_lib_dirs = os.environ.get("PROJ_DATA", "")
     import pyproj.datadir
 
     pyproj.datadir.set_data_dir(root + os.sep + "proj")
