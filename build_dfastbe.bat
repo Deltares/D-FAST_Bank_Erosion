@@ -1,4 +1,4 @@
-nuitka --standalone --python-flag=no_site --show-progress --plugin-enable=numpy --plugin-enable=qt-plugins --plugin-enable=tk-inter --file-reference-choice=runtime dfastbe > dfastbe.build.log 2>&1
+rem nuitka --standalone --python-flag=no_site --show-progress --plugin-enable=pyqt5 --plugin-enable=tk-inter --file-reference-choice=runtime dfastbe
 rem pause
 
 rem The code execution connot proceed because python38.dll was not found. Reinstalling the program may fix this problem.
