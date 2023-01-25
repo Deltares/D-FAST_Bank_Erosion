@@ -2,9 +2,8 @@
 name = "d-fast-bank-erosion"
 version = "0.1.0"
 description = ""
-authors = ["Marlon Vermeulen <Marlon.Vermeulen@deltares.nl>"]
+authors = ["Deltares"]
 readme = "README.md"
-packages = [{include = "d_fast_bank_erosion"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
