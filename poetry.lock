@@ -1079,6 +1079,18 @@ files = [
 ]
 
 [[package]]
+name = "teamcity-messages"
+version = "1.32"
+description = "Send test results to TeamCity continuous integration server from unittest, nose, py.test, twisted trial, behave (Python 2.6+)"
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "teamcity-messages-1.32.tar.gz", hash = "sha256:6991d95642c8d067524c90985b650d89caab6ac0bf47b721b931b04951abbfc1"},
+    {file = "teamcity_messages-1.32-py3-none-any.whl", hash = "sha256:1dbd30e24e80ee80083a5ce01d8898c8157a974fd7cd13ee219834b918f4ab8c"},
+]
+
+[[package]]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
@@ -1105,4 +1117,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "625e6497a09de74ca3ac2ce97ab7972fc953af62b54fd5fc2a66afb7bd0999fa"
+content-hash = "ad62058373e5e3721180fdfc7981aa78e4726b5bb7a0b3651aa3e7ac3aeaf40b"
