@@ -1,12 +1,12 @@
 [tool.poetry]
 name = "d-fast-bank-erosion"
-version = "0.1.0"
-description = ""
-authors = ["Deltares"]
+version = "2.3.1"
+description = "A tool to perform a bank erosion analysis based on a number of D-Flow FM simulations."
+authors = ["Stichting Deltares <delft3d.support@deltares.nl>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.9.12"
 pyproj = "^3.4.1"
 fiona = "^1.8.22"
 pandas = "1.1.3"
