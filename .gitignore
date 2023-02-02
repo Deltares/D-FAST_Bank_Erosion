@@ -1,7 +1,25 @@
-dfastbe.dist
-dfastbe.build
+# Environment and application related files
 __pycache__
 .vscode
-test.*
 .venv
+
+# Output files
+test.*
+dfastbe.dist
+dfastbe.build
 dfastbe.build.log
+dfastbe_results.nc
+report.txt
+[!ref]*.out
+tests/**/report.txt
+tests/**/verslag.run
+
+# Latex generated files
+docs/**/*.aux
+docs/**/*.mtc
+docs/**/*.mtc0
+docs/**/*.log
+docs/**/*.maf
+docs/**/*.nlo
+docs/**/*.pdf
+docs/**/*.toc
