@@ -56,7 +56,6 @@ import pandas._libs.tslibs.base
 
 # import pyproj._compat
 import netCDF4.utils
-import cftime
 import matplotlib.backends.backend_qt5
 
 # ------------------------------------------------------------------------------
