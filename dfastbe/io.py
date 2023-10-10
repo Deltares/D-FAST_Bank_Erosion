@@ -1042,9 +1042,6 @@ def config_get_xykm(
     xykm : shapely.geometry.linestring.LineStringAdapter
 
     """
-    # get km bounds
-    kmbounds = config_get_range(config, "General", "Boundaries")
-
     # get the chainage file
     kmfile = config_get_str(config, "General", "RiverKM")
     log_text("read_chainage", dict={"file": kmfile})

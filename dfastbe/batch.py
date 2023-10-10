@@ -175,7 +175,7 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
         search_lines, dlines
     )
 
-    # determine whet`her search lines are located on left or right
+    # determine whether search lines are located on left or right
     to_right = [True] * n_searchlines
     for ib in range(n_searchlines):
         to_right[ib] = dfastbe.support.on_right_side(
