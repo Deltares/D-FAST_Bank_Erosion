@@ -29,6 +29,16 @@
 \DeclareOption{biblatex}{%
     \@dbiblatextrue%
 }
+\newif\if@git% version control system GIT is used
+\@gitfalse%
+\DeclareOption{git}{%
+    \@gittrue%
+}
+\newif\if@svn% version control system SVN is used
+\@svnfalse%
+\DeclareOption{svn}{%
+    \@svntrue%
+}    
 \newif\if@druler% deltares ruler
 \@drulerfalse
 \DeclareOption{druler}{%
@@ -91,14 +101,16 @@
 \usepackage{float} % needed to force the location of figures \begin{figure}[H]
 \usepackage{textcomp} % needed for the promille sign: \textperthousand
 \usepackage{xspace} % needed for spaces behind a macro, but no space before punctuation
+\usepackage{xstring} % needed for string handling (GIT repository, branch and hash)
+\usepackage{catchfile} % needed for GIT repository, branch and hash
 \usepackage[final]{pdfpages} % needed for cover pages
 \usepackage[detect-all=true]{siunitx}
 
 \if@dutch
-    \usepackage[dutch]{babel}
+    \usepackage[shorthands=off, dutch]{babel}
 \else
     \if@spanish
-        \usepackage[spanish, es-tabla]{babel}
+        \usepackage[shorthands=off, spanish, es-tabla]{babel}
     \else
         \usepackage[english]{babel}
     \fi
@@ -138,7 +150,10 @@
 \hypersetup{pdfborder={0 0 0}, bookmarksnumbered=true, colorlinks=true, linkcolor=dbluelink, citecolor=dbluelink, urlcolor=dbluelink}
 
 \usepackage{colortbl} % colour the cells and rows
+
+% Because the \newif have side effects,use \newtoggle
 \usepackage{etoolbox}% http://ctan.org/pkg/etoolbox: needed for conditional list of figures and list of tables
+
 \usepackage{nomencl}
 \usepackage[intoc]{deltares_nomentbl}  % adjusted for the table of content
 \usepackage{bookmark}
@@ -175,8 +190,8 @@
 %foothoogte 2\baselineskip
 % 1.5cm remaining
 
-\oddsidemargin 35mm
-\evensidemargin 30mm
+\oddsidemargin 32.5mm
+\evensidemargin 32.5mm
 \setlength{\textwidth}{210mm-65mm} % 145mm
 
 \setlength{\marginparwidth}{18mm}
@@ -326,14 +341,14 @@
 
 \newcommand{\conditionalToC}{\tableofcontents}
 
-\AtEndEnvironment{figure}{\gdef\there@is@a@figure{}}%
-\AtEndDocument{\ifdefined\there@is@a@figure\label{fig:was:used:in:doc}\fi}%
-\newcommand{\conditionalLoF}{\@ifundefined{r@fig:was:used:in:doc}{}{\listofFigures\adjustmtc}}%
-
 \AtBeginEnvironment{longtable}{\gdef\there@is@a@table{}}%
 \AtEndEnvironment{table}{\gdef\there@is@a@table{}}%
 \AtEndDocument{\ifdefined\there@is@a@table\label{table:was:used:in:doc}\fi}%
 \newcommand{\conditionalLoT}{\@ifundefined{r@table:was:used:in:doc}{}{\listofTables\adjustmtc}}%
+
+\AtEndEnvironment{figure}{\gdef\there@is@a@figure{}}%
+\AtEndDocument{\ifdefined\there@is@a@figure\label{fig:was:used:in:doc}\fi}%
+\newcommand{\conditionalLoF}{\@ifundefined{r@fig:was:used:in:doc}{}{\listofFigures\adjustmtc}}%
 
 \AtEndEnvironment{photo}{\gdef\there@is@a@photo{}}%
 \AtEndDocument{\ifdefined\there@is@a@photo\label{photo:was:used:in:doc}\fi}%
@@ -397,8 +412,8 @@
     }
 
 %=================================
-\newcounter{photo}% the counter
-\renewcommand*\thephoto{\arabic{photo}}% the default format for the counter
+\newcounter{photo}[chapter]% the counter
+\renewcommand*\thephoto{\thechapter.\arabic{photo}}% the default format for the counter
 \newcommand*\fps@photo{tbp}% default floating options
 \newcommand*\ftype@photo{4}% float type number, needs to be a power of 2;
 % \ftype@figure=1, \ftype@table=2
@@ -431,13 +446,13 @@
 }
 \let\l@photo\l@figure % layout of list is the same as for figures
 %=================================
-\newcounter{actie}% the counter
-\renewcommand*\theactie{\arabic{actie}}% the default format for the counter
+\newcounter{actie}[chapter]% the counter
+\renewcommand*\theactie{\thechapter.\arabic{actie}}% the default format for the counter
 \newcommand*\fps@actie{tbp}% default floating options
 \newcommand*\ftype@actie{4}% float type number, needs to be a power of 2;
 % \ftype@figure=1, \ftype@table=2
 \newcommand*\ext@actie{lod}% extension of file for the list of acties
-\newcommand*\fnum@actie{\actiename\nobreakspace\theactie}% used in caption
+\newcommand*\fnum@actie{\color{dblue}\actiename\nobreakspace\theactie}% used in caption
 \if@dutch
     \newcommand*\actiename{TODO}% the name
     \def\@listactiename{Lijst van acties}
@@ -509,6 +524,32 @@
 \def\svn@revinit{00}
 \let\svnrev\svn@revinit\let\@svn@rev\svn@revinit
 
+\if@svn
+{
+    \def\tempa{}%
+    \def\tempb{\svnrev}%
+    \ifx\tempa\tempb
+        \gdef\vcsrev{-{}-{}-{}-}% vcsrev: version control system revision number
+    \else
+        \gdef\vcsrev{\svnrev}% vcsrev: version control system revision number
+    \fi
+}
+\else
+    \if@git
+    {
+        \def\tempa{}%
+        \def\tempb{\githash}%
+        \ifx\tempa\tempb
+            \gdef\vcsrev{-{}-{}-{}-}% vcsrev: version control system revision number
+        \else
+            \gdef\vcsrev{\githash}% vcsrev: version control system revision number
+        \fi
+    }
+    \else
+       \gdef\vcsrev{-{}-{}-{}-}% vcsrev: version control system revision number
+    \fi
+\fi
+
 \if@dutch
     \renewcommand{\monthname}{%
         \ifcase\month\or januari \or februari%
@@ -544,6 +585,8 @@
 \def\distribution#1{\gdef\@distribution{#1}}
 \def\version#1{\gdef\@version{#1}}
 \def\author#1{\gdef\@author{#1}}
+\def\contact#1{\gdef\@contact{#1}}
+\def\documentid#1{\gdef\@documentid{#1}}
 
 \def\@title{\texttt{$\backslash$title\{\ldots\}}}
 \def\@subtitle{\texttt{$\backslash$subtitle\{\ldots\}}}
@@ -551,6 +594,49 @@
 \def\@version{\texttt{$\backslash$version\{\ldots\}}}
 \def\@distribution{}
 \def\@author{}
+\def\@contact{\texttt{$\backslash$contact\{\ldots\}}}
+\def\@documentid{\texttt{$\backslash$documentid\{\ldots\}}}
+
+\newtoggle{b_disclaimer}
+\toggletrue{b_disclaimer}
+\def\disclaimer#1{%
+    \def\tempa{}%
+    \def\tempb{#1}%
+    \ifx\tempa\tempb
+        \if@ddraft
+            \toggletrue{b_disclaimer}
+        \else
+            \togglefalse{b_disclaimer}
+        \fi
+    \else
+        \toggletrue{b_disclaimer}%
+        \if@ddraft
+            % Default draft text, because option ddraft was given
+        \else
+            \gdef\@disclaimer{#1}
+        \fi
+    \fi
+}
+
+
+\def\@disclaimer{\texttt{$\backslash$disclaimer\{\ldots\}}}
+\def\@status{\texttt{$\backslash$status\{\ldots\}}}
+\if@ddraft
+    \toggletrue{b_disclaimer}
+    \if@dutch
+        \def\@status{Voorlopig}
+        \def\@disclaimer{Dit document is een concept en uitsluitend bedoeld voor discussiedoeleinden. Aan de inhoud van dit rapport kunnen noch door de opdrachtgever, noch door derden rechten worden ontleend.}
+    \else
+        \if@spanish
+            \def\@status{Borrador}
+            \def\@disclaimer{Este documento es un borrador el cual \'unicamente debe utilizarse para la discusi\'on del mismo. Ni el cliente ni terceros puedes derivar derecho alguno del contenido de este borrador.}
+        \else
+            \def\@status{Draft}
+            \def\@disclaimer{This is a draft report, intended for discussion purposes only. No part of this report may be relied upon by either principals or third parties.}
+       \fi
+    \fi
+\fi
+
 
 \newcommand{\thechap}{$\;$\leftmark{}$\;$}
 \renewcommand\today{%
@@ -566,7 +652,7 @@
 
 %\def\tiny{\@setsize\tiny{7pt}\vipt\@vipt}
 %\def\scriptsize{\@setsize\scriptsize{9.5pt}\viiipt\@viiipt}
-%\def\large{\@setsize\large{14pt}\xiipt\@xiipt}
+%\def\large{\@setsize\large{13pt}\xiipt\@xiipt}
 %\def\Large{\@setsize\Large{18pt}\xivpt\@xivpt}
 %\def\LARGE{\@setsize\LARGE{22pt}\xviipt\@xviipt}
 %\def\huge{\@setsize\huge{25pt}\xxpt\@xxpt}
@@ -607,6 +693,10 @@
 \long\def\dateiv#1{\gdef\@dateiv{#1}}
 \long\def\keywords#1{\gdef\@keywords{#1}}
 \long\def\projectnumber#1{\gdef\@projectnumber{#1}}
+\long\def\organisationi#1{\gdef\@organisationi{#1}}
+\long\def\organisationii#1{\gdef\@organisationii{#1}}
+\long\def\organisationiii#1{\gdef\@organisationiii{#1}}
+\long\def\organisationiv#1{\gdef\@organisationiv{#1}}
 \long\def\reference#1{\gdef\@reference{#1}}
 \long\def\references#1{\gdef\@references{#1}}
 \long\def\revieweri#1{\gdef\@revieweri{#1}}
@@ -636,6 +726,10 @@
 \long\def\@dateiv{}
 \long\def\@keywords{\texttt{$\backslash$keywords\{\ldots\}}}
 \long\def\@projectnumber{\texttt{$\backslash$projectnumber\{\ldots\}}}
+\long\def\@organisationi{\texttt{$\backslash$organisationi\{\ldots\}}}
+\long\def\@organisationii{}
+\long\def\@organisationiii{}
+\long\def\@organisationiv{}
 \long\def\@reference{\texttt{$\backslash$reference\{\ldots\}}}
 \long\def\@references{\texttt{$\backslash$references\{\ldots\}}}
 \long\def\@revieweri{\tiny \texttt{$\backslash$revieweri\{\ldots\}}}
@@ -707,14 +801,14 @@
     \vfil
     \if@dutch
         \hangindent 80pt \hspace*{80pt}{\helv Versie: \@version\newline
-                                              SVN Revisie: \svnrev \par}
+                                              Revisie: \vcsrev \par}
     \else
         \if@spanish
             \hangindent 80pt \hspace*{80pt}{\helv Versi\'on: \@version\newline
-                                                  SVN Revisi\'on: \svnrev \par}
+                                                  Revisi\'on: \vcsrev \par}
         \else
             \hangindent 80pt \hspace*{80pt}{\helv Version: \@version\newline
-                                                  SVN Revision: \svnrev \par}
+                                                  Revision: \vcsrev \par}
         \fi
     \fi
     \hangindent 80pt \hspace*{80pt}{\helv \@date  \par}
@@ -725,70 +819,63 @@
 }
 %
 %------------------------------------------------------------------------------
-% Signature GB
+% Signatures GB
 %------------------------------------------------------------------------------
 %
+\newlength{\texttab}
+\setlength{\texttab}{\textwidth + 19.75mm + 14mm}%
 \newcommand{\signatureGB}{
-    {\footnotesize\textbf{Title}}  \newline
-    \skipnewline{\@title}
+    \pagestyle{plainChapter}
+    \hspace*{-19.75mm} \parbox[t]{\texttab}{{\Large\bfseries\raggedright{\skipnewline{\@title}}}\newline
+    \@subtitle}
 
-    \begin{tabular}{@{}p{39.5mm}p{39.5mm}p{41.0mm}p{\textwidth-120.0mm-42pt}}
-        \footnotesize{\textbf{Client}} & \footnotesize{\textbf{Project}} &
-        \footnotesize{\textbf{Reference}} & \footnotesize{\textbf{Pages}} \\
-        \@client     & \@projectnumber     & \@reference     & \pageref*{LastPage}
+    \vspace*{0\baselineskip}
+    \hspace*{-19.75mm}
+    \begin{tabular}{p{40mm-12pt}|p{\texttab-40.0mm-12pt}}
+        \footnotesize{\textbf{Client}} & \@client \\
+        \midline
+        \footnotesize{\textbf{Contact}} & \@contact \\
+        \midline
+        \footnotesize{\textbf{Reference}} & \@reference  \\
+        \midline
+        \footnotesize{\textbf{Keywords}} & \@keywords
     \end{tabular}
 
-    {\footnotesize\textbf{Classification}} \newline
-    \@classification
-
-    {\footnotesize\textbf{Keywords}} \newline
-    \@keywords
-
-    {\footnotesize\textbf{Summary}} \newline
-    \@summary
-
-    {\footnotesize\textbf{References}} \newline
-    \@references
-
-    \vspace{2\baselineskip}
-    \signatureDocVersion
-
-    \vfill
-    {\footnotesize\textbf{Status}}  \newline
-    \@status
-}
-%
-%------------------------------------------------------------------------------
-% Signature ESP
-%------------------------------------------------------------------------------
-%
-\newcommand{\signatureESP}{
-    {\footnotesize\textbf{T\'itulo}}  \newline
-    \skipnewline{\@title}
-
-    \begin{tabular}{@{}p{39.5mm}p{39.5mm}p{41.0mm}p{\textwidth-120.0mm-42pt}}
-        \footnotesize{\textbf{Cliente}} & \footnotesize{\textbf{Proyecto}} &
-        \footnotesize{\textbf{Referencia}} & \footnotesize{\textbf{P\'aginas}} \\
-        \@client     & \@projectnumber     & \@reference     & \pageref*{LastPage}
+    \hspace*{-19.75mm}
+    \begin{tabular}{p{40mm-12pt}|p{\texttab-40.0mm-12pt}}
+        \rowcolor{dblue1} \multicolumn{2}{l}{\textbf{Document control}} \\
+        \topline
+        \footnotesize{\textbf{Version}} & \@version \\
+        \midline
+        \footnotesize{\textbf{Date}} & \@date  \\
+        \midline
+        \footnotesize{\textbf{Project number}} & \@projectnumber  \\
+        \midline
+        \footnotesize{\textbf{Document ID}} & \@documentid  \\
+        \midline
+        \footnotesize{\textbf{Pages}} &  \pageref*{LastPage}  \\
+        \midline
     \end{tabular}
+    \iftoggle{b_disclaimer}{%
+        \hspace*{-19.75mm}
+        \begin{tabular}{p{40mm-12pt}|p{\texttab-40.0mm-12pt}}
+            \footnotesize{\textbf{Status}} & \@status \newline \@disclaimer
+        \end{tabular}
+    }{
+        \hspace*{-19.75mm}
+        \begin{tabular}{p{40mm-12pt}|p{\texttab-40.0mm-12pt}}
+            \footnotesize{\textbf{Status}} & \@status
+        \end{tabular}
+    }
 
-    {\footnotesize\textbf{Clasificaci\'on}} \newline
-    \@classification
+    \signatureAuthors
 
-    {\footnotesize\textbf{Palabras clave}} \newline
-    \@keywords
+    \signatureDocVersionGB
 
-    {\footnotesize\textbf{Resumen ejecutivo}} \newline
-    \@summary
-
-    {\footnotesize\textbf{Referencia}} \newline
-    \@references
-
-    \vspace{2\baselineskip}
-    \signatureDocVersion
     \vfill
-    {\footnotesize\textbf{Estatus}}  \newline
-    \@status
+
+    \nonumchapter{Summary}
+    \@summary
 }
 %
 %------------------------------------------------------------------------------
@@ -796,85 +883,199 @@
 %------------------------------------------------------------------------------
 %
 \newcommand{\signatureNL}{
-    {\footnotesize\textbf{Titel}} \newline
-    \skipnewline{\@title}
+    \pagestyle{plainChapter}
+    \hspace*{-19.75mm} \parbox[t]{\texttab}{{\Large\bfseries\raggedright{\skipnewline{\@title}}}\newline
+    \@subtitle}
 
-    \begin{tabular}{@{}p{39.5mm}p{39.5mm}p{41.0mm}p{\textwidth-120.0mm-42pt}}
-        \footnotesize{\textbf{Opdrachtgever}} & \footnotesize{\textbf{Project}} &
-        \footnotesize{\textbf{Kenmerk}} & \footnotesize{\textbf{Pagina's}} \\
-        \@client     & \@projectnumber     & \@reference     & \pageref*{LastPage}
+    \vspace*{0\baselineskip}
+    \hspace*{-19.75mm}
+    \begin{tabular}{p{40mm-12pt}|p{\texttab-40.0mm-12pt}}
+        \footnotesize{\textbf{Opdrachtgever}} & \@client \\
+        \midline
+        \footnotesize{\textbf{Contactpersoon}} & \@contact \\
+        \midline
+        \footnotesize{\textbf{Referenties}} & \@reference  \\
+        \midline
+        \footnotesize{\textbf{Trefwoorden}} & \@keywords
     \end{tabular}
 
-    {\footnotesize\textbf{Classificatie}} \newline
-    \@classification
+    \hspace*{-19.75mm}
+    \begin{tabular}{p{40mm-12pt}|p{\texttab-40.0mm-12pt}}
+        \rowcolor{dblue1} \multicolumn{2}{l}{\textbf{Document controle}} \\
+        \topline
+        \footnotesize{\textbf{Versie}} & \@version \\
+        \midline
+        \footnotesize{\textbf{Datum}} & \@date  \\
+        \midline
+        \footnotesize{\textbf{Projectnummer}} & \@projectnumber  \\
+        \midline
+        \footnotesize{\textbf{Document ID}} & \@documentid  \\
+        \midline
+        \footnotesize{\textbf{Pagina's}} &  \pageref*{LastPage}  \\
+        \midline
+    \end{tabular}
+    \iftoggle{b_disclaimer}{%
+        \hspace*{-19.75mm}
+        \begin{tabular}{p{40mm-12pt}|p{\texttab-40.0mm-12pt}}
+            \footnotesize{\textbf{Status}} & \@status \newline \@disclaimer
+        \end{tabular}
+    }{
+        \hspace*{-19.75mm}
+        \begin{tabular}{p{40mm-12pt}|p{\texttab-40.0mm-12pt}}
+            \footnotesize{\textbf{Status}} & \@status
+        \end{tabular}
+    }
 
-    {\footnotesize\textbf{Trefwoorden}} \newline
-    \@keywords
+    \signatureAuthors
 
-    {\footnotesize\textbf{Samenvatting}} \newline
-    \@summary
+    \signatureDocVersionNL
 
-    {\footnotesize\textbf{Referenties}}  \newline
-    \@references
-
-    \vspace{2\baselineskip}
-    \signatureDocVersion
     \vfill
-    {\footnotesize\textbf{Status}}  \newline
-    \@status
+
+    \nonumchapter{Samenvatting}
+    \@summary
 }
 %
-\newcommand{\signatureDocVersion}{
-    \vspace{\baselineskip}
-    \if@dutch
-        {{\footnotesize
-        \begin{center}
-        \huge{Onderstaande tabel is niet voor publicatie}
-        \end{center}
-         \begin{tabular}{p{14mm-2pt}@{}p{20mm-2pt}@{}p{25mm-2pt}@{}p{12mm}@{}p{25mm-2pt}@{}p{12mm}@{}p{25mm-2pt}@{}p{\textwidth-133mm-1pt}} \hline
-          \rowcolor{dgrey4} \rule{0in}{2ex}\!\!
-           \textbf{Versie} & \textbf{Datum} & \textbf{Auteur} & \textbf{Paraaf} & \textbf{Review} & \textbf{Paraaf} & \textbf{Goedkeuring} & \textbf{Paraaf}  \\ \hline
-              \@versioni   & \@datei   & \@authori   & & \@revieweri   && \@approvali   &   \\ \hline
-              \@versionii  & \@dateii  & \@authorii  & & \@reviewerii  && \@approvalii  &   \\ \hline
-              \@versioniii & \@dateiii & \@authoriii & & \@revieweriii && \@approvaliii &   \\ \hline
-              \@versioniv  & \@dateiv  & \@authoriv  & & \@revieweriv  && \@approvaliv  &   \\ \hline
+%------------------------------------------------------------------------------
+% Signatures ESP
+%------------------------------------------------------------------------------
+%
+\newcommand{\signatureESP}{
+    \pagestyle{plainChapter}
+    \hspace*{-19.75mm} \parbox[t]{\texttab}{{\Large\bfseries\raggedright{\skipnewline{\@title}}}\newline
+    \@subtitle}
+
+    \vspace*{0\baselineskip}
+    \hspace*{-19.75mm}
+    \begin{tabular}{p{40mm-12pt}|p{\texttab-40.0mm-12pt}}
+        \footnotesize{\textbf{Cliente}} & \@client \\
+        \midline
+        \footnotesize{\textbf{Contacto}} & \@contact \\
+        \midline
+        \footnotesize{\textbf{Referencia}} & \@reference  \\
+        \midline
+        \footnotesize{\textbf{Palabras clave}} & \@keywords
+    \end{tabular}
+
+    \hspace*{-19.75mm}
+    \begin{tabular}{p{40mm-12pt}|p{\texttab-40.0mm-12pt}}
+        \rowcolor{dblue1} \multicolumn{2}{l}{\textbf{Control de documento}} \\
+        \topline
+        \footnotesize{\textbf{Versi\'on}} & \@version \\
+        \midline
+        \footnotesize{\textbf{Fecha}} & \@date  \\
+        \midline
+        \footnotesize{\textbf{N\'umero del proyecto}} & \@projectnumber  \\
+        \midline
+        \footnotesize{\textbf{Identificaci\'on del documento}} & \@documentid  \\
+        \midline
+        \footnotesize{\textbf{P\'aginas}} &  \pageref*{LastPage}  \\
+        \midline
+    \end{tabular}
+    \iftoggle{b_disclaimer}{%
+        \hspace*{-19.75mm}
+        \begin{tabular}{p{40mm-12pt}|p{\texttab-40.0mm-12pt}}
+            \footnotesize{\textbf{Estatus}} & \@status \newline \@disclaimer
         \end{tabular}
-    }}
+    }{
+        \hspace*{-19.75mm}
+        \begin{tabular}{p{40mm-12pt}|p{\texttab-40.0mm-12pt}}
+            \footnotesize{\textbf{Estatus}} & \@status
+        \end{tabular}
+    }
+
+    \signatureAuthors
+
+    \signatureDocVersionESP
+
+    \vfill
+
+    \nonumchapter{Resumen ejecutivo}
+    \@summary
+}
+\newcommand{\signatureAuthors}{
+    \if@dutch
+        \hspace*{-19.75mm}
+        \begin{tabular}{p{40mm-12pt}|p{\texttab/2-20mm-12pt}|p{\texttab/2-20mm-12pt}}
+            \rowcolor{dblue1} \multicolumn{3}{l}{\textbf{Auteur(s)}} \\
+            \topline
+            & \@authori & \@organisationi \\
+            \midline
+            & \@authorii & \@organisationii \\
+        \end{tabular}
     \else
         \if@spanish
-            \begin{center}
-            \huge{Esta tabla no debe ser publicada}
-            \end{center}
-            {{\footnotesize
-              %\begin{tabular}{p{18mm}@{}p{20mm}@{}p{25mm}@{}p{12mm}@{}p{25mm}@{}p{12mm}@{}p{25mm}@{}p{12mm}} \hline
-               \begin{tabular}{p{15mm-2pt}@{}p{20mm-2pt}@{}p{25mm-2pt}@{}p{12mm}@{}p{25mm-2pt}@{}p{12mm}@{}p{25mm-2pt}@{}p{\textwidth-133mm-1pt}} \hline
-                \rowcolor{dgrey4}\rule{0in}{2ex}\!\!
-                 \textbf{Versi\'on} & \textbf{Fecha} & \textbf{Autor} & \textbf{iniciales} & \textbf{Revisor} & \textbf{iniciales} & \textbf{Visto bueno} & \textbf{iniciales}  \\ \hline
-                    \@versioni & \@datei & \@authori & & \@revieweri && \@approvali &   \\ \hline
-                    \@versionii & \@dateii & \@authorii & & \@reviewerii && \@approvalii &   \\ \hline
-                    \@versioniii & \@dateiii & \@authoriii & & \@revieweriii && \@approvaliii &   \\ \hline
-                    \@versioniv  & \@dateiv  & \@authoriv  & & \@revieweriv  && \@approvaliv  &   \\ \hline
-              \end{tabular}
-            }}
+            \hspace*{-19.75mm}
+            \begin{tabular}{p{40mm-12pt}|p{\texttab/2-20mm-12pt}|p{\texttab/2-20mm-12pt}}
+                \rowcolor{dblue1} \multicolumn{3}{l}{\textbf{Autor(es)}} \\
+                \topline
+                & \@authori & \@organisationi \\
+                \midline
+                & \@authorii & \@organisationii \\
+            \end{tabular}
         \else
-            \begin{center}
-            \huge{This table is not for publication}
-            \end{center}
-            {{\footnotesize
-              %\begin{tabular}{p{18mm}@{}p{20mm}@{}p{25mm}@{}p{12mm}@{}p{25mm}@{}p{12mm}@{}p{25mm}@{}p{12mm}} \hline
-               \begin{tabular}{p{15mm-2pt}@{}p{20mm-2pt}@{}p{25mm-2pt}@{}p{12mm}@{}p{25mm-2pt}@{}p{12mm}@{}p{25mm-2pt}@{}p{\textwidth-133mm-1pt}} \hline
-                \rowcolor{dgrey4}\rule{0in}{2ex}\!\!
-                 \textbf{Version} & \textbf{Date} & \textbf{Author} & \textbf{Initials} & \textbf{Review} & \textbf{Initials} & \textbf{Approval} & \textbf{Initials}  \\ \hline
-                    \@versioni & \@datei & \@authori & & \@revieweri && \@approvali &   \\ \hline
-                    \@versionii & \@dateii & \@authorii & & \@reviewerii && \@approvalii &   \\ \hline
-                    \@versioniii & \@dateiii & \@authoriii & & \@revieweriii && \@approvaliii &   \\ \hline
-                    \@versioniv  & \@dateiv  & \@authoriv  & & \@revieweriv  && \@approvaliv  &   \\ \hline
-              \end{tabular}
-            }}
+            \hspace*{-19.75mm}
+            \begin{tabular}{p{40mm-12pt}|p{\texttab/2-20mm-12pt}|p{\texttab/2-20mm-12pt}}
+                \rowcolor{dblue1} \multicolumn{3}{l}{\textbf{Author(s)}} \\
+                \topline
+                & \@authori & \@organisationi \\
+                \midline
+                & \@authorii & \@organisationii \\
+            \end{tabular}
         \fi
     \fi
 }
-%
+\newcommand{\signatureDocVersionGB}{
+    \vspace{\baselineskip}
+    \hspace*{-19.75mm+14mm}
+    \begin{tabular}{p{\texttab-28mm-12pt}}
+        \color{dblue4}\textbf{\textit{The allowed use of this table is limited to check the correct order-performance by Deltares. Any other client-internal-use and any external distribution is not allowed.}}
+    \end{tabular}
+
+    \hspace*{-19.75mm}
+    \begin{tabular}{p{40mm-12pt}|p{\texttab/3-13mm-12pt}|p{\texttab/3-13mm-12pt}|p{\texttab/3-14mm-12pt}}
+        \rowcolor{dblue1}  \textbf{Doc.\ version} & \textbf{Author} & \textbf{Reviewer} & \textbf{Approver}  \\
+        \topline
+        \@versioni   & \@authori   & \@revieweri  & \@approvali   \\
+        \midline
+        \@versionii  & \@authorii  & \@reviewerii & \@approvalii  \\
+    \end{tabular}
+    \vspace{\baselineskip}
+}
+\newcommand{\signatureDocVersionNL}{
+    \vspace{\baselineskip}
+    \hspace*{-19.75mm+14mm}
+    \begin{tabular}{p{\texttab-28mm-12pt}}
+        \color{dblue4}\textbf{\textit{Gebruik van deze tabel is voor de controle van juiste uitvoering door Deltares van de opdracht. Ieder ander klantgebruik en externe verspreiding is niet toegestaan.}}
+     \end{tabular}
+
+    \hspace*{-19.75mm}
+    \begin{tabular}{p{40mm-12pt}|p{\texttab/3-13mm-12pt}|p{\texttab/3-13mm-12pt}|p{\texttab/3-14mm-12pt}}
+        \rowcolor{dblue1}  \textbf{Doc.\ Versie} & \textbf{Auteur} & \textbf{Controle} & \textbf{Akkoord}  \\
+        \topline
+        \@versioni & \@authori  & \@revieweri  & \@approvali  \\
+        \midline
+        \@versionii & \@authorii & \@reviewerii & \@approvalii  \\
+    \end{tabular}
+    \vspace{\baselineskip}
+}
+\newcommand{\signatureDocVersionESP}{
+    \vspace{\baselineskip}
+    \hspace*{-19.75mm+14mm}
+    \begin{tabular}{p{\texttab-28mm-12pt}}
+        \color{dblue4}\textbf{\textit{El uso de esta tabla se limita al control de la ejecuci\'on del encargo por parte de Deltares. No se permite cualquier otro uso por parte del cliente ni su distribuci\'on a terceros.}}
+    \end{tabular}
+
+    \hspace*{-19.75mm}
+    \begin{tabular}{p{40mm-12pt}|p{\texttab/3-13mm-12pt}|p{\texttab/3-13mm-12pt}|p{\texttab/3-14mm-12pt}}
+        \rowcolor{dblue1}  \textbf{Versi\'on doc.} & \textbf{Autor} & \textbf{Revisor} & \textbf{Visto bueno} \\
+        \topline
+        \@versioni   & \@authori   & \@revieweri  & \@approvali  \\
+        \midline
+        \@versionii  & \@authorii  & \@reviewerii & \@approvalii  \\
+    \end{tabular}
+    \vspace{\baselineskip}
+}
 %------------------------------------------------------------------------------
 % Copyright GB, NL, ESP
 %------------------------------------------------------------------------------
@@ -919,9 +1120,8 @@
         \begin{tabbing}
         \textbf{Verkoop:} \\
         telefoon: \= +31\,88\,335\,81\,88 \\
-        fax:       \> +31\,88\,335\,81\,11 \\
-        e-mail:    \> software@deltares.nl \\
-        www:       \> https://www.deltares.nl/software
+        e-mail:    \> \href{mailto: software@deltares.nl}{Verkoop}   \\
+        www:       \> \href{https://www.deltares.nl/software-en-data}{Verkoop \& Ondersteuning}
         \end{tabbing}
         %
         &
@@ -929,34 +1129,53 @@
         \begin{tabbing}
         \textbf{Ondersteuning:} \\
         telefoon: \= +31\,88\,335\,81\,00 \\
-        fax:       \> +31\,88\,335\,81\,11 \\
-        e-mail:    \> software.support@deltares.nl \\
-        www:       \> https://www.deltares.nl/software
+        e-mail:    \> \href{mailto: software.support@deltares.nl}{Ondersteuning} \\
+        www:       \> \href{https://www.deltares.nl/software-en-data}{Verkoop \& Ondersteuning}
         \end{tabbing}
         \end{tabular}
     }
 \else
-    \newcommand{\contactsalesandsupport}{
-        \begin{tabular}[t]{@{}p{0.50\textwidth}p{0.50\textwidth}}
-        \begin{tabbing}
-        \textbf{For sales contact:} \\
-        telephone: \= +31\,88\,335\,81\,88 \\
-        fax:       \> +31\,88\,335\,81\,11 \\
-        e-mail:    \> software@deltares.nl\\
-        www:       \> https://www.deltares.nl/software
-        \end{tabbing}
-        %
-        &
-        %
-        \begin{tabbing}
-        \textbf{For support contact:} \\
-        telephone: \= +31\,88\,335\,81\,00 \\
-        fax:       \> +31\,88\,335\,81\,11 \\
-        e-mail:    \> software.support@deltares.nl\\
-        www:       \> https://www.deltares.nl/software
-        \end{tabbing}
-        \end{tabular}
-    }
+    \if@spanish
+        \newcommand{\contactsalesandsupport}{
+            \begin{tabular}[t]{@{}p{0.50\textwidth}p{0.50\textwidth}}
+            \begin{tabbing}
+            \textbf{Para ventas contacte:} \\
+            tel\a'efono: \= +31\,88\,335\,81\,88 \\
+            e-mail:    \> \href{mailto: software@deltares.nl}{Venta} \\
+            www:       \> \href{https://www.deltares.nl/en/software-and-data}{Venta \& Mantener}
+            \end{tabbing}
+            %
+            &
+            %
+            \begin{tabbing}
+            \textbf{Para soporte contacte:} \\
+            tel\a'efono: \= +31\,88\,335\,81\,00 \\
+            e-mail:    \> \href{mailto: software.support@deltares.nl}{Mantener} \\
+            www:       \> \href{https://www.deltares.nl/en/software-and-data}{Venta \& Mantener}
+            \end{tabbing}
+            \end{tabular}
+        }
+    \else
+        \newcommand{\contactsalesandsupport}{
+            \begin{tabular}[t]{@{}p{0.50\textwidth}p{0.50\textwidth}}
+            \begin{tabbing}
+            \textbf{For sales contact:} \\
+            telephone: \= +31\,88\,335\,81\,88 \\
+            e-mail:    \> \href{mailto: software@deltares.nl}{Sales} \\
+            www:       \> \href{https://www.deltares.nl/en/software-and-data}{Sales \& Support}
+            \end{tabbing}
+            %
+            &
+            %
+            \begin{tabbing}
+            \textbf{For support contact:} \\
+            telephone: \= +31\,88\,335\,81\,00 \\
+            e-mail:    \> \href{mailto: software.support@deltares.nl}{Support} \\
+            www:       \> \href{https://www.deltares.nl/en/software-and-data}{Sales \& Support}
+            \end{tabbing}
+            \end{tabular}
+        }
+    \fi
 \fi
 \newcommand{\manualtitle}{%
     \frontmatter
@@ -982,9 +1201,8 @@
             \begin{tabbing}
             \\
             telefoon:  \=  +31\,88\,335\,82\,73\\
-            fax:       \>  +31\,88\,335\,85\,82\\
-            e-mail:    \>  info@deltares.nl\\
-            www:       \>  https://www.deltares.nl
+            e-mail:    \>  \href{mailto: info@deltares.nl}{Informatie} \\
+            www:       \>  \href{https://www.deltares.nl}{Deltares}
             \end{tabbing}
         \end{tabular}
     \else
@@ -1003,9 +1221,8 @@
                 \begin{tabbing}
                     \\
                     tel\a'efono: \=  +31\,88\,335\,82\,73\\
-                    fax:       \>  +31\,88\,335\,85\,82\\
-                    e-mail:    \>  info@deltares.nl\\
-                    www:       \>  https://www.deltares.nl
+                    e-mail:    \>  \href{mailto: info@deltares.nl}{Informe}\\
+                    www:       \>  \href{https://www.deltares.nl}{Deltares}
                 \end{tabbing}
             \end{tabular}
         \else
@@ -1023,9 +1240,8 @@
                 \begin{tabbing}
                     \\
                     telephone: \=  +31\,88\,335\,82\,73\\
-                    fax:       \>  +31\,88\,335\,85\,82\\
-                    e-mail:    \>  info@deltares.nl\\
-                    www:       \>  https://www.deltares.nl
+                    e-mail:    \>  \href{mailto: info@deltares.nl}{Information} \\
+                    www:       \>  \href{https://www.deltares.nl}{Deltares}
                 \end{tabbing}
             \end{tabular}
         \fi
@@ -1057,14 +1273,15 @@
             \else
                 \signatureGB
             \fi
-        \fi% end if@dutch
+        \fi
+        \
     \else
     \fi% end if@signature
 
     \pagestyle{frontmatterplain}%
     \conditionalToC% tableofcontents%
-    \conditionalLoF% Conditionally insert List of Figures
     \conditionalLoT% Conditionally insert List of Tables
+    \conditionalLoF% Conditionally insert List of Figures
     \conditionalLoP% Conditionally insert List of Photos
     \conditionalNomenclature% Conditionally insert List of To Do's
     \conditionalLoToDo% Conditionally insert List of To Do's
@@ -2241,4 +2458,48 @@
 }
 
 \makenomenclature
+
+%------------------------------------------------------------------------------
+% retrieving GIT repository, branch and hash
+%
+
+\def\@setgitdirectory{-{}-{}-{}-}
+\def\setgitdirectory#1{\gdef\@setgitdirectory{#1}\gitcontent}
+\def\@gitrepository{-{}-{}-{}-}
+\def\@branch{-{}-{}-{}-}
+\def\@githashlong{-{}-{}-{}-}
+\def\@githashshort{-{}-{}-{}-}
+%
+\def\gitcontent{
+    \IfFileExists{\@setgitdirectory/HEAD.}{%   
+        \CatchFileDef{\headfull}{\@setgitdirectory/HEAD.}{}   
+        \StrGobbleRight{\headfull}{1}[\head]    
+        \StrBehind[2]{\head}{/}[\@branch] 
+        \typeout{JanM 0: \@branch}
+        \IfFileExists{\@setgitdirectory/refs/heads/\@branch.}{%
+            \CatchFileDef{\@githashlong}{\@setgitdirectory/refs/heads/\@branch.}{}
+        }{%    
+            \newcommand{\@githashlong}{\dots~(in \emph{packed-refs})}
+        }
+
+        % find the git-repository
+        \CatchFileEdef{\configfull}{\@setgitdirectory/logs/HEAD.}{}
+        \StrBehind{\configfull}{from }[\gitreposA]  % look for the string "from "
+        \StrBefore{\gitreposA}{ }[\gitreposC]  % string before first white space
+        \StrSubstitute{\gitreposC}{\\}{\textbackslash }[\gitreposD]
+        \StrSubstitute{\gitreposD}{_}{\_}[\gitreposE]
+        \typeout{JanM E: \gitreposE}
+        \gdef\@gitrepository{\gitreposE}    
+        \StrLeft{\@githashlong}{7}[\@githashshort]
+    }{
+        % nothing: File \@setgitdirectory/HEAD. does not exist
+    }
+}
+\newcommand{\gitdirectory}{\@setgitdirectory}
+\newcommand{\gitrepository}{\@gitrepository}
+\newcommand{\githashlong}{\@githashlong}
+\newcommand{\githash}{\@githashshort}
+\newcommand{\gitbranch}{\StrSubstitute{\@branch}{_}{\_}}
+
+%------------------------------------------------------------------------------
 \makeatother
