@@ -2477,9 +2477,14 @@
         \StrBehind[2]{\head}{/}[\@branch] 
         \typeout{JanM 0: \@branch}
         \IfFileExists{\@setgitdirectory/refs/heads/\@branch.}{%
+            \typeout{Bert \@setgitdirectory/refs/heads/\@branch. found}
+        }{%    
+            \typeout{Bert \@setgitdirectory/refs/heads/\@branch. not found}
+        }
+        \IfFileExists{\@setgitdirectory/refs/heads/\@branch.}{%
             \CatchFileDef{\@githashlong}{\@setgitdirectory/refs/heads/\@branch.}{}
         }{%    
-            \newcommand{\@githashlong}{\dots~(in \emph{packed-refs})}
+            \renewcommand{\@githashlong}{\dots~(in \emph{packed-refs})}
         }
 
         % find the git-repository
