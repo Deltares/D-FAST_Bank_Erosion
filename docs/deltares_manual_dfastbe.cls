@@ -159,7 +159,7 @@
 \usepackage{bookmark}
 \usepackage{currfile} % needed to detect the directory of the current tex-file
 \usepackage{booktabs}
-\usepackage{minitoc}
+\usepackage[nohints]{minitoc}
 
 \usepackage[yyyymmdd]{datetime} % to generate a timestamp
 \settimeformat{hhmmsstime}
