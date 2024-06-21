@@ -2466,7 +2466,7 @@
 \def\@setgitdirectory{-{}-{}-{}-}
 \def\setgitdirectory#1{\gdef\@setgitdirectory{#1}\gitcontent}
 \def\@gitrepository{-{}-{}-{}-}
-\def\@branch{-{}-{}-{}-}
+\def\@gitbranch{-{}-{}-{}-}
 \def\@githashlong{-{}-{}-{}-}
 \def\@githashshort{-{}-{}-{}-}
 %
@@ -2474,26 +2474,22 @@
     \IfFileExists{\@setgitdirectory/HEAD.}{%   
         \CatchFileDef{\headfull}{\@setgitdirectory/HEAD.}{}   
         \StrGobbleRight{\headfull}{1}[\head]    
-        \StrBehind[2]{\head}{/}[\@branch] 
-        \typeout{JanM 0: \@branch}
-        \IfFileExists{\@setgitdirectory/refs/heads/\@branch.}{%
-            \typeout{Bert \@setgitdirectory/refs/heads/\@branch. found}
+        \StrBehind[2]{\head}{/}[\@gitbranch] 
+        \typeout{--- JanM Branch name: \@gitbranch}
+        \IfFileExists{\@setgitdirectory/refs/heads/\@gitbranch.}{%
+            \CatchFileDef{\@githashlong}{\@setgitdirectory/refs/heads/\@gitbranch.}{}
         }{%    
-            \typeout{Bert \@setgitdirectory/refs/heads/\@branch. not found}
-        }
-        \IfFileExists{\@setgitdirectory/refs/heads/\@branch.}{%
-            \CatchFileDef{\@githashlong}{\@setgitdirectory/refs/heads/\@branch.}{}
-        }{%    
-            \renewcommand{\@githashlong}{\dots~(in \emph{packed-refs})}
+            \def\@githashlong{-{}-{}-{}-{}-{}-{}-{}\ (File does not exist: \@setgitdirectory/refs/heads/\@gitbranch)}
         }
 
         % find the git-repository
-        \CatchFileEdef{\configfull}{\@setgitdirectory/logs/HEAD.}{}
+        \CatchFileEdef{\configfull}{\@setgitdirectory/logs/HEAD.}{\catcode`\\=11\catcode`\_=11\relax}  % text could have backslashes and underscores ex: "D:\git_databases\git_mooiman"
+        % \typeout{--- JanM Config: \configfull}
         \StrBehind{\configfull}{from }[\gitreposA]  % look for the string "from "
         \StrBefore{\gitreposA}{ }[\gitreposC]  % string before first white space
         \StrSubstitute{\gitreposC}{\\}{\textbackslash }[\gitreposD]
         \StrSubstitute{\gitreposD}{_}{\_}[\gitreposE]
-        \typeout{JanM E: \gitreposE}
+        \typeout{--- JanM Repository location: \gitreposE}
         \gdef\@gitrepository{\gitreposE}    
         \StrLeft{\@githashlong}{7}[\@githashshort]
     }{
@@ -2504,7 +2500,7 @@
 \newcommand{\gitrepository}{\@gitrepository}
 \newcommand{\githashlong}{\@githashlong}
 \newcommand{\githash}{\@githashshort}
-\newcommand{\gitbranch}{\StrSubstitute{\@branch}{_}{\_}}
+\newcommand{\gitbranch}{\StrSubstitute{\@gitbranch}{_}{\_}}
 
 %------------------------------------------------------------------------------
 \makeatother
