@@ -2479,6 +2479,7 @@
         \IfFileExists{\@setgitdirectory/refs/heads/\@gitbranch.}{%
             \CatchFileDef{\@githashlong}{\@setgitdirectory/refs/heads/\@gitbranch.}{}
         }{%    
+            \typeout{--- JanM file not found: \@setgitdirectory/refs/heads/\@gitbranch.}
             \def\@githashlong{-{}-{}-{}-{}-{}-{}-{}\ (File does not exist: \@setgitdirectory/refs/heads/\@gitbranch)}
         }
 
