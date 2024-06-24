@@ -2468,7 +2468,7 @@
 \def\@gitrepository{-{}-{}-{}-}
 \def\@gitbranch{-{}-{}-{}-}
 \def\@githashlong{-{}-{}-{}-}
-\def\@githashshort{-{}-{}-{}-}
+\def\@githashshort{-{}-{}-{}-default-{}-{}-{}-}
 %
 \def\gitcontent{
     \IfFileExists{gitsettings}{%   
