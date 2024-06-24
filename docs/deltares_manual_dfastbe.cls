@@ -2471,30 +2471,34 @@
 \def\@githashshort{-{}-{}-{}-}
 %
 \def\gitcontent{
-    \IfFileExists{\@setgitdirectory/HEAD.}{%   
-        \CatchFileDef{\headfull}{\@setgitdirectory/HEAD.}{}   
-        \StrGobbleRight{\headfull}{1}[\head]    
-        \StrBehind[2]{\head}{/}[\@gitbranch] 
-        \typeout{--- JanM Branch name: \@gitbranch}
-        \IfFileExists{\@setgitdirectory/refs/heads/\@gitbranch.}{%
-            \CatchFileDef{\@githashlong}{\@setgitdirectory/refs/heads/\@gitbranch.}{}
-        }{%    
-            \typeout{--- JanM file not found: \@setgitdirectory/refs/heads/\@gitbranch.}
-            \def\@githashlong{-{}-{}-{}-{}-{}-{}-{}\ (File does not exist: \@setgitdirectory/refs/heads/\@gitbranch)}
-        }
-
-        % find the git-repository
-        \CatchFileEdef{\configfull}{\@setgitdirectory/logs/HEAD.}{\catcode`\\=11\catcode`\_=11\relax}  % text could have backslashes and underscores ex: "D:\git_databases\git_mooiman"
-        % \typeout{--- JanM Config: \configfull}
-        \StrBehind{\configfull}{from }[\gitreposA]  % look for the string "from "
-        \StrBefore{\gitreposA}{ }[\gitreposC]  % string before first white space
-        \StrSubstitute{\gitreposC}{\\}{\textbackslash }[\gitreposD]
-        \StrSubstitute{\gitreposD}{_}{\_}[\gitreposE]
-        \typeout{--- JanM Repository location: \gitreposE}
-        \gdef\@gitrepository{\gitreposE}    
-        \StrLeft{\@githashlong}{7}[\@githashshort]
+    \IfFileExists{gitsettings}{%   
+        \input{gitsettings}
     }{
-        % nothing: File \@setgitdirectory/HEAD. does not exist
+        \IfFileExists{\@setgitdirectory/HEAD.}{%   
+            \CatchFileDef{\headfull}{\@setgitdirectory/HEAD.}{}   
+            \StrGobbleRight{\headfull}{1}[\head]    
+            \StrBehind[2]{\head}{/}[\@gitbranch] 
+            \typeout{--- JanM Branch name: \@gitbranch}
+            \IfFileExists{\@setgitdirectory/refs/heads/\@gitbranch.}{%
+                \CatchFileDef{\@githashlong}{\@setgitdirectory/refs/heads/\@gitbranch.}{}
+            }{%    
+                \typeout{--- JanM file not found: \@setgitdirectory/refs/heads/\@gitbranch.}
+                \def\@githashlong{-{}-{}-{}-{}-{}-{}-{}\ (File does not exist: \@setgitdirectory/refs/heads/\@gitbranch)}
+            }
+
+            % find the git-repository
+            \CatchFileEdef{\configfull}{\@setgitdirectory/logs/HEAD.}{\catcode`\\=11\catcode`\_=11\relax}  % text could have backslashes and underscores ex: "D:\git_databases\git_mooiman"
+            % \typeout{--- JanM Config: \configfull}
+            \StrBehind{\configfull}{from }[\gitreposA]  % look for the string "from "
+            \StrBefore{\gitreposA}{ }[\gitreposC]  % string before first white space
+            \StrSubstitute{\gitreposC}{\\}{\textbackslash }[\gitreposD]
+            \StrSubstitute{\gitreposD}{_}{\_}[\gitreposE]
+            \typeout{--- JanM Repository location: \gitreposE}
+            \gdef\@gitrepository{\gitreposE}    
+            \StrLeft{\@githashlong}{7}[\@githashshort]
+        }{
+            % nothing: File \@setgitdirectory/HEAD. does not exist
+        }
     }
 }
 \newcommand{\gitdirectory}{\@setgitdirectory}
