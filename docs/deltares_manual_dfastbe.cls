@@ -2472,7 +2472,9 @@
 %
 \def\gitcontent{
     \IfFileExists{gitsettings}{%   
+        \typeout{--- JanM including gitsettings.}
         \input{gitsettings}
+        \typeout{--- JanM git hash \@githashshort.}
     }{
         \IfFileExists{\@setgitdirectory/HEAD.}{%   
             \CatchFileDef{\headfull}{\@setgitdirectory/HEAD.}{}   
