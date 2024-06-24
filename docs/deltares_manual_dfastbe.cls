@@ -2471,9 +2471,11 @@
 \def\@githashshort{-{}-{}-{}-default-{}-{}-{}-}
 %
 \IfFileExists{gitsettings}{%   
-    \typeout{--- JanM including gitsettings.}
     \input{gitsettings}
-    \typeout{--- JanM git hash \@githashshort.}
+    \typeout{--- Git repository: \@gitrepository.}
+    \typeout{--- Git branch: \@gitbranch.}
+    \typeout{--- Git long hash: \@githashlong.}
+    \typeout{--- Git short hash: \@githashshort.}
 }{}
 %
 \def\gitcontent{
@@ -2488,7 +2490,6 @@
             \IfFileExists{\@setgitdirectory/refs/heads/\@gitbranch.}{%
                 \CatchFileDef{\@githashlong}{\@setgitdirectory/refs/heads/\@gitbranch.}{}
             }{%    
-                \typeout{--- JanM file not found: \@setgitdirectory/refs/heads/\@gitbranch.}
                 \def\@githashlong{-{}-{}-{}-{}-{}-{}-{}\ (File does not exist: \@setgitdirectory/refs/heads/\@gitbranch)}
             }
 
