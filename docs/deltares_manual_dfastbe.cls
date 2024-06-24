@@ -2470,11 +2470,15 @@
 \def\@githashlong{-{}-{}-{}-}
 \def\@githashshort{-{}-{}-{}-default-{}-{}-{}-}
 %
+\IfFileExists{gitsettings}{%   
+    \typeout{--- JanM including gitsettings.}
+    \input{gitsettings}
+    \typeout{--- JanM git hash \@githashshort.}
+}{}
+%
 \def\gitcontent{
-    \IfFileExists{gitsettings}{%   
-        \typeout{--- JanM including gitsettings.}
-        \input{gitsettings}
-        \typeout{--- JanM git hash \@githashshort.}
+    \IfFileExists{gitsettings}{%
+        % skip the processing of the Git files.
     }{
         \IfFileExists{\@setgitdirectory/HEAD.}{%   
             \CatchFileDef{\headfull}{\@setgitdirectory/HEAD.}{}   
