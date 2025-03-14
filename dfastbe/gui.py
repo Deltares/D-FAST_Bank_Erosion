@@ -32,15 +32,18 @@ from typing import Dict, Any, Optional, Tuple, List
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import PyQt5.QtGui
-import dfastbe.batch
-import dfastbe.io
 import pathlib
 import sys
 import os
 import configparser
-import matplotlib.pyplot
+import matplotlib.pyplot as plt
 import subprocess
 from functools import partial
+
+from dfastbe import batch
+from dfastbe import io
+from dfastbe import __version__
+
 
 DialogObject = Dict[str, PyQt5.QtCore.QObject]
 
@@ -69,7 +72,7 @@ def gui_text(key: str, prefix: str = "gui_", dict: Dict[str, Any] = {}):
     -------
         The first line of the text in the dictionary expanded with the keys.
     """
-    cstr = dfastbe.io.get_text(prefix + key)
+    cstr = io.get_text(prefix + key)
     str = cstr[0].format(**dict)
     return str
 
@@ -1198,13 +1201,13 @@ def run_detection() -> None:
     """
     config = get_configuration()
     rootdir = os.getcwd()
-    config = dfastbe.batch.config_to_relative_paths(rootdir, config)
+    config = batch.config_to_relative_paths(rootdir, config)
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
-    matplotlib.pyplot.close("all")
+    plt.close("all")
     # should maybe use a separate thread for this ...
     msg = ""
     try:
-        dfastbe.batch.banklines_core(config, rootdir, True)
+        batch.banklines_core(config, rootdir, True)
     except Exception as Ex:
         msg = str(Ex)
     dialog["application"].restoreOverrideCursor()
@@ -1226,13 +1229,13 @@ def run_erosion() -> None:
     """
     config = get_configuration()
     rootdir = os.getcwd()
-    config = dfastbe.batch.config_to_relative_paths(rootdir, config)
+    config = batch.config_to_relative_paths(rootdir, config)
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
-    matplotlib.pyplot.close("all")
+    plt.close("all")
     # should maybe use a separate thread for this ...
     msg = ""
     # try:
-    dfastbe.batch.bankerosion_core(config, rootdir, True)
+    batch.bankerosion_core(config, rootdir, True)
     # except Exception as Ex:
     #    msg = str(Ex)
     dialog["application"].restoreOverrideCursor()
@@ -1249,7 +1252,7 @@ def close_dialog() -> None:
     ---------
     None
     """
-    matplotlib.pyplot.close("all")
+    plt.close("all")
     dialog["window"].close()
 
 
@@ -1285,10 +1288,10 @@ def load_configuration(filename: str) -> None:
         if filename != "dfastbe.cfg":
             showError("The file '{}' does not exist!".format(filename))
         return
-    absfilename = dfastbe.io.absolute_path(os.getcwd(), filename)
+    absfilename = io.absolute_path(os.getcwd(), filename)
     rootdir = os.path.dirname(absfilename)
-    config = dfastbe.io.read_config(absfilename)
-    config = dfastbe.batch.config_to_absolute_paths(rootdir, config)
+    config = io.read_config(absfilename)
+    config = batch.config_to_absolute_paths(rootdir, config)
     try:
         version = config["General"]["Version"]
     except:
@@ -1297,52 +1300,52 @@ def load_configuration(filename: str) -> None:
     if version == "1.0":
         section = config["General"]
         dialog["chainFileEdit"].setText(section["RiverKM"])
-        studyRange = dfastbe.io.config_get_range(config, "General", "Boundaries")
+        studyRange = io.config_get_range(config, "General", "Boundaries")
         dialog["startRange"].setText(str(studyRange[0]))
         dialog["endRange"].setText(str(studyRange[1]))
         dialog["bankDirEdit"].setText(section["BankDir"])
-        bankFile = dfastbe.io.config_get_str(
+        bankFile = io.config_get_str(
             config, "General", "BankFile", default="bankfile",
         )
         dialog["bankFileName"].setText(bankFile)
-        flag = dfastbe.io.config_get_bool(config, "General", "Plotting", default=True)
+        flag = io.config_get_bool(config, "General", "Plotting", default=True)
         dialog["makePlotsEdit"].setChecked(flag)
-        flag = dfastbe.io.config_get_bool(config, "General", "SavePlots", default=True)
+        flag = io.config_get_bool(config, "General", "SavePlots", default=True)
         dialog["savePlotsEdit"].setChecked(flag)
-        flag = dfastbe.io.config_get_bool(config, "General", "SaveZoomPlots", default=False)
+        flag = io.config_get_bool(config, "General", "SaveZoomPlots", default=False)
         dialog["saveZoomPlotsEdit"].setChecked(flag)
-        zoomStepKM = dfastbe.io.config_get_float(config, "General", "ZoomStepKM", default=1.0)
+        zoomStepKM = io.config_get_float(config, "General", "ZoomStepKM", default=1.0)
         dialog["zoomPlotsRangeEdit"].setText(str(zoomStepKM))
-        figDir = dfastbe.io.config_get_str(
+        figDir = io.config_get_str(
             config,
             "General",
             "FigureDir",
-            default=dfastbe.io.absolute_path(rootdir, "figures"),
+            default=io.absolute_path(rootdir, "figures"),
         )
         dialog["figureDirEdit"].setText(figDir)
-        flag = dfastbe.io.config_get_bool(
+        flag = io.config_get_bool(
             config, "General", "ClosePlots", default=False
         )
         dialog["closePlotsEdit"].setChecked(flag)
-        flag = dfastbe.io.config_get_bool(
+        flag = io.config_get_bool(
             config, "General", "DebugOutput", default=False
         )
         dialog["debugOutputEdit"].setChecked(flag)
 
         section = config["Detect"]
         dialog["simFileEdit"].setText(section["SimFile"])
-        waterDepth = dfastbe.io.config_get_float(
+        waterDepth = io.config_get_float(
             config, "Detect", "WaterDepth", default=0.0,
         )
         dialog["waterDepth"].setText(str(waterDepth))
-        NBank = dfastbe.io.config_get_int(
+        NBank = io.config_get_int(
             config, "Detect", "NBank", default=0, positive=True
         )
-        DLines = dfastbe.io.config_get_bank_search_distances(config, NBank)
+        DLines = io.config_get_bank_search_distances(config, NBank)
         dialog["searchLines"].invisibleRootItem().takeChildren()
         for i in range(NBank):
             istr = str(i + 1)
-            fileName = dfastbe.io.config_get_str(config, "Detect", "Line" + istr)
+            fileName = io.config_get_str(config, "Detect", "Line" + istr)
             c1 = QtWidgets.QTreeWidgetItem(
                 dialog["searchLines"], [istr, fileName, str(DLines[i])]
             )
@@ -1356,31 +1359,31 @@ def load_configuration(filename: str) -> None:
         dialog["fairwayEdit"].setText(section["Fairway"])
         dialog["chainageOutStep"].setText(section["OutputInterval"])
         dialog["outDirEdit"].setText(section["OutputDir"])
-        bankNew = dfastbe.io.config_get_str(
+        bankNew = io.config_get_str(
             config, "Erosion", "BankNew", default="banknew",
         )
         dialog["newBankFile"].setText(bankNew)
-        bankEq = dfastbe.io.config_get_str(
+        bankEq = io.config_get_str(
             config, "Erosion", "BankEq", default="bankeq",
         )
         dialog["newEqBankFile"].setText(bankEq)
-        txt = dfastbe.io.config_get_str(
+        txt = io.config_get_str(
             config, "Erosion", "EroVol", default="erovol_standard.evo"
         )
         dialog["eroVol"].setText(txt)
-        txt = dfastbe.io.config_get_str(
+        txt = io.config_get_str(
             config, "Erosion", "EroVolEqui", default="erovol_eq.evo"
         )
         dialog["eroVolEqui"].setText(txt)
 
-        NLevel = dfastbe.io.config_get_int(
+        NLevel = io.config_get_int(
             config, "Erosion", "NLevel", default=0, positive=True
         )
         dialog["discharges"].invisibleRootItem().takeChildren()
         for i in range(NLevel):
             istr = str(i + 1)
-            fileName = dfastbe.io.config_get_str(config, "Erosion", "SimFile" + istr)
-            prob = dfastbe.io.config_get_str(config, "Erosion", "PDischarge" + istr)
+            fileName = io.config_get_str(config, "Erosion", "SimFile" + istr)
+            prob = io.config_get_str(config, "Erosion", "PDischarge" + istr)
             c1 = QtWidgets.QTreeWidgetItem(dialog["discharges"], [istr, fileName, prob])
         if NLevel > 0:
             dialog["dischargesEdit"].setEnabled(True)
@@ -1394,10 +1397,10 @@ def load_configuration(filename: str) -> None:
         setParam("shipNWaves", config, "Erosion", "NWave", "5")
         setParam("shipDraught", config, "Erosion", "Draught")
         setParam("wavePar0", config, "Erosion", "Wave0", "200.0")
-        wave0 = dfastbe.io.config_get_str(config, "Erosion", "Wave0", "200.0")
+        wave0 = io.config_get_str(config, "Erosion", "Wave0", "200.0")
         setParam("wavePar1", config, "Erosion", "Wave1", wave0)
 
-        useBankType = dfastbe.io.config_get_bool(
+        useBankType = io.config_get_bool(
             config, "Erosion", "Classes", default=True
         )
         dialog["bankType"].setEnabled(useBankType)
@@ -1438,7 +1441,7 @@ def load_configuration(filename: str) -> None:
             setOptParam(istr + "_shipDraught", config, "Erosion", "Draught" + istr)
             setOptParam(istr + "_bankSlope", config, "Erosion", "Slope" + istr)
             setOptParam(istr + "_bankReed", config, "Erosion", "Reed" + istr)
-            txt = dfastbe.io.config_get_str(
+            txt = io.config_get_str(
                 config, "Erosion", "EroVol" + istr, default=""
             )
             dialog[istr + "_eroVolEdit"].setText(txt)
@@ -1584,7 +1587,7 @@ def setParam(field: str, config, group: str, key: str, default: str = "??") -> N
         Default string if the group/key pair doesn't exist in the configuration.
 
     """
-    str = dfastbe.io.config_get_str(config, group, key, default)
+    str = io.config_get_str(config, group, key, default)
     try:
         val = float(str)
         dialog[field + "Type"].setCurrentText("Constant")
@@ -1616,7 +1619,7 @@ def setFilter(field: str, config, group: str, key: str) -> None:
         Name of the key in the configuration group.
 
     """
-    val = dfastbe.io.config_get_float(config, group, key, 0.0)
+    val = io.config_get_float(config, group, key, 0.0)
     if val > 0.0:
         dialog[field + "Active"].setChecked(True)
         dialog[field + "Width"].setText(str(val))
@@ -1639,7 +1642,7 @@ def setOptParam(field: str, config, group: str, key: str) -> None:
     key : str
         Name of the key in the configuration group.
     """
-    str = dfastbe.io.config_get_str(config, group, key, "")
+    str = io.config_get_str(config, group, key, "")
     if str == "":
         dialog[field + "Type"].setCurrentText("Use Default")
         dialog[field + "Edit"].setText("")
@@ -1672,8 +1675,8 @@ def menu_save_configuration() -> None:
     if filename != "":
         config = get_configuration()
         rootdir = os.path.dirname(filename)
-        config = dfastbe.batch.config_to_relative_paths(rootdir, config)
-        dfastbe.io.write_config(filename, config)
+        config = batch.config_to_relative_paths(rootdir, config)
+        io.write_config(filename, config)
 
 
 def get_configuration() -> configparser.ConfigParser:
@@ -1829,7 +1832,7 @@ def menu_about_self():
     """
     msg = QtWidgets.QMessageBox()
     msg.setIcon(QtWidgets.QMessageBox.Information)
-    msg.setText("D-FAST Bank Erosion " + dfastbe.__version__)
+    msg.setText(f"D-FAST Bank Erosion {__version__}")
     msg.setInformativeText("Copyright (c) 2020 Deltares.")
     msg.setDetailedText(gui_text("license"))
     msg.setWindowTitle(gui_text("about"))
@@ -1857,7 +1860,7 @@ def menu_open_manual():
     ---------
     None
     """
-    progloc = dfastbe.io.get_progloc()
+    progloc = io.get_progloc()
     filename = progloc + os.path.sep + "dfastbe_usermanual.pdf"
     subprocess.Popen(filename, shell=True)
 
