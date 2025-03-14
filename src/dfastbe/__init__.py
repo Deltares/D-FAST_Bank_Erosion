@@ -1,6 +1,4 @@
-
-"""
-D-FAST Bank Erosion package
+"""D-FAST Bank Erosion package.
 
 A Python package to perform a bank erosion analysis based on a number of D-Flow FM simulations.
 The source code of this tool is located at
@@ -32,7 +30,7 @@ are registered trademarks of Stichting Deltares, and remain the property of
 Stichting Deltares. All rights reserved.
 """
 
-from typing import List, Any
+from typing import Any, List
 
 __version__ = "2.3.1"
 

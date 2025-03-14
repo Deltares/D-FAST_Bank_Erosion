@@ -26,30 +26,26 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Dict, Any, Optional, Tuple, List
-
-from PyQt5 import QtWidgets
-from PyQt5 import QtCore
-import PyQt5.QtGui
-import pathlib
-import sys
-import os
 import configparser
-import matplotlib.pyplot as plt
+import os
+import pathlib
 import subprocess
+import sys
 from functools import partial
+from typing import Any, Dict, List, Optional, Tuple
 
-from dfastbe import batch
-from dfastbe import io
-from dfastbe import __version__
+import matplotlib.pyplot as plt
+import PyQt5.QtGui
+from PyQt5 import QtCore, QtWidgets
 
+from dfastbe import __version__, batch, io
 
 DialogObject = Dict[str, PyQt5.QtCore.QObject]
 
 dialog: DialogObject
 
 
-def gui_text(key: str, prefix: str = "gui_", dict: Dict[str, Any] = {}):
+def gui_text(key: str, prefix: str = "gui_", input_dict: Dict[str, Any] = {}):
     """
     Query the global dictionary of texts for a single string in the GUI.
 
@@ -64,7 +60,7 @@ def gui_text(key: str, prefix: str = "gui_", dict: Dict[str, Any] = {}):
         The key string used to query the dictionary (extended with prefix).
     prefix : str
         The prefix used in combination with the key (default "gui_").
-    dict : Dict[str, Any]
+    input_dict : Dict[str, Any]
         A dictionary used for placeholder expansions (default empty).
 
     Returns
@@ -72,7 +68,7 @@ def gui_text(key: str, prefix: str = "gui_", dict: Dict[str, Any] = {}):
         The first line of the text in the dictionary expanded with the keys.
     """
     cstr = io.get_text(prefix + key)
-    str = cstr[0].format(**dict)
+    str = cstr[0].format(**input_dict)
     return str
 
 
@@ -223,7 +219,7 @@ def addGeneralTab(
     gridly.addWidget(zoomPlotsRangeTxt, 0, 1)
     dialog["zoomPlotsRangeTxt"] = zoomPlotsRangeTxt
 
-    zoomPlotsRangeEdit = QtWidgets.QLineEdit("1.0",win)
+    zoomPlotsRangeEdit = QtWidgets.QLineEdit("1.0", win)
     zoomPlotsRangeEdit.setValidator(validator("positive_real"))
     zoomPlotsRangeEdit.setEnabled(False)
     gridly.addWidget(zoomPlotsRangeEdit, 0, 2)
@@ -474,8 +470,7 @@ def addBankTab(
 def addFilter(
     gridLayout: PyQt5.QtWidgets.QGridLayout, row: int, key: str, labelString: str
 ) -> None:
-    """
-    Add a line of controls for a filter
+    """Add a line of controls for a filter.
 
     Arguments
     ---------
@@ -508,8 +503,7 @@ def addFilter(
 
 
 def updateFilter(key: str) -> None:
-    """
-    Implements the dialog setting switching for both general and optional parameters.
+    """Implements the dialog setting switching for both general and optional parameters.
 
     Arguments
     ---------
@@ -523,8 +517,7 @@ def updateFilter(key: str) -> None:
 
 
 def bankStrengthSwitch() -> None:
-    """
-    Implements the dialog settings depending on the bank strength specification method.
+    """Implements the dialog settings depending on the bank strength specification method.
 
     Arguments
     ---------
@@ -662,8 +655,7 @@ def addOpenFileRow(
 
 
 def getIcon(filename: str) -> PyQt5.QtGui.QIcon:
-    """
-    Opens the icon file relative to the location of the program.
+    """Opens the icon file relative to the location of the program.
 
     Arguments
     ---------
@@ -763,7 +755,7 @@ def addRemoveEditLayout(
 def updatePlotting() -> None:
     """
     Update the plotting flags.
-    
+
     Arguments
     ---------
     None
@@ -802,11 +794,11 @@ def addAnItem(key: str) -> None:
     istr = str(i)
     if key == "searchLines":
         fileName, dist = editASearchLine(key, istr)
-        c1 = QtWidgets.QTreeWidgetItem(dialog["searchLines"], [istr, fileName, dist])
+        QtWidgets.QTreeWidgetItem(dialog["searchLines"], [istr, fileName, dist])
     elif key == "discharges":
         prob = str(1 / (nItems + 1))
         fileName, prob = editADischarge(key, istr, prob=prob)
-        c1 = QtWidgets.QTreeWidgetItem(dialog["discharges"], [istr, fileName, prob])
+        QtWidgets.QTreeWidgetItem(dialog["discharges"], [istr, fileName, prob])
         addTabForLevel(istr)
         dialog["refLevel"].validator().setTop(i)
     dialog[key + "Edit"].setEnabled(True)
@@ -816,7 +808,7 @@ def addAnItem(key: str) -> None:
 def setDialogSize(editDialog: PyQt5.QtWidgets.QDialog, width: int, height: int) -> None:
     """
     Set the width and height of a dialog and position it centered relative to the main window.
-    
+
     Arguments
     ---------
     editDialog : QtWidgets.QDialog
@@ -961,7 +953,6 @@ def editAnItem(key: str) -> None:
         Short name of the parameter.
     """
     selected = dialog[key].selectedItems()
-    root = dialog[key].invisibleRootItem()
     if len(selected) > 0:
         istr = selected[0].text(0)
         if key == "searchLines":
@@ -1052,7 +1043,6 @@ def selectFile(key: str) -> None:
     key : str
         Short name of the parameter.
     """
-    dnm: str
     if not dialog[key + "File"].hasFocus():
         # in the add/edit dialogs, the selectFile is triggered when the user presses enter in one of the lineEdit boxes ...
         # don't trigger the actual selectFile
@@ -1167,18 +1157,28 @@ def selectFile(key: str) -> None:
                         # file should end on _<nr>
                         nr = ""
                         while fil[-1] in "1234567890":
-                             nr = rkey[-1] + nr
-                             fil = fil[:-1]
+                            nr = rkey[-1] + nr
+                            fil = fil[:-1]
                         if nr == "" or fil[-1] != "_":
-                            print("Missing bank number(s) at end of file name. Reference not updated.")
+                            print(
+                                "Missing bank number(s) at end of file name. Reference not updated."
+                            )
                             fil = ""
                         else:
                             fil = fil[:-1]
                 else:
                     if ext == "":
-                        print("Unsupported file extension {} while expecting no extension. Reference not updated.".format(fext))
+                        print(
+                            "Unsupported file extension {} while expecting no extension. Reference not updated.".format(
+                                fext
+                            )
+                        )
                     else:
-                        print("Unsupported file extension {} while expecting {}. Reference not updated.".format(fext,ext))
+                        print(
+                            "Unsupported file extension {} while expecting {}. Reference not updated.".format(
+                                fext, ext
+                            )
+                        )
                     fil = ""
         else:
             print(key)
@@ -1190,7 +1190,7 @@ def selectFile(key: str) -> None:
 def run_detection() -> None:
     """
     Run the bank line detection based on settings in the GUI.
-    
+
     Use a dummy configuration name in the current work directory to create
     relative paths.
 
@@ -1232,7 +1232,7 @@ def run_erosion() -> None:
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
     plt.close("all")
     # should maybe use a separate thread for this ...
-    msg = ""
+    # msg = ""
     # try:
     batch.bankerosion_core(config, rootdir, True)
     # except Exception as Ex:
@@ -1304,7 +1304,10 @@ def load_configuration(filename: str) -> None:
         dialog["endRange"].setText(str(studyRange[1]))
         dialog["bankDirEdit"].setText(section["BankDir"])
         bankFile = io.config_get_str(
-            config, "General", "BankFile", default="bankfile",
+            config,
+            "General",
+            "BankFile",
+            default="bankfile",
         )
         dialog["bankFileName"].setText(bankFile)
         flag = io.config_get_bool(config, "General", "Plotting", default=True)
@@ -1322,30 +1325,27 @@ def load_configuration(filename: str) -> None:
             default=io.absolute_path(rootdir, "figures"),
         )
         dialog["figureDirEdit"].setText(figDir)
-        flag = io.config_get_bool(
-            config, "General", "ClosePlots", default=False
-        )
+        flag = io.config_get_bool(config, "General", "ClosePlots", default=False)
         dialog["closePlotsEdit"].setChecked(flag)
-        flag = io.config_get_bool(
-            config, "General", "DebugOutput", default=False
-        )
+        flag = io.config_get_bool(config, "General", "DebugOutput", default=False)
         dialog["debugOutputEdit"].setChecked(flag)
 
         section = config["Detect"]
         dialog["simFileEdit"].setText(section["SimFile"])
         waterDepth = io.config_get_float(
-            config, "Detect", "WaterDepth", default=0.0,
+            config,
+            "Detect",
+            "WaterDepth",
+            default=0.0,
         )
         dialog["waterDepth"].setText(str(waterDepth))
-        NBank = io.config_get_int(
-            config, "Detect", "NBank", default=0, positive=True
-        )
+        NBank = io.config_get_int(config, "Detect", "NBank", default=0, positive=True)
         DLines = io.config_get_bank_search_distances(config, NBank)
         dialog["searchLines"].invisibleRootItem().takeChildren()
         for i in range(NBank):
             istr = str(i + 1)
             fileName = io.config_get_str(config, "Detect", "Line" + istr)
-            c1 = QtWidgets.QTreeWidgetItem(
+            QtWidgets.QTreeWidgetItem(
                 dialog["searchLines"], [istr, fileName, str(DLines[i])]
             )
         if NBank > 0:
@@ -1359,11 +1359,17 @@ def load_configuration(filename: str) -> None:
         dialog["chainageOutStep"].setText(section["OutputInterval"])
         dialog["outDirEdit"].setText(section["OutputDir"])
         bankNew = io.config_get_str(
-            config, "Erosion", "BankNew", default="banknew",
+            config,
+            "Erosion",
+            "BankNew",
+            default="banknew",
         )
         dialog["newBankFile"].setText(bankNew)
         bankEq = io.config_get_str(
-            config, "Erosion", "BankEq", default="bankeq",
+            config,
+            "Erosion",
+            "BankEq",
+            default="bankeq",
         )
         dialog["newEqBankFile"].setText(bankEq)
         txt = io.config_get_str(
@@ -1383,7 +1389,7 @@ def load_configuration(filename: str) -> None:
             istr = str(i + 1)
             fileName = io.config_get_str(config, "Erosion", "SimFile" + istr)
             prob = io.config_get_str(config, "Erosion", "PDischarge" + istr)
-            c1 = QtWidgets.QTreeWidgetItem(dialog["discharges"], [istr, fileName, prob])
+            QtWidgets.QTreeWidgetItem(dialog["discharges"], [istr, fileName, prob])
         if NLevel > 0:
             dialog["dischargesEdit"].setEnabled(True)
             dialog["dischargesRemove"].setEnabled(True)
@@ -1399,9 +1405,7 @@ def load_configuration(filename: str) -> None:
         wave0 = io.config_get_str(config, "Erosion", "Wave0", "200.0")
         setParam("wavePar1", config, "Erosion", "Wave1", wave0)
 
-        useBankType = io.config_get_bool(
-            config, "Erosion", "Classes", default=True
-        )
+        useBankType = io.config_get_bool(config, "Erosion", "Classes", default=True)
         dialog["bankType"].setEnabled(useBankType)
         dialog["bankTypeType"].setEnabled(useBankType)
         dialog["bankTypeEdit"].setEnabled(useBankType)
@@ -1440,9 +1444,7 @@ def load_configuration(filename: str) -> None:
             setOptParam(istr + "_shipDraught", config, "Erosion", "Draught" + istr)
             setOptParam(istr + "_bankSlope", config, "Erosion", "Slope" + istr)
             setOptParam(istr + "_bankReed", config, "Erosion", "Reed" + istr)
-            txt = io.config_get_str(
-                config, "Erosion", "EroVol" + istr, default=""
-            )
+            txt = io.config_get_str(config, "Erosion", "EroVol" + istr, default="")
             dialog[istr + "_eroVolEdit"].setText(txt)
 
     else:
@@ -1776,6 +1778,7 @@ def get_configuration() -> configparser.ConfigParser:
         config["Erosion"]["PDischarge" + istr] = (
             dialog["discharges"].topLevelItem(i).text(2)
         )
+
         if dialog[istr + "_shipTypeType"].currentText() != "Use Default":
             if dialog[istr + "_shipTypeType"].currentText() == "Constant":
                 config["Erosion"]["ShipType" + istr] = (
@@ -1874,7 +1877,7 @@ def main(config: Optional[str] = None) -> None:
         Optional name of configuration file.
     """
     create_dialog()
-    if not config is None:
+    if config is not None:
         load_configuration(config)
 
     activate_dialog()

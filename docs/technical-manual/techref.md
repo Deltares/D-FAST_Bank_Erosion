@@ -200,7 +200,7 @@ It consists of two data columns: the first column specifies the x-coordinate and
     1.1895912376678947e+005  4.1443761348684208e+005
     1.1897326809242106e+005  4.1444033552631579e+005
     1.1898741241805263e+005  4.1444305756578950e+005
-    
+
     ...continued...
 
 
@@ -216,8 +216,8 @@ It consists of three data columns: the first column specifies the chainage, the 
     6     176913.890600      310727.781300
     10     176886.578100     314661.750000
     15     176927.328100     319589.687500
-    16     176357.000000     320335.375000 
-    
+    16     176357.000000     320335.375000
+
     ...continued...
 
 ### parameter files
@@ -292,7 +292,7 @@ The file format differs slightly from the file format used by WAQBANK since that
     69.10   7.40    69.27
     69.20   5.64    65.47
     69.30   11.98   55.78
-    
+
     ...continued...
 
 
@@ -313,7 +313,7 @@ The following excerpt of the default `messages.UK.cfg` dialog text file shows th
 The header string contains one placeholder, namely `{version}` for the the version number.
 
     []
-    
+
     [header_banklines]
     =====================================================
     Determine bank lines
@@ -322,7 +322,7 @@ The header string contains one placeholder, namely `{version}` for the the versi
     source: {location}
     -----------------------------------------------------
     [end_banklines]
-    
+
     =====================================================
     ===        BankLines ended successfully!          ===
     =====================================================

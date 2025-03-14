@@ -26,19 +26,19 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import List, Tuple, Optional
-import shapely
+from typing import List, Optional, Tuple
 
+import geopandas as gpd
 import matplotlib
 import matplotlib.pyplot as plt
-import geopandas as gpd
 import numpy as np
+import shapely
 
 
 def savefig(fig: matplotlib.figure.Figure, filename: str) -> None:
     """
     Save a single figure to file.
-    
+
     Arguments
     ---------
     fig : matplotlib.figure.Figure
@@ -54,10 +54,10 @@ def savefig(fig: matplotlib.figure.Figure, filename: str) -> None:
 def setsize(fig: matplotlib.figure.Figure) -> None:
     """
     Set the size of a figure.
-    
+
     Currently the size is hardcoded, but functionality may be extended in the
     future.
-    
+
     Arguments
     ---------
     fig : matplotlib.figure.Figure
@@ -74,11 +74,11 @@ def set_bbox(
 ) -> None:
     """
     Specify the bounding limits of an axes object.
-    
+
     Arguments
     ---------
     ax : matplotlib.axes.Axes
-        Axes object to be adjusted. 
+        Axes object to be adjusted.
     bbox : Tuple[float, float, float, float]
         Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
     scale: float
@@ -93,7 +93,7 @@ def chainage_markers(
 ) -> None:
     """
     Add markers indicating the river chainage to a plot.
-    
+
     Arguments
     ---------
     xykm : np.ndarray
@@ -131,7 +131,7 @@ def plot_mesh(
 ) -> None:
     """
     Add a mesh to a plot.
-    
+
     Arguments
     ---------
     ax : matplotlib.axes.Axes
@@ -172,7 +172,7 @@ def plot_mesh_patches(
 ) -> matplotlib.collections.PolyCollection:
     """
     Add a collection of patches to the plot one for every face of the mesh.
-    
+
     Arguments
     ---------
     ax : matplotlib.axes.Axes
@@ -193,7 +193,7 @@ def plot_mesh_patches(
         Upper limit for the color scale.
     scale : float
         Indicates whether the axes are in m (1) or km (1000).
-    
+
     Returns
     -------
     p : matplotlib.collections.PolyCollection
@@ -245,10 +245,10 @@ def plot_detect1(
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank line detection plot.
-    
+
     The figure contains a map of the water depth, the chainage, and detected
     bank lines.
-    
+
     Arguments
     ---------
     bbox : Tuple[float, float, float, float]
@@ -283,7 +283,7 @@ def plot_detect1(
         Label for the bank search areas.
     bankline_txt : str
         Label for the identified bank lines.
-    
+
     Returns
     -------
     fig : matplotlib.figure.Figure:
@@ -294,15 +294,14 @@ def plot_detect1(
     fig, ax = plt.subplots()
     setsize(fig)
     ax.set_aspect(1)
-    #
-    scale = 1 # using scale 1 here because of the geopandas plot commands
+    # using scale 1 here because of the geopandas plot commands
+    scale = 1
     chainage_markers(xykm, ax, ndec=0, scale=scale)
-    p = plot_mesh_patches(ax, fn, nnodes, xn, yn, h, 0, hmax, scale=scale)
+    plot_mesh_patches(ax, fn, nnodes, xn, yn, h, 0, hmax, scale=scale)
     for b, bankarea in enumerate(bankareas):
         gpd.GeoSeries(bankarea).plot(ax=ax, alpha=0.2, color="k")
         gpd.GeoSeries(bank[b]).plot(ax=ax, color="r")
-    cbar = fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=waterdepth_txt)
-    #
+
     shaded = matplotlib.patches.Patch(color="k", alpha=0.2)
     bankln = matplotlib.lines.Line2D([], [], color="r")
     handles = [shaded, bankln]
@@ -334,14 +333,14 @@ def plot1_waterdepth_and_banklines(
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with water depths and initial bank lines.
-    
+
     bbox : Tuple[float, float, float, float]
         Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
     xykm : np.ndarray
         Array containing the x, y, and chainage; unit m for x and y, km for chainage.
     banklines : gpd.geodataframe.GeoDataFrame
         Pandas object containing the bank lines.
-        
+
     fn : np.ndarray
         N x M array listing the nodes (max M) per face (total N) of the mesh.
     nnodes : np.ndarray
@@ -362,7 +361,7 @@ def plot1_waterdepth_and_banklines(
         Label for the axes title.
     waterdepth_txt : str
         Label for the color bar.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -380,9 +379,8 @@ def plot1_waterdepth_and_banklines(
     for bl in banklines.geometry:
         bp = np.array(bl)
         ax.plot(bp[:, 0] / scale, bp[:, 1] / scale, color="k")
-    p = plot_mesh_patches(ax, fn, nnodes, xn, yn, h, 0, hmax)
-    cbar = fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=waterdepth_txt)
-    #
+    plot_mesh_patches(ax, fn, nnodes, xn, yn, h, 0, hmax)
+
     set_bbox(ax, bbox)
     ax.set_xlabel(xlabel_txt)
     ax.set_ylabel(ylabel_txt)
@@ -410,7 +408,7 @@ def plot2_eroded_distance_and_equilibrium(
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with predicted bank line shift and equilibrium bank line.
-    
+
     Arguments
     ---------
     bbox : Tuple[float, float, float, float]
@@ -445,7 +443,7 @@ def plot2_eroded_distance_and_equilibrium(
         Label for the color bar.
     eqbank_txt : str
         Label for the equilibrium bank position.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -475,7 +473,7 @@ def plot2_eroded_distance_and_equilibrium(
         nbp = len(bankc)
         #
         dxy = bankc[1:] - bankc[:-1]
-        ds = np.sqrt((dxy ** 2).sum(axis=1))
+        ds = np.sqrt((dxy**2).sum(axis=1))
         dxy = dxy * (dn_tot[ib] / ds).reshape((nbp - 1, 1))
         #
         x = np.zeros(((nbp - 1) * 4,))
@@ -505,7 +503,7 @@ def plot2_eroded_distance_and_equilibrium(
         #
         colors = ["lawngreen", "gold", "darkorange"]
         cmap = matplotlib.colors.LinearSegmentedColormap.from_list("mycmap", colors)
-        p = ax.tripcolor(
+        ax.tripcolor(
             x / scale,
             y / scale,
             tfn,
@@ -516,11 +514,7 @@ def plot2_eroded_distance_and_equilibrium(
             vmin=0,
             vmax=2 * dnav_max,
         )
-    #
-    cbar = fig.colorbar(
-        p, ax=ax, shrink=0.5, drawedges=False, label=eroclr_txt
-    )
-    #
+
     shaded = matplotlib.patches.Patch(color="gold", linewidth=0.5)
     eqbank = matplotlib.lines.Line2D([], [], color="k", linewidth=1)
     handles = [shaded, eqbank]
@@ -547,7 +541,7 @@ def plot3_eroded_volume(
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with total eroded volume subdivided per discharge level.
-    
+
     Arguments
     ---------
     km_mid : np.ndarray
@@ -566,7 +560,7 @@ def plot3_eroded_volume(
         Label for discharge level.
     banklabel : str
         Label for bank id.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -589,16 +583,16 @@ def plot3_eroded_volume(
 
 
 def plot3_stacked_per_discharge(
-   ax: matplotlib.axes.Axes,
-   km_mid: np.ndarray,
-   km_step: float,
-   dv: List[List[np.ndarray]],
-   qlabel: str,
-   wfrac: float,
+    ax: matplotlib.axes.Axes,
+    km_mid: np.ndarray,
+    km_step: float,
+    dv: List[List[np.ndarray]],
+    qlabel: str,
+    wfrac: float,
 ) -> None:
     """
     Add a stacked plot of bank erosion with total eroded volume subdivided per discharge level to the selected axes.
-    
+
     Arguments
     ---------
     fig : matplotlib.figure.Figure
@@ -615,7 +609,7 @@ def plot3_stacked_per_discharge(
         Label for discharge level.
     wfrac : float
         Width fraction for the stacked column.
-    
+
     Results
     -------
     None
@@ -650,16 +644,16 @@ def plot3_stacked_per_discharge(
 
 
 def plot3_stacked_per_bank(
-   ax: matplotlib.axes.Axes,
-   km_mid: np.ndarray,
-   km_step: float,
-   dv: List[List[np.ndarray]],
-   banklabel: str,
-   wfrac: float,
+    ax: matplotlib.axes.Axes,
+    km_mid: np.ndarray,
+    km_step: float,
+    dv: List[List[np.ndarray]],
+    banklabel: str,
+    wfrac: float,
 ) -> None:
     """
     Add a stacked plot of bank erosion with total eroded volume subdivided per bank to the selected axes.
-    
+
     Arguments
     ---------
     fig : matplotlib.figure.Figure
@@ -676,7 +670,7 @@ def plot3_stacked_per_bank(
         Label for bank id.
     wfrac : float
         Width fraction for the stacked column.
-    
+
     Results
     -------
     None
@@ -721,7 +715,7 @@ def plot3_eroded_volume_subdivided_1(
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with total eroded volume subdivided per discharge level.
-    
+
     Arguments
     ---------
     km_mid : np.ndarray
@@ -738,7 +732,7 @@ def plot3_eroded_volume_subdivided_1(
         Label for axes title.
     qlabel : str
         Label for discharge level.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -770,7 +764,7 @@ def plot3_eroded_volume_subdivided_2(
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with total eroded volume subdivided per bank.
-    
+
     Arguments
     ---------
     km_mid : np.ndarray
@@ -787,7 +781,7 @@ def plot3_eroded_volume_subdivided_2(
         Label for axes title.
     banklabel : str
         Label for bank id.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -818,7 +812,7 @@ def plot4_eroded_volume_eq(
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with equilibrium eroded volume.
-    
+
     Arguments
     ---------
     km_mid : np.ndarray
@@ -833,7 +827,7 @@ def plot4_eroded_volume_eq(
         Label for the vertical erosion volume axes.
     title_txt : str
         Label for axes title.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -875,7 +869,7 @@ def plot5series_waterlevels_per_bank(
 ) -> [List[matplotlib.figure.Figure], List[matplotlib.axes.Axes]]:
     """
     Create the bank erosion plots with water levels, bank height and bank protection height along each bank.
-    
+
     Arguments
     ---------
     bank_km_mid : List[np.ndarray]
@@ -908,7 +902,7 @@ def plot5series_waterlevels_per_bank(
         Label for the axes title.
     elevation_unit : str
         Unit used for all elevation data.
-    
+
     Results
     -------
     figlist : List[matplotlib.figure.Figure]
@@ -963,7 +957,11 @@ def plot5series_waterlevels_per_bank(
         #
         wl_avg = wl_avg / n_levels
         ax.plot(
-            bk, wl_avg, color=(0.5, 0.5, 0.5), linewidth=2, label=avg_waterlevel_txt,
+            bk,
+            wl_avg,
+            color=(0.5, 0.5, 0.5),
+            linewidth=2,
+            label=avg_waterlevel_txt,
         )
         ax.plot(bk, bankheight[ib], color=(0.5, 0.5, 0.5), label=bankheight_txt)
         ymin, ymax = ax.get_ylim()
@@ -984,7 +982,7 @@ def plot5series_waterlevels_per_bank(
         handles, labels = ax.get_legend_handles_labels()
         #
         # use a slightly higher alpha for the legend to make it stand out better.
-        iq = int(n_levels/2)
+        iq = int(n_levels / 2)
         shaded = matplotlib.patches.Patch(color=clrs[iq + 1], alpha=0.2)
         handles = [*handles[:-3], shaded, *handles[-3:]]
         labels = [*labels[:-3], shipwave_txt, *labels[-3:]]
@@ -1015,7 +1013,7 @@ def plot6series_velocity_per_bank(
 ) -> [List[matplotlib.figure.Figure], List[matplotlib.axes.Axes]]:
     """
     Create the bank erosion plots with velocities and critical velocities along each bank.
-    
+
     Arguments
     ---------
     bank_km_mid : List[np.ndarray]
@@ -1042,7 +1040,7 @@ def plot6series_velocity_per_bank(
         Label for the axes title.
     veloc_unit: str
         Unit used for all velocities.
-    
+
     Results
     -------
     figlist : List[matplotlib.figure.Figure]
@@ -1092,7 +1090,7 @@ def plot7_banktype(
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with colour-coded bank types.
-    
+
     Arguments
     ---------
     bbox : Tuple[float, float, float, float]
@@ -1112,7 +1110,7 @@ def plot7_banktype(
         Label for the y-axis.
     title_txt : str
         Label for the axes title.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -1146,9 +1144,7 @@ def plot7_banktype(
                     ax.plot(x, y, color=clrs[ibt])
             else:
                 if ib == 0:
-                    ax.plot(
-                        np.nan, np.nan, color=clrs[ibt], label=taucls_str[ibt]
-                    )
+                    ax.plot(np.nan, np.nan, color=clrs[ibt], label=taucls_str[ibt])
     #
     set_bbox(ax, bbox)
     ax.set_xlabel(xlabel_txt)
@@ -1171,7 +1167,7 @@ def plot8_eroded_distance(
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with total and equilibrium eroded distance.
-    
+
     Arguments
     ---------
     bank_km_mid : List[np.ndarray]
@@ -1190,7 +1186,7 @@ def plot8_eroded_distance(
         General label for bank erosion distance.
     dn_unit: str
         Unit used for bank erosion distance.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -1225,14 +1221,14 @@ def plot8_eroded_distance(
 def get_colors(cmap_name: str, n: int) -> List[Tuple[float, float, float]]:
     """
     Obtain N colors from the specified colormap.
-    
+
     Arguments
     ---------
     cmap_name : str
         Name of the color map.
     n : int
         Number of colors to be returned.
-    
+
     Returns
     -------
     clrcyc : List[Tuple[float, float, float]]
@@ -1243,7 +1239,13 @@ def get_colors(cmap_name: str, n: int) -> List[Tuple[float, float, float]]:
     return clrs
 
 
-def zoom_x_and_save(fig: matplotlib.figure.Figure, ax: matplotlib.axes.Axes, figbase: str, plot_ext: str, xzoom: List[Tuple[float,float]]) -> None:
+def zoom_x_and_save(
+    fig: matplotlib.figure.Figure,
+    ax: matplotlib.axes.Axes,
+    figbase: str,
+    plot_ext: str,
+    xzoom: List[Tuple[float, float]],
+) -> None:
     """
     Zoom in on subregions of the x-axis and save the figure.
 
@@ -1263,17 +1265,19 @@ def zoom_x_and_save(fig: matplotlib.figure.Figure, ax: matplotlib.axes.Axes, fig
     xmin, xmax = ax.get_xlim()
     for ix in range(len(xzoom)):
         ax.set_xlim(xmin=xzoom[ix][0], xmax=xzoom[ix][1])
-        figfile = (
-            figbase
-            + ".sub"
-            + str(ix + 1)
-            + plot_ext
-        )
+        figfile = f"{figbase}.sub{ix + 1}{plot_ext}"
         savefig(fig, figfile)
     ax.set_xlim(xmin=xmin, xmax=xmax)
 
 
-def zoom_xy_and_save(fig: matplotlib.figure.Figure, ax: matplotlib.axes.Axes, figbase: str, plot_ext: str, xyzoom: List[Tuple[float, float, float, float]], scale: float = 1000) -> None:
+def zoom_xy_and_save(
+    fig: matplotlib.figure.Figure,
+    ax: matplotlib.axes.Axes,
+    figbase: str,
+    plot_ext: str,
+    xyzoom: List[Tuple[float, float, float, float]],
+    scale: float = 1000,
+) -> None:
     """
     Zoom in on subregions in x,y-space and save the figure.
 
@@ -1294,7 +1298,7 @@ def zoom_xy_and_save(fig: matplotlib.figure.Figure, ax: matplotlib.axes.Axes, fi
     """
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
-    
+
     dx_zoom = 0
     xy_ratio = (ymax - ymin) / (xmax - xmin)
     for ix in range(len(xyzoom)):
@@ -1311,19 +1315,14 @@ def zoom_xy_and_save(fig: matplotlib.figure.Figure, ax: matplotlib.axes.Axes, fi
             # y range limiting
             dx_zoom = max(dx_zoom, dy / xy_ratio)
     dy_zoom = dx_zoom * xy_ratio
-    
+
     for ix in range(len(xyzoom)):
         x0 = (xyzoom[ix][0] + xyzoom[ix][1]) / 2
         y0 = (xyzoom[ix][2] + xyzoom[ix][3]) / 2
-        ax.set_xlim(xmin=(x0 - dx_zoom/2) / scale, xmax=(x0 + dx_zoom/2) / scale)
-        ax.set_ylim(ymin=(y0 - dy_zoom/2) / scale, ymax=(y0 + dy_zoom/2) / scale)
-        figfile = (
-            figbase
-            + ".sub"
-            + str(ix + 1)
-            + plot_ext
-        )
+        ax.set_xlim(xmin=(x0 - dx_zoom / 2) / scale, xmax=(x0 + dx_zoom / 2) / scale)
+        ax.set_ylim(ymin=(y0 - dy_zoom / 2) / scale, ymax=(y0 + dy_zoom / 2) / scale)
+        figfile = figbase + ".sub" + str(ix + 1) + plot_ext
         savefig(fig, figfile)
-    
+
     ax.set_xlim(xmin=xmin, xmax=xmax)
     ax.set_ylim(ymin=ymin, ymax=ymax)

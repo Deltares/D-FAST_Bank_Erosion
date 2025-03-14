@@ -26,13 +26,15 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Tuple
+import argparse
 
 # Needed for Nuitka compilation
 import os
 import pathlib
+from typing import Tuple
+
 import matplotlib
-import argparse
+
 from dfastbe import cmd
 
 matplotlib.use("Qt5Agg")

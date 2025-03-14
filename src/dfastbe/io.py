@@ -26,19 +26,21 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Tuple, Any, List, Union, Dict, Optional, TextIO, Callable, TypedDict
-
-import numpy as np
-import netCDF4 as nc
 import configparser
 import os
-import pandas as pd
-import geopandas as gpd
-import shapely
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, TypedDict
+
+import geopandas as gpd
+import netCDF4 as nc
+import numpy as np
+import pandas as pd
+import shapely
 
 
 class SimulationObject(TypedDict):
+    """Simulation object type definition."""
+
     x_node: np.ndarray
     y_node: np.ndarray
     nnodes: np.ndarray
@@ -82,7 +84,7 @@ def load_program_texts(filename: str) -> None:
     for line in all_lines:
         rline = line.strip()
         if rline.startswith("[") and rline.endswith("]"):
-            if not key is None:
+            if key is not None:
                 dict[key] = text
             key = rline[1:-1]
             text = []
@@ -90,7 +92,7 @@ def load_program_texts(filename: str) -> None:
             text.append(line)
     if key in dict.keys():
         raise Exception('Duplicate entry for "{}" in "{}".'.format(key, filename))
-    if not key is None:
+    if key is not None:
         dict[key] = text
     PROGTEXTS = dict
 
@@ -122,9 +124,9 @@ def log_text(
     -------
     None
     """
-    str = get_text(key)
-    for r in range(repeat):
-        for s in str:
+    string = get_text(key)
+    for _ in range(repeat):
+        for s in string:
             sexp = s.format(**dict)
             if file is None:
                 print(indent + sexp)
@@ -154,8 +156,7 @@ def get_filename(key: str) -> str:
 
 
 def get_text(key: str) -> List[str]:
-    """
-    Query the global dictionary of texts via a string key.
+    """Query the global dictionary of texts via a string key.
 
     Query the global dictionary PROGTEXTS by means of a string key and return
     the list of strings contained in the dictionary. If the dictionary doesn't
@@ -307,7 +308,6 @@ def read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndarr
         var = var[0]
 
     # read data checking for time dimension
-    dims = var.dimensions
     if var.get_dims()[0].isunlimited():
         # assume that time dimension is unlimited and is the first dimension
         # slice to obtain last time step
@@ -467,8 +467,7 @@ def ugrid_add(
     long_name: str = "None",
     units: str = "None",
 ) -> None:
-    """
-    Add a new variable defined at faces to an existing UGRID netCDF file
+    """Add a new variable defined at faces to an existing UGRID netCDF file.
 
     Arguments
     ---------
@@ -490,9 +489,6 @@ def ugrid_add(
     """
     # open destination file
     dst = nc.Dataset(dstfile, "a")
-
-    # check if face dimension exists
-    dim = dst.dimensions[facedim]
 
     # add variable and write data
     var = dst.createVariable(varname, "f8", (facedim,))
@@ -690,9 +686,7 @@ def write_xyc(xy: np.ndarray, val: np.ndarray, filename: str) -> None:
                 xyc.write("{:.2f}\t{:.2f}\t".format(xy[i, 0], xy[i, 1]) + valstr + "\n")
 
 
-def write_shp_pnt(
-    xy: np.ndarray, dict: Dict[str, np.ndarray], filename: str
-) -> None:
+def write_shp_pnt(xy: np.ndarray, dict: Dict[str, np.ndarray], filename: str) -> None:
     """
     Write a shape point file with x, y, and values.
 
@@ -717,7 +711,8 @@ def write_shp_pnt(
 def write_shp(
     geom: gpd.geoseries.GeoSeries, dict: Dict[str, np.ndarray], filename: str
 ) -> None:
-    """
+    """Write a shape file.
+
     Write a shape file for a given GeoSeries and dictionary of NumPy arrays.
     The GeoSeries and all NumPy should have equal length.
 
@@ -765,9 +760,7 @@ def write_csv(dict: Dict[str, np.ndarray], filename: str) -> None:
     np.savetxt(filename, data, delimiter=", ", header=header, comments="")
 
 
-def write_km_eroded_volumes(
-    km: np.ndarray, vol: np.ndarray, filename: str
-) -> None:
+def write_km_eroded_volumes(km: np.ndarray, vol: np.ndarray, filename: str) -> None:
     """
     Write a text file with eroded volume data binned per kilometre.
 
@@ -1002,8 +995,10 @@ def sim2nc(oldfile: str) -> str:
     return ncfile
 
 
-def config_get_kmbounds(config: configparser.ConfigParser,) -> Tuple[float, float]:
-    """
+def config_get_kmbounds(
+    config: configparser.ConfigParser,
+) -> Tuple[float, float]:
+    """Convert the km bounds from the configuration file to a tuple.
 
     Arguments
     ---------
@@ -1024,7 +1019,7 @@ def config_get_kmbounds(config: configparser.ConfigParser,) -> Tuple[float, floa
 def config_get_xykm(
     config: configparser.ConfigParser,
 ) -> shapely.geometry.linestring.LineStringAdapter:
-    """
+    """Get the chainage line from the configuration file.
 
     Arguments
     ---------
@@ -1049,7 +1044,8 @@ def config_get_xykm(
 
 
 def clip_path_to_kmbounds(
-    xykm: shapely.geometry.linestring.LineStringAdapter, kmbounds: Tuple[float, float],
+    xykm: shapely.geometry.linestring.LineStringAdapter,
+    kmbounds: Tuple[float, float],
 ) -> shapely.geometry.linestring.LineStringAdapter:
     """
     Clip a chainage line to the relevant reach.
@@ -1060,7 +1056,7 @@ def clip_path_to_kmbounds(
         Original river chainage line.
     kmbounds : Tuple[float, float]
         Lower and upper limit for the chainage.
-        
+
     Returns
     -------
     xykm1 : shapely.geometry.linestring.LineStringAdapter
@@ -1346,7 +1342,7 @@ def config_get_bool(
             or (str == "1")
         )
     except:
-        if not default is None:
+        if default is not None:
             val = default
         else:
             raise Exception(
@@ -1394,7 +1390,7 @@ def config_get_int(
     try:
         val = int(config[group][key])
     except:
-        if not default is None:
+        if default is not None:
             val = default
         else:
             raise Exception(
@@ -1449,7 +1445,7 @@ def config_get_float(
     try:
         val = float(config[group][key])
     except:
-        if not default is None:
+        if default is not None:
             val = default
         else:
             raise Exception(
@@ -1500,7 +1496,7 @@ def config_get_str(
     try:
         val = config[group][key]
     except:
-        if not default is None:
+        if default is not None:
             val = default
         else:
             raise Exception(
@@ -1584,7 +1580,7 @@ def config_get_parameter(
                     raise Exception(
                         'Value of "{}" should be positive, not {}.'.format(key, rval)
                     )
-            if not valid is None:
+            if valid is not None:
                 if valid.count(rval) == 0:
                     raise Exception(
                         'Value of "{}" should be in {}, not {}.'.format(
@@ -1652,7 +1648,6 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
         skipinitialspace=True,
         delim_whitespace=True,
     )
-    nPnts = len(P.Chainage)
     km = P.Chainage.to_numpy()
     val = P.Val.to_numpy()
     if len(km.shape) == 0:
@@ -1731,9 +1726,7 @@ def read_simdata(filename: str, indent: str = "") -> Tuple[SimulationObject, flo
         FNC = read_fm_map(filename, "face_node_connectivity")
         if FNC.mask.shape == ():
             # all faces have the same number of nodes
-            sim["nnodes"] = (
-                np.ones(FNC.data.shape[0], dtype=np.int) * FNC.data.shape[1]
-            )
+            sim["nnodes"] = np.ones(FNC.data.shape[0], dtype=np.int) * FNC.data.shape[1]
         else:
             # varying number of nodes
             sim["nnodes"] = FNC.mask.shape[1] - FNC.mask.sum(axis=1)

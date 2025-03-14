@@ -26,11 +26,11 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
+import math
+import sys
 from typing import Tuple
 
 import numpy
-import math
-import sys
 
 
 def comp_erosion_eq(
@@ -50,7 +50,7 @@ def comp_erosion_eq(
 ) -> Tuple[numpy.ndarray, numpy.ndarray]:
     """
     Compute the equilibrium bank erosion.
-    
+
     Arguments
     ---------
     bankheight : numpy.ndarray
@@ -79,7 +79,7 @@ def comp_erosion_eq(
         Array containing bank protection height [m]
     g : float
         Gravitational acceleration [m/s2]
-    
+
     Returns
     -------
     dn_eq : numpy.ndarray
@@ -126,10 +126,17 @@ def comp_erosion(
     zss: numpy.ndarray,
     rho: float,
     g: float,
-) -> [numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray]:
+) -> [
+    numpy.ndarray,
+    numpy.ndarray,
+    numpy.ndarray,
+    numpy.ndarray,
+    numpy.ndarray,
+    numpy.ndarray,
+]:
     """
     Compute the bank erosion during a specific discharge level.
-    
+
     Arguments
     ---------
     velocity : numpy.ndarray
@@ -157,9 +164,9 @@ def comp_erosion(
     Teros : float
         Erosion period [yr]
     mu_slope : numpy.ndarray
-        Array containing 
+        Array containing
     mu_reed : numpy.ndarray
-        Array containing 
+        Array containing
     distance_fw : numpy.ndarray
         Array containing distance from bank to fairway [m]
     dfw0 : numpy.ndarray
@@ -176,7 +183,7 @@ def comp_erosion(
         Water density [kg/m3]
     g : float
         Gravitational acceleration [m/s2]
-        
+
     Returns
     -------
     dn : numpy.ndarray
@@ -206,8 +213,6 @@ def comp_erosion(
     dn = numpy.zeros(xlen)
     # erosion volume per segment
     dv = numpy.zeros(xlen)
-    # total wave damping coefficient
-    mu_tot = numpy.zeros(xlen)
 
     vel = velocity
 
@@ -221,13 +226,11 @@ def comp_erosion(
     E = 0.2 * numpy.sqrt(tauc) * 1e-6
 
     # critical velocity
-    velc = numpy.sqrt(tauc / rho * chezy ** 2 / g)
+    velc = numpy.sqrt(tauc / rho * chezy**2 / g)
 
     # strength
     cE = 1.85e-4 / tauc
 
-    # total wavedamping coefficient
-    mu_tot = (mu_slope / H0) + mu_reed
     # water level along bank line
     ho_line_ship = numpy.minimum(zfw - zss, 2 * H0)
     ho_line_flow = numpy.minimum(zfw - zss, hfw)
@@ -246,7 +249,7 @@ def comp_erosion(
     mask = (shipwavemin < zfw_ini) & (zfw_ini < shipwavemax)
     # limit mu -> 0
 
-    dn_ship = cE * H0 ** 2 * ts * Teros
+    dn_ship = cE * H0**2 * ts * Teros
     dn_ship[~mask] = 0
 
     # compute erosion volume
@@ -280,7 +283,7 @@ def comp_hw_ship_at_bank(
 ) -> numpy.ndarray:
     """
     Compute wave heights at bank due to passing ships.
-    
+
     Arguments
     ---------
     distance_fw : numpy.ndarray
@@ -299,7 +302,7 @@ def comp_hw_ship_at_bank(
         Array containing velocity of the ships [m/s]
     g : float
         Gravitational acceleration [m/s2]
-    
+
     Returns
     -------
     h0 : numpy.ndarray
@@ -325,14 +328,16 @@ def comp_hw_ship_at_bank(
     A[distance_fw < dfw1] = 1
     A[distance_fw > dfw0] = 0
 
-    h0 = a1 * h * (distance_fw / h) ** (-1 / 3) * Froude ** 4 * A
+    h0 = a1 * h * (distance_fw / h) ** (-1 / 3) * Froude**4 * A
     return h0
 
 
-def get_km_bins(km_bin: Tuple[float, float, float], type: int = 2, adjust: bool = False) -> numpy.ndarray:
+def get_km_bins(
+    km_bin: Tuple[float, float, float], type: int = 2, adjust: bool = False
+) -> numpy.ndarray:
     """
     Get an array of representative chainage values.
-    
+
     Arguments
     ---------
     km_bin : Tuple[float, float, float]
@@ -345,7 +350,7 @@ def get_km_bins(km_bin: Tuple[float, float, float], type: int = 2, adjust: bool 
             3: mid points (N values)
     adjust : bool
         Flag indicating whether the step size should be adjusted to include an integer number of steps
-    
+
     Returns
     -------
     km : numpy.ndarray
@@ -353,11 +358,11 @@ def get_km_bins(km_bin: Tuple[float, float, float], type: int = 2, adjust: bool 
     """
     km_step = km_bin[2]
     nbins = int(math.ceil((km_bin[1] - km_bin[0]) / km_step))
-    
+
     lb = 0
     ub = nbins + 1
     dx = 0.0
-    
+
     if adjust:
         km_step = (km_bin[1] - km_bin[0]) / nbins
 
@@ -385,7 +390,7 @@ def get_km_eroded_volume(
 ) -> numpy.ndarray:
     """
     Accumulate the erosion volumes per chainage bin.
-    
+
     Arguments
     ---------
     bank_km_mid : numpy.ndarray
@@ -394,7 +399,7 @@ def get_km_eroded_volume(
         Array containing the eroded volume per bank segment [m3]
     km_bin : Tuple[float, float, float]
         Tuple containing (start, end, step) for the chainage bins
-        
+
     Returns
     -------
     dvol : numpy.ndarray
@@ -412,7 +417,7 @@ def get_km_eroded_volume(
 def moving_avg(xi: numpy.ndarray, yi: numpy.ndarray, dx: float) -> numpy.ndarray:
     """
     Perform a moving average for given averaging distance.
-    
+
     Arguments
     ---------
     xi : numpy.ndarray
@@ -421,7 +426,7 @@ def moving_avg(xi: numpy.ndarray, yi: numpy.ndarray, dx: float) -> numpy.ndarray
         Array containing the values to be average [arbitrary]
     dx: float
         Averaging distance [same unit as x]
-        
+
     Returns
     -------
     yo : numpy.ndarray

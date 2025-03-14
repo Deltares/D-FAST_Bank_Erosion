@@ -38,7 +38,7 @@
 \@svnfalse%
 \DeclareOption{svn}{%
     \@svntrue%
-}    
+}
 \newif\if@druler% deltares ruler
 \@drulerfalse
 \DeclareOption{druler}{%
@@ -2470,7 +2470,7 @@
 \def\@githashlong{-{}-{}-{}-}
 \def\@githashshort{-{}-{}-{}-default-{}-{}-{}-}
 %
-\IfFileExists{gitsettings}{%   
+\IfFileExists{gitsettings}{%
     \input{gitsettings}
     \typeout{--- Git repository: \@gitrepository.}
     \typeout{--- Git branch: \@gitbranch.}
@@ -2482,14 +2482,14 @@
     \IfFileExists{gitsettings}{%
         % skip the processing of the Git files.
     }{
-        \IfFileExists{\@setgitdirectory/HEAD.}{%   
-            \CatchFileDef{\headfull}{\@setgitdirectory/HEAD.}{}   
-            \StrGobbleRight{\headfull}{1}[\head]    
-            \StrBehind[2]{\head}{/}[\@gitbranch] 
+        \IfFileExists{\@setgitdirectory/HEAD.}{%
+            \CatchFileDef{\headfull}{\@setgitdirectory/HEAD.}{}
+            \StrGobbleRight{\headfull}{1}[\head]
+            \StrBehind[2]{\head}{/}[\@gitbranch]
             \typeout{--- JanM Branch name: \@gitbranch}
             \IfFileExists{\@setgitdirectory/refs/heads/\@gitbranch.}{%
                 \CatchFileDef{\@githashlong}{\@setgitdirectory/refs/heads/\@gitbranch.}{}
-            }{%    
+            }{%
                 \def\@githashlong{-{}-{}-{}-{}-{}-{}-{}\ (File does not exist: \@setgitdirectory/refs/heads/\@gitbranch)}
             }
 
@@ -2501,7 +2501,7 @@
             \StrSubstitute{\gitreposC}{\\}{\textbackslash }[\gitreposD]
             \StrSubstitute{\gitreposD}{_}{\_}[\gitreposE]
             \typeout{--- JanM Repository location: \gitreposE}
-            \gdef\@gitrepository{\gitreposE}    
+            \gdef\@gitrepository{\gitreposE}
             \StrLeft{\@githashlong}{7}[\@githashshort]
         }{
             % nothing: File \@setgitdirectory/HEAD. does not exist

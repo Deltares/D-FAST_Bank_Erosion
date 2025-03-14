@@ -27,17 +27,17 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 import os
-from dfastbe import batch
-from dfastbe import gui
-from dfastbe import io
+
+from dfastbe import batch, gui, io
 
 
 def run(
-    language: str = "UK", runmode: str = "GUI", configfile: str = "dfastbe.cfg",
+    language: str = "UK",
+    runmode: str = "GUI",
+    configfile: str = "dfastbe.cfg",
 ) -> None:
-    """
-    Main routine initializing the language file and starting the chosen run mode.
-    
+    """Main routine initializing the language file and starting the chosen run mode.
+
     Arguments
     ---------
     language: str
@@ -50,18 +50,14 @@ def run(
     progloc = io.get_progloc()
     LANGUAGE = language.upper()
     try:
-        io.load_program_texts(
-            progloc + os.path.sep + "messages." + LANGUAGE + ".ini"
-        )
+        io.load_program_texts(f"{progloc}{os.path.sep} messages.{LANGUAGE}.ini")
     except:
         if LANGUAGE == "NL":
             print(
-                "Het taalbestand 'messages."
-                + LANGUAGE
-                + ".ini' kan niet worden geladen."
+                f"Het taalbestand 'messages. {LANGUAGE} .ini' kan niet worden geladen."
             )
         else:
-            print("Unable to load language file 'messages." + LANGUAGE + ".ini'")
+            print(f"Unable to load language file 'messages.{LANGUAGE}.ini'")
     else:
         RUNMODE = runmode.upper()
         if RUNMODE == "BANKLINES":
