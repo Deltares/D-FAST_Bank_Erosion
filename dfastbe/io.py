@@ -29,29 +29,28 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
 from typing import Tuple, Any, List, Union, Dict, Optional, TextIO, Callable, TypedDict
 
-import numpy
-import netCDF4
+import numpy as np
+import netCDF4 as nc
 import configparser
 import os
-import os.path
-import pandas
-import geopandas
+import pandas as pd
+import geopandas as gpd
 import shapely
-import pathlib
+from pathlib import Path
 
 
 class SimulationObject(TypedDict):
-    x_node: numpy.ndarray
-    y_node: numpy.ndarray
-    nnodes: numpy.ndarray
-    facenode: numpy.ma.masked_array
-    zb_location: numpy.ndarray
-    zb_val: numpy.ndarray
-    zw_face: numpy.ndarray
-    h_face: numpy.ndarray
-    ucx_face: numpy.ndarray
-    ucy_face: numpy.ndarray
-    chz_face: numpy.ndarray
+    x_node: np.ndarray
+    y_node: np.ndarray
+    nnodes: np.ndarray
+    facenode: np.ma.masked_array
+    zb_location: np.ndarray
+    zb_val: np.ndarray
+    zw_face: np.ndarray
+    h_face: np.ndarray
+    ucx_face: np.ndarray
+    ucy_face: np.ndarray
+    chz_face: np.ndarray
 
 
 PROGTEXTS: Dict[str, List[str]]
@@ -221,7 +220,7 @@ def write_config(filename: str, config: configparser.ConfigParser) -> None:
                 configfile.write(OPTIONLINE.format(o, config[s][o]))
 
 
-def read_fm_map(filename: str, varname: str, location: str = "face") -> numpy.ndarray:
+def read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndarray:
     """
     Read the last time step of any quantity defined at faces from a D-Flow FM map-file.
 
@@ -248,7 +247,7 @@ def read_fm_map(filename: str, varname: str, location: str = "face") -> numpy.nd
         time dependent).
     """
     # open file
-    rootgrp = netCDF4.Dataset(filename)
+    rootgrp = nc.Dataset(filename)
 
     # locate 2d mesh variable
     mesh2d = rootgrp.get_variables_by_attributes(
@@ -345,7 +344,7 @@ def get_mesh_and_facedim_names(filename: str) -> Tuple[str, str]:
         Name of the face dimension of that 2D mesh
     """
     # open file
-    rootgrp = netCDF4.Dataset(filename)
+    rootgrp = nc.Dataset(filename)
 
     # locate 2d mesh variable
     mesh2d = rootgrp.get_variables_by_attributes(
@@ -385,8 +384,8 @@ def copy_ugrid(srcname: str, meshname: str, dstname: str) -> None:
         file.
     """
     # open source and destination files
-    src = netCDF4.Dataset(srcname)
-    dst = netCDF4.Dataset(dstname, "w", format="NETCDF4")
+    src = nc.Dataset(srcname)
+    dst = nc.Dataset(dstname, "w", format="NETCDF4")
 
     # locate source mesh
     mesh = src.variables[meshname]
@@ -425,7 +424,7 @@ def copy_ugrid(srcname: str, meshname: str, dstname: str) -> None:
     dst.close()
 
 
-def copy_var(src: netCDF4.Dataset, varname: str, dst: netCDF4.Dataset) -> None:
+def copy_var(src: nc.Dataset, varname: str, dst: nc.Dataset) -> None:
     """
     Copy a single variable from one netCDF file to another.
 
@@ -434,11 +433,11 @@ def copy_var(src: netCDF4.Dataset, varname: str, dst: netCDF4.Dataset) -> None:
 
     Arguments
     ---------
-    src : netCDF4.Dataset
+    src : nc.Dataset
         Dataset object representing the source file.
     varname : str
         Name of the netCDF variable to be copied from source to destination.
-    dst : netCDF4.Dataset
+    dst : nc.Dataset
         Dataset object representing the destination file.
     """
     # locate the variable to be copied
@@ -463,7 +462,7 @@ def copy_var(src: netCDF4.Dataset, varname: str, dst: netCDF4.Dataset) -> None:
 def ugrid_add(
     dstfile: str,
     varname: str,
-    ldata: numpy.array,
+    ldata: np.array,
     meshname: str,
     facedim: str,
     long_name: str = "None",
@@ -478,7 +477,7 @@ def ugrid_add(
         Name of netCDF file to write data to.
     varname : str
         Name of netCDF variable to be written.
-    ldata : numpy.array
+    ldata : np.array
         Linear array containing the data to be written.
     meshname : str
         Name of mesh variable in the netCDF file.
@@ -491,7 +490,7 @@ def ugrid_add(
         String indicating the unit ("None" if no unit attribute should be written).
     """
     # open destination file
-    dst = netCDF4.Dataset(dstfile, "a")
+    dst = nc.Dataset(dstfile, "a")
 
     # check if face dimension exists
     dim = dst.dimensions[facedim]
@@ -510,7 +509,7 @@ def ugrid_add(
     dst.close()
 
 
-def read_waqua_xyz(filename: str, cols: Tuple[int, ...] = (2,)) -> numpy.ndarray:
+def read_waqua_xyz(filename: str, cols: Tuple[int, ...] = (2,)) -> np.ndarray:
     """
     Read data columns from a SIMONA XYZ file.
 
@@ -523,15 +522,15 @@ def read_waqua_xyz(filename: str, cols: Tuple[int, ...] = (2,)) -> numpy.ndarray
 
     Returns
     -------
-    data : numpy.ndarray
+    data : np.ndarray
         Data read from the file.
     """
-    data = numpy.genfromtxt(filename, delimiter=",", skip_header=1, usecols=cols)
+    data = np.genfromtxt(filename, delimiter=",", skip_header=1, usecols=cols)
     return data
 
 
 def write_simona_box(
-    filename: str, rdata: numpy.ndarray, firstm: int, firstn: int
+    filename: str, rdata: np.ndarray, firstm: int, firstn: int
 ) -> None:
     """
     Write a SIMONA BOX file.
@@ -540,7 +539,7 @@ def write_simona_box(
     ---------
     filename : str
         Name of the file to be written.
-    rdata : numpy.ndarray
+    rdata : np.ndarray
         Two-dimensional NumPy array containing the data to be written.
     firstm : int
         Firt M index to be written.
@@ -552,7 +551,7 @@ def write_simona_box(
 
     # get shape and prepare block header; data will be written in blocks of 10
     # N-lines
-    shp = numpy.shape(rdata)
+    shp = np.shape(rdata)
     mmax = shp[0]
     nmax = shp[1]
     boxheader = "      BOX MNMN=({m1:4d},{n1:5d},{m2:5d},{n2:5d}), VARIABLE_VAL=\n"
@@ -646,7 +645,7 @@ def read_xyc(
             colnames = ["Val", "X", "Y"]
         else:
             colnames = ["X", "Y"]
-        P = pandas.read_csv(
+        P = pd.read_csv(
             filename, names=colnames, skipinitialspace=True, delim_whitespace=True
         )
         nPnts = len(P.X)
@@ -654,25 +653,25 @@ def read_xyc(
         y = P.Y.to_numpy().reshape((nPnts, 1))
         if ncol == 3:
             z = P.Val.to_numpy().reshape((nPnts, 1))
-            LC = numpy.concatenate((x, y, z), axis=1)
+            LC = np.concatenate((x, y, z), axis=1)
         else:
-            LC = numpy.concatenate((x, y), axis=1)
+            LC = np.concatenate((x, y), axis=1)
         L = shapely.geometry.LineString(LC)
     else:
-        GEO = geopandas.read_file(filename)["geometry"]
+        GEO = gpd.read_file(filename)["geometry"]
         L = GEO[0]
     return L
 
 
-def write_xyc(xy: numpy.ndarray, val: numpy.ndarray, filename: str) -> None:
+def write_xyc(xy: np.ndarray, val: np.ndarray, filename: str) -> None:
     """
     Write a text file with x, y, and values.
 
     Arguments
     ---------
-    xy : numpy.ndarray
+    xy : np.ndarray
         N x 2 array containing x and y coordinates.
-    val : numpy.ndarray
+    val : np.ndarray
         N x k array containing values.
     filename : str
         Name of the file to be written.
@@ -693,16 +692,16 @@ def write_xyc(xy: numpy.ndarray, val: numpy.ndarray, filename: str) -> None:
 
 
 def write_shp_pnt(
-    xy: numpy.ndarray, dict: Dict[str, numpy.ndarray], filename: str
+    xy: np.ndarray, dict: Dict[str, np.ndarray], filename: str
 ) -> None:
     """
     Write a shape point file with x, y, and values.
 
     Arguments
     ---------
-    xy : numpy.ndarray
+    xy : np.ndarray
         N x 2 array containing x and y coordinates.
-    dict : Dict[str, numpy.ndarray]
+    dict : Dict[str, np.ndarray]
         Dictionary of quantities to be written, each NumPy array should have length k.
     filename : str
         Name of the file to be written.
@@ -712,12 +711,12 @@ def write_shp_pnt(
     None
     """
     xy_Points = [shapely.geometry.Point(xy1) for xy1 in xy]
-    geom = geopandas.geoseries.GeoSeries(xy_Points)
+    geom = gpd.geoseries.GeoSeries(xy_Points)
     write_shp(geom, dict, filename)
 
 
 def write_shp(
-    geom: geopandas.geoseries.GeoSeries, dict: Dict[str, numpy.ndarray], filename: str
+    geom: gpd.geoseries.GeoSeries, dict: Dict[str, np.ndarray], filename: str
 ) -> None:
     """
     Write a shape file for a given GeoSeries and dictionary of NumPy arrays.
@@ -725,9 +724,9 @@ def write_shp(
 
     Arguments
     ---------
-    geom : geopandas.geoseries.GeoSeries
-        geopandas GeoSeries containing k geometries.
-    dict : Dict[str, numpy.ndarray]
+    geom : gpd.geoseries.GeoSeries
+        gpd GeoSeries containing k geometries.
+    dict : Dict[str, np.ndarray]
         Dictionary of quantities to be written, each NumPy array should have length k.
     filename : str
         Name of the file to be written.
@@ -736,17 +735,17 @@ def write_shp(
     -------
     None
     """
-    val_DataFrame = pandas.DataFrame(dict)
-    geopandas.GeoDataFrame(val_DataFrame, geometry=geom).to_file(filename)
+    val_DataFrame = pd.DataFrame(dict)
+    gpd.GeoDataFrame(val_DataFrame, geometry=geom).to_file(filename)
 
 
-def write_csv(dict: Dict[str, numpy.ndarray], filename: str) -> None:
+def write_csv(dict: Dict[str, np.ndarray], filename: str) -> None:
     """
     Write a data to csv file.
 
     Arguments
     ---------
-    dict : Dict[str, numpy.ndarray]
+    dict : Dict[str, np.ndarray]
         Value(s) to be written.
     filename : str
         Name of the file to be written.
@@ -763,12 +762,12 @@ def write_csv(dict: Dict[str, numpy.ndarray], filename: str) -> None:
         else:
             header = header + '"' + keys[i] + '"'
 
-    data = numpy.column_stack([array for array in dict.values()])
-    numpy.savetxt(filename, data, delimiter=", ", header=header, comments="")
+    data = np.column_stack([array for array in dict.values()])
+    np.savetxt(filename, data, delimiter=", ", header=header, comments="")
 
 
 def write_km_eroded_volumes(
-    km: numpy.ndarray, vol: numpy.ndarray, filename: str
+    km: np.ndarray, vol: np.ndarray, filename: str
 ) -> None:
     """
     Write a text file with eroded volume data binned per kilometre.
@@ -1155,7 +1154,7 @@ def config_get_search_lines(
 
     Returns
     -------
-    line : List[numpy.ndarray]
+    line : List[np.ndarray]
         List of arrays containing the x,y-coordinates of a bank search lines.
     """
     # read guiding bank line
@@ -1170,7 +1169,7 @@ def config_get_search_lines(
 
 def config_get_bank_lines(
     config: configparser.ConfigParser, bankdir: str
-) -> List[numpy.ndarray]:
+) -> List[np.ndarray]:
     """
     Get the bank lines from the detection step.
 
@@ -1183,15 +1182,15 @@ def config_get_bank_lines(
 
     Returns
     -------
-    line : List[numpy.ndarray]
+    line : List[np.ndarray]
         List of arrays containing the x,y-coordinates of a bank lines.
     """
     bankname = config_get_str(config, "General", "BankFile", "bankfile")
     bankfile = bankdir + os.sep + bankname + ".shp"
     if os.path.exists(bankfile):
         log_text("read_banklines", dict={"file": bankfile})
-        banklines = geopandas.read_file(bankfile)
-        # -> geopandas.geodataframe.GeoDataFrame
+        banklines = gpd.read_file(bankfile)
+        # -> gpd.geodataframe.GeoDataFrame
         # banklines.geometry[0] -> shapely.geometry.linestring.LineString
     else:
         bankfile = bankdir + os.sep + bankname + "_#.xyc"
@@ -1206,8 +1205,8 @@ def config_get_bank_lines(
                 b = b + 1
             else:
                 break
-        bankline_series = geopandas.geoseries.GeoSeries(bankline_list)
-        banklines = geopandas.geodataframe.GeoDataFrame.from_features(bankline_series)
+        bankline_series = gpd.geoseries.GeoSeries(bankline_list)
+        banklines = gpd.geodataframe.GeoDataFrame.from_features(bankline_series)
     return banklines
 
 
@@ -1517,7 +1516,7 @@ def config_get_parameter(
     config: configparser.ConfigParser,
     group: str,
     key: str,
-    bank_km: List[numpy.ndarray],
+    bank_km: List[np.ndarray],
     default=None,
     ext: str = "",
     positive: bool = False,
@@ -1535,9 +1534,9 @@ def config_get_parameter(
         Name of the group from which to read.
     key : str
         Name of the keyword from which to read.
-    bank_km : List[numpy.ndarray]
+    bank_km : List[np.ndarray]
         For each bank a listing of the bank points (bank chainage locations).
-    default : Optional[Union[float, List[numpy.ndarray]]]
+    default : Optional[Union[float, List[np.ndarray]]]
         Optional default value or default parameter field; default None.
     ext : str
         File name extension; default empty string.
@@ -1557,7 +1556,7 @@ def config_get_parameter(
 
     Returns
     -------
-    parfield : List[numpy.ndarray]
+    parfield : List[np.ndarray]
         Parameter field: for each bank a parameter value per bank point (bank chainage location).
     """
     try:
@@ -1594,7 +1593,7 @@ def config_get_parameter(
                         )
                     )
         for ib, bkm in enumerate(bank_km):
-            parfield[ib] = numpy.zeros(len(bkm)) + rval
+            parfield[ib] = np.zeros(len(bkm)) + rval
     except:
         if onefile:
             log_text("read_param", dict={"param": key, "file": filename})
@@ -1608,9 +1607,9 @@ def config_get_parameter(
                 )
                 km_thr, val = get_kmval(filename_i, key, positive, valid)
             if km_thr is None:
-                parfield[ib] = numpy.zeros(len(bkm)) + val[0]
+                parfield[ib] = np.zeros(len(bkm)) + val[0]
             else:
-                idx = numpy.zeros(len(bkm), dtype=numpy.int64)
+                idx = np.zeros(len(bkm), dtype=np.int64)
                 for thr in km_thr:
                     idx[bkm >= thr] += 1
                 parfield[ib] = val[idx]
@@ -1642,13 +1641,13 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
 
     Returns
     -------
-    km_thr : Optional[numpy.ndarray]
+    km_thr : Optional[np.ndarray]
         Array containing the chainage of the midpoints between the values.
-    val : numpy.ndarray
+    val : np.ndarray
         Array containing the values.
     """
     # print("Trying to read: ",filename)
-    P = pandas.read_csv(
+    P = pd.read_csv(
         filename,
         names=["Chainage", "Val"],
         skipinitialspace=True,
@@ -1710,7 +1709,7 @@ def read_simdata(filename: str, indent: str = "") -> Tuple[SimulationObject, flo
     dh0 : float
         Threshold depth for detecting drying and flooding.
     """
-    dum = numpy.array([])
+    dum = np.array([])
     sim: SimulationObject = {
         "x_node": dum,
         "y_node": dum,
@@ -1734,7 +1733,7 @@ def read_simdata(filename: str, indent: str = "") -> Tuple[SimulationObject, flo
         if FNC.mask.shape == ():
             # all faces have the same number of nodes
             sim["nnodes"] = (
-                numpy.ones(FNC.data.shape[0], dtype=numpy.int) * FNC.data.shape[1]
+                np.ones(FNC.data.shape[0], dtype=np.int) * FNC.data.shape[1]
             )
         else:
             # varying number of nodes
@@ -1748,7 +1747,7 @@ def read_simdata(filename: str, indent: str = "") -> Tuple[SimulationObject, flo
         log_text("read_water_level", indent=indent)
         sim["zw_face"] = read_fm_map(filename, "Water level")
         log_text("read_water_depth", indent=indent)
-        sim["h_face"] = numpy.maximum(
+        sim["h_face"] = np.maximum(
             read_fm_map(filename, "sea_floor_depth_below_sea_surface"), 0.0
         )
         log_text("read_velocity", indent=indent)
@@ -1758,7 +1757,7 @@ def read_simdata(filename: str, indent: str = "") -> Tuple[SimulationObject, flo
         sim["chz_face"] = read_fm_map(filename, "Chezy roughness")
 
         log_text("read_drywet", indent=indent)
-        rootgrp = netCDF4.Dataset(filename)
+        rootgrp = nc.Dataset(filename)
         try:
             filesource = rootgrp.converted_from
             if filesource == "SIMONA":
@@ -1791,5 +1790,5 @@ def get_progloc() -> str:
     ---------
     None
     """
-    progloc = str(pathlib.Path(__file__).parent.absolute())
+    progloc = str(Path(__file__).parent.absolute())
     return progloc
