@@ -29,9 +29,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
 
 import os
-import dfastbe.batch
-import dfastbe.gui
-import dfastbe.io
+from dfastbe import batch
+from dfastbe import gui
+from dfastbe import io
 
 
 def run(
@@ -49,10 +49,10 @@ def run(
     configfile: str
         Configuration file ('dfastbe.cfg' is default)
     """
-    progloc = dfastbe.io.get_progloc()
+    progloc = io.get_progloc()
     LANGUAGE = language.upper()
     try:
-        dfastbe.io.load_program_texts(
+        io.load_program_texts(
             progloc + os.path.sep + "messages." + LANGUAGE + ".ini"
         )
     except:
@@ -67,11 +67,11 @@ def run(
     else:
         RUNMODE = runmode.upper()
         if RUNMODE == "BANKLINES":
-            dfastbe.batch.banklines(configfile)
+            batch.banklines(configfile)
         elif RUNMODE == "BANKEROSION":
-            dfastbe.batch.bankerosion(configfile)
+            batch.bankerosion(configfile)
         elif RUNMODE == "GUI":
-            dfastbe.gui.main(configfile)
+            gui.main(configfile)
         else:
             raise Exception(
                 "Invalid run mode '{}' specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'.".format(
