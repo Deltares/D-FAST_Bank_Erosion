@@ -26,7 +26,6 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-
 import os
 from dfastbe import batch
 from dfastbe import gui

@@ -26,13 +26,16 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Optional, Tuple
+from typing import Tuple
 
-# ------------------------------------------------------------------------------
 # Needed for Nuitka compilation
-# ------------------------------------------------------------------------------
 import os
 import pathlib
+import matplotlib
+import argparse
+from dfastbe import cmd
+
+matplotlib.use("Qt5Agg")
 
 is_nuitka = "__compiled__" in globals()
 if is_nuitka:
@@ -48,22 +51,9 @@ if is_nuitka:
     import pyproj
 
 
-# ------------------------------------------------------------------------------
-import matplotlib
-
-matplotlib.use("Qt5Agg")
-
-import argparse
-import dfastbe.cmd
-
-
 def parse_arguments() -> Tuple[str, str, str]:
     """
     Parse the command line arguments.
-
-    Arguments
-    ---------
-    None
 
     Raises
     ------
@@ -108,4 +98,4 @@ def parse_arguments() -> Tuple[str, str, str]:
 
 if __name__ == "__main__":
     language, runmode, configfile = parse_arguments()
-    dfastbe.cmd.run(language, runmode, configfile)
+    cmd.run(language, runmode, configfile)
