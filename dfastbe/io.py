@@ -30,6 +30,14 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from typing import Tuple, Any, List, Union, Dict, Optional, TextIO, Callable, TypedDict
 
 import numpy
+import netCDF4
+import configparser
+import os
+import os.path
+import pandas
+import geopandas
+import shapely
+import pathlib
 
 
 class SimulationObject(TypedDict):
@@ -45,15 +53,6 @@ class SimulationObject(TypedDict):
     ucy_face: numpy.ndarray
     chz_face: numpy.ndarray
 
-
-import netCDF4
-import configparser
-import os
-import os.path
-import pandas
-import geopandas
-import shapely
-import pathlib
 
 PROGTEXTS: Dict[str, List[str]]
 
