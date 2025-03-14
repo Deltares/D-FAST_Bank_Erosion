@@ -4,6 +4,7 @@ version = "2.3.1"
 description = "A tool to perform a bank erosion analysis based on a number of D-Flow FM simulations."
 authors = ["Stichting Deltares <delft3d.support@deltares.nl>"]
 readme = "README.md"
+packages = [{ include = "dfastbe"}]
 
 [tool.poetry.dependencies]
 python = "^3.9.12"
