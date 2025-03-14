@@ -30,9 +30,6 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from typing import Tuple, Any, List, Union, Dict, Optional, TextIO, Callable, TypedDict
 
 import numpy
-import pandas
-import geopandas
-import shapely
 
 
 class SimulationObject(TypedDict):

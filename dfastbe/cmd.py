@@ -27,13 +27,8 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Optional, Tuple
 
-import matplotlib.pyplot
-
-import sys
 import os
-import numpy
 import dfastbe.batch
 import dfastbe.gui
 import dfastbe.io
