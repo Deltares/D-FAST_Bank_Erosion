@@ -364,16 +364,16 @@ class Test_write_simona_box:
 @pytest.mark.skipif(
     platform.system() != "Windows", reason="it will be completely changed"
 )
-class Test_absolute_path:
+class TestAbsolutePath:
 
     def test_absolute_path_01(self):
         """
         Convert absolute path into relative path using relative_path (Windows).
         """
         rootdir = "d:" + os.sep + "some" + os.sep + "dir"
-        afile = f"d:{os.sep}some{os.sep}other{os.sep}dir{os.sep}file.ext"
+        a_file = f"d:{os.sep}some{os.sep}other{os.sep}dir{os.sep}file.ext"
         rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
-        assert df_io.absolute_path(rootdir, rfile) == afile
+        assert df_io.absolute_path(rootdir, rfile) == a_file
 
     def test_absolute_path_02(self):
         """
@@ -388,17 +388,7 @@ class Test_absolute_path:
         If path on different drive, it shouldn't be adjusted by relative_path (Windows).
         """
         rootdir = "d:" + os.sep + "some" + os.sep + "dir"
-        file = (
-            "e:"
-            + os.sep
-            + "some"
-            + os.sep
-            + "other"
-            + os.sep
-            + "dir"
-            + os.sep
-            + "file.ext"
-        )
+        file = f"e:{os.sep}some{os.sep}other{os.sep}dir{os.sep}file.ext"
         assert df_io.absolute_path(rootdir, file) == file
 
     def test_absolute_path_04(self):
@@ -441,6 +431,9 @@ class Test_relative_path:
         file = ""
         assert df_io.relative_path(rootdir, file) == file
 
+    @pytest.mark.skipif(
+        platform.system() != "Windows", reason="it will be completely changed"
+    )
     def test_relative_path_03(self):
         """
         If path on different drive, it shouldn't be adjusted by relative_path (Windows).
