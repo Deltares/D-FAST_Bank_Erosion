@@ -1589,7 +1589,8 @@ def config_get_parameter(
                     )
         for ib, bkm in enumerate(bank_km):
             parfield[ib] = np.zeros(len(bkm)) + rval
-    except:
+    except Exception as e:
+        print(e)
         if onefile:
             log_text("read_param", dict={"param": key, "file": filename})
             km_thr, val = get_kmval(filename, key, positive, valid)
@@ -1660,12 +1661,7 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
                     key, filename, km[val < 0]
                 )
             )
-    # if not valid is None:
-    #    isvalid = False
-    #    for valid_val in valid:
-    #        isvalid = isvalid | (val == valid_val)
-    #    if not isvalid.all():
-    #        raise Exception('Value of "{}" in "{}" should be in {}. Invalid value read for chainage(s): {}.'.format(key, filename, km[~isvalid]))
+
     if len(km) == 1:
         km_thr = None
     else:
@@ -1675,7 +1671,6 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
                     filename, key
                 )
             )
-        # km_thr = (km[:-1] + km[1:]) / 2
         km_thr = km[1:]
     return km_thr, val
 
@@ -1726,12 +1721,11 @@ def read_simdata(filename: str, indent: str = "") -> Tuple[SimulationObject, flo
         FNC = read_fm_map(filename, "face_node_connectivity")
         if FNC.mask.shape == ():
             # all faces have the same number of nodes
-            sim["nnodes"] = np.ones(FNC.data.shape[0], dtype=np.int) * FNC.data.shape[1]
+            sim["nnodes"] = np.ones(FNC.data.shape[0], dtype=int) * FNC.data.shape[1]
         else:
             # varying number of nodes
             sim["nnodes"] = FNC.mask.shape[1] - FNC.mask.sum(axis=1)
         FNC.data[FNC.mask] = 0
-        # sim["facenode"] = FNC.data
         sim["facenode"] = FNC
         log_text("read_bathymetry", indent=indent)
         sim["zb_location"] = "node"

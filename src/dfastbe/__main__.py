@@ -90,11 +90,10 @@ def parse_arguments() -> Tuple[str, str, str]:
     runmode = args.__dict__["mode"].upper()
     configfile = args.__dict__["config"]
     if language not in ["NL", "UK"]:
-        raise Exception(
-            "Incorrect language '{}' specified. Should read 'NL' or 'UK'.".format(
-                language
-            )
+        raise ValueError(
+            f"Incorrect language {language} specified. Should read 'NL' or 'UK'."
         )
+
     return language, runmode, configfile
 
 

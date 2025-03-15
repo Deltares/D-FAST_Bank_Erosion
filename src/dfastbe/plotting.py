@@ -208,7 +208,6 @@ def plot_mesh_patches(
         tval_list.append(val[mask])
     tfn = np.concatenate(tfn_list, axis=0)
     tval = np.concatenate(tval_list, axis=0)
-    # cmap = plt.get_cmap('Spectral')
     if minval is None:
         minval = np.min(tval)
     if maxval is None:
@@ -306,7 +305,7 @@ def plot_detect1(
     bankln = matplotlib.lines.Line2D([], [], color="r")
     handles = [shaded, bankln]
     labels = [bankarea_txt, bankline_txt]
-    #
+
     set_bbox(ax, bbox, scale=scale)
     ax.set_xlabel(xlabel_txt)
     ax.set_ylabel(ylabel_txt)
@@ -1127,16 +1126,16 @@ def plot7_banktype(
     clrs = get_colors("plasma", len(taucls_str) + 1)
     for ib in range(len(bank_crds)):
         for ibt in range(len(taucls_str)):
-            ibtEdges = np.nonzero(banktype[ib] == ibt)[0]
-            if len(ibtEdges) > 0:
-                nedges = len(ibtEdges)
+            ibt_edges = np.nonzero(banktype[ib] == ibt)[0]
+            if len(ibt_edges) > 0:
+                nedges = len(ibt_edges)
                 nx = max(3 * nedges - 1, 0)
                 x = np.zeros((nx,)) + np.nan
                 y = x.copy()
-                x[0::3] = bank_crds[ib][ibtEdges, 0].copy() / scale
-                y[0::3] = bank_crds[ib][ibtEdges, 1].copy() / scale
-                x[1::3] = bank_crds[ib][ibtEdges + 1, 0].copy() / scale
-                y[1::3] = bank_crds[ib][ibtEdges + 1, 1].copy() / scale
+                x[0::3] = bank_crds[ib][ibt_edges, 0].copy() / scale
+                y[0::3] = bank_crds[ib][ibt_edges, 1].copy() / scale
+                x[1::3] = bank_crds[ib][ibt_edges + 1, 0].copy() / scale
+                y[1::3] = bank_crds[ib][ibt_edges + 1, 1].copy() / scale
                 #
                 if ib == 0:
                     ax.plot(x, y, color=clrs[ibt], label=taucls_str[ibt])

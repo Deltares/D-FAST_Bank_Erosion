@@ -236,7 +236,7 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
                 km_numpy = support.project_km_on_line(bcrds_numpy, xykm_numpy)
                 bank_crds.append(bcrds_numpy)
                 bank_km.append(km_numpy)
-            kmzoom, xyzoom = get_zoom_extends(
+            _, xyzoom = get_zoom_extends(
                 kmbounds[0], kmbounds[1], zoom_km_step, bank_crds, bank_km
             )
 
@@ -368,8 +368,8 @@ def bankerosion_core(
         plot_ext = df_io.config_get_str(config, "General", "FigureExt", ".png")
 
     # get simulation time terosion
-    Teros = df_io.config_get_int(config, "Erosion", "TErosion", positive=True)
-    df_io.log_text("total_time", dict={"t": Teros})
+    teros = df_io.config_get_int(config, "Erosion", "TErosion", positive=True)
+    df_io.log_text("total_time", dict={"t": teros})
 
     # get filter settings for bank levels and flow velocities along banks
     zb_dx = df_io.config_get_float(
@@ -397,7 +397,7 @@ def bankerosion_core(
     df_io.log_text("-")
     df_io.log_text("read_simdata", dict={"file": simfile})
     df_io.log_text("-")
-    sim, dh0 = df_io.read_simdata(simfile)
+    sim, _ = df_io.read_simdata(simfile)
     df_io.log_text("-")
 
     df_io.log_text("derive_topology")
@@ -411,7 +411,7 @@ def bankerosion_core(
     # clip the chainage path to the range of chainages of interest
     kmbounds = df_io.config_get_kmbounds(config)
     df_io.log_text("clip_chainage", dict={"low": kmbounds[0], "high": kmbounds[1]})
-    xykm_numpy = np.array(xykm)
+
     xykm = df_io.clip_path_to_kmbounds(xykm, kmbounds)
     xykm_numpy = np.array(xykm)
     xy_numpy = xykm_numpy[:, :2]
@@ -422,7 +422,7 @@ def bankerosion_core(
 
     # map bank lines to mesh cells
     df_io.log_text("intersect_bank_mesh")
-    # bankline_faces = [None] * n_banklines
+
     xf = masked_index(sim["x_node"], fn)
     yf = masked_index(sim["y_node"], fn)
     xe = sim["x_node"][en]
@@ -478,7 +478,6 @@ def bankerosion_core(
     alpha = dist2.max() / dist2.sum()
     if alpha > 0.03:
         print("The river axis needs sorting!!")
-        # TODO: do sorting
 
     # map km to axis points, further using axis
     df_io.log_text("chainage_to_axis")
@@ -529,7 +528,6 @@ def bankerosion_core(
         # reverse fairway
         # fairway_km = fairway_km[i2 : i1 + 1][::-1]
         fairway_numpy = fairway_numpy[i2 : i1 + 1][::-1]
-    # fairway = shapely.geometry.LineString(fairway_numpy)
 
     # intersect fairway and mesh
     df_io.log_text("intersect_fairway_mesh", dict={"n": len(fairway_numpy)})
@@ -599,7 +597,6 @@ def bankerosion_core(
                     )
                     d1 = ((bp - fwp1) ** 2).sum() ** 0.5
                     if d1 < dbfw:
-                        fwp = fwp1
                         dbfw = d1
                         iseg = ifw
 
@@ -652,7 +649,7 @@ def bankerosion_core(
     nwave0 = df_io.config_get_parameter(
         config, "Erosion", "NWave", bank_km_mid, default=5, positive=True, onefile=True
     )
-    Tship0 = df_io.config_get_parameter(
+    tship0 = df_io.config_get_parameter(
         config, "Erosion", "Draught", bank_km_mid, positive=True, onefile=True
     )
     ship0 = df_io.config_get_parameter(
@@ -717,7 +714,7 @@ def bankerosion_core(
     for iq in range(num_levels):
         df_io.log_text(
             "discharge_header",
-            dict={"i": iq + 1, "p": pdischarge[iq], "t": pdischarge[iq] * Teros},
+            dict={"i": iq + 1, "p": pdischarge[iq], "t": pdischarge[iq] * teros},
         )
 
         iq_str = "{}".format(iq + 1)
@@ -733,7 +730,7 @@ def bankerosion_core(
             positive=True,
             onefile=True,
         )
-        Nship = df_io.config_get_parameter(
+        nship = df_io.config_get_parameter(
             config,
             "Erosion",
             "NShip" + iq_str,
@@ -751,12 +748,12 @@ def bankerosion_core(
             positive=True,
             onefile=True,
         )
-        Tship = df_io.config_get_parameter(
+        tship = df_io.config_get_parameter(
             config,
             "Erosion",
             "Draught" + iq_str,
             bank_km_mid,
-            default=Tship0,
+            default=tship0,
             positive=True,
             onefile=True,
         )
@@ -855,7 +852,6 @@ def bankerosion_core(
                 else:
                     # don't know ... need to check neighbouring cells ...
                     bankheight.append(None)
-                    pass
 
             # get water depth along fairway
             ii = bp_fw_face_idx[ib]
@@ -872,7 +868,7 @@ def bankerosion_core(
                     zfw_ini[ib],
                     vship[ib],
                     ship_type[ib],
-                    Tship[ib],
+                    tship[ib],
                     mu_slope[ib],
                     distance_fw[ib],
                     dfw0[ib],
@@ -899,7 +895,7 @@ def bankerosion_core(
                         "zw0": zfw_ini[ib],
                         "vship": vship[ib],
                         "shiptype": ship_type[ib],
-                        "draught": Tship[ib],
+                        "draught": tship[ib],
                         "mu_slp": mu_slope[ib],
                         "dist_fw": distance_fw[ib],
                         "dfw0": dfw0[ib],
@@ -928,12 +924,12 @@ def bankerosion_core(
                     waterlevel[iq][ib],
                     zfw_ini[ib],
                     tauc[ib],
-                    Nship[ib],
+                    nship[ib],
                     vship[ib],
                     nwave[ib],
                     ship_type[ib],
-                    Tship[ib],
-                    Teros * pdischarge[iq],
+                    tship[ib],
+                    teros * pdischarge[iq],
                     mu_slope[ib],
                     mu_reed[ib],
                     distance_fw[ib],
@@ -966,11 +962,11 @@ def bankerosion_core(
                     "zw": waterlevel[iq][ib],
                     "zw0": zfw_ini[ib],
                     "tauc": tauc[ib],
-                    "nship": Nship[ib],
+                    "nship": nship[ib],
                     "vship": vship[ib],
                     "nwave": nwave[ib],
                     "shiptype": ship_type[ib],
-                    "draught": Tship[ib],
+                    "draught": tship[ib],
                     "mu_slp": mu_slope[ib],
                     "mu_reed": mu_reed[ib],
                     "dist_fw": distance_fw[ib],
@@ -1146,7 +1142,7 @@ def bankerosion_core(
             "x-coordinate [km]",
             "y-coordinate [km]",
             "eroded distance and equilibrium bank location",
-            "eroded during {t} year".format(t=Teros),
+            "eroded during {t} year".format(t=teros),
             "eroded distance [m]",
             "equilibrium location",
         )
@@ -1165,7 +1161,7 @@ def bankerosion_core(
             dv,
             "eroded volume [m^3]",
             "eroded volume per {ds} chainage km ({t} years)".format(
-                ds=km_step, t=Teros
+                ds=km_step, t=teros
             ),
             "Q{iq}",
             "Bank {ib}",
@@ -1185,7 +1181,7 @@ def bankerosion_core(
             dv,
             "eroded volume [m^3]",
             "eroded volume per {ds} chainage km ({t} years)".format(
-                ds=km_step, t=Teros
+                ds=km_step, t=teros
             ),
             "Q{iq}",
         )
@@ -1204,7 +1200,7 @@ def bankerosion_core(
             dv,
             "eroded volume [m^3]",
             "eroded volume per {ds} chainage km ({t} years)".format(
-                ds=km_step, t=Teros
+                ds=km_step, t=teros
             ),
             "Bank {ib}",
         )
@@ -1405,20 +1401,20 @@ def derive_topology_arrays(
     # get a sorted list of edge node connections (shared edges occur twice)
     # face_nr contains the face index to which the edge belongs
     n_faces = fn.shape[0]
-    # max_n_nodes = fn.shape[1]
+
     n_edges = sum(n_nodes)
     en = np.zeros((n_edges, 2), dtype=np.int64)
     face_nr = np.zeros((n_edges,), dtype=np.int64)
     i = 0
-    for iFace in range(n_faces):
-        nEdges = n_nodes[iFace]  # note: nEdges = nNodes
-        for iEdge in range(nEdges):
-            if iEdge == 0:
-                en[i, 1] = fn[iFace, nEdges - 1]
+    for i_face in range(n_faces):
+        n_edges = n_nodes[i_face]  # note: nEdges = nNodes
+        for i_edge in range(n_edges):
+            if i_edge == 0:
+                en[i, 1] = fn[i_face, n_edges - 1]
             else:
-                en[i, 1] = fn[iFace, iEdge - 1]
-            en[i, 0] = fn[iFace, iEdge]
-            face_nr[i] = iFace
+                en[i, 1] = fn[i_face, i_edge - 1]
+            en[i, 0] = fn[i_face, i_edge]
+            face_nr[i] = i_face
             i = i + 1
     en.sort(axis=1)
     i2 = np.argsort(en[:, 1], kind="stable")
@@ -1454,10 +1450,10 @@ def derive_topology_arrays(
     # create the face edge connectivity array
     fe = np.zeros(fn.shape, dtype=np.int64)
     i = 0
-    for iFace in range(n_faces):
-        nEdges = n_nodes[iFace]  # note: nEdges = nNodes
-        for iEdge in range(nEdges):
-            fe[iFace, iEdge] = edge_nr_in_face_order[i]
+    for i_face in range(n_faces):
+        n_edges = n_nodes[i_face]  # note: nEdges = nNodes
+        for i_edge in range(n_edges):
+            fe[i_face, i_edge] = edge_nr_in_face_order[i]
             i = i + 1
 
     # determine the edge face connectivity
@@ -1541,9 +1537,9 @@ def config_to_absolute_paths(
         i = 0
         while True:
             i = i + 1
-            Line = "Line" + str(i)
-            if Line in config["Detect"]:
-                config = parameter_absolute_path(config, "Detect", Line, rootdir)
+            line = "Line" + str(i)
+            if line in config["Detect"]:
+                config = parameter_absolute_path(config, "Detect", line, rootdir)
             else:
                 break
 
@@ -1565,8 +1561,8 @@ def config_to_absolute_paths(
         config = parameter_absolute_path(config, "Erosion", "Slope", rootdir)
         config = parameter_absolute_path(config, "Erosion", "Reed", rootdir)
 
-        NLevel = df_io.config_get_int(config, "Erosion", "NLevel", default=0)
-        for i in range(NLevel):
+        n_level = df_io.config_get_int(config, "Erosion", "NLevel", default=0)
+        for i in range(n_level):
             istr = str(i + 1)
             config = parameter_absolute_path(
                 config, "Erosion", "SimFile" + istr, rootdir
@@ -1614,9 +1610,9 @@ def config_to_relative_paths(
         i = 0
         while True:
             i = i + 1
-            Line = "Line" + str(i)
-            if Line in config["Detect"]:
-                config = parameter_relative_path(config, "Detect", Line, rootdir)
+            line = "Line" + str(i)
+            if line in config["Detect"]:
+                config = parameter_relative_path(config, "Detect", line, rootdir)
             else:
                 break
 
@@ -1638,8 +1634,8 @@ def config_to_relative_paths(
         config = parameter_relative_path(config, "Erosion", "Slope", rootdir)
         config = parameter_relative_path(config, "Erosion", "Reed", rootdir)
 
-        NLevel = df_io.config_get_int(config, "Erosion", "NLevel", default=0)
-        for i in range(NLevel):
+        n_level = df_io.config_get_int(config, "Erosion", "NLevel", default=0)
+        for i in range(n_level):
             istr = str(i + 1)
             config = parameter_relative_path(
                 config, "Erosion", "SimFile" + istr, rootdir

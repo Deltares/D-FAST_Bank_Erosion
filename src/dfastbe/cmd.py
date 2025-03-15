@@ -51,7 +51,8 @@ def run(
     LANGUAGE = language.upper()
     try:
         io.load_program_texts(f"{progloc}{os.path.sep} messages.{LANGUAGE}.ini")
-    except:
+    except Exception as e:
+        print(e)
         if LANGUAGE == "NL":
             print(
                 f"Het taalbestand 'messages. {LANGUAGE} .ini' kan niet worden geladen."
@@ -67,8 +68,6 @@ def run(
         elif RUNMODE == "GUI":
             gui.main(configfile)
         else:
-            raise Exception(
-                "Invalid run mode '{}' specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'.".format(
-                    runmode
-                )
+            raise ValueError(
+                f"Invalid run mode {runmode} specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'."
             )

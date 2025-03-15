@@ -39,7 +39,7 @@ def comp_erosion_eq(
     zfw_ini: numpy.ndarray,
     vship: numpy.ndarray,
     ship_type: numpy.ndarray,
-    Tship: numpy.ndarray,
+    t_ship: numpy.ndarray,
     mu_slope: numpy.ndarray,
     distance_fw: numpy.ndarray,
     dfw0: numpy.ndarray,
@@ -63,7 +63,7 @@ def comp_erosion_eq(
         Array containing ship velocity [m/s]
     ship_type : numpy.ndarray
         Array containing ship type [-]
-    Tship : numpy.ndarray
+    t_ship : numpy.ndarray
         Array containing ship draught [m]
     mu_slope : numpy.ndarray
         Array containing slope [-]
@@ -90,7 +90,7 @@ def comp_erosion_eq(
     eps = sys.float_info.epsilon
 
     # ship induced wave height at the beginning of the foreshore
-    H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, ship_type, Tship, vship, g)
+    H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, ship_type, t_ship, vship, g)
     H0 = numpy.maximum(H0, eps)
 
     zup = numpy.minimum(bankheight, zfw_ini + 2 * H0)
@@ -110,11 +110,11 @@ def comp_erosion(
     zfw: numpy.ndarray,
     zfw_ini: numpy.ndarray,
     tauc: numpy.ndarray,
-    Nship: numpy.ndarray,
+    n_ship: numpy.ndarray,
     vship: numpy.ndarray,
     nwave: numpy.ndarray,
     ship_type: numpy.ndarray,
-    Tship: numpy.ndarray,
+    t_ship: numpy.ndarray,
     Teros: float,
     mu_slope: numpy.ndarray,
     mu_reed: numpy.ndarray,
@@ -151,7 +151,7 @@ def comp_erosion(
         Array containing reference water levels at fairway [m]
     tauc : numpy.ndarray
         Array containing critical shear stress [N/m2]
-    Nship : numpy.ndarray
+    n_ship : numpy.ndarray
         Array containing number of ships [-]
     vship : numpy.ndarray
         Array containing ship velocity [m/s]
@@ -159,7 +159,7 @@ def comp_erosion(
         Array containing number of waves per ship [-]
     ship_type : numpy.ndarray
         Array containing ship type [-]
-    Tship : numpy.ndarray
+    t_ship : numpy.ndarray
         Array containing ship draught [m]
     Teros : float
         Erosion period [yr]
@@ -205,19 +205,12 @@ def comp_erosion(
     # period of ship waves [s]
     T = 0.51 * vship / g
     # [s]
-    ts = T * Nship * nwave
-
-    # number of line segments
-    xlen = len(velocity)
-    # total erosion per segment
-    dn = numpy.zeros(xlen)
-    # erosion volume per segment
-    dv = numpy.zeros(xlen)
+    ts = T * n_ship * nwave
 
     vel = velocity
 
     # ship induced wave height at the beginning of the foreshore
-    H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, ship_type, Tship, vship, g)
+    H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, ship_type, t_ship, vship, g)
     H0 = numpy.maximum(H0, eps)
 
     # compute erosion parameters for each line part
@@ -229,7 +222,7 @@ def comp_erosion(
     velc = numpy.sqrt(tauc / rho * chezy**2 / g)
 
     # strength
-    cE = 1.85e-4 / tauc
+    c_e = 1.85e-4 / tauc
 
     # water level along bank line
     ho_line_ship = numpy.minimum(zfw - zss, 2 * H0)
@@ -249,7 +242,7 @@ def comp_erosion(
     mask = (shipwavemin < zfw_ini) & (zfw_ini < shipwavemax)
     # limit mu -> 0
 
-    dn_ship = cE * H0**2 * ts * Teros
+    dn_ship = c_e * H0**2 * ts * Teros
     dn_ship[~mask] = 0
 
     # compute erosion volume
@@ -266,8 +259,6 @@ def comp_erosion(
     dn = dn_ship + dn_flow
     dv = dv_ship + dv_flow
 
-    # print("  dv_flow total = ", dv_flow.sum())
-    # print("  dv_ship total = ", dv_ship.sum())
     return dn, dv, dn_ship, dn_flow, shipwavemax, shipwavemin
 
 
@@ -318,17 +309,17 @@ def comp_hw_ship_at_bank(
     # towboat
     a1[ship_type == 3] = 1
 
-    Froude = vship / numpy.sqrt(h * g)
-    Froude_limit = 0.8
-    high_Froude = Froude > Froude_limit
-    h[high_Froude] = ((vship[high_Froude] / Froude_limit) ** 2) / g
-    Froude[high_Froude] = Froude_limit
+    froude = vship / numpy.sqrt(h * g)
+    froude_limit = 0.8
+    high_froude = froude > froude_limit
+    h[high_froude] = ((vship[high_froude] / froude_limit) ** 2) / g
+    froude[high_froude] = froude_limit
 
     A = 0.5 * (1 + numpy.cos((distance_fw - dfw1) / (dfw0 - dfw1) * numpy.pi))
     A[distance_fw < dfw1] = 1
     A[distance_fw > dfw0] = 0
 
-    h0 = a1 * h * (distance_fw / h) ** (-1 / 3) * Froude**4 * A
+    h0 = a1 * h * (distance_fw / h) ** (-1 / 3) * froude**4 * A
     return h0
 
 

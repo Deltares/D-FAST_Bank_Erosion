@@ -916,15 +916,15 @@ def get_slices_ab(
     slices : np.ndarray
         Array containing a flag indicating whether the edge is sliced at a valid location.
     """
-    dX = X1 - X0
-    dY = Y1 - Y0
+    d_x = X1 - X0
+    d_y = Y1 - Y0
     dxi = xi1 - xi0
     dyi = yi1 - yi0
-    det = dX * dyi - dY * dxi
+    det = d_x * dyi - d_y * dxi
     det[det == 0] = 1e-10
     a = (dyi * (xi0 - X0) - dxi * (yi0 - Y0)) / det  # along mesh edge
-    b = (dY * (xi0 - X0) - dX * (yi0 - Y0)) / det  # along bank line
-    # eps = np.finfo(float).eps
+    b = (d_y * (xi0 - X0) - d_x * (yi0 - Y0)) / det  # along bank line
+
     if bmax1:
         slices = np.nonzero((b > bmin) & (b <= 1) & (a >= 0) & (a <= 1))[0]
     else:
@@ -1383,22 +1383,22 @@ def move_line_right(xylines: np.ndarray, dn: np.ndarray) -> np.ndarray:
                     n_last = n[i]
                     s_last = s[i]
                     if a[i] < prec:
-                        dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
-                        dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
+                        d_py = poly[n[i] + 1, 1] - poly[n[i], 1]
+                        d_px = poly[n[i] + 1, 0] - poly[n[i], 0]
                         s2 = s[i] - ixy0
-                        dBy = Y1[s2] - Y0[s2]
-                        dBx = X1[s2] - X0[s2]
-                        inside = dPy * dBx - dPx * dBy > 0
+                        d_by = Y1[s2] - Y0[s2]
+                        d_bx = X1[s2] - X0[s2]
+                        inside = d_py * d_bx - d_px * d_by > 0
                     elif a[i] > 1 - prec:
-                        dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
-                        dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
+                        d_py = poly[n[i] + 1, 1] - poly[n[i], 1]
+                        d_px = poly[n[i] + 1, 0] - poly[n[i], 0]
                         s2 = s[i] - ixy0 + 1
                         if s2 > len(X0) - 1:
                             inside = True
                         else:
-                            dBy = Y1[s2] - Y0[s2]
-                            dBx = X1[s2] - X0[s2]
-                            inside = dPy * dBx - dPx * dBy > 0
+                            d_by = Y1[s2] - Y0[s2]
+                            d_bx = X1[s2] - X0[s2]
+                            inside = d_py * d_bx - d_px * d_by > 0
                     else:
                         # line segment slices the edge somewhere in the middle
                         inside = not inside
@@ -1809,30 +1809,29 @@ def get_banklines(sim: SimulationObject, h0: float) -> gpd.GeoSeries:
     Y = sim["y_node"][FNC]
     ZB = sim["zb_val"][FNC]
     ZW = sim["zw_face"]
-    # H_face = sim["h_face"]
-    # WET_face = H_face > h0
-    #
+
     nnodes_total = len(sim["x_node"])
     try:
         mask = ~FNC.mask
-        nonmasked = sum(mask.reshape(FNC.size))
-        FNCm = FNC[mask]
-        ZWm = np.repeat(ZW, max_nnodes)[mask]
-    except:
+        non_masked = sum(mask.reshape(FNC.size))
+        fn_cm = FNC[mask]
+        z_wm = np.repeat(ZW, max_nnodes)[mask]
+    except Exception as e:
+        print(e)
         mask = np.repeat(True, FNC.size)
-        nonmasked = FNC.size
-        FNCm = FNC.reshape(nonmasked)
-        ZWm = np.repeat(ZW, max_nnodes).reshape(nonmasked)
-    ZW_node = np.bincount(FNCm, weights=ZWm, minlength=nnodes_total)
-    NVal = np.bincount(FNCm, weights=np.ones(nonmasked), minlength=nnodes_total)
-    ZW_node = ZW_node / np.maximum(NVal, 1)
-    ZW_node[NVal == 0] = sim["zb_val"][NVal == 0]
-    #
-    H_node = ZW_node[FNC] - ZB
-    WET_node = H_node > h0
-    NWET = WET_node.sum(axis=1)
-    MASK = NWET.mask.size > 1
-    #
+        non_masked = FNC.size
+        fn_cm = FNC.reshape(non_masked)
+        z_wm = np.repeat(ZW, max_nnodes).reshape(non_masked)
+    zw_node = np.bincount(fn_cm, weights=z_wm, minlength=nnodes_total)
+    n_val = np.bincount(fn_cm, weights=np.ones(non_masked), minlength=nnodes_total)
+    zw_node = zw_node / np.maximum(n_val, 1)
+    zw_node[n_val == 0] = sim["zb_val"][n_val == 0]
+
+    h_node = zw_node[FNC] - ZB
+    wet_node = h_node > h0
+    nwet = wet_node.sum(axis=1)
+    MASK = nwet.mask.size > 1
+
     nfaces = len(FNC)
     Lines = [None] * nfaces
     frac = 0
@@ -1841,16 +1840,16 @@ def get_banklines(sim: SimulationObject, h0: float) -> gpd.GeoSeries:
             print("{}%".format(int(frac * 10)))
             frac = frac + 1
         nnodes = NNODES[i]
-        nwet = NWET[i]
+        nwet = nwet[i]
         if (MASK and nwet.mask) or nwet == 0 or nwet == nnodes:
             # all dry or all wet
             pass
         else:
             # some nodes dry and some nodes wet: determine the line
             if nnodes == 3:
-                Lines[i] = tri_to_line(X[i], Y[i], WET_node[i], H_node[i], h0)
+                Lines[i] = tri_to_line(X[i], Y[i], wet_node[i], h_node[i], h0)
             else:
-                Lines[i] = poly_to_line(nnodes, X[i], Y[i], WET_node[i], H_node[i], h0)
+                Lines[i] = poly_to_line(nnodes, X[i], Y[i], wet_node[i], h_node[i], h0)
     Lines = [line for line in Lines if line is not None and not line.is_empty]
     multi_line = shapely.ops.cascaded_union(Lines)
     merged_line = shapely.ops.linemerge(multi_line)

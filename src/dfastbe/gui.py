@@ -1232,15 +1232,8 @@ def run_erosion() -> None:
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
     plt.close("all")
     # should maybe use a separate thread for this ...
-    # msg = ""
-    # try:
     batch.bankerosion_core(config, rootdir, True)
-    # except Exception as Ex:
-    #    msg = str(Ex)
     dialog["application"].restoreOverrideCursor()
-    # if msg != "":
-    #    print(msg)
-    #    showError(msg)
 
 
 def close_dialog() -> None:
@@ -1431,7 +1424,6 @@ def load_configuration(filename: str) -> None:
 
         tabs = dialog["tabs"]
         for i in range(tabs.count() - 1, 4, -1):
-            # tab = tabs.widget(i)
             tabs.removeTab(i)
 
         for i in range(NLevel):
@@ -1599,7 +1591,8 @@ def setParam(field: str, config, group: str, key: str, default: str = "??") -> N
             dialog[field + "Select"].setCurrentIndex(ival)
         else:
             dialog[field + "Edit"].setText(str)
-    except:
+    except Exception as e:
+        print(e)
         dialog[field + "Type"].setCurrentText("Variable")
         dialog[field + "Edit"].setText(str)
 
@@ -1656,7 +1649,8 @@ def setOptParam(field: str, config, group: str, key: str) -> None:
                 dialog[field + "Select"].setCurrentIndex(ival)
             else:
                 dialog[field + "Edit"].setText(str)
-        except:
+        except Exception as e:
+            print(e)
             dialog[field + "Type"].setCurrentText("Variable")
             dialog[field + "Edit"].setText(str)
 
