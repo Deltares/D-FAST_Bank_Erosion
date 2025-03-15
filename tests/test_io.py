@@ -361,11 +361,11 @@ class Test_write_simona_box:
         assert all_lines == all_lines_ref
 
 
+@pytest.mark.skipif(
+    platform.system() != "Windows", reason="it will be completely changed"
+)
 class Test_absolute_path:
 
-    @pytest.mark.skipif(
-        platform.system() != "Windows", reason="it will be completely changed"
-    )
     def test_absolute_path_01(self):
         """
         Convert absolute path into relative path using relative_path (Windows).
@@ -375,9 +375,6 @@ class Test_absolute_path:
         rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         assert df_io.absolute_path(rootdir, rfile) == afile
 
-    @pytest.mark.skipif(
-        platform.system() != "Windows", reason="it will be completely changed"
-    )
     def test_absolute_path_02(self):
         """
         Empty string should not be adjusted by relative_path.
