@@ -46,7 +46,7 @@ jobs:
           pip list
 
       - name: Test with pytest
-        run: poetry run pytest --cov . --cov-report xml:coverage-reports/coverage-hydrolib-core.xml --junitxml=xunit-reports/xunit-result-hydrolib-core.xml
+        run: poetry run pytest --cov --cov=src/dfastbe --cov-report term-missing
 
       - uses: codecov/codecov-action@v4
         env:
