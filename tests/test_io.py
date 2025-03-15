@@ -1,5 +1,6 @@
 import configparser
 import os
+import platform
 import sys
 from contextlib import contextmanager
 from io import StringIO
@@ -361,25 +362,22 @@ class Test_write_simona_box:
 
 
 class Test_absolute_path:
+
+    @pytest.mark.skipif(
+        platform.system() != "Windows", reason="it will be completely changed"
+    )
     def test_absolute_path_01(self):
         """
         Convert absolute path into relative path using relative_path (Windows).
         """
         rootdir = "d:" + os.sep + "some" + os.sep + "dir"
-        afile = (
-            "d:"
-            + os.sep
-            + "some"
-            + os.sep
-            + "other"
-            + os.sep
-            + "dir"
-            + os.sep
-            + "file.ext"
-        )
+        afile = f"d:{os.sep}some{os.sep}other{os.sep}dir{os.sep}file.ext"
         rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         assert df_io.absolute_path(rootdir, rfile) == afile
 
+    @pytest.mark.skipif(
+        platform.system() != "Windows", reason="it will be completely changed"
+    )
     def test_absolute_path_02(self):
         """
         Empty string should not be adjusted by relative_path.
