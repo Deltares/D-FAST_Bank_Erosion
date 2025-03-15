@@ -150,7 +150,7 @@ repos:
     hooks:
       - id: pytest-check
         name: pytest-check
-        entry: pytest -vvv --cov=dfastbe --cov-report term-missing
+        entry: pytest -vvv --cov=src/dfastbe --cov-report term-missing
         language: system
         pass_filenames: false
         always_run: true
