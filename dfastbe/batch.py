@@ -1795,10 +1795,11 @@ def get_zoom_extends(km_min: float, km_max: float, zoom_km_step: float, bank_crd
             range_crds = bank_crds[ib][irange, :]
             x = range_crds[:, 0]
             y = range_crds[:, 1]
-            xmin = min(xmin, min(x))
-            xmax = max(xmax, max(x))
-            ymin = min(ymin, min(y))
-            ymax = max(ymax, max(y))
+            if len(x) > 0:
+                xmin = min(xmin, min(x))
+                xmax = max(xmax, max(x))
+                ymin = min(ymin, min(y))
+                ymax = max(ymax, max(y))
         xyzoom.append((xmin, xmax, ymin, ymax))
 
     return kmzoom, xyzoom

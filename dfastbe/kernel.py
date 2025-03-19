@@ -401,12 +401,14 @@ def get_km_eroded_volume(
     dvol : numpy.ndarray
         Array containing the accumulated eroded volume per chainage bin.
     """
-    bin_idx = numpy.rint((bank_km_mid - km_bin[0] - km_bin[2] / 2) / km_bin[2]).astype(
+    km_step = km_bin[2]
+    nbins = int(math.ceil((km_bin[1] - km_bin[0]) / km_step))
+
+    bin_idx = numpy.rint((bank_km_mid - km_bin[0] - km_step / 2.0) / km_step).astype(
         numpy.int64
     )
     dvol = numpy.bincount(bin_idx, weights=dv)
-    length = int((km_bin[1] - km_bin[0]) / km_bin[2])
-    dvol.resize((length,))
+    dvol.resize((nbins,))
     return dvol
 
 
