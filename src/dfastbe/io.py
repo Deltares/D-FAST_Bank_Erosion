@@ -640,8 +640,10 @@ def read_xyc(
         Line strings.
     """
     filename = Path(filename)
-    ext = filename.suffix
-    if ext.lower() == ".xyc":
+    if not filename.exists():
+        raise FileNotFoundError(f"File not found: {filename}")
+
+    if filename.suffix.lower() == ".xyc":
         if ncol == 3:
             colnames = ["Val", "X", "Y"]
         else:
