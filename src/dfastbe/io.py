@@ -639,7 +639,7 @@ def read_xyc(
     L : shapely.geometry.linestring.LineStringAdapter
         Line strings.
     """
-    filename = Path(filename)
+    filename = Path(filename).resolve()
     if not filename.exists():
         raise FileNotFoundError(f"File not found: {filename}")
 
