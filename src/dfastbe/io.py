@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Copyright (C) 2020 Stichting Deltares.
 
@@ -26,13 +25,18 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-
+from pathlib import Path
 from typing import Tuple, Any, List, Union, Dict, Optional, TextIO, Callable, TypedDict
-
 import numpy
+
+import netCDF4
+import configparser
+import os
+import os.path
 import pandas
 import geopandas
 import shapely
+import pathlib
 
 
 class SimulationObject(TypedDict):
@@ -48,15 +52,6 @@ class SimulationObject(TypedDict):
     ucy_face: numpy.ndarray
     chz_face: numpy.ndarray
 
-
-import netCDF4
-import configparser
-import os
-import os.path
-import pandas
-import geopandas
-import shapely
-import pathlib
 
 PROGTEXTS: Dict[str, List[str]]
 
@@ -644,7 +639,8 @@ def read_xyc(
     L : shapely.geometry.linestring.LineStringAdapter
         Line strings.
     """
-    fileroot, ext = os.path.splitext(filename)
+    filename = Path(filename)
+    ext = filename.suffix
     if ext.lower() == ".xyc":
         if ncol == 3:
             colnames = ["Val", "X", "Y"]
@@ -1066,7 +1062,7 @@ def clip_path_to_kmbounds(
         Original river chainage line.
     kmbounds : Tuple[float, float]
         Lower and upper limit for the chainage.
-        
+
     Returns
     -------
     xykm1 : shapely.geometry.linestring.LineStringAdapter
