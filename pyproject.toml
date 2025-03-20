@@ -28,6 +28,7 @@ pytest = "^7.2.1"
 pytest-cov = "^6.0.0"
 black = "^22.12.0"
 teamcity-messages = "^1.32"
+pre-commit = "^4.2.0"
 
 [tool.flake8]
 ignore = ["E501", "E203", "F821", "E722", "B001", "D401", "B006", "D202", "W503"]
