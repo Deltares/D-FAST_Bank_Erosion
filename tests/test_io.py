@@ -1,7 +1,7 @@
-import context
 import dfastbe.io
 import configparser
 import os
+import platform
 import numpy
 import netCDF4
 
@@ -22,7 +22,7 @@ def captured_output():
         sys.stdout, sys.stderr = old_out, old_err
 
 
-class Test_load_program_texts():
+class Test_load_program_texts:
     def test_load_program_texts_01(self):
         """
         Testing load_program_texts.
@@ -30,7 +30,7 @@ class Test_load_program_texts():
         print("current work directory: ", os.getcwd())
         assert dfastbe.io.load_program_texts("tests/files/messages.UK.ini") == None
 
-class Test_log_text():
+class Test_log_text:
     def test_log_text_01(self):
         """
         Testing standard output of a single text without expansion.
@@ -79,14 +79,14 @@ class Test_log_text():
         strref = ['The measure is located on reach ABC']
         assert all_lines == strref
 
-class Test_get_filename():
+class Test_get_filename:
     def test_get_filename_01(self):
         """
         Testing get_filename wrapper for get_text.
         """
         assert dfastbe.io.get_filename("report.out") == "report.txt"
 
-class Test_get_text():
+class Test_get_text:
     def test_get_text_01(self):
         """
         Testing get_text: key not found.
@@ -105,7 +105,7 @@ class Test_get_text():
         """
         assert dfastbe.io.get_text("confirm") == ['Confirm using "y" ...','']
 
-class Test_write_config():
+class Test_write_config:
     def test_write_config_01(self):
         """
         Testing write_config.
@@ -132,7 +132,7 @@ class Test_write_config():
                          '  longkey = 3']
         assert all_lines == all_lines_ref
 
-class Test_read_fm_map():
+class Test_read_fm_map:
     def test_read_fm_map_01(self):
         """
         Testing read_fm_map: x coordinates of the faces.
@@ -332,7 +332,12 @@ class Test_write_simona_box():
         self.maxDiff = None
         assert all_lines == all_lines_ref
 
-class Test_absolute_path():
+
+@pytest.mark.skipif(
+    platform.system() != "Windows", reason="it will be completely changed"
+)
+class TestAbsolutePath:
+
     def test_absolute_path_01(self):
         """
         Convert absolute path into relative path using relative_path (Windows).
@@ -385,6 +390,9 @@ class Test_relative_path():
         file = ""
         assert dfastbe.io.relative_path(rootdir, file) == file
 
+    @pytest.mark.skipif(
+        platform.system() != "Windows", reason="it will be completely changed"
+    )
     def test_relative_path_03(self):
         """
         If path on different drive, it shouldn't be adjusted by relative_path (Windows).
