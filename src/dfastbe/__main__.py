@@ -115,7 +115,9 @@ def parse_arguments() -> Tuple[str, str, str]:
         )
     return language, runmode, configfile
 
-
-if __name__ == "__main__":
+def main():
     language, runmode, configfile = parse_arguments()
     dfastbe.cmd.run(language, runmode, configfile)
+
+if __name__ == "__main__":
+    main()
