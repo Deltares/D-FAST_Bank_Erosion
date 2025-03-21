@@ -622,7 +622,7 @@ def relative_path(rootdir: str, file: str) -> str:
 
 
 def read_xyc(
-    filename: str, ncol: int = 2
+    filename: str, num_columns: int = 2
 ) -> shapely.geometry.linestring.LineStringAdapter:
     """
     Read lines from a file.
@@ -631,7 +631,7 @@ def read_xyc(
     ---------
     filename : str
         Name of the file to be read.
-    ncol : int
+    num_columns : int
         Number of columns to be read (2 or 3)
 
     Returns
@@ -639,30 +639,32 @@ def read_xyc(
     L : shapely.geometry.linestring.LineStringAdapter
         Line strings.
     """
+    filename = Path(filename)
     if not filename.exists():
         raise FileNotFoundError(f"File not found: {filename}")
 
     if filename.suffix.lower() == ".xyc":
-        if ncol == 3:
-            colnames = ["Val", "X", "Y"]
+        if num_columns == 3:
+            column_names = ["Val", "X", "Y"]
         else:
-            colnames = ["X", "Y"]
-        P = pandas.read_csv(
-            filename, names=colnames, skipinitialspace=True, delim_whitespace=True
+            column_names = ["X", "Y"]
+        point_coordinates = pandas.read_csv(
+            filename, names=column_names, skipinitialspace=True, delim_whitespace=True
         )
-        nPnts = len(P.X)
-        x = P.X.to_numpy().reshape((nPnts, 1))
-        y = P.Y.to_numpy().reshape((nPnts, 1))
-        if ncol == 3:
-            z = P.Val.to_numpy().reshape((nPnts, 1))
-            LC = numpy.concatenate((x, y, z), axis=1)
+        num_points = len(point_coordinates.X)
+        x = point_coordinates.X.to_numpy().reshape((num_points, 1))
+        y = point_coordinates.Y.to_numpy().reshape((num_points, 1))
+        if num_columns == 3:
+            z = point_coordinates.Val.to_numpy().reshape((num_points, 1))
+            coords = numpy.concatenate((x, y, z), axis=1)
         else:
-            LC = numpy.concatenate((x, y), axis=1)
-        L = shapely.geometry.LineString(LC)
+            coords = numpy.concatenate((x, y), axis=1)
+        line_string = shapely.geometry.LineString(coords)
     else:
-        GEO = geopandas.read_file(filename)["geometry"]
-        L = GEO[0]
-    return L
+        gdf = geopandas.read_file(filename)["geometry"]
+        line_string = gdf[0]
+
+    return line_string
 
 
 def write_xyc(xy: numpy.ndarray, val: numpy.ndarray, filename: str) -> None:
@@ -1042,7 +1044,7 @@ def config_get_xykm(
     # get the chainage file
     kmfile = config_get_str(config, "General", "RiverKM")
     log_text("read_chainage", dict={"file": kmfile})
-    xykm = read_xyc(kmfile, ncol=3)
+    xykm = read_xyc(kmfile, num_columns=3)
 
     # make sure that chainage is increasing with node index
     if xykm.coords[0][2] > xykm.coords[1][2]:
