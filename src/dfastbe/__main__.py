@@ -48,15 +48,6 @@ if is_nuitka:
     pyproj.datadir.set_data_dir(root + os.sep + "proj")
     import pyproj
 
-import fiona.enums
-import fiona.ogrext
-import fiona.schema
-import _ctypes
-import pandas._libs.tslibs.base
-
-import six
-import netCDF4.utils
-import cftime
 
 # ------------------------------------------------------------------------------
 import matplotlib
@@ -115,7 +106,9 @@ def parse_arguments() -> Tuple[str, str, str]:
         )
     return language, runmode, configfile
 
-
-if __name__ == "__main__":
+def main():
     language, runmode, configfile = parse_arguments()
     dfastbe.cmd.run(language, runmode, configfile)
+
+if __name__ == "__main__":
+    main()

@@ -63,12 +63,10 @@ def run(
     except:
         if LANGUAGE == "NL":
             print(
-                "Het taalbestand 'messages."
-                + LANGUAGE
-                + ".ini' kan niet worden geladen."
+                f"Het taalbestand 'messages.{LANGUAGE}.ini' kan niet worden geladen."
             )
         else:
-            print("Unable to load language file 'messages." + LANGUAGE + ".ini'")
+            print(f"Unable to load language file 'messages.{LANGUAGE}.ini'")
     else:
         RUNMODE = runmode.upper()
         if RUNMODE == "BANKLINES":

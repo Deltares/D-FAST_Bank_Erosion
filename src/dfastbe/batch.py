@@ -27,19 +27,16 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Union, Dict, Any, Tuple, List
+from typing import Tuple, List
 
 import time
-import argparse
 import dfastbe.kernel
 import dfastbe.support
 import dfastbe.io
 import dfastbe.plotting
 import os
-import sys
 import geopandas
 import shapely
-import pathlib
 import numpy
 import matplotlib
 import configparser

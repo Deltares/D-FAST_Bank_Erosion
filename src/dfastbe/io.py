@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Copyright (C) 2020 Stichting Deltares.
 
@@ -26,13 +25,18 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-
+from pathlib import Path
 from typing import Tuple, Any, List, Union, Dict, Optional, TextIO, Callable, TypedDict
-
 import numpy
+
+import netCDF4
+import configparser
+import os
+import os.path
 import pandas
 import geopandas
 import shapely
+import pathlib
 
 
 class SimulationObject(TypedDict):
@@ -48,15 +52,6 @@ class SimulationObject(TypedDict):
     ucy_face: numpy.ndarray
     chz_face: numpy.ndarray
 
-
-import netCDF4
-import configparser
-import os
-import os.path
-import pandas
-import geopandas
-import shapely
-import pathlib
 
 PROGTEXTS: Dict[str, List[str]]
 
@@ -627,7 +622,7 @@ def relative_path(rootdir: str, file: str) -> str:
 
 
 def read_xyc(
-    filename: str, ncol: int = 2
+    filename: str, num_columns: int = 2
 ) -> shapely.geometry.linestring.LineStringAdapter:
     """
     Read lines from a file.
@@ -636,7 +631,7 @@ def read_xyc(
     ---------
     filename : str
         Name of the file to be read.
-    ncol : int
+    num_columns : int
         Number of columns to be read (2 or 3)
 
     Returns
@@ -644,28 +639,32 @@ def read_xyc(
     L : shapely.geometry.linestring.LineStringAdapter
         Line strings.
     """
-    fileroot, ext = os.path.splitext(filename)
-    if ext.lower() == ".xyc":
-        if ncol == 3:
-            colnames = ["Val", "X", "Y"]
+    filename = Path(filename)
+    if not filename.exists():
+        raise FileNotFoundError(f"File not found: {filename}")
+
+    if filename.suffix.lower() == ".xyc":
+        if num_columns == 3:
+            column_names = ["Val", "X", "Y"]
         else:
-            colnames = ["X", "Y"]
-        P = pandas.read_csv(
-            filename, names=colnames, skipinitialspace=True, delim_whitespace=True
+            column_names = ["X", "Y"]
+        point_coordinates = pandas.read_csv(
+            filename, names=column_names, skipinitialspace=True, delim_whitespace=True
         )
-        nPnts = len(P.X)
-        x = P.X.to_numpy().reshape((nPnts, 1))
-        y = P.Y.to_numpy().reshape((nPnts, 1))
-        if ncol == 3:
-            z = P.Val.to_numpy().reshape((nPnts, 1))
-            LC = numpy.concatenate((x, y, z), axis=1)
+        num_points = len(point_coordinates.X)
+        x = point_coordinates.X.to_numpy().reshape((num_points, 1))
+        y = point_coordinates.Y.to_numpy().reshape((num_points, 1))
+        if num_columns == 3:
+            z = point_coordinates.Val.to_numpy().reshape((num_points, 1))
+            coords = numpy.concatenate((x, y, z), axis=1)
         else:
-            LC = numpy.concatenate((x, y), axis=1)
-        L = shapely.geometry.LineString(LC)
+            coords = numpy.concatenate((x, y), axis=1)
+        line_string = shapely.geometry.LineString(coords)
     else:
-        GEO = geopandas.read_file(filename)["geometry"]
-        L = GEO[0]
-    return L
+        gdf = geopandas.read_file(filename)["geometry"]
+        line_string = gdf[0]
+
+    return line_string
 
 
 def write_xyc(xy: numpy.ndarray, val: numpy.ndarray, filename: str) -> None:
@@ -1045,7 +1044,7 @@ def config_get_xykm(
     # get the chainage file
     kmfile = config_get_str(config, "General", "RiverKM")
     log_text("read_chainage", dict={"file": kmfile})
-    xykm = read_xyc(kmfile, ncol=3)
+    xykm = read_xyc(kmfile, num_columns=3)
 
     # make sure that chainage is increasing with node index
     if xykm.coords[0][2] > xykm.coords[1][2]:
@@ -1066,7 +1065,7 @@ def clip_path_to_kmbounds(
         Original river chainage line.
     kmbounds : Tuple[float, float]
         Lower and upper limit for the chainage.
-        
+
     Returns
     -------
     xykm1 : shapely.geometry.linestring.LineStringAdapter
