@@ -413,21 +413,3 @@ class Test_relative_path():
         afile = os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         assert dfastbe.io.relative_path(rootdir, afile) == rfile
-
-# TODO: read_xyc
-# TODO: write_km_eroded_volumes
-# TODO: upgrade_config
-# TODO: movepar
-# TODO: config_get_xykm
-# TODO: clip_chainage_path
-# TODO: config_get_bank_guidelines
-# TODO: config_get_bank_search_distances
-# TODO: config_get_simfile
-# TODO: config_get_range
-# TODO: config_get_bool
-# TODO: config_get_int
-# TODO: config_get_float
-# TODO: config_get_str
-# TODO: config_get_parameter
-# TODO: get_kmval
-# TODO: read_simdata
