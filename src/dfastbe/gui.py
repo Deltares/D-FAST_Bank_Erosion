@@ -33,7 +33,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import PyQt5.QtGui
 from dfastbe.io import get_text, get_progloc, absolute_path, ConfigFile, config_get_range, \
-                        config_get_bool, config_get_float, config_get_int, config_get_bank_search_distances
+                        config_get_float, config_get_int, config_get_bank_search_distances
 import pathlib
 import sys
 import os
@@ -1308,11 +1308,11 @@ def load_configuration(filename: str) -> None:
         dialog["bankDirEdit"].setText(section["BankDir"])
         bankFile = config_file.get_str("General", "BankFile", default="bankfile")
         dialog["bankFileName"].setText(bankFile)
-        flag = config_get_bool(config, "General", "Plotting", default=True)
+        flag = config_file.get_bool("General", "Plotting", default=True)
         dialog["makePlotsEdit"].setChecked(flag)
-        flag = config_get_bool(config, "General", "SavePlots", default=True)
+        flag = config_file.get_bool("General", "SavePlots", default=True)
         dialog["savePlotsEdit"].setChecked(flag)
-        flag = config_get_bool(config, "General", "SaveZoomPlots", default=False)
+        flag = config_file.get_bool("General", "SaveZoomPlots", default=False)
         dialog["saveZoomPlotsEdit"].setChecked(flag)
         zoomStepKM = config_get_float(config, "General", "ZoomStepKM", default=1.0)
         dialog["zoomPlotsRangeEdit"].setText(str(zoomStepKM))
@@ -1322,13 +1322,9 @@ def load_configuration(filename: str) -> None:
             default=absolute_path(rootdir, "figures"),
         )
         dialog["figureDirEdit"].setText(figDir)
-        flag = config_get_bool(
-            config, "General", "ClosePlots", default=False
-        )
+        flag = config_file.get_bool("General", "ClosePlots", default=False)
         dialog["closePlotsEdit"].setChecked(flag)
-        flag = config_get_bool(
-            config, "General", "DebugOutput", default=False
-        )
+        flag = config_file.get_bool("General", "DebugOutput", default=False)
         dialog["debugOutputEdit"].setChecked(flag)
 
         section = config["Detect"]
@@ -1391,9 +1387,7 @@ def load_configuration(filename: str) -> None:
         wave0 = config_file.get_str("Erosion", "Wave0", "200.0")
         setParam("wavePar1", config, "Erosion", "Wave1", wave0)
 
-        useBankType = config_get_bool(
-            config, "Erosion", "Classes", default=True
-        )
+        useBankType = config_file.get_bool("Erosion", "Classes", default=True)
         dialog["bankType"].setEnabled(useBankType)
         dialog["bankTypeType"].setEnabled(useBankType)
         dialog["bankTypeEdit"].setEnabled(useBankType)

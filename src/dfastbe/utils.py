@@ -1,6 +1,5 @@
 from typing import Tuple
 import time
-import os
 import configparser
 from dfastbe import io
 

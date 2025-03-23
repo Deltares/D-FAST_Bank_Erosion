@@ -6,7 +6,7 @@ import geopandas as gpd
 from matplotlib import pyplot as plt
 from dfastbe import support
 from dfastbe import __version__
-from dfastbe.io import ConfigFile, log_text, config_get_bool, config_get_float, config_get_xykm, \
+from dfastbe.io import ConfigFile, log_text, config_get_float, config_get_xykm, \
                         config_get_kmbounds, clip_path_to_kmbounds, config_get_bank_search_distances, \
                         config_get_simfile, read_simdata, config_get_search_lines
 from dfastbe.kernel import get_bbox, get_zoom_extends
@@ -48,14 +48,14 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
         os.makedirs(bank_output_dir)
 
     # set plotting flags
-    plotting = config_get_bool(config, "General", "Plotting", True)
+    plotting = config_file.get_bool("General", "Plotting", True)
     if plotting:
-        saveplot = config_get_bool(config, "General", "SavePlots", True)
-        saveplot_zoomed = config_get_bool(config, "General", "SaveZoomPlots", True)
+        saveplot = config_file.get_bool("General", "SavePlots", True)
+        saveplot_zoomed = config_file.get_bool("General", "SaveZoomPlots", True)
         zoom_km_step = config_get_float(config, "General", "ZoomStepKM", 1.0)
         if zoom_km_step < 0.01:
             saveplot_zoomed = False
-        closeplot = config_get_bool(config, "General", "ClosePlots", False)
+        closeplot = config_file.get_bool("General", "ClosePlots", False)
     else:
         saveplot = False
         saveplot_zoomed = False

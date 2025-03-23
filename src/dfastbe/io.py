@@ -311,6 +311,54 @@ class ConfigFile:
                 )
         return val
 
+    def get_bool(
+        self,
+        group: str,
+        key: str,
+        default: Optional[bool] = None,
+    ) -> bool:
+        """
+        Get a boolean from a selected group and keyword in the analysis settings.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group from which to read.
+        key : str
+            Name of the keyword from which to read.
+        default : Optional[bool]
+            Optional default value.
+
+        Raises
+        ------
+        Exception
+            If the keyword isn't specified and no default value is given.
+
+        Returns
+        -------
+        val : bool
+            Boolean value.
+        """
+        try:
+            str = self.config[group][key].lower()
+            val = (
+                    (str == "yes")
+                    or (str == "y")
+                    or (str == "true")
+                    or (str == "t")
+                    or (str == "1")
+            )
+        except:
+            if not default is None:
+                val = default
+            else:
+                raise Exception(
+                    'No boolean value specified for required keyword "{}" in block "{}".'.format(
+                        key, group
+                    )
+                )
+        return val
+
 def load_program_texts(filename: str) -> None:
     """
     Load texts from configuration file, and store globally for access.
@@ -1268,7 +1316,8 @@ def config_get_bank_lines(
     line : List[numpy.ndarray]
         List of arrays containing the x,y-coordinates of a bank lines.
     """
-    bankname = config_get_str(config, "General", "BankFile", "bankfile")
+    config_file = ConfigFile(config)
+    bankname = config_file.get_str("General", "BankFile", "bankfile")
     bankfile = bankdir + os.sep + bankname + ".shp"
     if os.path.exists(bankfile):
         log_text("read_banklines", dict={"file": bankfile})
@@ -1388,57 +1437,6 @@ def config_get_range(
                 str_val, key, group
             )
         )
-    return val
-
-
-def config_get_bool(
-    config: configparser.ConfigParser,
-    group: str,
-    key: str,
-    default: Optional[bool] = None,
-) -> bool:
-    """
-    Get a boolean from a selected group and keyword in the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group from which to read.
-    key : str
-        Name of the keyword from which to read.
-    default : Optional[bool]
-        Optional default value.
-
-    Raises
-    ------
-    Exception
-        If the keyword isn't specified and no default value is given.
-
-    Returns
-    -------
-    val : bool
-        Boolean value.
-    """
-    try:
-        str = config[group][key].lower()
-        val = (
-            (str == "yes")
-            or (str == "y")
-            or (str == "true")
-            or (str == "t")
-            or (str == "1")
-        )
-    except:
-        if not default is None:
-            val = default
-        else:
-            raise Exception(
-                'No boolean value specified for required keyword "{}" in block "{}".'.format(
-                    key, group
-                )
-            )
     return val
 
 
