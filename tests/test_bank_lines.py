@@ -10,11 +10,11 @@ from dfastbe.cmd import run
 
 
 def test_bank_lines():
-    test_r_dir = Path("tests/data/bank_line")
+    test_r_dir = Path("tests/data/bank_lines")
     language = "UK"
     run_mode = "BANKLINES"
-    config_file = "tests/data/bank_line/Meuse_manual.cfg"
-    run(language, run_mode, config_file)
+    config_file = test_r_dir / "Meuse_manual.cfg"
+    run(language, run_mode, str(config_file))
 
     # check the detected banklines
     file_1 = test_r_dir / "output/banklines/raw_detected_bankline_fragments.shp"
