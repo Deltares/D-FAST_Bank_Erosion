@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 import configparser
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, \
-    config_get_int, config_get_simfile, read_simdata, config_get_xykm, config_get_kmbounds, \
+    config_get_simfile, read_simdata, config_get_xykm, config_get_kmbounds, \
     config_get_bank_lines, clip_path_to_kmbounds, read_xyc, write_shp_pnt, config_get_parameter, \
     write_km_eroded_volumes, write_shp, write_csv
 
@@ -134,7 +134,7 @@ def bankerosion_core(
         plot_ext = config_file.get_str("General", "FigureExt", ".png")
 
     # get simulation time terosion
-    Teros = config_get_int(config, "Erosion", "TErosion", positive=True)
+    Teros = config_file.get_int("Erosion", "TErosion", positive=True)
     log_text("total_time", dict={"t": Teros})
 
     # get filter settings for bank levels and flow velocities along banks
@@ -143,8 +143,8 @@ def bankerosion_core(
 
     # get pdischarges
     log_text("get_levels")
-    num_levels = config_get_int(config, "Erosion", "NLevel")
-    ref_level = config_get_int(config, "Erosion", "RefLevel") - 1
+    num_levels = config_file.get_int("Erosion", "NLevel")
+    ref_level = config_file.get_int("Erosion", "RefLevel") - 1
     simfiles = []
     pdischarge = []
     for iq in range(num_levels):

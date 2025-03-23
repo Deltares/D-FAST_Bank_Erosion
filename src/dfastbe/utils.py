@@ -1,7 +1,7 @@
 from typing import Tuple
 import time
 import configparser
-from dfastbe import io
+from dfastbe.io import ConfigFile, absolute_path, relative_path
 
 
 def timed_logger(label: str) -> None:
@@ -100,8 +100,8 @@ def config_to_absolute_paths(
         config = parameter_absolute_path(config, "Erosion", "ProtectionLevel", rootdir)
         config = parameter_absolute_path(config, "Erosion", "Slope", rootdir)
         config = parameter_absolute_path(config, "Erosion", "Reed", rootdir)
-
-        NLevel = io.config_get_int(config, "Erosion", "NLevel", default=0)
+        config_file = ConfigFile(config)
+        NLevel = config_file.get_int("Erosion", "NLevel", default=0)
         for i in range(NLevel):
             istr = str(i + 1)
             config = parameter_absolute_path(
@@ -174,7 +174,8 @@ def config_to_relative_paths(
         config = parameter_relative_path(config, "Erosion", "Slope", rootdir)
         config = parameter_relative_path(config, "Erosion", "Reed", rootdir)
 
-        NLevel = io.config_get_int(config, "Erosion", "NLevel", default=0)
+        config_file = ConfigFile(config)
+        NLevel = config_file.get_int("Erosion", "NLevel", default=0)
         for i in range(NLevel):
             istr = str(i + 1)
             config = parameter_relative_path(
@@ -224,7 +225,7 @@ def parameter_absolute_path(
         try:
             val = float(valstr)
         except:
-            config[group][key] = io.absolute_path(rootdir, valstr)
+            config[group][key] = absolute_path(rootdir, valstr)
     return config
 
 
@@ -258,5 +259,5 @@ def parameter_relative_path(
         try:
             val = float(valstr)
         except:
-            config[group][key] = io.relative_path(rootdir, valstr)
+            config[group][key] = relative_path(rootdir, valstr)
     return config

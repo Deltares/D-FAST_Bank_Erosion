@@ -33,7 +33,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import PyQt5.QtGui
 from dfastbe.io import get_text, get_progloc, absolute_path, ConfigFile, config_get_range, \
-                        config_get_int, config_get_bank_search_distances
+                        config_get_bank_search_distances
 import pathlib
 import sys
 import os
@@ -1331,9 +1331,7 @@ def load_configuration(filename: str) -> None:
         dialog["simFileEdit"].setText(section["SimFile"])
         waterDepth = config_file.get_float("Detect", "WaterDepth", default=0.0)
         dialog["waterDepth"].setText(str(waterDepth))
-        NBank = config_get_int(
-            config, "Detect", "NBank", default=0, positive=True
-        )
+        NBank = config_file.get_int("Detect", "NBank", default=0, positive=True)
         DLines = config_get_bank_search_distances(config, NBank)
         dialog["searchLines"].invisibleRootItem().takeChildren()
         for i in range(NBank):
@@ -1361,9 +1359,7 @@ def load_configuration(filename: str) -> None:
         txt = config_file.get_str("Erosion", "EroVolEqui", default="erovol_eq.evo")
         dialog["eroVolEqui"].setText(txt)
 
-        NLevel = config_get_int(
-            config, "Erosion", "NLevel", default=0, positive=True
-        )
+        NLevel = config_file.get_int("Erosion", "NLevel", default=0, positive=True)
         dialog["discharges"].invisibleRootItem().takeChildren()
         for i in range(NLevel):
             istr = str(i + 1)

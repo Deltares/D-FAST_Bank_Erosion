@@ -62,7 +62,9 @@ class ConfigFile:
         """
 
         Args:
-            filename : str
+            config : configparser.ConfigParser
+                Settings for the D-FAST Bank Erosion analysis.
+            path : str
                 Name of configuration file to be read.
         """
         self._config = config
@@ -143,7 +145,8 @@ class ConfigFile:
             )
             config = movepar(config, "General", "SimFile", "Detect")
             config = movepar(config, "General", "NBank", "Detect")
-            NBank = config_get_int(config, "Detect", "NBank", default=0, positive=True)
+            config_file = ConfigFile(config)
+            NBank = config_file.get_int("Detect", "NBank", default=0, positive=True)
             for i in range(NBank):
                 istr = str(i + 1)
                 config = movepar(config, "General", "Line" + istr, "Detect")
@@ -162,7 +165,8 @@ class ConfigFile:
             config = movepar(config, "General", "EroVol", "Erosion")
             config = movepar(config, "General", "EroVolEqui", "Erosion")
             config = movepar(config, "General", "NLevel", "Erosion")
-            NLevel = config_get_int(config, "Erosion", "NLevel", default=0, positive=True)
+            config_file = ConfigFile(config)
+            NLevel = config_file.get_int("Erosion", "NLevel", default=0, positive=True)
             for i in range(NLevel):
                 istr = str(i + 1)
                 config = movepar(
@@ -404,6 +408,58 @@ class ConfigFile:
                 )
         if positive:
             if val < 0.0:
+                raise Exception(
+                    'Value for "{}" in block "{}" must be positive, not {}.'.format(
+                        key, group, val
+                    )
+                )
+        return val
+
+    def get_int(
+        self,
+        group: str,
+        key: str,
+        default: Optional[int] = None,
+        positive: bool = False,
+    ) -> int:
+        """
+        Get an integer from a selected group and keyword in the analysis settings.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group from which to read.
+        key : str
+            Name of the keyword from which to read.
+        default : Optional[int]
+            Optional default value.
+        positive : bool
+            Flag specifying whether all integers are accepted (if False), or only strictly positive integers (if True).
+
+        Raises
+        ------
+        Exception
+            If the keyword isn't specified and no default value is given.
+            If a negative or zero value is specified when a positive value is required.
+
+        Returns
+        -------
+        val : int
+            Integer value.
+        """
+        try:
+            val = int(self.config[group][key])
+        except:
+            if not default is None:
+                val = default
+            else:
+                raise Exception(
+                    'No integer value specified for required keyword "{}" in block "{}".'.format(
+                        key, group
+                    )
+                )
+        if positive:
+            if val <= 0:
                 raise Exception(
                     'Value for "{}" in block "{}" must be positive, not {}.'.format(
                         key, group, val
@@ -1341,7 +1397,8 @@ def config_get_search_lines(
         List of arrays containing the x,y-coordinates of a bank search lines.
     """
     # read guiding bank line
-    nbank = config_get_int(config, "Detect", "NBank")
+    config_file = ConfigFile(config)
+    nbank = config_file.get_int("Detect", "NBank")
     line = [None] * nbank
     for b in range(nbank):
         bankfile = config["Detect"]["Line{}".format(b + 1)]
@@ -1489,61 +1546,6 @@ def config_get_range(
                 str_val, key, group
             )
         )
-    return val
-
-
-def config_get_int(
-    config: configparser.ConfigParser,
-    group: str,
-    key: str,
-    default: Optional[int] = None,
-    positive: bool = False,
-) -> int:
-    """
-    Get an integer from a selected group and keyword in the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group from which to read.
-    key : str
-        Name of the keyword from which to read.
-    default : Optional[int]
-        Optional default value.
-    positive : bool
-        Flag specifying whether all integers are accepted (if False), or only strictly positive integers (if True).
-
-    Raises
-    ------
-    Exception
-        If the keyword isn't specified and no default value is given.
-        If a negative or zero value is specified when a positive value is required.
-
-    Returns
-    -------
-    val : int
-        Integer value.
-    """
-    try:
-        val = int(config[group][key])
-    except:
-        if not default is None:
-            val = default
-        else:
-            raise Exception(
-                'No integer value specified for required keyword "{}" in block "{}".'.format(
-                    key, group
-                )
-            )
-    if positive:
-        if val <= 0:
-            raise Exception(
-                'Value for "{}" in block "{}" must be positive, not {}.'.format(
-                    key, group, val
-                )
-            )
     return val
 
 
