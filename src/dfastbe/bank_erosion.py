@@ -37,7 +37,7 @@ import shapely
 import numpy
 import matplotlib
 import configparser
-from dfastbe.utils import timedlogger, adjust_filenames
+from dfastbe.utils import timed_logger, adjust_filenames
 from dfastbe.kernel import get_zoom_extends, get_bbox
 
 
@@ -51,7 +51,7 @@ def bankerosion(filename="dfastbe.cfg") -> None:
         Name of the configuration file.
     """
     # read configuration file
-    timedlogger("reading configuration file ...")
+    timed_logger("reading configuration file ...")
     config = dfastbe.io.read_config(filename)
     rootdir, config = adjust_filenames(filename, config)
     bankerosion_core(config, rootdir, False)
@@ -73,10 +73,10 @@ def bankerosion_core(
         Flag indicating whether this routine is called from the GUI.
     """
     banklines: geopandas.GeoSeries
-    timedlogger("-- start analysis --")
+    timed_logger("-- start analysis --")
 
     rho = 1000  # density of water [kg/m3]
-    g = 9.81  # gravititional acceleration [m/s2]
+    g = 9.81  # gravitational acceleration [m/s2]
     dfastbe.io.log_text(
         "header_bankerosion",
         dict={
@@ -1105,7 +1105,7 @@ def bankerosion_core(
             matplotlib.pyplot.show(block=not gui)
 
     dfastbe.io.log_text("end_bankerosion")
-    timedlogger("-- end analysis --")
+    timed_logger("-- end analysis --")
 
 
 def _masked_index(x0: numpy.array, idx: numpy.ma.masked_array) -> numpy.ma.masked_array:

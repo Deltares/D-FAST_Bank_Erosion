@@ -5,9 +5,9 @@ import configparser
 from dfastbe import io
 
 
-def timedlogger(label: str) -> None:
+def timed_logger(label: str) -> None:
     """
-    Write message with time information.
+    Write a message with time information.
 
     Arguments
     ---------

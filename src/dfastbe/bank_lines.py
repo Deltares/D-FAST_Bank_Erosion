@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from dfastbe import io, support
 from dfastbe import __version__
 from dfastbe.kernel import get_bbox, get_zoom_extends
-from dfastbe.utils import timedlogger, adjust_filenames
+from dfastbe.utils import timed_logger, adjust_filenames
 from dfastbe import plotting as df_plt
 
 
@@ -24,7 +24,7 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
     gui : bool
         Flag indicating whether this routine is called from the GUI.
     """
-    timedlogger("-- start analysis --")
+    timed_logger("-- start analysis --")
 
     io.log_text(
         "header_banklines",
@@ -196,7 +196,7 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
             plt.show(block=not gui)
 
     io.log_text("end_banklines")
-    timedlogger("-- stop analysis --")
+    timed_logger("-- stop analysis --")
 
 
 def banklines(filename: str = "dfastbe.cfg") -> None:
@@ -209,7 +209,7 @@ def banklines(filename: str = "dfastbe.cfg") -> None:
         Name of the configuration file.
     """
     # read configuration file
-    timedlogger("reading configuration file ...")
+    timed_logger("reading configuration file ...")
     config = io.read_config(filename)
     rootdir, config = adjust_filenames(filename, config)
     banklines_core(config, rootdir, False)
