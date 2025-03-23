@@ -56,6 +56,261 @@ class SimulationObject(TypedDict):
 PROGTEXTS: Dict[str, List[str]]
 
 
+class ConfigFile:
+
+    def __init__(self, config:configparser.ConfigParser, path: Union[Path, str] = None):
+        """
+
+        Args:
+            filename : str
+                Name of configuration file to be read.
+        """
+        self._config = config
+        if path:
+            self.path = path
+
+    @property
+    def config(self) -> configparser.ConfigParser:
+        return self._config
+
+    @config.setter
+    def config(self, value:configparser.ConfigParser):
+        self._config = value
+
+    @classmethod
+    def read(cls, path: Union[str, pathlib.Path]):
+        """
+        Read a configParser object (configuration file).
+
+        This function ...
+            reads the config file using the standard configParser.
+            falls back to a dedicated reader compatible with old waqbank files.
+
+        Returns
+        -------
+        config : configparser.ConfigParser
+            Settings for the D-FAST Bank Erosion analysis.
+        """
+        try:
+            config = configparser.ConfigParser(comment_prefixes="%")
+            with open(path, "r") as configfile:
+                config.read_file(configfile)
+        except:
+            config = configparser.ConfigParser()
+            config["General"] = {}
+            all_lines = open(path, "r").read().splitlines()
+            for line in all_lines:
+                perc = line.find("%")
+                if perc >= 0:
+                    line = line[:perc]
+                data = line.split()
+                if len(data) >= 3:
+                    config["General"][data[0]] = data[2]
+
+        config = cls._upgrade(config)
+        return cls(config, path=path)
+
+    @staticmethod
+    def _upgrade(config: configparser.ConfigParser):
+        """
+        Upgrade the configuration data structure to version 1.0 format.
+
+        Arguments
+        ---------
+        config : configparser.ConfigParser
+            Settings for the D-FAST Bank Erosion analysis.
+
+        Results
+        -------
+        config1 : configparser.ConfigParser
+            Settings for the D-FAST Bank Erosion analysis in 1.0 format.
+
+        """
+        try:
+            version = config["General"]["Version"]
+        except:
+            version = "0.1"
+
+        if version == "0.1":
+            config["General"]["Version"] = "1.0"
+
+            config["Detect"] = {}
+            config = movepar(
+                config, "General", "Delft3Dfile", "Detect", "SimFile", convert=sim2nc
+            )
+            config = movepar(
+                config, "General", "SDSfile", "Detect", "SimFile", convert=sim2nc
+            )
+            config = movepar(config, "General", "SimFile", "Detect")
+            config = movepar(config, "General", "NBank", "Detect")
+            NBank = config_get_int(config, "Detect", "NBank", default=0, positive=True)
+            for i in range(NBank):
+                istr = str(i + 1)
+                config = movepar(config, "General", "Line" + istr, "Detect")
+            config = movepar(config, "General", "WaterDepth", "Detect")
+            config = movepar(config, "General", "DLines", "Detect")
+
+            config["Erosion"] = {}
+            config = movepar(config, "General", "TErosion", "Erosion")
+            config = movepar(config, "General", "RiverAxis", "Erosion")
+            config = movepar(config, "General", "Fairway", "Erosion")
+            config = movepar(config, "General", "RefLevel", "Erosion")
+            config = movepar(config, "General", "OutputInterval", "Erosion")
+            config = movepar(config, "General", "OutputDir", "Erosion")
+            config = movepar(config, "General", "BankNew", "Erosion")
+            config = movepar(config, "General", "BankEq", "Erosion")
+            config = movepar(config, "General", "EroVol", "Erosion")
+            config = movepar(config, "General", "EroVolEqui", "Erosion")
+            config = movepar(config, "General", "NLevel", "Erosion")
+            NLevel = config_get_int(config, "Erosion", "NLevel", default=0, positive=True)
+            for i in range(NLevel):
+                istr = str(i + 1)
+                config = movepar(
+                    config,
+                    "General",
+                    "Delft3Dfile" + istr,
+                    "Erosion",
+                    "SimFile" + istr,
+                    convert=sim2nc,
+                    )
+                config = movepar(
+                    config,
+                    "General",
+                    "SDSfile" + istr,
+                    "Erosion",
+                    "SimFile" + istr,
+                    convert=sim2nc,
+                    )
+                config = movepar(config, "General", "SimFile" + istr, "Erosion")
+                config = movepar(config, "General", "PDischarge" + istr, "Erosion")
+
+            config = movepar(config, "General", "ShipType", "Erosion")
+            config = movepar(config, "General", "VShip", "Erosion")
+            config = movepar(config, "General", "NShip", "Erosion")
+            config = movepar(config, "General", "NWave", "Erosion")
+            config = movepar(config, "General", "Draught", "Erosion")
+            config = movepar(config, "General", "Wave0", "Erosion")
+            config = movepar(config, "General", "Wave1", "Erosion")
+
+            config = movepar(config, "General", "Classes", "Erosion")
+            config = movepar(config, "General", "BankType", "Erosion")
+            config = movepar(
+                config, "General", "ProtectLevel", "Erosion", "ProtectionLevel"
+            )
+            config = movepar(config, "General", "Slope", "Erosion")
+            config = movepar(config, "General", "Reed", "Erosion")
+            config = movepar(config, "General", "VelFilter", "Erosion")
+
+            for i in range(NLevel):
+                istr = str(i + 1)
+                config = movepar(config, "General", "ShipType" + istr, "Erosion")
+                config = movepar(config, "General", "VShip" + istr, "Erosion")
+                config = movepar(config, "General", "NShip" + istr, "Erosion")
+                config = movepar(config, "General", "NWave" + istr, "Erosion")
+                config = movepar(config, "General", "Draught" + istr, "Erosion")
+                config = movepar(config, "General", "Slope" + istr, "Erosion")
+                config = movepar(config, "General", "Reed" + istr, "Erosion")
+                config = movepar(config, "General", "EroVol" + istr, "Erosion")
+
+        return config
+
+    def write(self, filename: str) -> None:
+        """Pretty print a configParser object (configuration file) to file.
+
+        This function ...
+            aligns the equal signs for all keyword/value pairs.
+            adds a two space indentation to all keyword lines.
+            adds an empty line before the start of a new block.
+
+        Arguments
+        ---------
+        filename : str
+            Name of the configuration file to be written.
+        config : configparser.ConfigParser
+            The variable containing the configuration.
+        """
+        config = self.config
+        sections = config.sections()
+        ml = 0
+        for s in sections:
+            options = config.options(s)
+            if len(options) > 0:
+                ml = max(ml, max([len(x) for x in options]))
+
+        OPTIONLINE = "  {{:{}s}} = {{}}\n".format(ml)
+        with open(filename, "w") as configfile:
+            first = True
+            for s in sections:
+                if first:
+                    first = False
+                else:
+                    configfile.write("\n")
+                configfile.write("[{}]\n".format(s))
+                options = config.options(s)
+                for o in options:
+                    configfile.write(OPTIONLINE.format(o, config[s][o]))
+
+    def adjust_filenames(self) -> Tuple[str, configparser.ConfigParser]:
+        """
+        Convert all paths to relative to current working directory.
+
+        Returns
+        -------
+        rootdir : str
+            Location of configuration file relative to current working directory.
+        config : configparser.ConfigParser
+            Analysis configuration settings using paths relative to current working directory.
+        """
+        from dfastbe.utils import config_to_absolute_paths, config_to_relative_paths
+        rootdir = os.path.dirname(self.path)
+        cwd = os.getcwd()
+        self.config = config_to_absolute_paths(rootdir, self.config)
+        self.config = config_to_relative_paths(cwd, self.config)
+        rootdir = relative_path(cwd, rootdir)
+
+        return rootdir
+
+    def get_str(
+        self,
+        group: str,
+        key: str,
+        default: Optional[str] = None,
+    ) -> str:
+        """
+        Get a string from a selected group and keyword in the analysis settings.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group from which to read.
+        key : str
+            Name of the keyword from which to read.
+        default : Optional[str]
+            Optional default value.
+
+        Raises
+        ------
+        Exception
+            If the keyword isn't specified and no default value is given.
+
+        Returns
+        -------
+        val : str
+            String.
+        """
+        try:
+            val = self.config[group][key]
+        except KeyError:
+            if not default is None:
+                val = default
+            else:
+                raise Exception(
+                    'No value specified for required keyword "{}" in block "{}".'.format(
+                        key, group
+                    )
+                )
+        return val
+
 def load_program_texts(filename: str) -> None:
     """
     Load texts from configuration file, and store globally for access.
@@ -182,42 +437,6 @@ def get_text(key: str) -> List[str]:
     except:
         str = ["No message found for " + key]
     return str
-
-
-def write_config(filename: str, config: configparser.ConfigParser) -> None:
-    """Pretty print a configParser object (configuration file) to file.
-
-    This function ...
-        aligns the equal signs for all keyword/value pairs.
-        adds a two space indentation to all keyword lines.
-        adds an empty line before the start of a new block.
-
-    Arguments
-    ---------
-    filename : str
-        Name of the configuration file to be written.
-    config : configparser.ConfigParser
-        The variable containing the configuration.
-    """
-    sections = config.sections()
-    ml = 0
-    for s in sections:
-        options = config.options(s)
-        if len(options) > 0:
-            ml = max(ml, max([len(x) for x in options]))
-
-    OPTIONLINE = "  {{:{}s}} = {{}}\n".format(ml)
-    with open(filename, "w") as configfile:
-        first = True
-        for s in sections:
-            if first:
-                first = False
-            else:
-                configfile.write("\n")
-            configfile.write("[{}]\n".format(s))
-            options = config.options(s)
-            for o in options:
-                configfile.write(OPTIONLINE.format(o, config[s][o]))
 
 
 def read_fm_map(filename: str, varname: str, location: str = "face") -> numpy.ndarray:
@@ -794,147 +1013,6 @@ def write_km_eroded_volumes(
             valstr = "\t".join(["{:.2f}".format(x) for x in vol[i, :]])
             erofile.write("{:.2f}\t".format(km[i]) + valstr + "\n")
 
-
-def read_config(filename: str) -> configparser.ConfigParser:
-    """
-    Read a configParser object (configuration file).
-
-    This function ...
-        reads the config file using the standard configParser.
-        falls back to a dedicated reader compatible with old waqbank files.
-
-    Arguments
-    ---------
-    filename : str
-        Name of configuration file to be read.
-
-    Returns
-    -------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    """
-    try:
-        config = configparser.ConfigParser(comment_prefixes=("%"))
-        with open(filename, "r") as configfile:
-            config.read_file(configfile)
-    except:
-        config = configparser.ConfigParser()
-        config["General"] = {}
-        all_lines = open(filename, "r").read().splitlines()
-        for line in all_lines:
-            perc = line.find("%")
-            if perc >= 0:
-                line = line[:perc]
-            data = line.split()
-            if len(data) >= 3:
-                config["General"][data[0]] = data[2]
-    return upgrade_config(config)
-
-
-def upgrade_config(config: configparser.ConfigParser):
-    """
-    Upgrade the configuration data structure to version 1.0 format.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-
-    Results
-    -------
-    config1 : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis in 1.0 format.
-
-    """
-    try:
-        version = config["General"]["Version"]
-    except:
-        version = "0.1"
-
-    if version == "0.1":
-        config["General"]["Version"] = "1.0"
-
-        config["Detect"] = {}
-        config = movepar(
-            config, "General", "Delft3Dfile", "Detect", "SimFile", convert=sim2nc
-        )
-        config = movepar(
-            config, "General", "SDSfile", "Detect", "SimFile", convert=sim2nc
-        )
-        config = movepar(config, "General", "SimFile", "Detect")
-        config = movepar(config, "General", "NBank", "Detect")
-        NBank = config_get_int(config, "Detect", "NBank", default=0, positive=True)
-        for i in range(NBank):
-            istr = str(i + 1)
-            config = movepar(config, "General", "Line" + istr, "Detect")
-        config = movepar(config, "General", "WaterDepth", "Detect")
-        config = movepar(config, "General", "DLines", "Detect")
-
-        config["Erosion"] = {}
-        config = movepar(config, "General", "TErosion", "Erosion")
-        config = movepar(config, "General", "RiverAxis", "Erosion")
-        config = movepar(config, "General", "Fairway", "Erosion")
-        config = movepar(config, "General", "RefLevel", "Erosion")
-        config = movepar(config, "General", "OutputInterval", "Erosion")
-        config = movepar(config, "General", "OutputDir", "Erosion")
-        config = movepar(config, "General", "BankNew", "Erosion")
-        config = movepar(config, "General", "BankEq", "Erosion")
-        config = movepar(config, "General", "EroVol", "Erosion")
-        config = movepar(config, "General", "EroVolEqui", "Erosion")
-        config = movepar(config, "General", "NLevel", "Erosion")
-        NLevel = config_get_int(config, "Erosion", "NLevel", default=0, positive=True)
-        for i in range(NLevel):
-            istr = str(i + 1)
-            config = movepar(
-                config,
-                "General",
-                "Delft3Dfile" + istr,
-                "Erosion",
-                "SimFile" + istr,
-                convert=sim2nc,
-            )
-            config = movepar(
-                config,
-                "General",
-                "SDSfile" + istr,
-                "Erosion",
-                "SimFile" + istr,
-                convert=sim2nc,
-            )
-            config = movepar(config, "General", "SimFile" + istr, "Erosion")
-            config = movepar(config, "General", "PDischarge" + istr, "Erosion")
-
-        config = movepar(config, "General", "ShipType", "Erosion")
-        config = movepar(config, "General", "VShip", "Erosion")
-        config = movepar(config, "General", "NShip", "Erosion")
-        config = movepar(config, "General", "NWave", "Erosion")
-        config = movepar(config, "General", "Draught", "Erosion")
-        config = movepar(config, "General", "Wave0", "Erosion")
-        config = movepar(config, "General", "Wave1", "Erosion")
-
-        config = movepar(config, "General", "Classes", "Erosion")
-        config = movepar(config, "General", "BankType", "Erosion")
-        config = movepar(
-            config, "General", "ProtectLevel", "Erosion", "ProtectionLevel"
-        )
-        config = movepar(config, "General", "Slope", "Erosion")
-        config = movepar(config, "General", "Reed", "Erosion")
-        config = movepar(config, "General", "VelFilter", "Erosion")
-
-        for i in range(NLevel):
-            istr = str(i + 1)
-            config = movepar(config, "General", "ShipType" + istr, "Erosion")
-            config = movepar(config, "General", "VShip" + istr, "Erosion")
-            config = movepar(config, "General", "NShip" + istr, "Erosion")
-            config = movepar(config, "General", "NWave" + istr, "Erosion")
-            config = movepar(config, "General", "Draught" + istr, "Erosion")
-            config = movepar(config, "General", "Slope" + istr, "Erosion")
-            config = movepar(config, "General", "Reed" + istr, "Erosion")
-            config = movepar(config, "General", "EroVol" + istr, "Erosion")
-
-    return config
-
-
 def movepar(
     config: configparser.ConfigParser,
     group1: str,
@@ -1042,7 +1120,8 @@ def config_get_xykm(
 
     """
     # get the chainage file
-    kmfile = config_get_str(config, "General", "RiverKM")
+    config_file = ConfigFile(config)
+    kmfile = config_file.get_str("General", "RiverKM")
     log_text("read_chainage", dict={"file": kmfile})
     xykm = read_xyc(kmfile, num_columns=3)
 
@@ -1291,13 +1370,14 @@ def config_get_range(
     val : Tuple[float,float]
         Lower and upper limit of the range.
     """
-    str = config_get_str(config, group, key)
+    config_file = ConfigFile(config)
+    str_val = config_file.get_str(group, key)
     try:
-        obrack = str.find("[")
-        cbrack = str.find("]")
+        obrack = str_val.find("[")
+        cbrack = str_val.find("]")
         if obrack >= 0 and cbrack >= 0:
-            str = str[obrack + 1 : cbrack - 1]
-        vallist = [float(fstr) for fstr in str.split(":")]
+            str_val = str_val[obrack + 1: cbrack - 1]
+        vallist = [float(fstr) for fstr in str_val.split(":")]
         if vallist[0] > vallist[1]:
             val = (vallist[1], vallist[0])
         else:
@@ -1305,7 +1385,7 @@ def config_get_range(
     except:
         raise Exception(
             'Invalid range specification "{}" for required keyword "{}" in block "{}".'.format(
-                str, key, group
+                str_val, key, group
             )
         )
     return val
@@ -1467,50 +1547,6 @@ def config_get_float(
             raise Exception(
                 'Value for "{}" in block "{}" must be positive, not {}.'.format(
                     key, group, val
-                )
-            )
-    return val
-
-
-def config_get_str(
-    config: configparser.ConfigParser,
-    group: str,
-    key: str,
-    default: Optional[str] = None,
-) -> str:
-    """
-    Get a string from a selected group and keyword in the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group from which to read.
-    key : str
-        Name of the keyword from which to read.
-    default : Optional[str]
-        Optional default value.
-
-    Raises
-    ------
-    Exception
-        If the keyword isn't specified and no default value is given.
-
-    Returns
-    -------
-    val : str
-        String.
-    """
-    try:
-        val = config[group][key]
-    except:
-        if not default is None:
-            val = default
-        else:
-            raise Exception(
-                'No value specified for required keyword "{}" in block "{}".'.format(
-                    key, group
                 )
             )
     return val

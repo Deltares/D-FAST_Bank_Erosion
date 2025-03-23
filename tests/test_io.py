@@ -1,6 +1,8 @@
 import dfastbe.io
+from dfastbe.io import ConfigFile
 import configparser
 import os
+from pathlib import Path
 import platform
 import numpy
 import netCDF4
@@ -105,7 +107,7 @@ class Test_get_text:
         """
         assert dfastbe.io.get_text("confirm") == ['Confirm using "y" ...','']
 
-class Test_write_config:
+class TestConfigFile:
     def test_write_config_01(self):
         """
         Testing write_config.
@@ -119,7 +121,8 @@ class Test_write_config:
         config["Group 2"]["K2"] = "2.0 0.2 0.02 0.0"
         config.add_section("Group 3")
         config["Group 3"]["LongKey"] = "3"
-        dfastbe.io.write_config(filename, config)
+        config = ConfigFile(config)
+        config.write(filename)
         all_lines = open(filename, "r").read().splitlines()
         all_lines_ref = ['[G 1]',
                          '  k 1     = V 1',
@@ -131,6 +134,7 @@ class Test_write_config:
                          '[Group 3]',
                          '  longkey = 3']
         assert all_lines == all_lines_ref
+        Path(filename).unlink()
 
 class Test_read_fm_map:
     def test_read_fm_map_01(self):
@@ -412,7 +416,6 @@ class Test_relative_path():
 
 # TODO: read_xyc
 # TODO: write_km_eroded_volumes
-# TODO: read_config
 # TODO: upgrade_config
 # TODO: movepar
 # TODO: config_get_xykm

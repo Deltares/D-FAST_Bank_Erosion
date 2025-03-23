@@ -37,7 +37,8 @@ import shapely
 import numpy
 import matplotlib
 import configparser
-from dfastbe.utils import timed_logger, adjust_filenames
+from dfastbe.io import ConfigFile
+from dfastbe.utils import timed_logger
 from dfastbe.kernel import get_zoom_extends, get_bbox
 
 
@@ -52,8 +53,9 @@ def bankerosion(filename="dfastbe.cfg") -> None:
     """
     # read configuration file
     timed_logger("reading configuration file ...")
-    config = dfastbe.io.read_config(filename)
-    rootdir, config = adjust_filenames(filename, config)
+    config = ConfigFile.read(filename)
+    rootdir = config.adjust_filenames()
+    config = config.config
     bankerosion_core(config, rootdir, False)
 
 

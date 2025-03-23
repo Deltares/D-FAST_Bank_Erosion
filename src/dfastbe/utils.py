@@ -261,31 +261,3 @@ def parameter_relative_path(
         except:
             config[group][key] = io.relative_path(rootdir, valstr)
     return config
-
-def adjust_filenames(
-        filename: str, config: configparser.ConfigParser
-) -> Tuple[str, configparser.ConfigParser]:
-    """
-    Convert all paths to relative to current working directory.
-
-    Arguments
-    ---------
-    filename : str
-        Name of the configuration file.
-    config : configparser.ConfigParser
-        Analysis configuration settings.
-
-    Returns
-    -------
-    rootdir : str
-        Location of configuration file relative to current working directory.
-    config : configparser.ConfigParser
-        Analysis configuration settings using paths relative to current working directory.
-    """
-    rootdir = os.path.dirname(filename)
-    cwd = os.getcwd()
-    config = config_to_absolute_paths(rootdir, config)
-    config = config_to_relative_paths(cwd, config)
-    rootdir = io.relative_path(cwd, rootdir)
-
-    return rootdir, config
