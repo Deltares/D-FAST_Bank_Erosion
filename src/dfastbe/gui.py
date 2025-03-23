@@ -32,8 +32,8 @@ from typing import Dict, Any, Optional, Tuple, List
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import PyQt5.QtGui
-from dfastbe.io import get_text, get_progloc, absolute_path, read_config, config_get_range, config_get_str, \
-                        config_get_bool, config_get_float, config_get_int, config_get_bank_search_distances, write_config
+from dfastbe.io import get_text, get_progloc, absolute_path, ConfigFile, config_get_range, \
+                        config_get_bool, config_get_float, config_get_int, config_get_bank_search_distances
 import pathlib
 import sys
 import os
@@ -1291,8 +1291,9 @@ def load_configuration(filename: str) -> None:
         return
     absfilename = absolute_path(os.getcwd(), filename)
     rootdir = os.path.dirname(absfilename)
-    config = read_config(absfilename)
+    config = ConfigFile.read(absfilename).config
     config = config_to_absolute_paths(rootdir, config)
+    config_file = ConfigFile(config, path=absfilename)
     try:
         version = config["General"]["Version"]
     except:
@@ -1305,9 +1306,7 @@ def load_configuration(filename: str) -> None:
         dialog["startRange"].setText(str(studyRange[0]))
         dialog["endRange"].setText(str(studyRange[1]))
         dialog["bankDirEdit"].setText(section["BankDir"])
-        bankFile = config_get_str(
-            config, "General", "BankFile", default="bankfile",
-        )
+        bankFile = config_file.get_str("General", "BankFile", default="bankfile")
         dialog["bankFileName"].setText(bankFile)
         flag = config_get_bool(config, "General", "Plotting", default=True)
         dialog["makePlotsEdit"].setChecked(flag)
@@ -1317,8 +1316,7 @@ def load_configuration(filename: str) -> None:
         dialog["saveZoomPlotsEdit"].setChecked(flag)
         zoomStepKM = config_get_float(config, "General", "ZoomStepKM", default=1.0)
         dialog["zoomPlotsRangeEdit"].setText(str(zoomStepKM))
-        figDir = config_get_str(
-            config,
+        figDir = config_file.get_str(
             "General",
             "FigureDir",
             default=absolute_path(rootdir, "figures"),
@@ -1346,7 +1344,7 @@ def load_configuration(filename: str) -> None:
         dialog["searchLines"].invisibleRootItem().takeChildren()
         for i in range(NBank):
             istr = str(i + 1)
-            fileName = config_get_str(config, "Detect", "Line" + istr)
+            fileName = config_file.get_str("Detect", "Line" + istr)
             c1 = QtWidgets.QTreeWidgetItem(
                 dialog["searchLines"], [istr, fileName, str(DLines[i])]
             )
@@ -1360,21 +1358,13 @@ def load_configuration(filename: str) -> None:
         dialog["fairwayEdit"].setText(section["Fairway"])
         dialog["chainageOutStep"].setText(section["OutputInterval"])
         dialog["outDirEdit"].setText(section["OutputDir"])
-        bankNew = config_get_str(
-            config, "Erosion", "BankNew", default="banknew",
-        )
+        bankNew = config_file.get_str("Erosion", "BankNew", default="banknew")
         dialog["newBankFile"].setText(bankNew)
-        bankEq = config_get_str(
-            config, "Erosion", "BankEq", default="bankeq",
-        )
+        bankEq = config_file.get_str("Erosion", "BankEq", default="bankeq")
         dialog["newEqBankFile"].setText(bankEq)
-        txt = config_get_str(
-            config, "Erosion", "EroVol", default="erovol_standard.evo"
-        )
+        txt = config_file.get_str("Erosion", "EroVol", default="erovol_standard.evo")
         dialog["eroVol"].setText(txt)
-        txt = config_get_str(
-            config, "Erosion", "EroVolEqui", default="erovol_eq.evo"
-        )
+        txt = config_file.get_str("Erosion", "EroVolEqui", default="erovol_eq.evo")
         dialog["eroVolEqui"].setText(txt)
 
         NLevel = config_get_int(
@@ -1383,8 +1373,8 @@ def load_configuration(filename: str) -> None:
         dialog["discharges"].invisibleRootItem().takeChildren()
         for i in range(NLevel):
             istr = str(i + 1)
-            fileName = config_get_str(config, "Erosion", "SimFile" + istr)
-            prob = config_get_str(config, "Erosion", "PDischarge" + istr)
+            fileName = config_file.get_str("Erosion", "SimFile" + istr)
+            prob = config_file.get_str("Erosion", "PDischarge" + istr)
             c1 = QtWidgets.QTreeWidgetItem(dialog["discharges"], [istr, fileName, prob])
         if NLevel > 0:
             dialog["dischargesEdit"].setEnabled(True)
@@ -1398,7 +1388,7 @@ def load_configuration(filename: str) -> None:
         setParam("shipNWaves", config, "Erosion", "NWave", "5")
         setParam("shipDraught", config, "Erosion", "Draught")
         setParam("wavePar0", config, "Erosion", "Wave0", "200.0")
-        wave0 = config_get_str(config, "Erosion", "Wave0", "200.0")
+        wave0 = config_file.get_str("Erosion", "Wave0", "200.0")
         setParam("wavePar1", config, "Erosion", "Wave1", wave0)
 
         useBankType = config_get_bool(
@@ -1442,9 +1432,7 @@ def load_configuration(filename: str) -> None:
             setOptParam(istr + "_shipDraught", config, "Erosion", "Draught" + istr)
             setOptParam(istr + "_bankSlope", config, "Erosion", "Slope" + istr)
             setOptParam(istr + "_bankReed", config, "Erosion", "Reed" + istr)
-            txt = config_get_str(
-                config, "Erosion", "EroVol" + istr, default=""
-            )
+            txt = config_file.get_str("Erosion", "EroVol" + istr, default="")
             dialog[istr + "_eroVolEdit"].setText(txt)
 
     else:
@@ -1588,7 +1576,9 @@ def setParam(field: str, config, group: str, key: str, default: str = "??") -> N
         Default string if the group/key pair doesn't exist in the configuration.
 
     """
-    str = config_get_str(config, group, key, default)
+    config_file = ConfigFile(config)
+    str = config_file.get_str(group, key, default)
+
     try:
         val = float(str)
         dialog[field + "Type"].setCurrentText("Constant")
@@ -1643,7 +1633,8 @@ def setOptParam(field: str, config, group: str, key: str) -> None:
     key : str
         Name of the key in the configuration group.
     """
-    str = config_get_str(config, group, key, "")
+    config_file = ConfigFile(config)
+    str = config_file.get_str(group, key, "")
     if str == "":
         dialog[field + "Type"].setCurrentText("Use Default")
         dialog[field + "Edit"].setText("")
@@ -1677,7 +1668,8 @@ def menu_save_configuration() -> None:
         config = get_configuration()
         rootdir = os.path.dirname(filename)
         config = config_to_relative_paths(rootdir, config)
-        write_config(filename, config)
+        config = ConfigFile(config)
+        config.write(filename)
 
 
 def get_configuration() -> configparser.ConfigParser:
