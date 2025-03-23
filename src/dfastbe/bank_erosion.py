@@ -40,9 +40,6 @@ import configparser
 from dfastbe.utils import timedlogger, adjust_filenames
 from dfastbe.kernel import get_zoom_extends, get_bbox
 
-FIRST_TIME: float
-LAST_TIME: float
-
 
 def bankerosion(filename="dfastbe.cfg") -> None:
     """
