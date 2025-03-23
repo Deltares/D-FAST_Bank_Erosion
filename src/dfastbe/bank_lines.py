@@ -8,7 +8,7 @@ from dfastbe import support
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, config_get_xykm, \
                         config_get_kmbounds, clip_path_to_kmbounds, config_get_bank_search_distances, \
-                        config_get_simfile, read_simdata, config_get_search_lines
+                        read_simdata, config_get_search_lines
 from dfastbe.kernel import get_bbox, get_zoom_extends
 from dfastbe.utils import timed_logger
 from dfastbe import plotting as df_plt
@@ -103,7 +103,7 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
         )
 
     # get simulation file name
-    simfile = config_get_simfile(config, "Detect", "")
+    simfile = config_file.get_sim_file("Detect", "")
 
     # get critical water depth used for defining bank line (default = 0.0 m)
     h0 = config_file.get_float("Detect", "WaterDepth", default=0)

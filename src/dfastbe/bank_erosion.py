@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 import configparser
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, \
-    config_get_simfile, read_simdata, config_get_xykm, config_get_kmbounds, \
+    read_simdata, config_get_xykm, config_get_kmbounds, \
     config_get_bank_lines, clip_path_to_kmbounds, read_xyc, write_shp_pnt, config_get_parameter, \
     write_km_eroded_volumes, write_shp, write_csv
 
@@ -149,13 +149,13 @@ def bankerosion_core(
     pdischarge = []
     for iq in range(num_levels):
         iq_str = str(iq + 1)
-        simfiles.append(config_get_simfile(config, "Erosion", iq_str))
+        simfiles.append(config_file.get_sim_file("Erosion", iq_str))
         pdischarge.append(
             config_file.get_float("Erosion", "PDischarge" + iq_str)
         )
 
     # read simulation data (getsimdata)
-    simfile = config_get_simfile(config, "Erosion", str(ref_level + 1))
+    simfile = config_file.get_sim_file("Erosion", str(ref_level + 1))
     log_text("-")
     log_text("read_simdata", dict={"file": simfile})
     log_text("-")

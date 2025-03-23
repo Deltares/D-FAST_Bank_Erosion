@@ -467,6 +467,25 @@ class ConfigFile:
                 )
         return val
 
+    def get_sim_file(self, group: str, istr: str) -> str:
+        """
+        Get the name of the simulation file from the analysis settings.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group in which to search for the simulation file name.
+        istr : str
+            Postfix for the simulation file name keyword; typically a string representation of the index.
+
+        Returns
+        -------
+        simfile : str
+            Name of the simulation file (empty string if keywords are not found).
+        """
+        sim_file = self.config[group].get("SimFile" + istr, "")
+        return sim_file
+
 def load_program_texts(filename: str) -> None:
     """
     Load texts from configuration file, and store globally for access.
@@ -1484,28 +1503,6 @@ def config_get_bank_search_distances(
                 "keyword DLINES should contain NBANK values in configuration file."
             )
     return dlines
-
-
-def config_get_simfile(config: configparser.ConfigParser, group: str, istr: str) -> str:
-    """
-    Get the name of the simulation file from the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group in which to search for the simulation file name.
-    istr : str
-        Postfix for the simulation file name keyword; typically a string representation of the index.
-
-    Returns
-    -------
-    simfile : str
-        Name of the simulation file (empty string if keywords are not found).
-    """
-    simfile = config[group].get("SimFile" + istr, "")
-    return simfile
 
 
 def config_get_range(
