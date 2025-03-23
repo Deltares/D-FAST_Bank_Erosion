@@ -10,10 +10,10 @@ from dfastbe.cmd import run
 
 
 def test_bank_lines():
-    test_r_dir = Path("tests/data/integration_test2")
+    test_r_dir = Path("tests/data/bank_line")
     language = "UK"
     run_mode = "BANKLINES"
-    config_file = "tests/data/integration_test2/Meuse_manual.cfg"
+    config_file = "tests/data/bank_line/Meuse_manual.cfg"
     run(language, run_mode, config_file)
 
     # check the detected banklines
