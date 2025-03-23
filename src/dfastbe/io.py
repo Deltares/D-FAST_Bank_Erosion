@@ -494,9 +494,27 @@ class ConfigFile:
         kmbounds : Tuple[float, float]
             Lower and upper limit for the chainage.
         """
-        kmbounds = config_get_range(self.config, "General", "Boundaries")
+        km_bounds = config_get_range(self.config, "General", "Boundaries")
 
-        return kmbounds
+        return km_bounds
+
+    def get_search_lines(self) -> List[shapely.geometry.linestring.LineStringAdapter]:
+        """
+        Get the search lines for the bank lines from the analysis settings.
+
+        Returns
+        -------
+        line : List[numpy.ndarray]
+            List of arrays containing the x,y-coordinates of a bank search lines.
+        """
+        # read guiding bank line
+        n_bank = self.get_int("Detect", "NBank")
+        line = [None] * n_bank
+        for b in range(n_bank):
+            bankfile = self.config["Detect"][f"Line{b + 1}"]
+            log_text("read_search_line", dict={"nr": b + 1, "file": bankfile})
+            line[b] = read_xyc(bankfile)
+        return line
 
 def load_program_texts(filename: str) -> None:
     """
@@ -1392,33 +1410,6 @@ def clip_path_to_kmbounds(
     return xykm
 
 
-def config_get_search_lines(
-    config: configparser.ConfigParser,
-) -> List[shapely.geometry.linestring.LineStringAdapter]:
-    """
-    Get the search lines for the bank lines from the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-
-    Returns
-    -------
-    line : List[numpy.ndarray]
-        List of arrays containing the x,y-coordinates of a bank search lines.
-    """
-    # read guiding bank line
-    config_file = ConfigFile(config)
-    nbank = config_file.get_int("Detect", "NBank")
-    line = [None] * nbank
-    for b in range(nbank):
-        bankfile = config["Detect"]["Line{}".format(b + 1)]
-        log_text("read_search_line", dict={"nr": b + 1, "file": bankfile})
-        line[b] = read_xyc(bankfile)
-    return line
-
-
 def config_get_bank_lines(
     config: configparser.ConfigParser, bankdir: str
 ) -> List[numpy.ndarray]:
@@ -1438,20 +1429,18 @@ def config_get_bank_lines(
         List of arrays containing the x,y-coordinates of a bank lines.
     """
     config_file = ConfigFile(config)
-    bankname = config_file.get_str("General", "BankFile", "bankfile")
-    bankfile = bankdir + os.sep + bankname + ".shp"
+    bank_name = config_file.get_str("General", "BankFile", "bankfile")
+    bankfile = f"{bankdir}{os.sep}{bank_name}.shp"
     if os.path.exists(bankfile):
         log_text("read_banklines", dict={"file": bankfile})
         banklines = geopandas.read_file(bankfile)
-        # -> geopandas.geodataframe.GeoDataFrame
-        # banklines.geometry[0] -> shapely.geometry.linestring.LineString
     else:
-        bankfile = bankdir + os.sep + bankname + "_#.xyc"
+        bankfile = bankdir + os.sep + bank_name + "_#.xyc"
         log_text("read_banklines", dict={"file": bankfile})
         bankline_list = []
         b = 1
         while True:
-            bankfile = bankdir + os.sep + bankname + "_" + str(b) + ".xyc"
+            bankfile = bankdir + os.sep + bank_name + "_" + str(b) + ".xyc"
             if os.path.exists(bankfile):
                 xy_bank = read_xyc(bankfile)
                 bankline_list.append(shapely.geometry.LineString(xy_bank))

@@ -8,7 +8,7 @@ from dfastbe import support
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, config_get_xykm, \
                         clip_path_to_kmbounds, config_get_bank_search_distances, \
-                        read_simdata, config_get_search_lines
+                        read_simdata
 from dfastbe.kernel import get_bbox, get_zoom_extends
 from dfastbe.utils import timed_logger
 from dfastbe import plotting as df_plt
@@ -83,7 +83,7 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
 
     # read bank search lines
     max_river_width = 1000
-    search_lines = config_get_search_lines(config)
+    search_lines = config_file.get_search_lines()
     search_lines, maxmaxd = support.clip_search_lines(
         search_lines, xykm, max_river_width
     )

@@ -171,10 +171,10 @@ def bankerosion_core(
     xykm = config_get_xykm(config)
 
     # clip the chainage path to the range of chainages of interest
-    kmbounds = config_file.get_km_bounds()
-    log_text("clip_chainage", dict={"low": kmbounds[0], "high": kmbounds[1]})
-    xykm_numpy = numpy.array(xykm)
-    xykm = clip_path_to_kmbounds(xykm, kmbounds)
+    km_bounds = config_file.get_km_bounds()
+    log_text("clip_chainage", dict={"low": km_bounds[0], "high": km_bounds[1]})
+
+    xykm = clip_path_to_kmbounds(xykm, km_bounds)
     xykm_numpy = numpy.array(xykm)
     xy_numpy = xykm_numpy[:, :2]
 
@@ -184,7 +184,7 @@ def bankerosion_core(
 
     # map bank lines to mesh cells
     log_text("intersect_bank_mesh")
-    bankline_faces = [None] * n_banklines
+
     xf = _masked_index(sim["x_node"], fn)
     yf = _masked_index(sim["y_node"], fn)
     xe = sim["x_node"][en]
