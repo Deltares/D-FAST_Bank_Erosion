@@ -6,7 +6,7 @@ import geopandas as gpd
 from matplotlib import pyplot as plt
 from dfastbe import support
 from dfastbe import __version__
-from dfastbe.io import ConfigFile, log_text, config_get_float, config_get_xykm, \
+from dfastbe.io import ConfigFile, log_text, config_get_xykm, \
                         config_get_kmbounds, clip_path_to_kmbounds, config_get_bank_search_distances, \
                         config_get_simfile, read_simdata, config_get_search_lines
 from dfastbe.kernel import get_bbox, get_zoom_extends
@@ -52,7 +52,7 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
     if plotting:
         saveplot = config_file.get_bool("General", "SavePlots", True)
         saveplot_zoomed = config_file.get_bool("General", "SaveZoomPlots", True)
-        zoom_km_step = config_get_float(config, "General", "ZoomStepKM", 1.0)
+        zoom_km_step = config_file.get_float("General", "ZoomStepKM", 1.0)
         if zoom_km_step < 0.01:
             saveplot_zoomed = False
         closeplot = config_file.get_bool("General", "ClosePlots", False)
@@ -106,7 +106,7 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
     simfile = config_get_simfile(config, "Detect", "")
 
     # get critical water depth used for defining bank line (default = 0.0 m)
-    h0 = config_get_float(config, "Detect", "WaterDepth", default=0)
+    h0 = config_file.get_float("Detect", "WaterDepth", default=0)
 
     # read simulation data and drying flooding threshold dh0
     log_text("-")

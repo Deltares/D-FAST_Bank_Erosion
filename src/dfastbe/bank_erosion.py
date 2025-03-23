@@ -37,7 +37,7 @@ import numpy
 import matplotlib.pyplot as plt
 import configparser
 from dfastbe import __version__
-from dfastbe.io import ConfigFile, log_text, config_get_float, \
+from dfastbe.io import ConfigFile, log_text, \
     config_get_int, config_get_simfile, read_simdata, config_get_xykm, config_get_kmbounds, \
     config_get_bank_lines, clip_path_to_kmbounds, read_xyc, write_shp_pnt, config_get_parameter, \
     write_km_eroded_volumes, write_shp, write_csv
@@ -78,7 +78,6 @@ def bankerosion_core(
     gui : bool
         Flag indicating whether this routine is called from the GUI.
     """
-    banklines: geopandas.GeoSeries
     timed_logger("-- start analysis --")
 
     rho = 1000  # density of water [kg/m3]
@@ -115,7 +114,7 @@ def bankerosion_core(
     if plotting:
         saveplot = config_file.get_bool("General", "SavePlots", True)
         saveplot_zoomed = config_file.get_bool("General", "SaveZoomPlots", True)
-        zoom_km_step = config_get_float(config, "General", "ZoomStepKM", 1.0)
+        zoom_km_step = config_file.get_float("General", "ZoomStepKM", 1.0)
         if zoom_km_step < 0.01:
             saveplot_zoomed = False
         closeplot = config_file.get_bool("General", "ClosePlots", False)
@@ -139,12 +138,8 @@ def bankerosion_core(
     log_text("total_time", dict={"t": Teros})
 
     # get filter settings for bank levels and flow velocities along banks
-    zb_dx = config_get_float(
-        config, "Erosion", "BedFilterDist", 0.0, positive=True
-    )
-    vel_dx = config_get_float(
-        config, "Erosion", "VelFilterDist", 0.0, positive=True
-    )
+    zb_dx = config_file.get_float("Erosion", "BedFilterDist", 0.0, positive=True)
+    vel_dx = config_file.get_float("Erosion", "VelFilterDist", 0.0, positive=True)
 
     # get pdischarges
     log_text("get_levels")
@@ -156,7 +151,7 @@ def bankerosion_core(
         iq_str = str(iq + 1)
         simfiles.append(config_get_simfile(config, "Erosion", iq_str))
         pdischarge.append(
-            config_get_float(config, "Erosion", "PDischarge" + iq_str)
+            config_file.get_float("Erosion", "PDischarge" + iq_str)
         )
 
     # read simulation data (getsimdata)
@@ -269,7 +264,7 @@ def bankerosion_core(
     river_axis = shapely.geometry.LineString(river_axis_numpy)
 
     # get output interval
-    km_step = config_get_float(config, "Erosion", "OutputInterval", 1.0)
+    km_step = config_file.get_float("Erosion", "OutputInterval", 1.0)
     # map to output interval
     km_bin = (river_axis_km.min(), river_axis_km.max(), km_step)
     km_mid = kernel.get_km_bins(km_bin, type=3)  # get mid points

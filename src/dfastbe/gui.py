@@ -33,7 +33,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import PyQt5.QtGui
 from dfastbe.io import get_text, get_progloc, absolute_path, ConfigFile, config_get_range, \
-                        config_get_float, config_get_int, config_get_bank_search_distances
+                        config_get_int, config_get_bank_search_distances
 import pathlib
 import sys
 import os
@@ -1314,7 +1314,7 @@ def load_configuration(filename: str) -> None:
         dialog["savePlotsEdit"].setChecked(flag)
         flag = config_file.get_bool("General", "SaveZoomPlots", default=False)
         dialog["saveZoomPlotsEdit"].setChecked(flag)
-        zoomStepKM = config_get_float(config, "General", "ZoomStepKM", default=1.0)
+        zoomStepKM = config_file.get_float("General", "ZoomStepKM", default=1.0)
         dialog["zoomPlotsRangeEdit"].setText(str(zoomStepKM))
         figDir = config_file.get_str(
             "General",
@@ -1329,9 +1329,7 @@ def load_configuration(filename: str) -> None:
 
         section = config["Detect"]
         dialog["simFileEdit"].setText(section["SimFile"])
-        waterDepth = config_get_float(
-            config, "Detect", "WaterDepth", default=0.0,
-        )
+        waterDepth = config_file.get_float("Detect", "WaterDepth", default=0.0)
         dialog["waterDepth"].setText(str(waterDepth))
         NBank = config_get_int(
             config, "Detect", "NBank", default=0, positive=True
@@ -1604,7 +1602,8 @@ def setFilter(field: str, config, group: str, key: str) -> None:
         Name of the key in the configuration group.
 
     """
-    val = config_get_float(config, group, key, 0.0)
+    config_file = ConfigFile(config)
+    val = config_file.get_float(group, key, 0.0)
     if val > 0.0:
         dialog[field + "Active"].setChecked(True)
         dialog[field + "Width"].setText(str(val))

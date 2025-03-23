@@ -359,6 +359,58 @@ class ConfigFile:
                 )
         return val
 
+    def get_float(
+        self,
+        group: str,
+        key: str,
+        default: Optional[float] = None,
+        positive: bool = False,
+    ) -> float:
+        """
+        Get a floating point value from a selected group and keyword in the analysis settings.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group from which to read.
+        key : str
+            Name of the keyword from which to read.
+        default : Optional[float]
+            Optional default value.
+        positive : bool
+            Flag specifying whether all floats are accepted (if False), or only positive floats (if True).
+
+        Raises
+        ------
+        Exception
+            If the keyword isn't specified and no default value is given.
+            If a negative value is specified when a positive value is required.
+
+        Returns
+        -------
+        val : float
+            Floating point value.
+        """
+        try:
+            val = float(self.config[group][key])
+        except:
+            if not default is None:
+                val = default
+            else:
+                raise Exception(
+                    'No floating point value specified for required keyword "{}" in block "{}".'.format(
+                        key, group
+                    )
+                )
+        if positive:
+            if val < 0.0:
+                raise Exception(
+                    'Value for "{}" in block "{}" must be positive, not {}.'.format(
+                        key, group, val
+                    )
+                )
+        return val
+
 def load_program_texts(filename: str) -> None:
     """
     Load texts from configuration file, and store globally for access.
@@ -1487,61 +1539,6 @@ def config_get_int(
             )
     if positive:
         if val <= 0:
-            raise Exception(
-                'Value for "{}" in block "{}" must be positive, not {}.'.format(
-                    key, group, val
-                )
-            )
-    return val
-
-
-def config_get_float(
-    config: configparser.ConfigParser,
-    group: str,
-    key: str,
-    default: Optional[float] = None,
-    positive: bool = False,
-) -> float:
-    """
-    Get a floating point value from a selected group and keyword in the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group from which to read.
-    key : str
-        Name of the keyword from which to read.
-    default : Optional[float]
-        Optional default value.
-    positive : bool
-        Flag specifying whether all floats are accepted (if False), or only positive floats (if True).
-
-    Raises
-    ------
-    Exception
-        If the keyword isn't specified and no default value is given.
-        If a negative value is specified when a positive value is required.
-
-    Returns
-    -------
-    val : float
-        Floating point value.
-    """
-    try:
-        val = float(config[group][key])
-    except:
-        if not default is None:
-            val = default
-        else:
-            raise Exception(
-                'No floating point value specified for required keyword "{}" in block "{}".'.format(
-                    key, group
-                )
-            )
-    if positive:
-        if val < 0.0:
             raise Exception(
                 'Value for "{}" in block "{}" must be positive, not {}.'.format(
                     key, group, val
