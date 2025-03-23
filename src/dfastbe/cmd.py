@@ -26,17 +26,12 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-
-from typing import Optional, Tuple
-
-import matplotlib.pyplot
-
-import sys
 import os
-import numpy
 import dfastbe.batch
-import dfastbe.gui
-import dfastbe.io
+from dfastbe.bank_lines import banklines
+from dfastbe.batch import bankerosion
+from dfastbe.gui import main
+from dfastbe.io import get_progloc, load_program_texts
 
 
 def run(
@@ -54,10 +49,10 @@ def run(
     configfile: str
         Configuration file ('dfastbe.cfg' is default)
     """
-    progloc = dfastbe.io.get_progloc()
+    progloc = get_progloc()
     LANGUAGE = language.upper()
     try:
-        dfastbe.io.load_program_texts(
+        load_program_texts(
             progloc + os.path.sep + "messages." + LANGUAGE + ".ini"
         )
     except:
@@ -70,11 +65,11 @@ def run(
     else:
         RUNMODE = runmode.upper()
         if RUNMODE == "BANKLINES":
-            dfastbe.batch.banklines(configfile)
+            banklines(configfile)
         elif RUNMODE == "BANKEROSION":
-            dfastbe.batch.bankerosion(configfile)
+            bankerosion(configfile)
         elif RUNMODE == "GUI":
-            dfastbe.gui.main(configfile)
+            main(configfile)
         else:
             raise Exception(
                 "Invalid run mode '{}' specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'.".format(
