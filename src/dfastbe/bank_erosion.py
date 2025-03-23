@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 import configparser
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, \
-    read_simdata, config_get_xykm, config_get_kmbounds, \
+    read_simdata, config_get_xykm, \
     config_get_bank_lines, clip_path_to_kmbounds, read_xyc, write_shp_pnt, config_get_parameter, \
     write_km_eroded_volumes, write_shp, write_csv
 
@@ -171,7 +171,7 @@ def bankerosion_core(
     xykm = config_get_xykm(config)
 
     # clip the chainage path to the range of chainages of interest
-    kmbounds = config_get_kmbounds(config)
+    kmbounds = config_file.get_km_bounds()
     log_text("clip_chainage", dict={"low": kmbounds[0], "high": kmbounds[1]})
     xykm_numpy = numpy.array(xykm)
     xykm = clip_path_to_kmbounds(xykm, kmbounds)

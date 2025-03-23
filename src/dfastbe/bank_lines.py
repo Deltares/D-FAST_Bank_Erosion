@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from dfastbe import support
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, config_get_xykm, \
-                        config_get_kmbounds, clip_path_to_kmbounds, config_get_bank_search_distances, \
+                        clip_path_to_kmbounds, config_get_bank_search_distances, \
                         read_simdata, config_get_search_lines
 from dfastbe.kernel import get_bbox, get_zoom_extends
 from dfastbe.utils import timed_logger
@@ -75,7 +75,7 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
     xykm = config_get_xykm(config)
 
     # clip the chainage path to the range of chainages of interest
-    kmbounds = config_get_kmbounds(config)
+    kmbounds = config_file.get_km_bounds()
     log_text("clip_chainage", dict={"low": kmbounds[0], "high": kmbounds[1]})
     xykm = clip_path_to_kmbounds(xykm, kmbounds)
     xykm_numpy = np.array(xykm)

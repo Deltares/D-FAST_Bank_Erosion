@@ -486,6 +486,18 @@ class ConfigFile:
         sim_file = self.config[group].get("SimFile" + istr, "")
         return sim_file
 
+    def get_km_bounds(self) -> Tuple[float, float]:
+        """
+
+        Returns
+        -------
+        kmbounds : Tuple[float, float]
+            Lower and upper limit for the chainage.
+        """
+        kmbounds = config_get_range(self.config, "General", "Boundaries")
+
+        return kmbounds
+
 def load_program_texts(filename: str) -> None:
     """
     Load texts from configuration file, and store globally for access.
@@ -1258,25 +1270,6 @@ def sim2nc(oldfile: str) -> str:
     else:
         raise Exception('Unable to determine file type for "{}"'.format(oldfile))
     return ncfile
-
-
-def config_get_kmbounds(config: configparser.ConfigParser,) -> Tuple[float, float]:
-    """
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-
-    Returns
-    -------
-    kmbounds : Tuple[float, float]
-        Lower and upper limit for the chainage.
-    """
-    # get km bounds
-    kmbounds = config_get_range(config, "General", "Boundaries")
-
-    return kmbounds
 
 
 def config_get_xykm(
