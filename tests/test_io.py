@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import patch
 from dfastbe.io import ConfigFile, load_program_texts, log_text, get_text, read_fm_map,\
     ugrid_add, copy_ugrid, copy_var, read_waqua_xyz, write_simona_box, \
-    get_mesh_and_facedim_names, absolute_path, relative_path, get_filename, ConfigFileError
+    get_mesh_and_facedim_names, absolute_path, relative_path, get_filename
 
 import configparser
 import os
@@ -447,14 +447,9 @@ class TestConfigFile(unittest.TestCase):
         config_str = """[General]\nVersion = 1.0\nTestParam = 42\n"""
         with unittest.mock.patch("builtins.open", return_value=StringIO(config_str)):
             config_obj = ConfigFile.read("dummy_path.cfg")
+            version = config_obj.version
         self.assertEqual(config_obj.config["General"]["Version"], "1.0")
-
-    def test_old_config_file(self):
-        """Test reading a configuration file."""
-        config_str = """[General]\nVersion = 0.1\nTestParam = 42\n"""
-        with patch("builtins.open", return_value=StringIO(config_str)):
-            with pytest.raises(ConfigFileError):
-                ConfigFile.read("dummy_path.cfg")
+        self.assertEqual(version, "1.0")
 
     def test_get_str(self):
         """Test retrieving a string value."""

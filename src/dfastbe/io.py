@@ -79,14 +79,17 @@ class ConfigFile:
     def config(self, value:configparser.ConfigParser):
         self._config = value
 
+    @property
+    def version(self) -> str:
+        return self.get_str("General", "Version")
+
     @classmethod
     def read(cls, path: Union[str, pathlib.Path]):
         """
         Read a configParser object (configuration file).
 
-        This function ...
-            reads the config file using the standard configParser.
-            falls back to a dedicated reader compatible with old waqbank files.
+        reads the config file using the standard configParser.
+        falls back to a dedicated reader compatible with old waqbank files.
 
         Returns
         -------
@@ -97,7 +100,8 @@ class ConfigFile:
             config = configparser.ConfigParser(comment_prefixes="%")
             with open(path, "r") as configfile:
                 config.read_file(configfile)
-        except:
+        except Exception as e:
+            print(f"Error during reading the config file: {e}")
             config = configparser.ConfigParser()
             config["General"] = {}
             all_lines = open(path, "r").read().splitlines()
@@ -109,6 +113,7 @@ class ConfigFile:
                 if len(data) >= 3:
                     config["General"][data[0]] = data[2]
 
+        # if version != "1.0":
         config = cls._upgrade(config)
         return cls(config, path=path)
 
@@ -140,9 +145,9 @@ class ConfigFile:
             config = move_parameter_location(config, "General", "NBank", "Detect")
             config_file = ConfigFile(config)
             n_bank = config_file.get_int("Detect", "NBank", default=0, positive=True)
-            for i in range(n_bank):
-                istr = str(i + 1)
-                config = move_parameter_location(config, "General", "Line" + istr, "Detect")
+            for i in range(1, n_bank + 1):
+                config = move_parameter_location(config, "General", f"Line{i}", "Detect")
+
             config = move_parameter_location(config, "General", "WaterDepth", "Detect")
             config = move_parameter_location(config, "General", "DLines", "Detect")
 
@@ -160,26 +165,16 @@ class ConfigFile:
             config = move_parameter_location(config, "General", "NLevel", "Erosion")
             config_file = ConfigFile(config)
             n_level = config_file.get_int("Erosion", "NLevel", default=0, positive=True)
-            for i in range(n_level):
-                istr = str(i + 1)
+
+            for i in range(1, n_level + 1):
                 config = move_parameter_location(
-                    config,
-                    "General",
-                    "Delft3Dfile" + istr,
-                    "Erosion",
-                    "SimFile" + istr,
-                    convert=sim2nc,
+                    config,"General", f"Delft3Dfile{i}", "Erosion", f"SimFile{i}", convert=sim2nc,
                     )
                 config = move_parameter_location(
-                    config,
-                    "General",
-                    "SDSfile" + istr,
-                    "Erosion",
-                    "SimFile" + istr,
-                    convert=sim2nc,
+                    config, "General", f"SDSfile{i}", "Erosion", f"SimFile{i}", convert=sim2nc,
                     )
-                config = move_parameter_location(config, "General", "SimFile" + istr, "Erosion")
-                config = move_parameter_location(config, "General", "PDischarge" + istr, "Erosion")
+                config = move_parameter_location(config, "General", f"SimFile{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"PDischarge{i}", "Erosion")
 
             config = move_parameter_location(config, "General", "ShipType", "Erosion")
             config = move_parameter_location(config, "General", "VShip", "Erosion")
@@ -196,16 +191,15 @@ class ConfigFile:
             config = move_parameter_location(config, "General", "Reed", "Erosion")
             config = move_parameter_location(config, "General", "VelFilter", "Erosion")
 
-            for i in range(n_level):
-                istr = str(i + 1)
-                config = move_parameter_location(config, "General", "ShipType" + istr, "Erosion")
-                config = move_parameter_location(config, "General", "VShip" + istr, "Erosion")
-                config = move_parameter_location(config, "General", "NShip" + istr, "Erosion")
-                config = move_parameter_location(config, "General", "NWave" + istr, "Erosion")
-                config = move_parameter_location(config, "General", "Draught" + istr, "Erosion")
-                config = move_parameter_location(config, "General", "Slope" + istr, "Erosion")
-                config = move_parameter_location(config, "General", "Reed" + istr, "Erosion")
-                config = move_parameter_location(config, "General", "EroVol" + istr, "Erosion")
+            for i in range(1, n_level + 1):
+                config = move_parameter_location(config, "General", f"ShipType{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"VShip{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"NShip{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"NWave{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"Draught{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"Slope{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"Reed{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"EroVol{i}", "Erosion")
 
         return config
 
@@ -296,14 +290,10 @@ class ConfigFile:
         try:
             val = self.config[group][key]
         except KeyError:
-            if not default is None:
+            if default is not None:
                 val = default
             else:
-                raise Exception(
-                    'No value specified for required keyword "{}" in block "{}".'.format(
-                        key, group
-                    )
-                )
+                raise ConfigFileError(f"No value specified for required keyword {key} in block {group}.")
         return val
 
     def get_bool(
@@ -335,23 +325,20 @@ class ConfigFile:
             Boolean value.
         """
         try:
-            str = self.config[group][key].lower()
+            str_val = self.config[group][key].lower()
             val = (
-                    (str == "yes")
-                    or (str == "y")
-                    or (str == "true")
-                    or (str == "t")
-                    or (str == "1")
+                    (str_val == "yes")
+                    or (str_val == "y")
+                    or (str_val == "true")
+                    or (str_val == "t")
+                    or (str_val == "1")
             )
         except:
-            if not default is None:
+            if default is not None:
                 val = default
             else:
-                raise Exception(
-                    'No boolean value specified for required keyword "{}" in block "{}".'.format(
-                        key, group
-                    )
-                )
+                raise ConfigFileError(f"No boolean value specified for required keyword {key} in block {group}.")
+
         return val
 
     def get_float(
@@ -388,22 +375,17 @@ class ConfigFile:
         """
         try:
             val = float(self.config[group][key])
-        except:
-            if not default is None:
+        except (KeyError, ValueError):
+            if default is not None:
                 val = default
             else:
-                raise Exception(
-                    'No floating point value specified for required keyword "{}" in block "{}".'.format(
-                        key, group
-                    )
+                raise ConfigFileError(
+                    f"No floating point value specified for required keyword {key} in block {group}."
                 )
-        if positive:
-            if val < 0.0:
-                raise Exception(
-                    'Value for "{}" in block "{}" must be positive, not {}.'.format(
-                        key, group, val
-                    )
-                )
+        if positive and val < 0.0:
+            raise ConfigFileError(
+                f"Value for {key} in block {group} must be positive, not {val}."
+            )
         return val
 
     def get_int(
@@ -440,22 +422,17 @@ class ConfigFile:
         """
         try:
             val = int(self.config[group][key])
-        except:
-            if not default is None:
+        except (KeyError, ValueError):
+            if default is not None:
                 val = default
             else:
-                raise Exception(
-                    'No integer value specified for required keyword "{}" in block "{}".'.format(
-                        key, group
-                    )
+                raise ConfigFileError(
+                    f"No integer value specified for required keyword {key} in block {group}."
                 )
-        if positive:
-            if val <= 0:
-                raise Exception(
-                    'Value for "{}" in block "{}" must be positive, not {}.'.format(
-                        key, group, val
-                    )
-                )
+        if positive and val <= 0:
+            raise ConfigFileError(
+                f"Value for {key} in block {group} must be positive, not {val}."
+            )
         return val
 
     def get_sim_file(self, group: str, istr: str) -> str:
@@ -480,10 +457,9 @@ class ConfigFile:
     def get_km_bounds(self) -> Tuple[float, float]:
         """
 
-        Returns
-        -------
-        kmbounds : Tuple[float, float]
-            Lower and upper limit for the chainage.
+        Returns:
+            km_bounds : Tuple[float, float]
+                Lower and upper limit for the chainage.
         """
         km_bounds = self.get_range("General", "Boundaries")
 
@@ -609,18 +585,16 @@ class ConfigFile:
                 rval = default
             else:
                 rval = float(filename)
-                if positive:
-                    if rval < 0:
-                        raise Exception(
-                            'Value of "{}" should be positive, not {}.'.format(key, rval)
+                if positive and rval < 0:
+                    raise Exception(
+                        'Value of "{}" should be positive, not {}.'.format(key, rval)
+                    )
+                if valid is not None and valid.count(rval) == 0:
+                    raise Exception(
+                        'Value of "{}" should be in {}, not {}.'.format(
+                            key, valid, rval
                         )
-                if not valid is None:
-                    if valid.count(rval) == 0:
-                        raise Exception(
-                            'Value of "{}" should be in {}, not {}.'.format(
-                                key, valid, rval
-                            )
-                        )
+                    )
             for ib, bkm in enumerate(bank_km):
                 parfield[ib] = numpy.zeros(len(bkm)) + rval
         except:
@@ -945,7 +919,6 @@ def read_fm_map(filename: str, varname: str, location: str = "face") -> numpy.nd
         var = var[0]
 
     # read data checking for time dimension
-    dims = var.dimensions
     if var.get_dims()[0].isunlimited():
         # assume that time dimension is unlimited and is the first dimension
         # slice to obtain last time step
@@ -953,10 +926,8 @@ def read_fm_map(filename: str, varname: str, location: str = "face") -> numpy.nd
     else:
         data = var[...] - start_index
 
-    # close file
     rootgrp.close()
 
-    # return data
     return data
 
 
@@ -1768,3 +1739,8 @@ def get_progloc() -> str:
     """
     progloc = str(pathlib.Path(__file__).parent.absolute())
     return progloc
+
+
+class ConfigFileError(Exception):
+    """Custom exception for configuration file errors."""
+    pass
