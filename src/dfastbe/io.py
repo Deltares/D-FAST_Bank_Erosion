@@ -516,6 +516,43 @@ class ConfigFile:
             line[b] = read_xyc(bankfile)
         return line
 
+    def get_bank_lines(self, bank_dir: str) -> List[numpy.ndarray]:
+        """
+        Get the bank lines from the detection step.
+
+        Arguments
+        ---------
+        bank_dir : str
+            Name of directory in which the bank lines files are located.
+
+        Returns
+        -------
+        line : List[numpy.ndarray]
+            List of arrays containing the x,y-coordinates of a bank lines.
+        """
+        bank_name = self.get_str("General", "BankFile", "bankfile")
+        bankfile = f"{bank_dir}{os.sep}{bank_name}.shp"
+        if os.path.exists(bankfile):
+            log_text("read_banklines", dict={"file": bankfile})
+            banklines = geopandas.read_file(bankfile)
+        else:
+            bankfile = bank_dir + os.sep + bank_name + "_#.xyc"
+            log_text("read_banklines", dict={"file": bankfile})
+            bankline_list = []
+            b = 1
+            while True:
+                bankfile = bank_dir + os.sep + bank_name + "_" + str(b) + ".xyc"
+                if os.path.exists(bankfile):
+                    xy_bank = read_xyc(bankfile)
+                    bankline_list.append(shapely.geometry.LineString(xy_bank))
+                    b = b + 1
+                else:
+                    break
+            bankline_series = geopandas.geoseries.GeoSeries(bankline_list)
+            banklines = geopandas.geodataframe.GeoDataFrame.from_features(bankline_series)
+        return banklines
+
+
 def load_program_texts(filename: str) -> None:
     """
     Load texts from configuration file, and store globally for access.
@@ -1408,48 +1445,6 @@ def clip_path_to_kmbounds(
         else:
             xykm = shapely.geometry.LineString([x0] + xykm.coords[start_i:end_i] + [x1])
     return xykm
-
-
-def config_get_bank_lines(
-    config: configparser.ConfigParser, bankdir: str
-) -> List[numpy.ndarray]:
-    """
-    Get the bank lines from the detection step.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    bankdir : str
-        Name of directory in which the bank lines files are located.
-
-    Returns
-    -------
-    line : List[numpy.ndarray]
-        List of arrays containing the x,y-coordinates of a bank lines.
-    """
-    config_file = ConfigFile(config)
-    bank_name = config_file.get_str("General", "BankFile", "bankfile")
-    bankfile = f"{bankdir}{os.sep}{bank_name}.shp"
-    if os.path.exists(bankfile):
-        log_text("read_banklines", dict={"file": bankfile})
-        banklines = geopandas.read_file(bankfile)
-    else:
-        bankfile = bankdir + os.sep + bank_name + "_#.xyc"
-        log_text("read_banklines", dict={"file": bankfile})
-        bankline_list = []
-        b = 1
-        while True:
-            bankfile = bankdir + os.sep + bank_name + "_" + str(b) + ".xyc"
-            if os.path.exists(bankfile):
-                xy_bank = read_xyc(bankfile)
-                bankline_list.append(shapely.geometry.LineString(xy_bank))
-                b = b + 1
-            else:
-                break
-        bankline_series = geopandas.geoseries.GeoSeries(bankline_list)
-        banklines = geopandas.geodataframe.GeoDataFrame.from_features(bankline_series)
-    return banklines
 
 
 def config_get_bank_search_distances(

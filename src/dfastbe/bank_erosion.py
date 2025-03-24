@@ -39,7 +39,7 @@ import configparser
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, \
     read_simdata, config_get_xykm, \
-    config_get_bank_lines, clip_path_to_kmbounds, read_xyc, write_shp_pnt, config_get_parameter, \
+    clip_path_to_kmbounds, read_xyc, write_shp_pnt, config_get_parameter, \
     write_km_eroded_volumes, write_shp, write_csv
 
 from dfastbe.utils import timed_logger
@@ -95,10 +95,10 @@ def bankerosion_core(
     debug = config_file.get_bool("General", "DebugOutput", False)
 
     # check bankdir for input
-    bankdir = config_file.get_str("General", "BankDir")
-    log_text("bankdir_in", dict={"dir": bankdir})
-    if not os.path.exists(bankdir):
-        log_text("missing_dir", dict={"dir": bankdir})
+    bank_dir = config_file.get_str("General", "BankDir")
+    log_text("bankdir_in", dict={"dir": bank_dir})
+    if not os.path.exists(bank_dir):
+        log_text("missing_dir", dict={"dir": bank_dir})
         return
 
     # check outputdir
@@ -179,7 +179,7 @@ def bankerosion_core(
     xy_numpy = xykm_numpy[:, :2]
 
     # read bank lines
-    banklines = config_get_bank_lines(config, bankdir)
+    banklines = config_file.get_bank_lines(bank_dir)
     n_banklines = len(banklines)
 
     # map bank lines to mesh cells
