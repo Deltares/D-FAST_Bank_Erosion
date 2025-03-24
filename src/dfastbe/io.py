@@ -117,11 +117,6 @@ class ConfigFile:
         """
         Upgrade the configuration data structure to version 1.0 format.
 
-        Arguments
-        ---------
-        config : configparser.ConfigParser
-            Settings for the D-FAST Bank Erosion analysis.
-
         Results
         -------
         config1 : configparser.ConfigParser
@@ -130,46 +125,44 @@ class ConfigFile:
         """
         try:
             version = config["General"]["Version"]
-        except:
+        except KeyError:
             version = "0.1"
 
         if version == "0.1":
             config["General"]["Version"] = "1.0"
 
             config["Detect"] = {}
-            config = movepar(
+            config = move_parameter_location(
                 config, "General", "Delft3Dfile", "Detect", "SimFile", convert=sim2nc
             )
-            config = movepar(
-                config, "General", "SDSfile", "Detect", "SimFile", convert=sim2nc
-            )
-            config = movepar(config, "General", "SimFile", "Detect")
-            config = movepar(config, "General", "NBank", "Detect")
+            config = move_parameter_location(config, "General", "SDSfile", "Detect", "SimFile", convert=sim2nc)
+            config = move_parameter_location(config, "General", "SimFile", "Detect")
+            config = move_parameter_location(config, "General", "NBank", "Detect")
             config_file = ConfigFile(config)
-            NBank = config_file.get_int("Detect", "NBank", default=0, positive=True)
-            for i in range(NBank):
+            n_bank = config_file.get_int("Detect", "NBank", default=0, positive=True)
+            for i in range(n_bank):
                 istr = str(i + 1)
-                config = movepar(config, "General", "Line" + istr, "Detect")
-            config = movepar(config, "General", "WaterDepth", "Detect")
-            config = movepar(config, "General", "DLines", "Detect")
+                config = move_parameter_location(config, "General", "Line" + istr, "Detect")
+            config = move_parameter_location(config, "General", "WaterDepth", "Detect")
+            config = move_parameter_location(config, "General", "DLines", "Detect")
 
             config["Erosion"] = {}
-            config = movepar(config, "General", "TErosion", "Erosion")
-            config = movepar(config, "General", "RiverAxis", "Erosion")
-            config = movepar(config, "General", "Fairway", "Erosion")
-            config = movepar(config, "General", "RefLevel", "Erosion")
-            config = movepar(config, "General", "OutputInterval", "Erosion")
-            config = movepar(config, "General", "OutputDir", "Erosion")
-            config = movepar(config, "General", "BankNew", "Erosion")
-            config = movepar(config, "General", "BankEq", "Erosion")
-            config = movepar(config, "General", "EroVol", "Erosion")
-            config = movepar(config, "General", "EroVolEqui", "Erosion")
-            config = movepar(config, "General", "NLevel", "Erosion")
+            config = move_parameter_location(config, "General", "TErosion", "Erosion")
+            config = move_parameter_location(config, "General", "RiverAxis", "Erosion")
+            config = move_parameter_location(config, "General", "Fairway", "Erosion")
+            config = move_parameter_location(config, "General", "RefLevel", "Erosion")
+            config = move_parameter_location(config, "General", "OutputInterval", "Erosion")
+            config = move_parameter_location(config, "General", "OutputDir", "Erosion")
+            config = move_parameter_location(config, "General", "BankNew", "Erosion")
+            config = move_parameter_location(config, "General", "BankEq", "Erosion")
+            config = move_parameter_location(config, "General", "EroVol", "Erosion")
+            config = move_parameter_location(config, "General", "EroVolEqui", "Erosion")
+            config = move_parameter_location(config, "General", "NLevel", "Erosion")
             config_file = ConfigFile(config)
-            NLevel = config_file.get_int("Erosion", "NLevel", default=0, positive=True)
-            for i in range(NLevel):
+            n_level = config_file.get_int("Erosion", "NLevel", default=0, positive=True)
+            for i in range(n_level):
                 istr = str(i + 1)
-                config = movepar(
+                config = move_parameter_location(
                     config,
                     "General",
                     "Delft3Dfile" + istr,
@@ -177,7 +170,7 @@ class ConfigFile:
                     "SimFile" + istr,
                     convert=sim2nc,
                     )
-                config = movepar(
+                config = move_parameter_location(
                     config,
                     "General",
                     "SDSfile" + istr,
@@ -185,36 +178,34 @@ class ConfigFile:
                     "SimFile" + istr,
                     convert=sim2nc,
                     )
-                config = movepar(config, "General", "SimFile" + istr, "Erosion")
-                config = movepar(config, "General", "PDischarge" + istr, "Erosion")
+                config = move_parameter_location(config, "General", "SimFile" + istr, "Erosion")
+                config = move_parameter_location(config, "General", "PDischarge" + istr, "Erosion")
 
-            config = movepar(config, "General", "ShipType", "Erosion")
-            config = movepar(config, "General", "VShip", "Erosion")
-            config = movepar(config, "General", "NShip", "Erosion")
-            config = movepar(config, "General", "NWave", "Erosion")
-            config = movepar(config, "General", "Draught", "Erosion")
-            config = movepar(config, "General", "Wave0", "Erosion")
-            config = movepar(config, "General", "Wave1", "Erosion")
+            config = move_parameter_location(config, "General", "ShipType", "Erosion")
+            config = move_parameter_location(config, "General", "VShip", "Erosion")
+            config = move_parameter_location(config, "General", "NShip", "Erosion")
+            config = move_parameter_location(config, "General", "NWave", "Erosion")
+            config = move_parameter_location(config, "General", "Draught", "Erosion")
+            config = move_parameter_location(config, "General", "Wave0", "Erosion")
+            config = move_parameter_location(config, "General", "Wave1", "Erosion")
 
-            config = movepar(config, "General", "Classes", "Erosion")
-            config = movepar(config, "General", "BankType", "Erosion")
-            config = movepar(
-                config, "General", "ProtectLevel", "Erosion", "ProtectionLevel"
-            )
-            config = movepar(config, "General", "Slope", "Erosion")
-            config = movepar(config, "General", "Reed", "Erosion")
-            config = movepar(config, "General", "VelFilter", "Erosion")
+            config = move_parameter_location(config, "General", "Classes", "Erosion")
+            config = move_parameter_location(config, "General", "BankType", "Erosion")
+            config = move_parameter_location(config, "General", "ProtectLevel", "Erosion", "ProtectionLevel")
+            config = move_parameter_location(config, "General", "Slope", "Erosion")
+            config = move_parameter_location(config, "General", "Reed", "Erosion")
+            config = move_parameter_location(config, "General", "VelFilter", "Erosion")
 
-            for i in range(NLevel):
+            for i in range(n_level):
                 istr = str(i + 1)
-                config = movepar(config, "General", "ShipType" + istr, "Erosion")
-                config = movepar(config, "General", "VShip" + istr, "Erosion")
-                config = movepar(config, "General", "NShip" + istr, "Erosion")
-                config = movepar(config, "General", "NWave" + istr, "Erosion")
-                config = movepar(config, "General", "Draught" + istr, "Erosion")
-                config = movepar(config, "General", "Slope" + istr, "Erosion")
-                config = movepar(config, "General", "Reed" + istr, "Erosion")
-                config = movepar(config, "General", "EroVol" + istr, "Erosion")
+                config = move_parameter_location(config, "General", "ShipType" + istr, "Erosion")
+                config = move_parameter_location(config, "General", "VShip" + istr, "Erosion")
+                config = move_parameter_location(config, "General", "NShip" + istr, "Erosion")
+                config = move_parameter_location(config, "General", "NWave" + istr, "Erosion")
+                config = move_parameter_location(config, "General", "Draught" + istr, "Erosion")
+                config = move_parameter_location(config, "General", "Slope" + istr, "Erosion")
+                config = move_parameter_location(config, "General", "Reed" + istr, "Erosion")
+                config = move_parameter_location(config, "General", "EroVol" + istr, "Erosion")
 
         return config
 
@@ -1440,7 +1431,7 @@ def write_km_eroded_volumes(
             valstr = "\t".join(["{:.2f}".format(x) for x in vol[i, :]])
             erofile.write("{:.2f}\t".format(km[i]) + valstr + "\n")
 
-def movepar(
+def move_parameter_location(
     config: configparser.ConfigParser,
     group1: str,
     key1: str,
@@ -1451,25 +1442,23 @@ def movepar(
     """
     Move a parameter from one group/keyword to another.
 
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Original settings for the D-FAST Bank Erosion analysis.
-    group1 : str
-        Name of the group in the original configuration.
-    key1 : str
-        Name of the keyword in the original configuration.
-    group2 : str
-        Name of the group in the target configuration.
-    key2 : Optional[str]
-        Name of the keyword in the target configuration (can be None if equal to the keyword in the original file).
-    convert: Optional[Callable[[str], str]]
-        Function to convert the original value into new value.
+    Args:
+        config : configparser.ConfigParser
+            Original settings for the D-FAST Bank Erosion analysis.
+        group1 : str
+            Name of the group in the original configuration.
+        key1 : str
+            Name of the keyword in the original configuration.
+        group2 : str
+            Name of the group in the target configuration.
+        key2 : Optional[str]
+            Name of the keyword in the target configuration (can be None if equal to the keyword in the original file).
+        convert: Optional[Callable[[str], str]]
+            Function to convert the original value into new value.
 
-    Results
-    -------
-    config1 : configparser.ConfigParser
-        Updated settings for the D-FAST Bank Erosion analysis.
+    Returns:
+        config : configparser.ConfigParser
+            Updated settings for the D-FAST Bank Erosion analysis.
     """
     val2: str
     if group1 in config.sections() and key1 in config[group1]:
