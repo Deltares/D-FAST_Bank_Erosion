@@ -552,6 +552,107 @@ class ConfigFile:
             banklines = geopandas.geodataframe.GeoDataFrame.from_features(bankline_series)
         return banklines
 
+    def get_parameter(
+        self,
+        group: str,
+        key: str,
+        bank_km: List[numpy.ndarray],
+        default=None,
+        ext: str = "",
+        positive: bool = False,
+        valid: Optional[List[float]] = None,
+        onefile: bool = False,
+    ):
+        """
+        Get a parameter field from a selected group and keyword in the analysis settings.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group from which to read.
+        key : str
+            Name of the keyword from which to read.
+        bank_km : List[numpy.ndarray]
+            For each bank a listing of the bank points (bank chainage locations).
+        default : Optional[Union[float, List[numpy.ndarray]]]
+            Optional default value or default parameter field; default None.
+        ext : str
+            File name extension; default empty string.
+        positive : bool
+            Flag specifying whether all values are accepted (if False), or only strictly positive values (if True); default False.
+        valid : Optional[List[float]]
+            Optional list of valid values; default None.
+        onefile : bool
+            Flag indicating whether for one file should be used for all bank lines (True) or one file per bank line (False; default).
+
+        Raises
+        ------
+        Exception
+            If a parameter isn't provided in the configuration, but no default value provided either.
+            If the value is negative while a positive value is required (positive = True).
+            If the value doesn't match one of the value values (valid is not None).
+
+        Returns
+        -------
+        parfield : List[numpy.ndarray]
+            Parameter field: for each bank a parameter value per bank point (bank chainage location).
+        """
+        try:
+            filename = self.config[group][key]
+            use_default = False
+        except:
+            if default is None:
+                raise Exception(
+                    'No value specified for required keyword "{}" in block "{}".'.format(
+                        key, group
+                    )
+                )
+            use_default = True
+
+        # if val is value then use that value globally
+        parfield = [None] * len(bank_km)
+        try:
+            if use_default:
+                if isinstance(default, list):
+                    return default
+                rval = default
+            else:
+                rval = float(filename)
+                if positive:
+                    if rval < 0:
+                        raise Exception(
+                            'Value of "{}" should be positive, not {}.'.format(key, rval)
+                        )
+                if not valid is None:
+                    if valid.count(rval) == 0:
+                        raise Exception(
+                            'Value of "{}" should be in {}, not {}.'.format(
+                                key, valid, rval
+                            )
+                        )
+            for ib, bkm in enumerate(bank_km):
+                parfield[ib] = numpy.zeros(len(bkm)) + rval
+        except:
+            if onefile:
+                log_text("read_param", dict={"param": key, "file": filename})
+                km_thr, val = get_kmval(filename, key, positive, valid)
+            for ib, bkm in enumerate(bank_km):
+                if not onefile:
+                    filename_i = filename + "_{}".format(ib + 1) + ext
+                    log_text(
+                        "read_param_one_bank",
+                        dict={"param": key, "i": ib + 1, "file": filename_i},
+                    )
+                    km_thr, val = get_kmval(filename_i, key, positive, valid)
+                if km_thr is None:
+                    parfield[ib] = numpy.zeros(len(bkm)) + val[0]
+                else:
+                    idx = numpy.zeros(len(bkm), dtype=numpy.int64)
+                    for thr in km_thr:
+                        idx[bkm >= thr] += 1
+                    parfield[ib] = val[idx]
+                # print("Min/max of data: ", parfield[ib].min(), parfield[ib].max())
+        return parfield
 
 def load_program_texts(filename: str) -> None:
     """
@@ -1521,111 +1622,6 @@ def config_get_range(
             )
         )
     return val
-
-
-def config_get_parameter(
-    config: configparser.ConfigParser,
-    group: str,
-    key: str,
-    bank_km: List[numpy.ndarray],
-    default=None,
-    ext: str = "",
-    positive: bool = False,
-    valid: Optional[List[float]] = None,
-    onefile: bool = False,
-):
-    """
-    Get a parameter field from a selected group and keyword in the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group from which to read.
-    key : str
-        Name of the keyword from which to read.
-    bank_km : List[numpy.ndarray]
-        For each bank a listing of the bank points (bank chainage locations).
-    default : Optional[Union[float, List[numpy.ndarray]]]
-        Optional default value or default parameter field; default None.
-    ext : str
-        File name extension; default empty string.
-    positive : bool
-        Flag specifying whether all values are accepted (if False), or only strictly positive values (if True); default False.
-    valid : Optional[List[float]]
-        Optional list of valid values; default None.
-    onefile : bool
-        Flag indicating whether for one file should be used for all bank lines (True) or one file per bank line (False; default).
-
-    Raises
-    ------
-    Exception
-        If a parameter isn't provided in the configuration, but no default value provided either.
-        If the value is negative while a positive value is required (positive = True).
-        If the value doesn't match one of the value values (valid is not None).
-
-    Returns
-    -------
-    parfield : List[numpy.ndarray]
-        Parameter field: for each bank a parameter value per bank point (bank chainage location).
-    """
-    try:
-        filename = config[group][key]
-        use_default = False
-    except:
-        if default is None:
-            raise Exception(
-                'No value specified for required keyword "{}" in block "{}".'.format(
-                    key, group
-                )
-            )
-        use_default = True
-
-    # if val is value then use that value globally
-    parfield = [None] * len(bank_km)
-    try:
-        if use_default:
-            if isinstance(default, list):
-                return default
-            rval = default
-        else:
-            rval = float(filename)
-            if positive:
-                if rval < 0:
-                    raise Exception(
-                        'Value of "{}" should be positive, not {}.'.format(key, rval)
-                    )
-            if not valid is None:
-                if valid.count(rval) == 0:
-                    raise Exception(
-                        'Value of "{}" should be in {}, not {}.'.format(
-                            key, valid, rval
-                        )
-                    )
-        for ib, bkm in enumerate(bank_km):
-            parfield[ib] = numpy.zeros(len(bkm)) + rval
-    except:
-        if onefile:
-            log_text("read_param", dict={"param": key, "file": filename})
-            km_thr, val = get_kmval(filename, key, positive, valid)
-        for ib, bkm in enumerate(bank_km):
-            if not onefile:
-                filename_i = filename + "_{}".format(ib + 1) + ext
-                log_text(
-                    "read_param_one_bank",
-                    dict={"param": key, "i": ib + 1, "file": filename_i},
-                )
-                km_thr, val = get_kmval(filename_i, key, positive, valid)
-            if km_thr is None:
-                parfield[ib] = numpy.zeros(len(bkm)) + val[0]
-            else:
-                idx = numpy.zeros(len(bkm), dtype=numpy.int64)
-                for thr in km_thr:
-                    idx[bkm >= thr] += 1
-                parfield[ib] = val[idx]
-            # print("Min/max of data: ", parfield[ib].min(), parfield[ib].max())
-    return parfield
 
 
 def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[float]]):

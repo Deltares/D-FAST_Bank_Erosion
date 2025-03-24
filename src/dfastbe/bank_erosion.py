@@ -39,7 +39,7 @@ import configparser
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, \
     read_simdata, config_get_xykm, \
-    clip_path_to_kmbounds, read_xyc, write_shp_pnt, config_get_parameter, \
+    clip_path_to_kmbounds, read_xyc, write_shp_pnt, \
     write_km_eroded_volumes, write_shp, write_csv
 
 from dfastbe.utils import timed_logger
@@ -383,15 +383,13 @@ def bankerosion_core(
             )
 
     # water level at fairway
-    # s1 = sim["zw_face"]
     zfw_ini = []
     for ib in range(n_banklines):
         ii = bp_fw_face_idx[ib]
         zfw_ini.append(sim["zw_face"][ii])
 
     # wave reduction s0, s1
-    dfw0 = config_get_parameter(
-        config,
+    dfw0 = config_file.get_parameter(
         "Erosion",
         "Wave0",
         bank_km_mid,
@@ -399,8 +397,7 @@ def bankerosion_core(
         positive=True,
         onefile=True,
     )
-    dfw1 = config_get_parameter(
-        config,
+    dfw1 = config_file.get_parameter(
         "Erosion",
         "Wave1",
         bank_km_mid,
@@ -412,26 +409,26 @@ def bankerosion_core(
     # save 1_banklines
 
     # read vship, nship, nwave, draught (tship), shiptype ... independent of level number
-    vship0 = config_get_parameter(
-        config, "Erosion", "VShip", bank_km_mid, positive=True, onefile=True
+    vship0 = config_file.get_parameter(
+        "Erosion", "VShip", bank_km_mid, positive=True, onefile=True
     )
-    Nship0 = config_get_parameter(
-        config, "Erosion", "NShip", bank_km_mid, positive=True, onefile=True
+    Nship0 = config_file.get_parameter(
+        "Erosion", "NShip", bank_km_mid, positive=True, onefile=True
     )
-    nwave0 = config_get_parameter(
-        config, "Erosion", "NWave", bank_km_mid, default=5, positive=True, onefile=True
+    nwave0 = config_file.get_parameter(
+        "Erosion", "NWave", bank_km_mid, default=5, positive=True, onefile=True
     )
-    Tship0 = config_get_parameter(
-        config, "Erosion", "Draught", bank_km_mid, positive=True, onefile=True
+    Tship0 = config_file.get_parameter(
+        "Erosion", "Draught", bank_km_mid, positive=True, onefile=True
     )
-    ship0 = config_get_parameter(
-        config, "Erosion", "ShipType", bank_km_mid, valid=[1, 2, 3], onefile=True
+    ship0 = config_file.get_parameter(
+        "Erosion", "ShipType", bank_km_mid, valid=[1, 2, 3], onefile=True
     )
-    parslope0 = config_get_parameter(
-        config, "Erosion", "Slope", bank_km_mid, default=20, positive=True, ext="slp"
+    parslope0 = config_file.get_parameter(
+        "Erosion", "Slope", bank_km_mid, default=20, positive=True, ext="slp"
     )
-    parreed0 = config_get_parameter(
-        config, "Erosion", "Reed", bank_km_mid, default=0, positive=True, ext="rdd"
+    parreed0 = config_file.get_parameter(
+        "Erosion", "Reed", bank_km_mid, default=0, positive=True, ext="rdd"
     )
 
     # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
@@ -439,15 +436,15 @@ def bankerosion_core(
     taucls = numpy.array([1e20, 95, 3.0, 0.95, 0.15])
     taucls_str = ["protected", "vegetation", "good clay", "moderate/bad clay", "sand"]
     if classes:
-        banktype = config_get_parameter(
-            config, "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
+        banktype = config_file.get_parameter(
+            "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
         )
         tauc = []
         for ib in range(len(banktype)):
             tauc.append(taucls[banktype[ib]])
     else:
-        tauc = config_get_parameter(
-            config, "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
+        tauc = config_file.get_parameter(
+            "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
         )
         thr = (taucls[:-1] + taucls[1:]) / 2
         banktype = [None] * len(thr)
@@ -459,8 +456,8 @@ def bankerosion_core(
 
     # read bank protection level zss
     zss_miss = -1000
-    zss = config_get_parameter(
-        config, "Erosion", "ProtectionLevel", bank_km_mid, default=zss_miss, ext=".bpl"
+    zss = config_file.get_parameter(
+        "Erosion", "ProtectionLevel", bank_km_mid, default=zss_miss, ext=".bpl"
     )
     # if zss undefined, set zss equal to zfw_ini - 1
     for ib in range(len(zss)):
@@ -493,8 +490,7 @@ def bankerosion_core(
 
         log_text("read_q_params", indent="  ")
         # read vship, nship, nwave, draught, shiptype, slope, reed, fairwaydepth, ... (level specific values)
-        vship = config_get_parameter(
-            config,
+        vship = config_file.get_parameter(
             "Erosion",
             "VShip" + iq_str,
             bank_km_mid,
@@ -502,8 +498,7 @@ def bankerosion_core(
             positive=True,
             onefile=True,
         )
-        Nship = config_get_parameter(
-            config,
+        Nship = config_file.get_parameter(
             "Erosion",
             "NShip" + iq_str,
             bank_km_mid,
@@ -511,8 +506,7 @@ def bankerosion_core(
             positive=True,
             onefile=True,
         )
-        nwave = config_get_parameter(
-            config,
+        nwave = config_file.get_parameter(
             "Erosion",
             "NWave" + iq_str,
             bank_km_mid,
@@ -520,8 +514,7 @@ def bankerosion_core(
             positive=True,
             onefile=True,
         )
-        Tship = config_get_parameter(
-            config,
+        Tship = config_file.get_parameter(
             "Erosion",
             "Draught" + iq_str,
             bank_km_mid,
@@ -529,8 +522,7 @@ def bankerosion_core(
             positive=True,
             onefile=True,
         )
-        ship_type = config_get_parameter(
-            config,
+        ship_type = config_file.get_parameter(
             "Erosion",
             "ShipType" + iq_str,
             bank_km_mid,
@@ -539,8 +531,7 @@ def bankerosion_core(
             onefile=True,
         )
 
-        parslope = config_get_parameter(
-            config,
+        parslope = config_file.get_parameter(
             "Erosion",
             "Slope" + iq_str,
             bank_km_mid,
@@ -548,8 +539,7 @@ def bankerosion_core(
             positive=True,
             ext="slp",
         )
-        parreed = config_get_parameter(
-            config,
+        parreed = config_file.get_parameter(
             "Erosion",
             "Reed" + iq_str,
             bank_km_mid,
