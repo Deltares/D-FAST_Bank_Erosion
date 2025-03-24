@@ -494,7 +494,7 @@ class ConfigFile:
         kmbounds : Tuple[float, float]
             Lower and upper limit for the chainage.
         """
-        km_bounds = config_get_range(self.config, "General", "Boundaries")
+        km_bounds = self.get_range("General", "Boundaries")
 
         return km_bounds
 
@@ -684,6 +684,40 @@ class ConfigFile:
                 )
         return dlines
 
+    def get_range(self, group: str, key: str) -> Tuple[float, float]:
+        """
+        Get a start and end value from a selected group and keyword in the analysis settings.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group from which to read.
+        key : str
+            Name of the keyword from which to read.
+
+        Returns
+        -------
+        val : Tuple[float,float]
+            Lower and upper limit of the range.
+        """
+        str_val = self.get_str(group, key)
+        try:
+            obrack = str_val.find("[")
+            cbrack = str_val.find("]")
+            if obrack >= 0 and cbrack >= 0:
+                str_val = str_val[obrack + 1: cbrack - 1]
+            val_list = [float(fstr) for fstr in str_val.split(":")]
+            if val_list[0] > val_list[1]:
+                val = (val_list[1], val_list[0])
+            else:
+                val = (val_list[0], val_list[1])
+        except:
+            raise Exception(
+                'Invalid range specification "{}" for required keyword "{}" in block "{}".'.format(
+                    str_val, key, group
+                )
+            )
+        return val
 
 def load_program_texts(filename: str) -> None:
     """
@@ -1577,47 +1611,6 @@ def clip_path_to_kmbounds(
         else:
             xykm = shapely.geometry.LineString([x0] + xykm.coords[start_i:end_i] + [x1])
     return xykm
-
-
-def config_get_range(
-    config: configparser.ConfigParser, group: str, key: str
-) -> Tuple[float, float]:
-    """
-    Get a start and end value from a selected group and keyword in the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group from which to read.
-    key : str
-        Name of the keyword from which to read.
-
-    Returns
-    -------
-    val : Tuple[float,float]
-        Lower and upper limit of the range.
-    """
-    config_file = ConfigFile(config)
-    str_val = config_file.get_str(group, key)
-    try:
-        obrack = str_val.find("[")
-        cbrack = str_val.find("]")
-        if obrack >= 0 and cbrack >= 0:
-            str_val = str_val[obrack + 1: cbrack - 1]
-        vallist = [float(fstr) for fstr in str_val.split(":")]
-        if vallist[0] > vallist[1]:
-            val = (vallist[1], vallist[0])
-        else:
-            val = (vallist[0], vallist[1])
-    except:
-        raise Exception(
-            'Invalid range specification "{}" for required keyword "{}" in block "{}".'.format(
-                str_val, key, group
-            )
-        )
-    return val
 
 
 def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[float]]):

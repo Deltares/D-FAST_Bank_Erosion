@@ -31,7 +31,7 @@ from typing import Dict, Any, Optional, Tuple, List
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import PyQt5.QtGui
-from dfastbe.io import get_text, get_progloc, absolute_path, ConfigFile, config_get_range
+from dfastbe.io import get_text, get_progloc, absolute_path, ConfigFile
 import pathlib
 import sys
 import os
@@ -1291,16 +1291,18 @@ def load_configuration(filename: str) -> None:
     rootdir = os.path.dirname(absfilename)
     config = ConfigFile.read(absfilename).config
     config = config_to_absolute_paths(rootdir, config)
-    config_file = ConfigFile(config, path=absfilename)
+    config_file: ConfigFile = ConfigFile(config, path=absfilename)
+
     try:
         version = config["General"]["Version"]
-    except:
+    except KeyError:
         showError("No version information in the file!")
         return
+
     if version == "1.0":
         section = config["General"]
         dialog["chainFileEdit"].setText(section["RiverKM"])
-        studyRange = config_get_range(config, "General", "Boundaries")
+        studyRange = config_file.get_range("General", "Boundaries")
         dialog["startRange"].setText(str(studyRange[0]))
         dialog["endRange"].setText(str(studyRange[1]))
         dialog["bankDirEdit"].setText(section["BankDir"])

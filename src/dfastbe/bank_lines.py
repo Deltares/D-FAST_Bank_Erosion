@@ -6,9 +6,7 @@ import geopandas as gpd
 from matplotlib import pyplot as plt
 from dfastbe import support
 from dfastbe import __version__
-from dfastbe.io import ConfigFile, log_text, config_get_xykm, \
-                        clip_path_to_kmbounds, \
-                        read_simdata
+from dfastbe.io import ConfigFile, log_text, config_get_xykm, clip_path_to_kmbounds, read_simdata
 from dfastbe.kernel import get_bbox, get_zoom_extends
 from dfastbe.utils import timed_logger
 from dfastbe import plotting as df_plt
