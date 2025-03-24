@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from dfastbe import support
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, config_get_xykm, \
-                        clip_path_to_kmbounds, config_get_bank_search_distances, \
+                        clip_path_to_kmbounds, \
                         read_simdata
 from dfastbe.kernel import get_bbox, get_zoom_extends
 from dfastbe.utils import timed_logger
@@ -90,7 +90,7 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
     n_searchlines = len(search_lines)
 
     # convert search lines to bank polygons
-    dlines = config_get_bank_search_distances(config, n_searchlines)
+    dlines = config_file.get_bank_search_distances(n_searchlines)
     bankareas = support.convert_search_lines_to_bank_polygons(
         search_lines, dlines
     )

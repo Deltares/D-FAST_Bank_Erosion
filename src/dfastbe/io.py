@@ -654,6 +654,37 @@ class ConfigFile:
                 # print("Min/max of data: ", parfield[ib].min(), parfield[ib].max())
         return parfield
 
+    def get_bank_search_distances(self, nbank: int) -> List[float]:
+        """
+        Get the search distance per bank line from the analysis settings.
+
+        Arguments
+        ---------
+        nbank : int
+            Number of bank search lines.
+
+        Returns
+        -------
+        dlines : List[float]
+            Array of length nbank containing the search distance value per bank line (default value: 50).
+        """
+        dlines_key = self.config["Detect"].get("DLines", None)
+        if dlines_key is None:
+            dlines = [50] * nbank
+        elif dlines_key[0] == "[" and dlines_key[-1] == "]":
+            dlines_split = dlines_key[1:-1].split(",")
+            dlines = [float(d) for d in dlines_split]
+            if not all([d > 0 for d in dlines]):
+                raise Exception(
+                    "keyword DLINES should contain positive values in configuration file."
+                )
+            if len(dlines) != nbank:
+                raise Exception(
+                    "keyword DLINES should contain NBANK values in configuration file."
+                )
+        return dlines
+
+
 def load_program_texts(filename: str) -> None:
     """
     Load texts from configuration file, and store globally for access.
@@ -1546,41 +1577,6 @@ def clip_path_to_kmbounds(
         else:
             xykm = shapely.geometry.LineString([x0] + xykm.coords[start_i:end_i] + [x1])
     return xykm
-
-
-def config_get_bank_search_distances(
-    config: configparser.ConfigParser, nbank: int
-) -> List[float]:
-    """
-    Get the search distance per bank line from the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    nbank : int
-        Number of bank search lines.
-
-    Returns
-    -------
-    dlines : List[float]
-        Array of length nbank containing the search distance value per bank line (default value: 50).
-    """
-    dlines_key = config["Detect"].get("DLines", None)
-    if dlines_key is None:
-        dlines = [50] * nbank
-    elif dlines_key[0] == "[" and dlines_key[-1] == "]":
-        dlines_split = dlines_key[1:-1].split(",")
-        dlines = [float(d) for d in dlines_split]
-        if not all([d > 0 for d in dlines]):
-            raise Exception(
-                "keyword DLINES should contain positive values in configuration file."
-            )
-        if len(dlines) != nbank:
-            raise Exception(
-                "keyword DLINES should contain NBANK values in configuration file."
-            )
-    return dlines
 
 
 def config_get_range(

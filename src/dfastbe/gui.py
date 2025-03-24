@@ -31,8 +31,7 @@ from typing import Dict, Any, Optional, Tuple, List
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import PyQt5.QtGui
-from dfastbe.io import get_text, get_progloc, absolute_path, ConfigFile, config_get_range, \
-                        config_get_bank_search_distances
+from dfastbe.io import get_text, get_progloc, absolute_path, ConfigFile, config_get_range
 import pathlib
 import sys
 import os
@@ -1331,7 +1330,7 @@ def load_configuration(filename: str) -> None:
         waterDepth = config_file.get_float("Detect", "WaterDepth", default=0.0)
         dialog["waterDepth"].setText(str(waterDepth))
         NBank = config_file.get_int("Detect", "NBank", default=0, positive=True)
-        DLines = config_get_bank_search_distances(config, NBank)
+        DLines = config_file.get_bank_search_distances(NBank)
         dialog["searchLines"].invisibleRootItem().takeChildren()
         for i in range(NBank):
             istr = str(i + 1)
