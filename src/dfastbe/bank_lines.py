@@ -4,9 +4,11 @@ import configparser
 import numpy as np
 import geopandas as gpd
 from matplotlib import pyplot as plt
+from setuptools.command.setopt import config_file
+
 from dfastbe import support
 from dfastbe import __version__
-from dfastbe.io import ConfigFile, log_text, config_get_xykm, clip_path_to_kmbounds, read_simdata
+from dfastbe.io import ConfigFile, log_text, clip_path_to_kmbounds, read_simdata
 from dfastbe.kernel import get_bbox, get_zoom_extends
 from dfastbe.utils import timed_logger
 from dfastbe import plotting as df_plt
@@ -70,7 +72,7 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
         plot_ext = config_file.get_str("General", "FigureExt", ".png")
 
     # read chainage path
-    xykm = config_get_xykm(config)
+    xykm = config_file.get_xy_km()
 
     # clip the chainage path to the range of chainages of interest
     kmbounds = config_file.get_km_bounds()

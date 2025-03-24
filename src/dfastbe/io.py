@@ -719,6 +719,25 @@ class ConfigFile:
             )
         return val
 
+    def get_xy_km(self) -> shapely.geometry.linestring.LineStringAdapter:
+        """
+
+        Returns
+        -------
+        xykm : shapely.geometry.linestring.LineStringAdapter
+
+        """
+        # get the chainage file
+        km_file = self.get_str("General", "RiverKM")
+        log_text("read_chainage", dict={"file": km_file})
+        xy_km = read_xyc(km_file, num_columns=3)
+
+        # make sure that chainage is increasing with node index
+        if xy_km.coords[0][2] > xy_km.coords[1][2]:
+            xy_km = shapely.geometry.asLineString(xy_km.coords[::-1])
+
+        return xy_km
+
 def load_program_texts(filename: str) -> None:
     """
     Load texts from configuration file, and store globally for access.
@@ -1491,34 +1510,6 @@ def sim2nc(oldfile: str) -> str:
     else:
         raise Exception('Unable to determine file type for "{}"'.format(oldfile))
     return ncfile
-
-
-def config_get_xykm(
-    config: configparser.ConfigParser,
-) -> shapely.geometry.linestring.LineStringAdapter:
-    """
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-
-    Returns
-    -------
-    xykm : shapely.geometry.linestring.LineStringAdapter
-
-    """
-    # get the chainage file
-    config_file = ConfigFile(config)
-    kmfile = config_file.get_str("General", "RiverKM")
-    log_text("read_chainage", dict={"file": kmfile})
-    xykm = read_xyc(kmfile, num_columns=3)
-
-    # make sure that chainage is increasing with node index
-    if xykm.coords[0][2] > xykm.coords[1][2]:
-        xykm = shapely.geometry.asLineString(xykm.coords[::-1])
-
-    return xykm
 
 
 def clip_path_to_kmbounds(

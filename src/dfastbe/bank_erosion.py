@@ -37,8 +37,7 @@ import numpy
 import matplotlib.pyplot as plt
 import configparser
 from dfastbe import __version__
-from dfastbe.io import ConfigFile, log_text, \
-    read_simdata, config_get_xykm, \
+from dfastbe.io import ConfigFile, log_text, read_simdata, \
     clip_path_to_kmbounds, read_xyc, write_shp_pnt, \
     write_km_eroded_volumes, write_shp, write_csv
 
@@ -168,7 +167,7 @@ def bankerosion_core(
     en, ef, fe, boundary_edge_nrs = _derive_topology_arrays(fn, nnodes)
 
     # read chainage path
-    xykm = config_get_xykm(config)
+    xykm = config_file.get_xy_km()
 
     # clip the chainage path to the range of chainages of interest
     km_bounds = config_file.get_km_bounds()
