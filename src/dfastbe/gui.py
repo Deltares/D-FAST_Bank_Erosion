@@ -31,6 +31,7 @@ from typing import Dict, Any, Optional, Tuple, List
 from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import PyQt5.QtGui
+
 from dfastbe.io import get_text, get_progloc, absolute_path, ConfigFile
 import pathlib
 import sys
@@ -42,7 +43,6 @@ from functools import partial
 from dfastbe import __version__
 from dfastbe.bank_lines import banklines_core
 from dfastbe.bank_erosion import bankerosion_core
-from dfastbe.utils import config_to_relative_paths, config_to_absolute_paths
 
 DialogObject = Dict[str, PyQt5.QtCore.QObject]
 
@@ -1200,7 +1200,9 @@ def run_detection() -> None:
     """
     config = get_configuration()
     rootdir = os.getcwd()
-    config = config_to_relative_paths(rootdir, config)
+    config_file = ConfigFile(config)
+    config_file.relative_to(rootdir)
+    config = config_file.config
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
     matplotlib.pyplot.close("all")
     # should maybe use a separate thread for this ...
@@ -1221,26 +1223,17 @@ def run_erosion() -> None:
 
     Use a dummy configuration name in the current work directory to create
     relative paths.
-
-    Arguments
-    ---------
-    None
     """
     config = get_configuration()
     rootdir = os.getcwd()
-    config = config_to_relative_paths(rootdir, config)
+    config_file = ConfigFile(config)
+    config_file.relative_to(rootdir)
+    config = config_file.config
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
     matplotlib.pyplot.close("all")
-    # should maybe use a separate thread for this ...
-    msg = ""
-    # try:
     bankerosion_core(config, rootdir, True)
-    # except Exception as Ex:
-    #    msg = str(Ex)
     dialog["application"].restoreOverrideCursor()
-    # if msg != "":
-    #    print(msg)
-    #    showError(msg)
+
 
 
 def close_dialog() -> None:
@@ -1289,16 +1282,17 @@ def load_configuration(filename: str) -> None:
         return
     absfilename = absolute_path(os.getcwd(), filename)
     rootdir = os.path.dirname(absfilename)
-    config = ConfigFile.read(absfilename).config
-    config = config_to_absolute_paths(rootdir, config)
-    config_file: ConfigFile = ConfigFile(config, path=absfilename)
+    config_file = ConfigFile.read(absfilename)
+    config_file.resolve(rootdir)
+    config_file.path = absfilename
 
     try:
-        version = config["General"]["Version"]
+        version = config_file.version
     except KeyError:
         showError("No version information in the file!")
         return
 
+    config = config_file.config
     if version == "1.0":
         section = config["General"]
         dialog["chainFileEdit"].setText(section["RiverKM"])
@@ -1379,7 +1373,7 @@ def load_configuration(filename: str) -> None:
         setParam("shipDraught", config, "Erosion", "Draught")
         setParam("wavePar0", config, "Erosion", "Wave0", "200.0")
         wave0 = config_file.get_str("Erosion", "Wave0", "200.0")
-        setParam("wavePar1", config, "Erosion", "Wave1", wave0)
+        setParam("wavePar1", config_file.config, "Erosion", "Wave1", wave0)
 
         useBankType = config_file.get_bool("Erosion", "Classes", default=True)
         dialog["bankType"].setEnabled(useBankType)
@@ -1393,7 +1387,7 @@ def load_configuration(filename: str) -> None:
         if useBankType:
             dialog["strengthPar"].setCurrentText("Bank Type")
             bankStrengthSwitch()
-            setParam("bankType", config, "Erosion", "BankType")
+            setParam("bankType", config_file.config, "Erosion", "BankType")
         else:
             dialog["strengthPar"].setCurrentText("Critical Shear Stress")
             bankStrengthSwitch()
@@ -1407,7 +1401,6 @@ def load_configuration(filename: str) -> None:
 
         tabs = dialog["tabs"]
         for i in range(tabs.count() - 1, 4, -1):
-            # tab = tabs.widget(i)
             tabs.removeTab(i)
 
         for i in range(NLevel):
@@ -1656,8 +1649,8 @@ def menu_save_configuration() -> None:
     if filename != "":
         config = get_configuration()
         rootdir = os.path.dirname(filename)
-        config = config_to_relative_paths(rootdir, config)
-        config = ConfigFile(config)
+        config_file = ConfigFile(config)
+        config_file.relative_to(rootdir)
         config.write(filename)
 
 

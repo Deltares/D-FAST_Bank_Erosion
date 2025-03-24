@@ -250,11 +250,10 @@ class ConfigFile:
         config : configparser.ConfigParser
             Analysis configuration settings using paths relative to current working directory.
         """
-        from dfastbe.utils import config_to_absolute_paths, config_to_relative_paths
         rootdir = os.path.dirname(self.path)
         cwd = os.getcwd()
-        self.config = config_to_absolute_paths(rootdir, self.config)
-        self.config = config_to_relative_paths(cwd, self.config)
+        self.resolve(rootdir)
+        self.relative_to(cwd)
         rootdir = relative_path(cwd, rootdir)
 
         return rootdir
@@ -702,6 +701,165 @@ class ConfigFile:
             xy_km = shapely.geometry.asLineString(xy_km.coords[::-1])
 
         return xy_km
+
+    def resolve(self, rootdir: str):
+        """
+        Convert a configuration object to contain absolute paths (for editing).
+
+        Arguments
+        ---------
+        rootdir : str
+            The path to be used as base for the absolute paths.
+        """
+        if "General" in self.config:
+            self.resolve_parameter("General", "RiverKM", rootdir)
+            self.resolve_parameter("General", "BankDir", rootdir)
+            self.resolve_parameter("General", "FigureDir", rootdir)
+
+        if "Detect" in self.config:
+            self.resolve_parameter("Detect", "SimFile", rootdir)
+            i = 0
+            while True:
+                i = i + 1
+                line_i = "Line" + str(i)
+                if line_i in self.config["Detect"]:
+                    self.resolve_parameter("Detect", line_i, rootdir)
+                else:
+                    break
+
+        if "Erosion" in self.config:
+            self.resolve_parameter("Erosion", "RiverAxis", rootdir)
+            self.resolve_parameter("Erosion", "Fairway", rootdir)
+            self.resolve_parameter("Erosion", "OutputDir", rootdir)
+
+            self.resolve_parameter("Erosion", "ShipType", rootdir)
+            self.resolve_parameter("Erosion", "VShip", rootdir)
+            self.resolve_parameter("Erosion", "NShip", rootdir)
+            self.resolve_parameter("Erosion", "NWave", rootdir)
+            self.resolve_parameter("Erosion", "Draught", rootdir)
+            self.resolve_parameter("Erosion", "Wave0", rootdir)
+            self.resolve_parameter("Erosion", "Wave1", rootdir)
+
+            self.resolve_parameter("Erosion", "BankType", rootdir)
+            self.resolve_parameter("Erosion", "ProtectionLevel", rootdir)
+            self.resolve_parameter("Erosion", "Slope", rootdir)
+            self.resolve_parameter("Erosion", "Reed", rootdir)
+
+            n_level = self.get_int("Erosion", "NLevel", default=0)
+            for i in range(1, n_level + 1):
+                self.resolve_parameter("Erosion", f"SimFile{i}", rootdir)
+                self.resolve_parameter("Erosion", f"ShipType{i}", rootdir)
+                self.resolve_parameter("Erosion", f"VShip{i}", rootdir)
+                self.resolve_parameter("Erosion", f"NShip{i}", rootdir)
+                self.resolve_parameter("Erosion", f"NWave{i}", rootdir)
+                self.resolve_parameter("Erosion", f"Draught{i}", rootdir)
+                self.resolve_parameter("Erosion", f"Slope{i}", rootdir)
+                self.resolve_parameter("Erosion", f"Reed{i}", rootdir)
+
+
+    def relative_to(self, rootdir: str):
+        """
+        Convert a configuration object to contain relative paths (for saving).
+
+        Args:
+            rootdir : str
+                The path to be used as base for the relative paths.
+        """
+        if "General" in self.config:
+            self.parameter_relative_to("General", "RiverKM", rootdir)
+            self.parameter_relative_to("General", "BankDir", rootdir)
+            self.parameter_relative_to("General", "FigureDir", rootdir)
+
+        if "Detect" in self.config:
+            self.parameter_relative_to("Detect", "SimFile", rootdir)
+
+            i = 0
+            while True:
+                i = i + 1
+                line_i = f"Line{i}"
+                if line_i in self.config["Detect"]:
+                    self.parameter_relative_to("Detect", line_i, rootdir)
+                else:
+                    break
+
+        if "Erosion" in self.config:
+            self.parameter_relative_to("Erosion", "RiverAxis", rootdir)
+            self.parameter_relative_to("Erosion", "Fairway", rootdir)
+            self.parameter_relative_to("Erosion", "OutputDir", rootdir)
+
+            self.parameter_relative_to("Erosion", "ShipType", rootdir)
+            self.parameter_relative_to("Erosion", "VShip", rootdir)
+            self.parameter_relative_to("Erosion", "NShip", rootdir)
+            self.parameter_relative_to("Erosion", "NWave", rootdir)
+            self.parameter_relative_to("Erosion", "Draught", rootdir)
+            self.parameter_relative_to("Erosion", "Wave0", rootdir)
+            self.parameter_relative_to("Erosion", "Wave1", rootdir)
+
+            self.parameter_relative_to("Erosion", "BankType", rootdir)
+            self.parameter_relative_to("Erosion", "ProtectionLevel", rootdir)
+            self.parameter_relative_to("Erosion", "Slope", rootdir)
+            self.parameter_relative_to("Erosion", "Reed", rootdir)
+
+            n_level = self.get_int("Erosion", "NLevel", default=0)
+            for i in range(1, n_level + 1):
+                self.parameter_relative_to("Erosion", f"SimFile{i}", rootdir)
+                self.parameter_relative_to("Erosion", f"ShipType{i}", rootdir)
+                self.parameter_relative_to("Erosion", f"VShip{i}", rootdir)
+                self.parameter_relative_to("Erosion", f"NShip{i}", rootdir)
+                self.parameter_relative_to("Erosion", f"NWave{i}", rootdir)
+                self.parameter_relative_to("Erosion", f"Draught{i}", rootdir)
+                self.parameter_relative_to("Erosion", f"Slope{i}", rootdir)
+                self.parameter_relative_to("Erosion", f"Reed{i}", rootdir)
+
+
+    def resolve_parameter(self, group: str, key: str, rootdir: str):
+        """
+        Convert a parameter value to contain an absolute path.
+
+        Determine whether the string represents a number.
+        If not, try to convert to an absolute path.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group in the configuration.
+        key : str
+            Name of the key in the configuration.
+        rootdir : str
+            The path to be used as base for the absolute paths.
+        """
+        if key in self.config[group]:
+            val_str = self.config[group][key]
+            try:
+                float(val_str)
+            except ValueError:
+                self.config[group][key] = absolute_path(rootdir, val_str)
+
+
+    def parameter_relative_to(self, group: str, key: str, rootdir: str):
+        """
+        Convert a parameter value to contain a relative path.
+
+        Determine whether the string represents a number.
+        If not, try to convert to a relative path.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group in the configuration.
+        key : str
+            Name of the key in the configuration.
+        rootdir : str
+            The path to be used as base for the relative paths.
+        """
+        if key in self.config[group]:
+            val_str = self.config[group][key]
+
+            try:
+                float(val_str)
+            except ValueError:
+                self.config[group][key] = relative_path(rootdir, val_str)
+
 
 def load_program_texts(filename: str) -> None:
     """
