@@ -1,8 +1,8 @@
-import dfastbe.io
-from dfastbe.io import ConfigFile
+import unittest
+from unittest.mock import patch
 from dfastbe.io import ConfigFile, load_program_texts, log_text, get_text, read_fm_map,\
     ugrid_add, copy_ugrid, copy_var, read_waqua_xyz, write_simona_box, \
-    get_mesh_and_facedim_names, absolute_path, relative_path, get_filename
+    get_mesh_and_facedim_names, absolute_path, relative_path, get_filename, ConfigFileError
 
 import configparser
 import os
@@ -417,4 +417,67 @@ class Test_relative_path():
         rootdir = os.sep + "some" + os.sep + "dir"
         afile = os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
-        assert dfastbe.io.relative_path(rootdir, afile) == rfile
+        assert relative_path(rootdir, afile) == rfile
+
+
+class TestConfigFile(unittest.TestCase):
+
+    def setUp(self):
+        """Set up a sample configuration for testing."""
+        self.config = configparser.ConfigParser()
+        self.config.read_dict({
+            "General": {"Version": "1.0", "TestParam": "42"},
+            "Detect": {"SimFile": "test_sim.nc"},
+            "Erosion": {"OutputDir": "./output"}
+        })
+        self.config_file = ConfigFile(self.config)
+
+    def test_init(self):
+        """Test initialization of ConfigFile."""
+        self.assertIsInstance(self.config_file, ConfigFile)
+
+    def test_config_property(self):
+        """Test getting and setting the config property."""
+        new_config = configparser.ConfigParser()
+        self.config_file.config = new_config
+        self.assertEqual(self.config_file.config, new_config)
+
+    def test_read(self):
+        """Test reading a configuration file."""
+        config_str = """[General]\nVersion = 1.0\nTestParam = 42\n"""
+        with unittest.mock.patch("builtins.open", return_value=StringIO(config_str)):
+            config_obj = ConfigFile.read("dummy_path.cfg")
+        self.assertEqual(config_obj.config["General"]["Version"], "1.0")
+
+    def test_old_config_file(self):
+        """Test reading a configuration file."""
+        config_str = """[General]\nVersion = 0.1\nTestParam = 42\n"""
+        with patch("builtins.open", return_value=StringIO(config_str)):
+            with pytest.raises(ConfigFileError):
+                ConfigFile.read("dummy_path.cfg")
+
+    def test_get_str(self):
+        """Test retrieving a string value."""
+        self.assertEqual(self.config_file.get_str("General", "Version"), "1.0")
+
+    def test_get_int(self):
+        """Test retrieving an integer value."""
+        self.assertEqual(self.config_file.get_int("General", "TestParam"), 42)
+
+    def test_get_bool(self):
+        """Test retrieving a boolean value."""
+        self.config_file.config["General"]["Enabled"] = "yes"
+        self.assertTrue(self.config_file.get_bool("General", "Enabled"))
+
+    def test_write(self):
+        """Test writing a configuration file."""
+        with patch("builtins.open", unittest.mock.mock_open()) as mock_file:
+            self.config_file.write("test_output.cfg")
+            mock_file.assert_called_with("test_output.cfg", "w")
+
+    def test_adjust_filenames(self):
+        """Test adjusting filenames."""
+        self.config_file.path = "/home/user/config.cfg"
+        with patch("os.getcwd", return_value="/home/user"):
+            rootdir = self.config_file.adjust_filenames()
+        self.assertEqual(rootdir, ".")
