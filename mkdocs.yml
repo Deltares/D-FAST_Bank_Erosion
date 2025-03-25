@@ -3,11 +3,11 @@ site_description: A tool to perform a bank erosion analysis based on a number of
 site_url: https://deltares.github.io/D-FAST_Bank_Erosion/
 repo_url: https://github.com/Deltares/D-FAST_Bank_Erosion
 repo_name: Deltares/D-FAST_Bank_Erosion
-edit_uri: edit/main/docs/mkdocs
+edit_uri: edit/main/docs/
 theme:
   name: material
   language: en
-  custom_dir: docs/mkdocs/overrides
+  custom_dir: docs/overrides
   palette:
     - scheme: deltares
       toggle:
@@ -45,7 +45,7 @@ plugins:
             show_root_heading: true
             show_signature_annotations: true
   - macros:
-      module_name: docs/mkdocs/include/mkdocs-macros/main
+      module_name: docs/include/mkdocs-macros/main
   - table-reader
 
 markdown_extensions:
@@ -76,19 +76,19 @@ nav:
   - Home: "index.md"
   - How-to:
       - Installation:
-          - "Local clone + Poetry": "mkdocs/guides/poetry.md"
+          - "Local clone + Poetry": "guides/poetry.md"
       - Contributing:
-          - "mkdocs/guides/contributing.md"
+          - "guides/contributing.md"
       - Documentation:
-          - "mkdocs/guides/documentation.md"
+          - "guides/documentation.md"
       - Tools:
-            - "mkdocs/guides/pre-commit-hooks.md"
-            - "mkdocs/guides/doctest.md"
+            - "guides/pre-commit-hooks.md"
+            - "guides/doctest.md"
   - API Reference:
-      - mkdocs/io.md
-      - mkdocs/batch.md
-      - mkdocs/cmd.md
-      - mkdocs/gui.md
-      - mkdocs/kernel.md
-      - mkdocs/plotting.md
-  - Release Notes: "mkdocs/changelog.md"
+      - io.md
+      - batch.md
+      - cmd.md
+      - gui.md
+      - kernel.md
+      - plotting.md
+  - Release Notes: "changelog.md"
