@@ -1,0 +1,101 @@
+site_name: D-FAST Bank Erosion
+site_description: A tool to perform a bank erosion analysis based on a number of D-Flow FM simulations.
+site_url: https://deltares.github.io/dfast-be/
+theme:
+  name: material
+  language: en
+  custom_dir: docs/mkdocs/overrides
+  palette:
+    - scheme: deltares
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to dark mode
+    - scheme: slate
+      toggle:
+        icon: material/lightbulb
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+plugins:
+  - search
+  - mkdocs-jupyter
+  - autorefs
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_root_toc_entry: false
+            show_source: true
+            show_signature_annotations: true
+            heading_level: 3
+            show_category_heading: false
+            group_by_category: false
+          selection:
+            inherited_members: false
+          options:
+            show_root_heading: true
+            show_signature_annotations: true
+  - macros:
+      module_name: docs/mkdocs/include/mkdocs-macros/main
+  - table-reader
+
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed
+  - pymdownx.details
+  - pymdownx.highlight
+  - toc:
+      permalink: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+repo_url: https://github.com/Deltares-research/hydro-testbench-introspection
+repo_name: Deltares-research/hydro-testbench-introspection
+edit_uri: edit/main/docs/
+
+extra:
+  version:
+    provider: mike
+  version_selector: true
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Deltares-research/hydro-testbench-introspection
+      name: Source code
+    - icon: fontawesome/brands/gitter
+      link: https://github.com/Deltares-research/hydro-testbench-introspection
+      name: Chat with us on Gitter
+copyright: Copyright &copy; 2022 Deltares
+extra_css:
+  - stylesheets/extra.css
+
+nav:
+  - Home: "mkdocs/index.md"
+  - How-to:
+      - Installation:
+          - "Local clone + Poetry": "mkdocs/guides/poetry.md"
+      - Contributing:
+          - "mkdocs/guides/contributing.md"
+      - Documentation:
+          - "mkdocs/guides/documentation.md"
+      - Tools:
+            - "mkdocs/guides/pre-commit-hooks.md"
+            - "mkdocs/guides/doctest.md"
+  - API Reference:
+      - mkdocs/io.md
+      - mkdocs/batch.md
+      - mkdocs/cmd.md
+      - mkdocs/gui.md
+      - mkdocs/kernel.md
+      - mkdocs/plotting.md
+  - Release Notes: "mkdocs/changelog.md"
