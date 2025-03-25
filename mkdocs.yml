@@ -1,6 +1,9 @@
 site_name: D-FAST Bank Erosion
 site_description: A tool to perform a bank erosion analysis based on a number of D-Flow FM simulations.
 site_url: https://deltares.github.io/D-FAST_Bank_Erosion/
+repo_url: https://github.com/Deltares/D-FAST_Bank_Erosion
+repo_name: Deltares/D-FAST_Bank_Erosion
+edit_uri: edit/main/docs/mkdocs
 theme:
   name: material
   language: en
@@ -60,9 +63,6 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
-repo_url: https://github.com/Deltares-research/hydro-testbench-introspection
-repo_name: Deltares-research/hydro-testbench-introspection
-edit_uri: edit/main/docs/
 
 extra:
   version:
