@@ -68,19 +68,12 @@ extra:
   version:
     provider: mike
   version_selector: true
-  social:
-    - icon: fontawesome/brands/github
-      link: https://github.com/Deltares-research/hydro-testbench-introspection
-      name: Source code
-    - icon: fontawesome/brands/gitter
-      link: https://github.com/Deltares-research/hydro-testbench-introspection
-      name: Chat with us on Gitter
 copyright: Copyright &copy; 2022 Deltares
 extra_css:
   - stylesheets/extra.css
 
 nav:
-  - Home: "mkdocs/index.md"
+  - Home: "index.md"
   - How-to:
       - Installation:
           - "Local clone + Poetry": "mkdocs/guides/poetry.md"
