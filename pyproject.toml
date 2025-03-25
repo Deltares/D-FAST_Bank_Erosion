@@ -30,6 +30,21 @@ black = "^22.12.0"
 teamcity-messages = "^1.32"
 pre-commit = "^4.2.0"
 
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.2"
+mkdocs-material = "^9.5"
+mkdocstrings = {extras = ["python"], version = "^0.27.0"}
+pymdown-extensions = "^10.12"
+mkdocs-autorefs = "^1.2"
+mkdocs-macros-plugin = "^1.3.7"
+mkdocs-table-reader-plugin = "^3.1.0"
+mkdocs-jupyter = "^0.25.1"
+mkdocs-mermaid2-plugin = "^1.2.1"
+mike = "^2.1.3"
+jupyter-contrib-nbextensions = "^0.7.0"
+notebook = "<7.0"
+
 [tool.flake8]
 ignore = ["E501", "E203", "F821", "E722", "B001", "D401", "B006", "D202", "W503"]
 max-line-length = 88
