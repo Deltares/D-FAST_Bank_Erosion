@@ -41,7 +41,7 @@ import matplotlib.pyplot
 import subprocess
 from functools import partial
 from dfastbe import __version__
-from dfastbe.bank_lines import banklines_core
+from dfastbe.bank_lines import BankLines
 from dfastbe.bank_erosion import bankerosion_core
 
 DialogObject = Dict[str, PyQt5.QtCore.QObject]
@@ -1201,14 +1201,15 @@ def run_detection() -> None:
     config = get_configuration()
     rootdir = os.getcwd()
     config_file = ConfigFile(config)
+    config_file.root_dir = rootdir
     config_file.relative_to(rootdir)
-    config = config_file.config
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
     matplotlib.pyplot.close("all")
     # should maybe use a separate thread for this ...
     msg = ""
     try:
-        banklines_core(config, rootdir, True)
+        bank_line = BankLines(config_file, gui=True)
+        bank_line.banklines_core()
     except Exception as Ex:
         msg = str(Ex)
     dialog["application"].restoreOverrideCursor()

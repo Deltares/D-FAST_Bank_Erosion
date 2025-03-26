@@ -27,9 +27,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 import os
-
+from dfastbe.io import ConfigFile
 from dfastbe.bank_erosion import bankerosion
-from dfastbe.bank_lines import banklines
+from dfastbe.bank_lines import BankLines
 from dfastbe.gui import main
 from dfastbe.io import get_progloc, load_program_texts
 
@@ -83,6 +83,9 @@ def run(
     """
     prog_loc = get_progloc()
     language = language.upper()
+
+    config_file = ConfigFile.read(configfile)
+
     try:
         load_program_texts(f"{prog_loc}{os.path.sep}messages.{language}.ini")
     except:
@@ -93,7 +96,8 @@ def run(
     else:
         run_mode = run_mode.upper()
         if run_mode == "BANKLINES":
-            banklines(configfile)
+            bank_lines = BankLines(config_file)
+            bank_lines.banklines_core()
         elif run_mode == "BANKEROSION":
             bankerosion(configfile)
         elif run_mode == "GUI":
