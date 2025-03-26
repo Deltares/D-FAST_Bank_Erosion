@@ -6,15 +6,6 @@ repo_name: Deltares/D-FAST_Bank_Erosion
 theme:
   name: material
   language: en
-  palette:
-    - scheme: deltares
-      toggle:
-        icon: material/lightbulb-outline
-        name: Switch to dark mode
-    - scheme: slate
-      toggle:
-        icon: material/lightbulb
-        name: Switch to light mode
   features:
     - navigation.instant
     - navigation.tracking
@@ -22,6 +13,25 @@ theme:
     - navigation.sections
     - navigation.expand
     - navigation.top
+  palette:
+  - media: "(prefers-color-scheme)"
+    toggle:
+      icon: material/brightness-auto
+      name: Switch to light mode
+  - media: "(prefers-color-scheme: light)"
+    scheme: default
+    primary: teal
+    accent: purple
+    toggle:
+      icon: material/weather-sunny
+      name: Switch to dark mode
+  - media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    primary: black
+    accent: lime
+    toggle:
+      icon: material/weather-night
+      name: Switch to system preference
 
 use_directory_urls: false
 
@@ -59,14 +69,14 @@ plugins:
 
 markdown_extensions:
   - admonition
+  - pymdownx.tabbed
+  - pymdownx.details
+  - pymdownx.highlight
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
-  - pymdownx.tabbed
-  - pymdownx.details
-  - pymdownx.highlight
   - toc:
       permalink: true
   - pymdownx.emoji:
