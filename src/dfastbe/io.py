@@ -68,6 +68,7 @@ class ConfigFile:
                 Name of configuration file to be read.
         """
         self._config = config
+        # the directory where the configuration file is located
         if path:
             self.path = path
 
@@ -82,6 +83,14 @@ class ConfigFile:
     @property
     def version(self) -> str:
         return self.get_str("General", "Version")
+
+    @property
+    def root_dir(self):
+        return self._root_dir
+
+    @root_dir.setter
+    def root_dir(self, value: str):
+        self._root_dir = value
 
     @classmethod
     def read(cls, path: Union[str, pathlib.Path]):
@@ -250,11 +259,11 @@ class ConfigFile:
         config : configparser.ConfigParser
             Analysis configuration settings using paths relative to current working directory.
         """
-        rootdir = os.path.dirname(self.path)
+        # rootdir = os.path.dirname(self.path)
         cwd = os.getcwd()
-        self.resolve(rootdir)
+        self.resolve(self.root_dir)
         self.relative_to(cwd)
-        rootdir = relative_path(cwd, rootdir)
+        rootdir = relative_path(cwd, self.root_dir)
 
         return rootdir
 
