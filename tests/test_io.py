@@ -112,35 +112,6 @@ class Test_get_text:
         """
         assert get_text("confirm") == ['Confirm using "y" ...','']
 
-class TestConfigFile:
-    def test_write_config_01(self):
-        """
-        Testing write_config.
-        """
-        filename = "test.cfg"
-        config = configparser.ConfigParser()
-        config.add_section("G 1")
-        config["G 1"]["K 1"] = "V 1"
-        config.add_section("Group 2")
-        config["Group 2"]["K1"] = "1.0 0.1 0.0 0.01"
-        config["Group 2"]["K2"] = "2.0 0.2 0.02 0.0"
-        config.add_section("Group 3")
-        config["Group 3"]["LongKey"] = "3"
-        config = ConfigFile(config)
-        config.write(filename)
-        all_lines = open(filename, "r").read().splitlines()
-        all_lines_ref = ['[G 1]',
-                         '  k 1     = V 1',
-                         '',
-                         '[Group 2]',
-                         '  k1      = 1.0 0.1 0.0 0.01',
-                         '  k2      = 2.0 0.2 0.02 0.0',
-                         '',
-                         '[Group 3]',
-                         '  longkey = 3']
-        assert all_lines == all_lines_ref
-        Path(filename).unlink()
-
 class Test_read_fm_map:
     def test_read_fm_map_01(self):
         """
@@ -473,6 +444,38 @@ class TestConfigFile(unittest.TestCase):
     def test_adjust_filenames(self):
         """Test adjusting filenames."""
         self.config_file.path = "/home/user/config.cfg"
+        self.config_file.root_dir = "/home/user"
         with patch("os.getcwd", return_value="/home/user"):
             rootdir = self.config_file.adjust_filenames()
         self.assertEqual(rootdir, ".")
+
+
+class TestConfigFileE2E:
+    def test_write_config_01(self):
+        """
+        Testing write_config.
+        """
+        filename = "test.cfg"
+        config = configparser.ConfigParser()
+        config.add_section("G 1")
+        config["G 1"]["K 1"] = "V 1"
+        config.add_section("Group 2")
+        config["Group 2"]["K1"] = "1.0 0.1 0.0 0.01"
+        config["Group 2"]["K2"] = "2.0 0.2 0.02 0.0"
+        config.add_section("Group 3")
+        config["Group 3"]["LongKey"] = "3"
+
+        config = ConfigFile(config)
+        config.write(filename)
+        all_lines = open(filename, "r").read().splitlines()
+        all_lines_ref = ['[G 1]',
+                         '  k 1     = V 1',
+                         '',
+                         '[Group 2]',
+                         '  k1      = 1.0 0.1 0.0 0.01',
+                         '  k2      = 2.0 0.2 0.02 0.0',
+                         '',
+                         '[Group 3]',
+                         '  longkey = 3']
+        assert all_lines == all_lines_ref
+        Path(filename).unlink()
