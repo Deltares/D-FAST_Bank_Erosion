@@ -404,9 +404,13 @@ def get_km_eroded_volume(
     bin_idx = numpy.rint((bank_km_mid - km_bin[0] - km_bin[2] / 2) / km_bin[2]).astype(
         numpy.int64
     )
-    dvol = numpy.bincount(bin_idx, weights=dv)
+    dvol_temp = numpy.bincount(bin_idx, weights=dv)
     length = int((km_bin[1] - km_bin[0]) / km_bin[2])
-    dvol.resize((length,), refcheck=False)
+    if len(dvol_temp) == length:
+       dvol = dvol_temp
+    else:
+       dvol = numpy.zeros((length,))
+       dvol[:len(dvol_temp)] = dvol_temp
     return dvol
 
 
