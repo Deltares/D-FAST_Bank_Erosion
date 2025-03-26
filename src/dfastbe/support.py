@@ -469,8 +469,8 @@ def intersect_line_mesh(
                                     )
                                 )
                     if l == crds.shape[0]:
-                        crds.resize((2 * l, 2))
-                        idx.resize(2 * l)
+                        crds.resize((2 * l, 2), refcheck=False)
+                        idx.resize(2 * l, refcheck=False)
                     crds[l] = bpj
                     idx[l] = index
                     l += 1
@@ -514,8 +514,8 @@ def intersect_line_mesh(
                                 if verbose:
                                     print("{}: last point ends in a node".format(j))
                                 if l == crds.shape[0]:
-                                    crds.resize((l + 1, 2))
-                                    idx.resize(l + 1)
+                                    crds.resize((l + 1, 2), refcheck=False)
+                                    idx.resize(l + 1, refcheck=False)
                                 crds[l] = bpj
                                 if index == -2:
                                     idx[l] = vindex[0]
@@ -658,8 +658,8 @@ def intersect_line_mesh(
                             if verbose:
                                 print("{}: last point ends on an edge".format(j))
                             if l == crds.shape[0]:
-                                crds.resize((l + 1, 2))
-                                idx.resize(l + 1)
+                                crds.resize((l + 1, 2), refcheck=False)
+                                idx.resize(l + 1, refcheck=False)
                             crds[l] = bpj
                             if index == -2:
                                 idx[l] = vindex[0]
@@ -747,8 +747,8 @@ def intersect_line_mesh(
                             )
                         )
                     if l == crds.shape[0]:
-                        crds.resize((2 * l, 2))
-                        idx.resize(2 * l)
+                        crds.resize((2 * l, 2), refcheck=False)
+                        idx.resize(2 * l, refcheck=False)
                     crds[l] = bpj1 + prev_b * (bpj - bpj1)
                     if index == -2:
                         idx[l] = vindex[0]
@@ -1468,7 +1468,7 @@ def add_point(
     if (xy_in[ixy1] - point != 0).any():
         ixy1 = ixy1 + 1
         if ixy1 >= len(xy_in):
-            xy_out = numpy.resize(xy_in, (2 * ixy1, 2))
+            xy_out = numpy.resize(xy_in, (2 * ixy1, 2), refcheck=False)
         else:
             xy_out = xy_in
         xy_out[ixy1] = point

@@ -406,7 +406,7 @@ def get_km_eroded_volume(
     )
     dvol = numpy.bincount(bin_idx, weights=dv)
     length = int((km_bin[1] - km_bin[0]) / km_bin[2])
-    dvol.resize((length,))
+    dvol.resize((length,), refcheck=False)
     return dvol
 
 
