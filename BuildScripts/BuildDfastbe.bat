@@ -5,11 +5,11 @@ if "%1" == "--no-console" (
 set cmd_box_args=--windows-force-stderr-spec=%PROGRAM%logs.txt ^
  --windows-force-stdout-spec=%PROGRAM%output.txt ^
  --windows-disable-console ^
- dfastbe
+ src/dfastbe
  
 ) else (
 
-set cmd_box_args=dfastbe
+set cmd_box_args=src/dfastbe
 
 )
 
