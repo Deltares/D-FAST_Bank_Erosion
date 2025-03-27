@@ -45,6 +45,8 @@ class BankLines:
 
         # get critical water depth used for defining bank line (default = 0.0 m)
         self.critical_water_depth = config_file.get_float("Detect", "WaterDepth", default=0)
+        # set plotting flags
+        self.plot_flags = self._get_plotting_flags()
 
     @property
     def config_file(self) -> ConfigFile:
@@ -126,9 +128,6 @@ class BankLines:
         )
         log_text("-")
 
-        # set plotting flags
-        plot_flags = self._get_plotting_flags()
-
         # read the chainage path
         xy_km = config_file.get_xy_km()
 
@@ -198,10 +197,10 @@ class BankLines:
         self.save(bank)
 
         if self.plot_data:
-            self.plot(xy_km_numpy, plot_flags, n_search_lines, bank, km_bounds, bank_areas, sim)
+            self.plot(xy_km_numpy, self.plot_flags, n_search_lines, bank, km_bounds, bank_areas, sim)
 
         if self.plot_data:
-            if plot_flags["close_plot"]:
+            if self.plot_flags["close_plot"]:
                 plt.close("all")
             else:
                 plt.show(block=not self.gui)
