@@ -46,6 +46,9 @@ START /B /WAIT poetry run nuitka ^
  --include-data-files=src/dfastbe/messages.UK.ini=dfastbe/messages.UK.ini ^
  --include-data-files=src/dfastbe/D-FASTBE.png=dfastbe/D-FASTBE.png ^
  --include-data-files=src/dfastbe/open.png=dfastbe/open.png ^
+ --include-data-files=src/dfastbe/add.png=dfastbe/add.png ^
+ --include-data-files=src/dfastbe/edit.png=dfastbe/edit.png ^
+ --include-data-files=src/dfastbe/remove.png=dfastbe/remove.png ^
  --include-data-files=LICENSE.md=LICENSE.md ^
  --include-data-files=docs/dfastbe_usermanual.pdf=dfastbe/dfastbe_usermanual.pdf ^
  --include-data-files=docs/dfastbe_techref.pdf=dfastbe/dfastbe_techref.pdf ^
