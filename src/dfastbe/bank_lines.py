@@ -5,7 +5,7 @@ import numpy as np
 import geopandas as gpd
 from shapely.ops import cascaded_union, linemerge
 from matplotlib import pyplot as plt
-from dfastbe.support import SimulationObject, clip_search_lines, convert_search_lines_to_bank_polygons,\
+from dfastbe.support import SimulationObject, convert_search_lines_to_bank_polygons,\
     on_right_side, clip_simdata, clip_bank_lines, project_km_on_line, sort_connect_bank_lines, poly_to_line,\
     tri_to_line
 from dfastbe import __version__
@@ -119,6 +119,7 @@ class BankLines:
         Run the bank line detection analysis for a specified configuration.
         """
         config_file = self.config_file
+        river_data = self.river_data
         timed_logger("-- start analysis --")
 
         log_text(
@@ -131,31 +132,21 @@ class BankLines:
         log_text("-")
 
         # clip the chainage path to the range of chainages of interest
-        km_bounds = self.river_data.km_bounds
-
-        log_text("clip_chainage", dict={"low": km_bounds[0], "high": km_bounds[1]})
-        xy_km = self.river_data.masked_xy_km
-        xy_km_numpy = np.array(xy_km)
-        xy_numpy = xy_km_numpy[:, :2]
-
-        # read bank search lines
-        search_lines = config_file.get_search_lines()
-        search_lines, max_max_d = clip_search_lines(
-            search_lines, xy_km, self.max_river_width
-        )
-        n_search_lines = len(search_lines)
+        km_bounds = river_data.station_bounds
+        river_profile = river_data.masked_profile
+        stations_coords = river_data.masked_profile_arr[:, :2]
 
         # convert search lines to bank polygons
-        d_lines = config_file.get_bank_search_distances(n_search_lines)
+        d_lines = config_file.get_bank_search_distances(river_data.num_search_lines)
         bank_areas = convert_search_lines_to_bank_polygons(
-            search_lines, d_lines
+            river_data.masked_search_lines, d_lines
         )
 
         # determine whether search lines are located on left or right
-        to_right = [True] * n_search_lines
-        for ib in range(n_search_lines):
+        to_right = [True] * river_data.num_search_lines
+        for ib in range(river_data.num_search_lines):
             to_right[ib] = on_right_side(
-                np.array(search_lines[ib]), xy_numpy
+                np.array(river_data.masked_search_lines[ib]), stations_coords
             )
 
         # read simulation data and drying flooding threshold dh0
@@ -170,7 +161,7 @@ class BankLines:
 
         # clip simulation data to boundaries ...
         log_text("clip_data")
-        sim = clip_simdata(sim, xy_km, max_max_d)
+        sim = clip_simdata(sim, river_profile, river_data.max_max_d)
 
         # derive bank lines (get_banklines)
         log_text("identify_banklines")
@@ -180,13 +171,13 @@ class BankLines:
 
         # clip the set of detected bank lines to the bank areas
         log_text("simplify_banklines")
-        bank = [None] * n_search_lines
-        clipped_banklines = [None] * n_search_lines
+        bank = [None] * river_data.num_search_lines
+        clipped_banklines = [None] * river_data.num_search_lines
         for ib, bank_area in enumerate(bank_areas):
             log_text("bank_lines", dict={"ib": ib + 1})
             clipped_banklines[ib] = clip_bank_lines(banklines, bank_area)
             bank[ib] = sort_connect_bank_lines(
-                clipped_banklines[ib], xy_km, to_right[ib]
+                clipped_banklines[ib], river_profile, to_right[ib]
             )
         gpd.GeoSeries(clipped_banklines).to_file(
             self.bank_output_dir / f"{BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE}{EXTENSION}"
@@ -197,7 +188,7 @@ class BankLines:
         self.save(bank)
 
         if self.plot_data:
-            self.plot(xy_km_numpy, self.plot_flags, n_search_lines, bank, km_bounds, bank_areas, sim)
+            self.plot(river_data.masked_profile_arr, self.plot_flags, river_data.num_search_lines, bank, km_bounds, bank_areas, sim)
 
         if self.plot_data:
             if self.plot_flags["close_plot"]:

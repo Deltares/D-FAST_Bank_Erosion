@@ -1642,69 +1642,6 @@ def sort_connect_bank_lines(
     return bank
 
 
-def clip_search_lines(
-    line: List[shapely.geometry.linestring.LineStringAdapter],
-    xykm: shapely.geometry.linestring.LineStringAdapter,
-    max_river_width: float = 1000,
-) -> Tuple[List[shapely.geometry.linestring.LineStringAdapter], float]:
-    """
-    Clip the list of lines to the envelope of certain size surrounding a reference line.
-
-    Arguments
-    ---------
-    line : List[shapely.geometry.linestring.LineStringAdapter]
-        List of search lines to be clipped.
-    xykm : shapely.geometry.linestring.LineStringAdapter
-        Reference line.
-    max_river_width: float
-        Maximum distance away from xykm.
-    
-    Returns
-    -------
-    line : List[shapely.geometry.linestring.LineStringAdapter]
-        List of clipped search lines.
-    maxmaxd: float
-        Maximum distance from any point within line to reference line.
-    """
-    nbank = len(line)
-    kmbuffer = xykm.buffer(max_river_width, cap_style=2)
-
-    # The algorithm uses simplified geometries for determining the distance between lines for speed.
-    # Stay accurate to within about 1 m
-    xy_simplified = xykm.simplify(1)
-
-    maxmaxd = 0
-    for b in range(nbank):
-        # Clip the bank search lines to the reach of interest (indicated by the reference line).
-        line[b] = line[b].intersection(kmbuffer)
-
-        # If the bank search line breaks into multiple parts, select the part closest to the reference line.
-        if line[b].geom_type == "MultiLineString":
-            dmin = max_river_width
-            imin = 0
-            for i in range(len(line[b])):
-                line_simplified = line[b][i].simplify(1)
-                dmin_i = line_simplified.distance(xy_simplified)
-                if dmin_i < dmin:
-                    dmin = dmin_i
-                    imin = i
-            line[b] = line[b][imin]
-
-        # Determine the maximum distance from a point on this line to the reference line.
-        line_simplified = line[b].simplify(1)
-        maxd = max(
-            [
-                shapely.geometry.Point(c).distance(xy_simplified)
-                for c in line_simplified.coords
-            ]
-        )
-
-        # Increase the value of maxd by 2 to account for error introduced by using simplified lines.
-        maxmaxd = max(maxmaxd, maxd + 2)
-
-    return line, maxmaxd
-
-
 def convert_search_lines_to_bank_polygons(
     search_lines: List[numpy.ndarray], dlines: List[float]
 ):

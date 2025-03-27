@@ -168,10 +168,10 @@ def bankerosion_core(
     en, ef, fe, boundary_edge_nrs = _derive_topology_arrays(fn, nnodes)
 
     # clip the chainage path to the range of chainages of interest
-    km_bounds = river_data.km_bounds
+    km_bounds = river_data.station_bounds
     log_text("clip_chainage", dict={"low": km_bounds[0], "high": km_bounds[1]})
 
-    xykm = river_data.masked_xy_km
+    xykm = river_data.masked_profile
     xykm_numpy = numpy.array(xykm)
     xy_numpy = xykm_numpy[:, :2]
 

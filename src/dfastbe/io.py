@@ -38,6 +38,8 @@ import geopandas
 import shapely
 import pathlib
 
+MAX_RIVER_WIDTH = 1000
+
 
 class SimulationObject(TypedDict):
     x_node: np.ndarray
@@ -874,23 +876,27 @@ class ConfigFile:
 class RiverData:
 
     def __init__(self, config_file: ConfigFile):
-        self.xy_km: shapely.geometry.linestring.LineString = config_file.get_xy_km()
-        self.km_bounds: Tuple = config_file.get_km_bounds() # start and end station
-        self.masked_xy_km: shapely.geometry.linestring.LineString = self.clip_path_to_kmbounds(self.xy_km, self.km_bounds)
+        self.profile: shapely.geometry.linestring.LineString = config_file.get_xy_km()
+        self.station_bounds: Tuple = config_file.get_km_bounds() # start and end station
+        self.start_station: float = self.station_bounds[0]
+        self.end_station: float = self.station_bounds[1]
+        log_text("clip_chainage", dict={"low": self.start_station, "high": self.end_station})
+        self.masked_profile: shapely.geometry.linestring.LineString = self.mask_profile(self.station_bounds)
+        self.masked_profile_arr = np.array(self.masked_profile)
+        # read bank search lines
+        search_lines = config_file.get_search_lines()
+        self.masked_search_lines, self.max_max_d = self.clip_search_lines(
+            search_lines, self.masked_profile, MAX_RIVER_WIDTH
+        )
+        self.num_search_lines = len(search_lines)
 
-    def clip_path_to_kmbounds(
-        self,
-        xy_km: shapely.geometry.linestring.LineStringAdapter,
-        km_bounds: Tuple[float, float],
-    ) -> shapely.geometry.linestring.LineStringAdapter:
+    def mask_profile(self, bounds: Tuple[float, float]) -> shapely.geometry.linestring.LineStringAdapter:
         """
         Clip a chainage line to the relevant reach.
 
         Arguments
         ---------
-        xy_km : shapely.geometry.linestring.LineStringAdapter
-            Original river chainage line.
-        km_bounds : Tuple[float, float]
+        bounds : Tuple[float, float]
             Lower and upper limit for the chainage.
 
         Returns
@@ -898,33 +904,34 @@ class RiverData:
         xykm1 : shapely.geometry.linestring.LineStringAdapter
             Clipped river chainage line.
         """
+        xy_km = self.profile
         start_i = None
         end_i = None
         for i, c in enumerate(xy_km.coords):
             if start_i is None:
-                if c[2] >= km_bounds[0]:
+                if c[2] >= bounds[0]:
                     start_i = i
-            if c[2] >= km_bounds[1]:
+            if c[2] >= bounds[1]:
                 end_i = i
                 break
 
         if start_i is None:
             raise Exception(
                 "Lower chainage bound {} is larger than the maximum chainage {} available".format(
-                    km_bounds[0], xy_km.coords[-1][2]
+                    bounds[0], xy_km.coords[-1][2]
                 )
             )
         elif start_i == 0:
             # lower bound (potentially) clipped to available reach
-            if xy_km.coords[0][2] - km_bounds[0] > 0.1:
+            if xy_km.coords[0][2] - bounds[0] > 0.1:
                 raise Exception(
                     "Lower chainage bound {} is smaller than the minimum chainage {} available".format(
-                        km_bounds[0], xy_km.coords[0][2]
+                        bounds[0], xy_km.coords[0][2]
                     )
                 )
             x0 = None
         else:
-            alpha = (km_bounds[0] - xy_km.coords[start_i - 1][2]) / (
+            alpha = (bounds[0] - xy_km.coords[start_i - 1][2]) / (
                     xy_km.coords[start_i][2] - xy_km.coords[start_i - 1][2]
             )
             x0 = tuple(
@@ -932,14 +939,14 @@ class RiverData:
                 for c1, c2 in zip(xy_km.coords[start_i - 1], xy_km.coords[start_i])
             )
             if alpha > 0.9:
-                # value close to first node (start_i), so let's skip that one
+                # value close to the first node (start_i), so let's skip that one
                 start_i = start_i + 1
 
         if end_i is None:
-            if km_bounds[1] - xy_km.coords[-1][2] > 0.1:
+            if bounds[1] - xy_km.coords[-1][2] > 0.1:
                 raise Exception(
                     "Upper chainage bound {} is larger than the maximum chainage {} available".format(
-                        km_bounds[1], xy_km.coords[-1][2]
+                        bounds[1], xy_km.coords[-1][2]
                     )
                 )
             # else kmbounds[1] matches chainage of last point
@@ -951,11 +958,11 @@ class RiverData:
         elif end_i == 0:
             raise Exception(
                 "Upper chainage bound {} is smaller than the minimum chainage {} available".format(
-                    km_bounds[1], xy_km.coords[0][2]
+                    bounds[1], xy_km.coords[0][2]
                 )
             )
         else:
-            alpha = (km_bounds[1] - xy_km.coords[end_i - 1][2]) / (
+            alpha = (bounds[1] - xy_km.coords[end_i - 1][2]) / (
                     xy_km.coords[end_i][2] - xy_km.coords[end_i - 1][2]
             )
             x1 = tuple(
@@ -970,6 +977,69 @@ class RiverData:
             else:
                 xy_km = shapely.geometry.LineString([x0] + xy_km.coords[start_i:end_i] + [x1])
         return xy_km
+
+    def clip_search_lines(
+        self,
+        line: List[shapely.geometry.linestring.LineStringAdapter],
+        xykm: shapely.geometry.linestring.LineStringAdapter,
+        max_river_width: float = 1000,
+    ) -> Tuple[List[shapely.geometry.linestring.LineStringAdapter], float]:
+        """
+        Clip the list of lines to the envelope of certain size surrounding a reference line.
+
+        Arguments
+        ---------
+        line : List[shapely.geometry.linestring.LineStringAdapter]
+            List of search lines to be clipped.
+        xykm : shapely.geometry.linestring.LineStringAdapter
+            Reference line.
+        max_river_width: float
+            Maximum distance away from xykm.
+
+        Returns
+        -------
+        line : List[shapely.geometry.linestring.LineStringAdapter]
+            List of clipped search lines.
+        maxmaxd: float
+            Maximum distance from any point within line to reference line.
+        """
+        nbank = len(line)
+        kmbuffer = xykm.buffer(max_river_width, cap_style=2)
+
+        # The algorithm uses simplified geometries for determining the distance between lines for speed.
+        # Stay accurate to within about 1 m
+        xy_simplified = xykm.simplify(1)
+
+        maxmaxd = 0
+        for b in range(nbank):
+            # Clip the bank search lines to the reach of interest (indicated by the reference line).
+            line[b] = line[b].intersection(kmbuffer)
+
+            # If the bank search line breaks into multiple parts, select the part closest to the reference line.
+            if line[b].geom_type == "MultiLineString":
+                dmin = max_river_width
+                imin = 0
+                for i in range(len(line[b])):
+                    line_simplified = line[b][i].simplify(1)
+                    dmin_i = line_simplified.distance(xy_simplified)
+                    if dmin_i < dmin:
+                        dmin = dmin_i
+                        imin = i
+                line[b] = line[b][imin]
+
+            # Determine the maximum distance from a point on this line to the reference line.
+            line_simplified = line[b].simplify(1)
+            maxd = max(
+                [
+                    shapely.geometry.Point(c).distance(xy_simplified)
+                    for c in line_simplified.coords
+                ]
+            )
+
+            # Increase the value of maxd by 2 to account for error introduced by using simplified lines.
+            maxmaxd = max(maxmaxd, maxd + 2)
+
+        return line, maxmaxd
 
 def load_program_texts(filename: str) -> None:
     """
