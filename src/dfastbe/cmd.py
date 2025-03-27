@@ -97,7 +97,7 @@ def run(
         run_mode = run_mode.upper()
         if run_mode == "BANKLINES":
             bank_lines = BankLines(config_file)
-            bank_lines.banklines_core()
+            bank_lines.detect()
         elif run_mode == "BANKEROSION":
             bankerosion(configfile)
         elif run_mode == "GUI":

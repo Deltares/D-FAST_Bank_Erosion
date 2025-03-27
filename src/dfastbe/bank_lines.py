@@ -110,7 +110,7 @@ class BankLines:
 
         return data
 
-    def banklines_core(self) -> None:
+    def detect(self) -> None:
         """
         Run the bank line detection analysis for a specified configuration.
         """

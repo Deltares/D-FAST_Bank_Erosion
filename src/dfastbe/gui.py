@@ -1209,7 +1209,7 @@ def run_detection() -> None:
     msg = ""
     try:
         bank_line = BankLines(config_file, gui=True)
-        bank_line.banklines_core()
+        bank_line.detect()
     except Exception as Ex:
         msg = str(Ex)
     dialog["application"].restoreOverrideCursor()
