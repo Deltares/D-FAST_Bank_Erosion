@@ -27,7 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 from pathlib import Path
 from typing import Tuple, Any, List, Union, Dict, Optional, TextIO, Callable, TypedDict
-import numpy
+import numpy as np
 
 import netCDF4
 import configparser
@@ -40,17 +40,17 @@ import pathlib
 
 
 class SimulationObject(TypedDict):
-    x_node: numpy.ndarray
-    y_node: numpy.ndarray
-    nnodes: numpy.ndarray
-    facenode: numpy.ma.masked_array
-    zb_location: numpy.ndarray
-    zb_val: numpy.ndarray
-    zw_face: numpy.ndarray
-    h_face: numpy.ndarray
-    ucx_face: numpy.ndarray
-    ucy_face: numpy.ndarray
-    chz_face: numpy.ndarray
+    x_node: np.ndarray
+    y_node: np.ndarray
+    nnodes: np.ndarray
+    facenode: np.ma.masked_array
+    zb_location: np.ndarray
+    zb_val: np.ndarray
+    zw_face: np.ndarray
+    h_face: np.ndarray
+    ucx_face: np.ndarray
+    ucy_face: np.ndarray
+    chz_face: np.ndarray
 
 
 PROGTEXTS: Dict[str, List[str]]
@@ -480,7 +480,7 @@ class ConfigFile:
 
         Returns
         -------
-        line : List[numpy.ndarray]
+        line : List[np.ndarray]
             List of arrays containing the x,y-coordinates of a bank search lines.
         """
         # read guiding bank line
@@ -492,7 +492,7 @@ class ConfigFile:
             line[b] = read_xyc(bankfile)
         return line
 
-    def get_bank_lines(self, bank_dir: str) -> List[numpy.ndarray]:
+    def get_bank_lines(self, bank_dir: str) -> List[np.ndarray]:
         """
         Get the bank lines from the detection step.
 
@@ -503,7 +503,7 @@ class ConfigFile:
 
         Returns
         -------
-        line : List[numpy.ndarray]
+        line : List[np.ndarray]
             List of arrays containing the x,y-coordinates of a bank lines.
         """
         bank_name = self.get_str("General", "BankFile", "bankfile")
@@ -532,7 +532,7 @@ class ConfigFile:
         self,
         group: str,
         key: str,
-        bank_km: List[numpy.ndarray],
+        bank_km: List[np.ndarray],
         default=None,
         ext: str = "",
         positive: bool = False,
@@ -548,9 +548,9 @@ class ConfigFile:
             Name of the group from which to read.
         key : str
             Name of the keyword from which to read.
-        bank_km : List[numpy.ndarray]
+        bank_km : List[np.ndarray]
             For each bank a listing of the bank points (bank chainage locations).
-        default : Optional[Union[float, List[numpy.ndarray]]]
+        default : Optional[Union[float, List[np.ndarray]]]
             Optional default value or default parameter field; default None.
         ext : str
             File name extension; default empty string.
@@ -570,7 +570,7 @@ class ConfigFile:
 
         Returns
         -------
-        parfield : List[numpy.ndarray]
+        parfield : List[np.ndarray]
             Parameter field: for each bank a parameter value per bank point (bank chainage location).
         """
         try:
@@ -605,7 +605,7 @@ class ConfigFile:
                         )
                     )
             for ib, bkm in enumerate(bank_km):
-                parfield[ib] = numpy.zeros(len(bkm)) + rval
+                parfield[ib] = np.zeros(len(bkm)) + rval
         except:
             if onefile:
                 log_text("read_param", dict={"param": key, "file": filename})
@@ -619,9 +619,9 @@ class ConfigFile:
                     )
                     km_thr, val = get_kmval(filename_i, key, positive, valid)
                 if km_thr is None:
-                    parfield[ib] = numpy.zeros(len(bkm)) + val[0]
+                    parfield[ib] = np.zeros(len(bkm)) + val[0]
                 else:
-                    idx = numpy.zeros(len(bkm), dtype=numpy.int64)
+                    idx = np.zeros(len(bkm), dtype=np.int64)
                     for thr in km_thr:
                         idx[bkm >= thr] += 1
                     parfield[ib] = val[idx]
@@ -963,7 +963,7 @@ class RiverData:
                 for c1, c2 in zip(xy_km.coords[end_i - 1], xy_km.coords[end_i])
             )
             if alpha < 0.1:
-                # value close to previous point (end_i - 1), so let's skip that one
+                # value close to the previous point (end_i - 1), so let's skip that one
                 end_i = end_i - 1
             if x0 is None:
                 xy_km = shapely.geometry.LineString(xy_km.coords[:end_i] + [x1])
@@ -1099,7 +1099,7 @@ def get_text(key: str) -> List[str]:
     return str
 
 
-def read_fm_map(filename: str, varname: str, location: str = "face") -> numpy.ndarray:
+def read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndarray:
     """
     Read the last time step of any quantity defined at faces from a D-Flow FM map-file.
 
@@ -1338,7 +1338,7 @@ def copy_var(src: netCDF4.Dataset, varname: str, dst: netCDF4.Dataset) -> None:
 def ugrid_add(
     dstfile: str,
     varname: str,
-    ldata: numpy.array,
+    ldata: np.array,
     meshname: str,
     facedim: str,
     long_name: str = "None",
@@ -1353,7 +1353,7 @@ def ugrid_add(
         Name of netCDF file to write data to.
     varname : str
         Name of netCDF variable to be written.
-    ldata : numpy.array
+    ldata : np.array
         Linear array containing the data to be written.
     meshname : str
         Name of mesh variable in the netCDF file.
@@ -1385,7 +1385,7 @@ def ugrid_add(
     dst.close()
 
 
-def read_waqua_xyz(filename: str, cols: Tuple[int, ...] = (2,)) -> numpy.ndarray:
+def read_waqua_xyz(filename: str, cols: Tuple[int, ...] = (2,)) -> np.ndarray:
     """
     Read data columns from a SIMONA XYZ file.
 
@@ -1398,15 +1398,15 @@ def read_waqua_xyz(filename: str, cols: Tuple[int, ...] = (2,)) -> numpy.ndarray
 
     Returns
     -------
-    data : numpy.ndarray
+    data : np.ndarray
         Data read from the file.
     """
-    data = numpy.genfromtxt(filename, delimiter=",", skip_header=1, usecols=cols)
+    data = np.genfromtxt(filename, delimiter=",", skip_header=1, usecols=cols)
     return data
 
 
 def write_simona_box(
-    filename: str, rdata: numpy.ndarray, firstm: int, firstn: int
+    filename: str, rdata: np.ndarray, firstm: int, firstn: int
 ) -> None:
     """
     Write a SIMONA BOX file.
@@ -1415,8 +1415,8 @@ def write_simona_box(
     ---------
     filename : str
         Name of the file to be written.
-    rdata : numpy.ndarray
-        Two-dimensional NumPy array containing the data to be written.
+    rdata : np.ndarray
+        Two-dimensional np array containing the data to be written.
     firstm : int
         Firt M index to be written.
     firstn : int
@@ -1427,7 +1427,7 @@ def write_simona_box(
 
     # get shape and prepare block header; data will be written in blocks of 10
     # N-lines
-    shp = numpy.shape(rdata)
+    shp = np.shape(rdata)
     mmax = shp[0]
     nmax = shp[1]
     boxheader = "      BOX MNMN=({m1:4d},{n1:5d},{m2:5d},{n2:5d}), VARIABLE_VAL=\n"
@@ -1532,9 +1532,9 @@ def read_xyc(
         y = point_coordinates.Y.to_numpy().reshape((num_points, 1))
         if num_columns == 3:
             z = point_coordinates.Val.to_numpy().reshape((num_points, 1))
-            coords = numpy.concatenate((x, y, z), axis=1)
+            coords = np.concatenate((x, y, z), axis=1)
         else:
-            coords = numpy.concatenate((x, y), axis=1)
+            coords = np.concatenate((x, y), axis=1)
         line_string = shapely.geometry.LineString(coords)
     else:
         gdf = geopandas.read_file(filename)["geometry"]
@@ -1543,15 +1543,15 @@ def read_xyc(
     return line_string
 
 
-def write_xyc(xy: numpy.ndarray, val: numpy.ndarray, filename: str) -> None:
+def write_xyc(xy: np.ndarray, val: np.ndarray, filename: str) -> None:
     """
     Write a text file with x, y, and values.
 
     Arguments
     ---------
-    xy : numpy.ndarray
+    xy : np.ndarray
         N x 2 array containing x and y coordinates.
-    val : numpy.ndarray
+    val : np.ndarray
         N x k array containing values.
     filename : str
         Name of the file to be written.
@@ -1572,17 +1572,17 @@ def write_xyc(xy: numpy.ndarray, val: numpy.ndarray, filename: str) -> None:
 
 
 def write_shp_pnt(
-    xy: numpy.ndarray, dict: Dict[str, numpy.ndarray], filename: str
+    xy: np.ndarray, dict: Dict[str, np.ndarray], filename: str
 ) -> None:
     """
     Write a shape point file with x, y, and values.
 
     Arguments
     ---------
-    xy : numpy.ndarray
+    xy : np.ndarray
         N x 2 array containing x and y coordinates.
-    dict : Dict[str, numpy.ndarray]
-        Dictionary of quantities to be written, each NumPy array should have length k.
+    dict : Dict[str, np.ndarray]
+        Dictionary of quantities to be written, each np array should have length k.
     filename : str
         Name of the file to be written.
 
@@ -1596,18 +1596,18 @@ def write_shp_pnt(
 
 
 def write_shp(
-    geom: geopandas.geoseries.GeoSeries, dict: Dict[str, numpy.ndarray], filename: str
+    geom: geopandas.geoseries.GeoSeries, dict: Dict[str, np.ndarray], filename: str
 ) -> None:
     """
-    Write a shape file for a given GeoSeries and dictionary of NumPy arrays.
-    The GeoSeries and all NumPy should have equal length.
+    Write a shape file for a given GeoSeries and dictionary of np arrays.
+    The GeoSeries and all np should have equal length.
 
     Arguments
     ---------
     geom : geopandas.geoseries.GeoSeries
         geopandas GeoSeries containing k geometries.
-    dict : Dict[str, numpy.ndarray]
-        Dictionary of quantities to be written, each NumPy array should have length k.
+    dict : Dict[str, np.ndarray]
+        Dictionary of quantities to be written, each np array should have length k.
     filename : str
         Name of the file to be written.
 
@@ -1619,13 +1619,13 @@ def write_shp(
     geopandas.GeoDataFrame(val_DataFrame, geometry=geom).to_file(filename)
 
 
-def write_csv(dict: Dict[str, numpy.ndarray], filename: str) -> None:
+def write_csv(dict: Dict[str, np.ndarray], filename: str) -> None:
     """
     Write a data to csv file.
 
     Arguments
     ---------
-    dict : Dict[str, numpy.ndarray]
+    dict : Dict[str, np.ndarray]
         Value(s) to be written.
     filename : str
         Name of the file to be written.
@@ -1642,12 +1642,12 @@ def write_csv(dict: Dict[str, numpy.ndarray], filename: str) -> None:
         else:
             header = header + '"' + keys[i] + '"'
 
-    data = numpy.column_stack([array for array in dict.values()])
-    numpy.savetxt(filename, data, delimiter=", ", header=header, comments="")
+    data = np.column_stack([array for array in dict.values()])
+    np.savetxt(filename, data, delimiter=", ", header=header, comments="")
 
 
 def write_km_eroded_volumes(
-    km: numpy.ndarray, vol: numpy.ndarray, filename: str
+    km: np.ndarray, vol: np.ndarray, filename: str
 ) -> None:
     """
     Write a text file with eroded volume data binned per kilometre.
@@ -1764,9 +1764,9 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
 
     Returns
     -------
-    km_thr : Optional[numpy.ndarray]
+    km_thr : Optional[np.ndarray]
         Array containing the chainage of the midpoints between the values.
-    val : numpy.ndarray
+    val : np.ndarray
         Array containing the values.
     """
     # print("Trying to read: ",filename)
@@ -1832,7 +1832,7 @@ def read_simdata(filename: str, indent: str = "") -> Tuple[SimulationObject, flo
     dh0 : float
         Threshold depth for detecting drying and flooding.
     """
-    dum = numpy.array([])
+    dum = np.array([])
     sim: SimulationObject = {
         "x_node": dum,
         "y_node": dum,
@@ -1856,7 +1856,7 @@ def read_simdata(filename: str, indent: str = "") -> Tuple[SimulationObject, flo
         if FNC.mask.shape == ():
             # all faces have the same number of nodes
             sim["nnodes"] = (
-                numpy.ones(FNC.data.shape[0], dtype=numpy.int) * FNC.data.shape[1]
+                np.ones(FNC.data.shape[0], dtype=np.int) * FNC.data.shape[1]
             )
         else:
             # varying number of nodes
@@ -1870,7 +1870,7 @@ def read_simdata(filename: str, indent: str = "") -> Tuple[SimulationObject, flo
         log_text("read_water_level", indent=indent)
         sim["zw_face"] = read_fm_map(filename, "Water level")
         log_text("read_water_depth", indent=indent)
-        sim["h_face"] = numpy.maximum(
+        sim["h_face"] = np.maximum(
             read_fm_map(filename, "sea_floor_depth_below_sea_surface"), 0.0
         )
         log_text("read_velocity", indent=indent)
