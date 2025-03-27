@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Copyright (C) 2020 Stichting Deltares.
 
@@ -1792,79 +1791,6 @@ def clip_simdata(
     sim["chz_face"] = sim["chz_face"][keepface]
 
     return sim
-
-
-def get_banklines(sim: SimulationObject, h0: float) -> geopandas.GeoSeries:
-    """
-    Detect all possible bank line segments based on simulation data.
-    
-    Use a critical water depth h0 as water depth threshold for dry/wet boundary.
-
-    Arguments
-    ---------
-    sim : SimulationObject
-        Simulation data: mesh, bed levels, water levels, velocities, etc.
-    h0 : float
-        Critical water depth for determining the banks.
-    
-    Returns
-    -------
-    banklines : geopandas.GeoSeries
-        The collection of all detected bank segments in the remaining model area.
-    """
-    FNC = sim["facenode"]
-    NNODES = sim["nnodes"]
-    max_nnodes = FNC.shape[1]
-    X = sim["x_node"][FNC]
-    Y = sim["y_node"][FNC]
-    ZB = sim["zb_val"][FNC]
-    ZW = sim["zw_face"]
-    H_face = sim["h_face"]
-    WET_face = H_face > h0
-    #
-    nnodes_total = len(sim["x_node"])
-    try:
-        mask = ~FNC.mask
-        nonmasked = sum(mask.reshape(FNC.size))
-        FNCm = FNC[mask]
-        ZWm = numpy.repeat(ZW, max_nnodes)[mask]
-    except:
-        mask = numpy.repeat(True, FNC.size)
-        nonmasked = FNC.size
-        FNCm = FNC.reshape(nonmasked)
-        ZWm = numpy.repeat(ZW, max_nnodes).reshape(nonmasked)
-    ZW_node = numpy.bincount(FNCm, weights=ZWm, minlength=nnodes_total)
-    NVal = numpy.bincount(FNCm, weights=numpy.ones(nonmasked), minlength=nnodes_total)
-    ZW_node = ZW_node / numpy.maximum(NVal, 1)
-    ZW_node[NVal == 0] = sim["zb_val"][NVal == 0]
-    #
-    H_node = ZW_node[FNC] - ZB
-    WET_node = H_node > h0
-    NWET = WET_node.sum(axis=1)
-    MASK = NWET.mask.size > 1
-    #
-    nfaces = len(FNC)
-    Lines = [None] * nfaces
-    frac = 0
-    for i in range(nfaces):
-        if i >= frac * (nfaces - 1) / 10:
-            print("{}%".format(int(frac * 10)))
-            frac = frac + 1
-        nnodes = NNODES[i]
-        nwet = NWET[i]
-        if (MASK and nwet.mask) or nwet == 0 or nwet == nnodes:
-            # all dry or all wet
-            pass
-        else:
-            # some nodes dry and some nodes wet: determine the line
-            if nnodes == 3:
-                Lines[i] = tri_to_line(X[i], Y[i], WET_node[i], H_node[i], h0)
-            else:
-                Lines[i] = poly_to_line(nnodes, X[i], Y[i], WET_node[i], H_node[i], h0)
-    Lines = [line for line in Lines if not line is None and not line.is_empty]
-    multi_line = shapely.ops.cascaded_union(Lines)
-    merged_line = shapely.ops.linemerge(multi_line)
-    return geopandas.GeoSeries(merged_line)
 
 
 def poly_to_line(
