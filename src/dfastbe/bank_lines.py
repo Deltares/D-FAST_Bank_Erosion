@@ -4,10 +4,13 @@ import configparser
 import numpy as np
 import geopandas as gpd
 from matplotlib import pyplot as plt
-from dfastbe import io, support
+from setuptools.command.setopt import config_file
+
+from dfastbe import support
 from dfastbe import __version__
+from dfastbe.io import ConfigFile, log_text, clip_path_to_kmbounds, read_simdata
 from dfastbe.kernel import get_bbox, get_zoom_extends
-from dfastbe.utils import timedlogger, adjust_filenames
+from dfastbe.utils import timed_logger
 from dfastbe import plotting as df_plt
 
 
@@ -24,34 +27,35 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
     gui : bool
         Flag indicating whether this routine is called from the GUI.
     """
-    timedlogger("-- start analysis --")
+    config_file = ConfigFile(config)
+    timed_logger("-- start analysis --")
 
-    io.log_text(
+    log_text(
         "header_banklines",
         dict={
             "version": __version__,
             "location": "https://github.com/Deltares/D-FAST_Bank_Erosion",
         },
     )
-    io.log_text("-")
+    log_text("-")
 
     # check output dir for bank lines
-    bank_output_dir = io.config_get_str(config, "General", "BankDir")
-    io.log_text("bankdir_out", dict={"dir": bank_output_dir})
+    bank_output_dir = config_file.get_str("General", "BankDir")
+    log_text("bankdir_out", dict={"dir": bank_output_dir})
     if os.path.exists(bank_output_dir):
-        io.log_text("overwrite_dir", dict={"dir": bank_output_dir})
+        log_text("overwrite_dir", dict={"dir": bank_output_dir})
     else:
         os.makedirs(bank_output_dir)
 
     # set plotting flags
-    plotting = io.config_get_bool(config, "General", "Plotting", True)
+    plotting = config_file.get_bool("General", "Plotting", True)
     if plotting:
-        saveplot = io.config_get_bool(config, "General", "SavePlots", True)
-        saveplot_zoomed = io.config_get_bool(config, "General", "SaveZoomPlots", True)
-        zoom_km_step = io.config_get_float(config, "General", "ZoomStepKM", 1.0)
+        saveplot = config_file.get_bool("General", "SavePlots", True)
+        saveplot_zoomed = config_file.get_bool("General", "SaveZoomPlots", True)
+        zoom_km_step = config_file.get_float("General", "ZoomStepKM", 1.0)
         if zoom_km_step < 0.01:
             saveplot_zoomed = False
-        closeplot = io.config_get_bool(config, "General", "ClosePlots", False)
+        closeplot = config_file.get_bool("General", "ClosePlots", False)
     else:
         saveplot = False
         saveplot_zoomed = False
@@ -59,36 +63,34 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
 
     # as appropriate check output dir for figures and file format
     if saveplot:
-        figdir = io.config_get_str(
-            config, "General", "FigureDir", rootdir + os.sep + "figure"
-        )
-        io.log_text("figure_dir", dict={"dir": figdir})
+        figdir = config_file.get_str("General", "FigureDir", f"{rootdir}{os.sep}figure")
+        log_text("figure_dir", dict={"dir": figdir})
         if os.path.exists(figdir):
-            io.log_text("overwrite_dir", dict={"dir": figdir})
+            log_text("overwrite_dir", dict={"dir": figdir})
         else:
             os.makedirs(figdir)
-        plot_ext = io.config_get_str(config, "General", "FigureExt", ".png")
+        plot_ext = config_file.get_str("General", "FigureExt", ".png")
 
     # read chainage path
-    xykm = io.config_get_xykm(config)
+    xykm = config_file.get_xy_km()
 
     # clip the chainage path to the range of chainages of interest
-    kmbounds = io.config_get_kmbounds(config)
-    io.log_text("clip_chainage", dict={"low": kmbounds[0], "high": kmbounds[1]})
-    xykm = io.clip_path_to_kmbounds(xykm, kmbounds)
+    kmbounds = config_file.get_km_bounds()
+    log_text("clip_chainage", dict={"low": kmbounds[0], "high": kmbounds[1]})
+    xykm = clip_path_to_kmbounds(xykm, kmbounds)
     xykm_numpy = np.array(xykm)
     xy_numpy = xykm_numpy[:, :2]
 
     # read bank search lines
     max_river_width = 1000
-    search_lines = io.config_get_search_lines(config)
+    search_lines = config_file.get_search_lines()
     search_lines, maxmaxd = support.clip_search_lines(
         search_lines, xykm, max_river_width
     )
     n_searchlines = len(search_lines)
 
     # convert search lines to bank polygons
-    dlines = io.config_get_bank_search_distances(config, n_searchlines)
+    dlines = config_file.get_bank_search_distances(n_searchlines)
     bankareas = support.convert_search_lines_to_bank_polygons(
         search_lines, dlines
     )
@@ -101,37 +103,37 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
         )
 
     # get simulation file name
-    simfile = io.config_get_simfile(config, "Detect", "")
+    simfile = config_file.get_sim_file("Detect", "")
 
     # get critical water depth used for defining bank line (default = 0.0 m)
-    h0 = io.config_get_float(config, "Detect", "WaterDepth", default=0)
+    h0 = config_file.get_float("Detect", "WaterDepth", default=0)
 
     # read simulation data and drying flooding threshold dh0
-    io.log_text("-")
-    io.log_text("read_simdata", dict={"file": simfile})
-    io.log_text("-")
-    sim, dh0 = io.read_simdata(simfile)
-    io.log_text("-")
+    log_text("-")
+    log_text("read_simdata", dict={"file": simfile})
+    log_text("-")
+    sim, dh0 = read_simdata(simfile)
+    log_text("-")
 
     # increase critical water depth h0 by flooding threshold dh0
     h0 = h0 + dh0
 
     # clip simulation data to boundaries ...
-    io.log_text("clip_data")
+    log_text("clip_data")
     sim = support.clip_simdata(sim, xykm, maxmaxd)
 
     # derive bank lines (getbanklines)
-    io.log_text("identify_banklines")
+    log_text("identify_banklines")
     banklines = support.get_banklines(sim, h0)
     banklines.to_file(bank_output_dir + os.sep + "raw_detected_bankline_fragments.shp")
     gpd.GeoSeries(bankareas).to_file(bank_output_dir + os.sep + "bank_areas.shp")
 
     # clip the set of detected bank lines to the bank areas
-    io.log_text("simplify_banklines")
+    log_text("simplify_banklines")
     bank = [None] * n_searchlines
     clipped_banklines = [None] * n_searchlines
     for ib, bankarea in enumerate(bankareas):
-        io.log_text("bank_lines", dict={"ib": ib + 1})
+        log_text("bank_lines", dict={"ib": ib + 1})
         clipped_banklines[ib] = support.clip_bank_lines(banklines, bankarea)
         bank[ib] = support.sort_connect_bank_lines(
             clipped_banklines[ib], xykm, to_right[ib]
@@ -139,17 +141,17 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
     gpd.GeoSeries(clipped_banklines).to_file(
         bank_output_dir + os.sep + "bankline_fragments_per_bank_area.shp"
     )
-    io.log_text("-")
+    log_text("-")
 
     # save bankfile
-    bankname = io.config_get_str(config, "General", "BankFile", "bankfile")
+    bankname = config_file.get_str("General", "BankFile", "bankfile")
     bankfile = bank_output_dir + os.sep + bankname + ".shp"
-    io.log_text("save_banklines", dict={"file": bankfile})
+    log_text("save_banklines", dict={"file": bankfile})
     gpd.GeoSeries(bank).to_file(bankfile)
 
     if plotting:
-        io.log_text("=")
-        io.log_text("create_figures")
+        log_text("=")
+        log_text("create_figures")
         ifig = 0
         bbox = get_bbox(xykm_numpy)
 
@@ -195,8 +197,8 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
         else:
             plt.show(block=not gui)
 
-    io.log_text("end_banklines")
-    timedlogger("-- stop analysis --")
+    log_text("end_banklines")
+    timed_logger("-- stop analysis --")
 
 
 def banklines(filename: str = "dfastbe.cfg") -> None:
@@ -209,7 +211,9 @@ def banklines(filename: str = "dfastbe.cfg") -> None:
         Name of the configuration file.
     """
     # read configuration file
-    timedlogger("reading configuration file ...")
-    config = io.read_config(filename)
-    rootdir, config = adjust_filenames(filename, config)
+    timed_logger("reading configuration file ...")
+
+    config = ConfigFile.read(filename)
+    rootdir = config.adjust_filenames()
+    config = config.config
     banklines_core(config, rootdir, False)
