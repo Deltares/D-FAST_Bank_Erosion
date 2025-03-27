@@ -38,8 +38,7 @@ import matplotlib.pyplot as plt
 import configparser
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, read_simdata, \
-    clip_path_to_kmbounds, read_xyc, write_shp_pnt, \
-    write_km_eroded_volumes, write_shp, write_csv
+    read_xyc, write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData
 
 from dfastbe.utils import timed_logger
 from dfastbe.kernel import get_zoom_extends, get_bbox
@@ -90,6 +89,8 @@ def bankerosion_core(
     )
     log_text("-")
     config_file = ConfigFile(config)
+    river_data = RiverData(config_file)
+
     # check if additional debug output is requested
     debug = config_file.get_bool("General", "DebugOutput", False)
 
@@ -166,14 +167,11 @@ def bankerosion_core(
     nnodes = sim["nnodes"]
     en, ef, fe, boundary_edge_nrs = _derive_topology_arrays(fn, nnodes)
 
-    # read chainage path
-    xykm = config_file.get_xy_km()
-
     # clip the chainage path to the range of chainages of interest
-    km_bounds = config_file.get_km_bounds()
+    km_bounds = river_data.km_bounds
     log_text("clip_chainage", dict={"low": km_bounds[0], "high": km_bounds[1]})
 
-    xykm = clip_path_to_kmbounds(xykm, km_bounds)
+    xykm = river_data.masked_xy_km
     xykm_numpy = numpy.array(xykm)
     xy_numpy = xykm_numpy[:, :2]
 

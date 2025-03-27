@@ -9,7 +9,7 @@ from dfastbe.support import SimulationObject, clip_search_lines, convert_search_
     on_right_side, clip_simdata, clip_bank_lines, project_km_on_line, sort_connect_bank_lines, poly_to_line,\
     tri_to_line
 from dfastbe import __version__
-from dfastbe.io import ConfigFile, log_text, clip_path_to_kmbounds, read_simdata
+from dfastbe.io import ConfigFile, log_text, read_simdata, RiverData
 from dfastbe.kernel import get_bbox, get_zoom_extends
 from dfastbe.utils import timed_logger
 from dfastbe import plotting as df_plt
@@ -20,6 +20,7 @@ RAW_DETECTED_BANKLINE_FRAGMENTS_FILE = "raw_detected_bankline_fragments"
 BANK_AREAS_FILE = "bank_areas"
 BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE = "bankline_fragments_per_bank_area"
 EXTENSION = ".shp"
+
 
 class BankLines:
     def __init__(self, config_file: ConfigFile, gui: bool = False):
@@ -47,6 +48,7 @@ class BankLines:
         self.critical_water_depth = config_file.get_float("Detect", "WaterDepth", default=0)
         # set plotting flags
         self.plot_flags = self._get_plotting_flags()
+        self.river_data = RiverData(config_file)
 
     @property
     def config_file(self) -> ConfigFile:
@@ -128,13 +130,11 @@ class BankLines:
         )
         log_text("-")
 
-        # read the chainage path
-        xy_km = config_file.get_xy_km()
-
         # clip the chainage path to the range of chainages of interest
-        km_bounds = config_file.get_km_bounds()
+        km_bounds = self.river_data.km_bounds
+
         log_text("clip_chainage", dict={"low": km_bounds[0], "high": km_bounds[1]})
-        xy_km = clip_path_to_kmbounds(xy_km, km_bounds)
+        xy_km = self.river_data.masked_xy_km
         xy_km_numpy = np.array(xy_km)
         xy_numpy = xy_km_numpy[:, :2]
 

@@ -871,6 +871,106 @@ class ConfigFile:
                 self.config[group][key] = relative_path(rootdir, val_str)
 
 
+class RiverData:
+
+    def __init__(self, config_file: ConfigFile):
+        self.xy_km: shapely.geometry.linestring.LineString = config_file.get_xy_km()
+        self.km_bounds: Tuple = config_file.get_km_bounds() # start and end station
+        self.masked_xy_km: shapely.geometry.linestring.LineString = self.clip_path_to_kmbounds(self.xy_km, self.km_bounds)
+
+    def clip_path_to_kmbounds(
+        self,
+        xy_km: shapely.geometry.linestring.LineStringAdapter,
+        km_bounds: Tuple[float, float],
+    ) -> shapely.geometry.linestring.LineStringAdapter:
+        """
+        Clip a chainage line to the relevant reach.
+
+        Arguments
+        ---------
+        xy_km : shapely.geometry.linestring.LineStringAdapter
+            Original river chainage line.
+        km_bounds : Tuple[float, float]
+            Lower and upper limit for the chainage.
+
+        Returns
+        -------
+        xykm1 : shapely.geometry.linestring.LineStringAdapter
+            Clipped river chainage line.
+        """
+        start_i = None
+        end_i = None
+        for i, c in enumerate(xy_km.coords):
+            if start_i is None:
+                if c[2] >= km_bounds[0]:
+                    start_i = i
+            if c[2] >= km_bounds[1]:
+                end_i = i
+                break
+
+        if start_i is None:
+            raise Exception(
+                "Lower chainage bound {} is larger than the maximum chainage {} available".format(
+                    km_bounds[0], xy_km.coords[-1][2]
+                )
+            )
+        elif start_i == 0:
+            # lower bound (potentially) clipped to available reach
+            if xy_km.coords[0][2] - km_bounds[0] > 0.1:
+                raise Exception(
+                    "Lower chainage bound {} is smaller than the minimum chainage {} available".format(
+                        km_bounds[0], xy_km.coords[0][2]
+                    )
+                )
+            x0 = None
+        else:
+            alpha = (km_bounds[0] - xy_km.coords[start_i - 1][2]) / (
+                    xy_km.coords[start_i][2] - xy_km.coords[start_i - 1][2]
+            )
+            x0 = tuple(
+                (c1 + alpha * (c2 - c1))
+                for c1, c2 in zip(xy_km.coords[start_i - 1], xy_km.coords[start_i])
+            )
+            if alpha > 0.9:
+                # value close to first node (start_i), so let's skip that one
+                start_i = start_i + 1
+
+        if end_i is None:
+            if km_bounds[1] - xy_km.coords[-1][2] > 0.1:
+                raise Exception(
+                    "Upper chainage bound {} is larger than the maximum chainage {} available".format(
+                        km_bounds[1], xy_km.coords[-1][2]
+                    )
+                )
+            # else kmbounds[1] matches chainage of last point
+            if x0 is None:
+                # whole range available selected
+                pass
+            else:
+                xy_km = shapely.geometry.LineString([x0] + xy_km.coords[start_i:])
+        elif end_i == 0:
+            raise Exception(
+                "Upper chainage bound {} is smaller than the minimum chainage {} available".format(
+                    km_bounds[1], xy_km.coords[0][2]
+                )
+            )
+        else:
+            alpha = (km_bounds[1] - xy_km.coords[end_i - 1][2]) / (
+                    xy_km.coords[end_i][2] - xy_km.coords[end_i - 1][2]
+            )
+            x1 = tuple(
+                (c1 + alpha * (c2 - c1))
+                for c1, c2 in zip(xy_km.coords[end_i - 1], xy_km.coords[end_i])
+            )
+            if alpha < 0.1:
+                # value close to previous point (end_i - 1), so let's skip that one
+                end_i = end_i - 1
+            if x0 is None:
+                xy_km = shapely.geometry.LineString(xy_km.coords[:end_i] + [x1])
+            else:
+                xy_km = shapely.geometry.LineString([x0] + xy_km.coords[start_i:end_i] + [x1])
+        return xy_km
+
 def load_program_texts(filename: str) -> None:
     """
     Load texts from configuration file, and store globally for access.
@@ -1638,98 +1738,6 @@ def sim2nc(oldfile: str) -> str:
     else:
         raise Exception('Unable to determine file type for "{}"'.format(oldfile))
     return ncfile
-
-
-def clip_path_to_kmbounds(
-    xykm: shapely.geometry.linestring.LineStringAdapter, kmbounds: Tuple[float, float],
-) -> shapely.geometry.linestring.LineStringAdapter:
-    """
-    Clip a chainage line to the relevant reach.
-
-    Arguments
-    ---------
-    xykm : shapely.geometry.linestring.LineStringAdapter
-        Original river chainage line.
-    kmbounds : Tuple[float, float]
-        Lower and upper limit for the chainage.
-
-    Returns
-    -------
-    xykm1 : shapely.geometry.linestring.LineStringAdapter
-        Clipped river chainage line.
-    """
-    start_i = None
-    end_i = None
-    for i, c in enumerate(xykm.coords):
-        if start_i is None:
-            if c[2] >= kmbounds[0]:
-                start_i = i
-        if c[2] >= kmbounds[1]:
-            end_i = i
-            break
-
-    if start_i is None:
-        raise Exception(
-            "Lower chainage bound {} is larger than the maximum chainage {} available".format(
-                kmbounds[0], xykm.coords[-1][2]
-            )
-        )
-    elif start_i == 0:
-        # lower bound (potentially) clipped to available reach
-        if xykm.coords[0][2] - kmbounds[0] > 0.1:
-            raise Exception(
-                "Lower chainage bound {} is smaller than the minimum chainage {} available".format(
-                    kmbounds[0], xykm.coords[0][2]
-                )
-            )
-        x0 = None
-    else:
-        alpha = (kmbounds[0] - xykm.coords[start_i - 1][2]) / (
-            xykm.coords[start_i][2] - xykm.coords[start_i - 1][2]
-        )
-        x0 = tuple(
-            (c1 + alpha * (c2 - c1))
-            for c1, c2 in zip(xykm.coords[start_i - 1], xykm.coords[start_i])
-        )
-        if alpha > 0.9:
-            # value close to first node (start_i), so let's skip that one
-            start_i = start_i + 1
-
-    if end_i is None:
-        if kmbounds[1] - xykm.coords[-1][2] > 0.1:
-            raise Exception(
-                "Upper chainage bound {} is larger than the maximum chainage {} available".format(
-                    kmbounds[1], xykm.coords[-1][2]
-                )
-            )
-        # else kmbounds[1] matches chainage of last point
-        if x0 is None:
-            # whole range available selected
-            pass
-        else:
-            xykm = shapely.geometry.LineString([x0] + xykm.coords[start_i:])
-    elif end_i == 0:
-        raise Exception(
-            "Upper chainage bound {} is smaller than the minimum chainage {} available".format(
-                kmbounds[1], xykm.coords[0][2]
-            )
-        )
-    else:
-        alpha = (kmbounds[1] - xykm.coords[end_i - 1][2]) / (
-            xykm.coords[end_i][2] - xykm.coords[end_i - 1][2]
-        )
-        x1 = tuple(
-            (c1 + alpha * (c2 - c1))
-            for c1, c2 in zip(xykm.coords[end_i - 1], xykm.coords[end_i])
-        )
-        if alpha < 0.1:
-            # value close to previous point (end_i - 1), so let's skip that one
-            end_i = end_i - 1
-        if x0 is None:
-            xykm = shapely.geometry.LineString(xykm.coords[:end_i] + [x1])
-        else:
-            xykm = shapely.geometry.LineString([x0] + xykm.coords[start_i:end_i] + [x1])
-    return xykm
 
 
 def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[float]]):
