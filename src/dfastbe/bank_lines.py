@@ -16,7 +16,10 @@ from dfastbe import plotting as df_plt
 
 
 MAX_RIVER_WIDTH = 1000
-
+RAW_DETECTED_BANKLINE_FRAGMENTS_FILE = "raw_detected_bankline_fragments"
+BANK_AREAS_FILE = "bank_areas"
+BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE = "bankline_fragments_per_bank_area"
+EXTENSION = ".shp"
 
 class BankLines:
     def __init__(self, config_file: ConfigFile, gui: bool = False):
@@ -173,8 +176,8 @@ class BankLines:
         # derive bank lines (get_banklines)
         log_text("identify_banklines")
         banklines = self.get_banklines(sim, h0)
-        banklines.to_file(self.bank_output_dir / "raw_detected_bankline_fragments.shp")
-        gpd.GeoSeries(bank_areas).to_file(self.bank_output_dir / "bank_areas.shp")
+        banklines.to_file(self.bank_output_dir / f"{RAW_DETECTED_BANKLINE_FRAGMENTS_FILE}{EXTENSION}")
+        gpd.GeoSeries(bank_areas).to_file(self.bank_output_dir / f"{BANK_AREAS_FILE}{EXTENSION}")
 
         # clip the set of detected bank lines to the bank areas
         log_text("simplify_banklines")
@@ -187,7 +190,7 @@ class BankLines:
                 clipped_banklines[ib], xy_km, to_right[ib]
             )
         gpd.GeoSeries(clipped_banklines).to_file(
-            self.bank_output_dir / "bankline_fragments_per_bank_area.shp"
+            self.bank_output_dir / f"{BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE}{EXTENSION}"
         )
         log_text("-")
 
