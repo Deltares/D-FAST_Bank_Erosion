@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Copyright (C) 2020 Stichting Deltares.
 
@@ -27,7 +26,7 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Tuple
+from typing import Tuple, List
 
 import numpy
 import math
@@ -404,9 +403,13 @@ def get_km_eroded_volume(
     bin_idx = numpy.rint((bank_km_mid - km_bin[0] - km_bin[2] / 2) / km_bin[2]).astype(
         numpy.int64
     )
-    dvol = numpy.bincount(bin_idx, weights=dv)
+    dvol_temp = numpy.bincount(bin_idx, weights=dv)
     length = int((km_bin[1] - km_bin[0]) / km_bin[2])
-    dvol.resize((length,))
+    if len(dvol_temp) == length:
+       dvol = dvol_temp
+    else:
+       dvol = numpy.zeros((length,))
+       dvol[:len(dvol_temp)] = dvol_temp
     return dvol
 
 
@@ -467,3 +470,86 @@ def moving_avg(xi: numpy.ndarray, yi: numpy.ndarray, dx: float) -> numpy.ndarray
         return yo
     else:
         return yo[::-1]
+
+def get_zoom_extends(km_min: float, km_max: float, zoom_km_step: float, bank_crds: List[numpy.ndarray], bank_km: List[numpy.ndarray]) -> [List[Tuple[float, float]], List[Tuple[float, float, float, float]]]:
+    """
+    Zoom .
+
+    Arguments
+    ---------
+    km_min : float
+        Minimum value for the chainage range of interest.
+    km_max : float
+        Maximum value for the chainage range of interest.
+    zoom_km_step : float
+        Preferred chainage length of zoom box.
+    bank_crds : List[numpy.ndarray]
+        List of N x 2 numpy arrays of coordinates per bank.
+    bank_km : List[numpy.ndarray]
+        List of N numpy arrays of chainage values per bank.
+
+    Returns
+    -------
+    kmzoom : List[Tuple[float, float]]
+        Zoom ranges for plots with chainage along x-axis.
+    xyzoom : List[Tuple[float, float, float, float]]
+        Zoom ranges for xy-plots.
+    """
+
+    zoom_km_bin = (km_min, km_max, zoom_km_step)
+    zoom_km_bnd = get_km_bins(zoom_km_bin, type=0, adjust=True)
+    eps = 0.1 * zoom_km_step
+
+    kmzoom: List[Tuple[float, float]] = []
+    xyzoom: List[Tuple[float, float, float, float]] = []
+    inf = float('inf')
+    for i in range(len(zoom_km_bnd)-1):
+        km_min = zoom_km_bnd[i] - eps
+        km_max = zoom_km_bnd[i + 1] + eps
+        kmzoom.append((km_min, km_max))
+
+        xmin = inf
+        xmax = -inf
+        ymin = inf
+        ymax = -inf
+        for ib in range(len(bank_km)):
+            irange = (bank_km[ib] >= km_min) & (bank_km[ib] <= km_max)
+            range_crds = bank_crds[ib][irange, :]
+            x = range_crds[:, 0]
+            y = range_crds[:, 1]
+            xmin = min(xmin, min(x))
+            xmax = max(xmax, max(x))
+            ymin = min(ymin, min(y))
+            ymax = max(ymax, max(y))
+        xyzoom.append((xmin, xmax, ymin, ymax))
+
+    return kmzoom, xyzoom
+
+
+def get_bbox(
+    xykm: numpy.ndarray, buffer: float = 0.1
+) -> Tuple[float, float, float, float]:
+    """
+    Derive the bounding box from a line.
+
+    Arguments
+    ---------
+    xybm : numpy.ndarray
+        An N x M array containing x- and y-coordinates as first two M entries
+    buffer : float
+        Buffer fraction surrounding the tight bounding box
+
+    Results
+    -------
+    bbox : Tuple[float, float, float, float]
+        Tuple bounding box consisting of [min x, min y, max x, max y)
+    """
+    x = xykm[:, 0]
+    y = xykm[:, 1]
+    xmin = x.min()
+    ymin = y.min()
+    xmax = x.max()
+    ymax = y.max()
+    d = buffer * max(xmax - xmin, ymax - ymin)
+    bbox = (xmin - d, ymin - d, xmax + d, ymax + d)
+    return bbox

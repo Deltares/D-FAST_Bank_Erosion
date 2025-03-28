@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Copyright (C) 2020 Stichting Deltares.
 
@@ -26,13 +25,18 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-
+from pathlib import Path
 from typing import Tuple, Any, List, Union, Dict, Optional, TextIO, Callable, TypedDict
-
 import numpy
+
+import netCDF4
+import configparser
+import os
+import os.path
 import pandas
 import geopandas
 import shapely
+import pathlib
 
 
 class SimulationObject(TypedDict):
@@ -49,16 +53,812 @@ class SimulationObject(TypedDict):
     chz_face: numpy.ndarray
 
 
-import netCDF4
-import configparser
-import os
-import os.path
-import pandas
-import geopandas
-import shapely
-import pathlib
-
 PROGTEXTS: Dict[str, List[str]]
+
+
+class ConfigFile:
+
+    def __init__(self, config:configparser.ConfigParser, path: Union[Path, str] = None):
+        """
+
+        Args:
+            config : configparser.ConfigParser
+                Settings for the D-FAST Bank Erosion analysis.
+            path : str
+                Name of configuration file to be read.
+        """
+        self._config = config
+        if path:
+            self.path = path
+
+    @property
+    def config(self) -> configparser.ConfigParser:
+        return self._config
+
+    @config.setter
+    def config(self, value:configparser.ConfigParser):
+        self._config = value
+
+    @property
+    def version(self) -> str:
+        return self.get_str("General", "Version")
+
+    @classmethod
+    def read(cls, path: Union[str, pathlib.Path]):
+        """
+        Read a configParser object (configuration file).
+
+        reads the config file using the standard configParser.
+        falls back to a dedicated reader compatible with old waqbank files.
+
+        Returns
+        -------
+        config : configparser.ConfigParser
+            Settings for the D-FAST Bank Erosion analysis.
+        """
+        try:
+            config = configparser.ConfigParser(comment_prefixes="%")
+            with open(path, "r") as configfile:
+                config.read_file(configfile)
+        except Exception as e:
+            print(f"Error during reading the config file: {e}")
+            config = configparser.ConfigParser()
+            config["General"] = {}
+            all_lines = open(path, "r").read().splitlines()
+            for line in all_lines:
+                perc = line.find("%")
+                if perc >= 0:
+                    line = line[:perc]
+                data = line.split()
+                if len(data) >= 3:
+                    config["General"][data[0]] = data[2]
+
+        # if version != "1.0":
+        config = cls._upgrade(config)
+        return cls(config, path=path)
+
+    @staticmethod
+    def _upgrade(config: configparser.ConfigParser):
+        """
+        Upgrade the configuration data structure to version 1.0 format.
+
+        Results
+        -------
+        config1 : configparser.ConfigParser
+            Settings for the D-FAST Bank Erosion analysis in 1.0 format.
+
+        """
+        try:
+            version = config["General"]["Version"]
+        except KeyError:
+            version = "0.1"
+
+        if version == "0.1":
+            config["General"]["Version"] = "1.0"
+
+            config["Detect"] = {}
+            config = move_parameter_location(
+                config, "General", "Delft3Dfile", "Detect", "SimFile", convert=sim2nc
+            )
+            config = move_parameter_location(config, "General", "SDSfile", "Detect", "SimFile", convert=sim2nc)
+            config = move_parameter_location(config, "General", "SimFile", "Detect")
+            config = move_parameter_location(config, "General", "NBank", "Detect")
+            config_file = ConfigFile(config)
+            n_bank = config_file.get_int("Detect", "NBank", default=0, positive=True)
+            for i in range(1, n_bank + 1):
+                config = move_parameter_location(config, "General", f"Line{i}", "Detect")
+
+            config = move_parameter_location(config, "General", "WaterDepth", "Detect")
+            config = move_parameter_location(config, "General", "DLines", "Detect")
+
+            config["Erosion"] = {}
+            config = move_parameter_location(config, "General", "TErosion", "Erosion")
+            config = move_parameter_location(config, "General", "RiverAxis", "Erosion")
+            config = move_parameter_location(config, "General", "Fairway", "Erosion")
+            config = move_parameter_location(config, "General", "RefLevel", "Erosion")
+            config = move_parameter_location(config, "General", "OutputInterval", "Erosion")
+            config = move_parameter_location(config, "General", "OutputDir", "Erosion")
+            config = move_parameter_location(config, "General", "BankNew", "Erosion")
+            config = move_parameter_location(config, "General", "BankEq", "Erosion")
+            config = move_parameter_location(config, "General", "EroVol", "Erosion")
+            config = move_parameter_location(config, "General", "EroVolEqui", "Erosion")
+            config = move_parameter_location(config, "General", "NLevel", "Erosion")
+            config_file = ConfigFile(config)
+            n_level = config_file.get_int("Erosion", "NLevel", default=0, positive=True)
+
+            for i in range(1, n_level + 1):
+                config = move_parameter_location(
+                    config,"General", f"Delft3Dfile{i}", "Erosion", f"SimFile{i}", convert=sim2nc,
+                    )
+                config = move_parameter_location(
+                    config, "General", f"SDSfile{i}", "Erosion", f"SimFile{i}", convert=sim2nc,
+                    )
+                config = move_parameter_location(config, "General", f"SimFile{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"PDischarge{i}", "Erosion")
+
+            config = move_parameter_location(config, "General", "ShipType", "Erosion")
+            config = move_parameter_location(config, "General", "VShip", "Erosion")
+            config = move_parameter_location(config, "General", "NShip", "Erosion")
+            config = move_parameter_location(config, "General", "NWave", "Erosion")
+            config = move_parameter_location(config, "General", "Draught", "Erosion")
+            config = move_parameter_location(config, "General", "Wave0", "Erosion")
+            config = move_parameter_location(config, "General", "Wave1", "Erosion")
+
+            config = move_parameter_location(config, "General", "Classes", "Erosion")
+            config = move_parameter_location(config, "General", "BankType", "Erosion")
+            config = move_parameter_location(config, "General", "ProtectLevel", "Erosion", "ProtectionLevel")
+            config = move_parameter_location(config, "General", "Slope", "Erosion")
+            config = move_parameter_location(config, "General", "Reed", "Erosion")
+            config = move_parameter_location(config, "General", "VelFilter", "Erosion")
+
+            for i in range(1, n_level + 1):
+                config = move_parameter_location(config, "General", f"ShipType{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"VShip{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"NShip{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"NWave{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"Draught{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"Slope{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"Reed{i}", "Erosion")
+                config = move_parameter_location(config, "General", f"EroVol{i}", "Erosion")
+
+        return config
+
+    def write(self, filename: str) -> None:
+        """Pretty print a configParser object (configuration file) to file.
+
+        This function ...
+            aligns the equal signs for all keyword/value pairs.
+            adds a two space indentation to all keyword lines.
+            adds an empty line before the start of a new block.
+
+        Arguments
+        ---------
+        filename : str
+            Name of the configuration file to be written.
+        config : configparser.ConfigParser
+            The variable containing the configuration.
+        """
+        config = self.config
+        sections = config.sections()
+        ml = 0
+        for s in sections:
+            options = config.options(s)
+            if len(options) > 0:
+                ml = max(ml, max([len(x) for x in options]))
+
+        OPTIONLINE = "  {{:{}s}} = {{}}\n".format(ml)
+        with open(filename, "w") as configfile:
+            first = True
+            for s in sections:
+                if first:
+                    first = False
+                else:
+                    configfile.write("\n")
+                configfile.write("[{}]\n".format(s))
+                options = config.options(s)
+                for o in options:
+                    configfile.write(OPTIONLINE.format(o, config[s][o]))
+
+    def adjust_filenames(self) -> Tuple[str, configparser.ConfigParser]:
+        """
+        Convert all paths to relative to current working directory.
+
+        Returns
+        -------
+        rootdir : str
+            Location of configuration file relative to current working directory.
+        config : configparser.ConfigParser
+            Analysis configuration settings using paths relative to current working directory.
+        """
+        rootdir = os.path.dirname(self.path)
+        cwd = os.getcwd()
+        self.resolve(rootdir)
+        self.relative_to(cwd)
+        rootdir = relative_path(cwd, rootdir)
+
+        return rootdir
+
+    def get_str(
+        self,
+        group: str,
+        key: str,
+        default: Optional[str] = None,
+    ) -> str:
+        """
+        Get a string from a selected group and keyword in the analysis settings.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group from which to read.
+        key : str
+            Name of the keyword from which to read.
+        default : Optional[str]
+            Optional default value.
+
+        Raises
+        ------
+        Exception
+            If the keyword isn't specified and no default value is given.
+
+        Returns
+        -------
+        val : str
+            String.
+        """
+        try:
+            val = self.config[group][key]
+        except KeyError:
+            if default is not None:
+                val = default
+            else:
+                raise ConfigFileError(f"No value specified for required keyword {key} in block {group}.")
+        return val
+
+    def get_bool(
+        self,
+        group: str,
+        key: str,
+        default: Optional[bool] = None,
+    ) -> bool:
+        """
+        Get a boolean from a selected group and keyword in the analysis settings.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group from which to read.
+        key : str
+            Name of the keyword from which to read.
+        default : Optional[bool]
+            Optional default value.
+
+        Raises
+        ------
+        Exception
+            If the keyword isn't specified and no default value is given.
+
+        Returns
+        -------
+        val : bool
+            Boolean value.
+        """
+        try:
+            str_val = self.config[group][key].lower()
+            val = (
+                    (str_val == "yes")
+                    or (str_val == "y")
+                    or (str_val == "true")
+                    or (str_val == "t")
+                    or (str_val == "1")
+            )
+        except:
+            if default is not None:
+                val = default
+            else:
+                raise ConfigFileError(f"No boolean value specified for required keyword {key} in block {group}.")
+
+        return val
+
+    def get_float(
+        self,
+        group: str,
+        key: str,
+        default: Optional[float] = None,
+        positive: bool = False,
+    ) -> float:
+        """
+        Get a floating point value from a selected group and keyword in the analysis settings.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group from which to read.
+        key : str
+            Name of the keyword from which to read.
+        default : Optional[float]
+            Optional default value.
+        positive : bool
+            Flag specifying whether all floats are accepted (if False), or only positive floats (if True).
+
+        Raises
+        ------
+        Exception
+            If the keyword isn't specified and no default value is given.
+            If a negative value is specified when a positive value is required.
+
+        Returns
+        -------
+        val : float
+            Floating point value.
+        """
+        try:
+            val = float(self.config[group][key])
+        except (KeyError, ValueError):
+            if default is not None:
+                val = default
+            else:
+                raise ConfigFileError(
+                    f"No floating point value specified for required keyword {key} in block {group}."
+                )
+        if positive and val < 0.0:
+            raise ConfigFileError(
+                f"Value for {key} in block {group} must be positive, not {val}."
+            )
+        return val
+
+    def get_int(
+        self,
+        group: str,
+        key: str,
+        default: Optional[int] = None,
+        positive: bool = False,
+    ) -> int:
+        """
+        Get an integer from a selected group and keyword in the analysis settings.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group from which to read.
+        key : str
+            Name of the keyword from which to read.
+        default : Optional[int]
+            Optional default value.
+        positive : bool
+            Flag specifying whether all integers are accepted (if False), or only strictly positive integers (if True).
+
+        Raises
+        ------
+        Exception
+            If the keyword isn't specified and no default value is given.
+            If a negative or zero value is specified when a positive value is required.
+
+        Returns
+        -------
+        val : int
+            Integer value.
+        """
+        try:
+            val = int(self.config[group][key])
+        except (KeyError, ValueError):
+            if default is not None:
+                val = default
+            else:
+                raise ConfigFileError(
+                    f"No integer value specified for required keyword {key} in block {group}."
+                )
+        if positive and val <= 0:
+            raise ConfigFileError(
+                f"Value for {key} in block {group} must be positive, not {val}."
+            )
+        return val
+
+    def get_sim_file(self, group: str, istr: str) -> str:
+        """
+        Get the name of the simulation file from the analysis settings.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group in which to search for the simulation file name.
+        istr : str
+            Postfix for the simulation file name keyword; typically a string representation of the index.
+
+        Returns
+        -------
+        simfile : str
+            Name of the simulation file (empty string if keywords are not found).
+        """
+        sim_file = self.config[group].get("SimFile" + istr, "")
+        return sim_file
+
+    def get_km_bounds(self) -> Tuple[float, float]:
+        """
+
+        Returns:
+            km_bounds : Tuple[float, float]
+                Lower and upper limit for the chainage.
+        """
+        km_bounds = self.get_range("General", "Boundaries")
+
+        return km_bounds
+
+    def get_search_lines(self) -> List[shapely.geometry.linestring.LineStringAdapter]:
+        """
+        Get the search lines for the bank lines from the analysis settings.
+
+        Returns
+        -------
+        line : List[numpy.ndarray]
+            List of arrays containing the x,y-coordinates of a bank search lines.
+        """
+        # read guiding bank line
+        n_bank = self.get_int("Detect", "NBank")
+        line = [None] * n_bank
+        for b in range(n_bank):
+            bankfile = self.config["Detect"][f"Line{b + 1}"]
+            log_text("read_search_line", dict={"nr": b + 1, "file": bankfile})
+            line[b] = read_xyc(bankfile)
+        return line
+
+    def get_bank_lines(self, bank_dir: str) -> List[numpy.ndarray]:
+        """
+        Get the bank lines from the detection step.
+
+        Arguments
+        ---------
+        bank_dir : str
+            Name of directory in which the bank lines files are located.
+
+        Returns
+        -------
+        line : List[numpy.ndarray]
+            List of arrays containing the x,y-coordinates of a bank lines.
+        """
+        bank_name = self.get_str("General", "BankFile", "bankfile")
+        bankfile = f"{bank_dir}{os.sep}{bank_name}.shp"
+        if os.path.exists(bankfile):
+            log_text("read_banklines", dict={"file": bankfile})
+            banklines = geopandas.read_file(bankfile)
+        else:
+            bankfile = bank_dir + os.sep + bank_name + "_#.xyc"
+            log_text("read_banklines", dict={"file": bankfile})
+            bankline_list = []
+            b = 1
+            while True:
+                bankfile = bank_dir + os.sep + bank_name + "_" + str(b) + ".xyc"
+                if os.path.exists(bankfile):
+                    xy_bank = read_xyc(bankfile)
+                    bankline_list.append(shapely.geometry.LineString(xy_bank))
+                    b = b + 1
+                else:
+                    break
+            bankline_series = geopandas.geoseries.GeoSeries(bankline_list)
+            banklines = geopandas.geodataframe.GeoDataFrame.from_features(bankline_series)
+        return banklines
+
+    def get_parameter(
+        self,
+        group: str,
+        key: str,
+        bank_km: List[numpy.ndarray],
+        default=None,
+        ext: str = "",
+        positive: bool = False,
+        valid: Optional[List[float]] = None,
+        onefile: bool = False,
+    ):
+        """
+        Get a parameter field from a selected group and keyword in the analysis settings.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group from which to read.
+        key : str
+            Name of the keyword from which to read.
+        bank_km : List[numpy.ndarray]
+            For each bank a listing of the bank points (bank chainage locations).
+        default : Optional[Union[float, List[numpy.ndarray]]]
+            Optional default value or default parameter field; default None.
+        ext : str
+            File name extension; default empty string.
+        positive : bool
+            Flag specifying whether all values are accepted (if False), or only strictly positive values (if True); default False.
+        valid : Optional[List[float]]
+            Optional list of valid values; default None.
+        onefile : bool
+            Flag indicating whether for one file should be used for all bank lines (True) or one file per bank line (False; default).
+
+        Raises
+        ------
+        Exception
+            If a parameter isn't provided in the configuration, but no default value provided either.
+            If the value is negative while a positive value is required (positive = True).
+            If the value doesn't match one of the value values (valid is not None).
+
+        Returns
+        -------
+        parfield : List[numpy.ndarray]
+            Parameter field: for each bank a parameter value per bank point (bank chainage location).
+        """
+        try:
+            filename = self.config[group][key]
+            use_default = False
+        except:
+            if default is None:
+                raise Exception(
+                    'No value specified for required keyword "{}" in block "{}".'.format(
+                        key, group
+                    )
+                )
+            use_default = True
+
+        # if val is value then use that value globally
+        parfield = [None] * len(bank_km)
+        try:
+            if use_default:
+                if isinstance(default, list):
+                    return default
+                rval = default
+            else:
+                rval = float(filename)
+                if positive and rval < 0:
+                    raise Exception(
+                        'Value of "{}" should be positive, not {}.'.format(key, rval)
+                    )
+                if valid is not None and valid.count(rval) == 0:
+                    raise Exception(
+                        'Value of "{}" should be in {}, not {}.'.format(
+                            key, valid, rval
+                        )
+                    )
+            for ib, bkm in enumerate(bank_km):
+                parfield[ib] = numpy.zeros(len(bkm)) + rval
+        except:
+            if onefile:
+                log_text("read_param", dict={"param": key, "file": filename})
+                km_thr, val = get_kmval(filename, key, positive, valid)
+            for ib, bkm in enumerate(bank_km):
+                if not onefile:
+                    filename_i = filename + "_{}".format(ib + 1) + ext
+                    log_text(
+                        "read_param_one_bank",
+                        dict={"param": key, "i": ib + 1, "file": filename_i},
+                    )
+                    km_thr, val = get_kmval(filename_i, key, positive, valid)
+                if km_thr is None:
+                    parfield[ib] = numpy.zeros(len(bkm)) + val[0]
+                else:
+                    idx = numpy.zeros(len(bkm), dtype=numpy.int64)
+                    for thr in km_thr:
+                        idx[bkm >= thr] += 1
+                    parfield[ib] = val[idx]
+                # print("Min/max of data: ", parfield[ib].min(), parfield[ib].max())
+        return parfield
+
+    def get_bank_search_distances(self, nbank: int) -> List[float]:
+        """
+        Get the search distance per bank line from the analysis settings.
+
+        Arguments
+        ---------
+        nbank : int
+            Number of bank search lines.
+
+        Returns
+        -------
+        dlines : List[float]
+            Array of length nbank containing the search distance value per bank line (default value: 50).
+        """
+        dlines_key = self.config["Detect"].get("DLines", None)
+        if dlines_key is None:
+            dlines = [50] * nbank
+        elif dlines_key[0] == "[" and dlines_key[-1] == "]":
+            dlines_split = dlines_key[1:-1].split(",")
+            dlines = [float(d) for d in dlines_split]
+            if not all([d > 0 for d in dlines]):
+                raise Exception(
+                    "keyword DLINES should contain positive values in configuration file."
+                )
+            if len(dlines) != nbank:
+                raise Exception(
+                    "keyword DLINES should contain NBANK values in configuration file."
+                )
+        return dlines
+
+    def get_range(self, group: str, key: str) -> Tuple[float, float]:
+        """
+        Get a start and end value from a selected group and keyword in the analysis settings.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group from which to read.
+        key : str
+            Name of the keyword from which to read.
+
+        Returns
+        -------
+        val : Tuple[float,float]
+            Lower and upper limit of the range.
+        """
+        str_val = self.get_str(group, key)
+        try:
+            obrack = str_val.find("[")
+            cbrack = str_val.find("]")
+            if obrack >= 0 and cbrack >= 0:
+                str_val = str_val[obrack + 1: cbrack - 1]
+            val_list = [float(fstr) for fstr in str_val.split(":")]
+            if val_list[0] > val_list[1]:
+                val = (val_list[1], val_list[0])
+            else:
+                val = (val_list[0], val_list[1])
+        except:
+            raise Exception(
+                'Invalid range specification "{}" for required keyword "{}" in block "{}".'.format(
+                    str_val, key, group
+                )
+            )
+        return val
+
+    def get_xy_km(self) -> shapely.geometry.linestring.LineStringAdapter:
+        """
+
+        Returns
+        -------
+        xykm : shapely.geometry.linestring.LineStringAdapter
+
+        """
+        # get the chainage file
+        km_file = self.get_str("General", "RiverKM")
+        log_text("read_chainage", dict={"file": km_file})
+        xy_km = read_xyc(km_file, num_columns=3)
+
+        # make sure that chainage is increasing with node index
+        if xy_km.coords[0][2] > xy_km.coords[1][2]:
+            xy_km = shapely.geometry.asLineString(xy_km.coords[::-1])
+
+        return xy_km
+
+    def resolve(self, rootdir: str):
+        """
+        Convert a configuration object to contain absolute paths (for editing).
+
+        Arguments
+        ---------
+        rootdir : str
+            The path to be used as base for the absolute paths.
+        """
+        if "General" in self.config:
+            self.resolve_parameter("General", "RiverKM", rootdir)
+            self.resolve_parameter("General", "BankDir", rootdir)
+            self.resolve_parameter("General", "FigureDir", rootdir)
+
+        if "Detect" in self.config:
+            self.resolve_parameter("Detect", "SimFile", rootdir)
+            i = 0
+            while True:
+                i = i + 1
+                line_i = "Line" + str(i)
+                if line_i in self.config["Detect"]:
+                    self.resolve_parameter("Detect", line_i, rootdir)
+                else:
+                    break
+
+        if "Erosion" in self.config:
+            self.resolve_parameter("Erosion", "RiverAxis", rootdir)
+            self.resolve_parameter("Erosion", "Fairway", rootdir)
+            self.resolve_parameter("Erosion", "OutputDir", rootdir)
+
+            self.resolve_parameter("Erosion", "ShipType", rootdir)
+            self.resolve_parameter("Erosion", "VShip", rootdir)
+            self.resolve_parameter("Erosion", "NShip", rootdir)
+            self.resolve_parameter("Erosion", "NWave", rootdir)
+            self.resolve_parameter("Erosion", "Draught", rootdir)
+            self.resolve_parameter("Erosion", "Wave0", rootdir)
+            self.resolve_parameter("Erosion", "Wave1", rootdir)
+
+            self.resolve_parameter("Erosion", "BankType", rootdir)
+            self.resolve_parameter("Erosion", "ProtectionLevel", rootdir)
+            self.resolve_parameter("Erosion", "Slope", rootdir)
+            self.resolve_parameter("Erosion", "Reed", rootdir)
+
+            n_level = self.get_int("Erosion", "NLevel", default=0)
+            for i in range(1, n_level + 1):
+                self.resolve_parameter("Erosion", f"SimFile{i}", rootdir)
+                self.resolve_parameter("Erosion", f"ShipType{i}", rootdir)
+                self.resolve_parameter("Erosion", f"VShip{i}", rootdir)
+                self.resolve_parameter("Erosion", f"NShip{i}", rootdir)
+                self.resolve_parameter("Erosion", f"NWave{i}", rootdir)
+                self.resolve_parameter("Erosion", f"Draught{i}", rootdir)
+                self.resolve_parameter("Erosion", f"Slope{i}", rootdir)
+                self.resolve_parameter("Erosion", f"Reed{i}", rootdir)
+
+
+    def relative_to(self, rootdir: str):
+        """
+        Convert a configuration object to contain relative paths (for saving).
+
+        Args:
+            rootdir : str
+                The path to be used as base for the relative paths.
+        """
+        if "General" in self.config:
+            self.parameter_relative_to("General", "RiverKM", rootdir)
+            self.parameter_relative_to("General", "BankDir", rootdir)
+            self.parameter_relative_to("General", "FigureDir", rootdir)
+
+        if "Detect" in self.config:
+            self.parameter_relative_to("Detect", "SimFile", rootdir)
+
+            i = 0
+            while True:
+                i = i + 1
+                line_i = f"Line{i}"
+                if line_i in self.config["Detect"]:
+                    self.parameter_relative_to("Detect", line_i, rootdir)
+                else:
+                    break
+
+        if "Erosion" in self.config:
+            self.parameter_relative_to("Erosion", "RiverAxis", rootdir)
+            self.parameter_relative_to("Erosion", "Fairway", rootdir)
+            self.parameter_relative_to("Erosion", "OutputDir", rootdir)
+
+            self.parameter_relative_to("Erosion", "ShipType", rootdir)
+            self.parameter_relative_to("Erosion", "VShip", rootdir)
+            self.parameter_relative_to("Erosion", "NShip", rootdir)
+            self.parameter_relative_to("Erosion", "NWave", rootdir)
+            self.parameter_relative_to("Erosion", "Draught", rootdir)
+            self.parameter_relative_to("Erosion", "Wave0", rootdir)
+            self.parameter_relative_to("Erosion", "Wave1", rootdir)
+
+            self.parameter_relative_to("Erosion", "BankType", rootdir)
+            self.parameter_relative_to("Erosion", "ProtectionLevel", rootdir)
+            self.parameter_relative_to("Erosion", "Slope", rootdir)
+            self.parameter_relative_to("Erosion", "Reed", rootdir)
+
+            n_level = self.get_int("Erosion", "NLevel", default=0)
+            for i in range(1, n_level + 1):
+                self.parameter_relative_to("Erosion", f"SimFile{i}", rootdir)
+                self.parameter_relative_to("Erosion", f"ShipType{i}", rootdir)
+                self.parameter_relative_to("Erosion", f"VShip{i}", rootdir)
+                self.parameter_relative_to("Erosion", f"NShip{i}", rootdir)
+                self.parameter_relative_to("Erosion", f"NWave{i}", rootdir)
+                self.parameter_relative_to("Erosion", f"Draught{i}", rootdir)
+                self.parameter_relative_to("Erosion", f"Slope{i}", rootdir)
+                self.parameter_relative_to("Erosion", f"Reed{i}", rootdir)
+
+
+    def resolve_parameter(self, group: str, key: str, rootdir: str):
+        """
+        Convert a parameter value to contain an absolute path.
+
+        Determine whether the string represents a number.
+        If not, try to convert to an absolute path.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group in the configuration.
+        key : str
+            Name of the key in the configuration.
+        rootdir : str
+            The path to be used as base for the absolute paths.
+        """
+        if key in self.config[group]:
+            val_str = self.config[group][key]
+            try:
+                float(val_str)
+            except ValueError:
+                self.config[group][key] = absolute_path(rootdir, val_str)
+
+
+    def parameter_relative_to(self, group: str, key: str, rootdir: str):
+        """
+        Convert a parameter value to contain a relative path.
+
+        Determine whether the string represents a number.
+        If not, try to convert to a relative path.
+
+        Arguments
+        ---------
+        group : str
+            Name of the group in the configuration.
+        key : str
+            Name of the key in the configuration.
+        rootdir : str
+            The path to be used as base for the relative paths.
+        """
+        if key in self.config[group]:
+            val_str = self.config[group][key]
+
+            try:
+                float(val_str)
+            except ValueError:
+                self.config[group][key] = relative_path(rootdir, val_str)
 
 
 def load_program_texts(filename: str) -> None:
@@ -189,42 +989,6 @@ def get_text(key: str) -> List[str]:
     return str
 
 
-def write_config(filename: str, config: configparser.ConfigParser) -> None:
-    """Pretty print a configParser object (configuration file) to file.
-
-    This function ...
-        aligns the equal signs for all keyword/value pairs.
-        adds a two space indentation to all keyword lines.
-        adds an empty line before the start of a new block.
-
-    Arguments
-    ---------
-    filename : str
-        Name of the configuration file to be written.
-    config : configparser.ConfigParser
-        The variable containing the configuration.
-    """
-    sections = config.sections()
-    ml = 0
-    for s in sections:
-        options = config.options(s)
-        if len(options) > 0:
-            ml = max(ml, max([len(x) for x in options]))
-
-    OPTIONLINE = "  {{:{}s}} = {{}}\n".format(ml)
-    with open(filename, "w") as configfile:
-        first = True
-        for s in sections:
-            if first:
-                first = False
-            else:
-                configfile.write("\n")
-            configfile.write("[{}]\n".format(s))
-            options = config.options(s)
-            for o in options:
-                configfile.write(OPTIONLINE.format(o, config[s][o]))
-
-
 def read_fm_map(filename: str, varname: str, location: str = "face") -> numpy.ndarray:
     """
     Read the last time step of any quantity defined at faces from a D-Flow FM map-file.
@@ -313,7 +1077,6 @@ def read_fm_map(filename: str, varname: str, location: str = "face") -> numpy.nd
         var = var[0]
 
     # read data checking for time dimension
-    dims = var.dimensions
     if var.get_dims()[0].isunlimited():
         # assume that time dimension is unlimited and is the first dimension
         # slice to obtain last time step
@@ -321,10 +1084,8 @@ def read_fm_map(filename: str, varname: str, location: str = "face") -> numpy.nd
     else:
         data = var[...] - start_index
 
-    # close file
     rootgrp.close()
 
-    # return data
     return data
 
 
@@ -627,7 +1388,7 @@ def relative_path(rootdir: str, file: str) -> str:
 
 
 def read_xyc(
-    filename: str, ncol: int = 2
+    filename: str, num_columns: int = 2
 ) -> shapely.geometry.linestring.LineStringAdapter:
     """
     Read lines from a file.
@@ -636,7 +1397,7 @@ def read_xyc(
     ---------
     filename : str
         Name of the file to be read.
-    ncol : int
+    num_columns : int
         Number of columns to be read (2 or 3)
 
     Returns
@@ -644,28 +1405,32 @@ def read_xyc(
     L : shapely.geometry.linestring.LineStringAdapter
         Line strings.
     """
-    fileroot, ext = os.path.splitext(filename)
-    if ext.lower() == ".xyc":
-        if ncol == 3:
-            colnames = ["Val", "X", "Y"]
+    filename = Path(filename)
+    if not filename.exists():
+        raise FileNotFoundError(f"File not found: {filename}")
+
+    if filename.suffix.lower() == ".xyc":
+        if num_columns == 3:
+            column_names = ["Val", "X", "Y"]
         else:
-            colnames = ["X", "Y"]
-        P = pandas.read_csv(
-            filename, names=colnames, skipinitialspace=True, delim_whitespace=True
+            column_names = ["X", "Y"]
+        point_coordinates = pandas.read_csv(
+            filename, names=column_names, skipinitialspace=True, delim_whitespace=True
         )
-        nPnts = len(P.X)
-        x = P.X.to_numpy().reshape((nPnts, 1))
-        y = P.Y.to_numpy().reshape((nPnts, 1))
-        if ncol == 3:
-            z = P.Val.to_numpy().reshape((nPnts, 1))
-            LC = numpy.concatenate((x, y, z), axis=1)
+        num_points = len(point_coordinates.X)
+        x = point_coordinates.X.to_numpy().reshape((num_points, 1))
+        y = point_coordinates.Y.to_numpy().reshape((num_points, 1))
+        if num_columns == 3:
+            z = point_coordinates.Val.to_numpy().reshape((num_points, 1))
+            coords = numpy.concatenate((x, y, z), axis=1)
         else:
-            LC = numpy.concatenate((x, y), axis=1)
-        L = shapely.geometry.LineString(LC)
+            coords = numpy.concatenate((x, y), axis=1)
+        line_string = shapely.geometry.LineString(coords)
     else:
-        GEO = geopandas.read_file(filename)["geometry"]
-        L = GEO[0]
-    return L
+        gdf = geopandas.read_file(filename)["geometry"]
+        line_string = gdf[0]
+
+    return line_string
 
 
 def write_xyc(xy: numpy.ndarray, val: numpy.ndarray, filename: str) -> None:
@@ -795,148 +1560,7 @@ def write_km_eroded_volumes(
             valstr = "\t".join(["{:.2f}".format(x) for x in vol[i, :]])
             erofile.write("{:.2f}\t".format(km[i]) + valstr + "\n")
 
-
-def read_config(filename: str) -> configparser.ConfigParser:
-    """
-    Read a configParser object (configuration file).
-
-    This function ...
-        reads the config file using the standard configParser.
-        falls back to a dedicated reader compatible with old waqbank files.
-
-    Arguments
-    ---------
-    filename : str
-        Name of configuration file to be read.
-
-    Returns
-    -------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    """
-    try:
-        config = configparser.ConfigParser(comment_prefixes=("%"))
-        with open(filename, "r") as configfile:
-            config.read_file(configfile)
-    except:
-        config = configparser.ConfigParser()
-        config["General"] = {}
-        all_lines = open(filename, "r").read().splitlines()
-        for line in all_lines:
-            perc = line.find("%")
-            if perc >= 0:
-                line = line[:perc]
-            data = line.split()
-            if len(data) >= 3:
-                config["General"][data[0]] = data[2]
-    return upgrade_config(config)
-
-
-def upgrade_config(config: configparser.ConfigParser):
-    """
-    Upgrade the configuration data structure to version 1.0 format.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-
-    Results
-    -------
-    config1 : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis in 1.0 format.
-
-    """
-    try:
-        version = config["General"]["Version"]
-    except:
-        version = "0.1"
-
-    if version == "0.1":
-        config["General"]["Version"] = "1.0"
-
-        config["Detect"] = {}
-        config = movepar(
-            config, "General", "Delft3Dfile", "Detect", "SimFile", convert=sim2nc
-        )
-        config = movepar(
-            config, "General", "SDSfile", "Detect", "SimFile", convert=sim2nc
-        )
-        config = movepar(config, "General", "SimFile", "Detect")
-        config = movepar(config, "General", "NBank", "Detect")
-        NBank = config_get_int(config, "Detect", "NBank", default=0, positive=True)
-        for i in range(NBank):
-            istr = str(i + 1)
-            config = movepar(config, "General", "Line" + istr, "Detect")
-        config = movepar(config, "General", "WaterDepth", "Detect")
-        config = movepar(config, "General", "DLines", "Detect")
-
-        config["Erosion"] = {}
-        config = movepar(config, "General", "TErosion", "Erosion")
-        config = movepar(config, "General", "RiverAxis", "Erosion")
-        config = movepar(config, "General", "Fairway", "Erosion")
-        config = movepar(config, "General", "RefLevel", "Erosion")
-        config = movepar(config, "General", "OutputInterval", "Erosion")
-        config = movepar(config, "General", "OutputDir", "Erosion")
-        config = movepar(config, "General", "BankNew", "Erosion")
-        config = movepar(config, "General", "BankEq", "Erosion")
-        config = movepar(config, "General", "EroVol", "Erosion")
-        config = movepar(config, "General", "EroVolEqui", "Erosion")
-        config = movepar(config, "General", "NLevel", "Erosion")
-        NLevel = config_get_int(config, "Erosion", "NLevel", default=0, positive=True)
-        for i in range(NLevel):
-            istr = str(i + 1)
-            config = movepar(
-                config,
-                "General",
-                "Delft3Dfile" + istr,
-                "Erosion",
-                "SimFile" + istr,
-                convert=sim2nc,
-            )
-            config = movepar(
-                config,
-                "General",
-                "SDSfile" + istr,
-                "Erosion",
-                "SimFile" + istr,
-                convert=sim2nc,
-            )
-            config = movepar(config, "General", "SimFile" + istr, "Erosion")
-            config = movepar(config, "General", "PDischarge" + istr, "Erosion")
-
-        config = movepar(config, "General", "ShipType", "Erosion")
-        config = movepar(config, "General", "VShip", "Erosion")
-        config = movepar(config, "General", "NShip", "Erosion")
-        config = movepar(config, "General", "NWave", "Erosion")
-        config = movepar(config, "General", "Draught", "Erosion")
-        config = movepar(config, "General", "Wave0", "Erosion")
-        config = movepar(config, "General", "Wave1", "Erosion")
-
-        config = movepar(config, "General", "Classes", "Erosion")
-        config = movepar(config, "General", "BankType", "Erosion")
-        config = movepar(
-            config, "General", "ProtectLevel", "Erosion", "ProtectionLevel"
-        )
-        config = movepar(config, "General", "Slope", "Erosion")
-        config = movepar(config, "General", "Reed", "Erosion")
-        config = movepar(config, "General", "VelFilter", "Erosion")
-
-        for i in range(NLevel):
-            istr = str(i + 1)
-            config = movepar(config, "General", "ShipType" + istr, "Erosion")
-            config = movepar(config, "General", "VShip" + istr, "Erosion")
-            config = movepar(config, "General", "NShip" + istr, "Erosion")
-            config = movepar(config, "General", "NWave" + istr, "Erosion")
-            config = movepar(config, "General", "Draught" + istr, "Erosion")
-            config = movepar(config, "General", "Slope" + istr, "Erosion")
-            config = movepar(config, "General", "Reed" + istr, "Erosion")
-            config = movepar(config, "General", "EroVol" + istr, "Erosion")
-
-    return config
-
-
-def movepar(
+def move_parameter_location(
     config: configparser.ConfigParser,
     group1: str,
     key1: str,
@@ -947,25 +1571,23 @@ def movepar(
     """
     Move a parameter from one group/keyword to another.
 
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Original settings for the D-FAST Bank Erosion analysis.
-    group1 : str
-        Name of the group in the original configuration.
-    key1 : str
-        Name of the keyword in the original configuration.
-    group2 : str
-        Name of the group in the target configuration.
-    key2 : Optional[str]
-        Name of the keyword in the target configuration (can be None if equal to the keyword in the original file).
-    convert: Optional[Callable[[str], str]]
-        Function to convert the original value into new value.
+    Args:
+        config : configparser.ConfigParser
+            Original settings for the D-FAST Bank Erosion analysis.
+        group1 : str
+            Name of the group in the original configuration.
+        key1 : str
+            Name of the keyword in the original configuration.
+        group2 : str
+            Name of the group in the target configuration.
+        key2 : Optional[str]
+            Name of the keyword in the target configuration (can be None if equal to the keyword in the original file).
+        convert: Optional[Callable[[str], str]]
+            Function to convert the original value into new value.
 
-    Results
-    -------
-    config1 : configparser.ConfigParser
-        Updated settings for the D-FAST Bank Erosion analysis.
+    Returns:
+        config : configparser.ConfigParser
+            Updated settings for the D-FAST Bank Erosion analysis.
     """
     val2: str
     if group1 in config.sections() and key1 in config[group1]:
@@ -1008,52 +1630,6 @@ def sim2nc(oldfile: str) -> str:
     return ncfile
 
 
-def config_get_kmbounds(config: configparser.ConfigParser,) -> Tuple[float, float]:
-    """
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-
-    Returns
-    -------
-    kmbounds : Tuple[float, float]
-        Lower and upper limit for the chainage.
-    """
-    # get km bounds
-    kmbounds = config_get_range(config, "General", "Boundaries")
-
-    return kmbounds
-
-
-def config_get_xykm(
-    config: configparser.ConfigParser,
-) -> shapely.geometry.linestring.LineStringAdapter:
-    """
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-
-    Returns
-    -------
-    xykm : shapely.geometry.linestring.LineStringAdapter
-
-    """
-    # get the chainage file
-    kmfile = config_get_str(config, "General", "RiverKM")
-    log_text("read_chainage", dict={"file": kmfile})
-    xykm = read_xyc(kmfile, ncol=3)
-
-    # make sure that chainage is increasing with node index
-    if xykm.coords[0][2] > xykm.coords[1][2]:
-        xykm = shapely.geometry.asLineString(xykm.coords[::-1])
-
-    return xykm
-
-
 def clip_path_to_kmbounds(
     xykm: shapely.geometry.linestring.LineStringAdapter, kmbounds: Tuple[float, float],
 ) -> shapely.geometry.linestring.LineStringAdapter:
@@ -1066,7 +1642,7 @@ def clip_path_to_kmbounds(
         Original river chainage line.
     kmbounds : Tuple[float, float]
         Lower and upper limit for the chainage.
-        
+
     Returns
     -------
     xykm1 : shapely.geometry.linestring.LineStringAdapter
@@ -1144,482 +1720,6 @@ def clip_path_to_kmbounds(
         else:
             xykm = shapely.geometry.LineString([x0] + xykm.coords[start_i:end_i] + [x1])
     return xykm
-
-
-def config_get_search_lines(
-    config: configparser.ConfigParser,
-) -> List[shapely.geometry.linestring.LineStringAdapter]:
-    """
-    Get the search lines for the bank lines from the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-
-    Returns
-    -------
-    line : List[numpy.ndarray]
-        List of arrays containing the x,y-coordinates of a bank search lines.
-    """
-    # read guiding bank line
-    nbank = config_get_int(config, "Detect", "NBank")
-    line = [None] * nbank
-    for b in range(nbank):
-        bankfile = config["Detect"]["Line{}".format(b + 1)]
-        log_text("read_search_line", dict={"nr": b + 1, "file": bankfile})
-        line[b] = read_xyc(bankfile)
-    return line
-
-
-def config_get_bank_lines(
-    config: configparser.ConfigParser, bankdir: str
-) -> List[numpy.ndarray]:
-    """
-    Get the bank lines from the detection step.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    bankdir : str
-        Name of directory in which the bank lines files are located.
-
-    Returns
-    -------
-    line : List[numpy.ndarray]
-        List of arrays containing the x,y-coordinates of a bank lines.
-    """
-    bankname = config_get_str(config, "General", "BankFile", "bankfile")
-    bankfile = bankdir + os.sep + bankname + ".shp"
-    if os.path.exists(bankfile):
-        log_text("read_banklines", dict={"file": bankfile})
-        banklines = geopandas.read_file(bankfile)
-        # -> geopandas.geodataframe.GeoDataFrame
-        # banklines.geometry[0] -> shapely.geometry.linestring.LineString
-    else:
-        bankfile = bankdir + os.sep + bankname + "_#.xyc"
-        log_text("read_banklines", dict={"file": bankfile})
-        bankline_list = []
-        b = 1
-        while True:
-            bankfile = bankdir + os.sep + bankname + "_" + str(b) + ".xyc"
-            if os.path.exists(bankfile):
-                xy_bank = read_xyc(bankfile)
-                bankline_list.append(shapely.geometry.LineString(xy_bank))
-                b = b + 1
-            else:
-                break
-        bankline_series = geopandas.geoseries.GeoSeries(bankline_list)
-        banklines = geopandas.geodataframe.GeoDataFrame.from_features(bankline_series)
-    return banklines
-
-
-def config_get_bank_search_distances(
-    config: configparser.ConfigParser, nbank: int
-) -> List[float]:
-    """
-    Get the search distance per bank line from the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    nbank : int
-        Number of bank search lines.
-
-    Returns
-    -------
-    dlines : List[float]
-        Array of length nbank containing the search distance value per bank line (default value: 50).
-    """
-    dlines_key = config["Detect"].get("DLines", None)
-    if dlines_key is None:
-        dlines = [50] * nbank
-    elif dlines_key[0] == "[" and dlines_key[-1] == "]":
-        dlines_split = dlines_key[1:-1].split(",")
-        dlines = [float(d) for d in dlines_split]
-        if not all([d > 0 for d in dlines]):
-            raise Exception(
-                "keyword DLINES should contain positive values in configuration file."
-            )
-        if len(dlines) != nbank:
-            raise Exception(
-                "keyword DLINES should contain NBANK values in configuration file."
-            )
-    return dlines
-
-
-def config_get_simfile(config: configparser.ConfigParser, group: str, istr: str) -> str:
-    """
-    Get the name of the simulation file from the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group in which to search for the simulation file name.
-    istr : str
-        Postfix for the simulation file name keyword; typically a string representation of the index.
-
-    Returns
-    -------
-    simfile : str
-        Name of the simulation file (empty string if keywords are not found).
-    """
-    simfile = config[group].get("SimFile" + istr, "")
-    return simfile
-
-
-def config_get_range(
-    config: configparser.ConfigParser, group: str, key: str
-) -> Tuple[float, float]:
-    """
-    Get a start and end value from a selected group and keyword in the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group from which to read.
-    key : str
-        Name of the keyword from which to read.
-
-    Returns
-    -------
-    val : Tuple[float,float]
-        Lower and upper limit of the range.
-    """
-    str = config_get_str(config, group, key)
-    try:
-        obrack = str.find("[")
-        cbrack = str.find("]")
-        if obrack >= 0 and cbrack >= 0:
-            str = str[obrack + 1 : cbrack - 1]
-        vallist = [float(fstr) for fstr in str.split(":")]
-        if vallist[0] > vallist[1]:
-            val = (vallist[1], vallist[0])
-        else:
-            val = (vallist[0], vallist[1])
-    except:
-        raise Exception(
-            'Invalid range specification "{}" for required keyword "{}" in block "{}".'.format(
-                str, key, group
-            )
-        )
-    return val
-
-
-def config_get_bool(
-    config: configparser.ConfigParser,
-    group: str,
-    key: str,
-    default: Optional[bool] = None,
-) -> bool:
-    """
-    Get a boolean from a selected group and keyword in the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group from which to read.
-    key : str
-        Name of the keyword from which to read.
-    default : Optional[bool]
-        Optional default value.
-
-    Raises
-    ------
-    Exception
-        If the keyword isn't specified and no default value is given.
-
-    Returns
-    -------
-    val : bool
-        Boolean value.
-    """
-    try:
-        str = config[group][key].lower()
-        val = (
-            (str == "yes")
-            or (str == "y")
-            or (str == "true")
-            or (str == "t")
-            or (str == "1")
-        )
-    except:
-        if not default is None:
-            val = default
-        else:
-            raise Exception(
-                'No boolean value specified for required keyword "{}" in block "{}".'.format(
-                    key, group
-                )
-            )
-    return val
-
-
-def config_get_int(
-    config: configparser.ConfigParser,
-    group: str,
-    key: str,
-    default: Optional[int] = None,
-    positive: bool = False,
-) -> int:
-    """
-    Get an integer from a selected group and keyword in the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group from which to read.
-    key : str
-        Name of the keyword from which to read.
-    default : Optional[int]
-        Optional default value.
-    positive : bool
-        Flag specifying whether all integers are accepted (if False), or only strictly positive integers (if True).
-
-    Raises
-    ------
-    Exception
-        If the keyword isn't specified and no default value is given.
-        If a negative or zero value is specified when a positive value is required.
-
-    Returns
-    -------
-    val : int
-        Integer value.
-    """
-    try:
-        val = int(config[group][key])
-    except:
-        if not default is None:
-            val = default
-        else:
-            raise Exception(
-                'No integer value specified for required keyword "{}" in block "{}".'.format(
-                    key, group
-                )
-            )
-    if positive:
-        if val <= 0:
-            raise Exception(
-                'Value for "{}" in block "{}" must be positive, not {}.'.format(
-                    key, group, val
-                )
-            )
-    return val
-
-
-def config_get_float(
-    config: configparser.ConfigParser,
-    group: str,
-    key: str,
-    default: Optional[float] = None,
-    positive: bool = False,
-) -> float:
-    """
-    Get a floating point value from a selected group and keyword in the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group from which to read.
-    key : str
-        Name of the keyword from which to read.
-    default : Optional[float]
-        Optional default value.
-    positive : bool
-        Flag specifying whether all floats are accepted (if False), or only positive floats (if True).
-
-    Raises
-    ------
-    Exception
-        If the keyword isn't specified and no default value is given.
-        If a negative value is specified when a positive value is required.
-
-    Returns
-    -------
-    val : float
-        Floating point value.
-    """
-    try:
-        val = float(config[group][key])
-    except:
-        if not default is None:
-            val = default
-        else:
-            raise Exception(
-                'No floating point value specified for required keyword "{}" in block "{}".'.format(
-                    key, group
-                )
-            )
-    if positive:
-        if val < 0.0:
-            raise Exception(
-                'Value for "{}" in block "{}" must be positive, not {}.'.format(
-                    key, group, val
-                )
-            )
-    return val
-
-
-def config_get_str(
-    config: configparser.ConfigParser,
-    group: str,
-    key: str,
-    default: Optional[str] = None,
-) -> str:
-    """
-    Get a string from a selected group and keyword in the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group from which to read.
-    key : str
-        Name of the keyword from which to read.
-    default : Optional[str]
-        Optional default value.
-
-    Raises
-    ------
-    Exception
-        If the keyword isn't specified and no default value is given.
-
-    Returns
-    -------
-    val : str
-        String.
-    """
-    try:
-        val = config[group][key]
-    except:
-        if not default is None:
-            val = default
-        else:
-            raise Exception(
-                'No value specified for required keyword "{}" in block "{}".'.format(
-                    key, group
-                )
-            )
-    return val
-
-
-def config_get_parameter(
-    config: configparser.ConfigParser,
-    group: str,
-    key: str,
-    bank_km: List[numpy.ndarray],
-    default=None,
-    ext: str = "",
-    positive: bool = False,
-    valid: Optional[List[float]] = None,
-    onefile: bool = False,
-):
-    """
-    Get a parameter field from a selected group and keyword in the analysis settings.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Settings for the D-FAST Bank Erosion analysis.
-    group : str
-        Name of the group from which to read.
-    key : str
-        Name of the keyword from which to read.
-    bank_km : List[numpy.ndarray]
-        For each bank a listing of the bank points (bank chainage locations).
-    default : Optional[Union[float, List[numpy.ndarray]]]
-        Optional default value or default parameter field; default None.
-    ext : str
-        File name extension; default empty string.
-    positive : bool
-        Flag specifying whether all values are accepted (if False), or only strictly positive values (if True); default False.
-    valid : Optional[List[float]]
-        Optional list of valid values; default None.
-    onefile : bool
-        Flag indicating whether for one file should be used for all bank lines (True) or one file per bank line (False; default).
-
-    Raises
-    ------
-    Exception
-        If a parameter isn't provided in the configuration, but no default value provided either.
-        If the value is negative while a positive value is required (positive = True).
-        If the value doesn't match one of the value values (valid is not None).
-
-    Returns
-    -------
-    parfield : List[numpy.ndarray]
-        Parameter field: for each bank a parameter value per bank point (bank chainage location).
-    """
-    try:
-        filename = config[group][key]
-        use_default = False
-    except:
-        if default is None:
-            raise Exception(
-                'No value specified for required keyword "{}" in block "{}".'.format(
-                    key, group
-                )
-            )
-        use_default = True
-
-    # if val is value then use that value globally
-    parfield = [None] * len(bank_km)
-    try:
-        if use_default:
-            if isinstance(default, list):
-                return default
-            rval = default
-        else:
-            rval = float(filename)
-            if positive:
-                if rval < 0:
-                    raise Exception(
-                        'Value of "{}" should be positive, not {}.'.format(key, rval)
-                    )
-            if not valid is None:
-                if valid.count(rval) == 0:
-                    raise Exception(
-                        'Value of "{}" should be in {}, not {}.'.format(
-                            key, valid, rval
-                        )
-                    )
-        for ib, bkm in enumerate(bank_km):
-            parfield[ib] = numpy.zeros(len(bkm)) + rval
-    except:
-        if onefile:
-            log_text("read_param", dict={"param": key, "file": filename})
-            km_thr, val = get_kmval(filename, key, positive, valid)
-        for ib, bkm in enumerate(bank_km):
-            if not onefile:
-                filename_i = filename + "_{}".format(ib + 1) + ext
-                log_text(
-                    "read_param_one_bank",
-                    dict={"param": key, "i": ib + 1, "file": filename_i},
-                )
-                km_thr, val = get_kmval(filename_i, key, positive, valid)
-            if km_thr is None:
-                parfield[ib] = numpy.zeros(len(bkm)) + val[0]
-            else:
-                idx = numpy.zeros(len(bkm), dtype=numpy.int64)
-                for thr in km_thr:
-                    idx[bkm >= thr] += 1
-                parfield[ib] = val[idx]
-            # print("Min/max of data: ", parfield[ib].min(), parfield[ib].max())
-    return parfield
 
 
 def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[float]]):
@@ -1797,3 +1897,8 @@ def get_progloc() -> str:
     """
     progloc = str(pathlib.Path(__file__).parent.absolute())
     return progloc
+
+
+class ConfigFileError(Exception):
+    """Custom exception for configuration file errors."""
+    pass
