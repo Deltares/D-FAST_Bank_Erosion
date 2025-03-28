@@ -876,6 +876,7 @@ class ConfigFile:
 class RiverData:
 
     def __init__(self, config_file: ConfigFile):
+        self.config_file = config_file
         self.profile: shapely.geometry.linestring.LineString = config_file.get_xy_km()
         self.station_bounds: Tuple = config_file.get_km_bounds() # start and end station
         self.start_station: float = self.station_bounds[0]
@@ -883,12 +884,23 @@ class RiverData:
         log_text("clip_chainage", dict={"low": self.start_station, "high": self.end_station})
         self.masked_profile: shapely.geometry.linestring.LineString = self.mask_profile(self.station_bounds)
         self.masked_profile_arr = np.array(self.masked_profile)
-        # read bank search lines
-        search_lines = config_file.get_search_lines()
-        self.masked_search_lines, self.max_max_d = self.clip_search_lines(
-            search_lines, self.masked_profile, MAX_RIVER_WIDTH
-        )
-        self.num_search_lines = len(search_lines)
+
+
+    @property
+    def bank_search_lines(self) -> List[shapely.geometry.linestring.LineStringAdapter]:
+        """
+        Get the bank search lines.
+
+        Returns
+        -------
+        search_lines : List[shapely.geometry.linestring.LineStringAdapter]
+            List of bank search lines.
+        """
+        return self.config_file.get_search_lines()
+
+    @property
+    def num_search_lines(self) -> int:
+        return len(self.bank_search_lines)
 
     def mask_profile(self, bounds: Tuple[float, float]) -> shapely.geometry.linestring.LineStringAdapter:
         """
@@ -980,66 +992,62 @@ class RiverData:
 
     def clip_search_lines(
         self,
-        line: List[shapely.geometry.linestring.LineStringAdapter],
-        xykm: shapely.geometry.linestring.LineStringAdapter,
         max_river_width: float = 1000,
     ) -> Tuple[List[shapely.geometry.linestring.LineStringAdapter], float]:
         """
         Clip the list of lines to the envelope of certain size surrounding a reference line.
 
-        Arguments
-        ---------
-        line : List[shapely.geometry.linestring.LineStringAdapter]
-            List of search lines to be clipped.
-        xykm : shapely.geometry.linestring.LineStringAdapter
-            Reference line.
-        max_river_width: float
-            Maximum distance away from xykm.
+        Arg:
+            search_lines : List[shapely.geometry.linestring.LineStringAdapter]
+                List of search lines to be clipped.
+            river_profile : shapely.geometry.linestring.LineStringAdapter
+                Reference line.
+            max_river_width: float
+                Maximum distance away from river_profile.
 
-        Returns
-        -------
-        line : List[shapely.geometry.linestring.LineStringAdapter]
-            List of clipped search lines.
-        maxmaxd: float
-            Maximum distance from any point within line to reference line.
+        Returns:
+            search_lines : List[shapely.geometry.linestring.LineStringAdapter]
+                List of clipped search lines.
+            max_distance: float
+                Maximum distance from any point within line to reference line.
         """
-        nbank = len(line)
-        kmbuffer = xykm.buffer(max_river_width, cap_style=2)
+        search_lines = self.bank_search_lines
+        profile_buffer = self.masked_profile.buffer(max_river_width, cap_style=2)
 
         # The algorithm uses simplified geometries for determining the distance between lines for speed.
         # Stay accurate to within about 1 m
-        xy_simplified = xykm.simplify(1)
+        profile_simplified = self.masked_profile.simplify(1)
 
-        maxmaxd = 0
-        for b in range(nbank):
+        max_distance = 0
+        for b in range(self.num_search_lines):
             # Clip the bank search lines to the reach of interest (indicated by the reference line).
-            line[b] = line[b].intersection(kmbuffer)
+            search_lines[b] = search_lines[b].intersection(profile_buffer)
 
             # If the bank search line breaks into multiple parts, select the part closest to the reference line.
-            if line[b].geom_type == "MultiLineString":
+            if search_lines[b].geom_type == "MultiLineString":
                 dmin = max_river_width
                 imin = 0
-                for i in range(len(line[b])):
-                    line_simplified = line[b][i].simplify(1)
-                    dmin_i = line_simplified.distance(xy_simplified)
+                for i in range(len(search_lines[b])):
+                    line_simplified = search_lines[b][i].simplify(1)
+                    dmin_i = line_simplified.distance(profile_simplified)
                     if dmin_i < dmin:
                         dmin = dmin_i
                         imin = i
-                line[b] = line[b][imin]
+                search_lines[b] = search_lines[b][imin]
 
             # Determine the maximum distance from a point on this line to the reference line.
-            line_simplified = line[b].simplify(1)
+            line_simplified = search_lines[b].simplify(1)
             maxd = max(
                 [
-                    shapely.geometry.Point(c).distance(xy_simplified)
+                    shapely.geometry.Point(c).distance(profile_simplified)
                     for c in line_simplified.coords
                 ]
             )
 
             # Increase the value of maxd by 2 to account for error introduced by using simplified lines.
-            maxmaxd = max(maxmaxd, maxd + 2)
+            max_distance = max(max_distance, maxd + 2)
 
-        return line, maxmaxd
+        return search_lines, max_distance
 
 def load_program_texts(filename: str) -> None:
     """

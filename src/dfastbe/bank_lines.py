@@ -135,18 +135,19 @@ class BankLines:
         km_bounds = river_data.station_bounds
         river_profile = river_data.masked_profile
         stations_coords = river_data.masked_profile_arr[:, :2]
+        masked_search_lines, max_distance = river_data.clip_search_lines()
 
         # convert search lines to bank polygons
         d_lines = config_file.get_bank_search_distances(river_data.num_search_lines)
         bank_areas = convert_search_lines_to_bank_polygons(
-            river_data.masked_search_lines, d_lines
+            masked_search_lines, d_lines
         )
 
         # determine whether search lines are located on left or right
         to_right = [True] * river_data.num_search_lines
         for ib in range(river_data.num_search_lines):
             to_right[ib] = on_right_side(
-                np.array(river_data.masked_search_lines[ib]), stations_coords
+                np.array(masked_search_lines[ib]), stations_coords
             )
 
         # read simulation data and drying flooding threshold dh0
@@ -161,7 +162,7 @@ class BankLines:
 
         # clip simulation data to boundaries ...
         log_text("clip_data")
-        sim = clip_simdata(sim, river_profile, river_data.max_max_d)
+        sim = clip_simdata(sim, river_profile, max_distance)
 
         # derive bank lines (get_banklines)
         log_text("identify_banklines")
