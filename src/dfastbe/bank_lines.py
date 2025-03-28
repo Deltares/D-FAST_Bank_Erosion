@@ -31,8 +31,8 @@ class BankLines:
             gui : bool
                 Flag indicating whether this routine is called from the GUI.
         """
-        if hasattr(config_file, "path"):
-            self.root_dir = config_file.root_dir
+        # the root_dir is used to get the FigureDir in the `_get_plotting_flags`
+        self.root_dir = config_file.root_dir
 
         self._config_file = config_file
         self.gui = gui
