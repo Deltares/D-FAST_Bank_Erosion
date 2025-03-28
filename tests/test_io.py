@@ -1,8 +1,12 @@
 import unittest
 from unittest.mock import patch
+
+import numpy as np
+
 from dfastbe.io import ConfigFile, load_program_texts, log_text, get_text, read_fm_map,\
     ugrid_add, copy_ugrid, copy_var, read_waqua_xyz, write_simona_box, \
-    get_mesh_and_facedim_names, absolute_path, relative_path, get_filename
+    get_mesh_and_facedim_names, absolute_path, relative_path, get_filename, \
+    RiverData
 
 import configparser
 import os
@@ -10,7 +14,7 @@ from pathlib import Path
 import platform
 import numpy
 import netCDF4
-
+from shapely.geometry.linestring import LineString
 import pytest
 
 import sys
@@ -486,3 +490,18 @@ class TestConfigFileE2E:
                          '  longkey = 3']
         assert all_lines == all_lines_ref
         Path(filename).unlink()
+
+
+class TestRiverData:
+    def test_initialization(self):
+        path = "tests/data/erosion/meuse_manual.cfg"
+        config_file = ConfigFile.read(path)
+        river_data = RiverData(config_file)
+        assert isinstance(river_data.config_file, ConfigFile)
+        assert river_data.num_search_lines == 2
+        assert river_data.start_station == 123.0
+        assert river_data.end_station == 128.0
+        assert isinstance(river_data.masked_profile, LineString)
+        assert isinstance(river_data.profile, LineString)
+        assert isinstance(river_data.masked_profile_arr, np.ndarray)
+        assert river_data.masked_profile_arr.shape == (251, 3)
