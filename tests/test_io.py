@@ -322,8 +322,8 @@ class TestAbsolutePath:
         """
         Convert absolute path into relative path using relative_path (Windows).
         """
-        rootdir = "d:" + os.sep + "some" + os.sep + "dir"
-        afile = "d:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
+        rootdir = "g:" + os.sep + "some" + os.sep + "dir"
+        afile = "g:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         assert absolute_path(rootdir, rfile) == afile
 
@@ -451,6 +451,13 @@ class TestConfigFile(unittest.TestCase):
 
 
 class TestConfigFileE2E:
+    def test_initialization(self):
+        path = "tests/data/erosion/meuse_manual.cfg"
+        config_file = ConfigFile.read(path)
+        river_km = config_file.config["General"]["riverkm"]
+        assert river_km == 'tests\\data\\erosion\\inputs\\rivkm_20m.xyc'
+
+
     def test_write_config_01(self):
         """
         Testing write_config.

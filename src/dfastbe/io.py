@@ -264,7 +264,6 @@ class ConfigFile:
         config : configparser.ConfigParser
             Analysis configuration settings using paths relative to current working directory.
         """
-        # rootdir = os.path.dirname(self.path)
         cwd = os.getcwd()
         self.resolve(self.root_dir)
         self.relative_to(cwd)
@@ -1535,21 +1534,20 @@ def absolute_path(rootdir: str, file: str) -> str:
     ---------
     rootdir : str
         Any relative paths should be given relative to this location.
-    file : str
+    path : str
         A relative or absolute location.
 
     Returns
     -------
-    afile : str
+    path : str
         An absolute location.
     """
-    if file == "":
-        return file
+    if path == "":
+        path = path
     else:
-        try:
-            return os.path.normpath(os.path.join(rootdir, file))
-        except:
-            return file
+        path =  os.path.normpath(os.path.join(rootdir, path))
+
+    return path
 
 
 def relative_path(rootdir: str, file: str) -> str:
