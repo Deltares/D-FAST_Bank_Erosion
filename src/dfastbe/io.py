@@ -1526,7 +1526,7 @@ def write_simona_box(
     boxfile.close()
 
 
-def absolute_path(rootdir: str, file: str) -> str:
+def absolute_path(rootdir: str, path: str) -> str:
     """
     Convert a relative path to an absolute path.
 
