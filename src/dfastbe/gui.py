@@ -1284,7 +1284,7 @@ def load_configuration(filename: str) -> None:
     absfilename = absolute_path(os.getcwd(), filename)
     rootdir = os.path.dirname(absfilename)
     config_file = ConfigFile.read(absfilename)
-    config_file.resolve(rootdir)
+
     config_file.path = absfilename
 
     try:
