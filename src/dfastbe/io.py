@@ -110,6 +110,9 @@ class ConfigFile:
         config : configparser.ConfigParser
             Settings for the D-FAST Bank Erosion analysis.
         """
+        if not Path(path).exists():
+            raise FileNotFoundError(f"The Config-File: {path} does not exist")
+
         try:
             config = configparser.ConfigParser(comment_prefixes="%")
             with open(path, "r") as configfile:
@@ -697,12 +700,11 @@ class ConfigFile:
         return val
 
     def get_xy_km(self) -> shapely.geometry.linestring.LineStringAdapter:
-        """
+        """get_xy_km
 
         Returns
         -------
         xykm : shapely.geometry.linestring.LineStringAdapter
-
         """
         # get the chainage file
         km_file = self.get_str("General", "RiverKM")
@@ -875,22 +877,34 @@ class ConfigFile:
 
 
 class RiverData:
+    """River data class."""
 
     def __init__(self, config_file: ConfigFile):
+        """River Data initialization.
+
+        Args:
+            config_file : ConfigFile
+                Configuration file with settings for the analysis.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile, RiverData
+            >>> config_file = ConfigFile("tests/data/erosion/meuse_manual.cfg")
+            >>> river_data = RiverData(config_file)
+            ```
+        """
         self.config_file = config_file
         self.profile: shapely.geometry.linestring.LineString = config_file.get_xy_km()
-        self.station_bounds: Tuple = config_file.get_km_bounds() # start and end station
+        self.station_bounds: Tuple = config_file.get_km_bounds()
         self.start_station: float = self.station_bounds[0]
         self.end_station: float = self.station_bounds[1]
         log_text("clip_chainage", dict={"low": self.start_station, "high": self.end_station})
         self.masked_profile: shapely.geometry.linestring.LineString = self.mask_profile(self.station_bounds)
         self.masked_profile_arr = np.array(self.masked_profile)
 
-
     @property
     def bank_search_lines(self) -> List[shapely.geometry.linestring.LineStringAdapter]:
-        """
-        Get the bank search lines.
+        """Get the bank search lines.
 
         Returns
         -------
@@ -901,6 +915,7 @@ class RiverData:
 
     @property
     def num_search_lines(self) -> int:
+        """Number of river bank search lines."""
         return len(self.bank_search_lines)
 
     def mask_profile(self, bounds: Tuple[float, float]) -> shapely.geometry.linestring.LineStringAdapter:
@@ -944,9 +959,7 @@ class RiverData:
                 )
             x0 = None
         else:
-            alpha = (bounds[0] - xy_km.coords[start_i - 1][2]) / (
-                    xy_km.coords[start_i][2] - xy_km.coords[start_i - 1][2]
-            )
+            alpha = (bounds[0] - xy_km.coords[start_i - 1][2]) / (xy_km.coords[start_i][2] - xy_km.coords[start_i - 1][2])
             x0 = tuple(
                 (c1 + alpha * (c2 - c1))
                 for c1, c2 in zip(xy_km.coords[start_i - 1], xy_km.coords[start_i])
@@ -975,9 +988,7 @@ class RiverData:
                 )
             )
         else:
-            alpha = (bounds[1] - xy_km.coords[end_i - 1][2]) / (
-                    xy_km.coords[end_i][2] - xy_km.coords[end_i - 1][2]
-            )
+            alpha = (bounds[1] - xy_km.coords[end_i - 1][2]) / (xy_km.coords[end_i][2] - xy_km.coords[end_i - 1][2])
             x1 = tuple(
                 (c1 + alpha * (c2 - c1))
                 for c1, c2 in zip(xy_km.coords[end_i - 1], xy_km.coords[end_i])
@@ -1677,7 +1688,8 @@ def write_shp_pnt(
 def write_shp(
     geom: geopandas.geoseries.GeoSeries, dict: Dict[str, np.ndarray], filename: str
 ) -> None:
-    """
+    """Write a shape file.
+
     Write a shape file for a given GeoSeries and dictionary of np arrays.
     The GeoSeries and all np should have equal length.
 
@@ -1748,6 +1760,7 @@ def write_km_eroded_volumes(
         for i in range(len(km)):
             valstr = "\t".join(["{:.2f}".format(x) for x in vol[i, :]])
             erofile.write("{:.2f}\t".format(km[i]) + valstr + "\n")
+
 
 def move_parameter_location(
     config: configparser.ConfigParser,
@@ -1998,4 +2011,5 @@ def get_progloc() -> str:
 
 class ConfigFileError(Exception):
     """Custom exception for configuration file errors."""
+
     pass

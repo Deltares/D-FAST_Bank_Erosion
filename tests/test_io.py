@@ -455,7 +455,7 @@ class TestConfigFileE2E:
         path = "tests/data/erosion/meuse_manual.cfg"
         config_file = ConfigFile.read(path)
         river_km = config_file.config["General"]["riverkm"]
-        assert river_km == 'tests\\data\\erosion\\inputs\\rivkm_20m.xyc'
+        assert Path(river_km).exists()
 
 
     def test_write_config_01(self):
