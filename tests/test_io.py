@@ -416,7 +416,7 @@ class TestConfigFile(unittest.TestCase):
     def test_read(self):
         """Test reading a configuration file."""
         config_str = """[General]\nVersion = 1.0\nTestParam = 42\n"""
-        with unittest.mock.patch("builtins.open", return_value=StringIO(config_str)):
+        with patch("builtins.open", return_value=StringIO(config_str)), patch("pathlib.Path.exists", return_value=True):
             config_obj = ConfigFile.read("dummy_path.cfg")
             version = config_obj.version
         self.assertEqual(config_obj.config["General"]["Version"], "1.0")
