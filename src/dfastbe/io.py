@@ -36,6 +36,7 @@ import os.path
 import pandas
 import geopandas
 import shapely
+from shapely.geometry import Point
 import pathlib
 
 MAX_RIVER_WIDTH = 1000
@@ -992,7 +993,7 @@ class RiverData:
 
     def clip_search_lines(
         self,
-        max_river_width: float = 1000,
+        max_river_width: float = MAX_RIVER_WIDTH,
     ) -> Tuple[List[shapely.geometry.linestring.LineStringAdapter], float]:
         """
         Clip the list of lines to the envelope of certain size surrounding a reference line.
@@ -1019,35 +1020,36 @@ class RiverData:
         profile_simplified = self.masked_profile.simplify(1)
 
         max_distance = 0
-        for b in range(self.num_search_lines):
+        for ind in range(self.num_search_lines):
             # Clip the bank search lines to the reach of interest (indicated by the reference line).
-            search_lines[b] = search_lines[b].intersection(profile_buffer)
+            search_lines[ind] = search_lines[ind].intersection(profile_buffer)
 
             # If the bank search line breaks into multiple parts, select the part closest to the reference line.
-            if search_lines[b].geom_type == "MultiLineString":
-                dmin = max_river_width
-                imin = 0
-                for i in range(len(search_lines[b])):
-                    line_simplified = search_lines[b][i].simplify(1)
-                    dmin_i = line_simplified.distance(profile_simplified)
-                    if dmin_i < dmin:
-                        dmin = dmin_i
-                        imin = i
-                search_lines[b] = search_lines[b][imin]
+            if search_lines[ind].geom_type == "MultiLineString":
+                distance_min = max_river_width
+                i_min = 0
+                for i in range(len(search_lines[ind])):
+                    line_simplified = search_lines[ind][i].simplify(1)
+                    distance_min_i = line_simplified.distance(profile_simplified)
+                    if distance_min_i < distance_min:
+                        distance_min = distance_min_i
+                        i_min = i
+                search_lines[ind] = search_lines[ind][i_min]
 
             # Determine the maximum distance from a point on this line to the reference line.
-            line_simplified = search_lines[b].simplify(1)
-            maxd = max(
+            line_simplified = search_lines[ind].simplify(1)
+            max_distance = max(
                 [
-                    shapely.geometry.Point(c).distance(profile_simplified)
+                    Point(c).distance(profile_simplified)
                     for c in line_simplified.coords
                 ]
             )
 
-            # Increase the value of maxd by 2 to account for error introduced by using simplified lines.
-            max_distance = max(max_distance, maxd + 2)
+            # Increase the value of max_distance by 2 to account for error introduced by using simplified lines.
+            max_distance = max(max_distance, max_distance + 2)
 
         return search_lines, max_distance
+
 
 def load_program_texts(filename: str) -> None:
     """
