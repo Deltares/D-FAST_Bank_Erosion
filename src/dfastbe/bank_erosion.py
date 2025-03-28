@@ -56,7 +56,7 @@ def bankerosion(filename="dfastbe.cfg") -> None:
     # read configuration file
     timed_logger("reading configuration file ...")
     config = ConfigFile.read(filename)
-    rootdir = config.adjust_filenames()
+    rootdir = str(config.root_dir)
     config = config.config
     bankerosion_core(config, rootdir, False)
 

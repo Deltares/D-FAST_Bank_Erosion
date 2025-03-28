@@ -32,9 +32,6 @@ class BankLines:
                 Flag indicating whether this routine is called from the GUI.
         """
         if hasattr(config_file, "path"):
-            rootdir = config_file.adjust_filenames()
-            self.root_dir = rootdir
-        else:
             self.root_dir = config_file.root_dir
 
         self._config_file = config_file

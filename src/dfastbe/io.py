@@ -74,7 +74,8 @@ class ConfigFile:
         # the directory where the configuration file is located
         if path:
             self.path = path
-            self.root_dir = pathlib.Path(path).parent
+            self.root_dir = Path(path).parent
+            self.adjust_filenames()
 
     @property
     def config(self) -> configparser.ConfigParser:
