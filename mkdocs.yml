@@ -96,29 +96,28 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 nav:
-  - Home: "index.md"
-#   - How-to:
-#       - Installation:
-#           - "Local clone + Poetry": "guides/poetry.md"
-#       - Contributing:
-#           - "guides/contributing.md"
-#       - Documentation:
-#           - "guides/documentation.md"
-#       - Tools:
-#             - "guides/pre-commit-hooks.md"
-#             - "guides/doctest.md"
-#   - API Reference:
-#       - bank_lines.md
-#       - bank_erosion.md
-#       - io.md
-#       - cmd.md
-#       - gui.md
-#       - kernel.md
-#       - plotting.md
-#   - Release Notes: "changelog.md"
+  - Home: index.md
+  - How-to:
+      - Installation:
+          - "Local clone + Poetry": guides/poetry.md
+      - Contributing:
+          - guides/contributing.md
+      - Documentation:
+          - guides/documentation.md
+      - Tools:
+            - guides/pre-commit-hooks.md
+            - guides/doctest.md
+  - API Reference:
+      - bank_lines.md
+      - bank_erosion.md
+      - io.md
+      - cmd.md
+      - gui.md
+      - kernel.md
+      - plotting.md
+  - Release Notes: changelog.md
 
 extra:
   version:
     provider: mike
   version_selector: true
-copyright: Copyright &copy; 2022 Deltares
