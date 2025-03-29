@@ -48,6 +48,10 @@ notebook = "<7.0"
 dfastbe = 'dfastbe.__main__:main'
 
 
+[tool.coverage.report]
+show_missing = true
+fail_under = 77
+
 [tool.flake8]
 ignore = ["E501", "E203", "F821", "E722", "B001", "D401", "B006", "D202", "W503"]
 max-line-length = 88
