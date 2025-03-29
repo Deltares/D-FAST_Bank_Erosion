@@ -43,7 +43,7 @@ import subprocess
 from functools import partial
 from dfastbe import __version__, __file__
 from dfastbe.bank_lines import BankLines
-from dfastbe.bank_erosion import bankerosion_core
+from dfastbe.bank_erosion import Erosion
 
 USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
 
@@ -1233,11 +1233,12 @@ def run_erosion() -> None:
     config = get_configuration()
     rootdir = os.getcwd()
     config_file = ConfigFile(config)
+    config_file.root_dir = rootdir
     config_file.relative_to(rootdir)
-    config = config_file.config
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
     matplotlib.pyplot.close("all")
-    bankerosion_core(config, rootdir, True)
+    erosion = Erosion(config_file, gui=True)
+    erosion.bankerosion_core()
     dialog["application"].restoreOverrideCursor()
 
 

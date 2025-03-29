@@ -27,7 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 from pathlib import Path
 from dfastbe.io import ConfigFile
-from dfastbe.bank_erosion import bankerosion
+from dfastbe.bank_erosion import Erosion
 from dfastbe.bank_lines import BankLines
 from dfastbe.gui import main
 from dfastbe.io import load_program_texts
@@ -91,7 +91,8 @@ def run(
         bank_lines = BankLines(config_file)
         bank_lines.detect()
     elif run_mode == "BANKEROSION":
-        bankerosion(configfile)
+        erosion = Erosion(config_file)
+        erosion.bankerosion_core()
     elif run_mode == "GUI":
         main(configfile)
     else:
