@@ -27,7 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 from pathlib import Path
 from typing import Tuple, Any, List, Union, Dict, Optional, TextIO, Callable, TypedDict
-import numpy
+import numpy as np
 
 import netCDF4
 import configparser
@@ -36,21 +36,24 @@ import os.path
 import pandas
 import geopandas
 import shapely
+from shapely.geometry import Point
 import pathlib
+
+MAX_RIVER_WIDTH = 1000
 
 
 class SimulationObject(TypedDict):
-    x_node: numpy.ndarray
-    y_node: numpy.ndarray
-    nnodes: numpy.ndarray
-    facenode: numpy.ma.masked_array
-    zb_location: numpy.ndarray
-    zb_val: numpy.ndarray
-    zw_face: numpy.ndarray
-    h_face: numpy.ndarray
-    ucx_face: numpy.ndarray
-    ucy_face: numpy.ndarray
-    chz_face: numpy.ndarray
+    x_node: np.ndarray
+    y_node: np.ndarray
+    nnodes: np.ndarray
+    facenode: np.ma.masked_array
+    zb_location: np.ndarray
+    zb_val: np.ndarray
+    zw_face: np.ndarray
+    h_face: np.ndarray
+    ucx_face: np.ndarray
+    ucy_face: np.ndarray
+    chz_face: np.ndarray
 
 
 PROGTEXTS: Dict[str, List[str]]
@@ -68,8 +71,11 @@ class ConfigFile:
                 Name of configuration file to be read.
         """
         self._config = config
+        # the directory where the configuration file is located
         if path:
             self.path = path
+            self.root_dir = Path(path).parent
+            self.adjust_filenames()
 
     @property
     def config(self) -> configparser.ConfigParser:
@@ -82,6 +88,14 @@ class ConfigFile:
     @property
     def version(self) -> str:
         return self.get_str("General", "Version")
+
+    @property
+    def root_dir(self):
+        return self._root_dir
+
+    @root_dir.setter
+    def root_dir(self, value: str):
+        self._root_dir = value
 
     @classmethod
     def read(cls, path: Union[str, pathlib.Path]):
@@ -96,6 +110,9 @@ class ConfigFile:
         config : configparser.ConfigParser
             Settings for the D-FAST Bank Erosion analysis.
         """
+        if not Path(path).exists():
+            raise FileNotFoundError(f"The Config-File: {path} does not exist")
+
         try:
             config = configparser.ConfigParser(comment_prefixes="%")
             with open(path, "r") as configfile:
@@ -250,11 +267,10 @@ class ConfigFile:
         config : configparser.ConfigParser
             Analysis configuration settings using paths relative to current working directory.
         """
-        rootdir = os.path.dirname(self.path)
         cwd = os.getcwd()
-        self.resolve(rootdir)
+        self.resolve(self.root_dir)
         self.relative_to(cwd)
-        rootdir = relative_path(cwd, rootdir)
+        rootdir = relative_path(cwd, self.root_dir)
 
         return rootdir
 
@@ -470,7 +486,7 @@ class ConfigFile:
 
         Returns
         -------
-        line : List[numpy.ndarray]
+        line : List[np.ndarray]
             List of arrays containing the x,y-coordinates of a bank search lines.
         """
         # read guiding bank line
@@ -482,7 +498,7 @@ class ConfigFile:
             line[b] = read_xyc(bankfile)
         return line
 
-    def get_bank_lines(self, bank_dir: str) -> List[numpy.ndarray]:
+    def get_bank_lines(self, bank_dir: str) -> List[np.ndarray]:
         """
         Get the bank lines from the detection step.
 
@@ -493,7 +509,7 @@ class ConfigFile:
 
         Returns
         -------
-        line : List[numpy.ndarray]
+        line : List[np.ndarray]
             List of arrays containing the x,y-coordinates of a bank lines.
         """
         bank_name = self.get_str("General", "BankFile", "bankfile")
@@ -522,7 +538,7 @@ class ConfigFile:
         self,
         group: str,
         key: str,
-        bank_km: List[numpy.ndarray],
+        bank_km: List[np.ndarray],
         default=None,
         ext: str = "",
         positive: bool = False,
@@ -538,9 +554,9 @@ class ConfigFile:
             Name of the group from which to read.
         key : str
             Name of the keyword from which to read.
-        bank_km : List[numpy.ndarray]
+        bank_km : List[np.ndarray]
             For each bank a listing of the bank points (bank chainage locations).
-        default : Optional[Union[float, List[numpy.ndarray]]]
+        default : Optional[Union[float, List[np.ndarray]]]
             Optional default value or default parameter field; default None.
         ext : str
             File name extension; default empty string.
@@ -560,7 +576,7 @@ class ConfigFile:
 
         Returns
         -------
-        parfield : List[numpy.ndarray]
+        parfield : List[np.ndarray]
             Parameter field: for each bank a parameter value per bank point (bank chainage location).
         """
         try:
@@ -595,7 +611,7 @@ class ConfigFile:
                         )
                     )
             for ib, bkm in enumerate(bank_km):
-                parfield[ib] = numpy.zeros(len(bkm)) + rval
+                parfield[ib] = np.zeros(len(bkm)) + rval
         except:
             if onefile:
                 log_text("read_param", dict={"param": key, "file": filename})
@@ -609,9 +625,9 @@ class ConfigFile:
                     )
                     km_thr, val = get_kmval(filename_i, key, positive, valid)
                 if km_thr is None:
-                    parfield[ib] = numpy.zeros(len(bkm)) + val[0]
+                    parfield[ib] = np.zeros(len(bkm)) + val[0]
                 else:
-                    idx = numpy.zeros(len(bkm), dtype=numpy.int64)
+                    idx = np.zeros(len(bkm), dtype=np.int64)
                     for thr in km_thr:
                         idx[bkm >= thr] += 1
                     parfield[ib] = val[idx]
@@ -684,12 +700,11 @@ class ConfigFile:
         return val
 
     def get_xy_km(self) -> shapely.geometry.linestring.LineStringAdapter:
-        """
+        """get_xy_km
 
         Returns
         -------
         xykm : shapely.geometry.linestring.LineStringAdapter
-
         """
         # get the chainage file
         km_file = self.get_str("General", "RiverKM")
@@ -861,6 +876,345 @@ class ConfigFile:
                 self.config[group][key] = relative_path(rootdir, val_str)
 
 
+class RiverData:
+    """River data class."""
+
+    def __init__(self, config_file: ConfigFile):
+        """River Data initialization.
+
+        Args:
+            config_file : ConfigFile
+                Configuration file with settings for the analysis.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile, RiverData
+            >>> config_file = ConfigFile("tests/data/erosion/meuse_manual.cfg")
+            >>> river_data = RiverData(config_file)
+            ```
+        """
+        self.config_file = config_file
+        self.profile: shapely.geometry.linestring.LineString = config_file.get_xy_km()
+        self.station_bounds: Tuple = config_file.get_km_bounds()
+        self.start_station: float = self.station_bounds[0]
+        self.end_station: float = self.station_bounds[1]
+        log_text("clip_chainage", dict={"low": self.start_station, "high": self.end_station})
+        self.masked_profile: shapely.geometry.linestring.LineString = self.mask_profile(self.station_bounds)
+        self.masked_profile_arr = np.array(self.masked_profile)
+
+
+    @property
+    def bank_search_lines(self) -> List[shapely.geometry.linestring.LineStringAdapter]:
+        """Get the bank search lines.
+
+        Returns
+        -------
+        search_lines : List[shapely.geometry.linestring.LineStringAdapter]
+            List of bank search lines.
+        """
+        return self.config_file.get_search_lines()
+
+    @property
+    def num_search_lines(self) -> int:
+        """Number of river bank search lines."""
+        return len(self.bank_search_lines)
+
+    def mask_profile(self, bounds: Tuple[float, float]) -> shapely.geometry.linestring.LineStringAdapter:
+        """
+        Clip a chainage line to the relevant reach.
+
+        Arguments
+        ---------
+        bounds : Tuple[float, float]
+            Lower and upper limit for the chainage.
+
+        Returns
+        -------
+        xykm1 : shapely.geometry.linestring.LineStringAdapter
+            Clipped river chainage line.
+        """
+        xy_km = self.profile
+        start_i = None
+        end_i = None
+        for i, c in enumerate(xy_km.coords):
+            if start_i is None:
+                if c[2] >= bounds[0]:
+                    start_i = i
+            if c[2] >= bounds[1]:
+                end_i = i
+                break
+
+        if start_i is None:
+            raise Exception(
+                "Lower chainage bound {} is larger than the maximum chainage {} available".format(
+                    bounds[0], xy_km.coords[-1][2]
+                )
+            )
+        elif start_i == 0:
+            # lower bound (potentially) clipped to available reach
+            if xy_km.coords[0][2] - bounds[0] > 0.1:
+                raise Exception(
+                    "Lower chainage bound {} is smaller than the minimum chainage {} available".format(
+                        bounds[0], xy_km.coords[0][2]
+                    )
+                )
+            x0 = None
+        else:
+            alpha = (bounds[0] - xy_km.coords[start_i - 1][2]) / (xy_km.coords[start_i][2] - xy_km.coords[start_i - 1][2])
+            x0 = tuple(
+                (c1 + alpha * (c2 - c1))
+                for c1, c2 in zip(xy_km.coords[start_i - 1], xy_km.coords[start_i])
+            )
+            if alpha > 0.9:
+                # value close to the first node (start_i), so let's skip that one
+                start_i = start_i + 1
+
+        if end_i is None:
+            if bounds[1] - xy_km.coords[-1][2] > 0.1:
+                raise Exception(
+                    "Upper chainage bound {} is larger than the maximum chainage {} available".format(
+                        bounds[1], xy_km.coords[-1][2]
+                    )
+                )
+            # else kmbounds[1] matches chainage of last point
+            if x0 is None:
+                # whole range available selected
+                pass
+            else:
+                xy_km = shapely.geometry.LineString([x0] + xy_km.coords[start_i:])
+        elif end_i == 0:
+            raise Exception(
+                "Upper chainage bound {} is smaller than the minimum chainage {} available".format(
+                    bounds[1], xy_km.coords[0][2]
+                )
+            )
+        else:
+            alpha = (bounds[1] - xy_km.coords[end_i - 1][2]) / (xy_km.coords[end_i][2] - xy_km.coords[end_i - 1][2])
+            x1 = tuple(
+                (c1 + alpha * (c2 - c1))
+                for c1, c2 in zip(xy_km.coords[end_i - 1], xy_km.coords[end_i])
+            )
+            if alpha < 0.1:
+                # value close to the previous point (end_i - 1), so let's skip that one
+                end_i = end_i - 1
+            if x0 is None:
+                xy_km = shapely.geometry.LineString(xy_km.coords[:end_i] + [x1])
+            else:
+                xy_km = shapely.geometry.LineString([x0] + xy_km.coords[start_i:end_i] + [x1])
+        return xy_km
+
+    def clip_search_lines(
+        self,
+        max_river_width: float = MAX_RIVER_WIDTH,
+    ) -> Tuple[List[shapely.geometry.linestring.LineStringAdapter], float]:
+        """
+        Clip the list of lines to the envelope of certain size surrounding a reference line.
+
+        Arg:
+            search_lines : List[shapely.geometry.linestring.LineStringAdapter]
+                List of search lines to be clipped.
+            river_profile : shapely.geometry.linestring.LineStringAdapter
+                Reference line.
+            max_river_width: float
+                Maximum distance away from river_profile.
+
+        Returns:
+            search_lines : List[shapely.geometry.linestring.LineStringAdapter]
+                List of clipped search lines.
+            max_distance: float
+                Maximum distance from any point within line to reference line.
+        """
+        search_lines = self.bank_search_lines
+        profile_buffer = self.masked_profile.buffer(max_river_width, cap_style=2)
+
+        # The algorithm uses simplified geometries for determining the distance between lines for speed.
+        # Stay accurate to within about 1 m
+        profile_simplified = self.masked_profile.simplify(1)
+
+        max_distance = 0
+        for ind in range(self.num_search_lines):
+            # Clip the bank search lines to the reach of interest (indicated by the reference line).
+            search_lines[ind] = search_lines[ind].intersection(profile_buffer)
+
+            # If the bank search line breaks into multiple parts, select the part closest to the reference line.
+            if search_lines[ind].geom_type == "MultiLineString":
+                distance_min = max_river_width
+                i_min = 0
+                for i in range(len(search_lines[ind])):
+                    line_simplified = search_lines[ind][i].simplify(1)
+                    distance_min_i = line_simplified.distance(profile_simplified)
+                    if distance_min_i < distance_min:
+                        distance_min = distance_min_i
+                        i_min = i
+                search_lines[ind] = search_lines[ind][i_min]
+
+            # Determine the maximum distance from a point on this line to the reference line.
+            line_simplified = search_lines[ind].simplify(1)
+            max_distance = max(
+                [
+                    Point(c).distance(profile_simplified)
+                    for c in line_simplified.coords
+                ]
+            )
+
+            # Increase the value of max_distance by 2 to account for error introduced by using simplified lines.
+            max_distance = max(max_distance, max_distance + 2)
+
+        return search_lines, max_distance
+
+
+def read_simulation_data(file_name: str, indent: str = "") -> Tuple[SimulationObject, float]:
+    """
+    Read a default set of quantities from a UGRID netCDF file coming from D-Flow FM (or similar).
+
+    Arguments
+    ---------
+    file_name : str
+        Name of the simulation output file to be read.
+    indent : str
+        String to use for each line as indentation (default empty).
+
+    Raises
+    ------
+    Exception
+        If the file is not recognized as a D-Flow FM map-file.
+
+    Returns
+    -------
+    sim : SimulationObject
+        Dictionary containing the data read from the simulation output file.
+    dh0 : float
+        Threshold depth for detecting drying and flooding.
+    """
+    dum = np.array([])
+    sim: SimulationObject = {
+        "x_node": dum,
+        "y_node": dum,
+        "nnodes": dum,
+        "facenode": dum,
+        "zb_location": dum,
+        "zb_val": dum,
+        "zw_face": dum,
+        "h_face": dum,
+        "ucx_face": dum,
+        "ucy_face": dum,
+        "chz_face": dum,
+    }
+    # determine the file type
+    path, name = os.path.split(file_name)
+    if name.endswith("map.nc"):
+        log_text("read_grid", indent=indent)
+        sim["x_node"] = read_fm_map(file_name, "x", location="node")
+        sim["y_node"] = read_fm_map(file_name, "y", location="node")
+        f_nc = read_fm_map(file_name, "face_node_connectivity")
+        if f_nc.mask.shape == ():
+            # all faces have the same number of nodes
+            sim["nnodes"] = (
+                    np.ones(f_nc.data.shape[0], dtype=np.int) * f_nc.data.shape[1]
+            )
+        else:
+            # varying number of nodes
+            sim["nnodes"] = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
+        f_nc.data[f_nc.mask] = 0
+
+        sim["facenode"] = f_nc
+        log_text("read_bathymetry", indent=indent)
+        sim["zb_location"] = "node"
+        sim["zb_val"] = read_fm_map(file_name, "altitude", location="node")
+        log_text("read_water_level", indent=indent)
+        sim["zw_face"] = read_fm_map(file_name, "Water level")
+        log_text("read_water_depth", indent=indent)
+        sim["h_face"] = np.maximum(
+            read_fm_map(file_name, "sea_floor_depth_below_sea_surface"), 0.0
+        )
+        log_text("read_velocity", indent=indent)
+        sim["ucx_face"] = read_fm_map(file_name, "sea_water_x_velocity")
+        sim["ucy_face"] = read_fm_map(file_name, "sea_water_y_velocity")
+        log_text("read_chezy", indent=indent)
+        sim["chz_face"] = read_fm_map(file_name, "Chezy roughness")
+
+        log_text("read_drywet", indent=indent)
+        root_group = netCDF4.Dataset(file_name)
+        try:
+            file_source = root_group.converted_from
+            if file_source == "SIMONA":
+                dh0 = 0.1
+            else:
+                dh0 = 0.01
+        except:
+            dh0 = 0.01
+
+    elif name.startswith("SDS"):
+        raise SimulationFilesError(f"WAQUA output files not yet supported. Unable to process {name}")
+    elif name.startswith("trim"):
+        raise SimulationFilesError(f"Delft3D map files not yet supported. Unable to process {name}")
+    else:
+        raise SimulationFilesError(f"Unable to determine file type for {name}")
+
+    return sim, dh0
+
+
+def clip_simulation_data(
+        sim: SimulationObject, river_profile: np.ndarray, max_distance: float
+) -> SimulationObject:
+    """
+    Clip the simulation mesh and data to the area of interest sufficiently close to the reference line.
+
+    Arguments
+    ---------
+    sim : SimulationObject
+        Simulation data: mesh, bed levels, water levels, velocities, etc.
+    river_profile : np.ndarray
+        Reference line.
+    max_distance : float
+        Maximum distance between the reference line and a point in the area of
+        interest defined based on the search lines for the banks and the search
+        distance.
+
+    Returns
+    -------
+    sim1 : SimulationObject
+        Clipped simulation data: mesh, bed levels, water levels, velocities, etc.
+    """
+    xy_buffer = river_profile.buffer(max_distance + max_distance)
+    bbox = xy_buffer.envelope.exterior
+    x_min = bbox.coords[0][0]
+    x_max = bbox.coords[1][0]
+    y_min = bbox.coords[0][1]
+    y_max = bbox.coords[2][1]
+
+    xy_b_prep = shapely.prepared.prep(xy_buffer)
+    x = sim["x_node"]
+    y = sim["y_node"]
+    nnodes = x.shape
+    keep = (x > x_min) & (x < x_max) & (y > y_min) & (y < y_max)
+    for i in range(x.size):
+        if keep[i] and not xy_b_prep.contains(shapely.geometry.Point((x[i], y[i]))):
+            keep[i] = False
+
+    fnc = sim["facenode"]
+    keep_face = keep[fnc].all(axis=1)
+    renum = np.zeros(nnodes, dtype=np.int)
+    renum[keep] = range(sum(keep))
+    sim["facenode"] = renum[fnc[keep_face]]
+
+    sim["x_node"] = x[keep]
+    sim["y_node"] = y[keep]
+    if sim["zb_location"] == "node":
+        sim["zb_val"] = sim["zb_val"][keep]
+    else:
+        sim["zb_val"] = sim["zb_val"][keep_face]
+
+    sim["nnodes"] = sim["nnodes"][keep_face]
+    sim["zw_face"] = sim["zw_face"][keep_face]
+    sim["h_face"] = sim["h_face"][keep_face]
+    sim["ucx_face"] = sim["ucx_face"][keep_face]
+    sim["ucy_face"] = sim["ucy_face"][keep_face]
+    sim["chz_face"] = sim["chz_face"][keep_face]
+
+    return sim
+
+
 def load_program_texts(filename: str) -> None:
     """
     Load texts from configuration file, and store globally for access.
@@ -989,7 +1343,7 @@ def get_text(key: str) -> List[str]:
     return str
 
 
-def read_fm_map(filename: str, varname: str, location: str = "face") -> numpy.ndarray:
+def read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndarray:
     """
     Read the last time step of any quantity defined at faces from a D-Flow FM map-file.
 
@@ -1228,7 +1582,7 @@ def copy_var(src: netCDF4.Dataset, varname: str, dst: netCDF4.Dataset) -> None:
 def ugrid_add(
     dstfile: str,
     varname: str,
-    ldata: numpy.array,
+    ldata: np.array,
     meshname: str,
     facedim: str,
     long_name: str = "None",
@@ -1243,7 +1597,7 @@ def ugrid_add(
         Name of netCDF file to write data to.
     varname : str
         Name of netCDF variable to be written.
-    ldata : numpy.array
+    ldata : np.array
         Linear array containing the data to be written.
     meshname : str
         Name of mesh variable in the netCDF file.
@@ -1275,7 +1629,7 @@ def ugrid_add(
     dst.close()
 
 
-def read_waqua_xyz(filename: str, cols: Tuple[int, ...] = (2,)) -> numpy.ndarray:
+def read_waqua_xyz(filename: str, cols: Tuple[int, ...] = (2,)) -> np.ndarray:
     """
     Read data columns from a SIMONA XYZ file.
 
@@ -1288,15 +1642,15 @@ def read_waqua_xyz(filename: str, cols: Tuple[int, ...] = (2,)) -> numpy.ndarray
 
     Returns
     -------
-    data : numpy.ndarray
+    data : np.ndarray
         Data read from the file.
     """
-    data = numpy.genfromtxt(filename, delimiter=",", skip_header=1, usecols=cols)
+    data = np.genfromtxt(filename, delimiter=",", skip_header=1, usecols=cols)
     return data
 
 
 def write_simona_box(
-    filename: str, rdata: numpy.ndarray, firstm: int, firstn: int
+    filename: str, rdata: np.ndarray, firstm: int, firstn: int
 ) -> None:
     """
     Write a SIMONA BOX file.
@@ -1305,8 +1659,8 @@ def write_simona_box(
     ---------
     filename : str
         Name of the file to be written.
-    rdata : numpy.ndarray
-        Two-dimensional NumPy array containing the data to be written.
+    rdata : np.ndarray
+        Two-dimensional np array containing the data to be written.
     firstm : int
         Firt M index to be written.
     firstn : int
@@ -1317,7 +1671,7 @@ def write_simona_box(
 
     # get shape and prepare block header; data will be written in blocks of 10
     # N-lines
-    shp = numpy.shape(rdata)
+    shp = np.shape(rdata)
     mmax = shp[0]
     nmax = shp[1]
     boxheader = "      BOX MNMN=({m1:4d},{n1:5d},{m2:5d},{n2:5d}), VARIABLE_VAL=\n"
@@ -1336,7 +1690,7 @@ def write_simona_box(
     boxfile.close()
 
 
-def absolute_path(rootdir: str, file: str) -> str:
+def absolute_path(rootdir: str, path: str) -> str:
     """
     Convert a relative path to an absolute path.
 
@@ -1344,21 +1698,20 @@ def absolute_path(rootdir: str, file: str) -> str:
     ---------
     rootdir : str
         Any relative paths should be given relative to this location.
-    file : str
+    path : str
         A relative or absolute location.
 
     Returns
     -------
-    afile : str
+    path : str
         An absolute location.
     """
-    if file == "":
-        return file
+    if path == "":
+        path = path
     else:
-        try:
-            return os.path.normpath(os.path.join(rootdir, file))
-        except:
-            return file
+        path =  os.path.normpath(os.path.join(rootdir, path))
+
+    return path
 
 
 def relative_path(rootdir: str, file: str) -> str:
@@ -1422,9 +1775,9 @@ def read_xyc(
         y = point_coordinates.Y.to_numpy().reshape((num_points, 1))
         if num_columns == 3:
             z = point_coordinates.Val.to_numpy().reshape((num_points, 1))
-            coords = numpy.concatenate((x, y, z), axis=1)
+            coords = np.concatenate((x, y, z), axis=1)
         else:
-            coords = numpy.concatenate((x, y), axis=1)
+            coords = np.concatenate((x, y), axis=1)
         line_string = shapely.geometry.LineString(coords)
     else:
         gdf = geopandas.read_file(filename)["geometry"]
@@ -1433,15 +1786,15 @@ def read_xyc(
     return line_string
 
 
-def write_xyc(xy: numpy.ndarray, val: numpy.ndarray, filename: str) -> None:
+def write_xyc(xy: np.ndarray, val: np.ndarray, filename: str) -> None:
     """
     Write a text file with x, y, and values.
 
     Arguments
     ---------
-    xy : numpy.ndarray
+    xy : np.ndarray
         N x 2 array containing x and y coordinates.
-    val : numpy.ndarray
+    val : np.ndarray
         N x k array containing values.
     filename : str
         Name of the file to be written.
@@ -1462,17 +1815,17 @@ def write_xyc(xy: numpy.ndarray, val: numpy.ndarray, filename: str) -> None:
 
 
 def write_shp_pnt(
-    xy: numpy.ndarray, dict: Dict[str, numpy.ndarray], filename: str
+    xy: np.ndarray, dict: Dict[str, np.ndarray], filename: str
 ) -> None:
     """
     Write a shape point file with x, y, and values.
 
     Arguments
     ---------
-    xy : numpy.ndarray
+    xy : np.ndarray
         N x 2 array containing x and y coordinates.
-    dict : Dict[str, numpy.ndarray]
-        Dictionary of quantities to be written, each NumPy array should have length k.
+    dict : Dict[str, np.ndarray]
+        Dictionary of quantities to be written, each np array should have length k.
     filename : str
         Name of the file to be written.
 
@@ -1486,18 +1839,19 @@ def write_shp_pnt(
 
 
 def write_shp(
-    geom: geopandas.geoseries.GeoSeries, dict: Dict[str, numpy.ndarray], filename: str
+    geom: geopandas.geoseries.GeoSeries, dict: Dict[str, np.ndarray], filename: str
 ) -> None:
-    """
-    Write a shape file for a given GeoSeries and dictionary of NumPy arrays.
-    The GeoSeries and all NumPy should have equal length.
+    """Write a shape file.
+
+    Write a shape file for a given GeoSeries and dictionary of np arrays.
+    The GeoSeries and all np should have equal length.
 
     Arguments
     ---------
     geom : geopandas.geoseries.GeoSeries
         geopandas GeoSeries containing k geometries.
-    dict : Dict[str, numpy.ndarray]
-        Dictionary of quantities to be written, each NumPy array should have length k.
+    dict : Dict[str, np.ndarray]
+        Dictionary of quantities to be written, each np array should have length k.
     filename : str
         Name of the file to be written.
 
@@ -1509,13 +1863,13 @@ def write_shp(
     geopandas.GeoDataFrame(val_DataFrame, geometry=geom).to_file(filename)
 
 
-def write_csv(dict: Dict[str, numpy.ndarray], filename: str) -> None:
+def write_csv(dict: Dict[str, np.ndarray], filename: str) -> None:
     """
     Write a data to csv file.
 
     Arguments
     ---------
-    dict : Dict[str, numpy.ndarray]
+    dict : Dict[str, np.ndarray]
         Value(s) to be written.
     filename : str
         Name of the file to be written.
@@ -1532,12 +1886,12 @@ def write_csv(dict: Dict[str, numpy.ndarray], filename: str) -> None:
         else:
             header = header + '"' + keys[i] + '"'
 
-    data = numpy.column_stack([array for array in dict.values()])
-    numpy.savetxt(filename, data, delimiter=", ", header=header, comments="")
+    data = np.column_stack([array for array in dict.values()])
+    np.savetxt(filename, data, delimiter=", ", header=header, comments="")
 
 
 def write_km_eroded_volumes(
-    km: numpy.ndarray, vol: numpy.ndarray, filename: str
+    km: np.ndarray, vol: np.ndarray, filename: str
 ) -> None:
     """
     Write a text file with eroded volume data binned per kilometre.
@@ -1559,6 +1913,7 @@ def write_km_eroded_volumes(
         for i in range(len(km)):
             valstr = "\t".join(["{:.2f}".format(x) for x in vol[i, :]])
             erofile.write("{:.2f}\t".format(km[i]) + valstr + "\n")
+
 
 def move_parameter_location(
     config: configparser.ConfigParser,
@@ -1630,98 +1985,6 @@ def sim2nc(oldfile: str) -> str:
     return ncfile
 
 
-def clip_path_to_kmbounds(
-    xykm: shapely.geometry.linestring.LineStringAdapter, kmbounds: Tuple[float, float],
-) -> shapely.geometry.linestring.LineStringAdapter:
-    """
-    Clip a chainage line to the relevant reach.
-
-    Arguments
-    ---------
-    xykm : shapely.geometry.linestring.LineStringAdapter
-        Original river chainage line.
-    kmbounds : Tuple[float, float]
-        Lower and upper limit for the chainage.
-
-    Returns
-    -------
-    xykm1 : shapely.geometry.linestring.LineStringAdapter
-        Clipped river chainage line.
-    """
-    start_i = None
-    end_i = None
-    for i, c in enumerate(xykm.coords):
-        if start_i is None:
-            if c[2] >= kmbounds[0]:
-                start_i = i
-        if c[2] >= kmbounds[1]:
-            end_i = i
-            break
-
-    if start_i is None:
-        raise Exception(
-            "Lower chainage bound {} is larger than the maximum chainage {} available".format(
-                kmbounds[0], xykm.coords[-1][2]
-            )
-        )
-    elif start_i == 0:
-        # lower bound (potentially) clipped to available reach
-        if xykm.coords[0][2] - kmbounds[0] > 0.1:
-            raise Exception(
-                "Lower chainage bound {} is smaller than the minimum chainage {} available".format(
-                    kmbounds[0], xykm.coords[0][2]
-                )
-            )
-        x0 = None
-    else:
-        alpha = (kmbounds[0] - xykm.coords[start_i - 1][2]) / (
-            xykm.coords[start_i][2] - xykm.coords[start_i - 1][2]
-        )
-        x0 = tuple(
-            (c1 + alpha * (c2 - c1))
-            for c1, c2 in zip(xykm.coords[start_i - 1], xykm.coords[start_i])
-        )
-        if alpha > 0.9:
-            # value close to first node (start_i), so let's skip that one
-            start_i = start_i + 1
-
-    if end_i is None:
-        if kmbounds[1] - xykm.coords[-1][2] > 0.1:
-            raise Exception(
-                "Upper chainage bound {} is larger than the maximum chainage {} available".format(
-                    kmbounds[1], xykm.coords[-1][2]
-                )
-            )
-        # else kmbounds[1] matches chainage of last point
-        if x0 is None:
-            # whole range available selected
-            pass
-        else:
-            xykm = shapely.geometry.LineString([x0] + xykm.coords[start_i:])
-    elif end_i == 0:
-        raise Exception(
-            "Upper chainage bound {} is smaller than the minimum chainage {} available".format(
-                kmbounds[1], xykm.coords[0][2]
-            )
-        )
-    else:
-        alpha = (kmbounds[1] - xykm.coords[end_i - 1][2]) / (
-            xykm.coords[end_i][2] - xykm.coords[end_i - 1][2]
-        )
-        x1 = tuple(
-            (c1 + alpha * (c2 - c1))
-            for c1, c2 in zip(xykm.coords[end_i - 1], xykm.coords[end_i])
-        )
-        if alpha < 0.1:
-            # value close to previous point (end_i - 1), so let's skip that one
-            end_i = end_i - 1
-        if x0 is None:
-            xykm = shapely.geometry.LineString(xykm.coords[:end_i] + [x1])
-        else:
-            xykm = shapely.geometry.LineString([x0] + xykm.coords[start_i:end_i] + [x1])
-    return xykm
-
-
 def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[float]]):
     """
     Read a parameter file, check its contents and return arrays of chainages and values.
@@ -1746,9 +2009,9 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
 
     Returns
     -------
-    km_thr : Optional[numpy.ndarray]
+    km_thr : Optional[np.ndarray]
         Array containing the chainage of the midpoints between the values.
-    val : numpy.ndarray
+    val : np.ndarray
         Array containing the values.
     """
     # print("Trying to read: ",filename)
@@ -1771,12 +2034,6 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
                     key, filename, km[val < 0]
                 )
             )
-    # if not valid is None:
-    #    isvalid = False
-    #    for valid_val in valid:
-    #        isvalid = isvalid | (val == valid_val)
-    #    if not isvalid.all():
-    #        raise Exception('Value of "{}" in "{}" should be in {}. Invalid value read for chainage(s): {}.'.format(key, filename, km[~isvalid]))
     if len(km) == 1:
         km_thr = None
     else:
@@ -1789,102 +2046,6 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
         # km_thr = (km[:-1] + km[1:]) / 2
         km_thr = km[1:]
     return km_thr, val
-
-
-def read_simdata(filename: str, indent: str = "") -> Tuple[SimulationObject, float]:
-    """
-    Read a deault set of quantities from a UGRID netCDF file coming from D-Flow FM (or similar).
-
-    Arguments
-    ---------
-    filename : str
-        Name of the simulation output file to be read.
-    indent : str
-        String to use for each line as indentation (default empty).
-
-    Raises
-    ------
-    Exception
-        If the file is not recognized as a D-Flow FM map-file.
-
-    Returns
-    -------
-    sim : SimulationObject
-        Dictionary containing the data read from the simulation output file.
-    dh0 : float
-        Threshold depth for detecting drying and flooding.
-    """
-    dum = numpy.array([])
-    sim: SimulationObject = {
-        "x_node": dum,
-        "y_node": dum,
-        "nnodes": dum,
-        "facenode": dum,
-        "zb_location": dum,
-        "zb_val": dum,
-        "zw_face": dum,
-        "h_face": dum,
-        "ucx_face": dum,
-        "ucy_face": dum,
-        "chz_face": dum,
-    }
-    # determine file type
-    path, name = os.path.split(filename)
-    if name[-6:] == "map.nc":
-        log_text("read_grid", indent=indent)
-        sim["x_node"] = read_fm_map(filename, "x", location="node")
-        sim["y_node"] = read_fm_map(filename, "y", location="node")
-        FNC = read_fm_map(filename, "face_node_connectivity")
-        if FNC.mask.shape == ():
-            # all faces have the same number of nodes
-            sim["nnodes"] = (
-                numpy.ones(FNC.data.shape[0], dtype=numpy.int) * FNC.data.shape[1]
-            )
-        else:
-            # varying number of nodes
-            sim["nnodes"] = FNC.mask.shape[1] - FNC.mask.sum(axis=1)
-        FNC.data[FNC.mask] = 0
-        # sim["facenode"] = FNC.data
-        sim["facenode"] = FNC
-        log_text("read_bathymetry", indent=indent)
-        sim["zb_location"] = "node"
-        sim["zb_val"] = read_fm_map(filename, "altitude", location="node")
-        log_text("read_water_level", indent=indent)
-        sim["zw_face"] = read_fm_map(filename, "Water level")
-        log_text("read_water_depth", indent=indent)
-        sim["h_face"] = numpy.maximum(
-            read_fm_map(filename, "sea_floor_depth_below_sea_surface"), 0.0
-        )
-        log_text("read_velocity", indent=indent)
-        sim["ucx_face"] = read_fm_map(filename, "sea_water_x_velocity")
-        sim["ucy_face"] = read_fm_map(filename, "sea_water_y_velocity")
-        log_text("read_chezy", indent=indent)
-        sim["chz_face"] = read_fm_map(filename, "Chezy roughness")
-
-        log_text("read_drywet", indent=indent)
-        rootgrp = netCDF4.Dataset(filename)
-        try:
-            filesource = rootgrp.converted_from
-            if filesource == "SIMONA":
-                dh0 = 0.1
-            else:
-                dh0 = 0.01
-        except:
-            dh0 = 0.01
-
-    elif name[:3] == "SDS":
-        dh0 = 0.1
-        raise Exception(
-            'WAQUA output files not yet supported. Unable to process "{}"'.format(name)
-        )
-    elif name[:4] == "trim":
-        dh0 = 0.01
-        raise Exception(
-            'Delft3D map files not yet supported. Unable to process "{}"'.format(name)
-        )
-    else:
-        raise Exception('Unable to determine file type for "{}"'.format(name))
-    return sim, dh0
 
 
 def get_progloc() -> str:
@@ -1901,4 +2062,11 @@ def get_progloc() -> str:
 
 class ConfigFileError(Exception):
     """Custom exception for configuration file errors."""
+
+    pass
+
+
+class SimulationFilesError(Exception):
+    """Custom exception for configuration file errors."""
+
     pass

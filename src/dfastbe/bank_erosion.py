@@ -37,9 +37,8 @@ import numpy
 import matplotlib.pyplot as plt
 import configparser
 from dfastbe import __version__
-from dfastbe.io import ConfigFile, log_text, read_simdata, \
-    clip_path_to_kmbounds, read_xyc, write_shp_pnt, \
-    write_km_eroded_volumes, write_shp, write_csv
+from dfastbe.io import ConfigFile, log_text, read_simulation_data, \
+    read_xyc, write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData
 
 from dfastbe.utils import timed_logger
 from dfastbe.kernel import get_zoom_extends, get_bbox
@@ -57,7 +56,7 @@ def bankerosion(filename="dfastbe.cfg") -> None:
     # read configuration file
     timed_logger("reading configuration file ...")
     config = ConfigFile.read(filename)
-    rootdir = config.adjust_filenames()
+    rootdir = str(config.root_dir)
     config = config.config
     bankerosion_core(config, rootdir, False)
 
@@ -90,6 +89,8 @@ def bankerosion_core(
     )
     log_text("-")
     config_file = ConfigFile(config)
+    river_data = RiverData(config_file)
+
     # check if additional debug output is requested
     debug = config_file.get_bool("General", "DebugOutput", False)
 
@@ -158,7 +159,7 @@ def bankerosion_core(
     log_text("-")
     log_text("read_simdata", dict={"file": simfile})
     log_text("-")
-    sim, dh0 = read_simdata(simfile)
+    sim, dh0 = read_simulation_data(simfile)
     log_text("-")
 
     log_text("derive_topology")
@@ -166,16 +167,11 @@ def bankerosion_core(
     nnodes = sim["nnodes"]
     en, ef, fe, boundary_edge_nrs = _derive_topology_arrays(fn, nnodes)
 
-    # read chainage path
-    xykm = config_file.get_xy_km()
-
     # clip the chainage path to the range of chainages of interest
-    km_bounds = config_file.get_km_bounds()
+    km_bounds = river_data.station_bounds
     log_text("clip_chainage", dict={"low": km_bounds[0], "high": km_bounds[1]})
 
-    xykm = clip_path_to_kmbounds(xykm, km_bounds)
-    xykm_numpy = numpy.array(xykm)
-    xy_numpy = xykm_numpy[:, :2]
+    stations_coords = river_data.masked_profile_arr[:, :2]
 
     # read bank lines
     banklines = config_file.get_bank_lines(bank_dir)
@@ -206,7 +202,7 @@ def bankerosion_core(
     to_right = [True] * n_banklines
     for ib, bcrds in enumerate(bank_crds):
         bcrds_mid = (bcrds[:-1, :] + bcrds[1:, :]) / 2
-        km_mid = support.project_km_on_line(bcrds_mid, xykm_numpy)
+        km_mid = support.project_km_on_line(bcrds_mid, river_data.masked_profile_arr)
 
         # check if bank line is defined from low chainage to high chainage
         if km_mid[0] > km_mid[-1]:
@@ -219,7 +215,7 @@ def bankerosion_core(
 
         # check if bank line is left or right bank
         # when looking from low to high chainage
-        to_right[ib] = support.on_right_side(bcrds, xy_numpy)
+        to_right[ib] = support.on_right_side(bcrds, stations_coords)
         if to_right[ib]:
             log_text("right_side_bank", dict={"ib": ib + 1})
         else:
@@ -243,7 +239,7 @@ def bankerosion_core(
 
     # map km to axis points, further using axis
     log_text("chainage_to_axis")
-    river_axis_km = support.project_km_on_line(river_axis_numpy, xykm_numpy)
+    river_axis_km = support.project_km_on_line(river_axis_numpy, river_data.masked_profile_arr)
     write_shp_pnt(
         river_axis_numpy,
         {"chainage": river_axis_km},
@@ -251,8 +247,8 @@ def bankerosion_core(
     )
 
     # clip river axis to reach of interest
-    i1 = numpy.argmin(((xy_numpy[0] - river_axis_numpy) ** 2).sum(axis=1))
-    i2 = numpy.argmin(((xy_numpy[-1] - river_axis_numpy) ** 2).sum(axis=1))
+    i1 = numpy.argmin(((stations_coords[0] - river_axis_numpy) ** 2).sum(axis=1))
+    i2 = numpy.argmin(((stations_coords[-1] - river_axis_numpy) ** 2).sum(axis=1))
     if i1 < i2:
         river_axis_km = river_axis_km[i1 : i2 + 1]
         river_axis_numpy = river_axis_numpy[i1 : i2 + 1]
@@ -267,7 +263,7 @@ def bankerosion_core(
     # map to output interval
     km_bin = (river_axis_km.min(), river_axis_km.max(), km_step)
     km_mid = kernel.get_km_bins(km_bin, type=3)  # get mid points
-    xykm_bin_numpy = support.xykm_bin(xykm_numpy, km_bin)
+    xykm_bin_numpy = support.xykm_bin(river_data.masked_profile_arr, km_bin)
 
     # read fairway file
     fairway_file = config_file.get_str("Erosion", "Fairway")
@@ -277,7 +273,7 @@ def bankerosion_core(
     # map km to fairway points, further using axis
     log_text("chainage_to_fairway")
     fairway_numpy = numpy.array(river_axis.coords)
-    fairway_km = support.project_km_on_line(fairway_numpy, xykm_numpy)
+    fairway_km = support.project_km_on_line(fairway_numpy, river_data.masked_profile_arr)
     write_shp_pnt(
         fairway_numpy,
         {"chainage": fairway_km},
@@ -285,8 +281,8 @@ def bankerosion_core(
     )
 
     # clip fairway to reach of interest
-    i1 = numpy.argmin(((xy_numpy[0] - fairway_numpy) ** 2).sum(axis=1))
-    i2 = numpy.argmin(((xy_numpy[-1] - fairway_numpy) ** 2).sum(axis=1))
+    i1 = numpy.argmin(((stations_coords[0] - fairway_numpy) ** 2).sum(axis=1))
+    i2 = numpy.argmin(((stations_coords[-1] - fairway_numpy) ** 2).sum(axis=1))
     if i1 < i2:
         fairway_km = fairway_km[i1 : i2 + 1]
         fairway_numpy = fairway_numpy[i1 : i2 + 1]
@@ -557,7 +553,7 @@ def bankerosion_core(
         log_text("-", indent="  ")
         log_text("read_simdata", dict={"file": simfiles[iq]}, indent="  ")
         log_text("-", indent="  ")
-        sim, dh0 = read_simdata(simfiles[iq], indent="  ")
+        sim, dh0 = read_simulation_data(simfiles[iq], indent="  ")
         log_text("-", indent="  ")
         fnc = sim["facenode"]
 
@@ -853,7 +849,7 @@ def bankerosion_core(
         log_text("=")
         log_text("create_figures")
         ifig = 0
-        bbox = get_bbox(xykm_numpy)
+        bbox = get_bbox(river_data.masked_profile_arr)
 
         if saveplot_zoomed:
             bank_crds_mid = []
@@ -863,7 +859,7 @@ def bankerosion_core(
 
         fig, ax = df_plt.plot1_waterdepth_and_banklines(
             bbox,
-            xykm_numpy,
+            river_data.masked_profile_arr,
             banklines,
             fn,
             sim["nnodes"],
@@ -886,7 +882,7 @@ def bankerosion_core(
 
         fig, ax = df_plt.plot2_eroded_distance_and_equilibrium(
             bbox,
-            xykm_numpy,
+            river_data.masked_profile_arr,
             bank_crds,
             dn_tot,
             to_right,
@@ -1046,7 +1042,7 @@ def bankerosion_core(
 
         fig, ax = df_plt.plot7_banktype(
             bbox,
-            xykm_numpy,
+            river_data.masked_profile_arr,
             bank_crds,
             banktype,
             taucls_str,

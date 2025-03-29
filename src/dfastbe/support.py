@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Copyright (C) 2020 Stichting Deltares.
 
@@ -27,17 +26,14 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Dict, List, Tuple, Union
-from dfastbe.io import SimulationObject
-
-# import matplotlib
-# import matplotlib.pyplot
+from typing import List, Tuple
 
 import numpy
 import math
 import shapely
 import geopandas
-import sys
+from shapely.geometry import Polygon, Point, LineString, MultiLineString
+from shapely.ops import linemerge
 
 
 def project_km_on_line(
@@ -342,9 +338,9 @@ def intersect_line_mesh(
                 # using numpy math might be faster, but since it's should only be for a few points let's use Shapely
                 # a point on the edge of a polygon is not contained in the polygon.
                 # a point on the edge of two polygons will thus be considered outside the mesh whereas it actually isn't.
-                pnt = shapely.geometry.Point(bp[0])
+                pnt = Point(bp[0])
                 for k in possible_cells:
-                    polygon_k = shapely.geometry.Polygon(
+                    polygon_k = Polygon(
                         numpy.concatenate(
                             (xf[k : k + 1, : nnodes[k]], yf[k : k + 1, : nnodes[k]]),
                             axis=0,
@@ -362,7 +358,7 @@ def intersect_line_mesh(
                             (xf[k : k + 1, : nnodes[k]], yf[k : k + 1, : nnodes[k]]),
                             axis=0,
                         ).T
-                        line_k = shapely.geometry.LineString(
+                        line_k = LineString(
                             numpy.concatenate(nd, nd[0:1], axis=0)
                         )
                         if line_k.contains(pnt):
@@ -452,8 +448,8 @@ def intersect_line_mesh(
                         else:
                             print("{}: -- no slices along this segment --".format(j))
                         if index >= 0:
-                            pnt = shapely.geometry.Point(bpj)
-                            polygon_k = shapely.geometry.Polygon(
+                            pnt = Point(bpj)
+                            polygon_k = Polygon(
                                 numpy.concatenate(
                                     (
                                         xf[index : index + 1, : nnodes[index]],
@@ -1011,9 +1007,9 @@ def map_line_mesh(
             else:
                 # one or more possible cells, check whether it's really inside one of them
                 # using numpy math might be faster, but since it's should only be for a few points let's using shapely
-                pnt = shapely.geometry.Point(bp[0])
+                pnt = Point(bp[0])
                 for k in possible_cells:
-                    polygon_k = shapely.geometry.Polygon(
+                    polygon_k = Polygon(
                         numpy.concatenate(
                             (xf[k : k + 1, : nnodes[k]], yf[k : k + 1, : nnodes[k]]),
                             axis=0,
@@ -1478,8 +1474,8 @@ def add_point(
 
 
 def clip_bank_lines(
-    banklines: geopandas.geoseries.GeoSeries, bankarea: shapely.geometry.polygon.Polygon
-) -> shapely.geometry.multilinestring.MultiLineString:
+    banklines: geopandas.geoseries.GeoSeries, bank_area: Polygon
+) -> MultiLineString:
     """
     Clip the bank line segments to the area of interest.
 
@@ -1487,31 +1483,31 @@ def clip_bank_lines(
     ---------
     banklines : geopandas.geoseries.GeoSeries
         Unordered set of bank line segments.
-    bankarea : shapely.geometry.polygon.Polygon
+    bank_area : Polygon
         A search area corresponding to one of the bank search lines.
     
     Returns
     -------
-    clipped_banklines : shapely.geometry.multilinestring.MultiLineString
+    clipped_banklines : MultiLineString
         Unordered set of bank line segments, clipped to bank area.
     """
     # intersection returns one MultiLineString object
-    clipped_banklines = banklines.intersection(bankarea)[0]
+    clipped_banklines = banklines.intersection(bank_area)[0]
 
     return clipped_banklines
 
 
 def sort_connect_bank_lines(
-    banklines: shapely.geometry.multilinestring.MultiLineString,
+    banklines: MultiLineString,
     xykm: shapely.geometry.linestring.LineString,
     right_bank: bool,
-) -> shapely.geometry.LineString:
+) -> LineString:
     """
     Connect the bank line segments to bank lines.
 
     Arguments
     ---------
-    banklines : shapely.geometry.multilinestring.MultiLineString
+    banklines : MultiLineString
         Unordered set of bank line segments.
     xykm : shapely.geometry.linestring.LineString
         Array containing x,y,chainage values.
@@ -1538,7 +1534,7 @@ def sort_connect_bank_lines(
         minloc = 1e20
         maxloc = -1
         for j, p in enumerate(bl.coords):
-            loc = xykm.project(shapely.geometry.Point(p))
+            loc = xykm.project(Point(p))
             if loc < minloc:
                 minloc = loc
                 minj = j
@@ -1571,14 +1567,14 @@ def sort_connect_bank_lines(
                 op = op2
             else:
                 op = op1
-            banklines_list[i] = shapely.geometry.LineString(op)
+            banklines_list[i] = LineString(op)
         else:
             if minj < maxj:
-                banklines_list[i] = shapely.geometry.LineString(
+                banklines_list[i] = LineString(
                     bl.coords[minj : maxj + 1]
                 )
             else:  # minj > maxj
-                banklines_list[i] = shapely.geometry.LineString(
+                banklines_list[i] = LineString(
                     bl.coords[maxj : minj + 1][::-1]
                 )
         lengths[i] = maxloc - minloc
@@ -1608,9 +1604,9 @@ def sort_connect_bank_lines(
                         # a line string of a single point would remain
                         lengths[j] = 0
                         break
-                    loc = xykm.project(shapely.geometry.Point(p))
+                    loc = xykm.project(Point(p))
                     if loc >= maxlocs[i]:
-                        banklines_list[j] = shapely.geometry.LineString(bl.coords[k:])
+                        banklines_list[j] = LineString(bl.coords[k:])
                         minlocs[j] = loc
                         break
         # if line partially overlaps ... but stick out on the low side
@@ -1626,9 +1622,9 @@ def sort_connect_bank_lines(
                         # a line string of a single point would remain
                         lengths[j] = 0
                         break
-                    loc = xykm.project(shapely.geometry.Point(p))
+                    loc = xykm.project(Point(p))
                     if loc <= minlocs[i]:
-                        banklines_list[j] = shapely.geometry.LineString(bl.coords[:k])
+                        banklines_list[j] = LineString(bl.coords[:k])
                         maxlocs[j] = loc
                         break
 
@@ -1638,233 +1634,9 @@ def sort_connect_bank_lines(
     new_bank_coords = []
     for i in idx2[idx]:
         new_bank_coords.extend(banklines_list[i].coords)
-    bank = shapely.geometry.LineString(new_bank_coords)
+    bank = LineString(new_bank_coords)
 
     return bank
-
-
-def clip_search_lines(
-    line: List[shapely.geometry.linestring.LineStringAdapter],
-    xykm: shapely.geometry.linestring.LineStringAdapter,
-    max_river_width: float = 1000,
-) -> Tuple[List[shapely.geometry.linestring.LineStringAdapter], float]:
-    """
-    Clip the list of lines to the envelope of certain size surrounding a reference line.
-
-    Arguments
-    ---------
-    line : List[shapely.geometry.linestring.LineStringAdapter]
-        List of search lines to be clipped.
-    xykm : shapely.geometry.linestring.LineStringAdapter
-        Reference line.
-    max_river_width: float
-        Maximum distance away from xykm.
-    
-    Returns
-    -------
-    line : List[shapely.geometry.linestring.LineStringAdapter]
-        List of clipped search lines.
-    maxmaxd: float
-        Maximum distance from any point within line to reference line.
-    """
-    nbank = len(line)
-    kmbuffer = xykm.buffer(max_river_width, cap_style=2)
-
-    # The algorithm uses simplified geometries for determining the distance between lines for speed.
-    # Stay accurate to within about 1 m
-    xy_simplified = xykm.simplify(1)
-
-    maxmaxd = 0
-    for b in range(nbank):
-        # Clip the bank search lines to the reach of interest (indicated by the reference line).
-        line[b] = line[b].intersection(kmbuffer)
-
-        # If the bank search line breaks into multiple parts, select the part closest to the reference line.
-        if line[b].geom_type == "MultiLineString":
-            dmin = max_river_width
-            imin = 0
-            for i in range(len(line[b])):
-                line_simplified = line[b][i].simplify(1)
-                dmin_i = line_simplified.distance(xy_simplified)
-                if dmin_i < dmin:
-                    dmin = dmin_i
-                    imin = i
-            line[b] = line[b][imin]
-
-        # Determine the maximum distance from a point on this line to the reference line.
-        line_simplified = line[b].simplify(1)
-        maxd = max(
-            [
-                shapely.geometry.Point(c).distance(xy_simplified)
-                for c in line_simplified.coords
-            ]
-        )
-
-        # Increase the value of maxd by 2 to account for error introduced by using simplified lines.
-        maxmaxd = max(maxmaxd, maxd + 2)
-
-    return line, maxmaxd
-
-
-def convert_search_lines_to_bank_polygons(
-    search_lines: List[numpy.ndarray], dlines: List[float]
-):
-    """
-    Construct a series of polygons surrounding the bank search lines.
-
-    Arguments
-    ---------
-    search_lines : List[numpy.ndarray]
-        List of arrays containing the x,y-coordinates of a bank search lines.
-    dlines : List[float]
-        Array containing the search distance value per bank line.
-        
-    Results
-    -------
-    bankareas
-        Array containing the areas of interest surrounding the bank search lines.
-    """
-    nbank = len(search_lines)
-    bankareas = [None] * nbank
-    for b, distance in enumerate(dlines):
-        bankareas[b] = search_lines[b].buffer(distance, cap_style=2)
-
-    return bankareas
-
-
-def clip_simdata(
-    sim: SimulationObject, xykm: numpy.ndarray, maxmaxd: float
-) -> SimulationObject:
-    """
-    Clip the simulation mesh and data to the area of interest sufficiently close to the reference line.
-
-    Arguments
-    ---------
-    sim : SimulationObject
-        Simulation data: mesh, bed levels, water levels, velocities, etc.
-    xykm : numpy.ndarray
-        Reference line.
-    maxmaxd : float
-        Maximum distance between the reference line and a point in the area of
-        interest defined based on the search lines for the banks and the search
-        distance.
-    
-    Returns
-    -------
-    sim1 : SimulationObject
-        Clipped simulation data: mesh, bed levels, water levels, velocities, etc.
-    """
-    maxdx = maxmaxd
-    xybuffer = xykm.buffer(maxmaxd + maxdx)
-    bbox = xybuffer.envelope.exterior
-    xmin = bbox.coords[0][0]
-    xmax = bbox.coords[1][0]
-    ymin = bbox.coords[0][1]
-    ymax = bbox.coords[2][1]
-
-    xybprep = shapely.prepared.prep(xybuffer)
-    x = sim["x_node"]
-    y = sim["y_node"]
-    nnodes = x.shape
-    keep = (x > xmin) & (x < xmax) & (y > ymin) & (y < ymax)
-    for i in range(x.size):
-        if keep[i] and not xybprep.contains(shapely.geometry.Point((x[i], y[i]))):
-            keep[i] = False
-
-    fnc = sim["facenode"]
-    keepface = keep[fnc].all(axis=1)
-    renum = numpy.zeros(nnodes, dtype=numpy.int)
-    renum[keep] = range(sum(keep))
-    sim["facenode"] = renum[fnc[keepface]]
-
-    sim["x_node"] = x[keep]
-    sim["y_node"] = y[keep]
-    if sim["zb_location"] == "node":
-        sim["zb_val"] = sim["zb_val"][keep]
-    else:
-        sim["zb_val"] = sim["zb_val"][keepface]
-
-    sim["nnodes"] = sim["nnodes"][keepface]
-    sim["zw_face"] = sim["zw_face"][keepface]
-    sim["h_face"] = sim["h_face"][keepface]
-    sim["ucx_face"] = sim["ucx_face"][keepface]
-    sim["ucy_face"] = sim["ucy_face"][keepface]
-    sim["chz_face"] = sim["chz_face"][keepface]
-
-    return sim
-
-
-def get_banklines(sim: SimulationObject, h0: float) -> geopandas.GeoSeries:
-    """
-    Detect all possible bank line segments based on simulation data.
-    
-    Use a critical water depth h0 as water depth threshold for dry/wet boundary.
-
-    Arguments
-    ---------
-    sim : SimulationObject
-        Simulation data: mesh, bed levels, water levels, velocities, etc.
-    h0 : float
-        Critical water depth for determining the banks.
-    
-    Returns
-    -------
-    banklines : geopandas.GeoSeries
-        The collection of all detected bank segments in the remaining model area.
-    """
-    FNC = sim["facenode"]
-    NNODES = sim["nnodes"]
-    max_nnodes = FNC.shape[1]
-    X = sim["x_node"][FNC]
-    Y = sim["y_node"][FNC]
-    ZB = sim["zb_val"][FNC]
-    ZW = sim["zw_face"]
-    H_face = sim["h_face"]
-    WET_face = H_face > h0
-    #
-    nnodes_total = len(sim["x_node"])
-    try:
-        mask = ~FNC.mask
-        nonmasked = sum(mask.reshape(FNC.size))
-        FNCm = FNC[mask]
-        ZWm = numpy.repeat(ZW, max_nnodes)[mask]
-    except:
-        mask = numpy.repeat(True, FNC.size)
-        nonmasked = FNC.size
-        FNCm = FNC.reshape(nonmasked)
-        ZWm = numpy.repeat(ZW, max_nnodes).reshape(nonmasked)
-    ZW_node = numpy.bincount(FNCm, weights=ZWm, minlength=nnodes_total)
-    NVal = numpy.bincount(FNCm, weights=numpy.ones(nonmasked), minlength=nnodes_total)
-    ZW_node = ZW_node / numpy.maximum(NVal, 1)
-    ZW_node[NVal == 0] = sim["zb_val"][NVal == 0]
-    #
-    H_node = ZW_node[FNC] - ZB
-    WET_node = H_node > h0
-    NWET = WET_node.sum(axis=1)
-    MASK = NWET.mask.size > 1
-    #
-    nfaces = len(FNC)
-    Lines = [None] * nfaces
-    frac = 0
-    for i in range(nfaces):
-        if i >= frac * (nfaces - 1) / 10:
-            print("{}%".format(int(frac * 10)))
-            frac = frac + 1
-        nnodes = NNODES[i]
-        nwet = NWET[i]
-        if (MASK and nwet.mask) or nwet == 0 or nwet == nnodes:
-            # all dry or all wet
-            pass
-        else:
-            # some nodes dry and some nodes wet: determine the line
-            if nnodes == 3:
-                Lines[i] = tri_to_line(X[i], Y[i], WET_node[i], H_node[i], h0)
-            else:
-                Lines[i] = poly_to_line(nnodes, X[i], Y[i], WET_node[i], H_node[i], h0)
-    Lines = [line for line in Lines if not line is None and not line.is_empty]
-    multi_line = shapely.ops.cascaded_union(Lines)
-    merged_line = shapely.ops.linemerge(multi_line)
-    return geopandas.GeoSeries(merged_line)
 
 
 def poly_to_line(
@@ -1909,8 +1681,8 @@ def poly_to_line(
     if len(Lines) == 0:
         return None
     else:
-        multi_line = shapely.geometry.MultiLineString(Lines)
-        merged_line = shapely.ops.linemerge(multi_line)
+        multi_line = MultiLineString(Lines)
+        merged_line = linemerge(multi_line)
         return merged_line
 
 

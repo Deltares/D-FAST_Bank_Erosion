@@ -1,174 +1,258 @@
-from typing import List
+"""Bank line detection module."""
+
 import os
-import configparser
-import numpy as np
+from pathlib import Path
+from typing import Dict, List, Tuple
+
 import geopandas as gpd
+import numpy as np
 from matplotlib import pyplot as plt
-from setuptools.command.setopt import config_file
+from shapely.geometry.polygon import Polygon
+from shapely.ops import cascaded_union, linemerge
 
-from dfastbe import support
 from dfastbe import __version__
-from dfastbe.io import ConfigFile, log_text, clip_path_to_kmbounds, read_simdata
-from dfastbe.kernel import get_bbox, get_zoom_extends
-from dfastbe.utils import timed_logger
 from dfastbe import plotting as df_plt
+from dfastbe.io import (
+    ConfigFile,
+    RiverData,
+    SimulationObject,
+    clip_simulation_data,
+    log_text,
+    read_simulation_data,
+)
+from dfastbe.kernel import get_bbox, get_zoom_extends
+from dfastbe.support import (
+    clip_bank_lines,
+    on_right_side,
+    poly_to_line,
+    project_km_on_line,
+    sort_connect_bank_lines,
+    tri_to_line,
+)
+from dfastbe.utils import timed_logger
+
+MAX_RIVER_WIDTH = 1000
+RAW_DETECTED_BANKLINE_FRAGMENTS_FILE = "raw_detected_bankline_fragments"
+BANK_AREAS_FILE = "bank_areas"
+BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE = "bankline_fragments_per_bank_area"
+EXTENSION = ".shp"
 
 
-def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -> None:
-    """
-    Run the bank line detection analysis for a specified configuration.
+class BankLines:
+    """Bank line detection class."""
 
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Analysis configuration settings.
-    rootdir : str
-        Root folder for the analysis (may be relative to current work directory).
-    gui : bool
-        Flag indicating whether this routine is called from the GUI.
-    """
-    config_file = ConfigFile(config)
-    timed_logger("-- start analysis --")
+    def __init__(self, config_file: ConfigFile, gui: bool = False):
+        """Bank line initializer.
 
-    log_text(
-        "header_banklines",
-        dict={
-            "version": __version__,
-            "location": "https://github.com/Deltares/D-FAST_Bank_Erosion",
-        },
-    )
-    log_text("-")
+        Args:
+            config_file : configparser.ConfigParser
+                Analysis configuration settings.
+            gui : bool
+                Flag indicating whether this routine is called from the GUI.
+        """
+        # the root_dir is used to get the FigureDir in the `_get_plotting_flags`
+        self.root_dir = config_file.root_dir
 
-    # check output dir for bank lines
-    bank_output_dir = config_file.get_str("General", "BankDir")
-    log_text("bankdir_out", dict={"dir": bank_output_dir})
-    if os.path.exists(bank_output_dir):
-        log_text("overwrite_dir", dict={"dir": bank_output_dir})
-    else:
-        os.makedirs(bank_output_dir)
+        self._config_file = config_file
+        self.gui = gui
+        self.bank_output_dir = self._get_bank_output_dir()
 
-    # set plotting flags
-    plotting = config_file.get_bool("General", "Plotting", True)
-    if plotting:
-        saveplot = config_file.get_bool("General", "SavePlots", True)
-        saveplot_zoomed = config_file.get_bool("General", "SaveZoomPlots", True)
-        zoom_km_step = config_file.get_float("General", "ZoomStepKM", 1.0)
-        if zoom_km_step < 0.01:
-            saveplot_zoomed = False
-        closeplot = config_file.get_bool("General", "ClosePlots", False)
-    else:
-        saveplot = False
-        saveplot_zoomed = False
-        closeplot = False
+        # set plotting flags
+        self.plot_data = config_file.get_bool("General", "Plotting", True)
+        self.plot_flags = self._get_plotting_flags()
+        self.river_data = RiverData(config_file)
 
-    # as appropriate check output dir for figures and file format
-    if saveplot:
-        figdir = config_file.get_str("General", "FigureDir", f"{rootdir}{os.sep}figure")
-        log_text("figure_dir", dict={"dir": figdir})
-        if os.path.exists(figdir):
-            log_text("overwrite_dir", dict={"dir": figdir})
+        self.simulation_data, self.h0 = self._get_simulation_data()
+
+    def _get_simulation_data(self) -> Tuple[SimulationObject, float]:
+        # read simulation data and drying flooding threshold dh0
+        sim_file = self.config_file.get_sim_file("Detect", "")
+        log_text("read_simdata", dict={"file": sim_file})
+        simulation_data, dh0 = read_simulation_data(sim_file)
+        # increase critical water depth h0 by flooding threshold dh0
+        # get critical water depth used for defining bank line (default = 0.0 m)
+        critical_water_depth = self.config_file.get_float(
+            "Detect", "WaterDepth", default=0
+        )
+        h0 = critical_water_depth + dh0
+        return simulation_data, h0
+
+    @property
+    def config_file(self) -> ConfigFile:
+        """Configuration file object."""
+        return self._config_file
+
+    @property
+    def max_river_width(self) -> int:
+        """Maximum river width in meters."""
+        return MAX_RIVER_WIDTH
+
+    def _get_bank_output_dir(self) -> Path:
+        bank_output_dir = self.config_file.get_str("General", "BankDir")
+        log_text("bankdir_out", dict={"dir": bank_output_dir})
+        if os.path.exists(bank_output_dir):
+            log_text("overwrite_dir", dict={"dir": bank_output_dir})
         else:
-            os.makedirs(figdir)
-        plot_ext = config_file.get_str("General", "FigureExt", ".png")
+            os.makedirs(bank_output_dir)
 
-    # read chainage path
-    xykm = config_file.get_xy_km()
+        return Path(bank_output_dir)
 
-    # clip the chainage path to the range of chainages of interest
-    kmbounds = config_file.get_km_bounds()
-    log_text("clip_chainage", dict={"low": kmbounds[0], "high": kmbounds[1]})
-    xykm = clip_path_to_kmbounds(xykm, kmbounds)
-    xykm_numpy = np.array(xykm)
-    xy_numpy = xykm_numpy[:, :2]
+    def _get_plotting_flags(self) -> Dict[str, bool]:
+        """Get the plotting flags from the configuration file.
 
-    # read bank search lines
-    max_river_width = 1000
-    search_lines = config_file.get_search_lines()
-    search_lines, maxmaxd = support.clip_search_lines(
-        search_lines, xykm, max_river_width
-    )
-    n_searchlines = len(search_lines)
+        Returns:
+            data (Dict[str, bool]):
+                Dictionary containing the plotting flags.
+                save_plot (bool): Flag indicating whether to save the plot.
+                save_plot_zoomed (bool): Flag indicating whether to save the zoomed plot.
+                zoom_km_step (float): Step size for zooming in on the plot.
+                close_plot (bool): Flag indicating whether to close the plot.
+        """
+        if self.plot_data:
+            save_plot = self.config_file.get_bool("General", "SavePlots", True)
+            save_plot_zoomed = self.config_file.get_bool(
+                "General", "SaveZoomPlots", True
+            )
+            zoom_km_step = self.config_file.get_float("General", "ZoomStepKM", 1.0)
+            if zoom_km_step < 0.01:
+                save_plot_zoomed = False
+            close_plot = self.config_file.get_bool("General", "ClosePlots", False)
+        else:
+            save_plot = False
+            save_plot_zoomed = False
+            close_plot = False
 
-    # convert search lines to bank polygons
-    dlines = config_file.get_bank_search_distances(n_searchlines)
-    bankareas = support.convert_search_lines_to_bank_polygons(
-        search_lines, dlines
-    )
+        data = {
+            "save_plot": save_plot,
+            "save_plot_zoomed": save_plot_zoomed,
+            "zoom_km_step": zoom_km_step,
+            "close_plot": close_plot,
+        }
 
-    # determine whether search lines are located on left or right
-    to_right = [True] * n_searchlines
-    for ib in range(n_searchlines):
-        to_right[ib] = support.on_right_side(
-            np.array(search_lines[ib]), xy_numpy
+        # as appropriate, check output dir for figures and file format
+        if save_plot:
+            fig_dir = self.config_file.get_str(
+                "General", "FigureDir", f"{self.root_dir}{os.sep}figure"
+            )
+            log_text("figure_dir", dict={"dir": fig_dir})
+            if os.path.exists(fig_dir):
+                log_text("overwrite_dir", dict={"dir": fig_dir})
+            else:
+                os.makedirs(fig_dir)
+            plot_ext = self.config_file.get_str("General", "FigureExt", ".png")
+            data = data | {
+                "fig_dir": fig_dir,
+                "plot_ext": plot_ext,
+            }
+
+        return data
+
+    def detect(self) -> None:
+        """Run the bank line detection analysis for a specified configuration."""
+        config_file = self.config_file
+        river_data = self.river_data
+        timed_logger("-- start analysis --")
+
+        log_text(
+            "header_banklines",
+            dict={
+                "version": __version__,
+                "location": "https://github.com/Deltares/D-FAST_Bank_Erosion",
+            },
+        )
+        log_text("-")
+
+        # clip the chainage path to the range of chainages of interest
+        km_bounds = river_data.station_bounds
+        river_profile = river_data.masked_profile
+        stations_coords = river_data.masked_profile_arr[:, :2]
+        masked_search_lines, max_distance = river_data.clip_search_lines()
+
+        # convert search lines to bank polygons
+        d_lines = config_file.get_bank_search_distances(river_data.num_search_lines)
+        bank_areas: List[Polygon] = self._convert_search_lines_to_bank_polygons(
+            masked_search_lines, d_lines
         )
 
-    # get simulation file name
-    simfile = config_file.get_sim_file("Detect", "")
+        # determine whether search lines are located on the left or right
+        to_right = [True] * river_data.num_search_lines
+        for ib in range(river_data.num_search_lines):
+            to_right[ib] = on_right_side(
+                np.array(masked_search_lines[ib]), stations_coords
+            )
 
-    # get critical water depth used for defining bank line (default = 0.0 m)
-    h0 = config_file.get_float("Detect", "WaterDepth", default=0)
+        # clip simulation data to boundaries ...
+        log_text("clip_data")
+        sim = clip_simulation_data(self.simulation_data, river_profile, max_distance)
 
-    # read simulation data and drying flooding threshold dh0
-    log_text("-")
-    log_text("read_simdata", dict={"file": simfile})
-    log_text("-")
-    sim, dh0 = read_simdata(simfile)
-    log_text("-")
+        # derive bank lines (get_banklines)
+        log_text("identify_banklines")
+        banklines = self._get_bank_lines(sim, self.h0)
 
-    # increase critical water depth h0 by flooding threshold dh0
-    h0 = h0 + dh0
+        # clip the set of detected bank lines to the bank areas
+        log_text("simplify_banklines")
+        bank = [None] * river_data.num_search_lines
+        clipped_banklines = [None] * river_data.num_search_lines
+        for ib, bank_area in enumerate(bank_areas):
+            log_text("bank_lines", dict={"ib": ib + 1})
+            clipped_banklines[ib] = clip_bank_lines(banklines, bank_area)
+            bank[ib] = sort_connect_bank_lines(
+                clipped_banklines[ib], river_profile, to_right[ib]
+            )
 
-    # clip simulation data to boundaries ...
-    log_text("clip_data")
-    sim = support.clip_simdata(sim, xykm, maxmaxd)
+        # save bank_file
+        self.save(bank, banklines, clipped_banklines, bank_areas)
 
-    # derive bank lines (getbanklines)
-    log_text("identify_banklines")
-    banklines = support.get_banklines(sim, h0)
-    banklines.to_file(bank_output_dir + os.sep + "raw_detected_bankline_fragments.shp")
-    gpd.GeoSeries(bankareas).to_file(bank_output_dir + os.sep + "bank_areas.shp")
+        if self.plot_data:
+            self.plot(
+                river_data.masked_profile_arr,
+                self.plot_flags,
+                river_data.num_search_lines,
+                bank,
+                km_bounds,
+                bank_areas,
+                sim,
+            )
 
-    # clip the set of detected bank lines to the bank areas
-    log_text("simplify_banklines")
-    bank = [None] * n_searchlines
-    clipped_banklines = [None] * n_searchlines
-    for ib, bankarea in enumerate(bankareas):
-        log_text("bank_lines", dict={"ib": ib + 1})
-        clipped_banklines[ib] = support.clip_bank_lines(banklines, bankarea)
-        bank[ib] = support.sort_connect_bank_lines(
-            clipped_banklines[ib], xykm, to_right[ib]
-        )
-    gpd.GeoSeries(clipped_banklines).to_file(
-        bank_output_dir + os.sep + "bankline_fragments_per_bank_area.shp"
-    )
-    log_text("-")
+        log_text("end_banklines")
+        timed_logger("-- stop analysis --")
 
-    # save bankfile
-    bankname = config_file.get_str("General", "BankFile", "bankfile")
-    bankfile = bank_output_dir + os.sep + bankname + ".shp"
-    log_text("save_banklines", dict={"file": bankfile})
-    gpd.GeoSeries(bank).to_file(bankfile)
-
-    if plotting:
+    def plot(
+        self,
+        xy_km_numpy: np.ndarray,
+        plot_flags: Dict[str, bool],
+        n_search_lines: int,
+        bank: List,
+        km_bounds,
+        bank_areas,
+        sim,
+    ):
+        """Plot the bank lines and the simulation data."""
         log_text("=")
         log_text("create_figures")
-        ifig = 0
-        bbox = get_bbox(xykm_numpy)
+        i_fig = 0
+        bbox = get_bbox(xy_km_numpy)
 
-        if saveplot_zoomed:
+        if plot_flags["save_plot_zoomed"]:
             bank_crds: List[np.ndarray] = []
             bank_km: List[np.ndarray] = []
-            for ib in range(n_searchlines):
+            for ib in range(n_search_lines):
                 bcrds_numpy = np.array(bank[ib])
-                km_numpy = support.project_km_on_line(bcrds_numpy, xykm_numpy)
+                km_numpy = project_km_on_line(bcrds_numpy, xy_km_numpy)
                 bank_crds.append(bcrds_numpy)
                 bank_km.append(km_numpy)
-            kmzoom, xyzoom = get_zoom_extends(kmbounds[0], kmbounds[1], zoom_km_step, bank_crds, bank_km)
+            km_zoom, xy_zoom = get_zoom_extends(
+                km_bounds[0],
+                km_bounds[1],
+                plot_flags["zoom_km_step"],
+                bank_crds,
+                bank_km,
+            )
 
         fig, ax = df_plt.plot_detect1(
             bbox,
-            xykm_numpy,
-            bankareas,
+            xy_km_numpy,
+            bank_areas,
             bank,
             sim["facenode"],
             sim["nnodes"],
@@ -181,39 +265,135 @@ def banklines_core(config: configparser.ConfigParser, rootdir: str, gui: bool) -
             "water depth and detected bank lines",
             "water depth [m]",
             "bank search area",
-            "detected bank line"
+            "detected bank line",
         )
-        if saveplot:
-            ifig = ifig + 1
-            figbase = figdir + os.sep + str(ifig) + "_banklinedetection"
-            if saveplot_zoomed:
-                df_plt.zoom_xy_and_save(fig, ax, figbase, plot_ext, xyzoom, scale=1)
-            figfile = figbase + plot_ext
-            df_plt.savefig(fig, figfile)
+        if plot_flags["save_plot"]:
+            i_fig = i_fig + 1
+            fig_base = f"{plot_flags.get('fig_dir')}{os.sep}{i_fig}_banklinedetection"
+            if plot_flags["save_plot_zoomed"]:
+                df_plt.zoom_xy_and_save(
+                    fig, ax, fig_base, plot_flags.get("plot_ext"), xy_zoom, scale=1
+                )
+            fig_file = fig_base + plot_flags["plot_ext"]
+            df_plt.savefig(fig, fig_file)
 
-    if plotting:
-        if closeplot:
+        if self.plot_flags["close_plot"]:
             plt.close("all")
         else:
-            plt.show(block=not gui)
+            plt.show(block=not self.gui)
 
-    log_text("end_banklines")
-    timed_logger("-- stop analysis --")
+    def save(self, bank, banklines, clipped_banklines, bank_areas):
+        """Save result files."""
+        bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
+        bank_file = self.bank_output_dir / f"{bank_name}.shp"
+        log_text("save_banklines", dict={"file": bank_file})
+        gpd.GeoSeries(bank).to_file(bank_file)
 
+        gpd.GeoSeries(clipped_banklines).to_file(
+            self.bank_output_dir / f"{BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE}{EXTENSION}"
+        )
+        banklines.to_file(
+            self.bank_output_dir / f"{RAW_DETECTED_BANKLINE_FRAGMENTS_FILE}{EXTENSION}"
+        )
+        gpd.GeoSeries(bank_areas).to_file(
+            self.bank_output_dir / f"{BANK_AREAS_FILE}{EXTENSION}"
+        )
 
-def banklines(filename: str = "dfastbe.cfg") -> None:
-    """
-    Run the bank line detection analysis using a configuration specified by file name.
+    @staticmethod
+    def _get_bank_lines(sim: SimulationObject, h0: float) -> gpd.GeoSeries:
+        """
+        Detect all possible bank line segments based on simulation data.
 
-    Arguments
-    ---------
-    filename : str
-        Name of the configuration file.
-    """
-    # read configuration file
-    timed_logger("reading configuration file ...")
+        Use a critical water depth h0 as a water depth threshold for dry/wet boundary.
 
-    config = ConfigFile.read(filename)
-    rootdir = config.adjust_filenames()
-    config = config.config
-    banklines_core(config, rootdir, False)
+        Args:
+            sim (SimulationObject):
+                Simulation data: mesh, bed levels, water levels, velocities, etc.
+            h0 (float):
+                Critical water depth for determining the banks.
+
+        Returns:
+        banklines (geopandas.GeoSeries):
+            The collection of all detected bank segments in the remaining model area.
+        """
+        fnc = sim["facenode"]
+        n_nodes = sim["nnodes"]
+        max_nnodes = fnc.shape[1]
+        x_node = sim["x_node"][fnc]
+        y_node = sim["y_node"][fnc]
+        zb = sim["zb_val"][fnc]
+        zw = sim["zw_face"]
+
+        nnodes_total = len(sim["x_node"])
+        try:
+            mask = ~fnc.mask
+            non_masked = sum(mask.reshape(fnc.size))
+            f_nc_m = fnc[mask]
+            zwm = np.repeat(zw, max_nnodes)[mask]
+        except:
+            mask = np.repeat(True, fnc.size)
+            non_masked = fnc.size
+            f_nc_m = fnc.reshape(non_masked)
+            zwm = np.repeat(zw, max_nnodes).reshape(non_masked)
+
+        zw_node = np.bincount(f_nc_m, weights=zwm, minlength=nnodes_total)
+        n_val = np.bincount(f_nc_m, weights=np.ones(non_masked), minlength=nnodes_total)
+        zw_node = zw_node / np.maximum(n_val, 1)
+        zw_node[n_val == 0] = sim["zb_val"][n_val == 0]
+
+        h_node = zw_node[fnc] - zb
+        wet_node = h_node > h0
+        n_wet_arr = wet_node.sum(axis=1)
+        mask = n_wet_arr.mask.size > 1
+
+        n_faces = len(fnc)
+        lines = [None] * n_faces
+        frac = 0
+        for i in range(n_faces):
+            if i >= frac * (n_faces - 1) / 10:
+                print(int(frac * 10))
+                frac = frac + 1
+            nnodes = n_nodes[i]
+            n_wet = n_wet_arr[i]
+            if (mask and n_wet.mask) or n_wet == 0 or n_wet == nnodes:
+                # all dry or all wet
+                pass
+            else:
+                # some nodes dry and some nodes wet: determine the line
+                if nnodes == 3:
+                    lines[i] = tri_to_line(
+                        x_node[i], y_node[i], wet_node[i], h_node[i], h0
+                    )
+                else:
+                    lines[i] = poly_to_line(
+                        nnodes, x_node[i], y_node[i], wet_node[i], h_node[i], h0
+                    )
+        lines = [line for line in lines if line is not None and not line.is_empty]
+        multi_line = cascaded_union(lines)
+        merged_line = linemerge(multi_line)
+
+        return gpd.GeoSeries(merged_line)
+
+    @staticmethod
+    def _convert_search_lines_to_bank_polygons(
+        search_lines: List[np.ndarray], d_lines: List[float]
+    ) -> List[Polygon]:
+        """
+        Construct a series of polygons surrounding the bank search lines.
+
+        Args:
+            search_lines : List[numpy.ndarray]
+                List of arrays containing the x,y-coordinates of a bank search lines.
+            d_lines : List[float]
+                Array containing the search distance value per bank line.
+
+        Returns:
+            bank_areas:
+                Array containing the areas of interest surrounding the bank search lines.
+        """
+        n_bank = len(search_lines)
+        bank_areas = [None] * n_bank
+        for b, distance in enumerate(d_lines):
+            bank_areas[b] = search_lines[b].buffer(distance, cap_style=2)
+
+        return bank_areas

@@ -1,8 +1,12 @@
 import unittest
 from unittest.mock import patch
+
+import numpy as np
+
 from dfastbe.io import ConfigFile, load_program_texts, log_text, get_text, read_fm_map,\
     ugrid_add, copy_ugrid, copy_var, read_waqua_xyz, write_simona_box, \
-    get_mesh_and_facedim_names, absolute_path, relative_path, get_filename
+    get_mesh_and_facedim_names, absolute_path, relative_path, get_filename, \
+    RiverData
 
 import configparser
 import os
@@ -10,7 +14,7 @@ from pathlib import Path
 import platform
 import numpy
 import netCDF4
-
+from shapely.geometry.linestring import LineString
 import pytest
 
 import sys
@@ -111,35 +115,6 @@ class Test_get_text:
         Testing get_text: "confirm" key.
         """
         assert get_text("confirm") == ['Confirm using "y" ...','']
-
-class TestConfigFile:
-    def test_write_config_01(self):
-        """
-        Testing write_config.
-        """
-        filename = "test.cfg"
-        config = configparser.ConfigParser()
-        config.add_section("G 1")
-        config["G 1"]["K 1"] = "V 1"
-        config.add_section("Group 2")
-        config["Group 2"]["K1"] = "1.0 0.1 0.0 0.01"
-        config["Group 2"]["K2"] = "2.0 0.2 0.02 0.0"
-        config.add_section("Group 3")
-        config["Group 3"]["LongKey"] = "3"
-        config = ConfigFile(config)
-        config.write(filename)
-        all_lines = open(filename, "r").read().splitlines()
-        all_lines_ref = ['[G 1]',
-                         '  k 1     = V 1',
-                         '',
-                         '[Group 2]',
-                         '  k1      = 1.0 0.1 0.0 0.01',
-                         '  k2      = 2.0 0.2 0.02 0.0',
-                         '',
-                         '[Group 3]',
-                         '  longkey = 3']
-        assert all_lines == all_lines_ref
-        Path(filename).unlink()
 
 class Test_read_fm_map:
     def test_read_fm_map_01(self):
@@ -351,8 +326,8 @@ class TestAbsolutePath:
         """
         Convert absolute path into relative path using relative_path (Windows).
         """
-        rootdir = "d:" + os.sep + "some" + os.sep + "dir"
-        afile = "d:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
+        rootdir = "g:" + os.sep + "some" + os.sep + "dir"
+        afile = "g:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         assert absolute_path(rootdir, rfile) == afile
 
@@ -445,7 +420,7 @@ class TestConfigFile(unittest.TestCase):
     def test_read(self):
         """Test reading a configuration file."""
         config_str = """[General]\nVersion = 1.0\nTestParam = 42\n"""
-        with unittest.mock.patch("builtins.open", return_value=StringIO(config_str)):
+        with patch("builtins.open", return_value=StringIO(config_str)), patch("pathlib.Path.exists", return_value=True):
             config_obj = ConfigFile.read("dummy_path.cfg")
             version = config_obj.version
         self.assertEqual(config_obj.config["General"]["Version"], "1.0")
@@ -473,6 +448,60 @@ class TestConfigFile(unittest.TestCase):
     def test_adjust_filenames(self):
         """Test adjusting filenames."""
         self.config_file.path = "/home/user/config.cfg"
+        self.config_file.root_dir = "/home/user"
         with patch("os.getcwd", return_value="/home/user"):
             rootdir = self.config_file.adjust_filenames()
         self.assertEqual(rootdir, ".")
+
+
+class TestConfigFileE2E:
+    def test_initialization(self):
+        path = "tests/data/erosion/meuse_manual.cfg"
+        config_file = ConfigFile.read(path)
+        river_km = config_file.config["General"]["riverkm"]
+        assert Path(river_km).exists()
+
+
+    def test_write_config_01(self):
+        """
+        Testing write_config.
+        """
+        filename = "test.cfg"
+        config = configparser.ConfigParser()
+        config.add_section("G 1")
+        config["G 1"]["K 1"] = "V 1"
+        config.add_section("Group 2")
+        config["Group 2"]["K1"] = "1.0 0.1 0.0 0.01"
+        config["Group 2"]["K2"] = "2.0 0.2 0.02 0.0"
+        config.add_section("Group 3")
+        config["Group 3"]["LongKey"] = "3"
+
+        config = ConfigFile(config)
+        config.write(filename)
+        all_lines = open(filename, "r").read().splitlines()
+        all_lines_ref = ['[G 1]',
+                         '  k 1     = V 1',
+                         '',
+                         '[Group 2]',
+                         '  k1      = 1.0 0.1 0.0 0.01',
+                         '  k2      = 2.0 0.2 0.02 0.0',
+                         '',
+                         '[Group 3]',
+                         '  longkey = 3']
+        assert all_lines == all_lines_ref
+        Path(filename).unlink()
+
+
+class TestRiverData:
+    def test_initialization(self):
+        path = "tests/data/erosion/meuse_manual.cfg"
+        config_file = ConfigFile.read(path)
+        river_data = RiverData(config_file)
+        assert isinstance(river_data.config_file, ConfigFile)
+        assert river_data.num_search_lines == 2
+        assert river_data.start_station == 123.0
+        assert river_data.end_station == 128.0
+        assert isinstance(river_data.masked_profile, LineString)
+        assert isinstance(river_data.profile, LineString)
+        assert isinstance(river_data.masked_profile_arr, np.ndarray)
+        assert river_data.masked_profile_arr.shape == (251, 3)
