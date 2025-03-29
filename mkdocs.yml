@@ -96,8 +96,9 @@ nav:
             - "guides/pre-commit-hooks.md"
             - "guides/doctest.md"
   - API Reference:
+      - bank_lines.md
+      - bank_erosion.md
       - io.md
-      - batch.md
       - cmd.md
       - gui.md
       - kernel.md

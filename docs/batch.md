@@ -1,4 +1,0 @@
-# batch
-
-## batch
-::: dfastbe.batch
