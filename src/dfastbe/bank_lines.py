@@ -4,12 +4,13 @@ from pathlib import Path
 import numpy as np
 import geopandas as gpd
 from shapely.ops import cascaded_union, linemerge
+from shapely.geometry.polygon import Polygon
 from matplotlib import pyplot as plt
-from dfastbe.support import SimulationObject, convert_search_lines_to_bank_polygons,\
+from dfastbe.support import \
     on_right_side, clip_bank_lines, project_km_on_line, sort_connect_bank_lines, poly_to_line,\
     tri_to_line
 from dfastbe import __version__
-from dfastbe.io import ConfigFile, log_text, RiverData, read_simulation_data, clip_simulation_data
+from dfastbe.io import ConfigFile, RiverData, SimulationObject, log_text, read_simulation_data, clip_simulation_data
 from dfastbe.kernel import get_bbox, get_zoom_extends
 from dfastbe.utils import timed_logger
 from dfastbe import plotting as df_plt
@@ -146,7 +147,7 @@ class BankLines:
 
         # convert search lines to bank polygons
         d_lines = config_file.get_bank_search_distances(river_data.num_search_lines)
-        bank_areas = convert_search_lines_to_bank_polygons(
+        bank_areas = self.convert_search_lines_to_bank_polygons(
             masked_search_lines, d_lines
         )
 
@@ -164,6 +165,7 @@ class BankLines:
         # derive bank lines (get_banklines)
         log_text("identify_banklines")
         banklines = self.get_bank_lines(sim, self.h0)
+
         banklines.to_file(self.bank_output_dir / f"{RAW_DETECTED_BANKLINE_FRAGMENTS_FILE}{EXTENSION}")
         gpd.GeoSeries(bank_areas).to_file(self.bank_output_dir / f"{BANK_AREAS_FILE}{EXTENSION}")
 
@@ -177,6 +179,7 @@ class BankLines:
             bank[ib] = sort_connect_bank_lines(
                 clipped_banklines[ib], river_profile, to_right[ib]
             )
+
         gpd.GeoSeries(clipped_banklines).to_file(
             self.bank_output_dir / f"{BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE}{EXTENSION}"
         )
@@ -188,7 +191,6 @@ class BankLines:
         if self.plot_data:
             self.plot(river_data.masked_profile_arr, self.plot_flags, river_data.num_search_lines, bank, km_bounds, bank_areas, sim)
 
-        if self.plot_data:
             if self.plot_flags["close_plot"]:
                 plt.close("all")
             else:
@@ -319,3 +321,27 @@ class BankLines:
         merged_line = linemerge(multi_line)
 
         return gpd.GeoSeries(merged_line)
+
+    @staticmethod
+    def convert_search_lines_to_bank_polygons(
+        search_lines: List[np.ndarray], d_lines: List[float]
+    ) -> List[Polygon]:
+        """
+        Construct a series of polygons surrounding the bank search lines.
+
+        Args:
+            search_lines : List[numpy.ndarray]
+                List of arrays containing the x,y-coordinates of a bank search lines.
+            d_lines : List[float]
+                Array containing the search distance value per bank line.
+
+        Returns:
+            bank_areas:
+                Array containing the areas of interest surrounding the bank search lines.
+        """
+        n_bank = len(search_lines)
+        bank_areas = [None] * n_bank
+        for b, distance in enumerate(d_lines):
+            bank_areas[b] = search_lines[b].buffer(distance, cap_style=2)
+
+        return bank_areas

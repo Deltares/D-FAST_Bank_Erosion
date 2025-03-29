@@ -26,17 +26,12 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Dict, List, Tuple, Union
-from dfastbe.io import SimulationObject
-
-# import matplotlib
-# import matplotlib.pyplot
+from typing import List, Tuple
 
 import numpy
 import math
 import shapely
 import geopandas
-import sys
 
 
 def project_km_on_line(
@@ -1640,30 +1635,6 @@ def sort_connect_bank_lines(
     bank = shapely.geometry.LineString(new_bank_coords)
 
     return bank
-
-
-def convert_search_lines_to_bank_polygons(
-    search_lines: List[numpy.ndarray], d_lines: List[float]
-):
-    """
-    Construct a series of polygons surrounding the bank search lines.
-
-    Args:
-        search_lines : List[numpy.ndarray]
-            List of arrays containing the x,y-coordinates of a bank search lines.
-        d_lines : List[float]
-            Array containing the search distance value per bank line.
-        
-    Returns:
-        bank_areas:
-            Array containing the areas of interest surrounding the bank search lines.
-    """
-    n_bank = len(search_lines)
-    bank_areas = [None] * n_bank
-    for b, distance in enumerate(d_lines):
-        bank_areas[b] = search_lines[b].buffer(distance, cap_style=2)
-
-    return bank_areas
 
 
 def poly_to_line(
