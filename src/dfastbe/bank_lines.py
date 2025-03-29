@@ -170,7 +170,7 @@ class BankLines:
 
         # convert search lines to bank polygons
         d_lines = config_file.get_bank_search_distances(river_data.num_search_lines)
-        bank_areas: List[Polygon] = self.convert_search_lines_to_bank_polygons(
+        bank_areas: List[Polygon] = self._convert_search_lines_to_bank_polygons(
             masked_search_lines, d_lines
         )
 
@@ -187,7 +187,7 @@ class BankLines:
 
         # derive bank lines (get_banklines)
         log_text("identify_banklines")
-        banklines = self.get_bank_lines(sim, self.h0)
+        banklines = self._get_bank_lines(sim, self.h0)
 
         # clip the set of detected bank lines to the bank areas
         log_text("simplify_banklines")
@@ -300,7 +300,7 @@ class BankLines:
         )
 
     @staticmethod
-    def get_bank_lines(sim: SimulationObject, h0: float) -> gpd.GeoSeries:
+    def _get_bank_lines(sim: SimulationObject, h0: float) -> gpd.GeoSeries:
         """
         Detect all possible bank line segments based on simulation data.
 
@@ -375,7 +375,7 @@ class BankLines:
         return gpd.GeoSeries(merged_line)
 
     @staticmethod
-    def convert_search_lines_to_bank_polygons(
+    def _convert_search_lines_to_bank_polygons(
         search_lines: List[np.ndarray], d_lines: List[float]
     ) -> List[Polygon]:
         """
