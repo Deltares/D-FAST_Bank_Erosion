@@ -16,7 +16,7 @@ We use `isort` as an autoformatter.
 
 ### Commitizen
 We use `commitizen` to automatically bump the version number.
-If you use [conventional commit messages](https://www.conventionalcommits.org/en/v1.0.0/#summary), the [`changelog.md`](../changelog.md) is generated automatically. More details below under ["Merging"](#merging).
+If you use [conventional commit messages](https://www.conventionalcommits.org/en/v1.0.0/#summary), the [`changelog.md`](../change-log) is generated automatically. More details below under ["Merging"](#merging).
 
 ## Development
 
