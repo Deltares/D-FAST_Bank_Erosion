@@ -150,7 +150,7 @@ class BankLines:
             masked_search_lines, d_lines
         )
 
-        # determine whether search lines are located on left or right
+        # determine whether search lines are located on the left or right
         to_right = [True] * river_data.num_search_lines
         for ib in range(river_data.num_search_lines):
             to_right[ib] = on_right_side(
@@ -163,7 +163,7 @@ class BankLines:
 
         # derive bank lines (get_banklines)
         log_text("identify_banklines")
-        banklines = self.get_banklines(sim, self.h0)
+        banklines = self.get_bank_lines(sim, self.h0)
         banklines.to_file(self.bank_output_dir / f"{RAW_DETECTED_BANKLINE_FRAGMENTS_FILE}{EXTENSION}")
         gpd.GeoSeries(bank_areas).to_file(self.bank_output_dir / f"{BANK_AREAS_FILE}{EXTENSION}")
 
@@ -250,11 +250,11 @@ class BankLines:
         gpd.GeoSeries(bank).to_file(bank_file)
 
     @staticmethod
-    def get_banklines(sim: SimulationObject, h0: float) -> gpd.GeoSeries:
+    def get_bank_lines(sim: SimulationObject, h0: float) -> gpd.GeoSeries:
         """
         Detect all possible bank line segments based on simulation data.
 
-        Use a critical water depth h0 as water depth threshold for dry/wet boundary.
+        Use a critical water depth h0 as a water depth threshold for dry/wet boundary.
 
         Args:
             sim (SimulationObject):
@@ -278,15 +278,16 @@ class BankLines:
         try:
             mask = ~fnc.mask
             non_masked = sum(mask.reshape(fnc.size))
-            fncm = fnc[mask]
+            f_nc_m = fnc[mask]
             zwm = np.repeat(zw, max_nnodes)[mask]
         except:
             mask = np.repeat(True, fnc.size)
             non_masked = fnc.size
-            fncm = fnc.reshape(non_masked)
+            f_nc_m = fnc.reshape(non_masked)
             zwm = np.repeat(zw, max_nnodes).reshape(non_masked)
-        zw_node = np.bincount(fncm, weights=zwm, minlength=nnodes_total)
-        n_val = np.bincount(fncm, weights=np.ones(non_masked), minlength=nnodes_total)
+
+        zw_node = np.bincount(f_nc_m, weights=zwm, minlength=nnodes_total)
+        n_val = np.bincount(f_nc_m, weights=np.ones(non_masked), minlength=nnodes_total)
         zw_node = zw_node / np.maximum(n_val, 1)
         zw_node[n_val == 0] = sim["zb_val"][n_val == 0]
 
