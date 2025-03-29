@@ -147,7 +147,7 @@ class BankLines:
 
         # convert search lines to bank polygons
         d_lines = config_file.get_bank_search_distances(river_data.num_search_lines)
-        bank_areas = self.convert_search_lines_to_bank_polygons(
+        bank_areas: List[Polygon] = self.convert_search_lines_to_bank_polygons(
             masked_search_lines, d_lines
         )
 
@@ -166,9 +166,6 @@ class BankLines:
         log_text("identify_banklines")
         banklines = self.get_bank_lines(sim, self.h0)
 
-        banklines.to_file(self.bank_output_dir / f"{RAW_DETECTED_BANKLINE_FRAGMENTS_FILE}{EXTENSION}")
-        gpd.GeoSeries(bank_areas).to_file(self.bank_output_dir / f"{BANK_AREAS_FILE}{EXTENSION}")
-
         # clip the set of detected bank lines to the bank areas
         log_text("simplify_banklines")
         bank = [None] * river_data.num_search_lines
@@ -180,21 +177,11 @@ class BankLines:
                 clipped_banklines[ib], river_profile, to_right[ib]
             )
 
-        gpd.GeoSeries(clipped_banklines).to_file(
-            self.bank_output_dir / f"{BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE}{EXTENSION}"
-        )
-        log_text("-")
-
         # save bank_file
-        self.save(bank)
+        self.save(bank, banklines, clipped_banklines, bank_areas)
 
         if self.plot_data:
             self.plot(river_data.masked_profile_arr, self.plot_flags, river_data.num_search_lines, bank, km_bounds, bank_areas, sim)
-
-            if self.plot_flags["close_plot"]:
-                plt.close("all")
-            else:
-                plt.show(block=not self.gui)
 
         log_text("end_banklines")
         timed_logger("-- stop analysis --")
@@ -203,7 +190,6 @@ class BankLines:
         self, xy_km_numpy: np.ndarray, plot_flags: Dict[str, bool], n_search_lines: int, bank: List, km_bounds,
             bank_areas, sim
     ):
-
         log_text("=")
         log_text("create_figures")
         i_fig = 0
@@ -245,11 +231,22 @@ class BankLines:
             fig_file = fig_base + plot_flags["plot_ext"]
             df_plt.savefig(fig, fig_file)
 
-    def save(self, bank):
+        if self.plot_flags["close_plot"]:
+            plt.close("all")
+        else:
+            plt.show(block=not self.gui)
+
+    def save(self, bank, banklines, clipped_banklines, bank_areas):
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
         bank_file = self.bank_output_dir / f"{bank_name}.shp"
         log_text("save_banklines", dict={"file": bank_file})
         gpd.GeoSeries(bank).to_file(bank_file)
+
+        gpd.GeoSeries(clipped_banklines).to_file(
+            self.bank_output_dir / f"{BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE}{EXTENSION}"
+        )
+        banklines.to_file(self.bank_output_dir / f"{RAW_DETECTED_BANKLINE_FRAGMENTS_FILE}{EXTENSION}")
+        gpd.GeoSeries(bank_areas).to_file(self.bank_output_dir / f"{BANK_AREAS_FILE}{EXTENSION}")
 
     @staticmethod
     def get_bank_lines(sim: SimulationObject, h0: float) -> gpd.GeoSeries:
