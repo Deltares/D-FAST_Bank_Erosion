@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple
 import os
 from pathlib import Path
 import numpy as np
@@ -6,10 +6,10 @@ import geopandas as gpd
 from shapely.ops import cascaded_union, linemerge
 from matplotlib import pyplot as plt
 from dfastbe.support import SimulationObject, convert_search_lines_to_bank_polygons,\
-    on_right_side, clip_simdata, clip_bank_lines, project_km_on_line, sort_connect_bank_lines, poly_to_line,\
+    on_right_side, clip_bank_lines, project_km_on_line, sort_connect_bank_lines, poly_to_line,\
     tri_to_line
 from dfastbe import __version__
-from dfastbe.io import ConfigFile, log_text, read_simdata, RiverData
+from dfastbe.io import ConfigFile, log_text, RiverData, read_simulation_data, clip_simulation_data
 from dfastbe.kernel import get_bbox, get_zoom_extends
 from dfastbe.utils import timed_logger
 from dfastbe import plotting as df_plt
@@ -36,16 +36,26 @@ class BankLines:
 
         self._config_file = config_file
         self.gui = gui
-        self.plot_data = config_file.get_bool("General", "Plotting", True)
         self.bank_output_dir = self._get_bank_output_dir()
-        # get simulation file name
-        self.sim_file = config_file.get_sim_file("Detect", "")
 
-        # get critical water depth used for defining bank line (default = 0.0 m)
-        self.critical_water_depth = config_file.get_float("Detect", "WaterDepth", default=0)
+
         # set plotting flags
+        self.plot_data = config_file.get_bool("General", "Plotting", True)
         self.plot_flags = self._get_plotting_flags()
         self.river_data = RiverData(config_file)
+
+        self.simulation_data, self.h0 = self._get_simulation_data()
+
+    def _get_simulation_data(self) -> Tuple[SimulationObject, float]:
+        # read simulation data and drying flooding threshold dh0
+        sim_file = self.config_file.get_sim_file("Detect", "")
+        log_text("read_simdata", dict={"file": sim_file})
+        simulation_data, dh0 = read_simulation_data(sim_file)
+        # increase critical water depth h0 by flooding threshold dh0
+        # get critical water depth used for defining bank line (default = 0.0 m)
+        critical_water_depth = self.config_file.get_float("Detect", "WaterDepth", default=0)
+        h0 = critical_water_depth + dh0
+        return simulation_data, h0
 
     @property
     def config_file(self) -> ConfigFile:
@@ -147,23 +157,13 @@ class BankLines:
                 np.array(masked_search_lines[ib]), stations_coords
             )
 
-        # read simulation data and drying flooding threshold dh0
-        log_text("-")
-        log_text("read_simdata", dict={"file": self.sim_file})
-        log_text("-")
-        sim, dh0 = read_simdata(self.sim_file)
-        log_text("-")
-
-        # increase critical water depth h0 by flooding threshold dh0
-        h0 = self.critical_water_depth + dh0
-
         # clip simulation data to boundaries ...
         log_text("clip_data")
-        sim = clip_simdata(sim, river_profile, max_distance)
+        sim = clip_simulation_data(self.simulation_data, river_profile, max_distance)
 
         # derive bank lines (get_banklines)
         log_text("identify_banklines")
-        banklines = self.get_banklines(sim, h0)
+        banklines = self.get_banklines(sim, self.h0)
         banklines.to_file(self.bank_output_dir / f"{RAW_DETECTED_BANKLINE_FRAGMENTS_FILE}{EXTENSION}")
         gpd.GeoSeries(bank_areas).to_file(self.bank_output_dir / f"{BANK_AREAS_FILE}{EXTENSION}")
 
@@ -182,7 +182,7 @@ class BankLines:
         )
         log_text("-")
 
-        # save bankfile
+        # save bank_file
         self.save(bank)
 
         if self.plot_data:
@@ -196,7 +196,6 @@ class BankLines:
 
         log_text("end_banklines")
         timed_logger("-- stop analysis --")
-
 
     def plot(
         self, xy_km_numpy: np.ndarray, plot_flags: Dict[str, bool], n_search_lines: int, bank: List, km_bounds,

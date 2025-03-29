@@ -37,7 +37,7 @@ import numpy
 import matplotlib.pyplot as plt
 import configparser
 from dfastbe import __version__
-from dfastbe.io import ConfigFile, log_text, read_simdata, \
+from dfastbe.io import ConfigFile, log_text, read_simulation_data, \
     read_xyc, write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData
 
 from dfastbe.utils import timed_logger
@@ -159,7 +159,7 @@ def bankerosion_core(
     log_text("-")
     log_text("read_simdata", dict={"file": simfile})
     log_text("-")
-    sim, dh0 = read_simdata(simfile)
+    sim, dh0 = read_simulation_data(simfile)
     log_text("-")
 
     log_text("derive_topology")
@@ -553,7 +553,7 @@ def bankerosion_core(
         log_text("-", indent="  ")
         log_text("read_simdata", dict={"file": simfiles[iq]}, indent="  ")
         log_text("-", indent="  ")
-        sim, dh0 = read_simdata(simfiles[iq], indent="  ")
+        sim, dh0 = read_simulation_data(simfiles[iq], indent="  ")
         log_text("-", indent="  ")
         fnc = sim["facenode"]
 

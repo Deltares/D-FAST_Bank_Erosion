@@ -1643,91 +1643,27 @@ def sort_connect_bank_lines(
 
 
 def convert_search_lines_to_bank_polygons(
-    search_lines: List[numpy.ndarray], dlines: List[float]
+    search_lines: List[numpy.ndarray], d_lines: List[float]
 ):
     """
     Construct a series of polygons surrounding the bank search lines.
 
-    Arguments
-    ---------
-    search_lines : List[numpy.ndarray]
-        List of arrays containing the x,y-coordinates of a bank search lines.
-    dlines : List[float]
-        Array containing the search distance value per bank line.
+    Args:
+        search_lines : List[numpy.ndarray]
+            List of arrays containing the x,y-coordinates of a bank search lines.
+        d_lines : List[float]
+            Array containing the search distance value per bank line.
         
-    Results
-    -------
-    bankareas
-        Array containing the areas of interest surrounding the bank search lines.
+    Returns:
+        bank_areas:
+            Array containing the areas of interest surrounding the bank search lines.
     """
-    nbank = len(search_lines)
-    bankareas = [None] * nbank
-    for b, distance in enumerate(dlines):
-        bankareas[b] = search_lines[b].buffer(distance, cap_style=2)
+    n_bank = len(search_lines)
+    bank_areas = [None] * n_bank
+    for b, distance in enumerate(d_lines):
+        bank_areas[b] = search_lines[b].buffer(distance, cap_style=2)
 
-    return bankareas
-
-
-def clip_simdata(
-    sim: SimulationObject, xykm: numpy.ndarray, maxmaxd: float
-) -> SimulationObject:
-    """
-    Clip the simulation mesh and data to the area of interest sufficiently close to the reference line.
-
-    Arguments
-    ---------
-    sim : SimulationObject
-        Simulation data: mesh, bed levels, water levels, velocities, etc.
-    xykm : numpy.ndarray
-        Reference line.
-    maxmaxd : float
-        Maximum distance between the reference line and a point in the area of
-        interest defined based on the search lines for the banks and the search
-        distance.
-    
-    Returns
-    -------
-    sim1 : SimulationObject
-        Clipped simulation data: mesh, bed levels, water levels, velocities, etc.
-    """
-    maxdx = maxmaxd
-    xybuffer = xykm.buffer(maxmaxd + maxdx)
-    bbox = xybuffer.envelope.exterior
-    xmin = bbox.coords[0][0]
-    xmax = bbox.coords[1][0]
-    ymin = bbox.coords[0][1]
-    ymax = bbox.coords[2][1]
-
-    xybprep = shapely.prepared.prep(xybuffer)
-    x = sim["x_node"]
-    y = sim["y_node"]
-    nnodes = x.shape
-    keep = (x > xmin) & (x < xmax) & (y > ymin) & (y < ymax)
-    for i in range(x.size):
-        if keep[i] and not xybprep.contains(shapely.geometry.Point((x[i], y[i]))):
-            keep[i] = False
-
-    fnc = sim["facenode"]
-    keepface = keep[fnc].all(axis=1)
-    renum = numpy.zeros(nnodes, dtype=numpy.int)
-    renum[keep] = range(sum(keep))
-    sim["facenode"] = renum[fnc[keepface]]
-
-    sim["x_node"] = x[keep]
-    sim["y_node"] = y[keep]
-    if sim["zb_location"] == "node":
-        sim["zb_val"] = sim["zb_val"][keep]
-    else:
-        sim["zb_val"] = sim["zb_val"][keepface]
-
-    sim["nnodes"] = sim["nnodes"][keepface]
-    sim["zw_face"] = sim["zw_face"][keepface]
-    sim["h_face"] = sim["h_face"][keepface]
-    sim["ucx_face"] = sim["ucx_face"][keepface]
-    sim["ucy_face"] = sim["ucy_face"][keepface]
-    sim["chz_face"] = sim["chz_face"][keepface]
-
-    return sim
+    return bank_areas
 
 
 def poly_to_line(
