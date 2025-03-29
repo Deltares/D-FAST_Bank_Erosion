@@ -469,8 +469,8 @@ def intersect_line_mesh(
                                     )
                                 )
                     if l == crds.shape[0]:
-                        crds.resize((2 * l, 2))
-                        idx.resize(2 * l)
+                        crds = enlarge(crds, (2 * l, 2))
+                        idx = enlarge(idx, (2 * l,))
                     crds[l] = bpj
                     idx[l] = index
                     l += 1
@@ -514,8 +514,8 @@ def intersect_line_mesh(
                                 if verbose:
                                     print("{}: last point ends in a node".format(j))
                                 if l == crds.shape[0]:
-                                    crds.resize((l + 1, 2))
-                                    idx.resize(l + 1)
+                                    crds = enlarge(crds, (l + 1, 2))
+                                    idx = enlarge(idx, (l + 1,))
                                 crds[l] = bpj
                                 if index == -2:
                                     idx[l] = vindex[0]
@@ -658,8 +658,8 @@ def intersect_line_mesh(
                             if verbose:
                                 print("{}: last point ends on an edge".format(j))
                             if l == crds.shape[0]:
-                                crds.resize((l + 1, 2))
-                                idx.resize(l + 1)
+                                crds = enlarge(crds, (l + 1, 2))
+                                idx = enlarge(idx, (l + 1,))
                             crds[l] = bpj
                             if index == -2:
                                 idx[l] = vindex[0]
@@ -747,8 +747,8 @@ def intersect_line_mesh(
                             )
                         )
                     if l == crds.shape[0]:
-                        crds.resize((2 * l, 2))
-                        idx.resize(2 * l)
+                        crds = enlarge(crds, (2 * l, 2))
+                        idx = enlarge(idx, (2 * l,))
                     crds[l] = bpj1 + prev_b * (bpj - bpj1)
                     if index == -2:
                         idx[l] = vindex[0]
@@ -1468,7 +1468,7 @@ def add_point(
     if (xy_in[ixy1] - point != 0).any():
         ixy1 = ixy1 + 1
         if ixy1 >= len(xy_in):
-            xy_out = numpy.resize(xy_in, (2 * ixy1, 2))
+            xy_out = enlarge(xy_in, (2 * ixy1, 2))
         else:
             xy_out = xy_in
         xy_out[ixy1] = point
@@ -1983,3 +1983,35 @@ def tri_to_line(
     else:
         Line = shapely.geometry.asLineString([[xl, yl], [xr, yr]])
     return Line
+
+
+def enlarge(
+    old_array: numpy.ndarray,
+    new_shape: Tuple
+):
+    """
+    Copy the values of the old array to a new, larger array of specified shape.
+
+    Arguments
+    ---------
+    old_array : numpy.ndarray
+        Array containing the values.
+    new_shape : Tuple
+        New shape of the array.
+        
+    Returns
+    -------
+    new_array : numpy.ndarray
+        Array of shape "new_shape" with the 'first entries filled by the same
+        values as contained in "old_array". The data type of the new array is
+        equal to that of the old array.
+    """
+    old_shape = old_array.shape
+    print("old: ", old_shape)
+    print("new: ", new_shape)
+    new_array = numpy.zeros(new_shape, dtype=old_array.dtype)
+    if len(new_shape)==1:
+        new_array[:old_shape[0]] = old_array
+    elif len(new_shape)==2:
+        new_array[:old_shape[0], :old_shape[1]] = old_array
+    return new_array
