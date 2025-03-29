@@ -105,8 +105,9 @@ nav:
       - Documentation:
           - guides/documentation.md
       - Tools:
-            - guides/pre-commit-hooks.md
-            - guides/doctest.md
+          - guides/developer-instructions.md
+          - guides/pre-commit-hooks.md
+          - guides/doctest.md
   - API Reference:
       - bank_lines.md
       - bank_erosion.md
@@ -116,6 +117,7 @@ nav:
       - kernel.md
       - plotting.md
   - Release Notes: changelog.md
+  - License: license.md
 
 extra:
   version:

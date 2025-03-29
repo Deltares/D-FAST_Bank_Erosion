@@ -24,4 +24,4 @@ docs/**/*.nlo
 docs/**/*.pdf
 docs/**/*.toc
 
-tests/*.dbf
+/site/*
