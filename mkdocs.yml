@@ -110,14 +110,15 @@ nav:
           - guides/pre-commit-hooks.md
           - guides/doctest.md
   - API Reference:
-      - bank_lines.md
-      - bank_erosion.md
-      - io.md
-      - cmd.md
-      - gui.md
-      - kernel.md
-      - plotting.md
-  - Release Notes: changelog.md
+      - api/bank_lines.md
+      - api/bank_erosion.md
+      - api/io.md
+      - api/cmd.md
+      - api/kernel.md
+      - api/plotting.md
+  - User Interface:
+      - gui/gui.md
+  - Release Notes: change-log.md
   - License: license.md
 
 extra:
