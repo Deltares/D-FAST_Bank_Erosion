@@ -118,7 +118,7 @@ nav:
       - kernel.md
       - plotting.md
   - Release Notes: changelog.md
-  - License: ../license.md
+  - License: license.md
 
 extra:
   version:
