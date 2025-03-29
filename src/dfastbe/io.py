@@ -494,7 +494,7 @@ class ConfigFile:
         line = [None] * n_bank
         for b in range(n_bank):
             bankfile = self.config["Detect"][f"Line{b + 1}"]
-            log_text("read_search_line", dict={"nr": b + 1, "file": bankfile})
+            log_text("read_search_line", data={"nr": b + 1, "file": bankfile})
             line[b] = read_xyc(bankfile)
         return line
 
@@ -515,11 +515,11 @@ class ConfigFile:
         bank_name = self.get_str("General", "BankFile", "bankfile")
         bankfile = f"{bank_dir}{os.sep}{bank_name}.shp"
         if os.path.exists(bankfile):
-            log_text("read_banklines", dict={"file": bankfile})
+            log_text("read_banklines", data={"file": bankfile})
             banklines = geopandas.read_file(bankfile)
         else:
             bankfile = bank_dir + os.sep + bank_name + "_#.xyc"
-            log_text("read_banklines", dict={"file": bankfile})
+            log_text("read_banklines", data={"file": bankfile})
             bankline_list = []
             b = 1
             while True:
@@ -614,14 +614,14 @@ class ConfigFile:
                 parfield[ib] = np.zeros(len(bkm)) + rval
         except:
             if onefile:
-                log_text("read_param", dict={"param": key, "file": filename})
+                log_text("read_param", data={"param": key, "file": filename})
                 km_thr, val = get_kmval(filename, key, positive, valid)
             for ib, bkm in enumerate(bank_km):
                 if not onefile:
                     filename_i = filename + "_{}".format(ib + 1) + ext
                     log_text(
                         "read_param_one_bank",
-                        dict={"param": key, "i": ib + 1, "file": filename_i},
+                        data={"param": key, "i": ib + 1, "file": filename_i},
                     )
                     km_thr, val = get_kmval(filename_i, key, positive, valid)
                 if km_thr is None:
@@ -708,7 +708,7 @@ class ConfigFile:
         """
         # get the chainage file
         km_file = self.get_str("General", "RiverKM")
-        log_text("read_chainage", dict={"file": km_file})
+        log_text("read_chainage", data={"file": km_file})
         xy_km = read_xyc(km_file, num_columns=3)
 
         # make sure that chainage is increasing with node index
@@ -898,7 +898,7 @@ class RiverData:
         self.station_bounds: Tuple = config_file.get_km_bounds()
         self.start_station: float = self.station_bounds[0]
         self.end_station: float = self.station_bounds[1]
-        log_text("clip_chainage", dict={"low": self.start_station, "high": self.end_station})
+        log_text("clip_chainage", data={"low": self.start_station, "high": self.end_station})
         self.masked_profile: shapely.geometry.linestring.LineString = self.mask_profile(self.station_bounds)
         self.masked_profile_arr = np.array(self.masked_profile)
 
@@ -1215,50 +1215,48 @@ def clip_simulation_data(
     return sim
 
 
-def load_program_texts(filename: str) -> None:
-    """
-    Load texts from configuration file, and store globally for access.
+def load_program_texts(file_name: Union[str, Path]) -> None:
+    """Load texts from a configuration file, and store globally for access.
 
-    This routine reads the text file "filename", and detects the keywords
+    This routine reads the text file "file_name", and detects the keywords
     indicated by lines starting with [ and ending with ]. The content is
     placed in a global dictionary PROGTEXTS which may be queried using the
-    routine "get_text". These routines are used to implement multi-
-    language support.
+    routine "get_text". These routines are used to implement multi-language support.
 
     Arguments
     ---------
-    filename : str
+    file_name : str
         The name of the file to be read and parsed.
     """
     text: List[str]
-    dict: Dict[str, List[str]]
+    data: Dict[str, List[str]]
 
     global PROGTEXTS
 
-    all_lines = open(filename, "r").read().splitlines()
-    dict = {}
+    all_lines = open(file_name, "r").read().splitlines()
+    data = {}
     text = []
     key = None
     for line in all_lines:
         rline = line.strip()
         if rline.startswith("[") and rline.endswith("]"):
             if not key is None:
-                dict[key] = text
+                data[key] = text
             key = rline[1:-1]
             text = []
         else:
             text.append(line)
-    if key in dict.keys():
-        raise Exception('Duplicate entry for "{}" in "{}".'.format(key, filename))
+    if key in data.keys():
+        raise Exception('Duplicate entry for "{}" in "{}".'.format(key, file_name))
     if not key is None:
-        dict[key] = text
-    PROGTEXTS = dict
+        data[key] = text
+    PROGTEXTS = data
 
 
 def log_text(
     key: str,
     file: Optional[TextIO] = None,
-    dict: Dict[str, Any] = {},
+    data: Dict[str, Any] = {},
     repeat: int = 1,
     indent: str = "",
 ) -> None:
@@ -1271,7 +1269,7 @@ def log_text(
         The key for the text to show to the user.
     file : Optional[TextIO]
         The file to write to (None for writing to standard out).
-    dict : Dict[str, Any]
+    data : Dict[str, Any]
         A dictionary used for placeholder expansions (default empty).
     repeat : int
         The number of times that the same text should be repeated (default 1).
@@ -1282,10 +1280,10 @@ def log_text(
     -------
     None
     """
-    str = get_text(key)
+    str_value = get_text(key)
     for r in range(repeat):
-        for s in str:
-            sexp = s.format(**dict)
+        for s in str_value:
+            sexp = s.format(**data)
             if file is None:
                 print(indent + sexp)
             else:
@@ -1337,10 +1335,10 @@ def get_text(key: str) -> List[str]:
     global PROGTEXTS
 
     try:
-        str = PROGTEXTS[key]
+        str_value = PROGTEXTS[key]
     except:
-        str = ["No message found for " + key]
-    return str
+        str_value = ["No message found for " + key]
+    return str_value
 
 
 def read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndarray:
@@ -1815,7 +1813,7 @@ def write_xyc(xy: np.ndarray, val: np.ndarray, filename: str) -> None:
 
 
 def write_shp_pnt(
-    xy: np.ndarray, dict: Dict[str, np.ndarray], filename: str
+    xy: np.ndarray, data: Dict[str, np.ndarray], filename: str
 ) -> None:
     """
     Write a shape point file with x, y, and values.
@@ -1824,7 +1822,7 @@ def write_shp_pnt(
     ---------
     xy : np.ndarray
         N x 2 array containing x and y coordinates.
-    dict : Dict[str, np.ndarray]
+    data : Dict[str, np.ndarray]
         Dictionary of quantities to be written, each np array should have length k.
     filename : str
         Name of the file to be written.
@@ -1835,11 +1833,11 @@ def write_shp_pnt(
     """
     xy_Points = [shapely.geometry.Point(xy1) for xy1 in xy]
     geom = geopandas.geoseries.GeoSeries(xy_Points)
-    write_shp(geom, dict, filename)
+    write_shp(geom, data, filename)
 
 
 def write_shp(
-    geom: geopandas.geoseries.GeoSeries, dict: Dict[str, np.ndarray], filename: str
+    geom: geopandas.geoseries.GeoSeries, data: Dict[str, np.ndarray], filename: str
 ) -> None:
     """Write a shape file.
 
@@ -1850,7 +1848,7 @@ def write_shp(
     ---------
     geom : geopandas.geoseries.GeoSeries
         geopandas GeoSeries containing k geometries.
-    dict : Dict[str, np.ndarray]
+    data : Dict[str, np.ndarray]
         Dictionary of quantities to be written, each np array should have length k.
     filename : str
         Name of the file to be written.
@@ -1859,17 +1857,17 @@ def write_shp(
     -------
     None
     """
-    val_DataFrame = pandas.DataFrame(dict)
+    val_DataFrame = pandas.DataFrame(data)
     geopandas.GeoDataFrame(val_DataFrame, geometry=geom).to_file(filename)
 
 
-def write_csv(dict: Dict[str, np.ndarray], filename: str) -> None:
+def write_csv(data: Dict[str, np.ndarray], filename: str) -> None:
     """
     Write a data to csv file.
 
     Arguments
     ---------
-    dict : Dict[str, np.ndarray]
+    data : Dict[str, np.ndarray]
         Value(s) to be written.
     filename : str
         Name of the file to be written.
@@ -1878,7 +1876,7 @@ def write_csv(dict: Dict[str, np.ndarray], filename: str) -> None:
     -------
     None
     """
-    keys = [key for key in dict.keys()]
+    keys = [key for key in data.keys()]
     header = ""
     for i in range(len(keys)):
         if i < len(keys) - 1:
@@ -1886,7 +1884,7 @@ def write_csv(dict: Dict[str, np.ndarray], filename: str) -> None:
         else:
             header = header + '"' + keys[i] + '"'
 
-    data = np.column_stack([array for array in dict.values()])
+    data = np.column_stack([array for array in data.values()])
     np.savetxt(filename, data, delimiter=", ", header=header, comments="")
 
 
@@ -2046,18 +2044,6 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
         # km_thr = (km[:-1] + km[1:]) / 2
         km_thr = km[1:]
     return km_thr, val
-
-
-def get_progloc() -> str:
-    """
-    Get the location of the program.
-
-    Arguments
-    ---------
-    None
-    """
-    progloc = str(pathlib.Path(__file__).parent.absolute())
-    return progloc
 
 
 class ConfigFileError(Exception):

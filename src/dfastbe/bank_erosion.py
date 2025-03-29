@@ -82,7 +82,7 @@ def bankerosion_core(
     g = 9.81  # gravitational acceleration [m/s2]
     log_text(
         "header_bankerosion",
-        dict={
+        data={
             "version": __version__,
             "location": "https://github.com/Deltares/D-FAST_Bank_Erosion",
         },
@@ -96,16 +96,16 @@ def bankerosion_core(
 
     # check bankdir for input
     bank_dir = config_file.get_str("General", "BankDir")
-    log_text("bankdir_in", dict={"dir": bank_dir})
+    log_text("bankdir_in", data={"dir": bank_dir})
     if not os.path.exists(bank_dir):
-        log_text("missing_dir", dict={"dir": bank_dir})
+        log_text("missing_dir", data={"dir": bank_dir})
         return
 
     # check outputdir
     outputdir = config_file.get_str("Erosion", "OutputDir")
-    log_text("output_dir", dict={"dir": outputdir})
+    log_text("output_dir", data={"dir": outputdir})
     if os.path.exists(outputdir):
-        log_text("overwrite_dir", dict={"dir": outputdir})
+        log_text("overwrite_dir", data={"dir": outputdir})
     else:
         os.makedirs(outputdir)
 
@@ -126,16 +126,16 @@ def bankerosion_core(
     # as appropriate, check output dir for figures and file format
     if saveplot:
         figdir = config_file.get_str("General", "FigureDir", rootdir + os.sep + "figure")
-        log_text("figure_dir", dict={"dir": figdir})
+        log_text("figure_dir", data={"dir": figdir})
         if os.path.exists(figdir):
-            log_text("overwrite_dir", dict={"dir": figdir})
+            log_text("overwrite_dir", data={"dir": figdir})
         else:
             os.makedirs(figdir)
         plot_ext = config_file.get_str("General", "FigureExt", ".png")
 
     # get simulation time terosion
     Teros = config_file.get_int("Erosion", "TErosion", positive=True)
-    log_text("total_time", dict={"t": Teros})
+    log_text("total_time", data={"t": Teros})
 
     # get filter settings for bank levels and flow velocities along banks
     zb_dx = config_file.get_float("Erosion", "BedFilterDist", 0.0, positive=True)
@@ -157,7 +157,7 @@ def bankerosion_core(
     # read simulation data (getsimdata)
     simfile = config_file.get_sim_file("Erosion", str(ref_level + 1))
     log_text("-")
-    log_text("read_simdata", dict={"file": simfile})
+    log_text("read_simdata", data={"file": simfile})
     log_text("-")
     sim, dh0 = read_simulation_data(simfile)
     log_text("-")
@@ -169,7 +169,7 @@ def bankerosion_core(
 
     # clip the chainage path to the range of chainages of interest
     km_bounds = river_data.station_bounds
-    log_text("clip_chainage", dict={"low": km_bounds[0], "high": km_bounds[1]})
+    log_text("clip_chainage", data={"low": km_bounds[0], "high": km_bounds[1]})
 
     stations_coords = river_data.masked_profile_arr[:, :2]
 
@@ -188,7 +188,7 @@ def bankerosion_core(
     bank_idx = []
     for ib in range(n_banklines):
         bp = numpy.array(banklines.geometry[ib])
-        log_text("bank_nodes", dict={"ib": ib + 1, "n": len(bp)})
+        log_text("bank_nodes", data={"ib": ib + 1, "n": len(bp)})
 
         crds, idx = support.intersect_line_mesh(
             bp, xf, yf, xe, ye, fe, ef, fn, en, nnodes, boundary_edge_nrs
@@ -217,13 +217,13 @@ def bankerosion_core(
         # when looking from low to high chainage
         to_right[ib] = support.on_right_side(bcrds, stations_coords)
         if to_right[ib]:
-            log_text("right_side_bank", dict={"ib": ib + 1})
+            log_text("right_side_bank", data={"ib": ib + 1})
         else:
-            log_text("left_side_bank", dict={"ib": ib + 1})
+            log_text("left_side_bank", data={"ib": ib + 1})
 
     # read river axis file
     river_axis_file = config_file.get_str("Erosion", "RiverAxis")
-    log_text("read_river_axis", dict={"file": river_axis_file})
+    log_text("read_river_axis", data={"file": river_axis_file})
     river_axis = read_xyc(river_axis_file)
     river_axis_numpy = numpy.array(river_axis)
     # optional sorting --> see 04_Waal_D3D example
@@ -267,7 +267,7 @@ def bankerosion_core(
 
     # read fairway file
     fairway_file = config_file.get_str("Erosion", "Fairway")
-    log_text("read_fairway", dict={"file": fairway_file})
+    log_text("read_fairway", data={"file": fairway_file})
     fairway = read_xyc(fairway_file)
 
     # map km to fairway points, further using axis
@@ -293,7 +293,7 @@ def bankerosion_core(
     fairway = shapely.geometry.LineString(fairway_numpy)
 
     # intersect fairway and mesh
-    log_text("intersect_fairway_mesh", dict={"n": len(fairway_numpy)})
+    log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
     ifw_numpy, ifw_face_idx = support.intersect_line_mesh(
         fairway_numpy, xf, yf, xe, ye, fe, ef, fn, en, nnodes, boundary_edge_nrs
     )
@@ -478,7 +478,7 @@ def bankerosion_core(
     for iq in range(num_levels):
         log_text(
             "discharge_header",
-            dict={"i": iq + 1, "p": pdischarge[iq], "t": pdischarge[iq] * Teros},
+            data={"i": iq + 1, "p": pdischarge[iq], "t": pdischarge[iq] * Teros},
         )
 
         iq_str = "{}".format(iq + 1)
@@ -551,7 +551,7 @@ def bankerosion_core(
             mu_reed[ib] = 8.5e-4 * parreed[ib] ** 0.8
 
         log_text("-", indent="  ")
-        log_text("read_simdata", dict={"file": simfiles[iq]}, indent="  ")
+        log_text("read_simdata", data={"file": simfiles[iq]}, indent="  ")
         log_text("-", indent="  ")
         sim, dh0 = read_simulation_data(simfiles[iq], indent="  ")
         log_text("-", indent="  ")
@@ -584,7 +584,7 @@ def bankerosion_core(
             if vel_dx > 0.0:
                 if ib == 0:
                     log_text(
-                        "apply_velocity_filter", indent="  ", dict={"dx": vel_dx}
+                        "apply_velocity_filter", indent="  ", data={"dx": vel_dx}
                     )
                 vel_bank = kernel.moving_avg(bank_km_mid[ib], vel_bank, vel_dx)
             velocity[iq].append(vel_bank)
@@ -601,7 +601,7 @@ def bankerosion_core(
                             log_text(
                                 "apply_banklevel_filter",
                                 indent="  ",
-                                dict={"dx": zb_dx},
+                                data={"dx": zb_dx},
                             )
                         zb_bank = kernel.moving_avg(
                             bank_km_mid[ib], zb_bank, zb_dx
@@ -765,7 +765,7 @@ def bankerosion_core(
             dvol_bank[:, ib] += dvol
 
         erovol_file = config_file.get_str("Erosion", "EroVol" + iq_str, default="erovolQ" + iq_str + ".evo")
-        log_text("save_erovol", dict={"file": erovol_file}, indent="  ")
+        log_text("save_erovol", data={"file": erovol_file}, indent="  ")
         write_km_eroded_volumes(
             km_mid, dvol_bank, outputdir + os.sep + erovol_file
         )
@@ -790,12 +790,12 @@ def bankerosion_core(
         dnavship[ib] = (dn_ship_tot[ib] * linesize[ib]).sum() / linesize[ib].sum()
         dnaveq[ib] = (dn_eq[ib] * linesize[ib]).sum() / linesize[ib].sum()
         dnmaxeq[ib] = dn_eq[ib].max()
-        log_text("bank_dnav", dict={"ib": ib + 1, "v": dnav[ib]})
-        log_text("bank_dnavflow", dict={"v": dnavflow[ib]})
-        log_text("bank_dnavship", dict={"v": dnavship[ib]})
-        log_text("bank_dnmax", dict={"v": dnmax[ib]})
-        log_text("bank_dnaveq", dict={"v": dnaveq[ib]})
-        log_text("bank_dnmaxeq", dict={"v": dnmaxeq[ib]})
+        log_text("bank_dnav", data={"ib": ib + 1, "v": dnav[ib]})
+        log_text("bank_dnavflow", data={"v": dnavflow[ib]})
+        log_text("bank_dnavship", data={"v": dnavship[ib]})
+        log_text("bank_dnmax", data={"v": dnmax[ib]})
+        log_text("bank_dnaveq", data={"v": dnaveq[ib]})
+        log_text("bank_dnmaxeq", data={"v": dnmaxeq[ib]})
 
         xyline_new = support.move_line(bcrds, dn_tot[ib], to_right[ib])
         xyline_new_list.append(xyline_new)
@@ -823,25 +823,25 @@ def bankerosion_core(
     )
     bankname = config_file.get_str("General", "BankFile", "bankfile")
     bankfile = outputdir + os.sep + bankname + "_new.shp"
-    log_text("save_banklines", dict={"file": bankfile})
+    log_text("save_banklines", data={"file": bankfile})
     banklines_new.to_file(bankfile)
 
     bankline_eq_series = geopandas.geoseries.GeoSeries(bankline_eq_list)
     banklines_eq = geopandas.geodataframe.GeoDataFrame.from_features(bankline_eq_series)
     bankfile = outputdir + os.sep + bankname + "_eq.shp"
-    log_text("save_banklines", dict={"file": bankfile})
+    log_text("save_banklines", data={"file": bankfile})
     banklines_eq.to_file(bankfile)
 
     # write eroded volumes per km (total)
     erovol_file = config_file.get_str("Erosion", "EroVol", default="erovol.evo")
-    log_text("save_tot_erovol", dict={"file": erovol_file})
+    log_text("save_tot_erovol", data={"file": erovol_file})
     write_km_eroded_volumes(
         km_mid, vol_tot, outputdir + os.sep + erovol_file
     )
 
     # write eroded volumes per km (equilibrium)
     erovol_file = config_file.get_str("Erosion", "EroVolEqui", default="erovol_eq.evo")
-    log_text("save_eq_erovol", dict={"file": erovol_file})
+    log_text("save_eq_erovol", data={"file": erovol_file})
     write_km_eroded_volumes(km_mid, vol_eq, outputdir + os.sep + erovol_file)
 
     # create various plots

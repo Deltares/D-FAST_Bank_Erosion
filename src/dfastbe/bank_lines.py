@@ -67,7 +67,7 @@ class BankLines:
     def _get_simulation_data(self) -> Tuple[SimulationObject, float]:
         # read simulation data and drying flooding threshold dh0
         sim_file = self.config_file.get_sim_file("Detect", "")
-        log_text("read_simdata", dict={"file": sim_file})
+        log_text("read_simdata", data={"file": sim_file})
         simulation_data, dh0 = read_simulation_data(sim_file)
         # increase critical water depth h0 by flooding threshold dh0
         # get critical water depth used for defining bank line (default = 0.0 m)
@@ -89,9 +89,9 @@ class BankLines:
 
     def _get_bank_output_dir(self) -> Path:
         bank_output_dir = self.config_file.get_str("General", "BankDir")
-        log_text("bankdir_out", dict={"dir": bank_output_dir})
+        log_text("bankdir_out", data={"dir": bank_output_dir})
         if os.path.exists(bank_output_dir):
-            log_text("overwrite_dir", dict={"dir": bank_output_dir})
+            log_text("overwrite_dir", data={"dir": bank_output_dir})
         else:
             os.makedirs(bank_output_dir)
 
@@ -134,9 +134,9 @@ class BankLines:
             fig_dir = self.config_file.get_str(
                 "General", "FigureDir", f"{self.root_dir}{os.sep}figure"
             )
-            log_text("figure_dir", dict={"dir": fig_dir})
+            log_text("figure_dir", data={"dir": fig_dir})
             if os.path.exists(fig_dir):
-                log_text("overwrite_dir", dict={"dir": fig_dir})
+                log_text("overwrite_dir", data={"dir": fig_dir})
             else:
                 os.makedirs(fig_dir)
             plot_ext = self.config_file.get_str("General", "FigureExt", ".png")
@@ -155,7 +155,7 @@ class BankLines:
 
         log_text(
             "header_banklines",
-            dict={
+            data={
                 "version": __version__,
                 "location": "https://github.com/Deltares/D-FAST_Bank_Erosion",
             },
@@ -194,7 +194,7 @@ class BankLines:
         bank = [None] * river_data.num_search_lines
         clipped_banklines = [None] * river_data.num_search_lines
         for ib, bank_area in enumerate(bank_areas):
-            log_text("bank_lines", dict={"ib": ib + 1})
+            log_text("bank_lines", data={"ib": ib + 1})
             clipped_banklines[ib] = clip_bank_lines(banklines, bank_area)
             bank[ib] = sort_connect_bank_lines(
                 clipped_banklines[ib], river_profile, to_right[ib]
@@ -286,7 +286,7 @@ class BankLines:
         """Save result files."""
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
         bank_file = self.bank_output_dir / f"{bank_name}.shp"
-        log_text("save_banklines", dict={"file": bank_file})
+        log_text("save_banklines", data={"file": bank_file})
         gpd.GeoSeries(bank).to_file(bank_file)
 
         gpd.GeoSeries(clipped_banklines).to_file(
