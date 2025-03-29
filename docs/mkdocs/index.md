@@ -22,4 +22,4 @@ The documentation consists of
 ## License
 
 This software is distributed under the terms of the GNU Lesser General Public License Version 2.1.
-See the [license file](license) for details.
+See the [license file](license.md) for details.

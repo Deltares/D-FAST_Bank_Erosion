@@ -96,27 +96,27 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
 
 nav:
-  - Home: index.md
+  - Home: mkdocs/index.md
   - How-to:
       - Installation:
-          - "Local clone + Poetry": guides/poetry.md
+          - "Local clone + Poetry": mkdocs/guides/poetry.md
       - Contributing:
-          - guides/contributing.md
+          - mkdocs/guides/contributing.md
       - Documentation:
-          - guides/documentation.md
+          - mkdocs/guides/documentation.md
       - Tools:
-          - guides/developer-instructions.md
-          - guides/pre-commit-hooks.md
-          - guides/doctest.md
+          - mkdocs/guides/developer-instructions.md
+          - mkdocs/guides/pre-commit-hooks.md
+          - mkdocs/guides/doctest.md
   - API Reference:
-      - bank_lines.md
-      - bank_erosion.md
-      - io.md
-      - cmd.md
-      - gui.md
-      - kernel.md
-      - plotting.md
-  - Release Notes: changelog.md
+      - mkdocs/bank_lines.md
+      - mkdocs/bank_erosion.md
+      - mkdocs/io.md
+      - mkdocs/cmd.md
+      - mkdocs/gui.md
+      - mkdocs/kernel.md
+      - mkdocs/plotting.md
+  - Release Notes: mkdocs/changelog.md
   - License: license.md
 
 extra:
