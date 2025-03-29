@@ -45,4 +45,4 @@ jobs:
           git config --global user.email '${{ github.actor }}@users.noreply.github.com'
           # poetry run mike deploy --push develop
           poetry run mike deploy --push --update-aliases develop latest
-          poetry run mike set-default latest
+          poetry run mike set-default --push latest
