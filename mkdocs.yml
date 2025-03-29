@@ -3,6 +3,7 @@ site_description: A tool to perform a bank erosion analysis based on a number of
 site_url: https://deltares.github.io/D-FAST_Bank_Erosion/
 repo_url: https://github.com/Deltares/D-FAST_Bank_Erosion
 repo_name: Deltares/D-FAST_Bank_Erosion
+docs_dir: docs/mkdocs
 theme:
   name: material
   language: en
