@@ -19,6 +19,7 @@ from dfastbe.io import (
     clip_simulation_data,
     log_text,
     read_simulation_data,
+    get_plotting_flags
 )
 from dfastbe.kernel import get_bbox, get_zoom_extends
 from dfastbe.support import (
@@ -59,7 +60,7 @@ class BankLines:
 
         # set plotting flags
         self.plot_data = config_file.get_bool("General", "Plotting", True)
-        self.plot_flags = self._get_plotting_flags()
+        self.plot_flags = get_plotting_flags(config_file, self.plot_data, self.root_dir)
         self.river_data = RiverData(config_file)
 
         self.simulation_data, self.h0 = self._get_simulation_data()
@@ -96,56 +97,6 @@ class BankLines:
             os.makedirs(bank_output_dir)
 
         return Path(bank_output_dir)
-
-    def _get_plotting_flags(self) -> Dict[str, bool]:
-        """Get the plotting flags from the configuration file.
-
-        Returns:
-            data (Dict[str, bool]):
-                Dictionary containing the plotting flags.
-                save_plot (bool): Flag indicating whether to save the plot.
-                save_plot_zoomed (bool): Flag indicating whether to save the zoomed plot.
-                zoom_km_step (float): Step size for zooming in on the plot.
-                close_plot (bool): Flag indicating whether to close the plot.
-        """
-        if self.plot_data:
-            save_plot = self.config_file.get_bool("General", "SavePlots", True)
-            save_plot_zoomed = self.config_file.get_bool(
-                "General", "SaveZoomPlots", True
-            )
-            zoom_km_step = self.config_file.get_float("General", "ZoomStepKM", 1.0)
-            if zoom_km_step < 0.01:
-                save_plot_zoomed = False
-            close_plot = self.config_file.get_bool("General", "ClosePlots", False)
-        else:
-            save_plot = False
-            save_plot_zoomed = False
-            close_plot = False
-
-        data = {
-            "save_plot": save_plot,
-            "save_plot_zoomed": save_plot_zoomed,
-            "zoom_km_step": zoom_km_step,
-            "close_plot": close_plot,
-        }
-
-        # as appropriate, check output dir for figures and file format
-        if save_plot:
-            fig_dir = self.config_file.get_str(
-                "General", "FigureDir", f"{self.root_dir}{os.sep}figure"
-            )
-            log_text("figure_dir", data={"dir": fig_dir})
-            if os.path.exists(fig_dir):
-                log_text("overwrite_dir", data={"dir": fig_dir})
-            else:
-                os.makedirs(fig_dir)
-            plot_ext = self.config_file.get_str("General", "FigureExt", ".png")
-            data = data | {
-                "fig_dir": fig_dir,
-                "plot_ext": plot_ext,
-            }
-
-        return data
 
     def detect(self) -> None:
         """Run the bank line detection analysis for a specified configuration."""
