@@ -2106,7 +2106,7 @@ def get_output_dir(config_file:ConfigFile, option: str) -> Path:
     if output_dir.exists():
         log_text("overwrite_dir", data={"dir": output_dir})
     else:
-        output_dir.mkdir()
+        output_dir.mkdir(parents=True, exist_ok=True)
 
     return output_dir
 
