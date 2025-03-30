@@ -7,7 +7,7 @@ from io import StringIO
 import context
 
 # dfast binary path relative to tstdir
-dfastexe = "../../dfastbe.dist/dfastbe.exe"
+dfastexe = "../../../dfastbe.dist/dfastbe.exe"
 
 
 @contextmanager
@@ -27,7 +27,7 @@ class Test_basic:
         Test whether program runs at all.
         """
         cwd = os.getcwd()
-        tstdir = "tests"
+        tstdir = "tests/data/bank_lines"
         success = False
         try:
             os.chdir(tstdir)
@@ -44,7 +44,7 @@ class Test_basic:
         Testing program help.
         """
         cwd = os.getcwd()
-        tstdir = "tests"
+        tstdir = "tests/data/bank_lines"
         try:
             os.chdir(tstdir)
             result = subprocess.run([dfastexe, "--help"], capture_output=True)
@@ -71,7 +71,7 @@ class Test_basic:
         If GUI does not start test will fail.
         """
         cwd = os.getcwd()
-        tstdir = "tests"
+        tstdir = "tests/data/bank_lines"
         try:
             os.chdir(tstdir)
             try:
