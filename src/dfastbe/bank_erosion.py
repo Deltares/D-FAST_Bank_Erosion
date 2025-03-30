@@ -53,9 +53,9 @@ class Erosion:
         self._config_file = config_file
         self.gui = gui
         self.bank_dir = self._get_bank_line_dir()
+        self.output_dir = self._get_bank_erosion_output_dir()
         # check if additional debug output is requested
         self.debug = config_file.get_bool("General", "DebugOutput", False)
-
 
     @property
     def config_file(self) -> ConfigFile:
@@ -75,6 +75,17 @@ class Erosion:
         else:
             return bank_dir
 
+    def _get_bank_erosion_output_dir(self) -> Path:
+        output_dir = self.config_file.get_str("Erosion", "OutputDir")
+        log_text("output_dir", data={"dir": output_dir})
+        output_dir = Path(output_dir)
+        if output_dir.exists():
+            log_text("overwrite_dir", data={"dir": output_dir})
+        else:
+            output_dir.mkdir()
+
+        return output_dir
+
     def bankerosion_core(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
         timed_logger("-- start analysis --")
@@ -88,14 +99,6 @@ class Erosion:
         log_text("-")
         config_file = self.config_file
         river_data = RiverData(config_file)
-
-        # check outputdir
-        outputdir = config_file.get_str("Erosion", "OutputDir")
-        log_text("output_dir", data={"dir": outputdir})
-        if os.path.exists(outputdir):
-            log_text("overwrite_dir", data={"dir": outputdir})
-        else:
-            os.makedirs(outputdir)
 
         # set plotting flags
         plotting = config_file.get_bool("General", "Plotting", True)
@@ -231,7 +234,7 @@ class Erosion:
         write_shp_pnt(
             river_axis_numpy,
             {"chainage": river_axis_km},
-            outputdir + os.sep + "river_axis_chainage.shp",
+            str(self.output_dir) + os.sep + "river_axis_chainage.shp",
         )
 
         # clip river axis to reach of interest
@@ -265,7 +268,7 @@ class Erosion:
         write_shp_pnt(
             fairway_numpy,
             {"chainage": fairway_km},
-            outputdir + os.sep + "fairway_chainage.shp",
+            str(self.output_dir) + os.sep + "fairway_chainage.shp",
         )
 
         # clip fairway to reach of interest
@@ -289,7 +292,7 @@ class Erosion:
             write_shp_pnt(
                 (ifw_numpy[:-1] + ifw_numpy[1:]) / 2,
                 {"iface": ifw_face_idx},
-                outputdir + os.sep + "fairway_face_indices.shp",
+                str(self.output_dir) + os.sep + "fairway_face_indices.shp",
             )
 
         # distance fairway-bankline (bankfairway)
@@ -360,7 +363,7 @@ class Erosion:
                 write_shp_pnt(
                     bcrds_mid,
                     {"chainage": bank_km_mid[ib], "iface_fw": bp_fw_face_idx[ib]},
-                    outputdir
+                    str(self.output_dir)
                     + os.sep
                     + "bank_{}_chainage_and_fairway_face_idx.shp".format(ib + 1),
                 )
@@ -656,10 +659,10 @@ class Erosion:
                         write_shp(
                             bcrds_geo,
                             params,
-                            outputdir + os.sep + "debug.EQ.B{}.shp".format(ib + 1),
+                            str(self.output_dir) + os.sep + "debug.EQ.B{}.shp".format(ib + 1),
                         )
                         write_csv(
-                            params, outputdir + os.sep + "debug.EQ.B{}.csv".format(ib + 1),
+                            params, str(self.output_dir) + os.sep + "debug.EQ.B{}.csv".format(ib + 1),
                         )
 
                 dniqib, dviqib, dnship, dnflow, shipwavemax_ib, shipwavemin_ib = kernel.comp_erosion(
@@ -727,11 +730,11 @@ class Erosion:
                     write_shp(
                         bcrds_geo,
                         params,
-                        outputdir + os.sep + "debug.Q{}.B{}.shp".format(iq + 1, ib + 1),
+                        str(self.output_dir) + os.sep + "debug.Q{}.B{}.shp".format(iq + 1, ib + 1),
                     )
                     write_csv(
                         params,
-                        outputdir + os.sep + "debug.Q{}.B{}.csv".format(iq + 1, ib + 1),
+                        str(self.output_dir) + os.sep + "debug.Q{}.B{}.csv".format(iq + 1, ib + 1),
                     )
 
                 # shift bank lines
@@ -755,7 +758,7 @@ class Erosion:
             erovol_file = config_file.get_str("Erosion", "EroVol" + iq_str, default="erovolQ" + iq_str + ".evo")
             log_text("save_erovol", data={"file": erovol_file}, indent="  ")
             write_km_eroded_volumes(
-                km_mid, dvol_bank, outputdir + os.sep + erovol_file
+                km_mid, dvol_bank, str(self.output_dir) + os.sep + erovol_file
             )
 
         log_text("=")
@@ -810,13 +813,13 @@ class Erosion:
             bankline_new_series
         )
         bankname = config_file.get_str("General", "BankFile", "bankfile")
-        bankfile = outputdir + os.sep + bankname + "_new.shp"
+        bankfile = str(self.output_dir) + os.sep + bankname + "_new.shp"
         log_text("save_banklines", data={"file": bankfile})
         banklines_new.to_file(bankfile)
 
         bankline_eq_series = geopandas.geoseries.GeoSeries(bankline_eq_list)
         banklines_eq = geopandas.geodataframe.GeoDataFrame.from_features(bankline_eq_series)
-        bankfile = outputdir + os.sep + bankname + "_eq.shp"
+        bankfile = str(self.output_dir) + os.sep + bankname + "_eq.shp"
         log_text("save_banklines", data={"file": bankfile})
         banklines_eq.to_file(bankfile)
 
@@ -824,13 +827,13 @@ class Erosion:
         erovol_file = config_file.get_str("Erosion", "EroVol", default="erovol.evo")
         log_text("save_tot_erovol", data={"file": erovol_file})
         write_km_eroded_volumes(
-            km_mid, vol_tot, outputdir + os.sep + erovol_file
+            km_mid, vol_tot, str(self.output_dir) + os.sep + erovol_file
         )
 
         # write eroded volumes per km (equilibrium)
         erovol_file = config_file.get_str("Erosion", "EroVolEqui", default="erovol_eq.evo")
         log_text("save_eq_erovol", data={"file": erovol_file})
-        write_km_eroded_volumes(km_mid, vol_eq, outputdir + os.sep + erovol_file)
+        write_km_eroded_volumes(km_mid, vol_eq, str(self.output_dir) + os.sep + erovol_file)
 
         # create various plots
         if plotting:
