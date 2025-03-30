@@ -875,7 +875,7 @@ class ConfigFile:
             except ValueError:
                 self.config[group][key] = relative_path(rootdir, val_str)
 
-    def get_plotting_flags(self, plot_data: bool, root_dir: str) -> Dict[str, bool]:
+    def get_plotting_flags(self, root_dir: str) -> Dict[str, bool]:
         """Get the plotting flags from the configuration file.
 
         Returns:
@@ -886,6 +886,8 @@ class ConfigFile:
                 zoom_km_step (float): Step size for zooming in on the plot.
                 close_plot (bool): Flag indicating whether to close the plot.
         """
+        plot_data = self.get_bool("General", "Plotting", True)
+
         if plot_data:
             save_plot = self.get_bool("General", "SavePlots", True)
             save_plot_zoomed = self.get_bool(
@@ -901,6 +903,7 @@ class ConfigFile:
             close_plot = False
 
         data = {
+            "plot_data": plot_data,
             "save_plot": save_plot,
             "save_plot_zoomed": save_plot_zoomed,
             "zoom_km_step": zoom_km_step,
@@ -924,6 +927,21 @@ class ConfigFile:
             }
 
         return data
+
+    def get_output_dir(self, option: str) -> Path:
+        if option == "banklines":
+            output_dir = self.get_str("General", "BankDir")
+        else:
+            output_dir = self.get_str("Erosion", "OutputDir")
+
+        output_dir = Path(output_dir)
+        log_text(f"{option}_out", data={"dir": output_dir})
+        if output_dir.exists():
+            log_text("overwrite_dir", data={"dir": output_dir})
+        else:
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+        return output_dir
 
 class RiverData:
     """River data class."""
@@ -2093,22 +2111,6 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
         # km_thr = (km[:-1] + km[1:]) / 2
         km_thr = km[1:]
     return km_thr, val
-
-
-def get_output_dir(config_file:ConfigFile, option: str) -> Path:
-    if option == "banklines":
-        output_dir = config_file.get_str("General", "BankDir")
-    else:
-        output_dir = config_file.get_str("Erosion", "OutputDir")
-
-    output_dir = Path(output_dir)
-    log_text(f"{option}_out", data={"dir": output_dir})
-    if output_dir.exists():
-        log_text("overwrite_dir", data={"dir": output_dir})
-    else:
-        output_dir.mkdir(parents=True, exist_ok=True)
-
-    return output_dir
 
 class ConfigFileError(Exception):
     """Custom exception for configuration file errors."""
