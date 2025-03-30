@@ -28,13 +28,14 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
 from typing import Tuple, List
 from pathlib import Path
-from dfastbe import kernel
-from dfastbe import support
+from dfastbe.kernel import get_km_bins, moving_avg, comp_erosion_eq, comp_erosion, get_km_eroded_volume
+from dfastbe.support import on_right_side, project_km_on_line, xykm_bin, intersect_line_mesh, \
+                              move_line
 from dfastbe import plotting as df_plt
 import os
 import geopandas
-import shapely
-import numpy
+from shapely.geometry import LineString, Point
+import numpy as np
 import matplotlib.pyplot as plt
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, read_simulation_data, \
@@ -91,7 +92,6 @@ class Erosion:
         config_file = self.config_file
         river_data = RiverData(config_file)
 
-
         # get simulation time terosion
         Teros = config_file.get_int("Erosion", "TErosion", positive=True)
         log_text("total_time", data={"t": Teros})
@@ -146,10 +146,10 @@ class Erosion:
         bank_crds = []
         bank_idx = []
         for ib in range(n_banklines):
-            bp = numpy.array(banklines.geometry[ib])
+            bp = np.array(banklines.geometry[ib])
             log_text("bank_nodes", data={"ib": ib + 1, "n": len(bp)})
 
-            crds, idx = support.intersect_line_mesh(
+            crds, idx = intersect_line_mesh(
                 bp, xf, yf, xe, ye, fe, ef, fn, en, nnodes, boundary_edge_nrs
             )
             bank_crds.append(crds)
@@ -161,7 +161,7 @@ class Erosion:
         to_right = [True] * n_banklines
         for ib, bcrds in enumerate(bank_crds):
             bcrds_mid = (bcrds[:-1, :] + bcrds[1:, :]) / 2
-            km_mid = support.project_km_on_line(bcrds_mid, river_data.masked_profile_arr)
+            km_mid = project_km_on_line(bcrds_mid, river_data.masked_profile_arr)
 
             # check if bank line is defined from low chainage to high chainage
             if km_mid[0] > km_mid[-1]:
@@ -174,7 +174,7 @@ class Erosion:
 
             # check if bank line is left or right bank
             # when looking from low to high chainage
-            to_right[ib] = support.on_right_side(bcrds, stations_coords)
+            to_right[ib] = on_right_side(bcrds, stations_coords)
             if to_right[ib]:
                 log_text("right_side_bank", data={"ib": ib + 1})
             else:
@@ -184,13 +184,13 @@ class Erosion:
         river_axis_file = config_file.get_str("Erosion", "RiverAxis")
         log_text("read_river_axis", data={"file": river_axis_file})
         river_axis = read_xyc(river_axis_file)
-        river_axis_numpy = numpy.array(river_axis)
+        river_axis_numpy = np.array(river_axis)
         # optional sorting --> see 04_Waal_D3D example
         # check: sum all distances and determine maximum distance ...
         # if maximum > alpha * sum then perform sort
         # Waal OK: 0.0082 ratio max/sum, Waal NotOK: 0.13 - Waal: 2500 points,
         # so even when OK still some 21 times more than 1/2500 = 0.0004
-        dist2 = (numpy.diff(river_axis_numpy, axis=0) ** 2).sum(axis=1)
+        dist2 = (np.diff(river_axis_numpy, axis=0) ** 2).sum(axis=1)
         alpha = dist2.max() / dist2.sum()
         if alpha > 0.03:
             print("The river axis needs sorting!!")
@@ -198,7 +198,7 @@ class Erosion:
 
         # map km to axis points, further using axis
         log_text("chainage_to_axis")
-        river_axis_km = support.project_km_on_line(river_axis_numpy, river_data.masked_profile_arr)
+        river_axis_km = project_km_on_line(river_axis_numpy, river_data.masked_profile_arr)
         write_shp_pnt(
             river_axis_numpy,
             {"chainage": river_axis_km},
@@ -206,8 +206,8 @@ class Erosion:
         )
 
         # clip river axis to reach of interest
-        i1 = numpy.argmin(((stations_coords[0] - river_axis_numpy) ** 2).sum(axis=1))
-        i2 = numpy.argmin(((stations_coords[-1] - river_axis_numpy) ** 2).sum(axis=1))
+        i1 = np.argmin(((stations_coords[0] - river_axis_numpy) ** 2).sum(axis=1))
+        i2 = np.argmin(((stations_coords[-1] - river_axis_numpy) ** 2).sum(axis=1))
         if i1 < i2:
             river_axis_km = river_axis_km[i1 : i2 + 1]
             river_axis_numpy = river_axis_numpy[i1 : i2 + 1]
@@ -215,14 +215,14 @@ class Erosion:
             # reverse river axis
             river_axis_km = river_axis_km[i2 : i1 + 1][::-1]
             river_axis_numpy = river_axis_numpy[i2 : i1 + 1][::-1]
-        river_axis = shapely.geometry.LineString(river_axis_numpy)
+        river_axis = LineString(river_axis_numpy)
 
         # get output interval
         km_step = config_file.get_float("Erosion", "OutputInterval", 1.0)
         # map to output interval
         km_bin = (river_axis_km.min(), river_axis_km.max(), km_step)
-        km_mid = kernel.get_km_bins(km_bin, type=3)  # get mid points
-        xykm_bin_numpy = support.xykm_bin(river_data.masked_profile_arr, km_bin)
+        km_mid = get_km_bins(km_bin, type=3)  # get mid points
+        xykm_bin_numpy = xykm_bin(river_data.masked_profile_arr, km_bin)
 
         # read fairway file
         fairway_file = config_file.get_str("Erosion", "Fairway")
@@ -231,8 +231,8 @@ class Erosion:
 
         # map km to fairway points, further using axis
         log_text("chainage_to_fairway")
-        fairway_numpy = numpy.array(river_axis.coords)
-        fairway_km = support.project_km_on_line(fairway_numpy, river_data.masked_profile_arr)
+        fairway_numpy = np.array(river_axis.coords)
+        fairway_km = project_km_on_line(fairway_numpy, river_data.masked_profile_arr)
         write_shp_pnt(
             fairway_numpy,
             {"chainage": fairway_km},
@@ -240,8 +240,8 @@ class Erosion:
         )
 
         # clip fairway to reach of interest
-        i1 = numpy.argmin(((stations_coords[0] - fairway_numpy) ** 2).sum(axis=1))
-        i2 = numpy.argmin(((stations_coords[-1] - fairway_numpy) ** 2).sum(axis=1))
+        i1 = np.argmin(((stations_coords[0] - fairway_numpy) ** 2).sum(axis=1))
+        i2 = np.argmin(((stations_coords[-1] - fairway_numpy) ** 2).sum(axis=1))
         if i1 < i2:
             fairway_km = fairway_km[i1 : i2 + 1]
             fairway_numpy = fairway_numpy[i1 : i2 + 1]
@@ -249,11 +249,11 @@ class Erosion:
             # reverse fairway
             fairway_km = fairway_km[i2 : i1 + 1][::-1]
             fairway_numpy = fairway_numpy[i2 : i1 + 1][::-1]
-        fairway = shapely.geometry.LineString(fairway_numpy)
+        fairway = LineString(fairway_numpy)
 
         # intersect fairway and mesh
         log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
-        ifw_numpy, ifw_face_idx = support.intersect_line_mesh(
+        ifw_numpy, ifw_face_idx = intersect_line_mesh(
             fairway_numpy, xf, yf, xe, ye, fe, ef, fn, en, nnodes, boundary_edge_nrs
         )
         if self.debug:
@@ -270,11 +270,11 @@ class Erosion:
         nfw = len(ifw_face_idx)
         for ib, bcrds in enumerate(bank_crds):
             bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
-            distance_fw.append(numpy.zeros(len(bcrds_mid)))
-            bp_fw_face_idx.append(numpy.zeros(len(bcrds_mid), dtype=numpy.int64))
+            distance_fw.append(np.zeros(len(bcrds_mid)))
+            bp_fw_face_idx.append(np.zeros(len(bcrds_mid), dtype=np.int64))
             for ip, bp in enumerate(bcrds_mid):
                 # find closest fairway support node
-                ifw = numpy.argmin(((bp - ifw_numpy) ** 2).sum(axis=1))
+                ifw = np.argmin(((bp - ifw_numpy) ** 2).sum(axis=1))
                 fwp = ifw_numpy[ifw]
                 dbfw = ((bp - fwp) ** 2).sum() ** 0.5
                 # If fairway support node is also the closest projected fairway point, then it likely
@@ -361,7 +361,6 @@ class Erosion:
         )
 
         # save 1_banklines
-
         # read vship, nship, nwave, draught (tship), shiptype ... independent of level number
         vship0 = config_file.get_parameter(
             "Erosion", "VShip", bank_km_mid, positive=True, onefile=True
@@ -387,7 +386,7 @@ class Erosion:
 
         # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
         classes = config_file.get_bool("Erosion", "Classes")
-        taucls = numpy.array([1e20, 95, 3.0, 0.95, 0.15])
+        taucls = np.array([1e20, 95, 3.0, 0.95, 0.15])
         taucls_str = ["protected", "vegetation", "good clay", "moderate/bad clay", "sand"]
         if classes:
             banktype = config_file.get_parameter(
@@ -403,7 +402,7 @@ class Erosion:
             thr = (taucls[:-1] + taucls[1:]) / 2
             banktype = [None] * len(thr)
             for ib in range(len(tauc)):
-                bt = numpy.zeros(tauc[ib].size)
+                bt = np.zeros(tauc[ib].size)
                 for thr_i in thr:
                     bt[tauc[ib] < thr_i] += 1
                 banktype[ib] = bt
@@ -419,21 +418,21 @@ class Erosion:
             zss[ib][mask] = zfw_ini[ib][mask] - 1
 
         # initialize arrays for erosion loop over all discharges
-        velocity: List[List[numpy.ndarray]] = []
-        bankheight: List[numpy.ndarray] = []
-        waterlevel: List[List[numpy.ndarray]] = []
-        chezy: List[List[numpy.ndarray]] = []
-        dv: List[List[numpy.ndarray]] = []
-        shipwavemax: List[List[numpy.ndarray]] = []
-        shipwavemin: List[List[numpy.ndarray]] = []
+        velocity: List[List[np.ndarray]] = []
+        bankheight: List[np.ndarray] = []
+        waterlevel: List[List[np.ndarray]] = []
+        chezy: List[List[np.ndarray]] = []
+        dv: List[List[np.ndarray]] = []
+        shipwavemax: List[List[np.ndarray]] = []
+        shipwavemin: List[List[np.ndarray]] = []
 
-        linesize: List[numpy.ndarray] = []
-        dn_flow_tot: List[numpy.ndarray] = []
-        dn_ship_tot: List[numpy.ndarray] = []
-        dn_tot: List[numpy.ndarray] = []
-        dv_tot: List[numpy.ndarray] = []
-        dn_eq: List[numpy.ndarray] = []
-        dv_eq: List[numpy.ndarray] = []
+        linesize: List[np.ndarray] = []
+        dn_flow_tot: List[np.ndarray] = []
+        dn_ship_tot: List[np.ndarray] = []
+        dn_tot: List[np.ndarray] = []
+        dv_tot: List[np.ndarray] = []
+        dn_eq: List[np.ndarray] = []
+        dv_eq: List[np.ndarray] = []
         for iq in range(num_levels):
             log_text(
                 "discharge_header",
@@ -524,18 +523,18 @@ class Erosion:
             shipwavemax.append([])
             shipwavemin.append([])
 
-            dvol_bank = numpy.zeros((len(km_mid), n_banklines))
+            dvol_bank = np.zeros((len(km_mid), n_banklines))
             hfw_max = 0
             for ib, bcrds in enumerate(bank_crds):
                 # determine velocity along banks ...
-                dx = numpy.diff(bcrds[:, 0])
-                dy = numpy.diff(bcrds[:, 1])
+                dx = np.diff(bcrds[:, 0])
+                dy = np.diff(bcrds[:, 1])
                 if iq == 0:
-                    linesize.append(numpy.sqrt(dx ** 2 + dy ** 2))
+                    linesize.append(np.sqrt(dx ** 2 + dy ** 2))
 
                 bank_index = bank_idx[ib]
                 vel_bank = (
-                    numpy.absolute(
+                    np.absolute(
                         sim["ucx_face"][bank_index] * dx + sim["ucy_face"][bank_index] * dy
                     )
                     / linesize[ib]
@@ -545,7 +544,7 @@ class Erosion:
                         log_text(
                             "apply_velocity_filter", indent="  ", data={"dx": vel_dx}
                         )
-                    vel_bank = kernel.moving_avg(bank_km_mid[ib], vel_bank, vel_dx)
+                    vel_bank = moving_avg(bank_km_mid[ib], vel_bank, vel_dx)
                 velocity[iq].append(vel_bank)
                 #
                 if iq == 0:
@@ -562,7 +561,7 @@ class Erosion:
                                     indent="  ",
                                     data={"dx": zb_dx},
                                 )
-                            zb_bank = kernel.moving_avg(
+                            zb_bank = moving_avg(
                                 bank_km_mid[ib], zb_bank, zb_dx
                             )
                         bankheight.append(zb_bank)
@@ -580,7 +579,7 @@ class Erosion:
                 chezy[iq].append(0 * chez + chez.mean())
 
                 if iq == num_levels - 1:  # ref_level:
-                    dn_eq1, dv_eq1 = kernel.comp_erosion_eq(
+                    dn_eq1, dv_eq1 = comp_erosion_eq(
                         bankheight[ib],
                         linesize[ib],
                         zfw_ini[ib],
@@ -600,7 +599,7 @@ class Erosion:
 
                     if self.debug:
                         bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
-                        bcrds_pnt = [shapely.geometry.Point(xy1) for xy1 in bcrds_mid]
+                        bcrds_pnt = [Point(xy1) for xy1 in bcrds_mid]
                         bcrds_geo = geopandas.geoseries.GeoSeries(bcrds_pnt)
                         params = {
                             "chainage": bank_km_mid[ib],
@@ -633,7 +632,7 @@ class Erosion:
                             params, str(self.output_dir) + os.sep + "debug.EQ.B{}.csv".format(ib + 1),
                         )
 
-                dniqib, dviqib, dnship, dnflow, shipwavemax_ib, shipwavemin_ib = kernel.comp_erosion(
+                dniqib, dviqib, dnship, dnflow, shipwavemax_ib, shipwavemin_ib = comp_erosion(
                     velocity[iq][ib],
                     bankheight[ib],
                     linesize[ib],
@@ -663,7 +662,7 @@ class Erosion:
                 if self.debug:
                     bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
 
-                    bcrds_pnt = [shapely.geometry.Point(xy1) for xy1 in bcrds_mid]
+                    bcrds_pnt = [Point(xy1) for xy1 in bcrds_mid]
                     bcrds_geo = geopandas.geoseries.GeoSeries(bcrds_pnt)
                     params = {
                         "chainage": bank_km_mid[ib],
@@ -719,7 +718,7 @@ class Erosion:
                     dv_tot[ib] += dviqib
 
                 # accumulate eroded volumes per km
-                dvol = kernel.get_km_eroded_volume(bank_km_mid[ib], dviqib, km_bin)
+                dvol = get_km_eroded_volume(bank_km_mid[ib], dviqib, km_bin)
                 dv[iq].append(dvol)
                 dvol_bank[:, ib] += dvol
 
@@ -730,14 +729,14 @@ class Erosion:
             )
 
         log_text("=")
-        dnav = numpy.zeros(n_banklines)
-        dnmax = numpy.zeros(n_banklines)
-        dnavflow = numpy.zeros(n_banklines)
-        dnavship = numpy.zeros(n_banklines)
-        dnaveq = numpy.zeros(n_banklines)
-        dnmaxeq = numpy.zeros(n_banklines)
-        vol_eq = numpy.zeros((len(km_mid), n_banklines))
-        vol_tot = numpy.zeros((len(km_mid), n_banklines))
+        dnav = np.zeros(n_banklines)
+        dnmax = np.zeros(n_banklines)
+        dnavflow = np.zeros(n_banklines)
+        dnavship = np.zeros(n_banklines)
+        dnaveq = np.zeros(n_banklines)
+        dnmaxeq = np.zeros(n_banklines)
+        vol_eq = np.zeros((len(km_mid), n_banklines))
+        vol_tot = np.zeros((len(km_mid), n_banklines))
         xyline_new_list = []
         bankline_new_list = []
         xyline_eq_list = []
@@ -756,19 +755,19 @@ class Erosion:
             log_text("bank_dnaveq", data={"v": dnaveq[ib]})
             log_text("bank_dnmaxeq", data={"v": dnmaxeq[ib]})
 
-            xyline_new = support.move_line(bcrds, dn_tot[ib], to_right[ib])
+            xyline_new = move_line(bcrds, dn_tot[ib], to_right[ib])
             xyline_new_list.append(xyline_new)
-            bankline_new_list.append(shapely.geometry.LineString(xyline_new))
+            bankline_new_list.append(LineString(xyline_new))
 
-            xyline_eq = support.move_line(bcrds, dn_eq[ib], to_right[ib])
+            xyline_eq = move_line(bcrds, dn_eq[ib], to_right[ib])
             xyline_eq_list.append(xyline_eq)
-            bankline_eq_list.append(shapely.geometry.LineString(xyline_eq))
+            bankline_eq_list.append(LineString(xyline_eq))
 
-            dvol_eq = kernel.get_km_eroded_volume(
+            dvol_eq = get_km_eroded_volume(
                 bank_km_mid[ib], dv_eq[ib], km_bin
             )
             vol_eq[:, ib] = dvol_eq
-            dvol_tot = kernel.get_km_eroded_volume(
+            dvol_tot = get_km_eroded_volume(
                 bank_km_mid[ib], dv_tot[ib], km_bin
             )
             vol_tot[:, ib] = dvol_tot
@@ -1044,50 +1043,50 @@ class Erosion:
         timed_logger("-- end analysis --")
 
 
-def _masked_index(x0: numpy.array, idx: numpy.ma.masked_array) -> numpy.ma.masked_array:
+def _masked_index(x0: np.array, idx: np.ma.masked_array) -> np.ma.masked_array:
     """
     Index one array by another transferring the mask.
     
     Arguments
     ---------
-    x0 : numpy.ndarray
+    x0 : np.ndarray
         A linear array.
-    idx : numpy.ma.masked_array
+    idx : np.ma.masked_array
         An index array with possibly masked indices.
     
     Results
     -------
-    x1: numpy.ma.masked_array
+    x1: np.ma.masked_array
         An array with same shape as idx, with mask.
     """
     idx_safe = idx.copy()
-    idx_safe.data[numpy.ma.getmask(idx)] = 0
-    x1 = numpy.ma.masked_where(numpy.ma.getmask(idx), x0[idx_safe])
+    idx_safe.data[np.ma.getmask(idx)] = 0
+    x1 = np.ma.masked_where(np.ma.getmask(idx), x0[idx_safe])
     return x1
 
 
 def _derive_topology_arrays(
-    fn: numpy.ndarray, n_nodes: numpy.ndarray
-) -> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray]:
+    fn: np.ndarray, n_nodes: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Derive the secondary topology arrays from the face_node_connectivity.
     
     Arguments
     ---------
-    fn : numpy.ndarray
+    fn : np.ndarray
         An N x M array containing the node indices (max M) for each of the N mesh faces.
-    n_nodes: numpy.ndarray
+    n_nodes: np.ndarray
         A array of length N containing the number of nodes for each one of the N mesh faces.
     
     Results
     -------
-    en : numpy.ndarray
+    en : np.ndarray
         An L x 2 array containing the node indices (2) for each of the L mesh edges.
-    ef : numpy.ndarray
+    ef : np.ndarray
         An L x 2 array containing the face indices (max 2) for each of the L mesh edges.
-    fe : numpy.ndarray
+    fe : np.ndarray
         An N x M array containing the edge indices (max M) for each of the N mesh faces.
-    boundary_edge_nrs : numpy.ndarray
+    boundary_edge_nrs : np.ndarray
         A array of length K containing the edge indices making the mesh outer (or inner) boundary.
     """
 
@@ -1096,8 +1095,8 @@ def _derive_topology_arrays(
     n_faces = fn.shape[0]
     max_n_nodes = fn.shape[1]
     n_edges = sum(n_nodes)
-    en = numpy.zeros((n_edges, 2), dtype=numpy.int64)
-    face_nr = numpy.zeros((n_edges,), dtype=numpy.int64)
+    en = np.zeros((n_edges, 2), dtype=np.int64)
+    face_nr = np.zeros((n_edges,), dtype=np.int64)
     i = 0
     for iFace in range(n_faces):
         nEdges = n_nodes[iFace]  # note: nEdges = nNodes
@@ -1110,38 +1109,38 @@ def _derive_topology_arrays(
             face_nr[i] = iFace
             i = i + 1
     en.sort(axis=1)
-    i2 = numpy.argsort(en[:, 1], kind="stable")
-    i1 = numpy.argsort(en[i2, 0], kind="stable")
+    i2 = np.argsort(en[:, 1], kind="stable")
+    i1 = np.argsort(en[i2, 0], kind="stable")
     i12 = i2[i1]
     en = en[i12, :]
     face_nr = face_nr[i12]
 
     # detect which edges are equal to the previous edge, and get a list of all unique edges
-    numpy_true = numpy.array([True])
-    equal_to_previous = numpy.concatenate(
-        (~numpy_true, (numpy.diff(en, axis=0) == 0).all(axis=1))
+    numpy_true = np.array([True])
+    equal_to_previous = np.concatenate(
+        (~numpy_true, (np.diff(en, axis=0) == 0).all(axis=1))
     )
     unique_edge = ~equal_to_previous
-    n_unique_edges = numpy.sum(unique_edge)
+    n_unique_edges = np.sum(unique_edge)
     # reduce the edge node connections to only the unique edges
     en = en[unique_edge, :]
 
     # number the edges
-    edge_nr = numpy.zeros(n_edges, dtype=numpy.int64)
-    edge_nr[unique_edge] = numpy.arange(n_unique_edges, dtype=numpy.int64)
+    edge_nr = np.zeros(n_edges, dtype=np.int64)
+    edge_nr[unique_edge] = np.arange(n_unique_edges, dtype=np.int64)
     edge_nr[equal_to_previous] = edge_nr[
-        numpy.concatenate((equal_to_previous[1:], equal_to_previous[:1]))
+        np.concatenate((equal_to_previous[1:], equal_to_previous[:1]))
     ]
 
     # if two consecutive edges are unique, the first one occurs only once and represents a boundary edge
-    is_boundary_edge = unique_edge & numpy.concatenate((unique_edge[1:], numpy_true))
+    is_boundary_edge = unique_edge & np.concatenate((unique_edge[1:], numpy_true))
     boundary_edge_nrs = edge_nr[is_boundary_edge]
 
     # go back to the original face order
-    edge_nr_in_face_order = numpy.zeros(n_edges, dtype=numpy.int64)
+    edge_nr_in_face_order = np.zeros(n_edges, dtype=np.int64)
     edge_nr_in_face_order[i12] = edge_nr
     # create the face edge connectivity array
-    fe = numpy.zeros(fn.shape, dtype=numpy.int64)
+    fe = np.zeros(fn.shape, dtype=np.int64)
     i = 0
     for iFace in range(n_faces):
         nEdges = n_nodes[iFace]  # note: nEdges = nNodes
@@ -1150,7 +1149,7 @@ def _derive_topology_arrays(
             i = i + 1
 
     # determine the edge face connectivity
-    ef = -numpy.ones((n_unique_edges, 2), dtype=numpy.int64)
+    ef = -np.ones((n_unique_edges, 2), dtype=np.int64)
     ef[edge_nr[unique_edge], 0] = face_nr[unique_edge]
     ef[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
 
