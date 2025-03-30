@@ -33,7 +33,8 @@ from dfastbe.support import on_right_side, project_km_on_line, xykm_bin, interse
                               move_line
 from dfastbe import plotting as df_plt
 import os
-import geopandas
+from geopandas.geodataframe import GeoDataFrame
+from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString, Point
 import numpy as np
 import matplotlib.pyplot as plt
@@ -112,8 +113,6 @@ class Erosion:
             "parreed0": parreed0,
         }
         return ship_data
-
-
 
 
     def bankerosion_core(self) -> None:
@@ -462,7 +461,7 @@ class Erosion:
             # read vship, nship, nwave, draught, shiptype, slope, reed, fairwaydepth, ... (level specific values)
             vship = config_file.get_parameter(
                 "Erosion",
-                "VShip" + iq_str,
+                f"VShip{iq_str}",
                 bank_km_mid,
                 default=ship_data["vship0"],
                 positive=True,
@@ -470,7 +469,7 @@ class Erosion:
             )
             Nship = config_file.get_parameter(
                 "Erosion",
-                "NShip" + iq_str,
+                f"NShip{iq_str}",
                 bank_km_mid,
                 default=ship_data["Nship0"],
                 positive=True,
@@ -478,7 +477,7 @@ class Erosion:
             )
             nwave = config_file.get_parameter(
                 "Erosion",
-                "NWave" + iq_str,
+                f"NWave{iq_str}",
                 bank_km_mid,
                 default=ship_data["nwave0"],
                 positive=True,
@@ -486,7 +485,7 @@ class Erosion:
             )
             Tship = config_file.get_parameter(
                 "Erosion",
-                "Draught" + iq_str,
+                f"Draught{iq_str}",
                 bank_km_mid,
                 default=ship_data["Tship0"],
                 positive=True,
@@ -494,7 +493,7 @@ class Erosion:
             )
             ship_type = config_file.get_parameter(
                 "Erosion",
-                "ShipType" + iq_str,
+                f"ShipType{iq_str}",
                 bank_km_mid,
                 default=ship_data["ship0"],
                 valid=[1, 2, 3],
@@ -503,7 +502,7 @@ class Erosion:
 
             parslope = config_file.get_parameter(
                 "Erosion",
-                "Slope" + iq_str,
+                f"Slope{iq_str}",
                 bank_km_mid,
                 default=ship_data["parslope0"],
                 positive=True,
@@ -511,7 +510,7 @@ class Erosion:
             )
             parreed = config_file.get_parameter(
                 "Erosion",
-                "Reed" + iq_str,
+                f"Reed{iq_str}",
                 bank_km_mid,
                 default=ship_data["parreed0"],
                 positive=True,
@@ -617,7 +616,7 @@ class Erosion:
                     if self.debug:
                         bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
                         bcrds_pnt = [Point(xy1) for xy1 in bcrds_mid]
-                        bcrds_geo = geopandas.geoseries.GeoSeries(bcrds_pnt)
+                        bcrds_geo = GeoSeries(bcrds_pnt)
                         params = {
                             "chainage": bank_km_mid[ib],
                             "x": bcrds_mid[:, 0],
@@ -680,7 +679,7 @@ class Erosion:
                     bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
 
                     bcrds_pnt = [Point(xy1) for xy1 in bcrds_mid]
-                    bcrds_geo = geopandas.geoseries.GeoSeries(bcrds_pnt)
+                    bcrds_geo = GeoSeries(bcrds_pnt)
                     params = {
                         "chainage": bank_km_mid[ib],
                         "x": bcrds_mid[:, 0],
@@ -739,7 +738,7 @@ class Erosion:
                 dv[iq].append(dvol)
                 dvol_bank[:, ib] += dvol
 
-            erovol_file = config_file.get_str("Erosion", "EroVol" + iq_str, default="erovolQ" + iq_str + ".evo")
+            erovol_file = config_file.get_str("Erosion", f"EroVol{iq_str}", default=f"erovolQ{iq_str}.evo")
             log_text("save_erovol", data={"file": erovol_file}, indent="  ")
             write_km_eroded_volumes(
                 km_mid, dvol_bank, str(self.output_dir) + os.sep + erovol_file
@@ -792,20 +791,20 @@ class Erosion:
                 log_text("-")
 
         # write bank line files
-        bankline_new_series = geopandas.geoseries.GeoSeries(bankline_new_list)
-        banklines_new = geopandas.geodataframe.GeoDataFrame.from_features(
-            bankline_new_series
-        )
-        bankname = config_file.get_str("General", "BankFile", "bankfile")
-        bankfile = str(self.output_dir) + os.sep + bankname + "_new.shp"
-        log_text("save_banklines", data={"file": bankfile})
-        banklines_new.to_file(bankfile)
+        bankline_new_series = GeoSeries(bankline_new_list)
+        bank_lines_new = GeoDataFrame.from_features(bankline_new_series)
+        bank_name = config_file.get_str("General", "BankFile", "bankfile")
 
-        bankline_eq_series = geopandas.geoseries.GeoSeries(bankline_eq_list)
-        banklines_eq = geopandas.geodataframe.GeoDataFrame.from_features(bankline_eq_series)
-        bankfile = str(self.output_dir) + os.sep + bankname + "_eq.shp"
-        log_text("save_banklines", data={"file": bankfile})
-        banklines_eq.to_file(bankfile)
+        bank_file = self.output_dir / f"{bank_name}_new.shp"
+        log_text("save_banklines", data={"file": str(bank_file)})
+        bank_lines_new.to_file(bank_file)
+
+        bankline_eq_series = GeoSeries(bankline_eq_list)
+        banklines_eq = GeoDataFrame.from_features(bankline_eq_series)
+
+        bank_file = self.output_dir/ f"{bank_name}_eq.shp"
+        log_text("save_banklines", data={"file": str(bank_file)})
+        banklines_eq.to_file(bank_file)
 
         # write eroded volumes per km (total)
         erovol_file = config_file.get_str("Erosion", "EroVol", default="erovol.evo")
@@ -974,17 +973,12 @@ class Erosion:
             if self.plot_flags["save_plot"]:
                 for ib, fig in enumerate(figlist):
                     ifig = ifig + 1
-                    figbase = (
-                        self.plot_flags["fig_dir"]
-                        + os.sep
-                        + str(ifig)
-                        + "_levels_bank_"
-                        + str(ib + 1)
-                    )
+                    figbase = f"{self.plot_flags['fig_dir']}/{ifig}_levels_bank_{ib + 1}"
+
                     if self.plot_flags["save_plot_zoomed"]:
                         df_plt.zoom_x_and_save(fig, axlist[ib], figbase, self.plot_flags["plot_ext"], kmzoom)
-                    figfile = figbase + self.plot_flags["plot_ext"]
-                    df_plt.savefig(fig, figfile)
+                    fig_file = f"{figbase}{self.plot_flags['plot_ext']}"
+                    df_plt.savefig(fig, fig_file)
 
             figlist, axlist = df_plt.plot6series_velocity_per_bank(
                 bank_km_mid,
@@ -1012,8 +1006,8 @@ class Erosion:
                     )
                     if self.plot_flags["save_plot_zoomed"]:
                         df_plt.zoom_x_and_save(fig, axlist[ib], figbase, self.plot_flags["plot_ext"], kmzoom)
-                    figfile = figbase + self.plot_flags["plot_ext"]
-                    df_plt.savefig(fig, figfile)
+                    fig_file = figbase + self.plot_flags["plot_ext"]
+                    df_plt.savefig(fig, fig_file)
 
             fig, ax = df_plt.plot7_banktype(
                 bbox,
@@ -1030,8 +1024,8 @@ class Erosion:
                 figbase = self.plot_flags["fig_dir"] + os.sep + str(ifig) + "_banktype"
                 if self.plot_flags["save_plot_zoomed"]:
                     df_plt.zoom_xy_and_save(fig, ax, figbase, self.plot_flags["plot_ext"], xyzoom)
-                figfile = figbase + self.plot_flags["plot_ext"]
-                df_plt.savefig(fig, figfile)
+                fig_file = figbase + self.plot_flags["plot_ext"]
+                df_plt.savefig(fig, fig_file)
 
             fig, ax = df_plt.plot8_eroded_distance(
                 bank_km_mid,
@@ -1048,8 +1042,8 @@ class Erosion:
                 figbase = self.plot_flags["fig_dir"] + os.sep + str(ifig) + "_erodis"
                 if self.plot_flags["save_plot_zoomed"]:
                     df_plt.zoom_x_and_save(fig, ax, figbase, self.plot_flags["plot_ext"], kmzoom)
-                figfile = figbase + self.plot_flags["plot_ext"]
-                df_plt.savefig(fig, figfile)
+                fig_file = figbase + self.plot_flags["plot_ext"]
+                df_plt.savefig(fig, fig_file)
 
             if self.plot_flags["close_plot"]:
                 plt.close("all")
