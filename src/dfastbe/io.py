@@ -33,11 +33,13 @@ import netCDF4
 import configparser
 import os
 import os.path
-import pandas
-import geopandas
+import pandas as pd
+import geopandas as gpd
+from geopandas.geodataframe import GeoDataFrame
+from geopandas.geoseries import GeoSeries
 import shapely
-from shapely.geometry import Point
-import pathlib
+from shapely.geometry import Point, linestring, LineString
+from shapely.prepared import prep
 
 MAX_RIVER_WIDTH = 1000
 
@@ -98,7 +100,7 @@ class ConfigFile:
         self._root_dir = value
 
     @classmethod
-    def read(cls, path: Union[str, pathlib.Path]):
+    def read(cls, path: Union[str, Path]):
         """
         Read a configParser object (configuration file).
 
@@ -480,7 +482,7 @@ class ConfigFile:
 
         return km_bounds
 
-    def get_search_lines(self) -> List[shapely.geometry.linestring.LineStringAdapter]:
+    def get_search_lines(self) -> List[linestring.LineStringAdapter]:
         """
         Get the search lines for the bank lines from the analysis settings.
 
@@ -516,7 +518,7 @@ class ConfigFile:
         bankfile = f"{bank_dir}{os.sep}{bank_name}.shp"
         if os.path.exists(bankfile):
             log_text("read_banklines", data={"file": bankfile})
-            banklines = geopandas.read_file(bankfile)
+            banklines = gpd.read_file(bankfile)
         else:
             bankfile = bank_dir + os.sep + bank_name + "_#.xyc"
             log_text("read_banklines", data={"file": bankfile})
@@ -526,12 +528,12 @@ class ConfigFile:
                 bankfile = bank_dir + os.sep + bank_name + "_" + str(b) + ".xyc"
                 if os.path.exists(bankfile):
                     xy_bank = read_xyc(bankfile)
-                    bankline_list.append(shapely.geometry.LineString(xy_bank))
+                    bankline_list.append(LineString(xy_bank))
                     b = b + 1
                 else:
                     break
-            bankline_series = geopandas.geoseries.GeoSeries(bankline_list)
-            banklines = geopandas.geodataframe.GeoDataFrame.from_features(bankline_series)
+            bankline_series = GeoSeries(bankline_list)
+            banklines = GeoDataFrame.from_features(bankline_series)
         return banklines
 
     def get_parameter(
@@ -699,12 +701,12 @@ class ConfigFile:
             )
         return val
 
-    def get_xy_km(self) -> shapely.geometry.linestring.LineStringAdapter:
+    def get_xy_km(self) -> linestring.LineStringAdapter:
         """get_xy_km
 
         Returns
         -------
-        xykm : shapely.geometry.linestring.LineStringAdapter
+        xykm : linestring.LineStringAdapter
         """
         # get the chainage file
         km_file = self.get_str("General", "RiverKM")
@@ -961,22 +963,22 @@ class RiverData:
             ```
         """
         self.config_file = config_file
-        self.profile: shapely.geometry.linestring.LineString = config_file.get_xy_km()
+        self.profile: linestring.LineString = config_file.get_xy_km()
         self.station_bounds: Tuple = config_file.get_km_bounds()
         self.start_station: float = self.station_bounds[0]
         self.end_station: float = self.station_bounds[1]
         log_text("clip_chainage", data={"low": self.start_station, "high": self.end_station})
-        self.masked_profile: shapely.geometry.linestring.LineString = self.mask_profile(self.station_bounds)
+        self.masked_profile: linestring.LineString = self.mask_profile(self.station_bounds)
         self.masked_profile_arr = np.array(self.masked_profile)
 
 
     @property
-    def bank_search_lines(self) -> List[shapely.geometry.linestring.LineStringAdapter]:
+    def bank_search_lines(self) -> List[linestring.LineStringAdapter]:
         """Get the bank search lines.
 
         Returns
         -------
-        search_lines : List[shapely.geometry.linestring.LineStringAdapter]
+        search_lines : List[linestring.LineStringAdapter]
             List of bank search lines.
         """
         return self.config_file.get_search_lines()
@@ -986,7 +988,7 @@ class RiverData:
         """Number of river bank search lines."""
         return len(self.bank_search_lines)
 
-    def mask_profile(self, bounds: Tuple[float, float]) -> shapely.geometry.linestring.LineStringAdapter:
+    def mask_profile(self, bounds: Tuple[float, float]) -> linestring.LineStringAdapter:
         """
         Clip a chainage line to the relevant reach.
 
@@ -997,7 +999,7 @@ class RiverData:
 
         Returns
         -------
-        xykm1 : shapely.geometry.linestring.LineStringAdapter
+        xykm1 : linestring.LineStringAdapter
             Clipped river chainage line.
         """
         xy_km = self.profile
@@ -1048,7 +1050,7 @@ class RiverData:
                 # whole range available selected
                 pass
             else:
-                xy_km = shapely.geometry.LineString([x0] + xy_km.coords[start_i:])
+                xy_km = LineString([x0] + xy_km.coords[start_i:])
         elif end_i == 0:
             raise Exception(
                 "Upper chainage bound {} is smaller than the minimum chainage {} available".format(
@@ -1065,28 +1067,28 @@ class RiverData:
                 # value close to the previous point (end_i - 1), so let's skip that one
                 end_i = end_i - 1
             if x0 is None:
-                xy_km = shapely.geometry.LineString(xy_km.coords[:end_i] + [x1])
+                xy_km = LineString(xy_km.coords[:end_i] + [x1])
             else:
-                xy_km = shapely.geometry.LineString([x0] + xy_km.coords[start_i:end_i] + [x1])
+                xy_km = LineString([x0] + xy_km.coords[start_i:end_i] + [x1])
         return xy_km
 
     def clip_search_lines(
         self,
         max_river_width: float = MAX_RIVER_WIDTH,
-    ) -> Tuple[List[shapely.geometry.linestring.LineStringAdapter], float]:
+    ) -> Tuple[List[linestring.LineStringAdapter], float]:
         """
         Clip the list of lines to the envelope of certain size surrounding a reference line.
 
         Arg:
-            search_lines : List[shapely.geometry.linestring.LineStringAdapter]
+            search_lines : List[linestring.LineStringAdapter]
                 List of search lines to be clipped.
-            river_profile : shapely.geometry.linestring.LineStringAdapter
+            river_profile : linestring.LineStringAdapter
                 Reference line.
             max_river_width: float
                 Maximum distance away from river_profile.
 
         Returns:
-            search_lines : List[shapely.geometry.linestring.LineStringAdapter]
+            search_lines : List[linestring.LineStringAdapter]
                 List of clipped search lines.
             max_distance: float
                 Maximum distance from any point within line to reference line.
@@ -1250,13 +1252,13 @@ def clip_simulation_data(
     y_min = bbox.coords[0][1]
     y_max = bbox.coords[2][1]
 
-    xy_b_prep = shapely.prepared.prep(xy_buffer)
+    xy_b_prep = prep(xy_buffer)
     x = sim["x_node"]
     y = sim["y_node"]
     nnodes = x.shape
     keep = (x > x_min) & (x < x_max) & (y > y_min) & (y < y_max)
     for i in range(x.size):
-        if keep[i] and not xy_b_prep.contains(shapely.geometry.Point((x[i], y[i]))):
+        if keep[i] and not xy_b_prep.contains(Point((x[i], y[i]))):
             keep[i] = False
 
     fnc = sim["facenode"]
@@ -1807,7 +1809,7 @@ def relative_path(rootdir: str, file: str) -> str:
 
 def read_xyc(
     filename: str, num_columns: int = 2
-) -> shapely.geometry.linestring.LineStringAdapter:
+) -> linestring.LineStringAdapter:
     """
     Read lines from a file.
 
@@ -1820,7 +1822,7 @@ def read_xyc(
 
     Returns
     -------
-    L : shapely.geometry.linestring.LineStringAdapter
+    L : linestring.LineStringAdapter
         Line strings.
     """
     filename = Path(filename)
@@ -1832,7 +1834,7 @@ def read_xyc(
             column_names = ["Val", "X", "Y"]
         else:
             column_names = ["X", "Y"]
-        point_coordinates = pandas.read_csv(
+        point_coordinates = pd.read_csv(
             filename, names=column_names, skipinitialspace=True, delim_whitespace=True
         )
         num_points = len(point_coordinates.X)
@@ -1843,9 +1845,9 @@ def read_xyc(
             coords = np.concatenate((x, y, z), axis=1)
         else:
             coords = np.concatenate((x, y), axis=1)
-        line_string = shapely.geometry.LineString(coords)
+        line_string = LineString(coords)
     else:
-        gdf = geopandas.read_file(filename)["geometry"]
+        gdf = gpd.read_file(filename)["geometry"]
         line_string = gdf[0]
 
     return line_string
@@ -1898,13 +1900,13 @@ def write_shp_pnt(
     -------
     None
     """
-    xy_Points = [shapely.geometry.Point(xy1) for xy1 in xy]
-    geom = geopandas.geoseries.GeoSeries(xy_Points)
+    xy_Points = [Point(xy1) for xy1 in xy]
+    geom = GeoSeries(xy_Points)
     write_shp(geom, data, filename)
 
 
 def write_shp(
-    geom: geopandas.geoseries.GeoSeries, data: Dict[str, np.ndarray], filename: str
+    geom: GeoSeries, data: Dict[str, np.ndarray], filename: str
 ) -> None:
     """Write a shape file.
 
@@ -1924,8 +1926,8 @@ def write_shp(
     -------
     None
     """
-    val_DataFrame = pandas.DataFrame(data)
-    geopandas.GeoDataFrame(val_DataFrame, geometry=geom).to_file(filename)
+    val_DataFrame = pd.DataFrame(data)
+    GeoDataFrame(val_DataFrame, geometry=geom).to_file(filename)
 
 
 def write_csv(data: Dict[str, np.ndarray], filename: str) -> None:
@@ -2080,7 +2082,7 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
         Array containing the values.
     """
     # print("Trying to read: ",filename)
-    P = pandas.read_csv(
+    P = pd.read_csv(
         filename,
         names=["Chainage", "Val"],
         skipinitialspace=True,
