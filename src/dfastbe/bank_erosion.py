@@ -627,7 +627,7 @@ class Erosion:
                     dn_eq.append(dn_eq1)
                     dv_eq.append(dv_eq1)
 
-                    if debug:
+                    if self.debug:
                         bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
                         bcrds_pnt = [shapely.geometry.Point(xy1) for xy1 in bcrds_mid]
                         bcrds_geo = geopandas.geoseries.GeoSeries(bcrds_pnt)
@@ -689,7 +689,7 @@ class Erosion:
                 shipwavemax[iq].append(shipwavemax_ib)
                 shipwavemin[iq].append(shipwavemin_ib)
 
-                if debug:
+                if self.debug:
                     bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
 
                     bcrds_pnt = [shapely.geometry.Point(xy1) for xy1 in bcrds_mid]
