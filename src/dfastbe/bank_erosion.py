@@ -27,6 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 from typing import Tuple, List
+from pathlib import Path
 from dfastbe import kernel
 from dfastbe import support
 from dfastbe import plotting as df_plt
@@ -35,7 +36,6 @@ import geopandas
 import shapely
 import numpy
 import matplotlib.pyplot as plt
-import configparser
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, read_simulation_data, \
     read_xyc, write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData
@@ -44,23 +44,40 @@ from dfastbe.utils import timed_logger
 from dfastbe.kernel import get_zoom_extends, get_bbox
 
 
+RHO = 1000  # density of water [kg/m3]
+g = 9.81  # gravitational acceleration [m/s2]
+
 class Erosion:
     def __init__(self, config_file: ConfigFile, gui: bool = False):
         self.root_dir = config_file.root_dir
         self._config_file = config_file
         self.gui = gui
+        self.bank_dir = self._get_bank_line_dir()
+        # check if additional debug output is requested
+        self.debug = config_file.get_bool("General", "DebugOutput", False)
+
 
     @property
     def config_file(self) -> ConfigFile:
         """Configuration file object."""
         return self._config_file
 
+    def _get_bank_line_dir(self) -> Path:
+        bank_dir = self.config_file.get_str("General", "BankDir")
+        log_text("bankdir_in", data={"dir": bank_dir})
+        bank_dir = Path(bank_dir)
+        if not bank_dir.exists():
+            log_text("missing_dir", data={"dir": bank_dir})
+            raise BankLinesResultsError(
+                f"Required bank line directory:{bank_dir} does not exist. please use the banklines command to run the "
+                "bankline detection tool first it."
+            )
+        else:
+            return bank_dir
+
     def bankerosion_core(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
         timed_logger("-- start analysis --")
-
-        rho = 1000  # density of water [kg/m3]
-        g = 9.81  # gravitational acceleration [m/s2]
         log_text(
             "header_bankerosion",
             data={
@@ -71,16 +88,6 @@ class Erosion:
         log_text("-")
         config_file = self.config_file
         river_data = RiverData(config_file)
-
-        # check if additional debug output is requested
-        debug = config_file.get_bool("General", "DebugOutput", False)
-
-        # check bankdir for input
-        bank_dir = config_file.get_str("General", "BankDir")
-        log_text("bankdir_in", data={"dir": bank_dir})
-        if not os.path.exists(bank_dir):
-            log_text("missing_dir", data={"dir": bank_dir})
-            return
 
         # check outputdir
         outputdir = config_file.get_str("Erosion", "OutputDir")
@@ -155,7 +162,7 @@ class Erosion:
         stations_coords = river_data.masked_profile_arr[:, :2]
 
         # read bank lines
-        banklines = config_file.get_bank_lines(bank_dir)
+        banklines = config_file.get_bank_lines(self.bank_dir)
         n_banklines = len(banklines)
 
         # map bank lines to mesh cells
@@ -278,7 +285,7 @@ class Erosion:
         ifw_numpy, ifw_face_idx = support.intersect_line_mesh(
             fairway_numpy, xf, yf, xe, ye, fe, ef, fn, en, nnodes, boundary_edge_nrs
         )
-        if debug:
+        if self.debug:
             write_shp_pnt(
                 (ifw_numpy[:-1] + ifw_numpy[1:]) / 2,
                 {"iface": ifw_face_idx},
@@ -349,7 +356,7 @@ class Erosion:
                 bp_fw_face_idx[ib][ip] = ifw_face_idx[iseg]
                 distance_fw[ib][ip] = dbfw
 
-            if debug:
+            if self.debug:
                 write_shp_pnt(
                     bcrds_mid,
                     {"chainage": bank_km_mid[ib], "iface_fw": bp_fw_face_idx[ib]},
@@ -676,7 +683,7 @@ class Erosion:
                     hfw,
                     chezy[iq][ib],
                     zss[ib],
-                    rho,
+                    RHO,
                     g,
                 )
                 shipwavemax[iq].append(shipwavemax_ib)
@@ -999,7 +1006,7 @@ class Erosion:
                 "velocity at Q{iq}",
                 tauc,
                 chezy[0],
-                rho,
+                RHO,
                 g,
                 "critical velocity",
                 "velocity",
@@ -1177,3 +1184,9 @@ def _derive_topology_arrays(
     ef[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
 
     return en, ef, fe, boundary_edge_nrs
+
+
+class BankLinesResultsError(Exception):
+    """Custom exception for BankLine results errors."""
+
+    pass
