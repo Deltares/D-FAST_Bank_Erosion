@@ -26,7 +26,7 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Tuple, List
+from typing import Tuple, List, Dict
 from pathlib import Path
 from dfastbe.kernel import get_km_bins, moving_avg, comp_erosion_eq, comp_erosion, get_km_eroded_volume
 from dfastbe.support import on_right_side, project_km_on_line, xykm_bin, intersect_line_mesh, \
@@ -78,6 +78,44 @@ class Erosion:
         else:
             return bank_dir
 
+    def get_ship_parameters(self, bank_km_mid) -> Dict[str, float]:
+
+        vship0 = self.config_file.get_parameter(
+            "Erosion", "VShip", bank_km_mid, positive=True, onefile=True
+        )
+        Nship0 = self.config_file.get_parameter(
+            "Erosion", "NShip", bank_km_mid, positive=True, onefile=True
+        )
+        nwave0 = self.config_file.get_parameter(
+            "Erosion", "NWave", bank_km_mid, default=5, positive=True, onefile=True
+        )
+        Tship0 = self.config_file.get_parameter(
+            "Erosion", "Draught", bank_km_mid, positive=True, onefile=True
+        )
+        ship0 = self.config_file.get_parameter(
+            "Erosion", "ShipType", bank_km_mid, valid=[1, 2, 3], onefile=True
+        )
+        parslope0 = self.config_file.get_parameter(
+            "Erosion", "Slope", bank_km_mid, default=20, positive=True, ext="slp"
+        )
+        parreed0 = self.config_file.get_parameter(
+            "Erosion", "Reed", bank_km_mid, default=0, positive=True, ext="rdd"
+        )
+
+        ship_data = {
+            "vship0": vship0,
+            "Nship0": Nship0,
+            "nwave0": nwave0,
+            "Tship0": Tship0,
+            "ship0": ship0,
+            "parslope0": parslope0,
+            "parreed0": parreed0,
+        }
+        return ship_data
+
+
+
+
     def bankerosion_core(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
         timed_logger("-- start analysis --")
@@ -104,12 +142,12 @@ class Erosion:
         log_text("get_levels")
         num_levels = config_file.get_int("Erosion", "NLevel")
         ref_level = config_file.get_int("Erosion", "RefLevel") - 1
-        simfiles = []
-        pdischarge = []
+        sim_files = []
+        p_discharge = []
         for iq in range(num_levels):
             iq_str = str(iq + 1)
-            simfiles.append(config_file.get_sim_file("Erosion", iq_str))
-            pdischarge.append(
+            sim_files.append(config_file.get_sim_file("Erosion", iq_str))
+            p_discharge.append(
                 config_file.get_float("Erosion", "PDischarge" + iq_str)
             )
 
@@ -332,8 +370,7 @@ class Erosion:
                     bcrds_mid,
                     {"chainage": bank_km_mid[ib], "iface_fw": bp_fw_face_idx[ib]},
                     str(self.output_dir)
-                    + os.sep
-                    + "bank_{}_chainage_and_fairway_face_idx.shp".format(ib + 1),
+                    + f"/bank_{ib + 1}_chainage_and_fairway_face_idx.shp",
                 )
 
         # water level at fairway
@@ -362,27 +399,7 @@ class Erosion:
 
         # save 1_banklines
         # read vship, nship, nwave, draught (tship), shiptype ... independent of level number
-        vship0 = config_file.get_parameter(
-            "Erosion", "VShip", bank_km_mid, positive=True, onefile=True
-        )
-        Nship0 = config_file.get_parameter(
-            "Erosion", "NShip", bank_km_mid, positive=True, onefile=True
-        )
-        nwave0 = config_file.get_parameter(
-            "Erosion", "NWave", bank_km_mid, default=5, positive=True, onefile=True
-        )
-        Tship0 = config_file.get_parameter(
-            "Erosion", "Draught", bank_km_mid, positive=True, onefile=True
-        )
-        ship0 = config_file.get_parameter(
-            "Erosion", "ShipType", bank_km_mid, valid=[1, 2, 3], onefile=True
-        )
-        parslope0 = config_file.get_parameter(
-            "Erosion", "Slope", bank_km_mid, default=20, positive=True, ext="slp"
-        )
-        parreed0 = config_file.get_parameter(
-            "Erosion", "Reed", bank_km_mid, default=0, positive=True, ext="rdd"
-        )
+        ship_data = self.get_ship_parameters(bank_km_mid)
 
         # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
         classes = config_file.get_bool("Erosion", "Classes")
@@ -436,7 +453,7 @@ class Erosion:
         for iq in range(num_levels):
             log_text(
                 "discharge_header",
-                data={"i": iq + 1, "p": pdischarge[iq], "t": pdischarge[iq] * Teros},
+                data={"i": iq + 1, "p": p_discharge[iq], "t": p_discharge[iq] * Teros},
             )
 
             iq_str = "{}".format(iq + 1)
@@ -447,7 +464,7 @@ class Erosion:
                 "Erosion",
                 "VShip" + iq_str,
                 bank_km_mid,
-                default=vship0,
+                default=ship_data["vship0"],
                 positive=True,
                 onefile=True,
             )
@@ -455,7 +472,7 @@ class Erosion:
                 "Erosion",
                 "NShip" + iq_str,
                 bank_km_mid,
-                default=Nship0,
+                default=ship_data["Nship0"],
                 positive=True,
                 onefile=True,
             )
@@ -463,7 +480,7 @@ class Erosion:
                 "Erosion",
                 "NWave" + iq_str,
                 bank_km_mid,
-                default=nwave0,
+                default=ship_data["nwave0"],
                 positive=True,
                 onefile=True,
             )
@@ -471,7 +488,7 @@ class Erosion:
                 "Erosion",
                 "Draught" + iq_str,
                 bank_km_mid,
-                default=Tship0,
+                default=ship_data["Tship0"],
                 positive=True,
                 onefile=True,
             )
@@ -479,7 +496,7 @@ class Erosion:
                 "Erosion",
                 "ShipType" + iq_str,
                 bank_km_mid,
-                default=ship0,
+                default=ship_data["ship0"],
                 valid=[1, 2, 3],
                 onefile=True,
             )
@@ -488,7 +505,7 @@ class Erosion:
                 "Erosion",
                 "Slope" + iq_str,
                 bank_km_mid,
-                default=parslope0,
+                default=ship_data["parslope0"],
                 positive=True,
                 ext="slp",
             )
@@ -496,7 +513,7 @@ class Erosion:
                 "Erosion",
                 "Reed" + iq_str,
                 bank_km_mid,
-                default=parreed0,
+                default=ship_data["parreed0"],
                 positive=True,
                 ext="rdd",
             )
@@ -509,9 +526,9 @@ class Erosion:
                 mu_reed[ib] = 8.5e-4 * parreed[ib] ** 0.8
 
             log_text("-", indent="  ")
-            log_text("read_simdata", data={"file": simfiles[iq]}, indent="  ")
+            log_text("read_simdata", data={"file": sim_files[iq]}, indent="  ")
             log_text("-", indent="  ")
-            sim, dh0 = read_simulation_data(simfiles[iq], indent="  ")
+            sim, dh0 = read_simulation_data(sim_files[iq], indent="  ")
             log_text("-", indent="  ")
             fnc = sim["facenode"]
 
@@ -644,7 +661,7 @@ class Erosion:
                     nwave[ib],
                     ship_type[ib],
                     Tship[ib],
-                    Teros * pdischarge[iq],
+                    Teros * p_discharge[iq],
                     mu_slope[ib],
                     mu_reed[ib],
                     distance_fw[ib],
