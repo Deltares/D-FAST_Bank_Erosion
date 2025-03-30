@@ -875,6 +875,55 @@ class ConfigFile:
             except ValueError:
                 self.config[group][key] = relative_path(rootdir, val_str)
 
+    def get_plotting_flags(self, plot_data: bool, root_dir: str) -> Dict[str, bool]:
+        """Get the plotting flags from the configuration file.
+
+        Returns:
+            data (Dict[str, bool]):
+                Dictionary containing the plotting flags.
+                save_plot (bool): Flag indicating whether to save the plot.
+                save_plot_zoomed (bool): Flag indicating whether to save the zoomed plot.
+                zoom_km_step (float): Step size for zooming in on the plot.
+                close_plot (bool): Flag indicating whether to close the plot.
+        """
+        if plot_data:
+            save_plot = self.get_bool("General", "SavePlots", True)
+            save_plot_zoomed = self.get_bool(
+                "General", "SaveZoomPlots", True
+            )
+            zoom_km_step = self.get_float("General", "ZoomStepKM", 1.0)
+            if zoom_km_step < 0.01:
+                save_plot_zoomed = False
+            close_plot = self.get_bool("General", "ClosePlots", False)
+        else:
+            save_plot = False
+            save_plot_zoomed = False
+            close_plot = False
+
+        data = {
+            "save_plot": save_plot,
+            "save_plot_zoomed": save_plot_zoomed,
+            "zoom_km_step": zoom_km_step,
+            "close_plot": close_plot,
+        }
+
+        # as appropriate, check output dir for figures and file format
+        if save_plot:
+            fig_dir = self.get_str(
+                "General", "FigureDir", f"{root_dir}{os.sep}figure"
+            )
+            log_text("figure_dir", data={"dir": fig_dir})
+            if os.path.exists(fig_dir):
+                log_text("overwrite_dir", data={"dir": fig_dir})
+            else:
+                os.makedirs(fig_dir)
+            plot_ext = self.get_str("General", "FigureExt", ".png")
+            data = data | {
+                "fig_dir": fig_dir,
+                "plot_ext": plot_ext,
+            }
+
+        return data
 
 class RiverData:
     """River data class."""
@@ -2045,56 +2094,6 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
         km_thr = km[1:]
     return km_thr, val
 
-
-def get_plotting_flags(config_file: ConfigFile, plot_data: bool, root_dir: str) -> Dict[str, bool]:
-    """Get the plotting flags from the configuration file.
-
-    Returns:
-        data (Dict[str, bool]):
-            Dictionary containing the plotting flags.
-            save_plot (bool): Flag indicating whether to save the plot.
-            save_plot_zoomed (bool): Flag indicating whether to save the zoomed plot.
-            zoom_km_step (float): Step size for zooming in on the plot.
-            close_plot (bool): Flag indicating whether to close the plot.
-    """
-    if plot_data:
-        save_plot = config_file.get_bool("General", "SavePlots", True)
-        save_plot_zoomed = config_file.get_bool(
-            "General", "SaveZoomPlots", True
-        )
-        zoom_km_step = config_file.get_float("General", "ZoomStepKM", 1.0)
-        if zoom_km_step < 0.01:
-            save_plot_zoomed = False
-        close_plot = config_file.get_bool("General", "ClosePlots", False)
-    else:
-        save_plot = False
-        save_plot_zoomed = False
-        close_plot = False
-
-    data = {
-        "save_plot": save_plot,
-        "save_plot_zoomed": save_plot_zoomed,
-        "zoom_km_step": zoom_km_step,
-        "close_plot": close_plot,
-    }
-
-    # as appropriate, check output dir for figures and file format
-    if save_plot:
-        fig_dir = config_file.get_str(
-            "General", "FigureDir", f"{root_dir}{os.sep}figure"
-        )
-        log_text("figure_dir", data={"dir": fig_dir})
-        if os.path.exists(fig_dir):
-            log_text("overwrite_dir", data={"dir": fig_dir})
-        else:
-            os.makedirs(fig_dir)
-        plot_ext = config_file.get_str("General", "FigureExt", ".png")
-        data = data | {
-            "fig_dir": fig_dir,
-            "plot_ext": plot_ext,
-        }
-
-    return data
 
 def get_output_dir(config_file:ConfigFile, option: str) -> Path:
     if option == "banklines":

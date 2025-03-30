@@ -38,7 +38,7 @@ import numpy
 import matplotlib.pyplot as plt
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, read_simulation_data, \
-    read_xyc, write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData, get_plotting_flags, get_output_dir
+    read_xyc, write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData, get_output_dir
 
 from dfastbe.utils import timed_logger
 from dfastbe.kernel import get_zoom_extends, get_bbox
@@ -58,7 +58,7 @@ class Erosion:
         self.debug = config_file.get_bool("General", "DebugOutput", False)
         # set plotting flags
         self.plot_data = config_file.get_bool("General", "Plotting", True)
-        self.plot_flags = get_plotting_flags(config_file, self.plot_data, self.root_dir)
+        self.plot_flags = config_file.get_plotting_flags(self.plot_data, self.root_dir)
 
     @property
     def config_file(self) -> ConfigFile:

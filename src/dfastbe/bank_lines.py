@@ -19,7 +19,6 @@ from dfastbe.io import (
     clip_simulation_data,
     log_text,
     read_simulation_data,
-    get_plotting_flags,
     get_output_dir
 )
 from dfastbe.kernel import get_bbox, get_zoom_extends
@@ -61,7 +60,7 @@ class BankLines:
 
         # set plotting flags
         self.plot_data = config_file.get_bool("General", "Plotting", True)
-        self.plot_flags = get_plotting_flags(config_file, self.plot_data, self.root_dir)
+        self.plot_flags = config_file.get_plotting_flags(self.plot_data, self.root_dir)
         self.river_data = RiverData(config_file)
 
         self.simulation_data, self.h0 = self._get_simulation_data()
