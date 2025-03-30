@@ -38,7 +38,7 @@ import numpy
 import matplotlib.pyplot as plt
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, read_simulation_data, \
-    read_xyc, write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData, get_plotting_flags
+    read_xyc, write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData, get_plotting_flags, get_output_dir
 
 from dfastbe.utils import timed_logger
 from dfastbe.kernel import get_zoom_extends, get_bbox
@@ -53,7 +53,7 @@ class Erosion:
         self._config_file = config_file
         self.gui = gui
         self.bank_dir = self._get_bank_line_dir()
-        self.output_dir = self._get_bank_erosion_output_dir()
+        self.output_dir = get_output_dir(config_file, "erosion")
         # check if additional debug output is requested
         self.debug = config_file.get_bool("General", "DebugOutput", False)
         # set plotting flags
@@ -77,18 +77,6 @@ class Erosion:
             )
         else:
             return bank_dir
-
-    def _get_bank_erosion_output_dir(self) -> Path:
-        output_dir = self.config_file.get_str("Erosion", "OutputDir")
-        log_text("output_dir", data={"dir": output_dir})
-        output_dir = Path(output_dir)
-        if output_dir.exists():
-            log_text("overwrite_dir", data={"dir": output_dir})
-        else:
-            output_dir.mkdir()
-
-        return output_dir
-
 
     def bankerosion_core(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""

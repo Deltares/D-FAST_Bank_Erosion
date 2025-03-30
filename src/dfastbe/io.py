@@ -2096,6 +2096,21 @@ def get_plotting_flags(config_file: ConfigFile, plot_data: bool, root_dir: str) 
 
     return data
 
+def get_output_dir(config_file:ConfigFile, option: str) -> Path:
+    if option == "banklines":
+        output_dir = config_file.get_str("General", "BankDir")
+    else:
+        output_dir = config_file.get_str("Erosion", "OutputDir")
+
+    output_dir = Path(output_dir)
+    log_text(f"{option}_out", data={"dir": output_dir})
+    if output_dir.exists():
+        log_text("overwrite_dir", data={"dir": output_dir})
+    else:
+        output_dir.mkdir()
+
+    return output_dir
+
 class ConfigFileError(Exception):
     """Custom exception for configuration file errors."""
 

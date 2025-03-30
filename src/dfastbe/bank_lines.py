@@ -19,7 +19,8 @@ from dfastbe.io import (
     clip_simulation_data,
     log_text,
     read_simulation_data,
-    get_plotting_flags
+    get_plotting_flags,
+    get_output_dir
 )
 from dfastbe.kernel import get_bbox, get_zoom_extends
 from dfastbe.support import (
@@ -56,7 +57,7 @@ class BankLines:
 
         self._config_file = config_file
         self.gui = gui
-        self.bank_output_dir = self._get_bank_output_dir()
+        self.bank_output_dir = get_output_dir(config_file, "banklines")
 
         # set plotting flags
         self.plot_data = config_file.get_bool("General", "Plotting", True)
