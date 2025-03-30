@@ -31,6 +31,7 @@ START /B /WAIT poetry run nuitka ^
  --include-module=shapely ^
  --include-package=matplotlib ^
  --include-package=netCDF4 ^
+ --include-package=cftime ^
  --include-module=geopandas ^
  --include-package-data=geopandas.datasets ^
  --include-module=fiona ^
