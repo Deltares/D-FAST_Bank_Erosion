@@ -23,3 +23,5 @@ docs/**/*.maf
 docs/**/*.nlo
 docs/**/*.pdf
 docs/**/*.toc
+
+/site/*
