@@ -14,7 +14,7 @@ For more details see the documentation section.
 ## Documentation
 
 The documentation consists of
-* a [Technical Reference Manual](docs/techref.md) in Markdown, and
+* a [Technical Reference Manual](../end-user-docs/techref.md) in Markdown, and
 * a LaTeX Technical Reference Manual.
 * a LaTeX User Manual including scientific description.
   The sources of all documents can be found in the `docs` folder.
