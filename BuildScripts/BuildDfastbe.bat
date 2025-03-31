@@ -15,7 +15,7 @@ set cmd_box_args=src/dfastbe
 
 cd %~dp0
 cd..
-START /B /WAIT poetry run nuitka ^
+START /B /WAIT poetry run python -m nuitka ^
  --standalone ^
  --assume-yes-for-downloads ^
  --python-flag=no_site ^
