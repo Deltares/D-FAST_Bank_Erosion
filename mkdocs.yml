@@ -1,0 +1,127 @@
+site_name: D-FAST Bank Erosion
+site_description: A tool to perform a bank erosion analysis based on a number of D-Flow FM simulations.
+site_url: https://deltares.github.io/D-FAST_Bank_Erosion/
+repo_url: https://github.com/Deltares/D-FAST_Bank_Erosion
+repo_name: Deltares/D-FAST_Bank_Erosion
+docs_dir: docs/mkdocs
+theme:
+  name: material
+  language: en
+  features:
+  - announce.dismiss
+  - content.action.edit
+  - content.action.view
+  - content.code.annotate
+  - content.code.copy
+  - content.tooltips
+  - navigation.footer
+  - navigation.indexes
+  - navigation.sections
+  - navigation.tabs
+  - navigation.tabs.sticky
+  - navigation.top
+  - search.highlight
+  - search.suggest
+  - toc.follow
+  palette:
+  - media: "(prefers-color-scheme)"
+    toggle:
+      icon: material/brightness-auto
+      name: Switch to light mode
+  - media: "(prefers-color-scheme: light)"
+    scheme: default
+    primary: teal
+    accent: purple
+    toggle:
+      icon: material/weather-sunny
+      name: Switch to dark mode
+  - media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    primary: black
+    accent: lime
+    toggle:
+      icon: material/weather-night
+      name: Switch to system preference
+
+use_directory_urls: false
+
+plugins:
+  - search
+  - mkdocs-jupyter
+  - autorefs
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          rendering:
+            show_root_toc_entry: false
+            show_source: true
+            show_signature_annotations: true
+            heading_level: 3
+            show_category_heading: false
+            group_by_category: false
+          selection:
+            inherited_members: false
+          options:
+            show_root_heading: true
+            show_signature_annotations: true
+            docstring_style: google
+  - table-reader
+  - tags
+  - mike:
+      # These fields are all optional; the defaults are as below...
+      alias_type: symlink
+      redirect_template: null
+      deploy_prefix: ''
+      canonical_version: null
+      version_selector: true
+#       css_dir: css
+#       javascript_dir: js
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.tabbed
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - toc:
+      permalink: "#"
+      toc_depth: 1-4
+      anchorlink: true
+
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+nav:
+  - Home: index.md
+  - How-to:
+      - Installation:
+          - "Local clone + Poetry": guides/poetry.md
+      - Contributing:
+          - guides/contributing.md
+      - Documentation:
+          - guides/documentation.md
+      - Tools:
+          - guides/developer-instructions.md
+          - guides/pre-commit-hooks.md
+          - guides/doctest.md
+  - API Reference:
+      - api/bank_lines.md
+      - api/bank_erosion.md
+      - api/io.md
+      - api/cmd.md
+      - api/kernel.md
+      - api/plotting.md
+  - User Interface:
+      - gui/gui.md
+  - Release Notes: change-log.md
+  - License: license.md
+
+extra:
+  version:
+    provider: mike
+  version_selector: true
