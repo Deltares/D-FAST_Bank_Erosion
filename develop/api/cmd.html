@@ -1573,11 +1573,7 @@ Defaults to 'UK'.</p>
 <span class="normal">103</span>
 <span class="normal">104</span>
 <span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span>
+<span class="normal">106</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span>
     <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;UK&quot;</span><span class="p">,</span>
     <span class="n">run_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;GUI&quot;</span><span class="p">,</span>
     <span class="n">configfile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dfastbe.cfg&quot;</span><span class="p">,</span>
@@ -1626,9 +1622,6 @@ Defaults to 'UK'.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">prog_loc</span> <span class="o">=</span> <span class="n">get_progloc</span><span class="p">()</span>
     <span class="n">language</span> <span class="o">=</span> <span class="n">language</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-
-    <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span>
-
     <span class="k">try</span><span class="p">:</span>
         <span class="n">load_program_texts</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prog_loc</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">messages.</span><span class="si">{</span><span class="n">language</span><span class="si">}</span><span class="s2">.ini&quot;</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
@@ -1639,8 +1632,7 @@ Defaults to 'UK'.</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">run_mode</span> <span class="o">=</span> <span class="n">run_mode</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;BANKLINES&quot;</span><span class="p">:</span>
-            <span class="n">bank_lines</span> <span class="o">=</span> <span class="n">BankLines</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
-            <span class="n">bank_lines</span><span class="o">.</span><span class="n">detect</span><span class="p">()</span>
+            <span class="n">banklines</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;BANKEROSION&quot;</span><span class="p">:</span>
             <span class="n">bankerosion</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;GUI&quot;</span><span class="p">:</span>
