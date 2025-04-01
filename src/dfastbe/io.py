@@ -60,18 +60,22 @@ PROGTEXTS: Dict[str, List[str]]
 
 
 class ConfigFile:
+    """Class to read configuration files for D-FAST Bank Erosion.
 
-    def __init__(self, config:configparser.ConfigParser, path: Union[Path, str] = None):
-        """
+    This class is used to read and write configuration files,
+    for the D-FAST Bank Erosion analysis.
+    It provides methods to read and write configuration files,
+    as well as to access the configuration settings.
 
-        Args:
-            config : configparser.ConfigParser
-                Settings for the D-FAST Bank Erosion analysis.
-            path : str
-                Name of configuration file to be read.
-        """
+    Args:
+        config (configparser.ConfigParser): Settings for the D-FAST Bank Erosion analysis.
+        path (str): Path to the configuration file.
+    """
+
+    def __init__(
+        self, config: configparser.ConfigParser, path: Union[Path, str] = None
+    ):
         self._config = config
-        # the directory where the configuration file is located
         if path:
             self.path = path
             self.root_dir = Path(path).parent
