@@ -83,6 +83,7 @@ class ConfigFile:
 
     @property
     def config(self) -> configparser.ConfigParser:
+        """configparser.ConfigParser: Get the configuration settings."""
         return self._config
 
     @config.setter
@@ -91,10 +92,12 @@ class ConfigFile:
 
     @property
     def version(self) -> str:
+        """str: Get the version of the configuration file."""
         return self.get_str("General", "Version")
 
     @property
-    def root_dir(self):
+    def root_dir(self) -> Path:
+        """Path: Get the root directory of the configuration file."""
         return self._root_dir
 
     @root_dir.setter
@@ -110,8 +113,7 @@ class ConfigFile:
         falls back to a dedicated reader compatible with old waqbank files.
 
         Returns:
-            config : configparser.ConfigParser
-                Settings for the D-FAST Bank Erosion analysis.
+            config (configparser.ConfigParser): Settings for the D-FAST Bank Erosion analysis.
         """
         if not Path(path).exists():
             raise FileNotFoundError(f"The Config-File: {path} does not exist")
