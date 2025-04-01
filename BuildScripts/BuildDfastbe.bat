@@ -17,6 +17,7 @@ cd %~dp0
 cd..
 START /B /WAIT poetry run python -m nuitka ^
  --standalone ^
+ --mingw64 ^
  --assume-yes-for-downloads ^
  --python-flag=no_site ^
  --python-flag=no_asserts ^
