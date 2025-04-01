@@ -105,10 +105,9 @@ class ConfigFile:
         reads the config file using the standard configParser.
         falls back to a dedicated reader compatible with old waqbank files.
 
-        Returns
-        -------
-        config : configparser.ConfigParser
-            Settings for the D-FAST Bank Erosion analysis.
+        Returns:
+            config : configparser.ConfigParser
+                Settings for the D-FAST Bank Erosion analysis.
         """
         if not Path(path).exists():
             raise FileNotFoundError(f"The Config-File: {path} does not exist")
@@ -139,10 +138,9 @@ class ConfigFile:
         """
         Upgrade the configuration data structure to version 1.0 format.
 
-        Results
-        -------
-        config1 : configparser.ConfigParser
-            Settings for the D-FAST Bank Erosion analysis in 1.0 format.
+        Returns:
+            config1 : configparser.ConfigParser
+                Settings for the D-FAST Bank Erosion analysis in 1.0 format.
 
         """
         try:
@@ -228,12 +226,11 @@ class ConfigFile:
             adds a two space indentation to all keyword lines.
             adds an empty line before the start of a new block.
 
-        Arguments
-        ---------
-        filename : str
-            Name of the configuration file to be written.
-        config : configparser.ConfigParser
-            The variable containing the configuration.
+        Args:
+            filename : str
+                Name of the configuration file to be written.
+            config : configparser.ConfigParser
+                The variable containing the configuration.
         """
         config = self.config
         sections = config.sections()
@@ -260,12 +257,11 @@ class ConfigFile:
         """
         Convert all paths to relative to current working directory.
 
-        Returns
-        -------
-        rootdir : str
-            Location of configuration file relative to current working directory.
-        config : configparser.ConfigParser
-            Analysis configuration settings using paths relative to current working directory.
+        Returns:
+            rootdir : str
+                Location of configuration file relative to current working directory.
+            config : configparser.ConfigParser
+                Analysis configuration settings using paths relative to current working directory.
         """
         cwd = os.getcwd()
         self.resolve(self.root_dir)
@@ -283,24 +279,21 @@ class ConfigFile:
         """
         Get a string from a selected group and keyword in the analysis settings.
 
-        Arguments
-        ---------
-        group : str
-            Name of the group from which to read.
-        key : str
-            Name of the keyword from which to read.
-        default : Optional[str]
-            Optional default value.
+        Args:
+            group : str
+                Name of the group from which to read.
+            key : str
+                Name of the keyword from which to read.
+            default : Optional[str]
+                Optional default value.
 
-        Raises
-        ------
-        Exception
-            If the keyword isn't specified and no default value is given.
+        Raises:
+            Exception:
+                If the keyword isn't specified and no default value is given.
 
-        Returns
-        -------
-        val : str
-            String.
+        Returns:
+            val : str
+                String.
         """
         try:
             val = self.config[group][key]
@@ -320,24 +313,21 @@ class ConfigFile:
         """
         Get a boolean from a selected group and keyword in the analysis settings.
 
-        Arguments
-        ---------
-        group : str
-            Name of the group from which to read.
-        key : str
-            Name of the keyword from which to read.
-        default : Optional[bool]
-            Optional default value.
+        Args:
+            group : str
+                Name of the group from which to read.
+            key : str
+                Name of the keyword from which to read.
+            default : Optional[bool]
+                Optional default value.
 
-        Raises
-        ------
-        Exception
-            If the keyword isn't specified and no default value is given.
+        Raises:
+            Exception:
+                If the keyword isn't specified and no default value is given.
 
-        Returns
-        -------
-        val : bool
-            Boolean value.
+        Returns:
+            val : bool
+                Boolean value.
         """
         try:
             str_val = self.config[group][key].lower()
@@ -366,27 +356,25 @@ class ConfigFile:
         """
         Get a floating point value from a selected group and keyword in the analysis settings.
 
-        Arguments
+        Args
         ---------
-        group : str
-            Name of the group from which to read.
-        key : str
-            Name of the keyword from which to read.
-        default : Optional[float]
-            Optional default value.
-        positive : bool
-            Flag specifying whether all floats are accepted (if False), or only positive floats (if True).
+            group : str
+                Name of the group from which to read.
+            key : str
+                Name of the keyword from which to read.
+            default : Optional[float]
+                Optional default value.
+            positive : bool
+                Flag specifying whether all floats are accepted (if False), or only positive floats (if True).
 
-        Raises
-        ------
-        Exception
-            If the keyword isn't specified and no default value is given.
-            If a negative value is specified when a positive value is required.
+        Raises:
+            Exception:
+                If the keyword isn't specified and no default value is given.
+                If a negative value is specified when a positive value is required.
 
-        Returns
-        -------
-        val : float
-            Floating point value.
+        Returns:
+            val : float
+                Floating point value.
         """
         try:
             val = float(self.config[group][key])
@@ -413,27 +401,24 @@ class ConfigFile:
         """
         Get an integer from a selected group and keyword in the analysis settings.
 
-        Arguments
-        ---------
-        group : str
-            Name of the group from which to read.
-        key : str
-            Name of the keyword from which to read.
-        default : Optional[int]
-            Optional default value.
-        positive : bool
-            Flag specifying whether all integers are accepted (if False), or only strictly positive integers (if True).
+        Args:
+            group : str
+                Name of the group from which to read.
+            key : str
+                Name of the keyword from which to read.
+            default : Optional[int]
+                Optional default value.
+            positive : bool
+                Flag specifying whether all integers are accepted (if False), or only strictly positive integers (if True).
 
-        Raises
-        ------
-        Exception
-            If the keyword isn't specified and no default value is given.
-            If a negative or zero value is specified when a positive value is required.
+        Raises:
+            Exception:
+                If the keyword isn't specified and no default value is given.
+                If a negative or zero value is specified when a positive value is required.
 
-        Returns
-        -------
-        val : int
-            Integer value.
+        Returns:
+            val : int
+                Integer value.
         """
         try:
             val = int(self.config[group][key])
@@ -454,17 +439,15 @@ class ConfigFile:
         """
         Get the name of the simulation file from the analysis settings.
 
-        Arguments
-        ---------
-        group : str
-            Name of the group in which to search for the simulation file name.
-        istr : str
-            Postfix for the simulation file name keyword; typically a string representation of the index.
+        Args:
+            group : str
+                Name of the group in which to search for the simulation file name.
+            istr : str
+                Postfix for the simulation file name keyword; typically a string representation of the index.
 
-        Returns
-        -------
-        simfile : str
-            Name of the simulation file (empty string if keywords are not found).
+        Returns:
+            simfile : str
+                Name of the simulation file (empty string if keywords are not found).
         """
         sim_file = self.config[group].get("SimFile" + istr, "")
         return sim_file
@@ -484,10 +467,9 @@ class ConfigFile:
         """
         Get the search lines for the bank lines from the analysis settings.
 
-        Returns
-        -------
-        line : List[np.ndarray]
-            List of arrays containing the x,y-coordinates of a bank search lines.
+        Returns:
+            line : List[np.ndarray]
+                List of arrays containing the x,y-coordinates of a bank search lines.
         """
         # read guiding bank line
         n_bank = self.get_int("Detect", "NBank")
@@ -502,15 +484,13 @@ class ConfigFile:
         """
         Get the bank lines from the detection step.
 
-        Arguments
-        ---------
-        bank_dir : str
-            Name of directory in which the bank lines files are located.
+        Args:
+            bank_dir : str
+                Name of directory in which the bank lines files are located.
 
-        Returns
-        -------
-        line : List[np.ndarray]
-            List of arrays containing the x,y-coordinates of a bank lines.
+        Returns:
+            line : List[np.ndarray]
+                List of arrays containing the x,y-coordinates of a bank lines.
         """
         bank_name = self.get_str("General", "BankFile", "bankfile")
         bankfile = f"{bank_dir}{os.sep}{bank_name}.shp"
@@ -548,36 +528,33 @@ class ConfigFile:
         """
         Get a parameter field from a selected group and keyword in the analysis settings.
 
-        Arguments
-        ---------
-        group : str
-            Name of the group from which to read.
-        key : str
-            Name of the keyword from which to read.
-        bank_km : List[np.ndarray]
-            For each bank a listing of the bank points (bank chainage locations).
-        default : Optional[Union[float, List[np.ndarray]]]
-            Optional default value or default parameter field; default None.
-        ext : str
-            File name extension; default empty string.
-        positive : bool
-            Flag specifying whether all values are accepted (if False), or only strictly positive values (if True); default False.
-        valid : Optional[List[float]]
-            Optional list of valid values; default None.
-        onefile : bool
-            Flag indicating whether for one file should be used for all bank lines (True) or one file per bank line (False; default).
+        Args:
+            group : str
+                Name of the group from which to read.
+            key : str
+                Name of the keyword from which to read.
+            bank_km : List[np.ndarray]
+                For each bank a listing of the bank points (bank chainage locations).
+            default : Optional[Union[float, List[np.ndarray]]]
+                Optional default value or default parameter field; default None.
+            ext : str
+                File name extension; default empty string.
+            positive : bool
+                Flag specifying whether all values are accepted (if False), or only strictly positive values (if True); default False.
+            valid : Optional[List[float]]
+                Optional list of valid values; default None.
+            onefile : bool
+                Flag indicating whether for one file should be used for all bank lines (True) or one file per bank line (False; default).
 
-        Raises
-        ------
-        Exception
-            If a parameter isn't provided in the configuration, but no default value provided either.
-            If the value is negative while a positive value is required (positive = True).
-            If the value doesn't match one of the value values (valid is not None).
+        Raises:
+            Exception:
+                If a parameter isn't provided in the configuration, but no default value provided either.
+                If the value is negative while a positive value is required (positive = True).
+                If the value doesn't match one of the value values (valid is not None).
 
-        Returns
-        -------
-        parfield : List[np.ndarray]
-            Parameter field: for each bank a parameter value per bank point (bank chainage location).
+        Returns:
+            parfield : List[np.ndarray]
+                Parameter field: for each bank a parameter value per bank point (bank chainage location).
         """
         try:
             filename = self.config[group][key]
@@ -638,15 +615,13 @@ class ConfigFile:
         """
         Get the search distance per bank line from the analysis settings.
 
-        Arguments
-        ---------
-        nbank : int
-            Number of bank search lines.
+        Args:
+            nbank : int
+                Number of bank search lines.
 
-        Returns
-        -------
-        dlines : List[float]
-            Array of length nbank containing the search distance value per bank line (default value: 50).
+        Returns:
+            dlines : List[float]
+                Array of length nbank containing the search distance value per bank line (default value: 50).
         """
         dlines_key = self.config["Detect"].get("DLines", None)
         if dlines_key is None:
@@ -668,17 +643,15 @@ class ConfigFile:
         """
         Get a start and end value from a selected group and keyword in the analysis settings.
 
-        Arguments
-        ---------
-        group : str
-            Name of the group from which to read.
-        key : str
-            Name of the keyword from which to read.
+        Args:
+            group : str
+                Name of the group from which to read.
+            key : str
+                Name of the keyword from which to read.
 
-        Returns
-        -------
-        val : Tuple[float,float]
-            Lower and upper limit of the range.
+        Returns:
+            val : Tuple[float,float]
+                Lower and upper limit of the range.
         """
         str_val = self.get_str(group, key)
         try:
@@ -702,9 +675,8 @@ class ConfigFile:
     def get_xy_km(self) -> shapely.geometry.linestring.LineStringAdapter:
         """get_xy_km
 
-        Returns
-        -------
-        xykm : shapely.geometry.linestring.LineStringAdapter
+        Returns:
+            xykm : shapely.geometry.linestring.LineStringAdapter
         """
         # get the chainage file
         km_file = self.get_str("General", "RiverKM")
@@ -721,10 +693,9 @@ class ConfigFile:
         """
         Convert a configuration object to contain absolute paths (for editing).
 
-        Arguments
-        ---------
-        rootdir : str
-            The path to be used as base for the absolute paths.
+        Args:
+            rootdir : str
+                The path to be used as base for the absolute paths.
         """
         if "General" in self.config:
             self.resolve_parameter("General", "RiverKM", rootdir)
@@ -770,7 +741,6 @@ class ConfigFile:
                 self.resolve_parameter("Erosion", f"Draught{i}", rootdir)
                 self.resolve_parameter("Erosion", f"Slope{i}", rootdir)
                 self.resolve_parameter("Erosion", f"Reed{i}", rootdir)
-
 
     def relative_to(self, rootdir: str):
         """
@@ -826,7 +796,6 @@ class ConfigFile:
                 self.parameter_relative_to("Erosion", f"Slope{i}", rootdir)
                 self.parameter_relative_to("Erosion", f"Reed{i}", rootdir)
 
-
     def resolve_parameter(self, group: str, key: str, rootdir: str):
         """
         Convert a parameter value to contain an absolute path.
@@ -834,14 +803,13 @@ class ConfigFile:
         Determine whether the string represents a number.
         If not, try to convert to an absolute path.
 
-        Arguments
-        ---------
-        group : str
-            Name of the group in the configuration.
-        key : str
-            Name of the key in the configuration.
-        rootdir : str
-            The path to be used as base for the absolute paths.
+        Args:
+            group : str
+                Name of the group in the configuration.
+            key : str
+                Name of the key in the configuration.
+            rootdir : str
+                The path to be used as base for the absolute paths.
         """
         if key in self.config[group]:
             val_str = self.config[group][key]
@@ -850,7 +818,6 @@ class ConfigFile:
             except ValueError:
                 self.config[group][key] = absolute_path(rootdir, val_str)
 
-
     def parameter_relative_to(self, group: str, key: str, rootdir: str):
         """
         Convert a parameter value to contain a relative path.
@@ -858,14 +825,13 @@ class ConfigFile:
         Determine whether the string represents a number.
         If not, try to convert to a relative path.
 
-        Arguments
-        ---------
-        group : str
-            Name of the group in the configuration.
-        key : str
-            Name of the key in the configuration.
-        rootdir : str
-            The path to be used as base for the relative paths.
+        Args:
+            group : str
+                Name of the group in the configuration.
+            key : str
+                Name of the key in the configuration.
+            rootdir : str
+                The path to be used as base for the relative paths.
         """
         if key in self.config[group]:
             val_str = self.config[group][key]
