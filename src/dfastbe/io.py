@@ -69,17 +69,26 @@ class ConfigFile:
 
     Args:
         config (configparser.ConfigParser): Settings for the D-FAST Bank Erosion analysis.
-        path (str): Path to the configuration file.
+        path (Union[Path, str]): Path to the configuration file.
 
     Examples:
-        ```python
-        >>> import tempfile
-        >>> from dfastbe.io import ConfigFile
-        >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-        >>> with tempfile.TemporaryDirectory() as tmpdirname:
-        ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
+        Reading a configuration file:
+            ```python
+            >>> import tempfile
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> print(config_file.config["General"]["Version"])
+            1.0
 
-        ```
+            ```
+        Writing a configuration file:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> with tempfile.TemporaryDirectory() as tmpdirname:
+            ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
+
+            ```
     """
 
     def __init__(
@@ -125,13 +134,14 @@ class ConfigFile:
             path (Union[str, pathlib.Path]): Path to the configuration file.
 
         Returns:
-            config (ConfigFile): Settings for the D-FAST Bank Erosion analysis.
+            ConfigFile: Settings for the D-FAST Bank Erosion analysis.
 
         Raises:
             FileNotFoundError: If the configuration file does not exist.
             Exception: If there is an error reading the config file.
 
         Examples:
+            Read a config file:
             ```python
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
@@ -170,7 +180,7 @@ class ConfigFile:
             config (configparser.ConfigParser): D-FAST Bank Erosion settings in 0.1 format.
 
         Returns:
-            config1 (configparser.ConfigParser): D-FAST Bank Erosion settings in 1.0 format.
+            configparser.ConfigParser: D-FAST Bank Erosion settings in 1.0 format.
 
         Examples:
             ```python
@@ -302,7 +312,7 @@ class ConfigFile:
         """Convert all paths to relative to current working directory.
 
         Returns:
-            rootdir (str): Location of configuration file relative to current working directory.
+            str: Location of configuration file relative to current working directory.
         """
         cwd = os.getcwd()
         self.resolve(self.root_dir)
@@ -329,7 +339,7 @@ class ConfigFile:
                 If the keyword isn't specified and no default value is given.
 
         Returns:
-            val (str): value of the keyword as string.
+            str: value of the keyword as string.
 
         Examples:
             ```python
@@ -369,7 +379,7 @@ class ConfigFile:
                 If the keyword isn't specified and no default value is given.
 
         Returns:
-            val (bool): value of the keyword as boolean.
+            bool: value of the keyword as boolean.
 
         Examples:
             ```python
@@ -419,7 +429,7 @@ class ConfigFile:
                 If a negative value is specified when a positive value is required.
 
         Returns:
-            val (float): value of the keyword as float.
+            float: value of the keyword as float.
 
         Examples:
             ```python
@@ -467,7 +477,7 @@ class ConfigFile:
                 If a negative or zero value is specified when a positive value is required.
 
         Returns:
-            val (int): value of the keyword as int.
+            int: value of the keyword as int.
 
         Examples:
             ```python
@@ -502,7 +512,7 @@ class ConfigFile:
                 typically a string representation of the index.
 
         Returns:
-            simfile (str): Name of the simulation file (empty string if keywords are not found).
+            str: Name of the simulation file (empty string if keywords are not found).
 
         Examples:
             ```python
@@ -522,7 +532,7 @@ class ConfigFile:
         """Get the lower and upper limit for the chainage.
 
         Returns:
-            km_bounds (Tuple[float, float]): Lower and upper limit for the chainage.
+            Tuple[float, float]: Lower and upper limit for the chainage.
 
         Examples:
             ```python
@@ -541,7 +551,7 @@ class ConfigFile:
         """Get the search lines for the bank lines from the analysis settings.
 
         Returns:
-            line (List[np.ndarray]): List of arrays containing the x,y-coordinates of a bank search lines.
+            List[np.ndarray]: List of arrays containing the x,y-coordinates of a bank search lines.
         """
         # read guiding bank line
         n_bank = self.get_int("Detect", "NBank")
@@ -559,7 +569,7 @@ class ConfigFile:
             bank_dir (str): Name of directory in which the bank lines files are located.
 
         Returns:
-            line (List[np.ndarray]): List of arrays containing the x,y-coordinates of a bank lines.
+            List[np.ndarray]: List of arrays containing the x,y-coordinates of a bank lines.
         """
         bank_name = self.get_str("General", "BankFile", "bankfile")
         bankfile = f"{bank_dir}{os.sep}{bank_name}.shp"
@@ -615,7 +625,7 @@ class ConfigFile:
                 If the value doesn't match one of the value values (valid is not None).
 
         Returns:
-            parfield (List[np.ndarray]): Parameter field
+            List[np.ndarray]: Parameter field
                 For each bank a parameter value per bank point (bank chainage location).
 
         Examples:
@@ -690,7 +700,7 @@ class ConfigFile:
             nbank (int): Number of bank search lines.
 
         Returns:
-            dlines (List[float]): Array of length nbank containing the search distance value per bank line (default value: 50).
+            List[float]: Array of length nbank containing the search distance value per bank line (default value: 50).
 
         Examples:
             ```python
@@ -725,7 +735,7 @@ class ConfigFile:
             key (str): Name of the keyword from which to read.
 
         Returns:
-            val (Tuple[float,float]): Lower and upper limit of the range.
+            Tuple[float,float]: Lower and upper limit of the range.
 
         Examples:
             ```python
@@ -759,7 +769,7 @@ class ConfigFile:
         """Get the chainage line from the analysis settings.
 
         Returns:
-            xykm (shapely.geometry.linestring.LineStringAdapter): Chainage line.
+            shapely.geometry.linestring.LineStringAdapter: Chainage line.
         """
         # get the chainage file
         km_file = self.get_str("General", "RiverKM")
