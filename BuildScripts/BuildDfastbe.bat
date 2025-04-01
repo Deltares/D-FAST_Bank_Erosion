@@ -15,7 +15,7 @@ set cmd_box_args=src/dfastbe
 
 cd %~dp0
 cd..
-START /B /WAIT poetry run python -m nuitka ^
+START /B /WAIT python -m nuitka ^
  --standalone ^
  --mingw64 ^
  --assume-yes-for-downloads ^
@@ -55,6 +55,11 @@ START /B /WAIT poetry run python -m nuitka ^
  --include-data-files=docs/dfastbe_usermanual.pdf=dfastbe/dfastbe_usermanual.pdf ^
  --include-data-files=docs/dfastbe_techref.pdf=dfastbe/dfastbe_techref.pdf ^
  %cmd_box_args%
+
+rem move some libraries to different folder ...
+move dfastbe.dist/pyproj.libs/* dfastbe.dist/pyproj
+move dfastbe.dist/matplotlib.libs/* dfastbe.dist/matplotlib
+move dfastbe.dist/fiona.libs/* dfastbe.dist/fiona
 
 rem include example files into the distribution
 call BuildScripts\Collect_Examples.bat
