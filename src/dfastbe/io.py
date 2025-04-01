@@ -62,10 +62,9 @@ PROGTEXTS: Dict[str, List[str]]
 class ConfigFile:
     """Class to read configuration files for D-FAST Bank Erosion.
 
-    This class is used to read and write configuration files,
-    for the D-FAST Bank Erosion analysis.
-    It provides methods to read and write configuration files,
-    as well as to access the configuration settings.
+    This class provides methods to read, write, and manage configuration files
+    for the D-FAST Bank Erosion analysis. It also allows access to configuration
+    settings and supports upgrading older configuration formats.
 
     Args:
         config (configparser.ConfigParser): Settings for the D-FAST Bank Erosion analysis.
@@ -127,8 +126,8 @@ class ConfigFile:
     def read(cls, path: Union[str, pathlib.Path]) -> "ConfigFile":
         """Read a configParser object (configuration file).
 
-        reads the config file using the standard configParser.
-        falls back to a dedicated reader compatible with old waqbank files.
+        Reads the config file using the standard `configparser`. Falls back to a
+        dedicated reader compatible with old waqbank files.
 
         Args:
             path (Union[str, pathlib.Path]): Path to the configuration file.
@@ -270,9 +269,9 @@ class ConfigFile:
     def write(self, filename: str) -> None:
         """Pretty print a configParser object (configuration file) to file.
 
-        aligns the equal signs for all keyword/value pairs.
-        adds a two space indentation to all keyword lines.
-        adds an empty line before the start of a new block.
+        Pretty prints a `configparser` object to a file. Aligns the equal signs for
+        all keyword/value pairs, adds a two-space indentation to all keyword lines,
+        and adds an empty line before the start of a new block.
 
         Args:
             filename (str): Name of the configuration file to be written.
@@ -335,8 +334,7 @@ class ConfigFile:
             default (Optional[str]): Optional default value.
 
         Raises:
-            Exception:
-                If the keyword isn't specified and no default value is given.
+            ConfigFileError: If the keyword isn't specified and no default value is given.
 
         Returns:
             str: value of the keyword as string.
@@ -375,8 +373,8 @@ class ConfigFile:
             default (Optional[bool]): Optional default value.
 
         Raises:
-            Exception:
-                If the keyword isn't specified and no default value is given.
+            ConfigFileError: If the keyword isn't specified and no default value is given.
+
 
         Returns:
             bool: value of the keyword as boolean.
@@ -424,9 +422,9 @@ class ConfigFile:
                 All floats are accepted (if False), or only positive floats (if True).
 
         Raises:
-            Exception:
-                If the keyword isn't specified and no default value is given.
-                If a negative value is specified when a positive value is required.
+            ConfigFileError: If the keyword isn't specified and no default value is given.
+            ConfigFileError: If a negative value is specified when a positive value is required.
+
 
         Returns:
             float: value of the keyword as float.
@@ -472,9 +470,9 @@ class ConfigFile:
                 All floats are accepted (if False), or only positive floats (if True).
 
         Raises:
-            Exception:
-                If the keyword isn't specified and no default value is given.
-                If a negative or zero value is specified when a positive value is required.
+            ConfigFileError: If the keyword isn't specified and no default value is given.
+            ConfigFileError: If a negative or zero value is specified when a positive value is required.
+
 
         Returns:
             int: value of the keyword as int.
