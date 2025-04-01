@@ -617,6 +617,16 @@ class ConfigFile:
         Returns:
             parfield (List[np.ndarray]): Parameter field
                 For each bank a parameter value per bank point (bank chainage location).
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5])]
+            >>> config_file.get_parameter("General", "ZoomStepKM", bank_km)
+            [array([1., 1., 1.]), array([1., 1., 1.])]
+
+            ```
         """
         try:
             filename = self.config[group][key]
@@ -681,6 +691,15 @@ class ConfigFile:
 
         Returns:
             dlines (List[float]): Array of length nbank containing the search distance value per bank line (default value: 50).
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> config_file.get_bank_search_distances(2)
+            [50.0, 50.0]
+
+            ```
         """
         dlines_key = self.config["Detect"].get("DLines", None)
         if dlines_key is None:
@@ -707,6 +726,15 @@ class ConfigFile:
 
         Returns:
             val (Tuple[float,float]): Lower and upper limit of the range.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> config_file.get_range("General", "Boundaries")
+            (123.0, 128.0)
+
+            ```
         """
         str_val = self.get_str(group, key)
         try:
@@ -749,6 +777,14 @@ class ConfigFile:
 
         Args:
             rootdir (str): The path to be used as base for the absolute paths.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> config_file.resolve("tests/data/erosion")
+
+            ```
         """
         if "General" in self.config:
             self.resolve_parameter("General", "RiverKM", rootdir)
@@ -800,6 +836,14 @@ class ConfigFile:
 
         Args:
             rootdir (str): The path to be used as base for the relative paths.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> config_file.relative_to("testing/data/erosion")
+
+            ```
         """
         if "General" in self.config:
             self.parameter_relative_to("General", "RiverKM", rootdir)
@@ -857,6 +901,14 @@ class ConfigFile:
             group (str): Name of the group in the configuration.
             key (str): Name of the key in the configuration.
             rootdir (str): The path to be used as base for the absolute paths.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> config_file.resolve_parameter("General", "RiverKM", "tests/data/erosion")
+
+            ```
         """
         if key in self.config[group]:
             val_str = self.config[group][key]
@@ -875,6 +927,14 @@ class ConfigFile:
             group (str): Name of the group in the configuration.
             key (str): Name of the key in the configuration.
             rootdir (str): The path to be used as base for the relative paths.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> config_file.parameter_relative_to("General", "RiverKM", "tests/data/erosion")
+
+            ```
         """
         if key in self.config[group]:
             val_str = self.config[group][key]
