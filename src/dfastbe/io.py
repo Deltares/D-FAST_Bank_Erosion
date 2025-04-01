@@ -106,8 +106,7 @@ class ConfigFile:
 
     @classmethod
     def read(cls, path: Union[str, pathlib.Path]):
-        """
-        Read a configParser object (configuration file).
+        """Read a configParser object (configuration file).
 
         reads the config file using the standard configParser.
         falls back to a dedicated reader compatible with old waqbank files.
@@ -141,12 +140,10 @@ class ConfigFile:
 
     @staticmethod
     def _upgrade(config: configparser.ConfigParser):
-        """
-        Upgrade the configuration data structure to version 1.0 format.
+        """Upgrade the configuration data structure to version 1.0 format.
 
         Returns:
             config1 (configparser.ConfigParser): Settings for the D-FAST Bank Erosion analysis in 1.0 format.
-
         """
         try:
             version = config["General"]["Version"]
@@ -257,8 +254,7 @@ class ConfigFile:
                     configfile.write(OPTIONLINE.format(o, config[s][o]))
 
     def adjust_filenames(self) -> Tuple[str, configparser.ConfigParser]:
-        """
-        Convert all paths to relative to current working directory.
+        """Convert all paths to relative to current working directory.
 
         Returns:
             rootdir (str): Location of configuration file relative to current working directory.
@@ -277,8 +273,7 @@ class ConfigFile:
         key: str,
         default: Optional[str] = None,
     ) -> str:
-        """
-        Get a string from a selected group and keyword in the analysis settings.
+        """Get a string from a selected group and keyword in the analysis settings.
 
         Args:
             group (str): Name of the group from which to read.
@@ -307,8 +302,7 @@ class ConfigFile:
         key: str,
         default: Optional[bool] = None,
     ) -> bool:
-        """
-        Get a boolean from a selected group and keyword in the analysis settings.
+        """Get a boolean from a selected group and keyword in the analysis settings.
 
         Args:
             group (str): Name of the group from which to read.
@@ -346,11 +340,9 @@ class ConfigFile:
         default: Optional[float] = None,
         positive: bool = False,
     ) -> float:
-        """
-        Get a floating point value from a selected group and keyword in the analysis settings.
+        """Get a floating point value from a selected group and keyword in the analysis settings.
 
-        Args
-        ---------
+        Args:
             group (str): Name of the group from which to read.
             key (str): Name of the keyword from which to read.
             default (Optional[float]): Optional default value.
@@ -387,8 +379,7 @@ class ConfigFile:
         default: Optional[int] = None,
         positive: bool = False,
     ) -> int:
-        """
-        Get an integer from a selected group and keyword in the analysis settings.
+        """Get an integer from a selected group and keyword in the analysis settings.
 
         Args:
             group (str): Name of the group from which to read.
@@ -421,8 +412,7 @@ class ConfigFile:
         return val
 
     def get_sim_file(self, group: str, istr: str) -> str:
-        """
-        Get the name of the simulation file from the analysis settings.
+        """Get the name of the simulation file from the analysis settings.
 
         Args:
             group (str): Name of the group in which to search for the simulation file name.
@@ -436,19 +426,17 @@ class ConfigFile:
         return sim_file
 
     def get_km_bounds(self) -> Tuple[float, float]:
-        """
+        """Get the lower and upper limit for the chainage.
 
         Returns:
-            km_bounds : Tuple[float, float]
-                Lower and upper limit for the chainage.
+            km_bounds (Tuple[float, float]): Lower and upper limit for the chainage.
         """
         km_bounds = self.get_range("General", "Boundaries")
 
         return km_bounds
 
     def get_search_lines(self) -> List[shapely.geometry.linestring.LineStringAdapter]:
-        """
-        Get the search lines for the bank lines from the analysis settings.
+        """Get the search lines for the bank lines from the analysis settings.
 
         Returns:
             line (List[np.ndarray]): List of arrays containing the x,y-coordinates of a bank search lines.
@@ -463,8 +451,7 @@ class ConfigFile:
         return line
 
     def get_bank_lines(self, bank_dir: str) -> List[np.ndarray]:
-        """
-        Get the bank lines from the detection step.
+        """Get the bank lines from the detection step.
 
         Args:
             bank_dir (str): Name of directory in which the bank lines files are located.
@@ -505,8 +492,7 @@ class ConfigFile:
         valid: Optional[List[float]] = None,
         onefile: bool = False,
     ):
-        """
-        Get a parameter field from a selected group and keyword in the analysis settings.
+        """Get a parameter field from a selected group and keyword in the analysis settings.
 
         Args:
             group (str): Name of the group from which to read.
@@ -586,8 +572,7 @@ class ConfigFile:
         return parfield
 
     def get_bank_search_distances(self, nbank: int) -> List[float]:
-        """
-        Get the search distance per bank line from the analysis settings.
+        """Get the search distance per bank line from the analysis settings.
 
         Args:
             nbank (int): Number of bank search lines.
@@ -612,8 +597,7 @@ class ConfigFile:
         return dlines
 
     def get_range(self, group: str, key: str) -> Tuple[float, float]:
-        """
-        Get a start and end value from a selected group and keyword in the analysis settings.
+        """Get a start and end value from a selected group and keyword in the analysis settings.
 
         Args:
             group (str): Name of the group from which to read.
@@ -642,10 +626,10 @@ class ConfigFile:
         return val
 
     def get_xy_km(self) -> shapely.geometry.linestring.LineStringAdapter:
-        """get_xy_km
+        """Get the chainage line from the analysis settings.
 
         Returns:
-            xykm (shapely.geometry.linestring.LineStringAdapter)
+            xykm (shapely.geometry.linestring.LineStringAdapter): Chainage line.
         """
         # get the chainage file
         km_file = self.get_str("General", "RiverKM")
@@ -659,8 +643,7 @@ class ConfigFile:
         return xy_km
 
     def resolve(self, rootdir: str):
-        """
-        Convert a configuration object to contain absolute paths (for editing).
+        """Convert a configuration object to contain absolute paths (for editing).
 
         Args:
             rootdir (str): The path to be used as base for the absolute paths.
@@ -711,8 +694,7 @@ class ConfigFile:
                 self.resolve_parameter("Erosion", f"Reed{i}", rootdir)
 
     def relative_to(self, rootdir: str):
-        """
-        Convert a configuration object to contain relative paths (for saving).
+        """Convert a configuration object to contain relative paths (for saving).
 
         Args:
             rootdir (str): The path to be used as base for the relative paths.
@@ -764,8 +746,7 @@ class ConfigFile:
                 self.parameter_relative_to("Erosion", f"Reed{i}", rootdir)
 
     def resolve_parameter(self, group: str, key: str, rootdir: str):
-        """
-        Convert a parameter value to contain an absolute path.
+        """Convert a parameter value to contain an absolute path.
 
         Determine whether the string represents a number.
         If not, try to convert to an absolute path.
@@ -783,8 +764,7 @@ class ConfigFile:
                 self.config[group][key] = absolute_path(rootdir, val_str)
 
     def parameter_relative_to(self, group: str, key: str, rootdir: str):
-        """
-        Convert a parameter value to contain a relative path.
+        """Convert a parameter value to contain a relative path.
 
         Determine whether the string represents a number.
         If not, try to convert to a relative path.
