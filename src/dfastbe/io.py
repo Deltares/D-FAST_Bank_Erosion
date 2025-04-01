@@ -112,7 +112,7 @@ class ConfigFile:
         self._root_dir = value
 
     @classmethod
-    def read(cls, path: Union[str, pathlib.Path]):
+    def read(cls, path: Union[str, pathlib.Path]) -> "ConfigFile":
         """Read a configParser object (configuration file).
 
         reads the config file using the standard configParser.
@@ -126,7 +126,7 @@ class ConfigFile:
 
         Raises:
             FileNotFoundError: If the configuration file does not exist.
-            Exception: If there is an error during reading the config file.
+            Exception: If there is an error reading the config file.
 
         Examples:
             ```python
@@ -159,11 +159,14 @@ class ConfigFile:
         return cls(config, path=path)
 
     @staticmethod
-    def _upgrade(config: configparser.ConfigParser):
+    def _upgrade(config: configparser.ConfigParser) -> configparser.ConfigParser:
         """Upgrade the configuration data structure to version 1.0 format.
 
+        Args:
+            config (configparser.ConfigParser): D-FAST Bank Erosion settings in 0.1 format.
+
         Returns:
-            config1 (configparser.ConfigParser): Settings for the D-FAST Bank Erosion analysis in 1.0 format.
+            config1 (configparser.ConfigParser): D-FAST Bank Erosion settings in 1.0 format.
         """
         try:
             version = config["General"]["Version"]
@@ -243,14 +246,12 @@ class ConfigFile:
     def write(self, filename: str) -> None:
         """Pretty print a configParser object (configuration file) to file.
 
-        This function ...
-            aligns the equal signs for all keyword/value pairs.
-            adds a two space indentation to all keyword lines.
-            adds an empty line before the start of a new block.
+        aligns the equal signs for all keyword/value pairs.
+        adds a two space indentation to all keyword lines.
+        adds an empty line before the start of a new block.
 
         Args:
             filename (str): Name of the configuration file to be written.
-            config (configparser.ConfigParser): The variable containing the configuration.
         """
         config = self.config
         sections = config.sections()
@@ -305,7 +306,7 @@ class ConfigFile:
                 If the keyword isn't specified and no default value is given.
 
         Returns:
-            val (str): String.
+            val (str): value of the keyword as string.
         """
         try:
             val = self.config[group][key]
@@ -334,7 +335,7 @@ class ConfigFile:
                 If the keyword isn't specified and no default value is given.
 
         Returns:
-            val (bool): Boolean value.
+            val (bool): value of the keyword as boolean.
         """
         try:
             str_val = self.config[group][key].lower()
@@ -375,7 +376,7 @@ class ConfigFile:
                 If a negative value is specified when a positive value is required.
 
         Returns:
-            val (float): Floating point value.
+            val (float): value of the keyword as float.
         """
         try:
             val = float(self.config[group][key])
@@ -414,7 +415,7 @@ class ConfigFile:
                 If a negative or zero value is specified when a positive value is required.
 
         Returns:
-            val (int): Integer value.
+            val (int): value of the keyword as int.
         """
         try:
             val = int(self.config[group][key])
@@ -511,7 +512,7 @@ class ConfigFile:
         positive: bool = False,
         valid: Optional[List[float]] = None,
         onefile: bool = False,
-    ):
+    ) -> List[np.ndarray]:
         """Get a parameter field from a selected group and keyword in the analysis settings.
 
         Args:
@@ -713,7 +714,7 @@ class ConfigFile:
                 self.resolve_parameter("Erosion", f"Slope{i}", rootdir)
                 self.resolve_parameter("Erosion", f"Reed{i}", rootdir)
 
-    def relative_to(self, rootdir: str):
+    def relative_to(self, rootdir: str) -> None:
         """Convert a configuration object to contain relative paths (for saving).
 
         Args:
