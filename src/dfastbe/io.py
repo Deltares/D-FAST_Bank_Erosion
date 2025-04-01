@@ -70,6 +70,13 @@ class ConfigFile:
     Args:
         config (configparser.ConfigParser): Settings for the D-FAST Bank Erosion analysis.
         path (str): Path to the configuration file.
+
+    Examples:
+        ```python
+        >>> from dfastbe.io import ConfigFile
+        >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+        >>> config_file.write("tests/data/erosion/meuse_manual.cfg")
+        ```
     """
 
     def __init__(
@@ -111,8 +118,21 @@ class ConfigFile:
         reads the config file using the standard configParser.
         falls back to a dedicated reader compatible with old waqbank files.
 
+        Args:
+            path (Union[str, pathlib.Path]): Path to the configuration file.
+
         Returns:
-            config (configparser.ConfigParser): Settings for the D-FAST Bank Erosion analysis.
+            config (ConfigFile): Settings for the D-FAST Bank Erosion analysis.
+
+        Raises:
+            FileNotFoundError: If the configuration file does not exist.
+            Exception: If there is an error during reading the config file.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            ```
         """
         if not Path(path).exists():
             raise FileNotFoundError(f"The Config-File: {path} does not exist")
