@@ -73,9 +73,12 @@ class ConfigFile:
 
     Examples:
         ```python
+        >>> import tempfile
         >>> from dfastbe.io import ConfigFile
         >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-        >>> config_file.write("tests/data/erosion/meuse_manual.cfg")
+        >>> with tempfile.TemporaryDirectory() as tmpdirname:
+        ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
+
         ```
     """
 
@@ -132,6 +135,7 @@ class ConfigFile:
             ```python
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+
             ```
         """
         if not Path(path).exists():
@@ -167,6 +171,16 @@ class ConfigFile:
 
         Returns:
             config1 (configparser.ConfigParser): D-FAST Bank Erosion settings in 1.0 format.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> result = config_file._upgrade(config_file.config)
+            >>> isinstance(result, configparser.ConfigParser)
+            True
+
+            ```
         """
         try:
             version = config["General"]["Version"]
@@ -252,6 +266,16 @@ class ConfigFile:
 
         Args:
             filename (str): Name of the configuration file to be written.
+
+        Examples:
+            ```python
+            >>> import tempfile
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> with tempfile.TemporaryDirectory() as tmpdirname:
+            ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
+
+            ```
         """
         config = self.config
         sections = config.sections()
@@ -274,12 +298,11 @@ class ConfigFile:
                 for o in options:
                     configfile.write(OPTIONLINE.format(o, config[s][o]))
 
-    def adjust_filenames(self) -> Tuple[str, configparser.ConfigParser]:
+    def adjust_filenames(self) -> str:
         """Convert all paths to relative to current working directory.
 
         Returns:
             rootdir (str): Location of configuration file relative to current working directory.
-            config (configparser.ConfigParser): Analysis configuration settings using paths relative to current working directory.
         """
         cwd = os.getcwd()
         self.resolve(self.root_dir)
@@ -307,6 +330,17 @@ class ConfigFile:
 
         Returns:
             val (str): value of the keyword as string.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> result = config_file.get_str("General", "BankDir")
+            >>> expected = Path("tests/data/erosion/output/banklines")
+            >>> str(expected) == result
+            True
+
+            ```
         """
         try:
             val = self.config[group][key]
@@ -336,6 +370,15 @@ class ConfigFile:
 
         Returns:
             val (bool): value of the keyword as boolean.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> config_file.get_bool("General", "Plotting")
+            True
+
+            ```
         """
         try:
             str_val = self.config[group][key].lower()
@@ -377,6 +420,15 @@ class ConfigFile:
 
         Returns:
             val (float): value of the keyword as float.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> config_file.get_float("General", "ZoomStepKM")
+            1.0
+
+            ```
         """
         try:
             val = float(self.config[group][key])
@@ -416,6 +468,15 @@ class ConfigFile:
 
         Returns:
             val (int): value of the keyword as int.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> config_file.get_int("Detect", "NBank")
+            2
+
+            ```
         """
         try:
             val = int(self.config[group][key])
@@ -442,6 +503,17 @@ class ConfigFile:
 
         Returns:
             simfile (str): Name of the simulation file (empty string if keywords are not found).
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> result = config_file.get_sim_file("Erosion", "1")
+            >>> expected = Path("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
+            >>> str(expected) == result
+            True
+
+            ```
         """
         sim_file = self.config[group].get("SimFile" + istr, "")
         return sim_file
@@ -451,6 +523,15 @@ class ConfigFile:
 
         Returns:
             km_bounds (Tuple[float, float]): Lower and upper limit for the chainage.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> config_file.get_km_bounds()
+            (123.0, 128.0)
+
+            ```
         """
         km_bounds = self.get_range("General", "Boundaries")
 
