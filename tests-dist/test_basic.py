@@ -60,7 +60,8 @@ class Test_basic:
             "",
             "option:",
             "  -h, --help           show this help message and exit",
-            "  --mode MODE          run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is default)",
+            "  --mode MODE          run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is",
+            "                       default)",
             "  --config CONFIG      name of configuration file ('dfastbe.cfg' is default)",
         ]
 

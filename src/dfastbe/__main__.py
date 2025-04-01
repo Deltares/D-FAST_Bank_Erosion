@@ -80,7 +80,7 @@ def parse_arguments() -> Tuple[str, str, str]:
     config_name : str
         Name of the configuration file.
     """
-    parser = argparse.ArgumentParser(description="D-FAST Morphological Impact.")
+    parser = argparse.ArgumentParser(description="D-FAST Bank Erosion.")
     parser.add_argument(
         "--language", help="display language 'NL' or 'UK' ('UK' is default)"
     )
