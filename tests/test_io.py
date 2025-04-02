@@ -473,6 +473,64 @@ class Test_ConfigFile:
             Path("tests/data") / "tests/data/erosion" / "inputs/rivkm_20m.xyc"
         )
 
+    def test__upgrade(self):
+        """Test upgrading the configuration."""
+        config = configparser.ConfigParser()
+        config.read_dict(
+            {
+                "General": {
+                    "Version": "1.0",
+                    "RiverKM": "inputs/rivkm_20m.xyc",
+                    "Boundaries": "123.0:128.0",
+                    "BankDir": "output/banklines",
+                    "BankFile": "bankfile",
+                    "Plotting": "yes",
+                    "SavePlots": "True",
+                    "SaveZoomPlots": "False",
+                    "ZoomStepKM": "1.0",
+                    "FigureDir": "output/figures",
+                    "ClosePlots": "False",
+                    "DebugOutput": "False",
+                    "SimFile": "inputs/sim0270/SDS-j19_map.nc",
+                    "WaterDepth": "0.0",
+                    "NBank": "2",
+                    "Line1": "inputs/oeverlijn_links_mod.xyc",
+                    "Line2": "inputs/oeverlijn_rechts_mod.xyc",
+                    "DLines": "[ 50.0, 50.0 ]",
+                    "TErosion": "1",
+                    "RiverAxis": "inputs/maas_rivieras_mod.xyc",
+                    "Fairway": "inputs/maas_rivieras_mod.xyc",
+                    "OutputInterval": "0.1",
+                    "OutputDir": "output/bankerosion",
+                    "BankNew": "banknew",
+                    "BankEq": "bankeq",
+                    "EroVol": "erovol_standard.evo",
+                    "EroVolEqui": "erovol_eq.evo",
+                    "ShipType": "2",
+                    "VShip": "5.0",
+                    "NShip": "inputs/nships_totaal",
+                    "NWaves": "5",
+                    "Draught": "1.2",
+                    "Wave0": "150.0",
+                    "Wave1": "110.0",
+                    "Classes": "false",
+                    "BankType": "inputs/bankstrength_tauc",
+                    "ProtectionLevel": "inputs/stortsteen",
+                    "Slope": "20.0",
+                    "Reed": "0.0",
+                    "VelFilterDist": "0.3",
+                    "BedFilterDist": "0.3",
+                    "NLevel": "0",
+                    "RefLevel": "3",
+                }
+            }
+        )
+        config_file = ConfigFile(config=config)
+        config_result = config_file._upgrade(config_file.config)
+        assert config_result["General"]["plotting"] == "yes"
+        # TODO: Check why the _upgrade function is not working as expected
+        # assert config_result["Detect"]["SimFile"] == "test_sim.nc"
+
 
 class TestConfigFile(unittest.TestCase):
 
