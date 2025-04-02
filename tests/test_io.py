@@ -16,6 +16,7 @@ import numpy
 import netCDF4
 from shapely.geometry.linestring import LineString
 import pytest
+from pyfakefs.fake_filesystem import FakeFilesystem
 
 import sys
 from contextlib import contextmanager
@@ -123,7 +124,7 @@ class Test_read_fm_map:
         """
         filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
         varname = "x"
-        #location = "face"
+        # location = "face"
         datac = read_fm_map(filename, varname)
         dataref = 41.24417604888325
         assert datac[1] == dataref
@@ -178,7 +179,7 @@ class Test_read_fm_map:
         with pytest.raises(Exception) as cm:
             datac = read_fm_map(filename, varname)
         assert str(cm.value) == 'Expected one variable for "water level", but obtained 0.'
-        
+
 class Test_get_mesh_and_facedim_names():
     def test_get_mesh_and_facedim_names_01(self):
         """
@@ -393,6 +394,65 @@ class Test_relative_path():
         afile = os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         assert relative_path(rootdir, afile) == rfile
+
+
+class Test_ConfigFile:
+    """Test cases for the ConfigFile class."""
+
+    @pytest.fixture
+    def config(self) -> configparser.ConfigParser:
+        """Fixture to create a ConfigFile instance."""
+        config = configparser.ConfigParser()
+        config.read_dict(
+            {
+                "General": {
+                    "Version": "1.0",
+                    "plotting": "yes",
+                    "ZoomStepKM": "0.1",
+                },
+                "Detect": {"SimFile": "test_sim.nc", "NBank": "2"},
+                "Erosion": {"OutputDir": "./output"},
+            }
+        )
+        return config
+
+    @pytest.fixture
+    def config_data(self) -> str:
+        """Fixture to create a sample configuration file string."""
+        content = (
+            "[General]\n"
+            "  version    = 1.0\n"
+            "  plotting   = yes\n"
+            "  zoomstepkm = 0.1\n\n"
+            "[Detect]\n"
+            "  simfile    = test_sim.nc\n"
+            "  nbank      = 2\n\n"
+            "[Erosion]\n"
+            "  outputdir  = ./output\n"
+        )
+        return content
+
+    def test_init(self, config: configparser.ConfigParser):
+        """Test initialization of ConfigFile."""
+        config_file = ConfigFile(config=config)
+        assert isinstance(config_file, ConfigFile)
+
+    def test_read(self, config_data: str, fs: FakeFilesystem):
+        """Test reading a configuration file."""
+        fs.create_file("dummy_path.cfg", contents=config_data)
+        config_file = ConfigFile.read("dummy_path.cfg")
+        assert isinstance(config_file, ConfigFile)
+        assert config_file.config["General"]["Version"] == "1.0"
+        assert config_file.config["Detect"]["NBank"] == "2"
+
+    def test_write(
+        self, config: configparser.ConfigParser, config_data: str, fs: FakeFilesystem
+    ):
+        """Test writing a configuration file."""
+        config_file = ConfigFile(config=config)
+        config_file.write("test_output.cfg")
+        with open("test_output.cfg", "r") as file:
+            assert file.read() == config_data
 
 
 class TestConfigFile(unittest.TestCase):
