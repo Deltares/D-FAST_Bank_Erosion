@@ -183,52 +183,7 @@ class Erosion:
 
         return x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, bank_line_coords, bank_face_indices, bank_km_mid, is_right_bank
 
-    def bankerosion_core(self) -> None:
-        """Run the bank erosion analysis for a specified configuration."""
-        timed_logger("-- start analysis --")
-        log_text(
-            "header_bankerosion",
-            data={
-                "version": __version__,
-                "location": "https://github.com/Deltares/D-FAST_Bank_Erosion",
-            },
-        )
-        log_text("-")
-        config_file = self.config_file
-
-        # get simulation time terosion
-        Teros = config_file.get_int("Erosion", "TErosion", positive=True)
-        log_text("total_time", data={"t": Teros})
-
-        # read simulation data (get_sim_data)
-        sim_file = config_file.get_sim_file("Erosion", str(self.ref_level + 1))
-        log_text("-")
-        log_text("read_simdata", data={"file": sim_file})
-        log_text("-")
-        sim, dh0 = read_simulation_data(sim_file)
-        log_text("-")
-
-        log_text("derive_topology")
-        face_node = sim["facenode"]
-        nnodes = sim["nnodes"]
-        edge_node, edge_face, fe, boundary_edge_nrs = _derive_topology_arrays(face_node, nnodes)
-
-        # clip the chainage path to the range of chainages of interest
-        km_bounds = self.river_data.station_bounds
-        log_text("clip_chainage", data={"low": km_bounds[0], "high": km_bounds[1]})
-
-        stations_coords = self.river_data.masked_profile_arr[:, :2]
-
-        # read bank lines
-        banklines = config_file.get_bank_lines(self.bank_dir)
-        n_banklines = len(banklines)
-
-        # map bank lines to mesh cells
-        log_text("intersect_bank_mesh")
-
-        x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, bank_line_coords, bank_idx, bank_km_mid, is_right_bank = self.intersect_bank_lines_with_mesh(
-            sim, face_node, banklines, edge_node, edge_face, fe, nnodes, boundary_edge_nrs, stations_coords
-        )
+    def _prepare_river_axis(self, stations_coords: np.ndarray) -> Tuple[np.ndarray, np.ndarray, LineString]:
         # read river axis file
         river_axis = self.river_data.read_river_axis()
         river_axis_numpy = np.array(river_axis)
@@ -250,7 +205,7 @@ class Erosion:
             river_axis_numpy,
             {"chainage": river_axis_km},
             str(self.output_dir) + os.sep + "river_axis_chainage.shp",
-        )
+            )
 
         # clip river axis to reach of interest
         i1 = np.argmin(((stations_coords[0] - river_axis_numpy) ** 2).sum(axis=1))
@@ -263,6 +218,58 @@ class Erosion:
             river_axis_km = river_axis_km[i2 : i1 + 1][::-1]
             river_axis_numpy = river_axis_numpy[i2 : i1 + 1][::-1]
         river_axis = LineString(river_axis_numpy)
+
+        return river_axis_km, river_axis_numpy, river_axis
+
+    def bankerosion_core(self) -> None:
+        """Run the bank erosion analysis for a specified configuration."""
+        timed_logger("-- start analysis --")
+        log_text(
+            "header_bankerosion",
+            data={
+                "version": __version__,
+                "location": "https://github.com/Deltares/D-FAST_Bank_Erosion",
+            },
+        )
+        log_text("-")
+        config_file = self.config_file
+
+        # get simulation time terosion
+        Teros = config_file.get_int("Erosion", "TErosion", positive=True)
+        log_text("total_time", data={"t": Teros})
+        # read simulation data (get_sim_data)
+        sim_file = config_file.get_sim_file("Erosion", str(self.ref_level + 1))
+        log_text("-")
+        log_text("read_simdata", data={"file": sim_file})
+        log_text("-")
+        sim, dh0 = read_simulation_data(sim_file)
+        log_text("-")
+
+        log_text("derive_topology")
+        face_node = sim["facenode"]
+        nnodes = sim["nnodes"]
+
+        edge_node, edge_face, fe, boundary_edge_nrs = _derive_topology_arrays(face_node, nnodes)
+
+
+        # clip the chainage path to the range of chainages of interest
+        km_bounds = self.river_data.station_bounds
+        log_text("clip_chainage", data={"low": km_bounds[0], "high": km_bounds[1]})
+
+        stations_coords = self.river_data.masked_profile_arr[:, :2]
+
+        # read bank lines
+        banklines = config_file.get_bank_lines(self.bank_dir)
+        n_banklines = len(banklines)
+
+        # map bank lines to mesh cells
+        log_text("intersect_bank_mesh")
+
+        x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, bank_line_coords, bank_idx, bank_km_mid, is_right_bank = self.intersect_bank_lines_with_mesh(
+            sim, face_node, banklines, edge_node, edge_face, fe, nnodes, boundary_edge_nrs, stations_coords
+        )
+
+        river_axis_km, river_axis_numpy, river_axis = self._prepare_river_axis(stations_coords)
 
         # get output interval
         km_step = config_file.get_float("Erosion", "OutputInterval", 1.0)
