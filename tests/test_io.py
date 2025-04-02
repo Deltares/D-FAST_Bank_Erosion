@@ -454,6 +454,25 @@ class Test_ConfigFile:
         with open("test_output.cfg", "r") as file:
             assert file.read() == config_data
 
+    def test_resolve(self):
+        """Test resolving paths in the configuration."""
+        config = configparser.ConfigParser()
+        config.read_dict(
+            {
+                "General": {
+                    "RiverKM": "inputs/rivkm_20m.xyc",
+                    "BankDir": "output/banklines",
+                    "FigureDir": "output/figures",
+                }
+            }
+        )
+        path = "tests/data/erosion/test.cfg"
+        config_file = ConfigFile(config, path)
+        config_file.resolve("tests/data")
+        assert config_file.config["General"]["RiverKM"] == str(
+            Path("tests/data") / "tests/data/erosion" / "inputs/rivkm_20m.xyc"
+        )
+
 
 class TestConfigFile(unittest.TestCase):
 
