@@ -88,7 +88,7 @@ class Test_batch_mode:
     @pytest.mark.parametrize(
         "tstdir, cfgfile",
         [
-            ("tests/data/erosion", "Meuse_manual.cfg"),
+            ("tests/data/erosion", "meuse_manual.cfg"),
         ],
     )
     def test_bank_erosion(self, tstdir, cfgfile):
