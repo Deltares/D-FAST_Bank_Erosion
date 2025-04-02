@@ -353,6 +353,66 @@ class Erosion:
 
         return bp_fw_face_idx, distance_fw
 
+    def _prepare_initial_conditions(self, config_file, bank_km_mid, zfw_ini) -> Tuple[
+        np.ndarray, np.ndarray, Dict[str, np.ndarray], np.ndarray, List[np.ndarray], List[np.ndarray]
+    ]:
+        # wave reduction s0, s1
+        dfw0 = config_file.get_parameter(
+            "Erosion",
+            "Wave0",
+            bank_km_mid,
+            default=200,
+            positive=True,
+            onefile=True,
+        )
+        dfw1 = config_file.get_parameter(
+            "Erosion",
+            "Wave1",
+            bank_km_mid,
+            default=150,
+            positive=True,
+            onefile=True,
+        )
+
+        # save 1_banklines
+        # read vship, nship, nwave, draught (tship), shiptype ... independent of level number
+        ship_data = self.get_ship_parameters(bank_km_mid)
+
+        # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
+        classes = config_file.get_bool("Erosion", "Classes")
+        taucls = np.array([1e20, 95, 3.0, 0.95, 0.15])
+        taucls_str = ["protected", "vegetation", "good clay", "moderate/bad clay", "sand"]
+        if classes:
+            banktype = config_file.get_parameter(
+                "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
+            )
+            tauc = []
+            for ib in range(len(banktype)):
+                tauc.append(taucls[banktype[ib]])
+        else:
+            tauc = config_file.get_parameter(
+                "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
+            )
+            thr = (taucls[:-1] + taucls[1:]) / 2
+            banktype = [None] * len(thr)
+            for ib in range(len(tauc)):
+                bt = np.zeros(tauc[ib].size)
+                for thr_i in thr:
+                    bt[tauc[ib] < thr_i] += 1
+                banktype[ib] = bt
+
+        # read bank protection level zss
+        zss_miss = -1000
+        zss = config_file.get_parameter(
+            "Erosion", "ProtectionLevel", bank_km_mid, default=zss_miss, ext=".bpl"
+        )
+        # if zss undefined, set zss equal to zfw_ini - 1
+        for ib in range(len(zss)):
+            mask = zss[ib] == zss_miss
+            zss[ib][mask] = zfw_ini[ib][mask] - 1
+
+        return ship_data, dfw0, dfw1, zss, tauc, banktype, taucls_str
+
     def bankerosion_core(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
         timed_logger("-- start analysis --")
@@ -415,66 +475,16 @@ class Erosion:
         )
 
         bp_fw_face_idx, distance_fw = self._map_bank_to_fairway(bank_line_coords, bank_km_mid,ifw_numpy,ifw_face_idx)
+
         # water level at fairway
         zfw_ini = []
         for ib in range(n_banklines):
             ii = bp_fw_face_idx[ib]
             zfw_ini.append(sim["zw_face"][ii])
 
-        # wave reduction s0, s1
-        dfw0 = config_file.get_parameter(
-            "Erosion",
-            "Wave0",
-            bank_km_mid,
-            default=200,
-            positive=True,
-            onefile=True,
+        ship_data, dfw0, dfw1, zss, tauc, banktype, taucls_str = self._prepare_initial_conditions(
+            config_file, bank_km_mid, zfw_ini
         )
-        dfw1 = config_file.get_parameter(
-            "Erosion",
-            "Wave1",
-            bank_km_mid,
-            default=150,
-            positive=True,
-            onefile=True,
-        )
-
-        # save 1_banklines
-        # read vship, nship, nwave, draught (tship), shiptype ... independent of level number
-        ship_data = self.get_ship_parameters(bank_km_mid)
-
-        # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
-        classes = config_file.get_bool("Erosion", "Classes")
-        taucls = np.array([1e20, 95, 3.0, 0.95, 0.15])
-        taucls_str = ["protected", "vegetation", "good clay", "moderate/bad clay", "sand"]
-        if classes:
-            banktype = config_file.get_parameter(
-                "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
-            )
-            tauc = []
-            for ib in range(len(banktype)):
-                tauc.append(taucls[banktype[ib]])
-        else:
-            tauc = config_file.get_parameter(
-                "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
-            )
-            thr = (taucls[:-1] + taucls[1:]) / 2
-            banktype = [None] * len(thr)
-            for ib in range(len(tauc)):
-                bt = np.zeros(tauc[ib].size)
-                for thr_i in thr:
-                    bt[tauc[ib] < thr_i] += 1
-                banktype[ib] = bt
-
-        # read bank protection level zss
-        zss_miss = -1000
-        zss = config_file.get_parameter(
-            "Erosion", "ProtectionLevel", bank_km_mid, default=zss_miss, ext=".bpl"
-        )
-        # if zss undefined, set zss equal to zfw_ini - 1
-        for ib in range(len(zss)):
-            mask = zss[ib] == zss_miss
-            zss[ib][mask] = zfw_ini[ib][mask] - 1
 
         # initialize arrays for erosion loop over all discharges
         velocity: List[List[np.ndarray]] = []
