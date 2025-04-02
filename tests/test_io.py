@@ -1,3 +1,4 @@
+from typing import Dict
 import unittest
 from unittest.mock import patch
 
@@ -454,18 +455,21 @@ class Test_ConfigFile:
         with open("test_output.cfg", "r") as file:
             assert file.read() == config_data
 
-    def test_resolve(self):
+    @pytest.fixture
+    def path_dict(self) -> Dict:
+        """Fixture to create a dictionary for path resolution."""
+        return {
+            "General": {
+                "RiverKM": "inputs/rivkm_20m.xyc",
+                "BankDir": "output/banklines",
+                "FigureDir": "output/figures",
+            }
+        }
+
+    def test_resolve(self, path_dict: Dict):
         """Test resolving paths in the configuration."""
         config = configparser.ConfigParser()
-        config.read_dict(
-            {
-                "General": {
-                    "RiverKM": "inputs/rivkm_20m.xyc",
-                    "BankDir": "output/banklines",
-                    "FigureDir": "output/figures",
-                }
-            }
-        )
+        config.read_dict(path_dict)
         path = "tests/data/erosion/test.cfg"
         config_file = ConfigFile(config, path)
         config_file.resolve("tests/data")
