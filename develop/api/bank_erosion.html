@@ -1449,10 +1449,10 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1187</span>
-<span class="normal">1188</span>
-<span class="normal">1189</span>
-<span class="normal">1190</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesResultsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1223</span>
+<span class="normal">1224</span>
+<span class="normal">1225</span>
+<span class="normal">1226</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesResultsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom exception for BankLine results errors.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span>
@@ -2503,7 +2503,43 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">1068</span>
 <span class="normal">1069</span>
 <span class="normal">1070</span>
-<span class="normal">1071</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Erosion</span><span class="p">:</span>
+<span class="normal">1071</span>
+<span class="normal">1072</span>
+<span class="normal">1073</span>
+<span class="normal">1074</span>
+<span class="normal">1075</span>
+<span class="normal">1076</span>
+<span class="normal">1077</span>
+<span class="normal">1078</span>
+<span class="normal">1079</span>
+<span class="normal">1080</span>
+<span class="normal">1081</span>
+<span class="normal">1082</span>
+<span class="normal">1083</span>
+<span class="normal">1084</span>
+<span class="normal">1085</span>
+<span class="normal">1086</span>
+<span class="normal">1087</span>
+<span class="normal">1088</span>
+<span class="normal">1089</span>
+<span class="normal">1090</span>
+<span class="normal">1091</span>
+<span class="normal">1092</span>
+<span class="normal">1093</span>
+<span class="normal">1094</span>
+<span class="normal">1095</span>
+<span class="normal">1096</span>
+<span class="normal">1097</span>
+<span class="normal">1098</span>
+<span class="normal">1099</span>
+<span class="normal">1100</span>
+<span class="normal">1101</span>
+<span class="normal">1102</span>
+<span class="normal">1103</span>
+<span class="normal">1104</span>
+<span class="normal">1105</span>
+<span class="normal">1106</span>
+<span class="normal">1107</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Erosion</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root_dir</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">root_dir</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_config_file</span> <span class="o">=</span> <span class="n">config_file</span>
@@ -2675,6 +2711,198 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
         <span class="k">return</span> <span class="n">river_axis_km</span><span class="p">,</span> <span class="n">river_axis_numpy</span><span class="p">,</span> <span class="n">river_axis</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_fairway</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">river_axis</span><span class="p">:</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">stations_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+            <span class="n">x_face_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y_face_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+            <span class="n">x_edge_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y_edge_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+            <span class="n">fe</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">edge_face</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+            <span class="n">face_node</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">edge_node</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+            <span class="n">nnodes</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">boundary_edge_nrs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+            <span class="c1"># ) -&gt; Tuple[np.ndarray, np.ndarray, List[int], List[int]]</span>
+    <span class="p">):</span>
+        <span class="c1"># read fairway file</span>
+        <span class="n">fairway_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;Fairway&quot;</span><span class="p">)</span>
+        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_fairway&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">fairway_file</span><span class="p">})</span>
+        <span class="n">fairway</span> <span class="o">=</span> <span class="n">read_xyc</span><span class="p">(</span><span class="n">fairway_file</span><span class="p">)</span>
+
+        <span class="c1"># map km to fairway points, further using axis</span>
+        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_fairway&quot;</span><span class="p">)</span>
+        <span class="n">fairway_numpy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">river_axis</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">fairway_km</span> <span class="o">=</span> <span class="n">project_km_on_line</span><span class="p">(</span><span class="n">fairway_numpy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">masked_profile_arr</span><span class="p">)</span>
+        <span class="n">write_shp_pnt</span><span class="p">(</span>
+            <span class="n">fairway_numpy</span><span class="p">,</span>
+            <span class="p">{</span><span class="s2">&quot;chainage&quot;</span><span class="p">:</span> <span class="n">fairway_km</span><span class="p">},</span>
+            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s2">&quot;fairway_chainage.shp&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># clip fairway to reach of interest</span>
+        <span class="n">i1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(((</span><span class="n">stations_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">fairway_numpy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">i2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(((</span><span class="n">stations_coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">fairway_numpy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">i1</span> <span class="o">&lt;</span> <span class="n">i2</span><span class="p">:</span>
+            <span class="n">fairway_km</span> <span class="o">=</span> <span class="n">fairway_km</span><span class="p">[</span><span class="n">i1</span> <span class="p">:</span> <span class="n">i2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">fairway_numpy</span> <span class="o">=</span> <span class="n">fairway_numpy</span><span class="p">[</span><span class="n">i1</span> <span class="p">:</span> <span class="n">i2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># reverse fairway</span>
+            <span class="n">fairway_km</span> <span class="o">=</span> <span class="n">fairway_km</span><span class="p">[</span><span class="n">i2</span> <span class="p">:</span> <span class="n">i1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">fairway_numpy</span> <span class="o">=</span> <span class="n">fairway_numpy</span><span class="p">[</span><span class="n">i2</span> <span class="p">:</span> <span class="n">i1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">fairway</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="n">fairway_numpy</span><span class="p">)</span>
+
+        <span class="c1"># intersect fairway and mesh</span>
+        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;intersect_fairway_mesh&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">fairway_numpy</span><span class="p">)})</span>
+        <span class="n">ifw_numpy</span><span class="p">,</span> <span class="n">ifw_face_idx</span> <span class="o">=</span> <span class="n">intersect_line_mesh</span><span class="p">(</span>
+            <span class="n">fairway_numpy</span><span class="p">,</span> <span class="n">x_face_coords</span><span class="p">,</span> <span class="n">y_face_coords</span><span class="p">,</span> <span class="n">x_edge_coords</span><span class="p">,</span> <span class="n">y_edge_coords</span><span class="p">,</span> <span class="n">fe</span><span class="p">,</span> <span class="n">edge_face</span><span class="p">,</span> <span class="n">face_node</span><span class="p">,</span> <span class="n">edge_node</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">boundary_edge_nrs</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
+            <span class="n">write_shp_pnt</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="p">{</span><span class="s2">&quot;iface&quot;</span><span class="p">:</span> <span class="n">ifw_face_idx</span><span class="p">},</span>
+                <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s2">&quot;fairway_face_indices.shp&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ifw_face_idx</span><span class="p">,</span> <span class="n">ifw_numpy</span>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_map_bank_to_fairway</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">bank_line_coords</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">bank_km_mid</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">ifw_numpy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">ifw_face_idx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+        <span class="c1"># distance fairway-bankline (bankfairway)</span>
+        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_distance_fairway&quot;</span><span class="p">)</span>
+        <span class="n">distance_fw</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">bp_fw_face_idx</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nfw</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ifw_face_idx</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ib</span><span class="p">,</span> <span class="n">bcrds</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bank_line_coords</span><span class="p">):</span>
+            <span class="n">bcrds_mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">bcrds</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bcrds</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="n">distance_fw</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bcrds_mid</span><span class="p">)))</span>
+            <span class="n">bp_fw_face_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bcrds_mid</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">ip</span><span class="p">,</span> <span class="n">bp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bcrds_mid</span><span class="p">):</span>
+                <span class="c1"># find closest fairway support node</span>
+                <span class="n">ifw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(((</span><span class="n">bp</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">fwp</span> <span class="o">=</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">]</span>
+                <span class="n">dbfw</span> <span class="o">=</span> <span class="p">((</span><span class="n">bp</span> <span class="o">-</span> <span class="n">fwp</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">**</span> <span class="mf">0.5</span>
+                <span class="c1"># If fairway support node is also the closest projected fairway point, then it likely</span>
+                <span class="c1"># that that point is one of the original support points (a corner) of the fairway path</span>
+                <span class="c1"># and located inside a grid cell. The segments before and after that point will then</span>
+                <span class="c1"># both be located inside that same grid cell, so let&#39;s pick the segment before the point.</span>
+                <span class="c1"># If the point happens to coincide with a grid edge and the two segments are located</span>
+                <span class="c1"># in different grid cells, then we could either simply choose one or add complexity to</span>
+                <span class="c1"># average the values of the two grid cells. Let&#39;s go for the simplest approach ...</span>
+                <span class="n">iseg</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">ifw</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">alpha</span> <span class="o">=</span> <span class="p">(</span>
+                                    <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                                    <span class="o">*</span> <span class="p">(</span><span class="n">bp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                                    <span class="o">+</span> <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+                                    <span class="o">*</span> <span class="p">(</span><span class="n">bp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+                            <span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+                                    <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+                                    <span class="o">+</span> <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+                            <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">alpha</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">fwp1</span> <span class="o">=</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span>
+                                <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                        <span class="p">)</span>
+                        <span class="n">d1</span> <span class="o">=</span> <span class="p">((</span><span class="n">bp</span> <span class="o">-</span> <span class="n">fwp1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">**</span> <span class="mf">0.5</span>
+                        <span class="k">if</span> <span class="n">d1</span> <span class="o">&lt;</span> <span class="n">dbfw</span><span class="p">:</span>
+                            <span class="n">fwp</span> <span class="o">=</span> <span class="n">fwp1</span>
+                            <span class="n">dbfw</span> <span class="o">=</span> <span class="n">d1</span>
+                            <span class="c1"># projected point located on segment before, which corresponds to initial choice: iseg = ifw - 1</span>
+                <span class="k">if</span> <span class="n">ifw</span> <span class="o">&lt;</span> <span class="n">nfw</span><span class="p">:</span>
+                    <span class="n">alpha</span> <span class="o">=</span> <span class="p">(</span>
+                                    <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                                    <span class="o">*</span> <span class="p">(</span><span class="n">bp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                                    <span class="o">+</span> <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+                                    <span class="o">*</span> <span class="p">(</span><span class="n">bp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+                            <span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+                                    <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+                                    <span class="o">+</span> <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+                            <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">alpha</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">fwp1</span> <span class="o">=</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span>
+                                <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">]</span>
+                        <span class="p">)</span>
+                        <span class="n">d1</span> <span class="o">=</span> <span class="p">((</span><span class="n">bp</span> <span class="o">-</span> <span class="n">fwp1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">**</span> <span class="mf">0.5</span>
+                        <span class="k">if</span> <span class="n">d1</span> <span class="o">&lt;</span> <span class="n">dbfw</span><span class="p">:</span>
+                            <span class="n">fwp</span> <span class="o">=</span> <span class="n">fwp1</span>
+                            <span class="n">dbfw</span> <span class="o">=</span> <span class="n">d1</span>
+                            <span class="n">iseg</span> <span class="o">=</span> <span class="n">ifw</span>
+
+                <span class="n">bp_fw_face_idx</span><span class="p">[</span><span class="n">ib</span><span class="p">][</span><span class="n">ip</span><span class="p">]</span> <span class="o">=</span> <span class="n">ifw_face_idx</span><span class="p">[</span><span class="n">iseg</span><span class="p">]</span>
+                <span class="n">distance_fw</span><span class="p">[</span><span class="n">ib</span><span class="p">][</span><span class="n">ip</span><span class="p">]</span> <span class="o">=</span> <span class="n">dbfw</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
+                <span class="n">write_shp_pnt</span><span class="p">(</span>
+                    <span class="n">bcrds_mid</span><span class="p">,</span>
+                    <span class="p">{</span><span class="s2">&quot;chainage&quot;</span><span class="p">:</span> <span class="n">bank_km_mid</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span> <span class="s2">&quot;iface_fw&quot;</span><span class="p">:</span> <span class="n">bp_fw_face_idx</span><span class="p">[</span><span class="n">ib</span><span class="p">]},</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
+                    <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;/bank_</span><span class="si">{</span><span class="n">ib</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">_chainage_and_fairway_face_idx.shp&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">bp_fw_face_idx</span><span class="p">,</span> <span class="n">distance_fw</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_initial_conditions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">zfw_ini</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+    <span class="p">]:</span>
+        <span class="c1"># wave reduction s0, s1</span>
+        <span class="n">dfw0</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
+            <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Wave0&quot;</span><span class="p">,</span>
+            <span class="n">bank_km_mid</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+            <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">onefile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">dfw1</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
+            <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Wave1&quot;</span><span class="p">,</span>
+            <span class="n">bank_km_mid</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
+            <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">onefile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># save 1_banklines</span>
+        <span class="c1"># read vship, nship, nwave, draught (tship), shiptype ... independent of level number</span>
+        <span class="n">ship_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ship_parameters</span><span class="p">(</span><span class="n">bank_km_mid</span><span class="p">)</span>
+
+        <span class="c1"># read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)</span>
+        <span class="n">classes</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;Classes&quot;</span><span class="p">)</span>
+        <span class="n">taucls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1e20</span><span class="p">,</span> <span class="mi">95</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">])</span>
+        <span class="n">taucls_str</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;protected&quot;</span><span class="p">,</span> <span class="s2">&quot;vegetation&quot;</span><span class="p">,</span> <span class="s2">&quot;good clay&quot;</span><span class="p">,</span> <span class="s2">&quot;moderate/bad clay&quot;</span><span class="p">,</span> <span class="s2">&quot;sand&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">classes</span><span class="p">:</span>
+            <span class="n">banktype</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
+                <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;BankType&quot;</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s2">&quot;.btp&quot;</span>
+            <span class="p">)</span>
+            <span class="n">tauc</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">banktype</span><span class="p">)):</span>
+                <span class="n">tauc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">taucls</span><span class="p">[</span><span class="n">banktype</span><span class="p">[</span><span class="n">ib</span><span class="p">]])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tauc</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
+                <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;BankType&quot;</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s2">&quot;.btp&quot;</span>
+            <span class="p">)</span>
+            <span class="n">thr</span> <span class="o">=</span> <span class="p">(</span><span class="n">taucls</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">taucls</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="n">banktype</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">thr</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tauc</span><span class="p">)):</span>
+                <span class="n">bt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">tauc</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">thr_i</span> <span class="ow">in</span> <span class="n">thr</span><span class="p">:</span>
+                    <span class="n">bt</span><span class="p">[</span><span class="n">tauc</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">thr_i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">banktype</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">bt</span>
+
+        <span class="c1"># read bank protection level zss</span>
+        <span class="n">zss_miss</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1000</span>
+        <span class="n">zss</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
+            <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;ProtectionLevel&quot;</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">zss_miss</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s2">&quot;.bpl&quot;</span>
+        <span class="p">)</span>
+        <span class="c1"># if zss undefined, set zss equal to zfw_ini - 1</span>
+        <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">zss</span><span class="p">)):</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">zss</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">==</span> <span class="n">zss_miss</span>
+            <span class="n">zss</span><span class="p">[</span><span class="n">ib</span><span class="p">][</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">zfw_ini</span><span class="p">[</span><span class="n">ib</span><span class="p">][</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">ship_data</span><span class="p">,</span> <span class="n">dfw0</span><span class="p">,</span> <span class="n">dfw1</span><span class="p">,</span> <span class="n">zss</span><span class="p">,</span> <span class="n">tauc</span><span class="p">,</span> <span class="n">banktype</span><span class="p">,</span> <span class="n">taucls_str</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">bankerosion_core</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the bank erosion analysis for a specified configuration.&quot;&quot;&quot;</span>
         <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- start analysis --&quot;</span><span class="p">)</span>
@@ -2732,116 +2960,11 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">km_mid</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># get mid points</span>
         <span class="n">xykm_bin_numpy</span> <span class="o">=</span> <span class="n">xykm_bin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">masked_profile_arr</span><span class="p">,</span> <span class="n">km_bin</span><span class="p">)</span>
 
-        <span class="c1"># read fairway file</span>
-        <span class="n">fairway_file</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;Fairway&quot;</span><span class="p">)</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_fairway&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">fairway_file</span><span class="p">})</span>
-        <span class="n">fairway</span> <span class="o">=</span> <span class="n">read_xyc</span><span class="p">(</span><span class="n">fairway_file</span><span class="p">)</span>
-
-        <span class="c1"># map km to fairway points, further using axis</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_fairway&quot;</span><span class="p">)</span>
-        <span class="n">fairway_numpy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">river_axis</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
-        <span class="n">fairway_km</span> <span class="o">=</span> <span class="n">project_km_on_line</span><span class="p">(</span><span class="n">fairway_numpy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">masked_profile_arr</span><span class="p">)</span>
-        <span class="n">write_shp_pnt</span><span class="p">(</span>
-            <span class="n">fairway_numpy</span><span class="p">,</span>
-            <span class="p">{</span><span class="s2">&quot;chainage&quot;</span><span class="p">:</span> <span class="n">fairway_km</span><span class="p">},</span>
-            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s2">&quot;fairway_chainage.shp&quot;</span><span class="p">,</span>
+        <span class="n">ifw_face_idx</span><span class="p">,</span> <span class="n">ifw_numpy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fairway</span><span class="p">(</span><span class="n">river_axis</span><span class="p">,</span> <span class="n">stations_coords</span><span class="p">,</span> <span class="n">x_face_coords</span><span class="p">,</span> <span class="n">y_face_coords</span><span class="p">,</span>
+            <span class="n">x_edge_coords</span><span class="p">,</span> <span class="n">y_edge_coords</span><span class="p">,</span> <span class="n">fe</span><span class="p">,</span> <span class="n">edge_face</span><span class="p">,</span> <span class="n">face_node</span><span class="p">,</span> <span class="n">edge_node</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">boundary_edge_nrs</span>
         <span class="p">)</span>
 
-        <span class="c1"># clip fairway to reach of interest</span>
-        <span class="n">i1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(((</span><span class="n">stations_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">fairway_numpy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-        <span class="n">i2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(((</span><span class="n">stations_coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">fairway_numpy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">i1</span> <span class="o">&lt;</span> <span class="n">i2</span><span class="p">:</span>
-            <span class="n">fairway_km</span> <span class="o">=</span> <span class="n">fairway_km</span><span class="p">[</span><span class="n">i1</span> <span class="p">:</span> <span class="n">i2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-            <span class="n">fairway_numpy</span> <span class="o">=</span> <span class="n">fairway_numpy</span><span class="p">[</span><span class="n">i1</span> <span class="p">:</span> <span class="n">i2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># reverse fairway</span>
-            <span class="n">fairway_km</span> <span class="o">=</span> <span class="n">fairway_km</span><span class="p">[</span><span class="n">i2</span> <span class="p">:</span> <span class="n">i1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">fairway_numpy</span> <span class="o">=</span> <span class="n">fairway_numpy</span><span class="p">[</span><span class="n">i2</span> <span class="p">:</span> <span class="n">i1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">fairway</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="n">fairway_numpy</span><span class="p">)</span>
-
-        <span class="c1"># intersect fairway and mesh</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;intersect_fairway_mesh&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">fairway_numpy</span><span class="p">)})</span>
-        <span class="n">ifw_numpy</span><span class="p">,</span> <span class="n">ifw_face_idx</span> <span class="o">=</span> <span class="n">intersect_line_mesh</span><span class="p">(</span>
-            <span class="n">fairway_numpy</span><span class="p">,</span> <span class="n">x_face_coords</span><span class="p">,</span> <span class="n">y_face_coords</span><span class="p">,</span> <span class="n">x_edge_coords</span><span class="p">,</span> <span class="n">y_edge_coords</span><span class="p">,</span> <span class="n">fe</span><span class="p">,</span> <span class="n">edge_face</span><span class="p">,</span> <span class="n">face_node</span><span class="p">,</span> <span class="n">edge_node</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">boundary_edge_nrs</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
-            <span class="n">write_shp_pnt</span><span class="p">(</span>
-                <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
-                <span class="p">{</span><span class="s2">&quot;iface&quot;</span><span class="p">:</span> <span class="n">ifw_face_idx</span><span class="p">},</span>
-                <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s2">&quot;fairway_face_indices.shp&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
-
-        <span class="c1"># distance fairway-bankline (bankfairway)</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_distance_fairway&quot;</span><span class="p">)</span>
-        <span class="n">distance_fw</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">bp_fw_face_idx</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">nfw</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ifw_face_idx</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">ib</span><span class="p">,</span> <span class="n">bcrds</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bank_line_coords</span><span class="p">):</span>
-            <span class="n">bcrds_mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">bcrds</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bcrds</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span>
-            <span class="n">distance_fw</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bcrds_mid</span><span class="p">)))</span>
-            <span class="n">bp_fw_face_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bcrds_mid</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span>
-            <span class="k">for</span> <span class="n">ip</span><span class="p">,</span> <span class="n">bp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bcrds_mid</span><span class="p">):</span>
-                <span class="c1"># find closest fairway support node</span>
-                <span class="n">ifw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(((</span><span class="n">bp</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-                <span class="n">fwp</span> <span class="o">=</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">]</span>
-                <span class="n">dbfw</span> <span class="o">=</span> <span class="p">((</span><span class="n">bp</span> <span class="o">-</span> <span class="n">fwp</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">**</span> <span class="mf">0.5</span>
-                <span class="c1"># If fairway support node is also the closest projected fairway point, then it likely</span>
-                <span class="c1"># that that point is one of the original support points (a corner) of the fairway path</span>
-                <span class="c1"># and located inside a grid cell. The segments before and after that point will then</span>
-                <span class="c1"># both be located inside that same grid cell, so let&#39;s pick the segment before the point.</span>
-                <span class="c1"># If the point happens to coincide with a grid edge and the two segments are located</span>
-                <span class="c1"># in different grid cells, then we could either simply choose one or add complexity to</span>
-                <span class="c1"># average the values of the two grid cells. Let&#39;s go for the simplest approach ...</span>
-                <span class="n">iseg</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">ifw</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">alpha</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-                        <span class="o">*</span> <span class="p">(</span><span class="n">bp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-                        <span class="o">+</span> <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-                        <span class="o">*</span> <span class="p">(</span><span class="n">bp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-                    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
-                        <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-                        <span class="o">+</span> <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-                    <span class="p">)</span>
-                    <span class="k">if</span> <span class="n">alpha</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">fwp1</span> <span class="o">=</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span>
-                            <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
-                        <span class="p">)</span>
-                        <span class="n">d1</span> <span class="o">=</span> <span class="p">((</span><span class="n">bp</span> <span class="o">-</span> <span class="n">fwp1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">**</span> <span class="mf">0.5</span>
-                        <span class="k">if</span> <span class="n">d1</span> <span class="o">&lt;</span> <span class="n">dbfw</span><span class="p">:</span>
-                            <span class="n">fwp</span> <span class="o">=</span> <span class="n">fwp1</span>
-                            <span class="n">dbfw</span> <span class="o">=</span> <span class="n">d1</span>
-                            <span class="c1"># projected point located on segment before, which corresponds to initial choice: iseg = ifw - 1</span>
-                <span class="k">if</span> <span class="n">ifw</span> <span class="o">&lt;</span> <span class="n">nfw</span><span class="p">:</span>
-                    <span class="n">alpha</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-                        <span class="o">*</span> <span class="p">(</span><span class="n">bp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-                        <span class="o">+</span> <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-                        <span class="o">*</span> <span class="p">(</span><span class="n">bp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-                    <span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
-                        <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-                        <span class="o">+</span> <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-                    <span class="p">)</span>
-                    <span class="k">if</span> <span class="n">alpha</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="n">fwp1</span> <span class="o">=</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span>
-                            <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">]</span>
-                        <span class="p">)</span>
-                        <span class="n">d1</span> <span class="o">=</span> <span class="p">((</span><span class="n">bp</span> <span class="o">-</span> <span class="n">fwp1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">**</span> <span class="mf">0.5</span>
-                        <span class="k">if</span> <span class="n">d1</span> <span class="o">&lt;</span> <span class="n">dbfw</span><span class="p">:</span>
-                            <span class="n">fwp</span> <span class="o">=</span> <span class="n">fwp1</span>
-                            <span class="n">dbfw</span> <span class="o">=</span> <span class="n">d1</span>
-                            <span class="n">iseg</span> <span class="o">=</span> <span class="n">ifw</span>
-
-                <span class="n">bp_fw_face_idx</span><span class="p">[</span><span class="n">ib</span><span class="p">][</span><span class="n">ip</span><span class="p">]</span> <span class="o">=</span> <span class="n">ifw_face_idx</span><span class="p">[</span><span class="n">iseg</span><span class="p">]</span>
-                <span class="n">distance_fw</span><span class="p">[</span><span class="n">ib</span><span class="p">][</span><span class="n">ip</span><span class="p">]</span> <span class="o">=</span> <span class="n">dbfw</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
-                <span class="n">write_shp_pnt</span><span class="p">(</span>
-                    <span class="n">bcrds_mid</span><span class="p">,</span>
-                    <span class="p">{</span><span class="s2">&quot;chainage&quot;</span><span class="p">:</span> <span class="n">bank_km_mid</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span> <span class="s2">&quot;iface_fw&quot;</span><span class="p">:</span> <span class="n">bp_fw_face_idx</span><span class="p">[</span><span class="n">ib</span><span class="p">]},</span>
-                    <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
-                    <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;/bank_</span><span class="si">{</span><span class="n">ib</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">_chainage_and_fairway_face_idx.shp&quot;</span><span class="p">,</span>
-                <span class="p">)</span>
+        <span class="n">bp_fw_face_idx</span><span class="p">,</span> <span class="n">distance_fw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_bank_to_fairway</span><span class="p">(</span><span class="n">bank_line_coords</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span><span class="n">ifw_numpy</span><span class="p">,</span><span class="n">ifw_face_idx</span><span class="p">)</span>
 
         <span class="c1"># water level at fairway</span>
         <span class="n">zfw_ini</span> <span class="o">=</span> <span class="p">[]</span>
@@ -2849,60 +2972,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="n">ii</span> <span class="o">=</span> <span class="n">bp_fw_face_idx</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span>
             <span class="n">zfw_ini</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sim</span><span class="p">[</span><span class="s2">&quot;zw_face&quot;</span><span class="p">][</span><span class="n">ii</span><span class="p">])</span>
 
-        <span class="c1"># wave reduction s0, s1</span>
-        <span class="n">dfw0</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
-            <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;Wave0&quot;</span><span class="p">,</span>
-            <span class="n">bank_km_mid</span><span class="p">,</span>
-            <span class="n">default</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
-            <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">onefile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">ship_data</span><span class="p">,</span> <span class="n">dfw0</span><span class="p">,</span> <span class="n">dfw1</span><span class="p">,</span> <span class="n">zss</span><span class="p">,</span> <span class="n">tauc</span><span class="p">,</span> <span class="n">banktype</span><span class="p">,</span> <span class="n">taucls_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_initial_conditions</span><span class="p">(</span>
+            <span class="n">config_file</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">zfw_ini</span>
         <span class="p">)</span>
-        <span class="n">dfw1</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
-            <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;Wave1&quot;</span><span class="p">,</span>
-            <span class="n">bank_km_mid</span><span class="p">,</span>
-            <span class="n">default</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
-            <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">onefile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
-
-        <span class="c1"># save 1_banklines</span>
-        <span class="c1"># read vship, nship, nwave, draught (tship), shiptype ... independent of level number</span>
-        <span class="n">ship_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ship_parameters</span><span class="p">(</span><span class="n">bank_km_mid</span><span class="p">)</span>
-
-        <span class="c1"># read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)</span>
-        <span class="n">classes</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;Classes&quot;</span><span class="p">)</span>
-        <span class="n">taucls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1e20</span><span class="p">,</span> <span class="mi">95</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">])</span>
-        <span class="n">taucls_str</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;protected&quot;</span><span class="p">,</span> <span class="s2">&quot;vegetation&quot;</span><span class="p">,</span> <span class="s2">&quot;good clay&quot;</span><span class="p">,</span> <span class="s2">&quot;moderate/bad clay&quot;</span><span class="p">,</span> <span class="s2">&quot;sand&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">classes</span><span class="p">:</span>
-            <span class="n">banktype</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
-                <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;BankType&quot;</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s2">&quot;.btp&quot;</span>
-            <span class="p">)</span>
-            <span class="n">tauc</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">banktype</span><span class="p">)):</span>
-                <span class="n">tauc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">taucls</span><span class="p">[</span><span class="n">banktype</span><span class="p">[</span><span class="n">ib</span><span class="p">]])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">tauc</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
-                <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;BankType&quot;</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s2">&quot;.btp&quot;</span>
-            <span class="p">)</span>
-            <span class="n">thr</span> <span class="o">=</span> <span class="p">(</span><span class="n">taucls</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">taucls</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span>
-            <span class="n">banktype</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">thr</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tauc</span><span class="p">)):</span>
-                <span class="n">bt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">tauc</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">thr_i</span> <span class="ow">in</span> <span class="n">thr</span><span class="p">:</span>
-                    <span class="n">bt</span><span class="p">[</span><span class="n">tauc</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">thr_i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">banktype</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">bt</span>
-
-        <span class="c1"># read bank protection level zss</span>
-        <span class="n">zss_miss</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1000</span>
-        <span class="n">zss</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
-            <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;ProtectionLevel&quot;</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">zss_miss</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s2">&quot;.bpl&quot;</span>
-        <span class="p">)</span>
-        <span class="c1"># if zss undefined, set zss equal to zfw_ini - 1</span>
-        <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">zss</span><span class="p">)):</span>
-            <span class="n">mask</span> <span class="o">=</span> <span class="n">zss</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">==</span> <span class="n">zss_miss</span>
-            <span class="n">zss</span><span class="p">[</span><span class="n">ib</span><span class="p">][</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">zfw_ini</span><span class="p">[</span><span class="n">ib</span><span class="p">][</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
 
         <span class="c1"># initialize arrays for erosion loop over all discharges</span>
         <span class="n">velocity</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -3574,199 +3646,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 224</span>
-<span class="normal"> 225</span>
-<span class="normal"> 226</span>
-<span class="normal"> 227</span>
-<span class="normal"> 228</span>
-<span class="normal"> 229</span>
-<span class="normal"> 230</span>
-<span class="normal"> 231</span>
-<span class="normal"> 232</span>
-<span class="normal"> 233</span>
-<span class="normal"> 234</span>
-<span class="normal"> 235</span>
-<span class="normal"> 236</span>
-<span class="normal"> 237</span>
-<span class="normal"> 238</span>
-<span class="normal"> 239</span>
-<span class="normal"> 240</span>
-<span class="normal"> 241</span>
-<span class="normal"> 242</span>
-<span class="normal"> 243</span>
-<span class="normal"> 244</span>
-<span class="normal"> 245</span>
-<span class="normal"> 246</span>
-<span class="normal"> 247</span>
-<span class="normal"> 248</span>
-<span class="normal"> 249</span>
-<span class="normal"> 250</span>
-<span class="normal"> 251</span>
-<span class="normal"> 252</span>
-<span class="normal"> 253</span>
-<span class="normal"> 254</span>
-<span class="normal"> 255</span>
-<span class="normal"> 256</span>
-<span class="normal"> 257</span>
-<span class="normal"> 258</span>
-<span class="normal"> 259</span>
-<span class="normal"> 260</span>
-<span class="normal"> 261</span>
-<span class="normal"> 262</span>
-<span class="normal"> 263</span>
-<span class="normal"> 264</span>
-<span class="normal"> 265</span>
-<span class="normal"> 266</span>
-<span class="normal"> 267</span>
-<span class="normal"> 268</span>
-<span class="normal"> 269</span>
-<span class="normal"> 270</span>
-<span class="normal"> 271</span>
-<span class="normal"> 272</span>
-<span class="normal"> 273</span>
-<span class="normal"> 274</span>
-<span class="normal"> 275</span>
-<span class="normal"> 276</span>
-<span class="normal"> 277</span>
-<span class="normal"> 278</span>
-<span class="normal"> 279</span>
-<span class="normal"> 280</span>
-<span class="normal"> 281</span>
-<span class="normal"> 282</span>
-<span class="normal"> 283</span>
-<span class="normal"> 284</span>
-<span class="normal"> 285</span>
-<span class="normal"> 286</span>
-<span class="normal"> 287</span>
-<span class="normal"> 288</span>
-<span class="normal"> 289</span>
-<span class="normal"> 290</span>
-<span class="normal"> 291</span>
-<span class="normal"> 292</span>
-<span class="normal"> 293</span>
-<span class="normal"> 294</span>
-<span class="normal"> 295</span>
-<span class="normal"> 296</span>
-<span class="normal"> 297</span>
-<span class="normal"> 298</span>
-<span class="normal"> 299</span>
-<span class="normal"> 300</span>
-<span class="normal"> 301</span>
-<span class="normal"> 302</span>
-<span class="normal"> 303</span>
-<span class="normal"> 304</span>
-<span class="normal"> 305</span>
-<span class="normal"> 306</span>
-<span class="normal"> 307</span>
-<span class="normal"> 308</span>
-<span class="normal"> 309</span>
-<span class="normal"> 310</span>
-<span class="normal"> 311</span>
-<span class="normal"> 312</span>
-<span class="normal"> 313</span>
-<span class="normal"> 314</span>
-<span class="normal"> 315</span>
-<span class="normal"> 316</span>
-<span class="normal"> 317</span>
-<span class="normal"> 318</span>
-<span class="normal"> 319</span>
-<span class="normal"> 320</span>
-<span class="normal"> 321</span>
-<span class="normal"> 322</span>
-<span class="normal"> 323</span>
-<span class="normal"> 324</span>
-<span class="normal"> 325</span>
-<span class="normal"> 326</span>
-<span class="normal"> 327</span>
-<span class="normal"> 328</span>
-<span class="normal"> 329</span>
-<span class="normal"> 330</span>
-<span class="normal"> 331</span>
-<span class="normal"> 332</span>
-<span class="normal"> 333</span>
-<span class="normal"> 334</span>
-<span class="normal"> 335</span>
-<span class="normal"> 336</span>
-<span class="normal"> 337</span>
-<span class="normal"> 338</span>
-<span class="normal"> 339</span>
-<span class="normal"> 340</span>
-<span class="normal"> 341</span>
-<span class="normal"> 342</span>
-<span class="normal"> 343</span>
-<span class="normal"> 344</span>
-<span class="normal"> 345</span>
-<span class="normal"> 346</span>
-<span class="normal"> 347</span>
-<span class="normal"> 348</span>
-<span class="normal"> 349</span>
-<span class="normal"> 350</span>
-<span class="normal"> 351</span>
-<span class="normal"> 352</span>
-<span class="normal"> 353</span>
-<span class="normal"> 354</span>
-<span class="normal"> 355</span>
-<span class="normal"> 356</span>
-<span class="normal"> 357</span>
-<span class="normal"> 358</span>
-<span class="normal"> 359</span>
-<span class="normal"> 360</span>
-<span class="normal"> 361</span>
-<span class="normal"> 362</span>
-<span class="normal"> 363</span>
-<span class="normal"> 364</span>
-<span class="normal"> 365</span>
-<span class="normal"> 366</span>
-<span class="normal"> 367</span>
-<span class="normal"> 368</span>
-<span class="normal"> 369</span>
-<span class="normal"> 370</span>
-<span class="normal"> 371</span>
-<span class="normal"> 372</span>
-<span class="normal"> 373</span>
-<span class="normal"> 374</span>
-<span class="normal"> 375</span>
-<span class="normal"> 376</span>
-<span class="normal"> 377</span>
-<span class="normal"> 378</span>
-<span class="normal"> 379</span>
-<span class="normal"> 380</span>
-<span class="normal"> 381</span>
-<span class="normal"> 382</span>
-<span class="normal"> 383</span>
-<span class="normal"> 384</span>
-<span class="normal"> 385</span>
-<span class="normal"> 386</span>
-<span class="normal"> 387</span>
-<span class="normal"> 388</span>
-<span class="normal"> 389</span>
-<span class="normal"> 390</span>
-<span class="normal"> 391</span>
-<span class="normal"> 392</span>
-<span class="normal"> 393</span>
-<span class="normal"> 394</span>
-<span class="normal"> 395</span>
-<span class="normal"> 396</span>
-<span class="normal"> 397</span>
-<span class="normal"> 398</span>
-<span class="normal"> 399</span>
-<span class="normal"> 400</span>
-<span class="normal"> 401</span>
-<span class="normal"> 402</span>
-<span class="normal"> 403</span>
-<span class="normal"> 404</span>
-<span class="normal"> 405</span>
-<span class="normal"> 406</span>
-<span class="normal"> 407</span>
-<span class="normal"> 408</span>
-<span class="normal"> 409</span>
-<span class="normal"> 410</span>
-<span class="normal"> 411</span>
-<span class="normal"> 412</span>
-<span class="normal"> 413</span>
-<span class="normal"> 414</span>
-<span class="normal"> 415</span>
-<span class="normal"> 416</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 416</span>
 <span class="normal"> 417</span>
 <span class="normal"> 418</span>
 <span class="normal"> 419</span>
@@ -4421,7 +4301,43 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">1068</span>
 <span class="normal">1069</span>
 <span class="normal">1070</span>
-<span class="normal">1071</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">bankerosion_core</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1071</span>
+<span class="normal">1072</span>
+<span class="normal">1073</span>
+<span class="normal">1074</span>
+<span class="normal">1075</span>
+<span class="normal">1076</span>
+<span class="normal">1077</span>
+<span class="normal">1078</span>
+<span class="normal">1079</span>
+<span class="normal">1080</span>
+<span class="normal">1081</span>
+<span class="normal">1082</span>
+<span class="normal">1083</span>
+<span class="normal">1084</span>
+<span class="normal">1085</span>
+<span class="normal">1086</span>
+<span class="normal">1087</span>
+<span class="normal">1088</span>
+<span class="normal">1089</span>
+<span class="normal">1090</span>
+<span class="normal">1091</span>
+<span class="normal">1092</span>
+<span class="normal">1093</span>
+<span class="normal">1094</span>
+<span class="normal">1095</span>
+<span class="normal">1096</span>
+<span class="normal">1097</span>
+<span class="normal">1098</span>
+<span class="normal">1099</span>
+<span class="normal">1100</span>
+<span class="normal">1101</span>
+<span class="normal">1102</span>
+<span class="normal">1103</span>
+<span class="normal">1104</span>
+<span class="normal">1105</span>
+<span class="normal">1106</span>
+<span class="normal">1107</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">bankerosion_core</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the bank erosion analysis for a specified configuration.&quot;&quot;&quot;</span>
     <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- start analysis --&quot;</span><span class="p">)</span>
     <span class="n">log_text</span><span class="p">(</span>
@@ -4478,116 +4394,11 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
     <span class="n">km_mid</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># get mid points</span>
     <span class="n">xykm_bin_numpy</span> <span class="o">=</span> <span class="n">xykm_bin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">masked_profile_arr</span><span class="p">,</span> <span class="n">km_bin</span><span class="p">)</span>
 
-    <span class="c1"># read fairway file</span>
-    <span class="n">fairway_file</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;Fairway&quot;</span><span class="p">)</span>
-    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_fairway&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">fairway_file</span><span class="p">})</span>
-    <span class="n">fairway</span> <span class="o">=</span> <span class="n">read_xyc</span><span class="p">(</span><span class="n">fairway_file</span><span class="p">)</span>
-
-    <span class="c1"># map km to fairway points, further using axis</span>
-    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_fairway&quot;</span><span class="p">)</span>
-    <span class="n">fairway_numpy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">river_axis</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
-    <span class="n">fairway_km</span> <span class="o">=</span> <span class="n">project_km_on_line</span><span class="p">(</span><span class="n">fairway_numpy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">masked_profile_arr</span><span class="p">)</span>
-    <span class="n">write_shp_pnt</span><span class="p">(</span>
-        <span class="n">fairway_numpy</span><span class="p">,</span>
-        <span class="p">{</span><span class="s2">&quot;chainage&quot;</span><span class="p">:</span> <span class="n">fairway_km</span><span class="p">},</span>
-        <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s2">&quot;fairway_chainage.shp&quot;</span><span class="p">,</span>
+    <span class="n">ifw_face_idx</span><span class="p">,</span> <span class="n">ifw_numpy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fairway</span><span class="p">(</span><span class="n">river_axis</span><span class="p">,</span> <span class="n">stations_coords</span><span class="p">,</span> <span class="n">x_face_coords</span><span class="p">,</span> <span class="n">y_face_coords</span><span class="p">,</span>
+        <span class="n">x_edge_coords</span><span class="p">,</span> <span class="n">y_edge_coords</span><span class="p">,</span> <span class="n">fe</span><span class="p">,</span> <span class="n">edge_face</span><span class="p">,</span> <span class="n">face_node</span><span class="p">,</span> <span class="n">edge_node</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">boundary_edge_nrs</span>
     <span class="p">)</span>
 
-    <span class="c1"># clip fairway to reach of interest</span>
-    <span class="n">i1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(((</span><span class="n">stations_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">fairway_numpy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-    <span class="n">i2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(((</span><span class="n">stations_coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">fairway_numpy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">i1</span> <span class="o">&lt;</span> <span class="n">i2</span><span class="p">:</span>
-        <span class="n">fairway_km</span> <span class="o">=</span> <span class="n">fairway_km</span><span class="p">[</span><span class="n">i1</span> <span class="p">:</span> <span class="n">i2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="n">fairway_numpy</span> <span class="o">=</span> <span class="n">fairway_numpy</span><span class="p">[</span><span class="n">i1</span> <span class="p">:</span> <span class="n">i2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># reverse fairway</span>
-        <span class="n">fairway_km</span> <span class="o">=</span> <span class="n">fairway_km</span><span class="p">[</span><span class="n">i2</span> <span class="p">:</span> <span class="n">i1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">fairway_numpy</span> <span class="o">=</span> <span class="n">fairway_numpy</span><span class="p">[</span><span class="n">i2</span> <span class="p">:</span> <span class="n">i1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">fairway</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">(</span><span class="n">fairway_numpy</span><span class="p">)</span>
-
-    <span class="c1"># intersect fairway and mesh</span>
-    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;intersect_fairway_mesh&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">fairway_numpy</span><span class="p">)})</span>
-    <span class="n">ifw_numpy</span><span class="p">,</span> <span class="n">ifw_face_idx</span> <span class="o">=</span> <span class="n">intersect_line_mesh</span><span class="p">(</span>
-        <span class="n">fairway_numpy</span><span class="p">,</span> <span class="n">x_face_coords</span><span class="p">,</span> <span class="n">y_face_coords</span><span class="p">,</span> <span class="n">x_edge_coords</span><span class="p">,</span> <span class="n">y_edge_coords</span><span class="p">,</span> <span class="n">fe</span><span class="p">,</span> <span class="n">edge_face</span><span class="p">,</span> <span class="n">face_node</span><span class="p">,</span> <span class="n">edge_node</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">boundary_edge_nrs</span>
-    <span class="p">)</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
-        <span class="n">write_shp_pnt</span><span class="p">(</span>
-            <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
-            <span class="p">{</span><span class="s2">&quot;iface&quot;</span><span class="p">:</span> <span class="n">ifw_face_idx</span><span class="p">},</span>
-            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s2">&quot;fairway_face_indices.shp&quot;</span><span class="p">,</span>
-        <span class="p">)</span>
-
-    <span class="c1"># distance fairway-bankline (bankfairway)</span>
-    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_distance_fairway&quot;</span><span class="p">)</span>
-    <span class="n">distance_fw</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">bp_fw_face_idx</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">nfw</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ifw_face_idx</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">ib</span><span class="p">,</span> <span class="n">bcrds</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bank_line_coords</span><span class="p">):</span>
-        <span class="n">bcrds_mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">bcrds</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bcrds</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span>
-        <span class="n">distance_fw</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bcrds_mid</span><span class="p">)))</span>
-        <span class="n">bp_fw_face_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bcrds_mid</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span>
-        <span class="k">for</span> <span class="n">ip</span><span class="p">,</span> <span class="n">bp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bcrds_mid</span><span class="p">):</span>
-            <span class="c1"># find closest fairway support node</span>
-            <span class="n">ifw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(((</span><span class="n">bp</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-            <span class="n">fwp</span> <span class="o">=</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">]</span>
-            <span class="n">dbfw</span> <span class="o">=</span> <span class="p">((</span><span class="n">bp</span> <span class="o">-</span> <span class="n">fwp</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">**</span> <span class="mf">0.5</span>
-            <span class="c1"># If fairway support node is also the closest projected fairway point, then it likely</span>
-            <span class="c1"># that that point is one of the original support points (a corner) of the fairway path</span>
-            <span class="c1"># and located inside a grid cell. The segments before and after that point will then</span>
-            <span class="c1"># both be located inside that same grid cell, so let&#39;s pick the segment before the point.</span>
-            <span class="c1"># If the point happens to coincide with a grid edge and the two segments are located</span>
-            <span class="c1"># in different grid cells, then we could either simply choose one or add complexity to</span>
-            <span class="c1"># average the values of the two grid cells. Let&#39;s go for the simplest approach ...</span>
-            <span class="n">iseg</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">ifw</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">alpha</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-                    <span class="o">*</span> <span class="p">(</span><span class="n">bp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-                    <span class="o">+</span> <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-                    <span class="o">*</span> <span class="p">(</span><span class="n">bp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-                <span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
-                    <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-                    <span class="o">+</span> <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-                <span class="p">)</span>
-                <span class="k">if</span> <span class="n">alpha</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">fwp1</span> <span class="o">=</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span>
-                        <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
-                    <span class="p">)</span>
-                    <span class="n">d1</span> <span class="o">=</span> <span class="p">((</span><span class="n">bp</span> <span class="o">-</span> <span class="n">fwp1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">**</span> <span class="mf">0.5</span>
-                    <span class="k">if</span> <span class="n">d1</span> <span class="o">&lt;</span> <span class="n">dbfw</span><span class="p">:</span>
-                        <span class="n">fwp</span> <span class="o">=</span> <span class="n">fwp1</span>
-                        <span class="n">dbfw</span> <span class="o">=</span> <span class="n">d1</span>
-                        <span class="c1"># projected point located on segment before, which corresponds to initial choice: iseg = ifw - 1</span>
-            <span class="k">if</span> <span class="n">ifw</span> <span class="o">&lt;</span> <span class="n">nfw</span><span class="p">:</span>
-                <span class="n">alpha</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-                    <span class="o">*</span> <span class="p">(</span><span class="n">bp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
-                    <span class="o">+</span> <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-                    <span class="o">*</span> <span class="p">(</span><span class="n">bp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
-                <span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
-                    <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-                    <span class="o">+</span> <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-                <span class="p">)</span>
-                <span class="k">if</span> <span class="n">alpha</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">alpha</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">fwp1</span> <span class="o">=</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">]</span> <span class="o">+</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span>
-                        <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="n">ifw</span><span class="p">]</span>
-                    <span class="p">)</span>
-                    <span class="n">d1</span> <span class="o">=</span> <span class="p">((</span><span class="n">bp</span> <span class="o">-</span> <span class="n">fwp1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">**</span> <span class="mf">0.5</span>
-                    <span class="k">if</span> <span class="n">d1</span> <span class="o">&lt;</span> <span class="n">dbfw</span><span class="p">:</span>
-                        <span class="n">fwp</span> <span class="o">=</span> <span class="n">fwp1</span>
-                        <span class="n">dbfw</span> <span class="o">=</span> <span class="n">d1</span>
-                        <span class="n">iseg</span> <span class="o">=</span> <span class="n">ifw</span>
-
-            <span class="n">bp_fw_face_idx</span><span class="p">[</span><span class="n">ib</span><span class="p">][</span><span class="n">ip</span><span class="p">]</span> <span class="o">=</span> <span class="n">ifw_face_idx</span><span class="p">[</span><span class="n">iseg</span><span class="p">]</span>
-            <span class="n">distance_fw</span><span class="p">[</span><span class="n">ib</span><span class="p">][</span><span class="n">ip</span><span class="p">]</span> <span class="o">=</span> <span class="n">dbfw</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
-            <span class="n">write_shp_pnt</span><span class="p">(</span>
-                <span class="n">bcrds_mid</span><span class="p">,</span>
-                <span class="p">{</span><span class="s2">&quot;chainage&quot;</span><span class="p">:</span> <span class="n">bank_km_mid</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span> <span class="s2">&quot;iface_fw&quot;</span><span class="p">:</span> <span class="n">bp_fw_face_idx</span><span class="p">[</span><span class="n">ib</span><span class="p">]},</span>
-                <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
-                <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;/bank_</span><span class="si">{</span><span class="n">ib</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">_chainage_and_fairway_face_idx.shp&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
+    <span class="n">bp_fw_face_idx</span><span class="p">,</span> <span class="n">distance_fw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_bank_to_fairway</span><span class="p">(</span><span class="n">bank_line_coords</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span><span class="n">ifw_numpy</span><span class="p">,</span><span class="n">ifw_face_idx</span><span class="p">)</span>
 
     <span class="c1"># water level at fairway</span>
     <span class="n">zfw_ini</span> <span class="o">=</span> <span class="p">[]</span>
@@ -4595,60 +4406,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">ii</span> <span class="o">=</span> <span class="n">bp_fw_face_idx</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span>
         <span class="n">zfw_ini</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sim</span><span class="p">[</span><span class="s2">&quot;zw_face&quot;</span><span class="p">][</span><span class="n">ii</span><span class="p">])</span>
 
-    <span class="c1"># wave reduction s0, s1</span>
-    <span class="n">dfw0</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
-        <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Wave0&quot;</span><span class="p">,</span>
-        <span class="n">bank_km_mid</span><span class="p">,</span>
-        <span class="n">default</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
-        <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">onefile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">ship_data</span><span class="p">,</span> <span class="n">dfw0</span><span class="p">,</span> <span class="n">dfw1</span><span class="p">,</span> <span class="n">zss</span><span class="p">,</span> <span class="n">tauc</span><span class="p">,</span> <span class="n">banktype</span><span class="p">,</span> <span class="n">taucls_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_initial_conditions</span><span class="p">(</span>
+        <span class="n">config_file</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">zfw_ini</span>
     <span class="p">)</span>
-    <span class="n">dfw1</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
-        <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;Wave1&quot;</span><span class="p">,</span>
-        <span class="n">bank_km_mid</span><span class="p">,</span>
-        <span class="n">default</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
-        <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">onefile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="c1"># save 1_banklines</span>
-    <span class="c1"># read vship, nship, nwave, draught (tship), shiptype ... independent of level number</span>
-    <span class="n">ship_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ship_parameters</span><span class="p">(</span><span class="n">bank_km_mid</span><span class="p">)</span>
-
-    <span class="c1"># read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)</span>
-    <span class="n">classes</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;Classes&quot;</span><span class="p">)</span>
-    <span class="n">taucls</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1e20</span><span class="p">,</span> <span class="mi">95</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">])</span>
-    <span class="n">taucls_str</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;protected&quot;</span><span class="p">,</span> <span class="s2">&quot;vegetation&quot;</span><span class="p">,</span> <span class="s2">&quot;good clay&quot;</span><span class="p">,</span> <span class="s2">&quot;moderate/bad clay&quot;</span><span class="p">,</span> <span class="s2">&quot;sand&quot;</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">classes</span><span class="p">:</span>
-        <span class="n">banktype</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
-            <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;BankType&quot;</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s2">&quot;.btp&quot;</span>
-        <span class="p">)</span>
-        <span class="n">tauc</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">banktype</span><span class="p">)):</span>
-            <span class="n">tauc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">taucls</span><span class="p">[</span><span class="n">banktype</span><span class="p">[</span><span class="n">ib</span><span class="p">]])</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">tauc</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
-            <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;BankType&quot;</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s2">&quot;.btp&quot;</span>
-        <span class="p">)</span>
-        <span class="n">thr</span> <span class="o">=</span> <span class="p">(</span><span class="n">taucls</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">taucls</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span>
-        <span class="n">banktype</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">thr</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tauc</span><span class="p">)):</span>
-            <span class="n">bt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">tauc</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">thr_i</span> <span class="ow">in</span> <span class="n">thr</span><span class="p">:</span>
-                <span class="n">bt</span><span class="p">[</span><span class="n">tauc</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">thr_i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">banktype</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">bt</span>
-
-    <span class="c1"># read bank protection level zss</span>
-    <span class="n">zss_miss</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1000</span>
-    <span class="n">zss</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
-        <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;ProtectionLevel&quot;</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">zss_miss</span><span class="p">,</span> <span class="n">ext</span><span class="o">=</span><span class="s2">&quot;.bpl&quot;</span>
-    <span class="p">)</span>
-    <span class="c1"># if zss undefined, set zss equal to zfw_ini - 1</span>
-    <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">zss</span><span class="p">)):</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">zss</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">==</span> <span class="n">zss_miss</span>
-        <span class="n">zss</span><span class="p">[</span><span class="n">ib</span><span class="p">][</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">zfw_ini</span><span class="p">[</span><span class="n">ib</span><span class="p">][</span><span class="n">mask</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
 
     <span class="c1"># initialize arrays for erosion loop over all discharges</span>
     <span class="n">velocity</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
