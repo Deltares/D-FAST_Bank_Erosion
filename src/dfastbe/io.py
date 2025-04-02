@@ -156,20 +156,33 @@ class ConfigFile:
                 config.read_file(configfile)
         except Exception as e:
             print(f"Error during reading the config file: {e}")
-            config = configparser.ConfigParser()
-            config["General"] = {}
-            all_lines = open(path, "r").read().splitlines()
-            for line in all_lines:
-                perc = line.find("%")
-                if perc >= 0:
-                    line = line[:perc]
-                data = line.split()
-                if len(data) >= 3:
-                    config["General"][data[0]] = data[2]
+            config = cls.config_file_callback_parser(path)
 
         # if version != "1.0":
         config = cls._upgrade(config)
         return cls(config, path=path)
+
+    @staticmethod
+    def config_file_callback_parser(path: str) -> configparser.ConfigParser:
+        """Parse a configuration file as fallback to the read method.
+
+        Args:
+            path (str): Path to the configuration file.
+
+        Returns:
+            configparser.ConfigParser: Parsed configuration file.
+        """
+        config = configparser.ConfigParser()
+        config["General"] = {}
+        all_lines = open(path, "r").read().splitlines()
+        for line in all_lines:
+            perc = line.find("%")
+            if perc >= 0:
+                line = line[:perc]
+            data = line.split()
+            if len(data) >= 3:
+                config["General"][data[0]] = data[2]
+        return config
 
     @staticmethod
     def _upgrade(config: configparser.ConfigParser) -> configparser.ConfigParser:
@@ -286,26 +299,22 @@ class ConfigFile:
 
             ```
         """
-        config = self.config
-        sections = config.sections()
-        ml = 0
-        for s in sections:
-            options = config.options(s)
-            if len(options) > 0:
-                ml = max(ml, max([len(x) for x in options]))
+        sections = self.config.sections()
+        max_length = 0
+        for section in sections:
+            options = self.config.options(section)
+            max_length = max(max_length, *[len(option) for option in options])
 
-        OPTIONLINE = "  {{:{}s}} = {{}}\n".format(ml)
         with open(filename, "w") as configfile:
-            first = True
-            for s in sections:
-                if first:
-                    first = False
-                else:
+            for index, section in enumerate(sections):
+                if index > 0:
                     configfile.write("\n")
-                configfile.write("[{}]\n".format(s))
-                options = config.options(s)
-                for o in options:
-                    configfile.write(OPTIONLINE.format(o, config[s][o]))
+                configfile.write(f"[{section}]\n")
+
+                for option in self.config.options(section):
+                    configfile.write(
+                        f"  {option:<{max_length}} = {self.config[section][option]}\n"
+                    )
 
     def adjust_filenames(self) -> str:
         """Convert all paths to relative to current working directory.
@@ -375,7 +384,6 @@ class ConfigFile:
         Raises:
             ConfigFileError: If the keyword isn't specified and no default value is given.
 
-
         Returns:
             bool: value of the keyword as boolean.
 
@@ -397,7 +405,7 @@ class ConfigFile:
                     or (str_val == "t")
                     or (str_val == "1")
             )
-        except:
+        except KeyError:
             if default is not None:
                 val = default
             else:
