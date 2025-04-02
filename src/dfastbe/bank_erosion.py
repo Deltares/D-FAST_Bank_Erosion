@@ -36,9 +36,10 @@ import shapely
 import numpy
 import matplotlib.pyplot as plt
 import configparser
+from dfastio.xyc.models import XYCModel
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, read_simulation_data, \
-    read_xyc, write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData
+    write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData
 
 from dfastbe.utils import timed_logger
 from dfastbe.kernel import get_zoom_extends, get_bbox
@@ -224,7 +225,7 @@ def bankerosion_core(
     # read river axis file
     river_axis_file = config_file.get_str("Erosion", "RiverAxis")
     log_text("read_river_axis", dict={"file": river_axis_file})
-    river_axis = read_xyc(river_axis_file)
+    river_axis = XYCModel.read_xyc(river_axis_file)
     river_axis_numpy = numpy.array(river_axis)
     # optional sorting --> see 04_Waal_D3D example
     # check: sum all distances and determine maximum distance ...
@@ -268,7 +269,7 @@ def bankerosion_core(
     # read fairway file
     fairway_file = config_file.get_str("Erosion", "Fairway")
     log_text("read_fairway", dict={"file": fairway_file})
-    fairway = read_xyc(fairway_file)
+    fairway = XYCModel.read_xyc(fairway_file)
 
     # map km to fairway points, further using axis
     log_text("chainage_to_fairway")
