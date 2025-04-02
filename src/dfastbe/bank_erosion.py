@@ -221,6 +221,57 @@ class Erosion:
 
         return river_axis_km, river_axis_numpy, river_axis
 
+    def _prepare_fairway(
+            self, river_axis: LineString, stations_coords: np.ndarray,
+            x_face_coords: np.ndarray, y_face_coords: np.ndarray,
+            x_edge_coords: np.ndarray, y_edge_coords: np.ndarray,
+            fe: np.ndarray, edge_face: np.ndarray,
+            face_node: np.ndarray, edge_node: np.ndarray,
+            nnodes: int, boundary_edge_nrs: np.ndarray
+            # ) -> Tuple[np.ndarray, np.ndarray, List[int], List[int]]
+    ):
+        # read fairway file
+        fairway_file = self.config_file.get_str("Erosion", "Fairway")
+        log_text("read_fairway", data={"file": fairway_file})
+        fairway = read_xyc(fairway_file)
+
+        # map km to fairway points, further using axis
+        log_text("chainage_to_fairway")
+        fairway_numpy = np.array(river_axis.coords)
+        fairway_km = project_km_on_line(fairway_numpy, self.river_data.masked_profile_arr)
+        write_shp_pnt(
+            fairway_numpy,
+            {"chainage": fairway_km},
+            str(self.output_dir) + os.sep + "fairway_chainage.shp",
+            )
+
+        # clip fairway to reach of interest
+        i1 = np.argmin(((stations_coords[0] - fairway_numpy) ** 2).sum(axis=1))
+        i2 = np.argmin(((stations_coords[-1] - fairway_numpy) ** 2).sum(axis=1))
+        if i1 < i2:
+            fairway_km = fairway_km[i1 : i2 + 1]
+            fairway_numpy = fairway_numpy[i1 : i2 + 1]
+        else:
+            # reverse fairway
+            fairway_km = fairway_km[i2 : i1 + 1][::-1]
+            fairway_numpy = fairway_numpy[i2 : i1 + 1][::-1]
+        fairway = LineString(fairway_numpy)
+
+        # intersect fairway and mesh
+        log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
+        ifw_numpy, ifw_face_idx = intersect_line_mesh(
+            fairway_numpy, x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, fe, edge_face, face_node, edge_node, nnodes, boundary_edge_nrs
+        )
+        if self.debug:
+            write_shp_pnt(
+                (ifw_numpy[:-1] + ifw_numpy[1:]) / 2,
+                {"iface": ifw_face_idx},
+                str(self.output_dir) + os.sep + "fairway_face_indices.shp",
+                )
+
+        return ifw_face_idx, ifw_numpy
+
+
     def bankerosion_core(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
         timed_logger("-- start analysis --")
@@ -278,44 +329,10 @@ class Erosion:
         km_mid = get_km_bins(km_bin, type=3)  # get mid points
         xykm_bin_numpy = xykm_bin(self.river_data.masked_profile_arr, km_bin)
 
-        # read fairway file
-        fairway_file = config_file.get_str("Erosion", "Fairway")
-        log_text("read_fairway", data={"file": fairway_file})
-        fairway = read_xyc(fairway_file)
 
-        # map km to fairway points, further using axis
-        log_text("chainage_to_fairway")
-        fairway_numpy = np.array(river_axis.coords)
-        fairway_km = project_km_on_line(fairway_numpy, self.river_data.masked_profile_arr)
-        write_shp_pnt(
-            fairway_numpy,
-            {"chainage": fairway_km},
-            str(self.output_dir) + os.sep + "fairway_chainage.shp",
+        ifw_face_idx, ifw_numpy = self._prepare_fairway(river_axis, stations_coords, x_face_coords, y_face_coords,
+            x_edge_coords, y_edge_coords, fe, edge_face, face_node, edge_node, nnodes, boundary_edge_nrs
         )
-
-        # clip fairway to reach of interest
-        i1 = np.argmin(((stations_coords[0] - fairway_numpy) ** 2).sum(axis=1))
-        i2 = np.argmin(((stations_coords[-1] - fairway_numpy) ** 2).sum(axis=1))
-        if i1 < i2:
-            fairway_km = fairway_km[i1 : i2 + 1]
-            fairway_numpy = fairway_numpy[i1 : i2 + 1]
-        else:
-            # reverse fairway
-            fairway_km = fairway_km[i2 : i1 + 1][::-1]
-            fairway_numpy = fairway_numpy[i2 : i1 + 1][::-1]
-        fairway = LineString(fairway_numpy)
-
-        # intersect fairway and mesh
-        log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
-        ifw_numpy, ifw_face_idx = intersect_line_mesh(
-            fairway_numpy, x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, fe, edge_face, face_node, edge_node, nnodes, boundary_edge_nrs
-        )
-        if self.debug:
-            write_shp_pnt(
-                (ifw_numpy[:-1] + ifw_numpy[1:]) / 2,
-                {"iface": ifw_face_idx},
-                str(self.output_dir) + os.sep + "fairway_face_indices.shp",
-            )
 
         # distance fairway-bankline (bankfairway)
         log_text("bank_distance_fairway")
