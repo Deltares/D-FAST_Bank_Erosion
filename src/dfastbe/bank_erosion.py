@@ -272,6 +272,87 @@ class Erosion:
         return ifw_face_idx, ifw_numpy
 
 
+    def _map_bank_to_fairway(
+        self,
+        bank_line_coords: List[np.ndarray],
+        bank_km_mid: List[np.ndarray],
+        ifw_numpy: np.ndarray,
+        ifw_face_idx: np.ndarray,
+    ) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+        # distance fairway-bankline (bankfairway)
+        log_text("bank_distance_fairway")
+        distance_fw = []
+        bp_fw_face_idx = []
+        nfw = len(ifw_face_idx)
+        for ib, bcrds in enumerate(bank_line_coords):
+            bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
+            distance_fw.append(np.zeros(len(bcrds_mid)))
+            bp_fw_face_idx.append(np.zeros(len(bcrds_mid), dtype=np.int64))
+            for ip, bp in enumerate(bcrds_mid):
+                # find closest fairway support node
+                ifw = np.argmin(((bp - ifw_numpy) ** 2).sum(axis=1))
+                fwp = ifw_numpy[ifw]
+                dbfw = ((bp - fwp) ** 2).sum() ** 0.5
+                # If fairway support node is also the closest projected fairway point, then it likely
+                # that that point is one of the original support points (a corner) of the fairway path
+                # and located inside a grid cell. The segments before and after that point will then
+                # both be located inside that same grid cell, so let's pick the segment before the point.
+                # If the point happens to coincide with a grid edge and the two segments are located
+                # in different grid cells, then we could either simply choose one or add complexity to
+                # average the values of the two grid cells. Let's go for the simplest approach ...
+                iseg = max(ifw - 1, 0)
+                if ifw > 0:
+                    alpha = (
+                                    (ifw_numpy[ifw, 0] - ifw_numpy[ifw - 1, 0])
+                                    * (bp[0] - ifw_numpy[ifw - 1, 0])
+                                    + (ifw_numpy[ifw, 1] - ifw_numpy[ifw - 1, 1])
+                                    * (bp[1] - ifw_numpy[ifw - 1, 1])
+                            ) / (
+                                    (ifw_numpy[ifw, 0] - ifw_numpy[ifw - 1, 0]) ** 2
+                                    + (ifw_numpy[ifw, 1] - ifw_numpy[ifw - 1, 1]) ** 2
+                            )
+                    if alpha > 0 and alpha < 1:
+                        fwp1 = ifw_numpy[ifw - 1] + alpha * (
+                                ifw_numpy[ifw] - ifw_numpy[ifw - 1]
+                        )
+                        d1 = ((bp - fwp1) ** 2).sum() ** 0.5
+                        if d1 < dbfw:
+                            fwp = fwp1
+                            dbfw = d1
+                            # projected point located on segment before, which corresponds to initial choice: iseg = ifw - 1
+                if ifw < nfw:
+                    alpha = (
+                                    (ifw_numpy[ifw + 1, 0] - ifw_numpy[ifw, 0])
+                                    * (bp[0] - ifw_numpy[ifw, 0])
+                                    + (ifw_numpy[ifw + 1, 1] - ifw_numpy[ifw, 1])
+                                    * (bp[1] - ifw_numpy[ifw, 1])
+                            ) / (
+                                    (ifw_numpy[ifw + 1, 0] - ifw_numpy[ifw, 0]) ** 2
+                                    + (ifw_numpy[ifw + 1, 1] - ifw_numpy[ifw, 1]) ** 2
+                            )
+                    if alpha > 0 and alpha < 1:
+                        fwp1 = ifw_numpy[ifw] + alpha * (
+                                ifw_numpy[ifw + 1] - ifw_numpy[ifw]
+                        )
+                        d1 = ((bp - fwp1) ** 2).sum() ** 0.5
+                        if d1 < dbfw:
+                            fwp = fwp1
+                            dbfw = d1
+                            iseg = ifw
+
+                bp_fw_face_idx[ib][ip] = ifw_face_idx[iseg]
+                distance_fw[ib][ip] = dbfw
+
+            if self.debug:
+                write_shp_pnt(
+                    bcrds_mid,
+                    {"chainage": bank_km_mid[ib], "iface_fw": bp_fw_face_idx[ib]},
+                    str(self.output_dir)
+                    + f"/bank_{ib + 1}_chainage_and_fairway_face_idx.shp",
+                    )
+
+        return bp_fw_face_idx, distance_fw
+
     def bankerosion_core(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
         timed_logger("-- start analysis --")
@@ -329,83 +410,11 @@ class Erosion:
         km_mid = get_km_bins(km_bin, type=3)  # get mid points
         xykm_bin_numpy = xykm_bin(self.river_data.masked_profile_arr, km_bin)
 
-
         ifw_face_idx, ifw_numpy = self._prepare_fairway(river_axis, stations_coords, x_face_coords, y_face_coords,
             x_edge_coords, y_edge_coords, fe, edge_face, face_node, edge_node, nnodes, boundary_edge_nrs
         )
 
-        # distance fairway-bankline (bankfairway)
-        log_text("bank_distance_fairway")
-        distance_fw = []
-        bp_fw_face_idx = []
-        nfw = len(ifw_face_idx)
-        for ib, bcrds in enumerate(bank_line_coords):
-            bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
-            distance_fw.append(np.zeros(len(bcrds_mid)))
-            bp_fw_face_idx.append(np.zeros(len(bcrds_mid), dtype=np.int64))
-            for ip, bp in enumerate(bcrds_mid):
-                # find closest fairway support node
-                ifw = np.argmin(((bp - ifw_numpy) ** 2).sum(axis=1))
-                fwp = ifw_numpy[ifw]
-                dbfw = ((bp - fwp) ** 2).sum() ** 0.5
-                # If fairway support node is also the closest projected fairway point, then it likely
-                # that that point is one of the original support points (a corner) of the fairway path
-                # and located inside a grid cell. The segments before and after that point will then
-                # both be located inside that same grid cell, so let's pick the segment before the point.
-                # If the point happens to coincide with a grid edge and the two segments are located
-                # in different grid cells, then we could either simply choose one or add complexity to
-                # average the values of the two grid cells. Let's go for the simplest approach ...
-                iseg = max(ifw - 1, 0)
-                if ifw > 0:
-                    alpha = (
-                        (ifw_numpy[ifw, 0] - ifw_numpy[ifw - 1, 0])
-                        * (bp[0] - ifw_numpy[ifw - 1, 0])
-                        + (ifw_numpy[ifw, 1] - ifw_numpy[ifw - 1, 1])
-                        * (bp[1] - ifw_numpy[ifw - 1, 1])
-                    ) / (
-                        (ifw_numpy[ifw, 0] - ifw_numpy[ifw - 1, 0]) ** 2
-                        + (ifw_numpy[ifw, 1] - ifw_numpy[ifw - 1, 1]) ** 2
-                    )
-                    if alpha > 0 and alpha < 1:
-                        fwp1 = ifw_numpy[ifw - 1] + alpha * (
-                            ifw_numpy[ifw] - ifw_numpy[ifw - 1]
-                        )
-                        d1 = ((bp - fwp1) ** 2).sum() ** 0.5
-                        if d1 < dbfw:
-                            fwp = fwp1
-                            dbfw = d1
-                            # projected point located on segment before, which corresponds to initial choice: iseg = ifw - 1
-                if ifw < nfw:
-                    alpha = (
-                        (ifw_numpy[ifw + 1, 0] - ifw_numpy[ifw, 0])
-                        * (bp[0] - ifw_numpy[ifw, 0])
-                        + (ifw_numpy[ifw + 1, 1] - ifw_numpy[ifw, 1])
-                        * (bp[1] - ifw_numpy[ifw, 1])
-                    ) / (
-                        (ifw_numpy[ifw + 1, 0] - ifw_numpy[ifw, 0]) ** 2
-                        + (ifw_numpy[ifw + 1, 1] - ifw_numpy[ifw, 1]) ** 2
-                    )
-                    if alpha > 0 and alpha < 1:
-                        fwp1 = ifw_numpy[ifw] + alpha * (
-                            ifw_numpy[ifw + 1] - ifw_numpy[ifw]
-                        )
-                        d1 = ((bp - fwp1) ** 2).sum() ** 0.5
-                        if d1 < dbfw:
-                            fwp = fwp1
-                            dbfw = d1
-                            iseg = ifw
-
-                bp_fw_face_idx[ib][ip] = ifw_face_idx[iseg]
-                distance_fw[ib][ip] = dbfw
-
-            if self.debug:
-                write_shp_pnt(
-                    bcrds_mid,
-                    {"chainage": bank_km_mid[ib], "iface_fw": bp_fw_face_idx[ib]},
-                    str(self.output_dir)
-                    + f"/bank_{ib + 1}_chainage_and_fairway_face_idx.shp",
-                )
-
+        bp_fw_face_idx, distance_fw = self._map_bank_to_fairway(bank_line_coords, bank_km_mid,ifw_numpy,ifw_face_idx)
         # water level at fairway
         zfw_ini = []
         for ib in range(n_banklines):
