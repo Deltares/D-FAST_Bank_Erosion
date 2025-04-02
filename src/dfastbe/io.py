@@ -468,7 +468,7 @@ class ConfigFile:
         simfile : str
             Name of the simulation file (empty string if keywords are not found).
         """
-        sim_file = self.config[group].get("SimFile" + istr, "")
+        sim_file = self.config[group].get(f"SimFile{istr}", "")
         return sim_file
 
     def get_km_bounds(self) -> Tuple[float, float]:
@@ -1131,6 +1131,11 @@ class RiverData:
 
         return search_lines, max_distance
 
+    def read_river_axis(self):
+        river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
+        log_text("read_river_axis", data={"file": river_axis_file})
+        river_axis = read_xyc(river_axis_file)
+        return river_axis
 
 def read_simulation_data(file_name: str, indent: str = "") -> Tuple[SimulationObject, float]:
     """
