@@ -477,6 +477,16 @@ class Test_ConfigFile:
             Path("tests/data") / "tests/data/erosion" / "inputs/rivkm_20m.xyc"
         )
 
+    def test_relative_to(self, path_dict: Dict):
+        """Test converting paths to relative paths."""
+        config = configparser.ConfigParser()
+        config.read_dict(path_dict)
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file.relative_to("tests/data")
+        assert config_file.config["General"]["RiverKM"] == str(
+            Path("erosion") / "inputs/rivkm_20m.xyc"
+        )
+
     def test__upgrade(self):
         """Test upgrading the configuration."""
         config = configparser.ConfigParser()
