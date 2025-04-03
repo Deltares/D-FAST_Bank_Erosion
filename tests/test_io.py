@@ -488,6 +488,12 @@ class Test_ConfigFile:
             0.1, rel=1e-6
         )
 
+    def test_get_sim_file(self, config: configparser.ConfigParser):
+        """Test retrieving a simulation file."""
+        path = Path("tests/data/erosion")
+        config_file = ConfigFile(config, str(path / "test.cfg"))
+        assert config_file.get_sim_file("Detect", "") == str(path / "test_sim.nc")
+
     def test_resolve(self, path_dict: Dict):
         """Test resolving paths in the configuration."""
         config = configparser.ConfigParser()
