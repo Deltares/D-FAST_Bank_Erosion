@@ -470,8 +470,7 @@ class Test_ConfigFile:
         """Test resolving paths in the configuration."""
         config = configparser.ConfigParser()
         config.read_dict(path_dict)
-        path = "tests/data/erosion/test.cfg"
-        config_file = ConfigFile(config, path)
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
         config_file.resolve("tests/data")
         assert config_file.config["General"]["RiverKM"] == str(
             Path("tests/data") / "tests/data/erosion" / "inputs/rivkm_20m.xyc"
@@ -486,6 +485,23 @@ class Test_ConfigFile:
         assert config_file.config["General"]["RiverKM"] == str(
             Path("erosion") / "inputs/rivkm_20m.xyc"
         )
+
+    def test_adjust_filenames(self, path_dict: Dict):
+        """Test adjusting filenames to be relative to the current working directory."""
+        cwd = Path("tests/data/erosion")
+        config = configparser.ConfigParser()
+        config.read_dict(path_dict)
+        config_file = ConfigFile(config, cwd / "test.cfg")
+
+        with patch("os.getcwd", return_value=str(cwd)):
+            rootdir = config_file.adjust_filenames()
+
+        assert rootdir == "."
+        assert config_file.config["General"]["RiverKM"] == str(
+            cwd / "inputs/rivkm_20m.xyc"
+        )
+        assert config_file.config["General"]["BankDir"] == str(cwd / "output/banklines")
+        assert config_file.config["General"]["FigureDir"] == str(cwd / "output/figures")
 
     def test__upgrade(self):
         """Test upgrading the configuration."""
