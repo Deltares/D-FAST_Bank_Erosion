@@ -504,11 +504,28 @@ class Test_ConfigFile:
         assert len(search_lines) == 2
         assert list(search_lines[0].coords) == [(0, 0), (1, 1), (2, 2)]
 
-    def test_get_bank_lines(self, config: configparser.ConfigParser):
-        """Test retrieving bank lines."""
-        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+    def test_get_bank_lines(
+        self, config: configparser.ConfigParser, fs: FakeFilesystem
+    ):
+        config["General"]["BankLine"] = "bankfile"
+        config = ConfigFile(config, "tests/data/erosion/test.cfg")
+
+        fs.create_file(
+            "inputs/bankfile_1.xyc",
+            contents="0.0 0.0\n1.0 1.0\n2.0 2.0\n3.0 3.0\n4.0 4.0\n",
+        )
+
         bank_lines = config.get_bank_lines("inputs")
-        assert isinstance(bank_lines, geopandas.geodataframe.GeoDataFrame)
+
+        assert isinstance(bank_lines, geopandas.GeoDataFrame)
+        assert len(bank_lines) == 1
+        assert list(bank_lines.geometry[0].coords) == [
+            (0.0, 0.0),
+            (1.0, 1.0),
+            (2.0, 2.0),
+            (3.0, 3.0),
+            (4.0, 4.0),
+        ]
 
     @pytest.fixture
     def path_dict(self) -> Dict:
