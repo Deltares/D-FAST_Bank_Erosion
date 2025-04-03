@@ -877,26 +877,10 @@ class Erosion:
             zfw_ini, zss, tauc, dfw0, dfw1, distance_fw, config_file
         )
 
-
         bankline_new_list, bankline_eq_list, vol_tot, vol_eq, dnav, xyline_eq_list = self._postprocess_erosion_results(
             bank_line_coords, dn_tot, linesize, is_right_bank, dn_eq, dv_eq, dv_tot, bank_km_mid, km_bin,
             n_banklines, km_mid, dn_flow_tot, dn_ship_tot,
         )
-        # write bank line files
-        bankline_new_series = GeoSeries(bankline_new_list)
-        bank_lines_new = GeoDataFrame.from_features(bankline_new_series)
-        bank_name = config_file.get_str("General", "BankFile", "bankfile")
-
-        bank_file = self.output_dir / f"{bank_name}_new.shp"
-        log_text("save_banklines", data={"file": str(bank_file)})
-        bank_lines_new.to_file(bank_file)
-
-        bankline_eq_series = GeoSeries(bankline_eq_list)
-        banklines_eq = GeoDataFrame.from_features(bankline_eq_series)
-
-        bank_file = self.output_dir/ f"{bank_name}_eq.shp"
-        log_text("save_banklines", data={"file": str(bank_file)})
-        banklines_eq.to_file(bank_file)
 
         # write eroded volumes per km (total)
         erovol_file = config_file.get_str("Erosion", "EroVol", default="erovol.evo")
@@ -1144,6 +1128,22 @@ class Erosion:
 
         log_text("end_bankerosion")
         timed_logger("-- end analysis --")
+
+    def _write_bankline_shapefiles(self, bankline_new_list, bankline_eq_list):
+        bankline_new_series = GeoSeries(bankline_new_list)
+        bank_lines_new = GeoDataFrame.from_features(bankline_new_series)
+        bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
+
+        bank_file = self.output_dir / f"{bank_name}_new.shp"
+        log_text("save_banklines", data={"file": str(bank_file)})
+        bank_lines_new.to_file(bank_file)
+
+        bankline_eq_series = GeoSeries(bankline_eq_list)
+        banklines_eq = GeoDataFrame.from_features(bankline_eq_series)
+
+        bank_file = self.output_dir/ f"{bank_name}_eq.shp"
+        log_text("save_banklines", data={"file": str(bank_file)})
+        banklines_eq.to_file(bank_file)
 
 
 def _masked_index(x0: np.array, idx: np.ma.masked_array) -> np.ma.masked_array:
