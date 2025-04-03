@@ -585,6 +585,16 @@ class Test_ConfigFile:
         result = config_file.get_bank_search_distances(2)
         assert all(pytest.approx(item, rel=1e-6) == 50.0 for item in result)
 
+    def test_get_xy_km(self):
+        """Test retrieving x and y coordinates."""
+        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+        mock_linestring = LineString([(0, 0, 1), (1, 1, 2), (2, 2, 3)])
+
+        with patch("dfastbe.io.read_xyc", return_value=mock_linestring):
+            xykm = config.get_xy_km()
+
+        assert xykm.wkt == 'LINESTRING Z (0 0 1, 1 1 2, 2 2 3)'
+
     @pytest.fixture
     def path_dict(self) -> Dict:
         """Fixture to create a dictionary for path resolution."""
