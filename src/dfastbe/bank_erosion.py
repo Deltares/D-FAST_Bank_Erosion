@@ -29,7 +29,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from typing import Tuple, List, Dict
 from pathlib import Path
 from dfastbe.kernel import get_km_bins, moving_avg, comp_erosion_eq, comp_erosion, get_km_eroded_volume
-from dfastbe.support import on_right_side, project_km_on_line, xykm_bin, intersect_line_mesh, \
+from dfastbe.support import on_right_side, project_km_on_line, intersect_line_mesh, \
                               move_line
 from dfastbe import plotting as df_plt
 import os
@@ -40,7 +40,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, read_simulation_data, \
-    read_xyc, write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData, SimulationObject
+    write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData, SimulationObject
 
 from dfastbe.utils import timed_logger
 from dfastbe.kernel import get_zoom_extends, get_bbox
@@ -48,6 +48,9 @@ from dfastbe.kernel import get_zoom_extends, get_bbox
 
 RHO = 1000  # density of water [kg/m3]
 g = 9.81  # gravitational acceleration [m/s2]
+
+X_AXIS_TITLE = "x-coordinate [km]"
+Y_AXIS_TITLE = "y-coordinate [km]"
 
 class Erosion:
     def __init__(self, config_file: ConfigFile, gui: bool = False):
@@ -196,7 +199,6 @@ class Erosion:
         alpha = dist2.max() / dist2.sum()
         if alpha > 0.03:
             print("The river axis needs sorting!!")
-            # TODO: do sorting
 
         # map km to axis points, further using axis
         log_text("chainage_to_axis")
@@ -233,7 +235,6 @@ class Erosion:
         # read fairway file
         fairway_file = self.config_file.get_str("Erosion", "Fairway")
         log_text("read_fairway", data={"file": fairway_file})
-        fairway = read_xyc(fairway_file)
 
         # map km to fairway points, further using axis
         log_text("chainage_to_fairway")
@@ -249,13 +250,10 @@ class Erosion:
         i1 = np.argmin(((stations_coords[0] - fairway_numpy) ** 2).sum(axis=1))
         i2 = np.argmin(((stations_coords[-1] - fairway_numpy) ** 2).sum(axis=1))
         if i1 < i2:
-            fairway_km = fairway_km[i1 : i2 + 1]
             fairway_numpy = fairway_numpy[i1 : i2 + 1]
         else:
             # reverse fairway
-            fairway_km = fairway_km[i2 : i1 + 1][::-1]
             fairway_numpy = fairway_numpy[i2 : i1 + 1][::-1]
-        fairway = LineString(fairway_numpy)
 
         # intersect fairway and mesh
         log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
@@ -317,7 +315,6 @@ class Erosion:
                         )
                         d1 = ((bp - fwp1) ** 2).sum() ** 0.5
                         if d1 < dbfw:
-                            fwp = fwp1
                             dbfw = d1
                             # projected point located on segment before, which corresponds to initial choice: iseg = ifw - 1
                 if ifw < nfw:
@@ -414,22 +411,21 @@ class Erosion:
         return ship_data, dfw0, dfw1, zss, tauc, banktype, taucls_str
 
     def _process_discharge_levels(
-            self, ship_data, n_banklines, km_mid, km_bin, Teros: int, bank_km_mid: List[np.ndarray], bank_line_coords:
+            self, ship_data, n_banklines, km_mid, km_bin, t_erosion: int, bank_km_mid: List[np.ndarray], bank_line_coords:
             List[np.ndarray], bank_idx: List[np.ndarray], bp_fw_face_idx: List[np.ndarray], zfw_ini: List[np.ndarray],
             zss: List[np.ndarray], tauc: List[np.ndarray], dfw0: List[np.ndarray], dfw1: List[np.ndarray],
             distance_fw: List[np.ndarray], config_file: ConfigFile
     ):
-
         # initialize arrays for erosion loop over all discharges
         velocity: List[List[np.ndarray]] = []
-        bankheight: List[np.ndarray] = []
-        waterlevel: List[List[np.ndarray]] = []
+        bank_height: List[np.ndarray] = []
+        water_level: List[List[np.ndarray]] = []
         chezy: List[List[np.ndarray]] = []
         dv: List[List[np.ndarray]] = []
-        shipwavemax: List[List[np.ndarray]] = []
-        shipwavemin: List[List[np.ndarray]] = []
+        ship_wave_max: List[List[np.ndarray]] = []
+        ship_wave_min: List[List[np.ndarray]] = []
 
-        linesize: List[np.ndarray] = []
+        line_size: List[np.ndarray] = []
         dn_flow_tot: List[np.ndarray] = []
         dn_ship_tot: List[np.ndarray] = []
         dn_tot: List[np.ndarray] = []
@@ -439,7 +435,7 @@ class Erosion:
         for iq in range(self.num_levels):
             log_text(
                 "discharge_header",
-                data={"i": iq + 1, "p": self.p_discharge[iq], "t": self.p_discharge[iq] * Teros},
+                data={"i": iq + 1, "p": self.p_discharge[iq], "t": self.p_discharge[iq] * t_erosion},
             )
 
             iq_str = "{}".format(iq + 1)
@@ -514,17 +510,17 @@ class Erosion:
             log_text("-", indent="  ")
             log_text("read_simdata", data={"file": self.sim_files[iq]}, indent="  ")
             log_text("-", indent="  ")
-            sim, dh0 = read_simulation_data(self.sim_files[iq], indent="  ")
+            sim, _ = read_simulation_data(self.sim_files[iq], indent="  ")
             log_text("-", indent="  ")
             fnc = sim["facenode"]
 
             log_text("bank_erosion", indent="  ")
             velocity.append([])
-            waterlevel.append([])
+            water_level.append([])
             chezy.append([])
             dv.append([])
-            shipwavemax.append([])
-            shipwavemin.append([])
+            ship_wave_max.append([])
+            ship_wave_min.append([])
 
             dvol_bank = np.zeros((len(km_mid), n_banklines))
             hfw_max = 0
@@ -533,14 +529,14 @@ class Erosion:
                 dx = np.diff(bcrds[:, 0])
                 dy = np.diff(bcrds[:, 1])
                 if iq == 0:
-                    linesize.append(np.sqrt(dx ** 2 + dy ** 2))
+                    line_size.append(np.sqrt(dx ** 2 + dy ** 2))
 
                 bank_index = bank_idx[ib]
                 vel_bank = (
                         np.absolute(
                             sim["ucx_face"][bank_index] * dx + sim["ucy_face"][bank_index] * dy
                         )
-                        / linesize[ib]
+                        / line_size[ib]
                 )
                 if self.vel_dx > 0.0:
                     if ib == 0:
@@ -567,24 +563,23 @@ class Erosion:
                             zb_bank = moving_avg(
                                 bank_km_mid[ib], zb_bank, self.zb_dx
                             )
-                        bankheight.append(zb_bank)
+                        bank_height.append(zb_bank)
                     else:
                         # don't know ... need to check neighbouring cells ...
-                        bankheight.append(None)
-                        pass
+                        bank_height.append(None)
 
                 # get water depth along fairway
                 ii = bp_fw_face_idx[ib]
                 hfw = sim["h_face"][ii]
                 hfw_max = max(hfw_max, hfw.max())
-                waterlevel[iq].append(sim["zw_face"][ii])
+                water_level[iq].append(sim["zw_face"][ii])
                 chez = sim["chz_face"][ii]
                 chezy[iq].append(0 * chez + chez.mean())
 
                 if iq == self.num_levels - 1:  # ref_level:
                     dn_eq1, dv_eq1 = comp_erosion_eq(
-                        bankheight[ib],
-                        linesize[ib],
+                        bank_height[ib],
+                        line_size[ib],
                         zfw_ini[ib],
                         vship[ib],
                         ship_type[ib],
@@ -610,8 +605,8 @@ class Erosion:
                             "y": bcrds_mid[:, 1],
                             "iface_fw": bp_fw_face_idx[ib],  # ii
                             "iface_bank": bank_idx[ib],  # bank_index
-                            "zb": bankheight[ib],
-                            "len": linesize[ib],
+                            "zb": bank_height[ib],
+                            "len": line_size[ib],
                             "zw0": zfw_ini[ib],
                             "vship": vship[ib],
                             "shiptype": ship_type[ib],
@@ -637,9 +632,9 @@ class Erosion:
 
                 dniqib, dviqib, dnship, dnflow, shipwavemax_ib, shipwavemin_ib = comp_erosion(
                     velocity[iq][ib],
-                    bankheight[ib],
-                    linesize[ib],
-                    waterlevel[iq][ib],
+                    bank_height[ib],
+                    line_size[ib],
+                    water_level[iq][ib],
                     zfw_ini[ib],
                     tauc[ib],
                     Nship[ib],
@@ -647,7 +642,7 @@ class Erosion:
                     nwave[ib],
                     ship_type[ib],
                     Tship[ib],
-                    Teros * self.p_discharge[iq],
+                    t_erosion * self.p_discharge[iq],
                     mu_slope[ib],
                     mu_reed[ib],
                     distance_fw[ib],
@@ -659,8 +654,8 @@ class Erosion:
                     RHO,
                     g,
                     )
-                shipwavemax[iq].append(shipwavemax_ib)
-                shipwavemin[iq].append(shipwavemin_ib)
+                ship_wave_max[iq].append(shipwavemax_ib)
+                ship_wave_min[iq].append(shipwavemin_ib)
 
                 if self.debug:
                     bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
@@ -674,9 +669,9 @@ class Erosion:
                         "iface_fw": bp_fw_face_idx[ib],  # ii
                         "iface_bank": bank_idx[ib],  # bank_index
                         "u": velocity[iq][ib],
-                        "zb": bankheight[ib],
-                        "len": linesize[ib],
-                        "zw": waterlevel[iq][ib],
+                        "zb": bank_height[ib],
+                        "len": line_size[ib],
+                        "zw": water_level[iq][ib],
                         "zw0": zfw_ini[ib],
                         "tauc": tauc[ib],
                         "nship": Nship[ib],
@@ -730,8 +725,9 @@ class Erosion:
             write_km_eroded_volumes(
                 km_mid, dvol_bank, str(self.output_dir) + os.sep + erovol_file
             )
-        return dn_tot, linesize, dn_flow_tot, dn_ship_tot, dn_eq, hfw_max, dv, dv_eq, dv_tot, waterlevel, shipwavemax, \
-            shipwavemin, bankheight, velocity, chezy
+
+        return dn_tot, line_size, dn_flow_tot, dn_ship_tot, dn_eq, hfw_max, dv, dv_eq, dv_tot, water_level, ship_wave_max, \
+            ship_wave_min, bank_height, velocity, chezy
 
     def _postprocess_erosion_results(
         self,
@@ -819,7 +815,7 @@ class Erosion:
         log_text("-")
         log_text("read_simdata", data={"file": sim_file})
         log_text("-")
-        sim, dh0 = read_simulation_data(sim_file)
+        sim, _ = read_simulation_data(sim_file)
         log_text("-")
 
         log_text("derive_topology")
@@ -835,7 +831,7 @@ class Erosion:
         stations_coords = self.river_data.masked_profile_arr[:, :2]
 
         # read bank lines
-        banklines = config_file.get_bank_lines(self.bank_dir)
+        banklines = config_file.get_bank_lines(str(self.bank_dir))
         n_banklines = len(banklines)
 
         # map bank lines to mesh cells
@@ -845,14 +841,13 @@ class Erosion:
             sim, face_node, banklines, edge_node, edge_face, fe, nnodes, boundary_edge_nrs, stations_coords
         )
 
-        river_axis_km, river_axis_numpy, river_axis = self._prepare_river_axis(stations_coords)
+        river_axis_km, _, river_axis = self._prepare_river_axis(stations_coords)
 
         # get output interval
         km_step = config_file.get_float("Erosion", "OutputInterval", 1.0)
         # map to output interval
         km_bin = (river_axis_km.min(), river_axis_km.max(), km_step)
-        km_mid = get_km_bins(km_bin, type=3)  # get mid points
-        # xykm_bin_numpy = xykm_bin(self.river_data.masked_profile_arr, km_bin)
+        km_mid = get_km_bins(km_bin, type=3)  # get mid-points
 
         ifw_face_idx, ifw_numpy = self._prepare_fairway(river_axis, stations_coords, x_face_coords, y_face_coords,
             x_edge_coords, y_edge_coords, fe, edge_face, face_node, edge_node, nnodes, boundary_edge_nrs
@@ -911,14 +906,14 @@ class Erosion:
         banklines_eq.to_file(bank_file)
 
     def _write_volume_outputs(self, vol_tot, vol_eq, km_mid):
-        erovol_file = self.config_file.get_str("Erosion", "EroVol", default="erovol.evo")
-        log_text("save_tot_erovol", data={"file": erovol_file})
-        write_km_eroded_volumes(km_mid, vol_tot, str(self.output_dir) + os.sep + erovol_file)
+        erosion_vol_file = self.config_file.get_str("Erosion", "EroVol", default="erovol.evo")
+        log_text("save_tot_erovol", data={"file": erosion_vol_file})
+        write_km_eroded_volumes(km_mid, vol_tot, str(self.output_dir) + os.sep + erosion_vol_file)
 
         # write eroded volumes per km (equilibrium)
-        erovol_file = self.config_file.get_str("Erosion", "EroVolEqui", default="erovol_eq.evo")
-        log_text("save_eq_erovol", data={"file": erovol_file})
-        write_km_eroded_volumes(km_mid, vol_eq, str(self.output_dir) + os.sep + erovol_file)
+        erosion_vol_file = self.config_file.get_str("Erosion", "EroVolEqui", default="erovol_eq.evo")
+        log_text("save_eq_erovol", data={"file": erosion_vol_file})
+        write_km_eroded_volumes(km_mid, vol_eq, str(self.output_dir) + os.sep + erosion_vol_file)
 
     def _generate_plots(
         self,n_banklines, bank_line_coords, river_axis_km, bank_km_mid, banklines, face_node, sim, hfw_max, dn_tot,
@@ -948,8 +943,8 @@ class Erosion:
                 sim["y_node"],
                 sim["h_face"],
                 1.1 * hfw_max,
-                "x-coordinate [km]",
-                "y-coordinate [km]",
+                X_AXIS_TITLE,
+                Y_AXIS_TITLE,
                 "water depth and initial bank lines",
                 "water depth [m]",
                 )
@@ -973,8 +968,8 @@ class Erosion:
                 xy_line_eq_list,
                 x_edge_coords,
                 y_edge_coords,
-                "x-coordinate [km]",
-                "y-coordinate [km]",
+                X_AXIS_TITLE,
+                Y_AXIS_TITLE,
                 "eroded distance and equilibrium bank location",
                 "eroded during {t} year".format(t=t_erosion),
                 "eroded distance [m]",
@@ -1128,8 +1123,8 @@ class Erosion:
                 bank_line_coords,
                 bank_type,
                 taucls_str,
-                "x-coordinate [km]",
-                "y-coordinate [km]",
+                X_AXIS_TITLE,
+                Y_AXIS_TITLE,
                 "bank type",
             )
             if self.plot_flags["save_plot"]:
