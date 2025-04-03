@@ -72,9 +72,9 @@ def parse_arguments() -> Tuple[str, str, str]:
     config_name : str
         Name of the configuration file.
     """
-    parser = argparse.ArgumentParser(description="D-FAST Morphological Impact.")
+    parser = argparse.ArgumentParser(description="D-FAST Morphological Impact. Example: python -m dfastbe --mode BANKEROSION --config settings.cfg")
     parser.add_argument(
-        "--language", default="UK", help="display language 'NL' or 'UK' ('UK' is default)"
+        "--language", default="UK", choices=["NL", "UK"], help="display language 'NL' or 'UK' ('UK' is default)"
     )
     parser.add_argument(
         "--mode", choices=["BANKLINES", "BANKEROSION", "GUI"], default="GUI",
@@ -89,16 +89,7 @@ def parse_arguments() -> Tuple[str, str, str]:
     run_mode = args.mode.upper()
     configfile = args.config
 
-    if language not in ["NL", "UK"]:
-        raise LanguageError(f"Incorrect language {language} specified. Should read 'NL' or 'UK'.")
-
     return language, run_mode, configfile
-
-
-class LanguageError(Exception):
-    """Custom exception for CLI Language errors."""
-
-    pass
 
 
 def main():
