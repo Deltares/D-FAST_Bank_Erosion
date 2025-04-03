@@ -1314,7 +1314,7 @@ def load_program_texts(file_name: Union[str, Path]) -> None:
     for line in all_lines:
         r_line = line.strip()
         if r_line.startswith("[") and r_line.endswith("]"):
-            if not key is None:
+            if key is not None:
                 data[key] = text
             key = r_line[1:-1]
             text = []
