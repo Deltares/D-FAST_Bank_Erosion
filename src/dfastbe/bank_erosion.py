@@ -413,78 +413,12 @@ class Erosion:
 
         return ship_data, dfw0, dfw1, zss, tauc, banktype, taucls_str
 
-    def bankerosion_core(self) -> None:
-        """Run the bank erosion analysis for a specified configuration."""
-        timed_logger("-- start analysis --")
-        log_text(
-            "header_bankerosion",
-            data={
-                "version": __version__,
-                "location": "https://github.com/Deltares/D-FAST_Bank_Erosion",
-            },
-        )
-        log_text("-")
-        config_file = self.config_file
-
-        # get simulation time terosion
-        Teros = config_file.get_int("Erosion", "TErosion", positive=True)
-        log_text("total_time", data={"t": Teros})
-        # read simulation data (get_sim_data)
-        sim_file = config_file.get_sim_file("Erosion", str(self.ref_level + 1))
-        log_text("-")
-        log_text("read_simdata", data={"file": sim_file})
-        log_text("-")
-        sim, dh0 = read_simulation_data(sim_file)
-        log_text("-")
-
-        log_text("derive_topology")
-        face_node = sim["facenode"]
-        nnodes = sim["nnodes"]
-
-        edge_node, edge_face, fe, boundary_edge_nrs = _derive_topology_arrays(face_node, nnodes)
-
-
-        # clip the chainage path to the range of chainages of interest
-        km_bounds = self.river_data.station_bounds
-        log_text("clip_chainage", data={"low": km_bounds[0], "high": km_bounds[1]})
-
-        stations_coords = self.river_data.masked_profile_arr[:, :2]
-
-        # read bank lines
-        banklines = config_file.get_bank_lines(self.bank_dir)
-        n_banklines = len(banklines)
-
-        # map bank lines to mesh cells
-        log_text("intersect_bank_mesh")
-
-        x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, bank_line_coords, bank_idx, bank_km_mid, is_right_bank = self.intersect_bank_lines_with_mesh(
-            sim, face_node, banklines, edge_node, edge_face, fe, nnodes, boundary_edge_nrs, stations_coords
-        )
-
-        river_axis_km, river_axis_numpy, river_axis = self._prepare_river_axis(stations_coords)
-
-        # get output interval
-        km_step = config_file.get_float("Erosion", "OutputInterval", 1.0)
-        # map to output interval
-        km_bin = (river_axis_km.min(), river_axis_km.max(), km_step)
-        km_mid = get_km_bins(km_bin, type=3)  # get mid points
-        xykm_bin_numpy = xykm_bin(self.river_data.masked_profile_arr, km_bin)
-
-        ifw_face_idx, ifw_numpy = self._prepare_fairway(river_axis, stations_coords, x_face_coords, y_face_coords,
-            x_edge_coords, y_edge_coords, fe, edge_face, face_node, edge_node, nnodes, boundary_edge_nrs
-        )
-
-        bp_fw_face_idx, distance_fw = self._map_bank_to_fairway(bank_line_coords, bank_km_mid,ifw_numpy,ifw_face_idx)
-
-        # water level at fairway
-        zfw_ini = []
-        for ib in range(n_banklines):
-            ii = bp_fw_face_idx[ib]
-            zfw_ini.append(sim["zw_face"][ii])
-
-        ship_data, dfw0, dfw1, zss, tauc, banktype, taucls_str = self._prepare_initial_conditions(
-            config_file, bank_km_mid, zfw_ini
-        )
+    def _process_discharge_levels(
+            self, ship_data, n_banklines, km_mid, km_bin, Teros: int, bank_km_mid: List[np.ndarray], bank_line_coords:
+            List[np.ndarray], bank_idx: List[np.ndarray], bp_fw_face_idx: List[np.ndarray], zfw_ini: List[np.ndarray],
+            zss: List[np.ndarray], tauc: List[np.ndarray], dfw0: List[np.ndarray], dfw1: List[np.ndarray],
+            distance_fw: List[np.ndarray], config_file: ConfigFile
+    ):
 
         # initialize arrays for erosion loop over all discharges
         velocity: List[List[np.ndarray]] = []
@@ -603,10 +537,10 @@ class Erosion:
 
                 bank_index = bank_idx[ib]
                 vel_bank = (
-                    np.absolute(
-                        sim["ucx_face"][bank_index] * dx + sim["ucy_face"][bank_index] * dy
-                    )
-                    / linesize[ib]
+                        np.absolute(
+                            sim["ucx_face"][bank_index] * dx + sim["ucy_face"][bank_index] * dy
+                        )
+                        / linesize[ib]
                 )
                 if self.vel_dx > 0.0:
                     if ib == 0:
@@ -696,10 +630,10 @@ class Erosion:
                             bcrds_geo,
                             params,
                             str(self.output_dir) + os.sep + "debug.EQ.B{}.shp".format(ib + 1),
-                        )
+                            )
                         write_csv(
                             params, str(self.output_dir) + os.sep + "debug.EQ.B{}.csv".format(ib + 1),
-                        )
+                                    )
 
                 dniqib, dviqib, dnship, dnflow, shipwavemax_ib, shipwavemin_ib = comp_erosion(
                     velocity[iq][ib],
@@ -724,7 +658,7 @@ class Erosion:
                     zss[ib],
                     RHO,
                     g,
-                )
+                    )
                 shipwavemax[iq].append(shipwavemax_ib)
                 shipwavemin[iq].append(shipwavemin_ib)
 
@@ -767,11 +701,11 @@ class Erosion:
                         bcrds_geo,
                         params,
                         str(self.output_dir) + os.sep + "debug.Q{}.B{}.shp".format(iq + 1, ib + 1),
-                    )
+                        )
                     write_csv(
                         params,
                         str(self.output_dir) + os.sep + "debug.Q{}.B{}.csv".format(iq + 1, ib + 1),
-                    )
+                        )
 
                 # shift bank lines
 
@@ -796,6 +730,88 @@ class Erosion:
             write_km_eroded_volumes(
                 km_mid, dvol_bank, str(self.output_dir) + os.sep + erovol_file
             )
+        return dn_tot, linesize, dn_flow_tot, dn_ship_tot, dn_eq, hfw_max, dv, dv_eq, dv_tot, waterlevel, shipwavemax, \
+            shipwavemin, bankheight, velocity, chezy
+
+    def bankerosion_core(self) -> None:
+        """Run the bank erosion analysis for a specified configuration."""
+        timed_logger("-- start analysis --")
+        log_text(
+            "header_bankerosion",
+            data={
+                "version": __version__,
+                "location": "https://github.com/Deltares/D-FAST_Bank_Erosion",
+            },
+        )
+        log_text("-")
+        config_file = self.config_file
+
+        # get simulation time terosion
+        Teros = config_file.get_int("Erosion", "TErosion", positive=True)
+        log_text("total_time", data={"t": Teros})
+        # read simulation data (get_sim_data)
+        sim_file = config_file.get_sim_file("Erosion", str(self.ref_level + 1))
+        log_text("-")
+        log_text("read_simdata", data={"file": sim_file})
+        log_text("-")
+        sim, dh0 = read_simulation_data(sim_file)
+        log_text("-")
+
+        log_text("derive_topology")
+        face_node = sim["facenode"]
+        nnodes = sim["nnodes"]
+
+        edge_node, edge_face, fe, boundary_edge_nrs = _derive_topology_arrays(face_node, nnodes)
+
+
+        # clip the chainage path to the range of chainages of interest
+        km_bounds = self.river_data.station_bounds
+        log_text("clip_chainage", data={"low": km_bounds[0], "high": km_bounds[1]})
+
+        stations_coords = self.river_data.masked_profile_arr[:, :2]
+
+        # read bank lines
+        banklines = config_file.get_bank_lines(self.bank_dir)
+        n_banklines = len(banklines)
+
+        # map bank lines to mesh cells
+        log_text("intersect_bank_mesh")
+
+        x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, bank_line_coords, bank_idx, bank_km_mid, is_right_bank = self.intersect_bank_lines_with_mesh(
+            sim, face_node, banklines, edge_node, edge_face, fe, nnodes, boundary_edge_nrs, stations_coords
+        )
+
+        river_axis_km, river_axis_numpy, river_axis = self._prepare_river_axis(stations_coords)
+
+        # get output interval
+        km_step = config_file.get_float("Erosion", "OutputInterval", 1.0)
+        # map to output interval
+        km_bin = (river_axis_km.min(), river_axis_km.max(), km_step)
+        km_mid = get_km_bins(km_bin, type=3)  # get mid points
+        xykm_bin_numpy = xykm_bin(self.river_data.masked_profile_arr, km_bin)
+
+        ifw_face_idx, ifw_numpy = self._prepare_fairway(river_axis, stations_coords, x_face_coords, y_face_coords,
+            x_edge_coords, y_edge_coords, fe, edge_face, face_node, edge_node, nnodes, boundary_edge_nrs
+        )
+
+        bp_fw_face_idx, distance_fw = self._map_bank_to_fairway(bank_line_coords, bank_km_mid,ifw_numpy,ifw_face_idx)
+
+        # water level at fairway
+        zfw_ini = []
+        for ib in range(n_banklines):
+            ii = bp_fw_face_idx[ib]
+            zfw_ini.append(sim["zw_face"][ii])
+
+        ship_data, dfw0, dfw1, zss, tauc, banktype, taucls_str = self._prepare_initial_conditions(
+            config_file, bank_km_mid, zfw_ini
+        )
+
+        # # initialize arrays for erosion loop over all discharges
+        dn_tot, linesize, dn_flow_tot, dn_ship_tot, dn_eq, hfw_max, dv, dv_eq, dv_tot, waterlevel, shipwavemax,\
+            shipwavemin, bankheight, velocity, chezy = self._process_discharge_levels(
+            ship_data, n_banklines, km_mid, km_bin, Teros, bank_km_mid, bank_line_coords, bank_idx, bp_fw_face_idx,
+            zfw_ini, zss, tauc, dfw0, dfw1, distance_fw, config_file
+        )
 
         log_text("=")
         dnav = np.zeros(n_banklines)
