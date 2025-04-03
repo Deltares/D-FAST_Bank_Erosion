@@ -413,7 +413,11 @@ class Test_ConfigFile:
                     "ZoomStepKM": "0.1",
                     "Boundaries": "123.0:128.0",
                 },
-                "Detect": {"SimFile": "test_sim.nc", "NBank": "2"},
+                "Detect": {
+                    "SimFile": "test_sim.nc",
+                    "NBank": "2",
+                    "DLines": "[ 50.0, 50.0 ]",
+                },
                 "Erosion": {"OutputDir": "./output"},
             }
         )
@@ -430,7 +434,8 @@ class Test_ConfigFile:
             "  boundaries = 123.0:128.0\n\n"
             "[Detect]\n"
             "  simfile    = test_sim.nc\n"
-            "  nbank      = 2\n\n"
+            "  nbank      = 2\n"
+            "  dlines     = [ 50.0, 50.0 ]\n\n"
             "[Erosion]\n"
             "  outputdir  = ./output\n"
         )
@@ -507,6 +512,7 @@ class Test_ConfigFile:
     def test_get_bank_lines(
         self, config: configparser.ConfigParser, fs: FakeFilesystem
     ):
+        """Test retrieving bank lines."""
         config["General"]["BankLine"] = "bankfile"
         config = ConfigFile(config, "tests/data/erosion/test.cfg")
 
@@ -566,6 +572,18 @@ class Test_ConfigFile:
             config_file.get_parameter(
                 "General", "InvalidValue", bank_km, valid=[1.0, 2.0, 3.0]
             )
+
+    def test_get_bank_search_distances(self, config: configparser.ConfigParser):
+        """Test retrieving bank search distances."""
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+
+        # Case 1: Bank search distances exist in the configuration
+        result = config_file.get_bank_search_distances(2)
+        assert all(pytest.approx(item, rel=1e-6) == 50.0 for item in result)
+
+        # Case 2: Bank search distances do not exist, use default value
+        result = config_file.get_bank_search_distances(2)
+        assert all(pytest.approx(item, rel=1e-6) == 50.0 for item in result)
 
     @pytest.fixture
     def path_dict(self) -> Dict:
