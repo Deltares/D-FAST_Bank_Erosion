@@ -77,7 +77,8 @@ def parse_arguments() -> Tuple[str, str, str]:
         "--language", default="UK", help="display language 'NL' or 'UK' ('UK' is default)"
     )
     parser.add_argument(
-        "--mode", default="GUI", help="run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is default)"
+        "--mode", choices=["BANKLINES", "BANKEROSION", "GUI"], default="GUI",
+        help="run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is default)"
     )
     parser.add_argument(
         "--config", default="dfastbe.cfg", help="name of the configuration file ('dfastbe.cfg' is default)"
@@ -90,9 +91,6 @@ def parse_arguments() -> Tuple[str, str, str]:
 
     if language not in ["NL", "UK"]:
         raise LanguageError(f"Incorrect language {language} specified. Should read 'NL' or 'UK'.")
-
-    if run_mode not in ["BANKLINES", "BANKEROSION", "GUI"]:
-        raise ValueError(f"Invalid mode `{run_mode}`. Choose from BANKLINES, BANKEROSION, or GUI.")
 
     return language, run_mode, configfile
 
