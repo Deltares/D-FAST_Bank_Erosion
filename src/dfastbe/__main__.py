@@ -87,12 +87,12 @@ def parse_arguments() -> Tuple[str, str, str]:
     parser.add_argument(
         "--config", default="dfastbe.cfg", help="name of the configuration file ('dfastbe.cfg' is default)"
     )
-    parser.set_defaults(config="dfastbe.cfg")
     args = parser.parse_args()
 
-    language = args.__dict__["language"].upper()
-    run_mode = args.__dict__["mode"].upper()
-    configfile = args.__dict__["config"]
+    language = args.language.upper()
+    run_mode = args.mode.upper()
+    configfile = args.config
+
     if language not in ["NL", "UK"]:
         raise LanguageError(
             "Incorrect language '{}' specified. Should read 'NL' or 'UK'.".format(
