@@ -41,7 +41,8 @@ class Test_batch_mode:
                     "--config",
                     "config.cfg",
                 ],
-                capture_output=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
             )
             outstr = result.stdout.decode("UTF-8").splitlines()
         finally:
