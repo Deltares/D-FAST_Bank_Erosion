@@ -617,65 +617,6 @@ class Test_ConfigFile:
         # assert config_result["Detect"]["SimFile"] == "test_sim.nc"
 
 
-class TestConfigFile(unittest.TestCase):
-
-    def setUp(self):
-        """Set up a sample configuration for testing."""
-        self.config = configparser.ConfigParser()
-        self.config.read_dict({
-            "General": {"Version": "1.0", "TestParam": "42"},
-            "Detect": {"SimFile": "test_sim.nc"},
-            "Erosion": {"OutputDir": "./output"}
-        })
-        self.config_file = ConfigFile(self.config)
-
-    def test_init(self):
-        """Test initialization of ConfigFile."""
-        self.assertIsInstance(self.config_file, ConfigFile)
-
-    def test_config_property(self):
-        """Test getting and setting the config property."""
-        new_config = configparser.ConfigParser()
-        self.config_file.config = new_config
-        self.assertEqual(self.config_file.config, new_config)
-
-    def test_read(self):
-        """Test reading a configuration file."""
-        config_str = """[General]\nVersion = 1.0\nTestParam = 42\n"""
-        with patch("builtins.open", return_value=StringIO(config_str)), patch("pathlib.Path.exists", return_value=True):
-            config_obj = ConfigFile.read("dummy_path.cfg")
-            version = config_obj.version
-        self.assertEqual(config_obj.config["General"]["Version"], "1.0")
-        self.assertEqual(version, "1.0")
-
-    def test_get_str(self):
-        """Test retrieving a string value."""
-        self.assertEqual(self.config_file.get_str("General", "Version"), "1.0")
-
-    def test_get_int(self):
-        """Test retrieving an integer value."""
-        self.assertEqual(self.config_file.get_int("General", "TestParam"), 42)
-
-    def test_get_bool(self):
-        """Test retrieving a boolean value."""
-        self.config_file.config["General"]["Enabled"] = "yes"
-        self.assertTrue(self.config_file.get_bool("General", "Enabled"))
-
-    def test_write(self):
-        """Test writing a configuration file."""
-        with patch("builtins.open", unittest.mock.mock_open()) as mock_file:
-            self.config_file.write("test_output.cfg")
-            mock_file.assert_called_with("test_output.cfg", "w")
-
-    def test_adjust_filenames(self):
-        """Test adjusting filenames."""
-        self.config_file.path = "/home/user/config.cfg"
-        self.config_file.root_dir = "/home/user"
-        with patch("os.getcwd", return_value="/home/user"):
-            rootdir = self.config_file.adjust_filenames()
-        self.assertEqual(rootdir, ".")
-
-
 class TestConfigFileE2E:
     def test_initialization(self):
         path = "tests/data/erosion/meuse_manual.cfg"
