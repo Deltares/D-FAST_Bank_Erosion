@@ -410,6 +410,7 @@ class Test_ConfigFile:
                     "Version": "1.0",
                     "plotting": "yes",
                     "ZoomStepKM": "0.1",
+                    "Boundaries": "123.0:128.0",
                 },
                 "Detect": {"SimFile": "test_sim.nc", "NBank": "2"},
                 "Erosion": {"OutputDir": "./output"},
@@ -424,7 +425,8 @@ class Test_ConfigFile:
             "[General]\n"
             "  version    = 1.0\n"
             "  plotting   = yes\n"
-            "  zoomstepkm = 0.1\n\n"
+            "  zoomstepkm = 0.1\n"
+            "  boundaries = 123.0:128.0\n\n"
             "[Detect]\n"
             "  simfile    = test_sim.nc\n"
             "  nbank      = 2\n\n"
@@ -493,6 +495,13 @@ class Test_ConfigFile:
         path = Path("tests/data/erosion")
         config_file = ConfigFile(config, str(path / "test.cfg"))
         assert config_file.get_sim_file("Detect", "") == str(path / "test_sim.nc")
+
+    def test_get_km_bounds(self, config: configparser.ConfigParser):
+        """Test retrieving km bounds."""
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        start, end = config_file.get_km_bounds()
+        assert start == pytest.approx(123.0, rel=1e-6)
+        assert end == pytest.approx(128.0, rel=1e-6)
 
     def test_resolve(self, path_dict: Dict):
         """Test resolving paths in the configuration."""
