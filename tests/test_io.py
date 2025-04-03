@@ -471,6 +471,23 @@ class Test_ConfigFile:
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
         assert config_file.get_str("General", "Version") == "1.0"
 
+    def test_get_int(self, config: configparser.ConfigParser):
+        """Test retrieving an integer value."""
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        assert config_file.get_int("Detect", "NBank") == 2
+
+    def test_get_bool(self, config: configparser.ConfigParser):
+        """Test retrieving a boolean value."""
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        assert config_file.get_bool("General", "plotting") is True
+
+    def test_get_float(self, config: configparser.ConfigParser):
+        """Test retrieving a float value."""
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        assert config_file.get_float("General", "ZoomStepKM") == pytest.approx(
+            0.1, rel=1e-6
+        )
+
     def test_resolve(self, path_dict: Dict):
         """Test resolving paths in the configuration."""
         config = configparser.ConfigParser()
