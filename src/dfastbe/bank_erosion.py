@@ -691,7 +691,7 @@ class Erosion:
         self,
         bank_line_coords: List[np.ndarray],
         dn_tot: List[np.ndarray],
-        linesize: List[np.ndarray],
+        line_size: List[np.ndarray],
         is_right_bank: List[bool],
         dn_eq: List[np.ndarray],
         dv_eq: List[np.ndarray],
@@ -704,39 +704,39 @@ class Erosion:
         dn_ship_tot,
     ):
         log_text("=")
-        dnav = np.zeros(n_banklines)
-        dnmax = np.zeros(n_banklines)
-        dnavflow = np.zeros(n_banklines)
-        dnavship = np.zeros(n_banklines)
-        dnaveq = np.zeros(n_banklines)
-        dnmaxeq = np.zeros(n_banklines)
+        d_nav = np.zeros(n_banklines)
+        dn_max = np.zeros(n_banklines)
+        d_nav_flow = np.zeros(n_banklines)
+        d_nav_ship = np.zeros(n_banklines)
+        d_nav_eq = np.zeros(n_banklines)
+        dn_max_eq = np.zeros(n_banklines)
         vol_eq = np.zeros((len(km_mid), n_banklines))
         vol_tot = np.zeros((len(km_mid), n_banklines))
-        xyline_new_list = []
+        xy_line_new_list = []
         bankline_new_list = []
-        xyline_eq_list = []
+        xy_line_eq_list = []
         bankline_eq_list = []
-        for ib, bcrds in enumerate(bank_line_coords):
-            dnav[ib] = (dn_tot[ib] * linesize[ib]).sum() / linesize[ib].sum()
-            dnmax[ib] = dn_tot[ib].max()
-            dnavflow[ib] = (dn_flow_tot[ib] * linesize[ib]).sum() / linesize[ib].sum()
-            dnavship[ib] = (dn_ship_tot[ib] * linesize[ib]).sum() / linesize[ib].sum()
-            dnaveq[ib] = (dn_eq[ib] * linesize[ib]).sum() / linesize[ib].sum()
-            dnmaxeq[ib] = dn_eq[ib].max()
-            log_text("bank_dnav", data={"ib": ib + 1, "v": dnav[ib]})
-            log_text("bank_dnavflow", data={"v": dnavflow[ib]})
-            log_text("bank_dnavship", data={"v": dnavship[ib]})
-            log_text("bank_dnmax", data={"v": dnmax[ib]})
-            log_text("bank_dnaveq", data={"v": dnaveq[ib]})
-            log_text("bank_dnmaxeq", data={"v": dnmaxeq[ib]})
+        for ib, bank_coords in enumerate(bank_line_coords):
+            d_nav[ib] = (dn_tot[ib] * line_size[ib]).sum() / line_size[ib].sum()
+            dn_max[ib] = dn_tot[ib].max()
+            d_nav_flow[ib] = (dn_flow_tot[ib] * line_size[ib]).sum() / line_size[ib].sum()
+            d_nav_ship[ib] = (dn_ship_tot[ib] * line_size[ib]).sum() / line_size[ib].sum()
+            d_nav_eq[ib] = (dn_eq[ib] * line_size[ib]).sum() / line_size[ib].sum()
+            dn_max_eq[ib] = dn_eq[ib].max()
+            log_text("bank_dnav", data={"ib": ib + 1, "v": d_nav[ib]})
+            log_text("bank_dnavflow", data={"v": d_nav_flow[ib]})
+            log_text("bank_dnavship", data={"v": d_nav_ship[ib]})
+            log_text("bank_dnmax", data={"v": dn_max[ib]})
+            log_text("bank_dnaveq", data={"v": d_nav_eq[ib]})
+            log_text("bank_dnmaxeq", data={"v": dn_max_eq[ib]})
 
-            xyline_new = move_line(bcrds, dn_tot[ib], is_right_bank[ib])
-            xyline_new_list.append(xyline_new)
-            bankline_new_list.append(LineString(xyline_new))
+            xy_line_new = move_line(bank_coords, dn_tot[ib], is_right_bank[ib])
+            xy_line_new_list.append(xy_line_new)
+            bankline_new_list.append(LineString(xy_line_new))
 
-            xyline_eq = move_line(bcrds, dn_eq[ib], is_right_bank[ib])
-            xyline_eq_list.append(xyline_eq)
-            bankline_eq_list.append(LineString(xyline_eq))
+            xy_line_eq = move_line(bank_coords, dn_eq[ib], is_right_bank[ib])
+            xy_line_eq_list.append(xy_line_eq)
+            bankline_eq_list.append(LineString(xy_line_eq))
 
             dvol_eq = get_km_eroded_volume(
                 bank_km_mid[ib], dv_eq[ib], km_bin
@@ -749,7 +749,7 @@ class Erosion:
             if ib < n_banklines - 1:
                 log_text("-")
 
-        return bankline_new_list, bankline_eq_list, vol_tot, vol_eq, dnav, xyline_eq_list
+        return bankline_new_list, bankline_eq_list, vol_tot, vol_eq, d_nav, xy_line_eq_list
 
     def bankerosion_core(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
