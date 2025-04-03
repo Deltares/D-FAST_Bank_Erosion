@@ -564,7 +564,7 @@ class Test_ConfigFile:
         config.read_dict(
             {
                 "General": {
-                    "Version": "1.0",
+                    "Version": "0.1",
                     "RiverKM": "inputs/rivkm_20m.xyc",
                     "Boundaries": "123.0:128.0",
                     "BankDir": "output/banklines",
@@ -605,7 +605,8 @@ class Test_ConfigFile:
                     "Reed": "0.0",
                     "VelFilterDist": "0.3",
                     "BedFilterDist": "0.3",
-                    "NLevel": "0",
+                    "NLevel": "1",
+                    "SimFile1": "inputs/sim0270/SDS-j19_map.nc",
                     "RefLevel": "3",
                 }
             }
@@ -613,8 +614,7 @@ class Test_ConfigFile:
         config_file = ConfigFile(config=config)
         config_result = config_file._upgrade(config_file.config)
         assert config_result["General"]["plotting"] == "yes"
-        # TODO: Check why the _upgrade function is not working as expected
-        # assert config_result["Detect"]["SimFile"] == "test_sim.nc"
+        assert config_result["Detect"]["SimFile"] == "inputs/sim0270/SDS-j19_map.nc"
 
 
 class TestConfigFileE2E:
