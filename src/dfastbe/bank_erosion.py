@@ -881,20 +881,50 @@ class Erosion:
             bank_line_coords, dn_tot, linesize, is_right_bank, dn_eq, dv_eq, dv_tot, bank_km_mid, km_bin,
             n_banklines, km_mid, dn_flow_tot, dn_ship_tot,
         )
-        self._write_bankline_shapefiles(bankline_new_list, bankline_eq_list)
 
-        # write eroded volumes per km (total)
-        erovol_file = config_file.get_str("Erosion", "EroVol", default="erovol.evo")
-        log_text("save_tot_erovol", data={"file": erovol_file})
-        write_km_eroded_volumes(
-            km_mid, vol_tot, str(self.output_dir) + os.sep + erovol_file
+        self._write_bankline_shapefiles(bankline_new_list, bankline_eq_list)
+        self._write_volume_outputs(vol_tot, vol_eq, km_mid)
+
+        # create various plots
+        self._generate_plots(
+            n_banklines, bank_line_coords, river_axis_km, bank_km_mid, banklines, face_node, sim, hfw_max, dn_tot,
+            is_right_bank, xyline_eq_list, x_edge_coords, y_edge_coords, dnav, Teros, km_mid, km_step, dv, vol_eq,
+            waterlevel, shipwavemax, shipwavemin, bankheight, velocity, chezy, zss, tauc, banktype, taucls_str, dn_eq
         )
+        log_text("end_bankerosion")
+        timed_logger("-- end analysis --")
+
+    def _write_bankline_shapefiles(self, bankline_new_list, bankline_eq_list):
+        bankline_new_series = GeoSeries(bankline_new_list)
+        bank_lines_new = GeoDataFrame.from_features(bankline_new_series)
+        bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
+
+        bank_file = self.output_dir / f"{bank_name}_new.shp"
+        log_text("save_banklines", data={"file": str(bank_file)})
+        bank_lines_new.to_file(bank_file)
+
+        bankline_eq_series = GeoSeries(bankline_eq_list)
+        banklines_eq = GeoDataFrame.from_features(bankline_eq_series)
+
+        bank_file = self.output_dir/ f"{bank_name}_eq.shp"
+        log_text("save_banklines", data={"file": str(bank_file)})
+        banklines_eq.to_file(bank_file)
+
+    def _write_volume_outputs(self, vol_tot, vol_eq, km_mid):
+        erovol_file = self.config_file.get_str("Erosion", "EroVol", default="erovol.evo")
+        log_text("save_tot_erovol", data={"file": erovol_file})
+        write_km_eroded_volumes(km_mid, vol_tot, str(self.output_dir) + os.sep + erovol_file)
 
         # write eroded volumes per km (equilibrium)
-        erovol_file = config_file.get_str("Erosion", "EroVolEqui", default="erovol_eq.evo")
+        erovol_file = self.config_file.get_str("Erosion", "EroVolEqui", default="erovol_eq.evo")
         log_text("save_eq_erovol", data={"file": erovol_file})
         write_km_eroded_volumes(km_mid, vol_eq, str(self.output_dir) + os.sep + erovol_file)
 
+    def _generate_plots(
+        self,n_banklines, bank_line_coords, river_axis_km, bank_km_mid, banklines, face_node, sim, hfw_max, dn_tot,
+        is_right_bank, xyline_eq_list, x_edge_coords, y_edge_coords, dnav, Teros, km_mid, km_step, dv, vol_eq,
+        waterlevel, shipwavemax, shipwavemin, bankheight, velocity, chezy, zss, tauc, banktype, taucls_str, dn_eq
+    ):
         # create various plots
         if self.plot_flags["plot_data"]:
             log_text("=")
@@ -922,7 +952,7 @@ class Erosion:
                 "y-coordinate [km]",
                 "water depth and initial bank lines",
                 "water depth [m]",
-            )
+                )
             if self.plot_flags["save_plot"]:
                 ifig = ifig + 1
                 figbase = self.plot_flags["fig_dir"] + os.sep + str(ifig) + "_banklines"
@@ -1075,11 +1105,11 @@ class Erosion:
                 for ib, fig in enumerate(figlist):
                     ifig = ifig + 1
                     figbase = (
-                        self.plot_flags["fig_dir"]
-                        + os.sep
-                        + str(ifig)
-                        + "_velocity_bank_"
-                        + str(ib + 1)
+                            self.plot_flags["fig_dir"]
+                            + os.sep
+                            + str(ifig)
+                            + "_velocity_bank_"
+                            + str(ib + 1)
                     )
                     if self.plot_flags["save_plot_zoomed"]:
                         df_plt.zoom_x_and_save(fig, axlist[ib], figbase, self.plot_flags["plot_ext"], kmzoom)
@@ -1126,25 +1156,6 @@ class Erosion:
                 plt.close("all")
             else:
                 plt.show(block=not self.gui)
-
-        log_text("end_bankerosion")
-        timed_logger("-- end analysis --")
-
-    def _write_bankline_shapefiles(self, bankline_new_list, bankline_eq_list):
-        bankline_new_series = GeoSeries(bankline_new_list)
-        bank_lines_new = GeoDataFrame.from_features(bankline_new_series)
-        bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
-
-        bank_file = self.output_dir / f"{bank_name}_new.shp"
-        log_text("save_banklines", data={"file": str(bank_file)})
-        bank_lines_new.to_file(bank_file)
-
-        bankline_eq_series = GeoSeries(bankline_eq_list)
-        banklines_eq = GeoDataFrame.from_features(bankline_eq_series)
-
-        bank_file = self.output_dir/ f"{bank_name}_eq.shp"
-        log_text("save_banklines", data={"file": str(bank_file)})
-        banklines_eq.to_file(bank_file)
 
 
 def _masked_index(x0: np.array, idx: np.ma.masked_array) -> np.ma.masked_array:
