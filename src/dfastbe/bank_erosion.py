@@ -733,6 +733,70 @@ class Erosion:
         return dn_tot, linesize, dn_flow_tot, dn_ship_tot, dn_eq, hfw_max, dv, dv_eq, dv_tot, waterlevel, shipwavemax, \
             shipwavemin, bankheight, velocity, chezy
 
+    def _postprocess_erosion_results(
+        self,
+        bank_line_coords: List[np.ndarray],
+        dn_tot: List[np.ndarray],
+        linesize: List[np.ndarray],
+        is_right_bank: List[bool],
+        dn_eq: List[np.ndarray],
+        dv_eq: List[np.ndarray],
+        dv_tot: List[np.ndarray],
+        bank_km_mid: List[np.ndarray],
+        km_bin: Tuple[float, float, float],
+        n_banklines: int,
+        km_mid,
+        dn_flow_tot,
+        dn_ship_tot,
+    ):
+        log_text("=")
+        dnav = np.zeros(n_banklines)
+        dnmax = np.zeros(n_banklines)
+        dnavflow = np.zeros(n_banklines)
+        dnavship = np.zeros(n_banklines)
+        dnaveq = np.zeros(n_banklines)
+        dnmaxeq = np.zeros(n_banklines)
+        vol_eq = np.zeros((len(km_mid), n_banklines))
+        vol_tot = np.zeros((len(km_mid), n_banklines))
+        xyline_new_list = []
+        bankline_new_list = []
+        xyline_eq_list = []
+        bankline_eq_list = []
+        for ib, bcrds in enumerate(bank_line_coords):
+            dnav[ib] = (dn_tot[ib] * linesize[ib]).sum() / linesize[ib].sum()
+            dnmax[ib] = dn_tot[ib].max()
+            dnavflow[ib] = (dn_flow_tot[ib] * linesize[ib]).sum() / linesize[ib].sum()
+            dnavship[ib] = (dn_ship_tot[ib] * linesize[ib]).sum() / linesize[ib].sum()
+            dnaveq[ib] = (dn_eq[ib] * linesize[ib]).sum() / linesize[ib].sum()
+            dnmaxeq[ib] = dn_eq[ib].max()
+            log_text("bank_dnav", data={"ib": ib + 1, "v": dnav[ib]})
+            log_text("bank_dnavflow", data={"v": dnavflow[ib]})
+            log_text("bank_dnavship", data={"v": dnavship[ib]})
+            log_text("bank_dnmax", data={"v": dnmax[ib]})
+            log_text("bank_dnaveq", data={"v": dnaveq[ib]})
+            log_text("bank_dnmaxeq", data={"v": dnmaxeq[ib]})
+
+            xyline_new = move_line(bcrds, dn_tot[ib], is_right_bank[ib])
+            xyline_new_list.append(xyline_new)
+            bankline_new_list.append(LineString(xyline_new))
+
+            xyline_eq = move_line(bcrds, dn_eq[ib], is_right_bank[ib])
+            xyline_eq_list.append(xyline_eq)
+            bankline_eq_list.append(LineString(xyline_eq))
+
+            dvol_eq = get_km_eroded_volume(
+                bank_km_mid[ib], dv_eq[ib], km_bin
+            )
+            vol_eq[:, ib] = dvol_eq
+            dvol_tot = get_km_eroded_volume(
+                bank_km_mid[ib], dv_tot[ib], km_bin
+            )
+            vol_tot[:, ib] = dvol_tot
+            if ib < n_banklines - 1:
+                log_text("-")
+
+        return bankline_new_list, bankline_eq_list, vol_tot, vol_eq, dnav, xyline_eq_list
+
     def bankerosion_core(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
         timed_logger("-- start analysis --")
@@ -813,52 +877,11 @@ class Erosion:
             zfw_ini, zss, tauc, dfw0, dfw1, distance_fw, config_file
         )
 
-        log_text("=")
-        dnav = np.zeros(n_banklines)
-        dnmax = np.zeros(n_banklines)
-        dnavflow = np.zeros(n_banklines)
-        dnavship = np.zeros(n_banklines)
-        dnaveq = np.zeros(n_banklines)
-        dnmaxeq = np.zeros(n_banklines)
-        vol_eq = np.zeros((len(km_mid), n_banklines))
-        vol_tot = np.zeros((len(km_mid), n_banklines))
-        xyline_new_list = []
-        bankline_new_list = []
-        xyline_eq_list = []
-        bankline_eq_list = []
-        for ib, bcrds in enumerate(bank_line_coords):
-            dnav[ib] = (dn_tot[ib] * linesize[ib]).sum() / linesize[ib].sum()
-            dnmax[ib] = dn_tot[ib].max()
-            dnavflow[ib] = (dn_flow_tot[ib] * linesize[ib]).sum() / linesize[ib].sum()
-            dnavship[ib] = (dn_ship_tot[ib] * linesize[ib]).sum() / linesize[ib].sum()
-            dnaveq[ib] = (dn_eq[ib] * linesize[ib]).sum() / linesize[ib].sum()
-            dnmaxeq[ib] = dn_eq[ib].max()
-            log_text("bank_dnav", data={"ib": ib + 1, "v": dnav[ib]})
-            log_text("bank_dnavflow", data={"v": dnavflow[ib]})
-            log_text("bank_dnavship", data={"v": dnavship[ib]})
-            log_text("bank_dnmax", data={"v": dnmax[ib]})
-            log_text("bank_dnaveq", data={"v": dnaveq[ib]})
-            log_text("bank_dnmaxeq", data={"v": dnmaxeq[ib]})
 
-            xyline_new = move_line(bcrds, dn_tot[ib], is_right_bank[ib])
-            xyline_new_list.append(xyline_new)
-            bankline_new_list.append(LineString(xyline_new))
-
-            xyline_eq = move_line(bcrds, dn_eq[ib], is_right_bank[ib])
-            xyline_eq_list.append(xyline_eq)
-            bankline_eq_list.append(LineString(xyline_eq))
-
-            dvol_eq = get_km_eroded_volume(
-                bank_km_mid[ib], dv_eq[ib], km_bin
-            )
-            vol_eq[:, ib] = dvol_eq
-            dvol_tot = get_km_eroded_volume(
-                bank_km_mid[ib], dv_tot[ib], km_bin
-            )
-            vol_tot[:, ib] = dvol_tot
-            if ib < n_banklines - 1:
-                log_text("-")
-
+        bankline_new_list, bankline_eq_list, vol_tot, vol_eq, dnav, xyline_eq_list = self._postprocess_erosion_results(
+            bank_line_coords, dn_tot, linesize, is_right_bank, dn_eq, dv_eq, dv_tot, bank_km_mid, km_bin,
+            n_banklines, km_mid, dn_flow_tot, dn_ship_tot,
+        )
         # write bank line files
         bankline_new_series = GeoSeries(bankline_new_list)
         bank_lines_new = GeoDataFrame.from_features(bankline_new_series)
