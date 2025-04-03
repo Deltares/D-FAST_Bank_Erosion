@@ -50,8 +50,7 @@ class Test_batch_mode:
         # for s in outstr:
         #    print(s)
         self.maxDiff = None
-        assert outstr == ["   0.00       reading configuration file ...",
-            "Error during reading the config file: [Errno 2] No such file or directory: 'config.cfg'"]
+        assert outstr[-1] == "FileNotFoundError: The Config-File: config.cfg does not exist"
 
     @pytest.mark.parametrize(
         "tstdir, cfgfile",
