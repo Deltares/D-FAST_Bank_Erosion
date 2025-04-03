@@ -1302,14 +1302,11 @@ def load_program_texts(file_name: Union[str, Path]) -> None:
     file_name : str
         The name of the file to be read and parsed.
     """
-    text: List[str]
-    data: Dict[str, List[str]]
-
     global PROGTEXTS
 
     all_lines = open(file_name, "r").read().splitlines()
-    data = {}
-    text = []
+    data: Dict[str, List[str]] = {}
+    text: List[str] = []
     key = None
     for line in all_lines:
         r_line = line.strip()
