@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Copyright (C) 2020 Stichting Deltares.
 
@@ -96,15 +95,22 @@ def parse_arguments() -> Tuple[str, str, str]:
     args = parser.parse_args()
 
     language = args.__dict__["language"].upper()
-    runmode = args.__dict__["mode"].upper()
+    run_mode = args.__dict__["mode"].upper()
     configfile = args.__dict__["config"]
     if language not in ["NL", "UK"]:
-        raise Exception(
+        raise LanguageError(
             "Incorrect language '{}' specified. Should read 'NL' or 'UK'.".format(
                 language
             )
         )
-    return language, runmode, configfile
+    return language, run_mode, configfile
+
+
+class LanguageError(Exception):
+    """Custom exception for CLI Language errors."""
+
+    pass
+
 
 def main():
     language, runmode, configfile = parse_arguments()
