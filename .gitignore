@@ -21,7 +21,6 @@ docs/**/*.mtc0
 docs/**/*.log
 docs/**/*.maf
 docs/**/*.nlo
-docs/**/*.pdf
 docs/**/*.toc
 
 /site/*
