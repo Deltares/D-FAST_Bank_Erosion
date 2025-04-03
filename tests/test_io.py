@@ -466,6 +466,11 @@ class Test_ConfigFile:
             }
         }
 
+    def test_get_str(self, config: configparser.ConfigParser):
+        """Test retrieving a string value."""
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        assert config_file.get_str("General", "Version") == "1.0"
+
     def test_resolve(self, path_dict: Dict):
         """Test resolving paths in the configuration."""
         config = configparser.ConfigParser()
