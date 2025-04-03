@@ -1,5 +1,6 @@
 import sys
-
+import matplotlib
+matplotlib.use("Agg")
 import pytest
 
 from dfastbe.__main__ import main, parse_arguments
