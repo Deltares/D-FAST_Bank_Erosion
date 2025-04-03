@@ -26,12 +26,15 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Tuple
+import argparse
 import os
 from pathlib import Path
-import argparse
-from dfastbe.cmd import run
+from typing import Tuple
+
 import matplotlib
+
+from dfastbe.cmd import run
+
 matplotlib.use("Qt5Agg")
 
 
@@ -72,16 +75,25 @@ def parse_arguments() -> Tuple[str, str, str]:
     config_name : str
         Name of the configuration file.
     """
-    parser = argparse.ArgumentParser(description="D-FAST Morphological Impact. Example: python -m dfastbe --mode BANKEROSION --config settings.cfg")
-    parser.add_argument(
-        "--language", default="UK", choices=["NL", "UK"], help="display language 'NL' or 'UK' ('UK' is default)"
+    parser = argparse.ArgumentParser(
+        description="D-FAST Morphological Impact. Example: python -m dfastbe --mode BANKEROSION --config settings.cfg"
     )
     parser.add_argument(
-        "--mode", choices=["BANKLINES", "BANKEROSION", "GUI"], default="GUI",
-        help="run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is default)"
+        "--language",
+        default="UK",
+        choices=["NL", "UK"],
+        help="display language 'NL' or 'UK' ('UK' is default)",
     )
     parser.add_argument(
-        "--config", default="dfastbe.cfg", help="name of the configuration file ('dfastbe.cfg' is default)"
+        "--mode",
+        choices=["BANKLINES", "BANKEROSION", "GUI"],
+        default="GUI",
+        help="run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is default)",
+    )
+    parser.add_argument(
+        "--config",
+        default="dfastbe.cfg",
+        help="name of the configuration file ('dfastbe.cfg' is default)",
     )
     args = parser.parse_args()
 
@@ -93,8 +105,10 @@ def parse_arguments() -> Tuple[str, str, str]:
 
 
 def main():
+    """Main function to run the D-FAST Bank Erosion application."""
     language, run_mode, configfile = parse_arguments()
     run(language, run_mode, configfile)
+
 
 if __name__ == "__main__":
     main()
