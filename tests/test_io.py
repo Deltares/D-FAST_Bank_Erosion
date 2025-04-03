@@ -527,6 +527,46 @@ class Test_ConfigFile:
             (4.0, 4.0),
         ]
 
+    def test_get_parameter(self, config: configparser.ConfigParser):
+        """Test retrieving a parameter field."""
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5])]
+
+        # Case 1: Parameter exists in the configuration
+        config["General"] = {"ZoomStepKM": "1.0"}
+        result = config_file.get_parameter("General", "ZoomStepKM", bank_km)
+        expected = [np.array([1.0, 1.0, 1.0]), np.array([1.0, 1.0, 1.0])]
+        assert all(np.array_equal(r, e) for r, e in zip(result, expected))
+
+        # Case 2: Parameter does not exist, use default value
+        result = config_file.get_parameter(
+            "General", "NonExistentKey", bank_km, default=2.0
+        )
+        expected = [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])]
+        assert all(np.array_equal(r, e) for r, e in zip(result, expected))
+
+        # Case 3: Parameter must be positive
+        config["General"] = {"NegativeValue": "-1.0"}
+        with pytest.raises(Exception, match="No such file or directory"):
+            config_file.get_parameter(
+                "General", "NegativeValue", bank_km, positive=True
+            )
+
+        # Case 4: Parameter must match valid values
+        config["General"] = {"ValidValue": "3.0"}
+        result = config_file.get_parameter(
+            "General", "ValidValue", bank_km, valid=[1.0, 2.0, 3.0]
+        )
+        expected = [np.array([3.0, 3.0, 3.0]), np.array([3.0, 3.0, 3.0])]
+        assert all(np.array_equal(r, e) for r, e in zip(result, expected))
+
+        # Case 5: Parameter does not match valid values
+        config["General"] = {"InvalidValue": "4.0"}
+        with pytest.raises(Exception, match="No such file or directory"):
+            config_file.get_parameter(
+                "General", "InvalidValue", bank_km, valid=[1.0, 2.0, 3.0]
+            )
+
     @pytest.fixture
     def path_dict(self) -> Dict:
         """Fixture to create a dictionary for path resolution."""
