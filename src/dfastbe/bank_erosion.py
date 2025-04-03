@@ -881,6 +881,7 @@ class Erosion:
             bank_line_coords, dn_tot, linesize, is_right_bank, dn_eq, dv_eq, dv_tot, bank_km_mid, km_bin,
             n_banklines, km_mid, dn_flow_tot, dn_ship_tot,
         )
+        self._write_bankline_shapefiles(bankline_new_list, bankline_eq_list)
 
         # write eroded volumes per km (total)
         erovol_file = config_file.get_str("Erosion", "EroVol", default="erovol.evo")
