@@ -32,22 +32,27 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import PyQt5.QtGui
 
-from dfastbe.io import get_text, get_progloc, absolute_path, ConfigFile
+from dfastbe.io import get_text, absolute_path, ConfigFile
 import pathlib
+from pathlib import Path
 import sys
 import os
 import configparser
 import matplotlib.pyplot
 import subprocess
 from functools import partial
-from dfastbe import __version__
+from dfastbe import __version__, __file__
 from dfastbe.bank_lines import BankLines
-from dfastbe.bank_erosion import bankerosion_core
+from dfastbe.bank_erosion import Erosion
+
+USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
+
 
 DialogObject = Dict[str, PyQt5.QtCore.QObject]
 
 dialog: DialogObject
 
+r_dir = Path(__file__).resolve().parent
 
 def gui_text(key: str, prefix: str = "gui_", dict: Dict[str, Any] = {}):
     """
@@ -1228,11 +1233,12 @@ def run_erosion() -> None:
     config = get_configuration()
     rootdir = os.getcwd()
     config_file = ConfigFile(config)
+    config_file.root_dir = rootdir
     config_file.relative_to(rootdir)
-    config = config_file.config
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
     matplotlib.pyplot.close("all")
-    bankerosion_core(config, rootdir, True)
+    erosion = Erosion(config_file, gui=True)
+    erosion.bankerosion_core()
     dialog["application"].restoreOverrideCursor()
 
 
@@ -1829,15 +1835,8 @@ def menu_about_qt():
 
 
 def menu_open_manual():
-    """
-    Open the user manual.
-
-    Arguments
-    ---------
-    None
-    """
-    progloc = get_progloc()
-    filename = progloc + os.path.sep + "dfastbe_usermanual.pdf"
+    """Open the user manual."""
+    filename = str(r_dir / USER_MANUAL_FILE_NAME)
     subprocess.Popen(filename, shell=True)
 
 
