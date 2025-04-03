@@ -3406,26 +3406,10 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="n">zfw_ini</span><span class="p">,</span> <span class="n">zss</span><span class="p">,</span> <span class="n">tauc</span><span class="p">,</span> <span class="n">dfw0</span><span class="p">,</span> <span class="n">dfw1</span><span class="p">,</span> <span class="n">distance_fw</span><span class="p">,</span> <span class="n">config_file</span>
         <span class="p">)</span>
 
-
         <span class="n">bankline_new_list</span><span class="p">,</span> <span class="n">bankline_eq_list</span><span class="p">,</span> <span class="n">vol_tot</span><span class="p">,</span> <span class="n">vol_eq</span><span class="p">,</span> <span class="n">dnav</span><span class="p">,</span> <span class="n">xyline_eq_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_postprocess_erosion_results</span><span class="p">(</span>
             <span class="n">bank_line_coords</span><span class="p">,</span> <span class="n">dn_tot</span><span class="p">,</span> <span class="n">linesize</span><span class="p">,</span> <span class="n">is_right_bank</span><span class="p">,</span> <span class="n">dn_eq</span><span class="p">,</span> <span class="n">dv_eq</span><span class="p">,</span> <span class="n">dv_tot</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">km_bin</span><span class="p">,</span>
             <span class="n">n_banklines</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">,</span> <span class="n">dn_flow_tot</span><span class="p">,</span> <span class="n">dn_ship_tot</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="c1"># write bank line files</span>
-        <span class="n">bankline_new_series</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bankline_new_list</span><span class="p">)</span>
-        <span class="n">bank_lines_new</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_features</span><span class="p">(</span><span class="n">bankline_new_series</span><span class="p">)</span>
-        <span class="n">bank_name</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;BankFile&quot;</span><span class="p">,</span> <span class="s2">&quot;bankfile&quot;</span><span class="p">)</span>
-
-        <span class="n">bank_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">_new.shp&quot;</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)})</span>
-        <span class="n">bank_lines_new</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)</span>
-
-        <span class="n">bankline_eq_series</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bankline_eq_list</span><span class="p">)</span>
-        <span class="n">banklines_eq</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_features</span><span class="p">(</span><span class="n">bankline_eq_series</span><span class="p">)</span>
-
-        <span class="n">bank_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">_eq.shp&quot;</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)})</span>
-        <span class="n">banklines_eq</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)</span>
 
         <span class="c1"># write eroded volumes per km (total)</span>
         <span class="n">erovol_file</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;EroVol&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;erovol.evo&quot;</span><span class="p">)</span>
@@ -3673,6 +3657,22 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;end_bankerosion&quot;</span><span class="p">)</span>
         <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- end analysis --&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_write_bankline_shapefiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bankline_new_list</span><span class="p">,</span> <span class="n">bankline_eq_list</span><span class="p">):</span>
+        <span class="n">bankline_new_series</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bankline_new_list</span><span class="p">)</span>
+        <span class="n">bank_lines_new</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_features</span><span class="p">(</span><span class="n">bankline_new_series</span><span class="p">)</span>
+        <span class="n">bank_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;BankFile&quot;</span><span class="p">,</span> <span class="s2">&quot;bankfile&quot;</span><span class="p">)</span>
+
+        <span class="n">bank_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">_new.shp&quot;</span>
+        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)})</span>
+        <span class="n">bank_lines_new</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)</span>
+
+        <span class="n">bankline_eq_series</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bankline_eq_list</span><span class="p">)</span>
+        <span class="n">banklines_eq</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_features</span><span class="p">(</span><span class="n">bankline_eq_series</span><span class="p">)</span>
+
+        <span class="n">bank_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">_eq.shp&quot;</span>
+        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)})</span>
+        <span class="n">banklines_eq</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -4054,23 +4054,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">1127</span>
 <span class="normal">1128</span>
 <span class="normal">1129</span>
-<span class="normal">1130</span>
-<span class="normal">1131</span>
-<span class="normal">1132</span>
-<span class="normal">1133</span>
-<span class="normal">1134</span>
-<span class="normal">1135</span>
-<span class="normal">1136</span>
-<span class="normal">1137</span>
-<span class="normal">1138</span>
-<span class="normal">1139</span>
-<span class="normal">1140</span>
-<span class="normal">1141</span>
-<span class="normal">1142</span>
-<span class="normal">1143</span>
-<span class="normal">1144</span>
-<span class="normal">1145</span>
-<span class="normal">1146</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">bankerosion_core</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1130</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">bankerosion_core</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the bank erosion analysis for a specified configuration.&quot;&quot;&quot;</span>
     <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- start analysis --&quot;</span><span class="p">)</span>
     <span class="n">log_text</span><span class="p">(</span>
@@ -4150,26 +4134,10 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">zfw_ini</span><span class="p">,</span> <span class="n">zss</span><span class="p">,</span> <span class="n">tauc</span><span class="p">,</span> <span class="n">dfw0</span><span class="p">,</span> <span class="n">dfw1</span><span class="p">,</span> <span class="n">distance_fw</span><span class="p">,</span> <span class="n">config_file</span>
     <span class="p">)</span>
 
-
     <span class="n">bankline_new_list</span><span class="p">,</span> <span class="n">bankline_eq_list</span><span class="p">,</span> <span class="n">vol_tot</span><span class="p">,</span> <span class="n">vol_eq</span><span class="p">,</span> <span class="n">dnav</span><span class="p">,</span> <span class="n">xyline_eq_list</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_postprocess_erosion_results</span><span class="p">(</span>
         <span class="n">bank_line_coords</span><span class="p">,</span> <span class="n">dn_tot</span><span class="p">,</span> <span class="n">linesize</span><span class="p">,</span> <span class="n">is_right_bank</span><span class="p">,</span> <span class="n">dn_eq</span><span class="p">,</span> <span class="n">dv_eq</span><span class="p">,</span> <span class="n">dv_tot</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">km_bin</span><span class="p">,</span>
         <span class="n">n_banklines</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">,</span> <span class="n">dn_flow_tot</span><span class="p">,</span> <span class="n">dn_ship_tot</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="c1"># write bank line files</span>
-    <span class="n">bankline_new_series</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bankline_new_list</span><span class="p">)</span>
-    <span class="n">bank_lines_new</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_features</span><span class="p">(</span><span class="n">bankline_new_series</span><span class="p">)</span>
-    <span class="n">bank_name</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;BankFile&quot;</span><span class="p">,</span> <span class="s2">&quot;bankfile&quot;</span><span class="p">)</span>
-
-    <span class="n">bank_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">_new.shp&quot;</span>
-    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)})</span>
-    <span class="n">bank_lines_new</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)</span>
-
-    <span class="n">bankline_eq_series</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bankline_eq_list</span><span class="p">)</span>
-    <span class="n">banklines_eq</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_features</span><span class="p">(</span><span class="n">bankline_eq_series</span><span class="p">)</span>
-
-    <span class="n">bank_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">_eq.shp&quot;</span>
-    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)})</span>
-    <span class="n">banklines_eq</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)</span>
 
     <span class="c1"># write eroded volumes per km (total)</span>
     <span class="n">erovol_file</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;EroVol&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;erovol.evo&quot;</span><span class="p">)</span>
