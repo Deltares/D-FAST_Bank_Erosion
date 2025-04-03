@@ -26,17 +26,22 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Optional, Tuple
+from typing import Tuple
+import os
+from pathlib import Path
+import argparse
+from dfastbe.cmd import run
+import matplotlib
+matplotlib.use("Qt5Agg")
+
 
 # ------------------------------------------------------------------------------
 # Needed for Nuitka compilation
 # ------------------------------------------------------------------------------
-import os
-import pathlib
 
 is_nuitka = "__compiled__" in globals()
 if is_nuitka:
-    root = str(pathlib.Path(__file__).parent)
+    root = str(Path(__file__).parent)
     os.environ["GDAL_DATA"] = root + os.sep + "gdal"
     os.environ["PROJ_LIB"] = root + os.sep + "proj"
     os.environ["MATPLOTLIBDATA"] = root + os.sep + "matplotlib" + os.sep + "mpl-data"
@@ -47,14 +52,7 @@ if is_nuitka:
     pyproj.datadir.set_data_dir(root + os.sep + "proj")
     import pyproj
 
-
 # ------------------------------------------------------------------------------
-import matplotlib
-
-matplotlib.use("Qt5Agg")
-
-import argparse
-import dfastbe.cmd
 
 
 def parse_arguments() -> Tuple[str, str, str]:
