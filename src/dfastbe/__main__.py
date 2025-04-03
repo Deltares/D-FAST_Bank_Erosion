@@ -56,23 +56,18 @@ if is_nuitka:
 
 
 def parse_arguments() -> Tuple[str, str, str]:
-    """
-    Parse the command line arguments.
-
-    Arguments
-    ---------
-    None
+    """Parse the command line arguments.
 
     Raises
     ------
-    Exception
+    LanguageError:
         If invalid language is specified.
 
     Returns
     -------
     language : str
         Language identifier ("NL" or "UK").
-    runmode : str
+    run_mode : str
         Specification of the run mode ("BANKLINES", "BANKEROSION" or "GUI")
     config_name : str
         Name of the configuration file.
@@ -94,11 +89,11 @@ def parse_arguments() -> Tuple[str, str, str]:
     configfile = args.config
 
     if language not in ["NL", "UK"]:
-        raise LanguageError(
-            "Incorrect language '{}' specified. Should read 'NL' or 'UK'.".format(
-                language
-            )
-        )
+        raise LanguageError(f"Incorrect language {language} specified. Should read 'NL' or 'UK'.")
+
+    if run_mode not in ["BANKLINES", "BANKEROSION", "GUI"]:
+        raise ValueError(f"Invalid mode `{run_mode}`. Choose from BANKLINES, BANKEROSION, or GUI.")
+
     return language, run_mode, configfile
 
 
@@ -109,8 +104,8 @@ class LanguageError(Exception):
 
 
 def main():
-    language, runmode, configfile = parse_arguments()
-    dfastbe.cmd.run(language, runmode, configfile)
+    language, run_mode, configfile = parse_arguments()
+    run(language, run_mode, configfile)
 
 if __name__ == "__main__":
     main()
