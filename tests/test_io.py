@@ -2,6 +2,7 @@ from typing import Dict
 import unittest
 from unittest.mock import patch
 
+import geopandas
 import numpy as np
 
 from dfastbe.io import ConfigFile, load_program_texts, log_text, get_text, read_fm_map,\
@@ -457,17 +458,6 @@ class Test_ConfigFile:
         with open("test_output.cfg", "r") as file:
             assert file.read() == config_data
 
-    @pytest.fixture
-    def path_dict(self) -> Dict:
-        """Fixture to create a dictionary for path resolution."""
-        return {
-            "General": {
-                "RiverKM": "inputs/rivkm_20m.xyc",
-                "BankDir": "output/banklines",
-                "FigureDir": "output/figures",
-            }
-        }
-
     def test_get_str(self, config: configparser.ConfigParser):
         """Test retrieving a string value."""
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
@@ -502,6 +492,34 @@ class Test_ConfigFile:
         start, end = config_file.get_km_bounds()
         assert start == pytest.approx(123.0, rel=1e-6)
         assert end == pytest.approx(128.0, rel=1e-6)
+
+    def test_get_search_lines(self):
+        """Test retrieving search lines."""
+        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+        mock_linestring = LineString([(0, 0), (1, 1), (2, 2)])
+
+        with patch("dfastbe.io.read_xyc", return_value=mock_linestring):
+            search_lines = config.get_search_lines()
+
+        assert len(search_lines) == 2
+        assert list(search_lines[0].coords) == [(0, 0), (1, 1), (2, 2)]
+
+    def test_get_bank_lines(self, config: configparser.ConfigParser):
+        """Test retrieving bank lines."""
+        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+        bank_lines = config.get_bank_lines("inputs")
+        assert isinstance(bank_lines, geopandas.geodataframe.GeoDataFrame)
+
+    @pytest.fixture
+    def path_dict(self) -> Dict:
+        """Fixture to create a dictionary for path resolution."""
+        return {
+            "General": {
+                "RiverKM": "inputs/rivkm_20m.xyc",
+                "BankDir": "output/banklines",
+                "FigureDir": "output/figures",
+            }
+        }
 
     def test_resolve(self, path_dict: Dict):
         """Test resolving paths in the configuration."""
