@@ -1302,28 +1302,28 @@ def load_program_texts(file_name: Union[str, Path]) -> None:
     file_name : str
         The name of the file to be read and parsed.
     """
-    text: List[str]
-    data: Dict[str, List[str]]
-
     global PROGTEXTS
 
     all_lines = open(file_name, "r").read().splitlines()
-    data = {}
-    text = []
+    data: Dict[str, List[str]] = {}
+    text: List[str] = []
     key = None
     for line in all_lines:
-        rline = line.strip()
-        if rline.startswith("[") and rline.endswith("]"):
-            if not key is None:
+        r_line = line.strip()
+        if r_line.startswith("[") and r_line.endswith("]"):
+            if key is not None:
                 data[key] = text
-            key = rline[1:-1]
+            key = r_line[1:-1]
             text = []
         else:
             text.append(line)
+
     if key in data.keys():
-        raise Exception('Duplicate entry for "{}" in "{}".'.format(key, file_name))
-    if not key is None:
+        raise ValueError(f"Duplicate entry for {key} in {file_name}.")
+
+    if key is not None:
         data[key] = text
+
     PROGTEXTS = data
 
 

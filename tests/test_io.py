@@ -1,6 +1,5 @@
 import unittest
 from unittest.mock import patch
-
 import numpy as np
 
 from dfastbe.io import ConfigFile, load_program_texts, log_text, get_text, read_fm_map,\
