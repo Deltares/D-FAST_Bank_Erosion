@@ -359,7 +359,7 @@ class ConfigFile:
         Returns:
             str: Location of configuration file relative to current working directory.
         """
-        cwd = os.getcwd()
+        cwd = str(Path.cwd())
         self.resolve(self.root_dir)
         self.relative_to(cwd)
         rootdir = relative_path(cwd, self.root_dir)

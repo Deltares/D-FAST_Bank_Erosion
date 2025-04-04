@@ -597,7 +597,7 @@ class Test_ConfigFile:
         config.read_dict(path_dict)
         config_file = ConfigFile(config, cwd / "test.cfg")
 
-        with patch("os.getcwd", return_value=str(cwd)):
+        with patch("dfastbe.io.Path.cwd", return_value=str(cwd)):
             rootdir = config_file.adjust_filenames()
 
         assert rootdir == "."
