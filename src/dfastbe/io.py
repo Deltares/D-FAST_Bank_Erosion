@@ -27,9 +27,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 import configparser
-import os
-import os.path
 from pathlib import Path
+import os
 from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, TypedDict, Union
 
 import geopandas
@@ -1835,24 +1834,23 @@ def absolute_path(rootdir: str, path: str) -> str:
     """
     Convert a relative path to an absolute path.
 
-    Arguments
-    ---------
-    rootdir : str
-        Any relative paths should be given relative to this location.
-    path : str
-        A relative or absolute location.
+    Args:
+        rootdir (str): Any relative paths should be given relative to this location.
+        path (str): A relative or absolute location.
 
-    Returns
-    -------
-    path : str
-        An absolute location.
+    Returns:
+        str: An absolute location.
     """
-    if path == "":
-        path = path
-    else:
-        path = os.path.normpath(os.path.join(rootdir, path))
+    if not path:
+        return path
+    root_path = Path(rootdir)
+    target_path = Path(path)
 
-    return path
+    if target_path.is_absolute():
+        return str(target_path)
+
+    resolved_path = (root_path / target_path).resolve()
+    return str(resolved_path)
 
 
 def relative_path(rootdir: str, file: str) -> str:

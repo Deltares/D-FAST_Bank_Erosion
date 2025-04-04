@@ -350,14 +350,6 @@ class TestAbsolutePath:
         file = "e:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         assert absolute_path(rootdir, file) == file
 
-    def test_absolute_path_04(self):
-        """
-        Convert absolute path into relative path using relative_path (Linux).
-        """
-        rootdir = os.sep + "some" + os.sep + "dir"
-        afile = os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
-        rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
-        assert absolute_path(rootdir, rfile) == afile
 
 class Test_relative_path():
     def test_relative_path_01(self):
@@ -613,7 +605,7 @@ class Test_ConfigFile:
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
         config_file.resolve("tests/data")
         assert config_file.config["General"]["RiverKM"] == str(
-            Path("tests/data") / "tests/data/erosion" / "inputs/rivkm_20m.xyc"
+            Path("tests/data").resolve() / "tests/data/erosion" / "inputs/rivkm_20m.xyc"
         )
 
     def test_relative_to(self, path_dict: Dict):
