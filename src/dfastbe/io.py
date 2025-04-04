@@ -28,7 +28,6 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
 import configparser
 from pathlib import Path
-import os
 from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, TypedDict, Union
 
 import geopandas
@@ -1237,7 +1236,7 @@ def read_simulation_data(
         "chz_face": dum,
     }
     # determine the file type
-    path, name = os.path.split(file_name)
+    name = Path(file_name).name
     if name.endswith("map.nc"):
         log_text("read_grid", indent=indent)
         sim["x_node"] = read_fm_map(file_name, "x", location="node")
@@ -2104,14 +2103,13 @@ def sim2nc(oldfile: str) -> str:
     ncfile : str
         Name of the netCDF file as created by sim2ugrid.m.
     """
-    path, name = os.path.split(oldfile)
+    name = Path(oldfile).name
     if name[:3] == "SDS":
         # SDS-case_map.nc
         ncfile = oldfile + "_map.nc"
     elif name[:4] == "trim":
         # trim-case_map.nc
-        basename, ext = os.path.splitext(oldfile)
-        ncfile = basename + "_map.nc"
+        ncfile = f"{Path(oldfile).stem}_map.nc"
     else:
         raise Exception('Unable to determine file type for "{}"'.format(oldfile))
     return ncfile
