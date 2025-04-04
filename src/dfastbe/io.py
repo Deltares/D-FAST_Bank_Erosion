@@ -1857,26 +1857,23 @@ def relative_path(rootdir: str, file: str) -> str:
     """
     Convert an absolute path to a relative path.
 
-    Arguments
-    ---------
-    rootdir : str
-        Any relative paths will be given relative to this location.
-    file : str
-        An absolute location.
+    Args:
+        rootdir (str): Any relative paths will be given relative to this location.
+        file (str): An absolute location.
 
-    Returns
-    -------
-    rfile : str
-        An absolute or relative location (relative only if it's on the same drive as rootdir).
+    Returns:
+        str: A relative location if possible, otherwise the absolute location.
     """
-    if file == "":
+    if not file:
         return file
-    else:
-        try:
-            rfile = os.path.relpath(file, rootdir)
-            return rfile
-        except:
-            return file
+
+    root_path = Path(rootdir).resolve()
+    file_path = Path(file).resolve()
+
+    try:
+        return str(file_path.relative_to(root_path))
+    except ValueError:
+        return str(file_path)
 
 
 def read_xyc(

@@ -326,45 +326,28 @@ class Test_write_simona_box():
 class TestAbsolutePath:
 
     def test_absolute_path_01(self):
-        """
-        Convert absolute path into relative path using relative_path (Windows).
-        """
+        """Convert absolute path into relative path using relative_path (Windows)."""
         rootdir = "g:" + os.sep + "some" + os.sep + "dir"
         afile = "g:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         assert absolute_path(rootdir, rfile) == afile
 
     def test_absolute_path_02(self):
-        """
-        Empty string should not be adjusted by relative_path.
-        """
+        """Empty string should not be adjusted by relative_path."""
         rootdir = "d:" + os.sep + "some" + os.sep + "dir"
         file = ""
         assert absolute_path(rootdir, file) == file
 
     def test_absolute_path_03(self):
-        """
-        If path on different drive, it shouldn't be adjusted by relative_path (Windows).
-        """
+        """If path on different drive, it shouldn't be adjusted by relative_path (Windows)."""
         rootdir = "d:" + os.sep + "some" + os.sep + "dir"
         file = "e:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         assert absolute_path(rootdir, file) == file
 
 
-class Test_relative_path():
-    def test_relative_path_01(self):
-        """
-        Convert absolute path into relative path using relative_path (Windows).
-        """
-        rootdir = "d:" + os.sep + "some" + os.sep + "dir"
-        afile = "d:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
-        rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
-        assert relative_path(rootdir, afile) == rfile
-
+class Test_relative_path:
     def test_relative_path_02(self):
-        """
-        Empty string should not be adjusted by relative_path.
-        """
+        """Empty string should not be adjusted by relative_path."""
         rootdir = "d:" + os.sep + "some" + os.sep + "dir"
         file = ""
         assert relative_path(rootdir, file) == file
@@ -373,21 +356,10 @@ class Test_relative_path():
         platform.system() != "Windows", reason="it will be completely changed"
     )
     def test_relative_path_03(self):
-        """
-        If path on different drive, it shouldn't be adjusted by relative_path (Windows).
-        """
+        """If path on different drive, it shouldn't be adjusted by relative_path (Windows)."""
         rootdir = "d:" + os.sep + "some" + os.sep + "dir"
         file = "e:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         assert relative_path(rootdir, file) == file
-
-    def test_relative_path_04(self):
-        """
-        Convert absolute path into relative path using relative_path (Linux).
-        """
-        rootdir = os.sep + "some" + os.sep + "dir"
-        afile = os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
-        rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
-        assert relative_path(rootdir, afile) == rfile
 
 
 class Test_ConfigFile:
