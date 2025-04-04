@@ -37,7 +37,6 @@ import pandas
 import geopandas
 import shapely
 from shapely.geometry import Point
-import pathlib
 
 MAX_RIVER_WIDTH = 1000
 
@@ -123,14 +122,14 @@ class ConfigFile:
         self._root_dir = value
 
     @classmethod
-    def read(cls, path: Union[str, pathlib.Path]) -> "ConfigFile":
+    def read(cls, path: Union[str, Path]) -> "ConfigFile":
         """Read a configParser object (configuration file).
 
         Reads the config file using the standard `configparser`. Falls back to a
         dedicated reader compatible with old waqbank files.
 
         Args:
-            path (Union[str, pathlib.Path]): Path to the configuration file.
+            path (Union[str, Path]): Path to the configuration file.
 
         Returns:
             ConfigFile: Settings for the D-FAST Bank Erosion analysis.
@@ -2141,7 +2140,7 @@ def get_progloc() -> str:
     ---------
     None
     """
-    progloc = str(pathlib.Path(__file__).parent.absolute())
+    progloc = str(Path(__file__).parent.absolute())
     return progloc
 
 
