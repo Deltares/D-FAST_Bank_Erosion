@@ -25,14 +25,13 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-
-import os
+from pathlib import Path
 from dfastbe.io import ConfigFile
-from dfastbe.bank_erosion import bankerosion
+from dfastbe.bank_erosion import Erosion
 from dfastbe.bank_lines import BankLines
 from dfastbe.gui import main
-from dfastbe.io import get_progloc, load_program_texts
-
+from dfastbe.io import load_program_texts
+from dfastbe import __file__
 
 def run(
     language: str = "UK",
@@ -81,30 +80,24 @@ def run(
         run()
         ```
     """
-    prog_loc = get_progloc()
     language = language.upper()
 
     config_file = ConfigFile.read(configfile)
+    r_dir = Path(__file__).resolve().parent
 
-    try:
-        load_program_texts(f"{prog_loc}{os.path.sep}messages.{language}.ini")
-    except:
-        if language == "NL":
-            print(f"Het taalbestand 'messages.{language}.ini' kan niet worden geladen.")
-        else:
-            print(f"Unable to load language file 'messages.{language}.ini'")
+    load_program_texts( r_dir / f"messages.{language}.ini")
+    run_mode = run_mode.upper()
+    if run_mode == "BANKLINES":
+        bank_lines = BankLines(config_file)
+        bank_lines.detect()
+    elif run_mode == "BANKEROSION":
+        erosion = Erosion(config_file)
+        erosion.bankerosion_core()
+    elif run_mode == "GUI":
+        main(configfile)
     else:
-        run_mode = run_mode.upper()
-        if run_mode == "BANKLINES":
-            bank_lines = BankLines(config_file)
-            bank_lines.detect()
-        elif run_mode == "BANKEROSION":
-            bankerosion(configfile)
-        elif run_mode == "GUI":
-            main(configfile)
-        else:
-            raise Exception(
-                "Invalid run mode '{}' specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'.".format(
-                    run_mode
-                )
+        raise Exception(
+            "Invalid run mode '{}' specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'.".format(
+                run_mode
             )
+        )

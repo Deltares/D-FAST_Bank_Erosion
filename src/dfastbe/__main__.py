@@ -80,19 +80,27 @@ def parse_arguments() -> Tuple[str, str, str]:
     config_name : str
         Name of the configuration file.
     """
-    parser = argparse.ArgumentParser(description="D-FAST Morphological Impact.")
+    parser = argparse.ArgumentParser(description="D-FAST Bank Erosion.")
+    
     parser.add_argument(
-        "--language", help="display language 'NL' or 'UK' ('UK' is default)"
+        "--language",
+        choices=["UK", "NL"],
+        default="UK",
+        help=argparse.SUPPRESS
     )
-    parser.set_defaults(language="UK")
+
     parser.add_argument(
-        "--mode", help="run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is default)"
+        "--mode",
+        default="GUI",
+        help="run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is default)"
     )
-    parser.set_defaults(mode="GUI")
+
     parser.add_argument(
-        "--config", help="name of configuration file ('dfastbe.cfg' is default)"
+        "--config",
+        default="dfastbe.cfg",
+        help="name of configuration file ('dfastbe.cfg' is default)"
     )
-    parser.set_defaults(config="dfastbe.cfg")
+
     args = parser.parse_args()
 
     language = args.__dict__["language"].upper()

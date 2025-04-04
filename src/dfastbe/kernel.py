@@ -400,7 +400,10 @@ def get_km_eroded_volume(
     dvol : numpy.ndarray
         Array containing the accumulated eroded volume per chainage bin.
     """
-    bin_idx = numpy.rint((bank_km_mid - km_bin[0] - km_bin[2] / 2) / km_bin[2]).astype(
+    km_step = km_bin[2]
+    nbins = int(math.ceil((km_bin[1] - km_bin[0]) / km_step))
+    
+    bin_idx = numpy.rint((bank_km_mid - km_bin[0] - km_step / 2.0) / km_step).astype(
         numpy.int64
     )
     dvol_temp = numpy.bincount(bin_idx, weights=dv)
@@ -517,10 +520,11 @@ def get_zoom_extends(km_min: float, km_max: float, zoom_km_step: float, bank_crd
             range_crds = bank_crds[ib][irange, :]
             x = range_crds[:, 0]
             y = range_crds[:, 1]
-            xmin = min(xmin, min(x))
-            xmax = max(xmax, max(x))
-            ymin = min(ymin, min(y))
-            ymax = max(ymax, max(y))
+            if len(x) > 0:
+                xmin = min(xmin, min(x))
+                xmax = max(xmax, max(x))
+                ymin = min(ymin, min(y))
+                ymax = max(ymax, max(y))
         xyzoom.append((xmin, xmax, ymin, ymax))
 
     return kmzoom, xyzoom

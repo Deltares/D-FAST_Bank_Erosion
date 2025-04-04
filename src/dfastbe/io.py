@@ -33,10 +33,13 @@ import netCDF4
 import configparser
 import os
 import os.path
-import pandas
-import geopandas
+import pandas as pd
+import geopandas as gpd
+from geopandas.geodataframe import GeoDataFrame
+from geopandas.geoseries import GeoSeries
 import shapely
-from shapely.geometry import Point
+from shapely.prepared import prep
+from shapely.geometry import Point, linestring, LineString
 import pathlib
 from dfastio.xyc.models import XYCModel
 MAX_RIVER_WIDTH = 1000
@@ -98,7 +101,7 @@ class ConfigFile:
         self._root_dir = value
 
     @classmethod
-    def read(cls, path: Union[str, pathlib.Path]):
+    def read(cls, path: Union[str, Path]):
         """
         Read a configParser object (configuration file).
 
@@ -494,7 +497,7 @@ class ConfigFile:
         line = [None] * n_bank
         for b in range(n_bank):
             bankfile = self.config["Detect"][f"Line{b + 1}"]
-            log_text("read_search_line", dict={"nr": b + 1, "file": bankfile})
+            log_text("read_search_line", data={"nr": b + 1, "file": bankfile})
             line[b] = XYCModel.read_xyc(bankfile)
         return line
 
@@ -515,23 +518,23 @@ class ConfigFile:
         bank_name = self.get_str("General", "BankFile", "bankfile")
         bankfile = f"{bank_dir}{os.sep}{bank_name}.shp"
         if os.path.exists(bankfile):
-            log_text("read_banklines", dict={"file": bankfile})
-            banklines = geopandas.read_file(bankfile)
+            log_text("read_banklines", data={"file": bankfile})
+            banklines = gpd.read_file(bankfile)
         else:
             bankfile = bank_dir + os.sep + bank_name + "_#.xyc"
-            log_text("read_banklines", dict={"file": bankfile})
+            log_text("read_banklines", data={"file": bankfile})
             bankline_list = []
             b = 1
             while True:
                 bankfile = bank_dir + os.sep + bank_name + "_" + str(b) + ".xyc"
                 if os.path.exists(bankfile):
                     xy_bank = XYCModel.read_xyc(bankfile)
-                    bankline_list.append(shapely.geometry.LineString(xy_bank))
+                    bankline_list.append(LineString(xy_bank))
                     b = b + 1
                 else:
                     break
-            bankline_series = geopandas.geoseries.GeoSeries(bankline_list)
-            banklines = geopandas.geodataframe.GeoDataFrame.from_features(bankline_series)
+            bankline_series = GeoSeries(bankline_list)
+            banklines = GeoDataFrame.from_features(bankline_series)
         return banklines
 
     def get_parameter(
@@ -614,14 +617,14 @@ class ConfigFile:
                 parfield[ib] = np.zeros(len(bkm)) + rval
         except:
             if onefile:
-                log_text("read_param", dict={"param": key, "file": filename})
+                log_text("read_param", data={"param": key, "file": filename})
                 km_thr, val = get_kmval(filename, key, positive, valid)
             for ib, bkm in enumerate(bank_km):
                 if not onefile:
                     filename_i = filename + "_{}".format(ib + 1) + ext
                     log_text(
                         "read_param_one_bank",
-                        dict={"param": key, "i": ib + 1, "file": filename_i},
+                        data={"param": key, "i": ib + 1, "file": filename_i},
                     )
                     km_thr, val = get_kmval(filename_i, key, positive, valid)
                 if km_thr is None:
@@ -699,16 +702,16 @@ class ConfigFile:
             )
         return val
 
-    def get_xy_km(self) -> shapely.geometry.linestring.LineStringAdapter:
+    def get_xy_km(self) -> linestring.LineStringAdapter:
         """get_xy_km
 
         Returns
         -------
-        xykm : shapely.geometry.linestring.LineStringAdapter
+        xykm : linestring.LineStringAdapter
         """
         # get the chainage file
         km_file = self.get_str("General", "RiverKM")
-        log_text("read_chainage", dict={"file": km_file})
+        log_text("read_chainage", data={"file": km_file})
         xy_km = XYCModel.read_xyc(km_file, num_columns=3)
 
         # make sure that chainage is increasing with node index
@@ -875,6 +878,73 @@ class ConfigFile:
             except ValueError:
                 self.config[group][key] = relative_path(rootdir, val_str)
 
+    def get_plotting_flags(self, root_dir: str) -> Dict[str, bool]:
+        """Get the plotting flags from the configuration file.
+
+        Returns:
+            data (Dict[str, bool]):
+                Dictionary containing the plotting flags.
+                save_plot (bool): Flag indicating whether to save the plot.
+                save_plot_zoomed (bool): Flag indicating whether to save the zoomed plot.
+                zoom_km_step (float): Step size for zooming in on the plot.
+                close_plot (bool): Flag indicating whether to close the plot.
+        """
+        plot_data = self.get_bool("General", "Plotting", True)
+
+        if plot_data:
+            save_plot = self.get_bool("General", "SavePlots", True)
+            save_plot_zoomed = self.get_bool(
+                "General", "SaveZoomPlots", True
+            )
+            zoom_km_step = self.get_float("General", "ZoomStepKM", 1.0)
+            if zoom_km_step < 0.01:
+                save_plot_zoomed = False
+            close_plot = self.get_bool("General", "ClosePlots", False)
+        else:
+            save_plot = False
+            save_plot_zoomed = False
+            close_plot = False
+
+        data = {
+            "plot_data": plot_data,
+            "save_plot": save_plot,
+            "save_plot_zoomed": save_plot_zoomed,
+            "zoom_km_step": zoom_km_step,
+            "close_plot": close_plot,
+        }
+
+        # as appropriate, check output dir for figures and file format
+        if save_plot:
+            fig_dir = self.get_str(
+                "General", "FigureDir", f"{root_dir}{os.sep}figure"
+            )
+            log_text("figure_dir", data={"dir": fig_dir})
+            if os.path.exists(fig_dir):
+                log_text("overwrite_dir", data={"dir": fig_dir})
+            else:
+                os.makedirs(fig_dir)
+            plot_ext = self.get_str("General", "FigureExt", ".png")
+            data = data | {
+                "fig_dir": fig_dir,
+                "plot_ext": plot_ext,
+            }
+
+        return data
+
+    def get_output_dir(self, option: str) -> Path:
+        if option == "banklines":
+            output_dir = self.get_str("General", "BankDir")
+        else:
+            output_dir = self.get_str("Erosion", "OutputDir")
+
+        output_dir = Path(output_dir)
+        log_text(f"{option}_out", data={"dir": output_dir})
+        if output_dir.exists():
+            log_text("overwrite_dir", data={"dir": output_dir})
+        else:
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+        return output_dir
 
 class RiverData:
     """River data class."""
@@ -894,22 +964,22 @@ class RiverData:
             ```
         """
         self.config_file = config_file
-        self.profile: shapely.geometry.linestring.LineString = config_file.get_xy_km()
+        self.profile: linestring.LineString = config_file.get_xy_km()
         self.station_bounds: Tuple = config_file.get_km_bounds()
         self.start_station: float = self.station_bounds[0]
         self.end_station: float = self.station_bounds[1]
-        log_text("clip_chainage", dict={"low": self.start_station, "high": self.end_station})
-        self.masked_profile: shapely.geometry.linestring.LineString = self.mask_profile(self.station_bounds)
+        log_text("clip_chainage", data={"low": self.start_station, "high": self.end_station})
+        self.masked_profile: linestring.LineString = self.mask_profile(self.station_bounds)
         self.masked_profile_arr = np.array(self.masked_profile)
 
 
     @property
-    def bank_search_lines(self) -> List[shapely.geometry.linestring.LineStringAdapter]:
+    def bank_search_lines(self) -> List[linestring.LineStringAdapter]:
         """Get the bank search lines.
 
         Returns
         -------
-        search_lines : List[shapely.geometry.linestring.LineStringAdapter]
+        search_lines : List[linestring.LineStringAdapter]
             List of bank search lines.
         """
         return self.config_file.get_search_lines()
@@ -919,7 +989,7 @@ class RiverData:
         """Number of river bank search lines."""
         return len(self.bank_search_lines)
 
-    def mask_profile(self, bounds: Tuple[float, float]) -> shapely.geometry.linestring.LineStringAdapter:
+    def mask_profile(self, bounds: Tuple[float, float]) -> linestring.LineStringAdapter:
         """
         Clip a chainage line to the relevant reach.
 
@@ -930,7 +1000,7 @@ class RiverData:
 
         Returns
         -------
-        xykm1 : shapely.geometry.linestring.LineStringAdapter
+        xykm1 : linestring.LineStringAdapter
             Clipped river chainage line.
         """
         xy_km = self.profile
@@ -981,7 +1051,7 @@ class RiverData:
                 # whole range available selected
                 pass
             else:
-                xy_km = shapely.geometry.LineString([x0] + xy_km.coords[start_i:])
+                xy_km = LineString([x0] + xy_km.coords[start_i:])
         elif end_i == 0:
             raise Exception(
                 "Upper chainage bound {} is smaller than the minimum chainage {} available".format(
@@ -998,28 +1068,28 @@ class RiverData:
                 # value close to the previous point (end_i - 1), so let's skip that one
                 end_i = end_i - 1
             if x0 is None:
-                xy_km = shapely.geometry.LineString(xy_km.coords[:end_i] + [x1])
+                xy_km = LineString(xy_km.coords[:end_i] + [x1])
             else:
-                xy_km = shapely.geometry.LineString([x0] + xy_km.coords[start_i:end_i] + [x1])
+                xy_km = LineString([x0] + xy_km.coords[start_i:end_i] + [x1])
         return xy_km
 
     def clip_search_lines(
         self,
         max_river_width: float = MAX_RIVER_WIDTH,
-    ) -> Tuple[List[shapely.geometry.linestring.LineStringAdapter], float]:
+    ) -> Tuple[List[linestring.LineStringAdapter], float]:
         """
         Clip the list of lines to the envelope of certain size surrounding a reference line.
 
         Arg:
-            search_lines : List[shapely.geometry.linestring.LineStringAdapter]
+            search_lines : List[linestring.LineStringAdapter]
                 List of search lines to be clipped.
-            river_profile : shapely.geometry.linestring.LineStringAdapter
+            river_profile : linestring.LineStringAdapter
                 Reference line.
             max_river_width: float
                 Maximum distance away from river_profile.
 
         Returns:
-            search_lines : List[shapely.geometry.linestring.LineStringAdapter]
+            search_lines : List[linestring.LineStringAdapter]
                 List of clipped search lines.
             max_distance: float
                 Maximum distance from any point within line to reference line.
@@ -1062,6 +1132,11 @@ class RiverData:
 
         return search_lines, max_distance
 
+    def read_river_axis(self):
+        river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
+        log_text("read_river_axis", data={"file": river_axis_file})
+        river_axis = XYCModel.read_xyc(river_axis_file)
+        return river_axis
 
 def read_simulation_data(file_name: str, indent: str = "") -> Tuple[SimulationObject, float]:
     """
@@ -1183,13 +1258,13 @@ def clip_simulation_data(
     y_min = bbox.coords[0][1]
     y_max = bbox.coords[2][1]
 
-    xy_b_prep = shapely.prepared.prep(xy_buffer)
+    xy_b_prep = prep(xy_buffer)
     x = sim["x_node"]
     y = sim["y_node"]
     nnodes = x.shape
     keep = (x > x_min) & (x < x_max) & (y > y_min) & (y < y_max)
     for i in range(x.size):
-        if keep[i] and not xy_b_prep.contains(shapely.geometry.Point((x[i], y[i]))):
+        if keep[i] and not xy_b_prep.contains(Point((x[i], y[i]))):
             keep[i] = False
 
     fnc = sim["facenode"]
@@ -1215,50 +1290,48 @@ def clip_simulation_data(
     return sim
 
 
-def load_program_texts(filename: str) -> None:
-    """
-    Load texts from configuration file, and store globally for access.
+def load_program_texts(file_name: Union[str, Path]) -> None:
+    """Load texts from a configuration file, and store globally for access.
 
-    This routine reads the text file "filename", and detects the keywords
+    This routine reads the text file "file_name", and detects the keywords
     indicated by lines starting with [ and ending with ]. The content is
     placed in a global dictionary PROGTEXTS which may be queried using the
-    routine "get_text". These routines are used to implement multi-
-    language support.
+    routine "get_text". These routines are used to implement multi-language support.
 
     Arguments
     ---------
-    filename : str
+    file_name : str
         The name of the file to be read and parsed.
     """
     text: List[str]
-    dict: Dict[str, List[str]]
+    data: Dict[str, List[str]]
 
     global PROGTEXTS
 
-    all_lines = open(filename, "r").read().splitlines()
-    dict = {}
+    all_lines = open(file_name, "r").read().splitlines()
+    data = {}
     text = []
     key = None
     for line in all_lines:
         rline = line.strip()
         if rline.startswith("[") and rline.endswith("]"):
-            if not key is None:
-                dict[key] = text
+            if key is not None:
+                data[key] = text
             key = rline[1:-1]
             text = []
         else:
             text.append(line)
-    if key in dict.keys():
-        raise Exception('Duplicate entry for "{}" in "{}".'.format(key, filename))
-    if not key is None:
-        dict[key] = text
-    PROGTEXTS = dict
+    if key in data.keys():
+        raise Exception('Duplicate entry for "{}" in "{}".'.format(key, file_name))
+    if key is not None:
+        data[key] = text
+    PROGTEXTS = data
 
 
 def log_text(
     key: str,
     file: Optional[TextIO] = None,
-    dict: Dict[str, Any] = {},
+    data: Dict[str, Any] = {},
     repeat: int = 1,
     indent: str = "",
 ) -> None:
@@ -1271,7 +1344,7 @@ def log_text(
         The key for the text to show to the user.
     file : Optional[TextIO]
         The file to write to (None for writing to standard out).
-    dict : Dict[str, Any]
+    data : Dict[str, Any]
         A dictionary used for placeholder expansions (default empty).
     repeat : int
         The number of times that the same text should be repeated (default 1).
@@ -1282,10 +1355,10 @@ def log_text(
     -------
     None
     """
-    str = get_text(key)
+    str_value = get_text(key)
     for r in range(repeat):
-        for s in str:
-            sexp = s.format(**dict)
+        for s in str_value:
+            sexp = s.format(**data)
             if file is None:
                 print(indent + sexp)
             else:
@@ -1337,10 +1410,10 @@ def get_text(key: str) -> List[str]:
     global PROGTEXTS
 
     try:
-        str = PROGTEXTS[key]
+        str_value = PROGTEXTS[key]
     except:
-        str = ["No message found for " + key]
-    return str
+        str_value = ["No message found for " + key]
+    return str_value
 
 
 def read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndarray:
@@ -1740,9 +1813,8 @@ def relative_path(rootdir: str, file: str) -> str:
             return file
 
 
-
 def write_shp_pnt(
-    xy: np.ndarray, dict: Dict[str, np.ndarray], filename: str
+    xy: np.ndarray, data: Dict[str, np.ndarray], filename: str
 ) -> None:
     """
     Write a shape point file with x, y, and values.
@@ -1751,7 +1823,7 @@ def write_shp_pnt(
     ---------
     xy : np.ndarray
         N x 2 array containing x and y coordinates.
-    dict : Dict[str, np.ndarray]
+    data : Dict[str, np.ndarray]
         Dictionary of quantities to be written, each np array should have length k.
     filename : str
         Name of the file to be written.
@@ -1760,13 +1832,13 @@ def write_shp_pnt(
     -------
     None
     """
-    xy_Points = [shapely.geometry.Point(xy1) for xy1 in xy]
-    geom = geopandas.geoseries.GeoSeries(xy_Points)
-    write_shp(geom, dict, filename)
+    xy_Points = [Point(xy1) for xy1 in xy]
+    geom = GeoSeries(xy_Points)
+    write_shp(geom, data, filename)
 
 
 def write_shp(
-    geom: geopandas.geoseries.GeoSeries, dict: Dict[str, np.ndarray], filename: str
+    geom: GeoSeries, data: Dict[str, np.ndarray], filename: str
 ) -> None:
     """Write a shape file.
 
@@ -1777,7 +1849,7 @@ def write_shp(
     ---------
     geom : geopandas.geoseries.GeoSeries
         geopandas GeoSeries containing k geometries.
-    dict : Dict[str, np.ndarray]
+    data : Dict[str, np.ndarray]
         Dictionary of quantities to be written, each np array should have length k.
     filename : str
         Name of the file to be written.
@@ -1786,17 +1858,17 @@ def write_shp(
     -------
     None
     """
-    val_DataFrame = pandas.DataFrame(dict)
-    geopandas.GeoDataFrame(val_DataFrame, geometry=geom).to_file(filename)
+    val_DataFrame = pd.DataFrame(data)
+    GeoDataFrame(val_DataFrame, geometry=geom).to_file(filename)
 
 
-def write_csv(dict: Dict[str, np.ndarray], filename: str) -> None:
+def write_csv(data: Dict[str, np.ndarray], filename: str) -> None:
     """
     Write a data to csv file.
 
     Arguments
     ---------
-    dict : Dict[str, np.ndarray]
+    data : Dict[str, np.ndarray]
         Value(s) to be written.
     filename : str
         Name of the file to be written.
@@ -1805,7 +1877,7 @@ def write_csv(dict: Dict[str, np.ndarray], filename: str) -> None:
     -------
     None
     """
-    keys = [key for key in dict.keys()]
+    keys = [key for key in data.keys()]
     header = ""
     for i in range(len(keys)):
         if i < len(keys) - 1:
@@ -1813,7 +1885,7 @@ def write_csv(dict: Dict[str, np.ndarray], filename: str) -> None:
         else:
             header = header + '"' + keys[i] + '"'
 
-    data = np.column_stack([array for array in dict.values()])
+    data = np.column_stack([array for array in data.values()])
     np.savetxt(filename, data, delimiter=", ", header=header, comments="")
 
 
@@ -1942,7 +2014,7 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
         Array containing the values.
     """
     # print("Trying to read: ",filename)
-    P = pandas.read_csv(
+    P = pd.read_csv(
         filename,
         names=["Chainage", "Val"],
         skipinitialspace=True,

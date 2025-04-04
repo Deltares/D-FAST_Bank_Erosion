@@ -24,6 +24,7 @@ d-fast-io = { git = "https://github.com/Deltares/D-FAST_Commons.git", branch = "
 
 [tool.poetry.group.dev.dependencies]
 nuitka = "^1.3.8"
+imageio = "^2.33.1"
 pytest = "^7.2.1"
 pytest-cov = "^6.0.0"
 black = "^22.12.0"
@@ -67,6 +68,18 @@ profile = "black"
 line_length = 88
 multi_line_output = 3
 
+[tool.pytest.ini_options]
+addopts = [ "--ignore=tests-dist",
+            "--cov",
+            "--cov-report=term",
+            "--cov-report=html",
+            "--cov-report=xml:coverage-reports/coverage.xml",
+]
+testpaths="tests"
+python_functions=["given_*",
+                    "Given_*",
+                    "test_*",
+                    "Test_*"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

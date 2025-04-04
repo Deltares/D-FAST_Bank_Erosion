@@ -72,7 +72,7 @@ class Test_log_text:
         key = "reach"
         dict = {"reach": "ABC"}
         with captured_output() as (out, err):
-            log_text(key, dict=dict)
+            log_text(key, data=dict)
         outstr = out.getvalue().splitlines()
         strref = ['The measure is located on reach ABC']
         assert outstr == strref
@@ -85,7 +85,7 @@ class Test_log_text:
         dict = {"reach": "ABC"}
         filename = "test.log"
         with open(filename, "w") as f:
-            log_text(key, dict=dict, file=f)
+            log_text(key, data=dict, file=f)
         all_lines = open(filename, "r").read().splitlines()
         strref = ['The measure is located on reach ABC']
         assert all_lines == strref
