@@ -1034,14 +1034,12 @@ class ConfigFile:
 
         # as appropriate, check output dir for figures and file format
         if save_plot:
-            fig_dir = self.get_str(
-                "General", "FigureDir", f"{root_dir}{os.sep}figure"
-            )
+            fig_dir = self.get_str("General", "FigureDir", Path(root_dir) / "figure")
             log_text("figure_dir", data={"dir": fig_dir})
-            if os.path.exists(fig_dir):
+            path_fig_dir = Path(fig_dir)
+            if path_fig_dir.exists():
                 log_text("overwrite_dir", data={"dir": fig_dir})
-            else:
-                os.makedirs(fig_dir)
+            path_fig_dir.mkdir(parents=True, exist_ok=True)
             plot_ext = self.get_str("General", "FigureExt", ".png")
             data = data | {
                 "fig_dir": fig_dir,

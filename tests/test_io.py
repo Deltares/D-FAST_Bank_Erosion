@@ -665,6 +665,37 @@ class Test_ConfigFile:
         assert config_result["General"]["plotting"] == "yes"
         assert config_result["Detect"]["SimFile"] == "inputs/sim0270/SDS-j19_map.nc"
 
+    @pytest.fixture
+    def plotting_data(self) -> Dict:
+        """Fixture to create a dictionary for plotting flags."""
+        return {
+            "General": {
+                "Plotting": "yes",
+                "SavePlots": "yes",
+                "SaveZoomPlots": "no",
+                "ZoomStepKM": "0.5",
+                "ClosePlots": "no",
+                "FigureDir": "output/figures",
+                "FigureExt": ".png",
+            }
+        }
+
+    def test_get_plotting_flags(self, plotting_data: Dict, fs: FakeFilesystem):
+        """Test the get_plotting_flags method."""
+        config = configparser.ConfigParser()
+        config.read_dict(plotting_data)
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        root_dir = Path("tests/data/erosion")
+        plotting_flags = config_file.get_plotting_flags(str(root_dir))
+
+        assert plotting_flags["plot_data"] is True
+        assert plotting_flags["save_plot"] is True
+        assert plotting_flags["save_plot_zoomed"] is False
+        assert plotting_flags["zoom_km_step"] == 0.5
+        assert plotting_flags["close_plot"] is False
+        assert plotting_flags["fig_dir"] == str(root_dir / "output/figures")
+        assert plotting_flags["plot_ext"] == ".png"
+
 
 class TestConfigFileE2E:
     def test_initialization(self):
