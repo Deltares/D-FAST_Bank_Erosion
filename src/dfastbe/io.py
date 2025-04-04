@@ -25,16 +25,17 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-from pathlib import Path
-from typing import Tuple, Any, List, Union, Dict, Optional, TextIO, Callable, TypedDict
-import numpy as np
 
-import netCDF4
 import configparser
 import os
 import os.path
-import pandas
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, TypedDict, Union
+
 import geopandas
+import netCDF4
+import numpy as np
+import pandas
 import shapely
 from shapely.geometry import Point
 
@@ -94,8 +95,8 @@ class ConfigFile:
     ):
         self._config = config
         if path:
-            self.path = path
-            self.root_dir = Path(path).parent
+            self.path = Path(path)
+            self.root_dir = self.path.parent
             self.adjust_filenames()
 
     @property
@@ -104,7 +105,7 @@ class ConfigFile:
         return self._config
 
     @config.setter
-    def config(self, value:configparser.ConfigParser):
+    def config(self, value: configparser.ConfigParser):
         self._config = value
 
     @property
@@ -215,13 +216,17 @@ class ConfigFile:
             config = move_parameter_location(
                 config, "General", "Delft3Dfile", "Detect", "SimFile", convert=sim2nc
             )
-            config = move_parameter_location(config, "General", "SDSfile", "Detect", "SimFile", convert=sim2nc)
+            config = move_parameter_location(
+                config, "General", "SDSfile", "Detect", "SimFile", convert=sim2nc
+            )
             config = move_parameter_location(config, "General", "SimFile", "Detect")
             config = move_parameter_location(config, "General", "NBank", "Detect")
             config_file = ConfigFile(config)
             n_bank = config_file.get_int("Detect", "NBank", default=0, positive=True)
             for i in range(1, n_bank + 1):
-                config = move_parameter_location(config, "General", f"Line{i}", "Detect")
+                config = move_parameter_location(
+                    config, "General", f"Line{i}", "Detect"
+                )
 
             config = move_parameter_location(config, "General", "WaterDepth", "Detect")
             config = move_parameter_location(config, "General", "DLines", "Detect")
@@ -231,7 +236,9 @@ class ConfigFile:
             config = move_parameter_location(config, "General", "RiverAxis", "Erosion")
             config = move_parameter_location(config, "General", "Fairway", "Erosion")
             config = move_parameter_location(config, "General", "RefLevel", "Erosion")
-            config = move_parameter_location(config, "General", "OutputInterval", "Erosion")
+            config = move_parameter_location(
+                config, "General", "OutputInterval", "Erosion"
+            )
             config = move_parameter_location(config, "General", "OutputDir", "Erosion")
             config = move_parameter_location(config, "General", "BankNew", "Erosion")
             config = move_parameter_location(config, "General", "BankEq", "Erosion")
@@ -243,13 +250,27 @@ class ConfigFile:
 
             for i in range(1, n_level + 1):
                 config = move_parameter_location(
-                    config,"General", f"Delft3Dfile{i}", "Erosion", f"SimFile{i}", convert=sim2nc,
-                    )
+                    config,
+                    "General",
+                    f"Delft3Dfile{i}",
+                    "Erosion",
+                    f"SimFile{i}",
+                    convert=sim2nc,
+                )
                 config = move_parameter_location(
-                    config, "General", f"SDSfile{i}", "Erosion", f"SimFile{i}", convert=sim2nc,
-                    )
-                config = move_parameter_location(config, "General", f"SimFile{i}", "Erosion")
-                config = move_parameter_location(config, "General", f"PDischarge{i}", "Erosion")
+                    config,
+                    "General",
+                    f"SDSfile{i}",
+                    "Erosion",
+                    f"SimFile{i}",
+                    convert=sim2nc,
+                )
+                config = move_parameter_location(
+                    config, "General", f"SimFile{i}", "Erosion"
+                )
+                config = move_parameter_location(
+                    config, "General", f"PDischarge{i}", "Erosion"
+                )
 
             config = move_parameter_location(config, "General", "ShipType", "Erosion")
             config = move_parameter_location(config, "General", "VShip", "Erosion")
@@ -261,20 +282,38 @@ class ConfigFile:
 
             config = move_parameter_location(config, "General", "Classes", "Erosion")
             config = move_parameter_location(config, "General", "BankType", "Erosion")
-            config = move_parameter_location(config, "General", "ProtectLevel", "Erosion", "ProtectionLevel")
+            config = move_parameter_location(
+                config, "General", "ProtectLevel", "Erosion", "ProtectionLevel"
+            )
             config = move_parameter_location(config, "General", "Slope", "Erosion")
             config = move_parameter_location(config, "General", "Reed", "Erosion")
             config = move_parameter_location(config, "General", "VelFilter", "Erosion")
 
             for i in range(1, n_level + 1):
-                config = move_parameter_location(config, "General", f"ShipType{i}", "Erosion")
-                config = move_parameter_location(config, "General", f"VShip{i}", "Erosion")
-                config = move_parameter_location(config, "General", f"NShip{i}", "Erosion")
-                config = move_parameter_location(config, "General", f"NWave{i}", "Erosion")
-                config = move_parameter_location(config, "General", f"Draught{i}", "Erosion")
-                config = move_parameter_location(config, "General", f"Slope{i}", "Erosion")
-                config = move_parameter_location(config, "General", f"Reed{i}", "Erosion")
-                config = move_parameter_location(config, "General", f"EroVol{i}", "Erosion")
+                config = move_parameter_location(
+                    config, "General", f"ShipType{i}", "Erosion"
+                )
+                config = move_parameter_location(
+                    config, "General", f"VShip{i}", "Erosion"
+                )
+                config = move_parameter_location(
+                    config, "General", f"NShip{i}", "Erosion"
+                )
+                config = move_parameter_location(
+                    config, "General", f"NWave{i}", "Erosion"
+                )
+                config = move_parameter_location(
+                    config, "General", f"Draught{i}", "Erosion"
+                )
+                config = move_parameter_location(
+                    config, "General", f"Slope{i}", "Erosion"
+                )
+                config = move_parameter_location(
+                    config, "General", f"Reed{i}", "Erosion"
+                )
+                config = move_parameter_location(
+                    config, "General", f"EroVol{i}", "Erosion"
+                )
 
         return config
 
@@ -364,7 +403,9 @@ class ConfigFile:
             if default is not None:
                 val = default
             else:
-                raise ConfigFileError(f"No value specified for required keyword {key} in block {group}.")
+                raise ConfigFileError(
+                    f"No value specified for required keyword {key} in block {group}."
+                )
         return val
 
     def get_bool(
@@ -398,17 +439,19 @@ class ConfigFile:
         try:
             str_val = self.config[group][key].lower()
             val = (
-                    (str_val == "yes")
-                    or (str_val == "y")
-                    or (str_val == "true")
-                    or (str_val == "t")
-                    or (str_val == "1")
+                (str_val == "yes")
+                or (str_val == "y")
+                or (str_val == "true")
+                or (str_val == "t")
+                or (str_val == "1")
             )
         except KeyError:
             if default is not None:
                 val = default
             else:
-                raise ConfigFileError(f"No boolean value specified for required keyword {key} in block {group}.")
+                raise ConfigFileError(
+                    f"No boolean value specified for required keyword {key} in block {group}."
+                )
 
         return val
 
@@ -577,25 +620,25 @@ class ConfigFile:
             List[np.ndarray]: List of arrays containing the x,y-coordinates of a bank lines.
         """
         bank_name = self.get_str("General", "BankFile", "bankfile")
-        bankfile = f"{bank_dir}{os.sep}{bank_name}.shp"
-        if os.path.exists(bankfile):
-            log_text("read_banklines", dict={"file": bankfile})
-            banklines = geopandas.read_file(bankfile)
-        else:
-            bankfile = bank_dir + os.sep + bank_name + "_#.xyc"
-            log_text("read_banklines", dict={"file": bankfile})
-            bankline_list = []
-            b = 1
-            while True:
-                bankfile = bank_dir + os.sep + bank_name + "_" + str(b) + ".xyc"
-                if os.path.exists(bankfile):
-                    xy_bank = read_xyc(bankfile)
-                    bankline_list.append(shapely.geometry.LineString(xy_bank))
-                    b = b + 1
-                else:
-                    break
-            bankline_series = geopandas.geoseries.GeoSeries(bankline_list)
-            banklines = geopandas.geodataframe.GeoDataFrame.from_features(bankline_series)
+        bankfile = Path(bank_dir) / f"{bank_name}.shp"
+        if bankfile.exists():
+            log_text("read_banklines", dict={"file": str(bankfile)})
+            return geopandas.read_file(bankfile)
+
+        bankfile = Path(bank_dir) / f"{bank_name}_#.xyc"
+        log_text("read_banklines", dict={"file": str(bankfile)})
+        bankline_list = []
+        b = 1
+        while True:
+            xyc_file = Path(bank_dir) / f"{bank_name}_{b}.xyc"
+            if not xyc_file.exists():
+                break
+
+            xy_bank = read_xyc(xyc_file)
+            bankline_list.append(shapely.geometry.LineString(xy_bank))
+            b += 1
+        bankline_series = geopandas.geoseries.GeoSeries(bankline_list)
+        banklines = geopandas.geodataframe.GeoDataFrame.from_features(bankline_series)
         return banklines
 
     def get_parameter(
@@ -756,7 +799,7 @@ class ConfigFile:
             obrack = str_val.find("[")
             cbrack = str_val.find("]")
             if obrack >= 0 and cbrack >= 0:
-                str_val = str_val[obrack + 1: cbrack - 1]
+                str_val = str_val[obrack + 1 : cbrack - 1]
             val_list = [float(fstr) for fstr in str_val.split(":")]
             if val_list[0] > val_list[1]:
                 val = (val_list[1], val_list[0])
@@ -982,10 +1025,13 @@ class RiverData:
         self.station_bounds: Tuple = config_file.get_km_bounds()
         self.start_station: float = self.station_bounds[0]
         self.end_station: float = self.station_bounds[1]
-        log_text("clip_chainage", dict={"low": self.start_station, "high": self.end_station})
-        self.masked_profile: shapely.geometry.linestring.LineString = self.mask_profile(self.station_bounds)
+        log_text(
+            "clip_chainage", dict={"low": self.start_station, "high": self.end_station}
+        )
+        self.masked_profile: shapely.geometry.linestring.LineString = self.mask_profile(
+            self.station_bounds
+        )
         self.masked_profile_arr = np.array(self.masked_profile)
-
 
     @property
     def bank_search_lines(self) -> List[shapely.geometry.linestring.LineStringAdapter]:
@@ -1003,7 +1049,9 @@ class RiverData:
         """Number of river bank search lines."""
         return len(self.bank_search_lines)
 
-    def mask_profile(self, bounds: Tuple[float, float]) -> shapely.geometry.linestring.LineStringAdapter:
+    def mask_profile(
+        self, bounds: Tuple[float, float]
+    ) -> shapely.geometry.linestring.LineStringAdapter:
         """
         Clip a chainage line to the relevant reach.
 
@@ -1044,7 +1092,9 @@ class RiverData:
                 )
             x0 = None
         else:
-            alpha = (bounds[0] - xy_km.coords[start_i - 1][2]) / (xy_km.coords[start_i][2] - xy_km.coords[start_i - 1][2])
+            alpha = (bounds[0] - xy_km.coords[start_i - 1][2]) / (
+                xy_km.coords[start_i][2] - xy_km.coords[start_i - 1][2]
+            )
             x0 = tuple(
                 (c1 + alpha * (c2 - c1))
                 for c1, c2 in zip(xy_km.coords[start_i - 1], xy_km.coords[start_i])
@@ -1073,7 +1123,9 @@ class RiverData:
                 )
             )
         else:
-            alpha = (bounds[1] - xy_km.coords[end_i - 1][2]) / (xy_km.coords[end_i][2] - xy_km.coords[end_i - 1][2])
+            alpha = (bounds[1] - xy_km.coords[end_i - 1][2]) / (
+                xy_km.coords[end_i][2] - xy_km.coords[end_i - 1][2]
+            )
             x1 = tuple(
                 (c1 + alpha * (c2 - c1))
                 for c1, c2 in zip(xy_km.coords[end_i - 1], xy_km.coords[end_i])
@@ -1084,7 +1136,9 @@ class RiverData:
             if x0 is None:
                 xy_km = shapely.geometry.LineString(xy_km.coords[:end_i] + [x1])
             else:
-                xy_km = shapely.geometry.LineString([x0] + xy_km.coords[start_i:end_i] + [x1])
+                xy_km = shapely.geometry.LineString(
+                    [x0] + xy_km.coords[start_i:end_i] + [x1]
+                )
         return xy_km
 
     def clip_search_lines(
@@ -1135,10 +1189,7 @@ class RiverData:
             # Determine the maximum distance from a point on this line to the reference line.
             line_simplified = search_lines[ind].simplify(1)
             max_distance = max(
-                [
-                    Point(c).distance(profile_simplified)
-                    for c in line_simplified.coords
-                ]
+                [Point(c).distance(profile_simplified) for c in line_simplified.coords]
             )
 
             # Increase the value of max_distance by 2 to account for error introduced by using simplified lines.
@@ -1147,7 +1198,9 @@ class RiverData:
         return search_lines, max_distance
 
 
-def read_simulation_data(file_name: str, indent: str = "") -> Tuple[SimulationObject, float]:
+def read_simulation_data(
+    file_name: str, indent: str = ""
+) -> Tuple[SimulationObject, float]:
     """
     Read a default set of quantities from a UGRID netCDF file coming from D-Flow FM (or similar).
 
@@ -1194,7 +1247,7 @@ def read_simulation_data(file_name: str, indent: str = "") -> Tuple[SimulationOb
         if f_nc.mask.shape == ():
             # all faces have the same number of nodes
             sim["nnodes"] = (
-                    np.ones(f_nc.data.shape[0], dtype=np.int) * f_nc.data.shape[1]
+                np.ones(f_nc.data.shape[0], dtype=np.int) * f_nc.data.shape[1]
             )
         else:
             # varying number of nodes
@@ -1229,9 +1282,13 @@ def read_simulation_data(file_name: str, indent: str = "") -> Tuple[SimulationOb
             dh0 = 0.01
 
     elif name.startswith("SDS"):
-        raise SimulationFilesError(f"WAQUA output files not yet supported. Unable to process {name}")
+        raise SimulationFilesError(
+            f"WAQUA output files not yet supported. Unable to process {name}"
+        )
     elif name.startswith("trim"):
-        raise SimulationFilesError(f"Delft3D map files not yet supported. Unable to process {name}")
+        raise SimulationFilesError(
+            f"Delft3D map files not yet supported. Unable to process {name}"
+        )
     else:
         raise SimulationFilesError(f"Unable to determine file type for {name}")
 
@@ -1239,7 +1296,7 @@ def read_simulation_data(file_name: str, indent: str = "") -> Tuple[SimulationOb
 
 
 def clip_simulation_data(
-        sim: SimulationObject, river_profile: np.ndarray, max_distance: float
+    sim: SimulationObject, river_profile: np.ndarray, max_distance: float
 ) -> SimulationObject:
     """
     Clip the simulation mesh and data to the area of interest sufficiently close to the reference line.
@@ -1793,7 +1850,7 @@ def absolute_path(rootdir: str, path: str) -> str:
     if path == "":
         path = path
     else:
-        path =  os.path.normpath(os.path.join(rootdir, path))
+        path = os.path.normpath(os.path.join(rootdir, path))
 
     return path
 
@@ -1898,9 +1955,7 @@ def write_xyc(xy: np.ndarray, val: np.ndarray, filename: str) -> None:
                 xyc.write("{:.2f}\t{:.2f}\t".format(xy[i, 0], xy[i, 1]) + valstr + "\n")
 
 
-def write_shp_pnt(
-    xy: np.ndarray, dict: Dict[str, np.ndarray], filename: str
-) -> None:
+def write_shp_pnt(xy: np.ndarray, dict: Dict[str, np.ndarray], filename: str) -> None:
     """
     Write a shape point file with x, y, and values.
 
@@ -1974,9 +2029,7 @@ def write_csv(dict: Dict[str, np.ndarray], filename: str) -> None:
     np.savetxt(filename, data, delimiter=", ", header=header, comments="")
 
 
-def write_km_eroded_volumes(
-    km: np.ndarray, vol: np.ndarray, filename: str
-) -> None:
+def write_km_eroded_volumes(km: np.ndarray, vol: np.ndarray, filename: str) -> None:
     """
     Write a text file with eroded volume data binned per kilometre.
 
