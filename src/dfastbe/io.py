@@ -95,7 +95,7 @@ class ConfigFile:
         if path:
             self.path = Path(path)
             self.root_dir = self.path.parent
-            self.adjust_filenames()
+            self.convert_paths_relative_to_cwd()
 
     @property
     def config(self) -> configparser.ConfigParser:
@@ -352,7 +352,7 @@ class ConfigFile:
                         f"  {option:<{max_length}} = {self.config[section][option]}\n"
                     )
 
-    def adjust_filenames(self) -> str:
+    def convert_paths_relative_to_cwd(self) -> str:
         """Convert all paths to relative to current working directory.
 
         Returns:
