@@ -1,7 +1,5 @@
 import unittest
 from unittest.mock import patch
-import matplotlib
-matplotlib.use("Agg")
 import numpy as np
 
 from dfastbe.io import ConfigFile, load_program_texts, log_text, get_text, read_fm_map,\
