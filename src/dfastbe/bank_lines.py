@@ -55,11 +55,10 @@ class BankLines:
 
         self._config_file = config_file
         self.gui = gui
-        self.bank_output_dir = self._get_bank_output_dir()
+        self.bank_output_dir = config_file.get_output_dir("banklines")
 
         # set plotting flags
-        self.plot_data = config_file.get_bool("General", "Plotting", True)
-        self.plot_flags = self._get_plotting_flags()
+        self.plot_flags = config_file.get_plotting_flags(self.root_dir)
         self.river_data = RiverData(config_file)
 
         self.simulation_data, self.h0 = self._get_simulation_data()
@@ -67,7 +66,7 @@ class BankLines:
     def _get_simulation_data(self) -> Tuple[SimulationObject, float]:
         # read simulation data and drying flooding threshold dh0
         sim_file = self.config_file.get_sim_file("Detect", "")
-        log_text("read_simdata", dict={"file": sim_file})
+        log_text("read_simdata", data={"file": sim_file})
         simulation_data, dh0 = read_simulation_data(sim_file)
         # increase critical water depth h0 by flooding threshold dh0
         # get critical water depth used for defining bank line (default = 0.0 m)
@@ -89,63 +88,13 @@ class BankLines:
 
     def _get_bank_output_dir(self) -> Path:
         bank_output_dir = self.config_file.get_str("General", "BankDir")
-        log_text("bankdir_out", dict={"dir": bank_output_dir})
+        log_text("bankdir_out", data={"dir": bank_output_dir})
         if os.path.exists(bank_output_dir):
-            log_text("overwrite_dir", dict={"dir": bank_output_dir})
+            log_text("overwrite_dir", data={"dir": bank_output_dir})
         else:
             os.makedirs(bank_output_dir)
 
         return Path(bank_output_dir)
-
-    def _get_plotting_flags(self) -> Dict[str, bool]:
-        """Get the plotting flags from the configuration file.
-
-        Returns:
-            data (Dict[str, bool]):
-                Dictionary containing the plotting flags.
-                save_plot (bool): Flag indicating whether to save the plot.
-                save_plot_zoomed (bool): Flag indicating whether to save the zoomed plot.
-                zoom_km_step (float): Step size for zooming in on the plot.
-                close_plot (bool): Flag indicating whether to close the plot.
-        """
-        if self.plot_data:
-            save_plot = self.config_file.get_bool("General", "SavePlots", True)
-            save_plot_zoomed = self.config_file.get_bool(
-                "General", "SaveZoomPlots", True
-            )
-            zoom_km_step = self.config_file.get_float("General", "ZoomStepKM", 1.0)
-            if zoom_km_step < 0.01:
-                save_plot_zoomed = False
-            close_plot = self.config_file.get_bool("General", "ClosePlots", False)
-        else:
-            save_plot = False
-            save_plot_zoomed = False
-            close_plot = False
-
-        data = {
-            "save_plot": save_plot,
-            "save_plot_zoomed": save_plot_zoomed,
-            "zoom_km_step": zoom_km_step,
-            "close_plot": close_plot,
-        }
-
-        # as appropriate, check output dir for figures and file format
-        if save_plot:
-            fig_dir = self.config_file.get_str(
-                "General", "FigureDir", f"{self.root_dir}{os.sep}figure"
-            )
-            log_text("figure_dir", dict={"dir": fig_dir})
-            if os.path.exists(fig_dir):
-                log_text("overwrite_dir", dict={"dir": fig_dir})
-            else:
-                os.makedirs(fig_dir)
-            plot_ext = self.config_file.get_str("General", "FigureExt", ".png")
-            data = data | {
-                "fig_dir": fig_dir,
-                "plot_ext": plot_ext,
-            }
-
-        return data
 
     def detect(self) -> None:
         """Run the bank line detection analysis for a specified configuration."""
@@ -155,7 +104,7 @@ class BankLines:
 
         log_text(
             "header_banklines",
-            dict={
+            data={
                 "version": __version__,
                 "location": "https://github.com/Deltares/D-FAST_Bank_Erosion",
             },
@@ -194,7 +143,7 @@ class BankLines:
         bank = [None] * river_data.num_search_lines
         clipped_banklines = [None] * river_data.num_search_lines
         for ib, bank_area in enumerate(bank_areas):
-            log_text("bank_lines", dict={"ib": ib + 1})
+            log_text("bank_lines", data={"ib": ib + 1})
             clipped_banklines[ib] = clip_bank_lines(banklines, bank_area)
             bank[ib] = sort_connect_bank_lines(
                 clipped_banklines[ib], river_profile, to_right[ib]
@@ -203,7 +152,7 @@ class BankLines:
         # save bank_file
         self.save(bank, banklines, clipped_banklines, bank_areas)
 
-        if self.plot_data:
+        if self.plot_flags["plot_data"]:
             self.plot(
                 river_data.masked_profile_arr,
                 self.plot_flags,
@@ -286,7 +235,7 @@ class BankLines:
         """Save result files."""
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
         bank_file = self.bank_output_dir / f"{bank_name}.shp"
-        log_text("save_banklines", dict={"file": bank_file})
+        log_text("save_banklines", data={"file": bank_file})
         gpd.GeoSeries(bank).to_file(bank_file)
 
         gpd.GeoSeries(clipped_banklines).to_file(
