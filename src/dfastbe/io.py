@@ -152,7 +152,7 @@ class ConfigFile:
             config = configparser.ConfigParser(comment_prefixes="%")
             with open(path, "r") as configfile:
                 config.read_file(configfile)
-        except Exception as e:
+        except configparser.Error as e:
             print(f"Error during reading the config file: {e}")
             config = cls.config_file_callback_parser(path)
 
@@ -397,13 +397,13 @@ class ConfigFile:
         """
         try:
             val = self.config[group][key]
-        except KeyError:
+        except KeyError as exc:
             if default is not None:
                 val = default
             else:
                 raise ConfigFileError(
                     f"No value specified for required keyword {key} in block {group}."
-                )
+                ) from exc
         return val
 
     def get_bool(
@@ -443,13 +443,13 @@ class ConfigFile:
                 or (str_val == "t")
                 or (str_val == "1")
             )
-        except KeyError:
+        except KeyError as exc:
             if default is not None:
                 val = default
             else:
                 raise ConfigFileError(
                     f"No boolean value specified for required keyword {key} in block {group}."
-                )
+                ) from exc
 
         return val
 
@@ -488,13 +488,13 @@ class ConfigFile:
         """
         try:
             val = float(self.config[group][key])
-        except (KeyError, ValueError):
+        except (KeyError, ValueError) as exc:
             if default is not None:
                 val = default
             else:
                 raise ConfigFileError(
                     f"No floating point value specified for required keyword {key} in block {group}."
-                )
+                ) from exc
         if positive and val < 0.0:
             raise ConfigFileError(
                 f"Value for {key} in block {group} must be positive, not {val}."
@@ -536,13 +536,13 @@ class ConfigFile:
         """
         try:
             val = int(self.config[group][key])
-        except (KeyError, ValueError):
+        except (KeyError, ValueError) as exc:
             if default is not None:
                 val = default
             else:
                 raise ConfigFileError(
                     f"No integer value specified for required keyword {key} in block {group}."
-                )
+                ) from exc
         if positive and val <= 0:
             raise ConfigFileError(
                 f"Value for {key} in block {group} must be positive, not {val}."
@@ -687,9 +687,9 @@ class ConfigFile:
         try:
             filename = self.config[group][key]
             use_default = False
-        except:
+        except (KeyError, TypeError):
             if default is None:
-                raise Exception(
+                raise ConfigFileError(
                     'No value specified for required keyword "{}" in block "{}".'.format(
                         key, group
                     )
@@ -706,24 +706,22 @@ class ConfigFile:
             else:
                 rval = float(filename)
                 if positive and rval < 0:
-                    raise Exception(
-                        'Value of "{}" should be positive, not {}.'.format(key, rval)
+                    raise ValueError(
+                        f'Value of "{key}" should be positive, not {rval}.'
                     )
                 if valid is not None and valid.count(rval) == 0:
-                    raise Exception(
-                        'Value of "{}" should be in {}, not {}.'.format(
-                            key, valid, rval
-                        )
+                    raise ValueError(
+                        f'Value of "{key}" should be in {valid}, not {rval}.'
                     )
             for ib, bkm in enumerate(bank_km):
                 parfield[ib] = np.zeros(len(bkm)) + rval
-        except:
+        except (ValueError, TypeError):
             if onefile:
                 log_text("read_param", dict={"param": key, "file": filename})
                 km_thr, val = get_kmval(filename, key, positive, valid)
             for ib, bkm in enumerate(bank_km):
                 if not onefile:
-                    filename_i = filename + "_{}".format(ib + 1) + ext
+                    filename_i = filename + f"_{ib + 1}" + ext
                     log_text(
                         "read_param_one_bank",
                         dict={"param": key, "i": ib + 1, "file": filename_i},
@@ -764,11 +762,11 @@ class ConfigFile:
             dlines_split = dlines_key[1:-1].split(",")
             dlines = [float(d) for d in dlines_split]
             if not all([d > 0 for d in dlines]):
-                raise Exception(
+                raise ValueError(
                     "keyword DLINES should contain positive values in configuration file."
                 )
             if len(dlines) != nbank:
-                raise Exception(
+                raise ConfigFileError(
                     "keyword DLINES should contain NBANK values in configuration file."
                 )
         return dlines
@@ -803,12 +801,10 @@ class ConfigFile:
                 val = (val_list[1], val_list[0])
             else:
                 val = (val_list[0], val_list[1])
-        except:
-            raise Exception(
-                'Invalid range specification "{}" for required keyword "{}" in block "{}".'.format(
-                    str_val, key, group
-                )
-            )
+        except ValueError as exc:
+            raise ValueError(
+                f'Invalid range specification "{str_val}" for required keyword "{key}" in block "{group}".'
+            ) from exc
         return val
 
     def get_xy_km(self) -> shapely.geometry.linestring.LineStringAdapter:
