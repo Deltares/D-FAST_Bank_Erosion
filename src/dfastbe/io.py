@@ -687,13 +687,11 @@ class ConfigFile:
         try:
             filename = self.config[group][key]
             use_default = False
-        except (KeyError, TypeError):
+        except (KeyError, TypeError) as exc:
             if default is None:
                 raise ConfigFileError(
-                    'No value specified for required keyword "{}" in block "{}".'.format(
-                        key, group
-                    )
-                )
+                    f'No value specified for required keyword "{key}" in block "{group}".'
+                ) from exc
             use_default = True
 
         # if val is value then use that value globally
