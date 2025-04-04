@@ -1843,7 +1843,7 @@ def absolute_path(rootdir: str, path: str) -> str:
     """
     if not path:
         return path
-    root_path = Path(rootdir)
+    root_path = Path(rootdir).resolve()
     target_path = Path(path)
 
     if target_path.is_absolute():
