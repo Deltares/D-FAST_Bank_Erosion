@@ -169,4 +169,4 @@ repos:
         name: doctest
         entry: pytest --doctest-modules
         language: system
-        files: ^dfastbe/.*\.py$
+        files: ^src/dfastbe/.*\.py$
