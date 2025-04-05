@@ -109,6 +109,8 @@ nav:
           - guides/developer-instructions.md
           - guides/pre-commit-hooks.md
           - guides/doctest.md
+  - Architecture Design:
+      - architecture-design/main-components.md
   - API Reference:
       - api/bank_lines.md
       - api/bank_erosion.md
