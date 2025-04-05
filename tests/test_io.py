@@ -1,6 +1,8 @@
+from typing import Dict
 import unittest
 from unittest.mock import patch
 
+import geopandas
 import numpy as np
 
 from dfastbe.io import ConfigFile, load_program_texts, log_text, get_text, read_fm_map,\
@@ -16,6 +18,7 @@ import numpy
 import netCDF4
 from shapely.geometry.linestring import LineString
 import pytest
+from pyfakefs.fake_filesystem import FakeFilesystem
 
 import sys
 from contextlib import contextmanager
@@ -123,7 +126,7 @@ class Test_read_fm_map:
         """
         filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
         varname = "x"
-        #location = "face"
+        # location = "face"
         datac = read_fm_map(filename, varname)
         dataref = 41.24417604888325
         assert datac[1] == dataref
@@ -178,7 +181,7 @@ class Test_read_fm_map:
         with pytest.raises(Exception) as cm:
             datac = read_fm_map(filename, varname)
         assert str(cm.value) == 'Expected one variable for "water level", but obtained 0.'
-        
+
 class Test_get_mesh_and_facedim_names():
     def test_get_mesh_and_facedim_names_01(self):
         """
@@ -323,53 +326,28 @@ class Test_write_simona_box():
 class TestAbsolutePath:
 
     def test_absolute_path_01(self):
-        """
-        Convert absolute path into relative path using relative_path (Windows).
-        """
+        """Convert absolute path into relative path using relative_path (Windows)."""
         rootdir = "g:" + os.sep + "some" + os.sep + "dir"
         afile = "g:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         assert absolute_path(rootdir, rfile) == afile
 
     def test_absolute_path_02(self):
-        """
-        Empty string should not be adjusted by relative_path.
-        """
+        """Empty string should not be adjusted by relative_path."""
         rootdir = "d:" + os.sep + "some" + os.sep + "dir"
         file = ""
         assert absolute_path(rootdir, file) == file
 
     def test_absolute_path_03(self):
-        """
-        If path on different drive, it shouldn't be adjusted by relative_path (Windows).
-        """
+        """If path on different drive, it shouldn't be adjusted by relative_path (Windows)."""
         rootdir = "d:" + os.sep + "some" + os.sep + "dir"
         file = "e:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         assert absolute_path(rootdir, file) == file
 
-    def test_absolute_path_04(self):
-        """
-        Convert absolute path into relative path using relative_path (Linux).
-        """
-        rootdir = os.sep + "some" + os.sep + "dir"
-        afile = os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
-        rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
-        assert absolute_path(rootdir, rfile) == afile
 
-class Test_relative_path():
-    def test_relative_path_01(self):
-        """
-        Convert absolute path into relative path using relative_path (Windows).
-        """
-        rootdir = "d:" + os.sep + "some" + os.sep + "dir"
-        afile = "d:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
-        rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
-        assert relative_path(rootdir, afile) == rfile
-
+class Test_relative_path:
     def test_relative_path_02(self):
-        """
-        Empty string should not be adjusted by relative_path.
-        """
+        """Empty string should not be adjusted by relative_path."""
         rootdir = "d:" + os.sep + "some" + os.sep + "dir"
         file = ""
         assert relative_path(rootdir, file) == file
@@ -378,80 +356,345 @@ class Test_relative_path():
         platform.system() != "Windows", reason="it will be completely changed"
     )
     def test_relative_path_03(self):
-        """
-        If path on different drive, it shouldn't be adjusted by relative_path (Windows).
-        """
+        """If path on different drive, it shouldn't be adjusted by relative_path (Windows)."""
         rootdir = "d:" + os.sep + "some" + os.sep + "dir"
         file = "e:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         assert relative_path(rootdir, file) == file
 
-    def test_relative_path_04(self):
-        """
-        Convert absolute path into relative path using relative_path (Linux).
-        """
-        rootdir = os.sep + "some" + os.sep + "dir"
-        afile = os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
-        rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
-        assert relative_path(rootdir, afile) == rfile
 
+class Test_ConfigFile:
+    """Test cases for the ConfigFile class."""
 
-class TestConfigFile(unittest.TestCase):
+    @pytest.fixture
+    def config(self) -> configparser.ConfigParser:
+        """Fixture to create a ConfigFile instance."""
+        config = configparser.ConfigParser()
+        config.read_dict(
+            {
+                "General": {
+                    "Version": "1.0",
+                    "plotting": "yes",
+                    "ZoomStepKM": "0.1",
+                    "Boundaries": "123.0:128.0",
+                },
+                "Detect": {
+                    "SimFile": "test_sim.nc",
+                    "NBank": "2",
+                    "DLines": "[ 50.0, 50.0 ]",
+                },
+                "Erosion": {"OutputDir": "./output"},
+            }
+        )
+        return config
 
-    def setUp(self):
-        """Set up a sample configuration for testing."""
-        self.config = configparser.ConfigParser()
-        self.config.read_dict({
-            "General": {"Version": "1.0", "TestParam": "42"},
-            "Detect": {"SimFile": "test_sim.nc"},
-            "Erosion": {"OutputDir": "./output"}
-        })
-        self.config_file = ConfigFile(self.config)
+    @pytest.fixture
+    def config_data(self) -> str:
+        """Fixture to create a sample configuration file string."""
+        content = (
+            "[General]\n"
+            "  version    = 1.0\n"
+            "  plotting   = yes\n"
+            "  zoomstepkm = 0.1\n"
+            "  boundaries = 123.0:128.0\n\n"
+            "[Detect]\n"
+            "  simfile    = test_sim.nc\n"
+            "  nbank      = 2\n"
+            "  dlines     = [ 50.0, 50.0 ]\n\n"
+            "[Erosion]\n"
+            "  outputdir  = ./output\n"
+        )
+        return content
 
-    def test_init(self):
+    def test_init(self, config: configparser.ConfigParser):
         """Test initialization of ConfigFile."""
-        self.assertIsInstance(self.config_file, ConfigFile)
+        config_file = ConfigFile(config=config)
+        assert isinstance(config_file, ConfigFile)
 
-    def test_config_property(self):
-        """Test getting and setting the config property."""
-        new_config = configparser.ConfigParser()
-        self.config_file.config = new_config
-        self.assertEqual(self.config_file.config, new_config)
-
-    def test_read(self):
+    def test_read(self, config_data: str, fs: FakeFilesystem):
         """Test reading a configuration file."""
-        config_str = """[General]\nVersion = 1.0\nTestParam = 42\n"""
-        with patch("builtins.open", return_value=StringIO(config_str)), patch("pathlib.Path.exists", return_value=True):
-            config_obj = ConfigFile.read("dummy_path.cfg")
-            version = config_obj.version
-        self.assertEqual(config_obj.config["General"]["Version"], "1.0")
-        self.assertEqual(version, "1.0")
+        fs.create_file("dummy_path.cfg", contents=config_data)
+        config_file = ConfigFile.read("dummy_path.cfg")
+        assert isinstance(config_file, ConfigFile)
+        assert config_file.config["General"]["Version"] == "1.0"
+        assert config_file.config["Detect"]["NBank"] == "2"
 
-    def test_get_str(self):
-        """Test retrieving a string value."""
-        self.assertEqual(self.config_file.get_str("General", "Version"), "1.0")
-
-    def test_get_int(self):
-        """Test retrieving an integer value."""
-        self.assertEqual(self.config_file.get_int("General", "TestParam"), 42)
-
-    def test_get_bool(self):
-        """Test retrieving a boolean value."""
-        self.config_file.config["General"]["Enabled"] = "yes"
-        self.assertTrue(self.config_file.get_bool("General", "Enabled"))
-
-    def test_write(self):
+    def test_write(
+        self, config: configparser.ConfigParser, config_data: str, fs: FakeFilesystem
+    ):
         """Test writing a configuration file."""
-        with patch("builtins.open", unittest.mock.mock_open()) as mock_file:
-            self.config_file.write("test_output.cfg")
-            mock_file.assert_called_with("test_output.cfg", "w")
+        config_file = ConfigFile(config=config)
+        config_file.write("test_output.cfg")
+        with open("test_output.cfg", "r") as file:
+            assert file.read() == config_data
 
-    def test_adjust_filenames(self):
-        """Test adjusting filenames."""
-        self.config_file.path = "/home/user/config.cfg"
-        self.config_file.root_dir = "/home/user"
-        with patch("os.getcwd", return_value="/home/user"):
-            rootdir = self.config_file.adjust_filenames()
-        self.assertEqual(rootdir, ".")
+    def test_get_str(self, config: configparser.ConfigParser):
+        """Test retrieving a string value."""
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        assert config_file.get_str("General", "Version") == "1.0"
+
+    def test_get_int(self, config: configparser.ConfigParser):
+        """Test retrieving an integer value."""
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        assert config_file.get_int("Detect", "NBank") == 2
+
+    def test_get_bool(self, config: configparser.ConfigParser):
+        """Test retrieving a boolean value."""
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        assert config_file.get_bool("General", "plotting") is True
+
+    def test_get_float(self, config: configparser.ConfigParser):
+        """Test retrieving a float value."""
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        assert config_file.get_float("General", "ZoomStepKM") == pytest.approx(
+            0.1, rel=1e-6
+        )
+
+    def test_get_sim_file(self, config: configparser.ConfigParser):
+        """Test retrieving a simulation file."""
+        path = Path("tests/data/erosion")
+        config_file = ConfigFile(config, str(path / "test.cfg"))
+        assert config_file.get_sim_file("Detect", "") == str(path / "test_sim.nc")
+
+    def test_get_km_bounds(self, config: configparser.ConfigParser):
+        """Test retrieving km bounds."""
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        start, end = config_file.get_km_bounds()
+        assert start == pytest.approx(123.0, rel=1e-6)
+        assert end == pytest.approx(128.0, rel=1e-6)
+
+    def test_get_search_lines(self):
+        """Test retrieving search lines."""
+        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+        mock_linestring = LineString([(0, 0), (1, 1), (2, 2)])
+
+        with patch("dfastbe.io.read_xyc", return_value=mock_linestring):
+            search_lines = config.get_search_lines()
+
+        assert len(search_lines) == 2
+        assert list(search_lines[0].coords) == [(0, 0), (1, 1), (2, 2)]
+
+    def test_get_bank_lines(
+        self, config: configparser.ConfigParser, fs: FakeFilesystem
+    ):
+        """Test retrieving bank lines."""
+        config["General"]["BankLine"] = "bankfile"
+        config = ConfigFile(config, "tests/data/erosion/test.cfg")
+
+        fs.create_file(
+            "inputs/bankfile_1.xyc",
+            contents="0.0 0.0\n1.0 1.0\n2.0 2.0\n3.0 3.0\n4.0 4.0\n",
+        )
+
+        bank_lines = config.get_bank_lines("inputs")
+
+        assert isinstance(bank_lines, geopandas.GeoDataFrame)
+        assert len(bank_lines) == 1
+        assert list(bank_lines.geometry[0].coords) == [
+            (0.0, 0.0),
+            (1.0, 1.0),
+            (2.0, 2.0),
+            (3.0, 3.0),
+            (4.0, 4.0),
+        ]
+
+    def test_get_parameter(self, config: configparser.ConfigParser):
+        """Test retrieving a parameter field."""
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5])]
+
+        # Case 1: Parameter exists in the configuration
+        config["General"] = {"ZoomStepKM": "1.0"}
+        result = config_file.get_parameter("General", "ZoomStepKM", bank_km)
+        expected = [np.array([1.0, 1.0, 1.0]), np.array([1.0, 1.0, 1.0])]
+        assert all(np.array_equal(r, e) for r, e in zip(result, expected))
+
+        # Case 2: Parameter does not exist, use default value
+        result = config_file.get_parameter(
+            "General", "NonExistentKey", bank_km, default=2.0
+        )
+        expected = [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])]
+        assert all(np.array_equal(r, e) for r, e in zip(result, expected))
+
+        # Case 3: Parameter must be positive
+        config["General"] = {"NegativeValue": "-1.0"}
+        with pytest.raises(Exception, match="No such file or directory"):
+            config_file.get_parameter(
+                "General", "NegativeValue", bank_km, positive=True
+            )
+
+        # Case 4: Parameter must match valid values
+        config["General"] = {"ValidValue": "3.0"}
+        result = config_file.get_parameter(
+            "General", "ValidValue", bank_km, valid=[1.0, 2.0, 3.0]
+        )
+        expected = [np.array([3.0, 3.0, 3.0]), np.array([3.0, 3.0, 3.0])]
+        assert all(np.array_equal(r, e) for r, e in zip(result, expected))
+
+        # Case 5: Parameter does not match valid values
+        config["General"] = {"InvalidValue": "4.0"}
+        with pytest.raises(Exception, match="No such file or directory"):
+            config_file.get_parameter(
+                "General", "InvalidValue", bank_km, valid=[1.0, 2.0, 3.0]
+            )
+
+    def test_get_bank_search_distances(self, config: configparser.ConfigParser):
+        """Test retrieving bank search distances."""
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+
+        # Case 1: Bank search distances exist in the configuration
+        result = config_file.get_bank_search_distances(2)
+        assert all(pytest.approx(item, rel=1e-6) == 50.0 for item in result)
+
+        # Case 2: Bank search distances do not exist, use default value
+        result = config_file.get_bank_search_distances(2)
+        assert all(pytest.approx(item, rel=1e-6) == 50.0 for item in result)
+
+    def test_get_xy_km(self):
+        """Test retrieving x and y coordinates."""
+        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+        mock_linestring = LineString([(0, 0, 1), (1, 1, 2), (2, 2, 3)])
+
+        with patch("dfastbe.io.read_xyc", return_value=mock_linestring):
+            xykm = config.get_xy_km()
+
+        assert xykm.wkt == 'LINESTRING Z (0 0 1, 1 1 2, 2 2 3)'
+
+    @pytest.fixture
+    def path_dict(self) -> Dict:
+        """Fixture to create a dictionary for path resolution."""
+        return {
+            "General": {
+                "RiverKM": "inputs/rivkm_20m.xyc",
+                "BankDir": "output/banklines",
+                "FigureDir": "output/figures",
+            }
+        }
+
+    def test_resolve(self, path_dict: Dict):
+        """Test resolving paths in the configuration."""
+        config = configparser.ConfigParser()
+        config.read_dict(path_dict)
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file.resolve("tests/data")
+        assert config_file.config["General"]["RiverKM"] == str(
+            Path("tests/data").resolve() / "tests/data/erosion" / "inputs/rivkm_20m.xyc"
+        )
+
+    def test_relative_to(self, path_dict: Dict):
+        """Test converting paths to relative paths."""
+        config = configparser.ConfigParser()
+        config.read_dict(path_dict)
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file.relative_to("tests/data")
+        assert config_file.config["General"]["RiverKM"] == str(
+            Path("erosion") / "inputs/rivkm_20m.xyc"
+        )
+
+    def test_convert_paths_relative_to_cwd(self, path_dict: Dict):
+        """Test converting filenames to be relative to the current working directory."""
+        cwd = Path("tests/data/erosion")
+        config = configparser.ConfigParser()
+        config.read_dict(path_dict)
+        config_file = ConfigFile(config, cwd / "test.cfg")
+
+        with patch("dfastbe.io.Path.cwd", return_value=str(cwd)):
+            rootdir = config_file.convert_paths_relative_to_cwd()
+
+        assert rootdir == "."
+        assert config_file.config["General"]["RiverKM"] == str(
+            cwd / "inputs/rivkm_20m.xyc"
+        )
+        assert config_file.config["General"]["BankDir"] == str(cwd / "output/banklines")
+        assert config_file.config["General"]["FigureDir"] == str(cwd / "output/figures")
+
+    def test__upgrade(self):
+        """Test upgrading the configuration."""
+        config = configparser.ConfigParser()
+        config.read_dict(
+            {
+                "General": {
+                    "Version": "0.1",
+                    "RiverKM": "inputs/rivkm_20m.xyc",
+                    "Boundaries": "123.0:128.0",
+                    "BankDir": "output/banklines",
+                    "BankFile": "bankfile",
+                    "Plotting": "yes",
+                    "SavePlots": "True",
+                    "SaveZoomPlots": "False",
+                    "ZoomStepKM": "1.0",
+                    "FigureDir": "output/figures",
+                    "ClosePlots": "False",
+                    "DebugOutput": "False",
+                    "SimFile": "inputs/sim0270/SDS-j19_map.nc",
+                    "WaterDepth": "0.0",
+                    "NBank": "2",
+                    "Line1": "inputs/oeverlijn_links_mod.xyc",
+                    "Line2": "inputs/oeverlijn_rechts_mod.xyc",
+                    "DLines": "[ 50.0, 50.0 ]",
+                    "TErosion": "1",
+                    "RiverAxis": "inputs/maas_rivieras_mod.xyc",
+                    "Fairway": "inputs/maas_rivieras_mod.xyc",
+                    "OutputInterval": "0.1",
+                    "OutputDir": "output/bankerosion",
+                    "BankNew": "banknew",
+                    "BankEq": "bankeq",
+                    "EroVol": "erovol_standard.evo",
+                    "EroVolEqui": "erovol_eq.evo",
+                    "ShipType": "2",
+                    "VShip": "5.0",
+                    "NShip": "inputs/nships_totaal",
+                    "NWaves": "5",
+                    "Draught": "1.2",
+                    "Wave0": "150.0",
+                    "Wave1": "110.0",
+                    "Classes": "false",
+                    "BankType": "inputs/bankstrength_tauc",
+                    "ProtectionLevel": "inputs/stortsteen",
+                    "Slope": "20.0",
+                    "Reed": "0.0",
+                    "VelFilterDist": "0.3",
+                    "BedFilterDist": "0.3",
+                    "NLevel": "1",
+                    "SimFile1": "inputs/sim0270/SDS-j19_map.nc",
+                    "RefLevel": "3",
+                }
+            }
+        )
+        config_file = ConfigFile(config=config)
+        config_result = config_file._upgrade(config_file.config)
+        assert config_result["General"]["plotting"] == "yes"
+        assert config_result["Detect"]["SimFile"] == "inputs/sim0270/SDS-j19_map.nc"
+
+    @pytest.fixture
+    def plotting_data(self) -> Dict:
+        """Fixture to create a dictionary for plotting flags."""
+        return {
+            "General": {
+                "Plotting": "yes",
+                "SavePlots": "yes",
+                "SaveZoomPlots": "no",
+                "ZoomStepKM": "0.5",
+                "ClosePlots": "no",
+                "FigureDir": "output/figures",
+                "FigureExt": ".png",
+            }
+        }
+
+    def test_get_plotting_flags(self, plotting_data: Dict, fs: FakeFilesystem):
+        """Test the get_plotting_flags method."""
+        config = configparser.ConfigParser()
+        config.read_dict(plotting_data)
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        root_dir = Path("tests/data/erosion")
+        plotting_flags = config_file.get_plotting_flags(str(root_dir))
+
+        assert plotting_flags["plot_data"] is True
+        assert plotting_flags["save_plot"] is True
+        assert plotting_flags["save_plot_zoomed"] is False
+        assert plotting_flags["zoom_km_step"] == 0.5
+        assert plotting_flags["close_plot"] is False
+        assert plotting_flags["fig_dir"] == str(root_dir / "output/figures")
+        assert plotting_flags["plot_ext"] == ".png"
 
 
 class TestConfigFileE2E:
