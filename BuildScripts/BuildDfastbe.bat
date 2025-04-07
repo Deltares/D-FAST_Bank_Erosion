@@ -15,8 +15,9 @@ set cmd_box_args=src/dfastbe
 
 cd %~dp0
 cd..
-START /B /WAIT poetry run nuitka ^
+START /B /WAIT python -m nuitka ^
  --standalone ^
+ --mingw64 ^
  --assume-yes-for-downloads ^
  --python-flag=no_site ^
  --python-flag=no_asserts ^
@@ -31,6 +32,7 @@ START /B /WAIT poetry run nuitka ^
  --include-module=shapely ^
  --include-package=matplotlib ^
  --include-package=netCDF4 ^
+ --include-package=cftime ^
  --include-module=geopandas ^
  --include-package-data=geopandas.datasets ^
  --include-module=fiona ^
@@ -53,6 +55,9 @@ START /B /WAIT poetry run nuitka ^
  --include-data-files=docs/dfastbe_usermanual.pdf=dfastbe/dfastbe_usermanual.pdf ^
  --include-data-files=docs/dfastbe_techref.pdf=dfastbe/dfastbe_techref.pdf ^
  %cmd_box_args%
+
+rem move some libraries to resolve dependencies ...
+call BuildScripts\Move_Libs.bat
 
 rem include example files into the distribution
 call BuildScripts\Collect_Examples.bat

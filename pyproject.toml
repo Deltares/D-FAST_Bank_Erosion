@@ -19,12 +19,15 @@ cftime = "1.3.0"
 matplotlib = "3.8.4"
 geopandas = "^0.14.4"
 shapely = "1.8.4"
+dfastio = { git = "https://github.com/Deltares/D-FAST_Commons.git", tag = "0.1.0-alpha.2" }
 
 
 [tool.poetry.group.dev.dependencies]
 nuitka = "^1.3.8"
+imageio = "^2.33.1"
 pytest = "^7.2.1"
 pytest-cov = "^6.0.0"
+pyfakefs = "^5.1.0"
 black = "^22.12.0"
 teamcity-messages = "^1.32"
 pre-commit = "^4.2.0"
@@ -66,6 +69,18 @@ profile = "black"
 line_length = 88
 multi_line_output = 3
 
+[tool.pytest.ini_options]
+addopts = [ "--ignore=tests-dist",
+            "--cov",
+            "--cov-report=term",
+            "--cov-report=html",
+            "--cov-report=xml:coverage-reports/coverage.xml",
+]
+testpaths="tests"
+python_functions=["given_*",
+                    "Given_*",
+                    "test_*",
+                    "Test_*"]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
