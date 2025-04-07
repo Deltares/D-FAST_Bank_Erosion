@@ -19,7 +19,7 @@ cftime = "1.3.0"
 matplotlib = "3.8.4"
 geopandas = "^0.14.4"
 shapely = "1.8.4"
-d-fast-io = { git = "https://github.com/Deltares/D-FAST_Commons.git", branch = "feature/dfast-261-add-xyc-read-write" }
+dfastio = { git = "https://github.com/Deltares/D-FAST_Commons.git", tag = "0.1.0-alpha.2" }
 
 
 [tool.poetry.group.dev.dependencies]
