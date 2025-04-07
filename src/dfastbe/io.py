@@ -27,6 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 from configparser import ConfigParser
+from configparser import Error as ConfigparserError
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, TypedDict, Union
 
@@ -152,7 +153,7 @@ class ConfigFile:
             config = ConfigParser(comment_prefixes="%")
             with open(path, "r") as configfile:
                 config.read_file(configfile)
-        except configparser.Error as e:
+        except ConfigparserError as e:
             print(f"Error during reading the config file: {e}")
             config = cls.config_file_callback_parser(path)
 
