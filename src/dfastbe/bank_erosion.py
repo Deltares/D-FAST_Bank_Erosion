@@ -28,21 +28,22 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
 from typing import Tuple, List, Dict
 from pathlib import Path
-from dfastbe.kernel import get_km_bins, moving_avg, comp_erosion_eq, comp_erosion, get_km_eroded_volume
-from dfastbe.support import on_right_side, project_km_on_line, intersect_line_mesh, move_line
-from dfastbe import plotting as df_plt
+
 import os
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString, Point
 import numpy as np
 import matplotlib.pyplot as plt
+
 from dfastbe import __version__
+from dfastbe.kernel import get_km_bins, moving_avg, comp_erosion_eq, comp_erosion, get_km_eroded_volume, \
+                            get_zoom_extends, get_bbox
+from dfastbe.support import on_right_side, project_km_on_line, intersect_line_mesh, move_line
+from dfastbe import plotting as df_plt
 from dfastbe.io import ConfigFile, log_text, read_simulation_data, \
     write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData, SimulationObject
-
 from dfastbe.utils import timed_logger
-from dfastbe.kernel import get_zoom_extends, get_bbox
 
 
 RHO = 1000  # density of water [kg/m3]
