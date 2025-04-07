@@ -97,7 +97,7 @@ class ConfigFile:
         if path:
             self.path = Path(path)
             self.root_dir = self.path.parent
-            self.convert_paths_relative_to_cwd()
+            self.make_paths_absolute()
 
     @property
     def config(self) -> configparser.ConfigParser:
@@ -354,18 +354,15 @@ class ConfigFile:
                         f"  {option:<{max_length}} = {self.config[section][option]}\n"
                     )
 
-    def convert_paths_relative_to_cwd(self) -> str:
-        """Convert all paths to relative to current working directory.
+    def make_paths_absolute(self) -> str:
+        """Convert all relative paths in the configuration to absolute paths.
 
         Returns:
-            str: Location of configuration file relative to current working directory.
+            str: Absolute path of the configuration file's root directory.
         """
-        cwd = str(Path.cwd())
         self.resolve(self.root_dir)
-        self.relative_to(cwd)
-        rootdir = relative_path(cwd, self.root_dir)
 
-        return rootdir
+        return self.root_dir
 
     def get_str(
         self,

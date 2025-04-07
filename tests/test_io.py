@@ -514,7 +514,9 @@ class Test_ConfigFile:
         """Test retrieving a simulation file."""
         path = Path("tests/data/erosion")
         config_file = ConfigFile(config, str(path / "test.cfg"))
-        assert config_file.get_sim_file("Detect", "") == str(path / "test_sim.nc")
+        assert config_file.get_sim_file("Detect", "") == str(
+            path.resolve() / "test_sim.nc"
+        )
 
     def test_get_km_bounds(self, config: configparser.ConfigParser):
         """Test retrieving km bounds."""
@@ -636,9 +638,9 @@ class Test_ConfigFile:
         config = configparser.ConfigParser()
         config.read_dict(path_dict)
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
-        config_file.resolve("tests/data")
+        config_file.resolve("tests/data/erosion")
         assert config_file.config["General"]["RiverKM"] == str(
-            Path("tests/data").resolve() / "tests/data/erosion" / "inputs/rivkm_20m.xyc"
+            Path("tests/data/erosion").resolve() / "inputs/rivkm_20m.xyc"
         )
 
     def test_relative_to(self, path_dict: Dict):
@@ -651,17 +653,17 @@ class Test_ConfigFile:
             Path("erosion") / "inputs/rivkm_20m.xyc"
         )
 
-    def test_convert_paths_relative_to_cwd(self, path_dict: Dict):
+    def test_make_paths_absolute(self, path_dict: Dict):
         """Test converting filenames to be relative to the current working directory."""
-        cwd = Path("tests/data/erosion")
+        cwd = Path("tests/data/erosion").resolve()
         config = configparser.ConfigParser()
         config.read_dict(path_dict)
         config_file = ConfigFile(config, cwd / "test.cfg")
 
         with patch("dfastbe.io.Path.cwd", return_value=str(cwd)):
-            rootdir = config_file.convert_paths_relative_to_cwd()
+            rootdir = config_file.make_paths_absolute()
 
-        assert rootdir == "."
+        assert rootdir == cwd
         assert config_file.config["General"]["RiverKM"] == str(
             cwd / "inputs/rivkm_20m.xyc"
         )
@@ -746,7 +748,7 @@ class Test_ConfigFile:
         config = configparser.ConfigParser()
         config.read_dict(plotting_data)
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
-        root_dir = Path("tests/data/erosion")
+        root_dir = Path("tests/data/erosion").resolve()
         plotting_flags = config_file.get_plotting_flags(str(root_dir))
 
         assert plotting_flags["plot_data"] is True
