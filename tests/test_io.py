@@ -528,7 +528,7 @@ class Test_ConfigFile:
         config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
         mock_linestring = LineString([(0, 0), (1, 1), (2, 2)])
 
-        with patch("dfastbe.io.read_xyc", return_value=mock_linestring):
+        with patch("dfastio.xyc.models.XYCModel.read", return_value=mock_linestring):
             search_lines = config.get_search_lines()
 
         assert len(search_lines) == 2
@@ -643,7 +643,7 @@ class Test_ConfigFile:
         config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
         mock_linestring = LineString([(0, 0, 1), (1, 1, 2), (2, 2, 3)])
 
-        with patch("dfastbe.io.read_xyc", return_value=mock_linestring):
+        with patch("dfastio.xyc.models.XYCModel.read", return_value=mock_linestring):
             xykm = config.get_xy_km()
 
         assert xykm.wkt == 'LINESTRING Z (0 0 1, 1 1 2, 2 2 3)'
