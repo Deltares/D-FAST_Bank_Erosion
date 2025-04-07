@@ -1,17 +1,17 @@
-import configparser
 import os
 import platform
 import sys
+from configparser import ConfigParser
 from contextlib import contextmanager
 from io import StringIO
 from pathlib import Path
 from typing import Dict
 from unittest.mock import patch
 
-from geopandas import GeoDataFrame
 import netCDF4
 import numpy as np
 import pytest
+from geopandas import GeoDataFrame
 from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry.linestring import LineString
 
@@ -427,9 +427,9 @@ class Test_ConfigFile:
     """Test cases for the ConfigFile class."""
 
     @pytest.fixture
-    def config(self) -> configparser.ConfigParser:
+    def config(self) -> ConfigParser:
         """Fixture to create a ConfigFile instance."""
-        config = configparser.ConfigParser()
+        config = ConfigParser()
         config.read_dict(
             {
                 "General": {
@@ -466,7 +466,7 @@ class Test_ConfigFile:
         )
         return content
 
-    def test_init(self, config: configparser.ConfigParser):
+    def test_init(self, config: ConfigParser):
         """Test initialization of ConfigFile."""
         config_file = ConfigFile(config=config)
         assert isinstance(config_file, ConfigFile)
@@ -479,38 +479,36 @@ class Test_ConfigFile:
         assert config_file.config["General"]["Version"] == "1.0"
         assert config_file.config["Detect"]["NBank"] == "2"
 
-    def test_write(
-        self, config: configparser.ConfigParser, config_data: str, fs: FakeFilesystem
-    ):
+    def test_write(self, config: ConfigParser, config_data: str, fs: FakeFilesystem):
         """Test writing a configuration file."""
         config_file = ConfigFile(config=config)
         config_file.write("test_output.cfg")
         with open("test_output.cfg", "r") as file:
             assert file.read() == config_data
 
-    def test_get_str(self, config: configparser.ConfigParser):
+    def test_get_str(self, config: ConfigParser):
         """Test retrieving a string value."""
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
         assert config_file.get_str("General", "Version") == "1.0"
 
-    def test_get_int(self, config: configparser.ConfigParser):
+    def test_get_int(self, config: ConfigParser):
         """Test retrieving an integer value."""
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
         assert config_file.get_int("Detect", "NBank") == 2
 
-    def test_get_bool(self, config: configparser.ConfigParser):
+    def test_get_bool(self, config: ConfigParser):
         """Test retrieving a boolean value."""
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
         assert config_file.get_bool("General", "plotting") is True
 
-    def test_get_float(self, config: configparser.ConfigParser):
+    def test_get_float(self, config: ConfigParser):
         """Test retrieving a float value."""
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
         assert config_file.get_float("General", "ZoomStepKM") == pytest.approx(
             0.1, rel=1e-6
         )
 
-    def test_get_sim_file(self, config: configparser.ConfigParser):
+    def test_get_sim_file(self, config: ConfigParser):
         """Test retrieving a simulation file."""
         path = Path("tests/data/erosion")
         config_file = ConfigFile(config, str(path / "test.cfg"))
@@ -518,7 +516,7 @@ class Test_ConfigFile:
             path.resolve() / "test_sim.nc"
         )
 
-    def test_get_km_bounds(self, config: configparser.ConfigParser):
+    def test_get_km_bounds(self, config: ConfigParser):
         """Test retrieving km bounds."""
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
         start, end = config_file.get_km_bounds()
@@ -536,9 +534,7 @@ class Test_ConfigFile:
         assert len(search_lines) == 2
         assert list(search_lines[0].coords) == [(0, 0), (1, 1), (2, 2)]
 
-    def test_get_bank_lines(
-        self, config: configparser.ConfigParser, fs: FakeFilesystem
-    ):
+    def test_get_bank_lines(self, config: ConfigParser, fs: FakeFilesystem):
         """Test retrieving bank lines."""
         config["General"]["BankLine"] = "bankfile"
         config = ConfigFile(config, "tests/data/erosion/test.cfg")
@@ -592,7 +588,7 @@ class Test_ConfigFile:
         ],
     )
     def test_get_parameter(
-        self, key, value, default, valid, expected, config: configparser.ConfigParser
+        self, key, value, default, valid, expected, config: ConfigParser
     ):
         """Test retrieving a parameter field."""
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
@@ -617,7 +613,7 @@ class Test_ConfigFile:
         ],
     )
     def test_get_parameter_exception(
-        self, key, value, positive, valid, expected, config: configparser.ConfigParser
+        self, key, value, positive, valid, expected, config: ConfigParser
     ):
         """Test retrieving a parameter field."""
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
@@ -630,7 +626,7 @@ class Test_ConfigFile:
                 "General", key, bank_km, positive=positive, valid=valid
             )
 
-    def test_get_bank_search_distances(self, config: configparser.ConfigParser):
+    def test_get_bank_search_distances(self, config: ConfigParser):
         """Test retrieving bank search distances."""
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
 
@@ -665,7 +661,7 @@ class Test_ConfigFile:
 
     def test_resolve(self, path_dict: Dict):
         """Test resolving paths in the configuration."""
-        config = configparser.ConfigParser()
+        config = ConfigParser()
         config.read_dict(path_dict)
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
         config_file.resolve("tests/data/erosion")
@@ -675,7 +671,7 @@ class Test_ConfigFile:
 
     def test_relative_to(self, path_dict: Dict):
         """Test converting paths to relative paths."""
-        config = configparser.ConfigParser()
+        config = ConfigParser()
         config.read_dict(path_dict)
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
         config_file.relative_to("tests/data")
@@ -686,7 +682,7 @@ class Test_ConfigFile:
     def test_make_paths_absolute(self, path_dict: Dict):
         """Test converting filenames to be relative to the current working directory."""
         cwd = Path("tests/data/erosion").resolve()
-        config = configparser.ConfigParser()
+        config = ConfigParser()
         config.read_dict(path_dict)
         config_file = ConfigFile(config, cwd / "test.cfg")
 
@@ -702,7 +698,7 @@ class Test_ConfigFile:
 
     def test__upgrade(self):
         """Test upgrading the configuration."""
-        config = configparser.ConfigParser()
+        config = ConfigParser()
         config.read_dict(
             {
                 "General": {
@@ -775,7 +771,7 @@ class Test_ConfigFile:
 
     def test_get_plotting_flags(self, plotting_data: Dict, fs: FakeFilesystem):
         """Test the get_plotting_flags method."""
-        config = configparser.ConfigParser()
+        config = ConfigParser()
         config.read_dict(plotting_data)
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
         root_dir = Path("tests/data/erosion").resolve()
@@ -802,7 +798,7 @@ class TestConfigFileE2E:
         Testing write_config.
         """
         filename = "test.cfg"
-        config = configparser.ConfigParser()
+        config = ConfigParser()
         config.add_section("G 1")
         config["G 1"]["K 1"] = "V 1"
         config.add_section("Group 2")

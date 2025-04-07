@@ -26,17 +26,17 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-import configparser
+from configparser import ConfigParser
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, TypedDict, Union
 
 import geopandas as gpd
-from geopandas.geodataframe import GeoDataFrame
-from geopandas.geoseries import GeoSeries
 import netCDF4
 import numpy as np
 import pandas as pd
-from shapely.geometry import Point, linestring, LineString, asLineString
+from geopandas.geodataframe import GeoDataFrame
+from geopandas.geoseries import GeoSeries
+from shapely.geometry import LineString, Point, asLineString, linestring
 from shapely.prepared import prep
 
 MAX_RIVER_WIDTH = 1000
@@ -67,7 +67,7 @@ class ConfigFile:
     settings and supports upgrading older configuration formats.
 
     Args:
-        config (configparser.ConfigParser): Settings for the D-FAST Bank Erosion analysis.
+        config (ConfigParser): Settings for the D-FAST Bank Erosion analysis.
         path (Union[Path, str]): Path to the configuration file.
 
     Examples:
@@ -90,9 +90,7 @@ class ConfigFile:
             ```
     """
 
-    def __init__(
-        self, config: configparser.ConfigParser, path: Union[Path, str] = None
-    ):
+    def __init__(self, config: ConfigParser, path: Union[Path, str] = None):
         self._config = config
         if path:
             self.path = Path(path)
@@ -100,12 +98,12 @@ class ConfigFile:
             self.make_paths_absolute()
 
     @property
-    def config(self) -> configparser.ConfigParser:
-        """configparser.ConfigParser: Get the configuration settings."""
+    def config(self) -> ConfigParser:
+        """ConfigParser: Get the configuration settings."""
         return self._config
 
     @config.setter
-    def config(self, value: configparser.ConfigParser):
+    def config(self, value: ConfigParser):
         self._config = value
 
     @property
@@ -151,7 +149,7 @@ class ConfigFile:
             raise FileNotFoundError(f"The Config-File: {path} does not exist")
 
         try:
-            config = configparser.ConfigParser(comment_prefixes="%")
+            config = ConfigParser(comment_prefixes="%")
             with open(path, "r") as configfile:
                 config.read_file(configfile)
         except configparser.Error as e:
@@ -163,16 +161,16 @@ class ConfigFile:
         return cls(config, path=path)
 
     @staticmethod
-    def config_file_callback_parser(path: str) -> configparser.ConfigParser:
+    def config_file_callback_parser(path: str) -> ConfigParser:
         """Parse a configuration file as fallback to the read method.
 
         Args:
             path (str): Path to the configuration file.
 
         Returns:
-            configparser.ConfigParser: Parsed configuration file.
+            ConfigParser: Parsed configuration file.
         """
-        config = configparser.ConfigParser()
+        config = ConfigParser()
         config["General"] = {}
         all_lines = open(path, "r").read().splitlines()
         for line in all_lines:
@@ -185,21 +183,21 @@ class ConfigFile:
         return config
 
     @staticmethod
-    def _upgrade(config: configparser.ConfigParser) -> configparser.ConfigParser:
+    def _upgrade(config: ConfigParser) -> ConfigParser:
         """Upgrade the configuration data structure to version 1.0 format.
 
         Args:
-            config (configparser.ConfigParser): D-FAST Bank Erosion settings in 0.1 format.
+            config (ConfigParser): D-FAST Bank Erosion settings in 0.1 format.
 
         Returns:
-            configparser.ConfigParser: D-FAST Bank Erosion settings in 1.0 format.
+            ConfigParser: D-FAST Bank Erosion settings in 1.0 format.
 
         Examples:
             ```python
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> result = config_file._upgrade(config_file.config)
-            >>> isinstance(result, configparser.ConfigParser)
+            >>> isinstance(result, ConfigParser)
             True
 
             ```
@@ -1008,9 +1006,7 @@ class ConfigFile:
 
         if plot_data:
             save_plot = self.get_bool("General", "SavePlots", True)
-            save_plot_zoomed = self.get_bool(
-                "General", "SaveZoomPlots", True
-            )
+            save_plot_zoomed = self.get_bool("General", "SaveZoomPlots", True)
             zoom_km_step = self.get_float("General", "ZoomStepKM", 1.0)
             if zoom_km_step < 0.01:
                 save_plot_zoomed = False
@@ -1059,6 +1055,7 @@ class ConfigFile:
 
         return output_dir
 
+
 class RiverData:
     """River data class."""
 
@@ -1105,9 +1102,7 @@ class RiverData:
         """Number of river bank search lines."""
         return len(self.bank_search_lines)
 
-    def mask_profile(
-        self, bounds: Tuple[float, float]
-    ) -> linestring.LineStringAdapter:
+    def mask_profile(self, bounds: Tuple[float, float]) -> linestring.LineStringAdapter:
         """
         Clip a chainage line to the relevant reach.
 
@@ -1256,6 +1251,7 @@ class RiverData:
         log_text("read_river_axis", data={"file": river_axis_file})
         river_axis = read_xyc(river_axis_file)
         return river_axis
+
 
 def read_simulation_data(
     file_name: str, indent: str = ""
@@ -1934,9 +1930,7 @@ def relative_path(rootdir: str, file: str) -> str:
         return str(file_path)
 
 
-def read_xyc(
-    filename: str, num_columns: int = 2
-) -> linestring.LineStringAdapter:
+def read_xyc(filename: str, num_columns: int = 2) -> linestring.LineStringAdapter:
     """
     Read lines from a file.
 
@@ -2008,9 +2002,7 @@ def write_xyc(xy: np.ndarray, val: np.ndarray, filename: str) -> None:
                 xyc.write("{:.2f}\t{:.2f}\t".format(xy[i, 0], xy[i, 1]) + valstr + "\n")
 
 
-def write_shp_pnt(
-    xy: np.ndarray, data: Dict[str, np.ndarray], filename: str
-) -> None:
+def write_shp_pnt(xy: np.ndarray, data: Dict[str, np.ndarray], filename: str) -> None:
     """
     Write a shape point file with x, y, and values.
 
@@ -2032,9 +2024,7 @@ def write_shp_pnt(
     write_shp(geom, data, filename)
 
 
-def write_shp(
-    geom: GeoSeries, data: Dict[str, np.ndarray], filename: str
-) -> None:
+def write_shp(geom: GeoSeries, data: Dict[str, np.ndarray], filename: str) -> None:
     """Write a shape file.
 
     Write a shape file for a given GeoSeries and dictionary of np arrays.
@@ -2108,18 +2098,18 @@ def write_km_eroded_volumes(km: np.ndarray, vol: np.ndarray, filename: str) -> N
 
 
 def move_parameter_location(
-    config: configparser.ConfigParser,
+    config: ConfigParser,
     group1: str,
     key1: str,
     group2: str,
     key2: Optional[str] = None,
     convert: Optional[Callable[[str], str]] = None,
-) -> configparser.ConfigParser:
+) -> ConfigParser:
     """
     Move a parameter from one group/keyword to another.
 
     Args:
-        config : configparser.ConfigParser
+        config : ConfigParser
             Original settings for the D-FAST Bank Erosion analysis.
         group1 : str
             Name of the group in the original configuration.
@@ -2133,7 +2123,7 @@ def move_parameter_location(
             Function to convert the original value into new value.
 
     Returns:
-        config : configparser.ConfigParser
+        config : ConfigParser
             Updated settings for the D-FAST Bank Erosion analysis.
     """
     val2: str
@@ -2233,6 +2223,7 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
         # km_thr = (km[:-1] + km[1:]) / 2
         km_thr = km[1:]
     return km_thr, val
+
 
 class ConfigFileError(Exception):
     """Custom exception for configuration file errors."""
