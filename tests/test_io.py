@@ -560,44 +560,74 @@ class Test_ConfigFile:
             (4.0, 4.0),
         ]
 
-    def test_get_parameter(self, config: configparser.ConfigParser):
+    @pytest.mark.parametrize(
+        "key, value, default, valid, expected",
+        [
+            (
+                "ZoomStepKM",
+                1.0,
+                None,
+                None,
+                [np.array([1.0, 1.0, 1.0]), np.array([1.0, 1.0, 1.0])],
+            ),
+            (
+                "NonExistentKey",
+                None,
+                2.0,
+                None,
+                [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])],
+            ),
+            (
+                "ValidValue",
+                3.0,
+                None,
+                [1.0, 2.0, 3.0],
+                [np.array([3.0, 3.0, 3.0]), np.array([3.0, 3.0, 3.0])],
+            ),
+        ],
+        ids=[
+            "Valid parameter with value 1.0",
+            "Missing parameter with default value 2.0",
+            "Valid parameter with restricted valid values",
+        ],
+    )
+    def test_get_parameter(
+        self, key, value, default, valid, expected, config: configparser.ConfigParser
+    ):
         """Test retrieving a parameter field."""
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
         bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5])]
 
-        # Case 1: Parameter exists in the configuration
-        config["General"] = {"ZoomStepKM": "1.0"}
-        result = config_file.get_parameter("General", "ZoomStepKM", bank_km)
-        expected = [np.array([1.0, 1.0, 1.0]), np.array([1.0, 1.0, 1.0])]
-        assert all(np.array_equal(r, e) for r, e in zip(result, expected))
-
-        # Case 2: Parameter does not exist, use default value
+        if value:
+            config["General"] = {key: str(value)}
         result = config_file.get_parameter(
-            "General", "NonExistentKey", bank_km, default=2.0
+            "General", key, bank_km, default=default, valid=valid
         )
-        expected = [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])]
         assert all(np.array_equal(r, e) for r, e in zip(result, expected))
 
-        # Case 3: Parameter must be positive
-        config["General"] = {"NegativeValue": "-1.0"}
-        with pytest.raises(Exception, match="No such file or directory"):
-            config_file.get_parameter(
-                "General", "NegativeValue", bank_km, positive=True
-            )
-
-        # Case 4: Parameter must match valid values
-        config["General"] = {"ValidValue": "3.0"}
-        result = config_file.get_parameter(
-            "General", "ValidValue", bank_km, valid=[1.0, 2.0, 3.0]
-        )
-        expected = [np.array([3.0, 3.0, 3.0]), np.array([3.0, 3.0, 3.0])]
-        assert all(np.array_equal(r, e) for r, e in zip(result, expected))
+    @pytest.mark.parametrize(
+        "key, value, positive, valid, expected",
+        [
+            ("NegativeValue", -1.0, True, None, "No such file or directory"),
+            ("InvalidValue", 4.0, False, [1.0, 2.0, 3.0], "No such file or directory"),
+        ],
+        ids=[
+            "Negative value with positive=True",
+            "Invalid value not in valid list",
+        ],
+    )
+    def test_get_parameter_exception(
+        self, key, value, positive, valid, expected, config: configparser.ConfigParser
+    ):
+        """Test retrieving a parameter field."""
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5])]
 
         # Case 5: Parameter does not match valid values
-        config["General"] = {"InvalidValue": "4.0"}
-        with pytest.raises(Exception, match="No such file or directory"):
+        config["General"] = {key: str(value)}
+        with pytest.raises(Exception, match=expected):
             config_file.get_parameter(
-                "General", "InvalidValue", bank_km, valid=[1.0, 2.0, 3.0]
+                "General", key, bank_km, positive=positive, valid=valid
             )
 
     def test_get_bank_search_distances(self, config: configparser.ConfigParser):
