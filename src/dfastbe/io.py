@@ -2157,26 +2157,22 @@ def sim2nc(oldfile: str) -> str:
     """
     Convert an SDS file name to an NC file (mirrors sim2ugrid.m).
 
-    Arguments
-    ---------
-    oldfile : str
-        Name of the original SIMONA SDS or Delft3D-FLOW TRIM file.
+    Args:
+        oldfile (str):Name of the original SIMONA SDS or Delft3D-FLOW TRIM file.
 
-    Results
-    -------
-    ncfile : str
-        Name of the netCDF file as created by sim2ugrid.m.
+    Returns:
+        str: Name of the netCDF file as created by sim2ugrid.m.
     """
     name = Path(oldfile).name
     if name.startswith("SDS"):
         # SDS-case_map.nc
-        ncfile = f"{oldfile}_map.nc"
+        nc_file = f"{oldfile}_map.nc"
     elif name.startswith("trim"):
         # trim-case_map.nc
-        ncfile = f"{Path(oldfile).stem}_map.nc"
+        nc_file = f"{Path(oldfile).stem}_map.nc"
     else:
         raise SimulationFilesError(f'Unable to determine file type for "{oldfile}"')
-    return ncfile
+    return nc_file
 
 
 def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[float]]):
