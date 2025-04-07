@@ -8107,10 +8107,10 @@ and adds an empty line before the start of a new block.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2244</span>
-<span class="normal">2245</span>
-<span class="normal">2246</span>
-<span class="normal">2247</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConfigFileError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2240</span>
+<span class="normal">2241</span>
+<span class="normal">2242</span>
+<span class="normal">2243</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConfigFileError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom exception for configuration file errors.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span>
@@ -9119,10 +9119,10 @@ Maximum distance from any point within line to reference line.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2250</span>
-<span class="normal">2251</span>
-<span class="normal">2252</span>
-<span class="normal">2253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SimulationFilesError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2246</span>
+<span class="normal">2247</span>
+<span class="normal">2248</span>
+<span class="normal">2249</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SimulationFilesError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom exception for configuration file errors.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span>
@@ -9753,7 +9753,11 @@ val : np.ndarray
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2182</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2178</span>
+<span class="normal">2179</span>
+<span class="normal">2180</span>
+<span class="normal">2181</span>
+<span class="normal">2182</span>
 <span class="normal">2183</span>
 <span class="normal">2184</span>
 <span class="normal">2185</span>
@@ -9809,11 +9813,7 @@ val : np.ndarray
 <span class="normal">2235</span>
 <span class="normal">2236</span>
 <span class="normal">2237</span>
-<span class="normal">2238</span>
-<span class="normal">2239</span>
-<span class="normal">2240</span>
-<span class="normal">2241</span>
-<span class="normal">2242</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_kmval</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">positive</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">valid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]):</span>
+<span class="normal">2238</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_kmval</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">positive</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">valid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read a parameter file, check its contents and return arrays of chainages and values.</span>
 
@@ -11298,12 +11298,60 @@ num_columns : int
     <div class="doc doc-contents ">
 
         <p>Convert an SDS file name to an NC file (mirrors sim2ugrid.m).</p>
-<h5 id="dfastbe.io.sim2nc--arguments"><a class="toclink" href="#dfastbe.io.sim2nc--arguments">Arguments</a><a class="headerlink" href="#dfastbe.io.sim2nc--arguments" title="Permanent link">#</a></h5>
-<p>oldfile : str
-    Name of the original SIMONA SDS or Delft3D-FLOW TRIM file.</p>
-<h5 id="dfastbe.io.sim2nc--results"><a class="toclink" href="#dfastbe.io.sim2nc--results">Results</a><a class="headerlink" href="#dfastbe.io.sim2nc--results" title="Permanent link">#</a></h5>
-<p>ncfile : str
-    Name of the netCDF file as created by sim2ugrid.m.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>oldfile</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Name of the original SIMONA SDS or Delft3D-FLOW TRIM file.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>str</code></td>            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Name of the netCDF file as created by sim2ugrid.m.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
@@ -11326,34 +11374,26 @@ num_columns : int
 <span class="normal">2172</span>
 <span class="normal">2173</span>
 <span class="normal">2174</span>
-<span class="normal">2175</span>
-<span class="normal">2176</span>
-<span class="normal">2177</span>
-<span class="normal">2178</span>
-<span class="normal">2179</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sim2nc</span><span class="p">(</span><span class="n">oldfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">2175</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sim2nc</span><span class="p">(</span><span class="n">oldfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert an SDS file name to an NC file (mirrors sim2ugrid.m).</span>
 
-<span class="sd">    Arguments</span>
-<span class="sd">    ---------</span>
-<span class="sd">    oldfile : str</span>
-<span class="sd">        Name of the original SIMONA SDS or Delft3D-FLOW TRIM file.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        oldfile (str):Name of the original SIMONA SDS or Delft3D-FLOW TRIM file.</span>
 
-<span class="sd">    Results</span>
-<span class="sd">    -------</span>
-<span class="sd">    ncfile : str</span>
-<span class="sd">        Name of the netCDF file as created by sim2ugrid.m.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Name of the netCDF file as created by sim2ugrid.m.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">oldfile</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
     <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;SDS&quot;</span><span class="p">):</span>
         <span class="c1"># SDS-case_map.nc</span>
-        <span class="n">ncfile</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">oldfile</span><span class="si">}</span><span class="s2">_map.nc&quot;</span>
+        <span class="n">nc_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">oldfile</span><span class="si">}</span><span class="s2">_map.nc&quot;</span>
     <span class="k">elif</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;trim&quot;</span><span class="p">):</span>
         <span class="c1"># trim-case_map.nc</span>
-        <span class="n">ncfile</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">oldfile</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">_map.nc&quot;</span>
+        <span class="n">nc_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Path</span><span class="p">(</span><span class="n">oldfile</span><span class="p">)</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">_map.nc&quot;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">SimulationFilesError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unable to determine file type for &quot;</span><span class="si">{</span><span class="n">oldfile</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">ncfile</span>
+    <span class="k">return</span> <span class="n">nc_file</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
