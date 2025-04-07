@@ -498,7 +498,7 @@ class ConfigFile:
         for b in range(n_bank):
             bankfile = self.config["Detect"][f"Line{b + 1}"]
             log_text("read_search_line", data={"nr": b + 1, "file": bankfile})
-            line[b] = XYCModel.read_xyc(bankfile)
+            line[b] = XYCModel.read(bankfile)
         return line
 
     def get_bank_lines(self, bank_dir: str) -> List[np.ndarray]:
@@ -528,7 +528,7 @@ class ConfigFile:
             while True:
                 bankfile = bank_dir + os.sep + bank_name + "_" + str(b) + ".xyc"
                 if os.path.exists(bankfile):
-                    xy_bank = XYCModel.read_xyc(bankfile)
+                    xy_bank = XYCModel.read(bankfile)
                     bankline_list.append(LineString(xy_bank))
                     b = b + 1
                 else:
@@ -712,7 +712,7 @@ class ConfigFile:
         # get the chainage file
         km_file = self.get_str("General", "RiverKM")
         log_text("read_chainage", data={"file": km_file})
-        xy_km = XYCModel.read_xyc(km_file, num_columns=3)
+        xy_km = XYCModel.read(km_file, num_columns=3)
 
         # make sure that chainage is increasing with node index
         if xy_km.coords[0][2] > xy_km.coords[1][2]:
@@ -774,7 +774,6 @@ class ConfigFile:
                 self.resolve_parameter("Erosion", f"Slope{i}", rootdir)
                 self.resolve_parameter("Erosion", f"Reed{i}", rootdir)
 
-
     def relative_to(self, rootdir: str):
         """
         Convert a configuration object to contain relative paths (for saving).
@@ -829,7 +828,6 @@ class ConfigFile:
                 self.parameter_relative_to("Erosion", f"Slope{i}", rootdir)
                 self.parameter_relative_to("Erosion", f"Reed{i}", rootdir)
 
-
     def resolve_parameter(self, group: str, key: str, rootdir: str):
         """
         Convert a parameter value to contain an absolute path.
@@ -852,7 +850,6 @@ class ConfigFile:
                 float(val_str)
             except ValueError:
                 self.config[group][key] = absolute_path(rootdir, val_str)
-
 
     def parameter_relative_to(self, group: str, key: str, rootdir: str):
         """
@@ -971,7 +968,6 @@ class RiverData:
         log_text("clip_chainage", data={"low": self.start_station, "high": self.end_station})
         self.masked_profile: linestring.LineString = self.mask_profile(self.station_bounds)
         self.masked_profile_arr = np.array(self.masked_profile)
-
 
     @property
     def bank_search_lines(self) -> List[linestring.LineStringAdapter]:
@@ -1135,7 +1131,7 @@ class RiverData:
     def read_river_axis(self):
         river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
         log_text("read_river_axis", data={"file": river_axis_file})
-        river_axis = XYCModel.read_xyc(river_axis_file)
+        river_axis = XYCModel.read(river_axis_file)
         return river_axis
 
 def read_simulation_data(file_name: str, indent: str = "") -> Tuple[SimulationObject, float]:
