@@ -36,8 +36,7 @@ from geopandas.geoseries import GeoSeries
 import netCDF4
 import numpy as np
 import pandas as pd
-import shapely
-from shapely.geometry import Point, linestring, LineString
+from shapely.geometry import Point, linestring, LineString, asLineString
 from shapely.prepared import prep
 
 MAX_RIVER_WIDTH = 1000
@@ -821,7 +820,7 @@ class ConfigFile:
 
         # make sure that chainage is increasing with node index
         if xy_km.coords[0][2] > xy_km.coords[1][2]:
-            xy_km = shapely.geometry.asLineString(xy_km.coords[::-1])
+            xy_km = asLineString(xy_km.coords[::-1])
 
         return xy_km
 
