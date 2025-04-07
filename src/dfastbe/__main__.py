@@ -94,8 +94,8 @@ def parse_arguments() -> Tuple[str, str, str]:
     )
     args = parser.parse_args()
 
-    language = args.language.upper()
-    run_mode = args.mode.upper()
+    language = args.language
+    run_mode = args.mode
     configfile = args.config
 
     return language, run_mode, configfile
