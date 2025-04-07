@@ -35,6 +35,7 @@ import geopandas as gpd
 import netCDF4
 import numpy as np
 import pandas as pd
+from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString, Point, asLineString, linestring
@@ -603,7 +604,7 @@ class ConfigFile:
         for b in range(n_bank):
             bankfile = self.config["Detect"][f"Line{b + 1}"]
             log_text("read_search_line", data={"nr": b + 1, "file": bankfile})
-            line[b] = read_xyc(bankfile)
+            line[b] = XYCModel.read(bankfile)
         return line
 
     def get_bank_lines(self, bank_dir: str) -> List[np.ndarray]:
@@ -630,7 +631,7 @@ class ConfigFile:
             if not xyc_file.exists():
                 break
 
-            xy_bank = read_xyc(xyc_file)
+            xy_bank = XYCModel.read(xyc_file)
             bankline_list.append(LineString(xy_bank))
             b += 1
         bankline_series = GeoSeries(bankline_list)
@@ -812,7 +813,7 @@ class ConfigFile:
         # get the chainage file
         km_file = self.get_str("General", "RiverKM")
         log_text("read_chainage", data={"file": km_file})
-        xy_km = read_xyc(km_file, num_columns=3)
+        xy_km = XYCModel.read(km_file, num_columns=3)
 
         # make sure that chainage is increasing with node index
         if xy_km.coords[0][2] > xy_km.coords[1][2]:
@@ -1121,9 +1122,8 @@ class RiverData:
         start_i = None
         end_i = None
         for i, c in enumerate(xy_km.coords):
-            if start_i is None:
-                if c[2] >= bounds[0]:
-                    start_i = i
+            if start_i is None and c[2] >= bounds[0]:
+                start_i = i
             if c[2] >= bounds[1]:
                 end_i = i
                 break
@@ -1250,7 +1250,7 @@ class RiverData:
     def read_river_axis(self):
         river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
         log_text("read_river_axis", data={"file": river_axis_file})
-        river_axis = read_xyc(river_axis_file)
+        river_axis = XYCModel.read(river_axis_file)
         return river_axis
 
 
@@ -1440,7 +1440,6 @@ def load_program_texts(file_name: Union[str, Path]) -> None:
             text = []
         else:
             text.append(line)
-
     if key in data.keys():
         raise ValueError(f"Duplicate entry for {key} in {file_name}.")
 
@@ -1478,7 +1477,7 @@ def log_text(
     None
     """
     str_value = get_text(key)
-    for r in range(repeat):
+    for _ in range(repeat):
         for s in str_value:
             sexp = s.format(**data)
             if file is None:
@@ -1601,7 +1600,7 @@ def read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndarr
                 var = rootgrp.variables[n]
                 break
 
-    elif varname[-12:] == "connectivity":
+    elif varname.endswith("connectivity"):
         # a mesh connectivity variable with corrected index
         varname = mesh2d[0].getncattr(varname)
         var = rootgrp.variables[varname]
@@ -1807,9 +1806,6 @@ def ugrid_add(
     # open destination file
     dst = netCDF4.Dataset(dstfile, "a")
 
-    # check if face dimension exists
-    dim = dst.dimensions[facedim]
-
     # add variable and write data
     var = dst.createVariable(varname, "f8", (facedim,))
     var.mesh = meshname
@@ -1931,78 +1927,6 @@ def relative_path(rootdir: str, file: str) -> str:
         return str(file_path)
 
 
-def read_xyc(filename: str, num_columns: int = 2) -> linestring.LineStringAdapter:
-    """
-    Read lines from a file.
-
-    Arguments
-    ---------
-    filename : str
-        Name of the file to be read.
-    num_columns : int
-        Number of columns to be read (2 or 3)
-
-    Returns
-    -------
-    L : linestring.LineStringAdapter
-        Line strings.
-    """
-    filename = Path(filename)
-    if not filename.exists():
-        raise FileNotFoundError(f"File not found: {filename}")
-
-    if filename.suffix.lower() == ".xyc":
-        if num_columns == 3:
-            column_names = ["Val", "X", "Y"]
-        else:
-            column_names = ["X", "Y"]
-        point_coordinates = pd.read_csv(
-            filename, names=column_names, skipinitialspace=True, delim_whitespace=True
-        )
-        num_points = len(point_coordinates.X)
-        x = point_coordinates.X.to_numpy().reshape((num_points, 1))
-        y = point_coordinates.Y.to_numpy().reshape((num_points, 1))
-        if num_columns == 3:
-            z = point_coordinates.Val.to_numpy().reshape((num_points, 1))
-            coords = np.concatenate((x, y, z), axis=1)
-        else:
-            coords = np.concatenate((x, y), axis=1)
-        line_string = LineString(coords)
-    else:
-        gdf = gpd.read_file(filename)["geometry"]
-        line_string = gdf[0]
-
-    return line_string
-
-
-def write_xyc(xy: np.ndarray, val: np.ndarray, filename: str) -> None:
-    """
-    Write a text file with x, y, and values.
-
-    Arguments
-    ---------
-    xy : np.ndarray
-        N x 2 array containing x and y coordinates.
-    val : np.ndarray
-        N x k array containing values.
-    filename : str
-        Name of the file to be written.
-
-    Returns
-    -------
-    None
-    """
-    with open(filename, "w") as xyc:
-        if val.ndim == 1:
-            for i in range(len(val)):
-                valstr = "{:.2f}".format(val[i])
-                xyc.write("{:.2f}\t{:.2f}\t".format(xy[i, 0], xy[i, 1]) + valstr + "\n")
-        else:
-            for i in range(len(val)):
-                valstr = "\t".join(["{:.2f}".format(x) for x in val[i, :]])
-                xyc.write("{:.2f}\t{:.2f}\t".format(xy[i, 0], xy[i, 1]) + valstr + "\n")
-
-
 def write_shp_pnt(xy: np.ndarray, data: Dict[str, np.ndarray], filename: str) -> None:
     """
     Write a shape point file with x, y, and values.
@@ -2020,8 +1944,8 @@ def write_shp_pnt(xy: np.ndarray, data: Dict[str, np.ndarray], filename: str) ->
     -------
     None
     """
-    xy_Points = [Point(xy1) for xy1 in xy]
-    geom = GeoSeries(xy_Points)
+    xy_points = [Point(xy1) for xy1 in xy]
+    geom = GeoSeries(xy_points)
     write_shp(geom, data, filename)
 
 
@@ -2044,8 +1968,8 @@ def write_shp(geom: GeoSeries, data: Dict[str, np.ndarray], filename: str) -> No
     -------
     None
     """
-    val_DataFrame = pd.DataFrame(data)
-    GeoDataFrame(val_DataFrame, geometry=geom).to_file(filename)
+    df = pd.DataFrame(data)
+    GeoDataFrame(df, geometry=geom).to_file(filename)
 
 
 def write_csv(data: Dict[str, np.ndarray], filename: str) -> None:
@@ -2193,36 +2117,32 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
         Array containing the values.
     """
     # print("Trying to read: ",filename)
-    P = pd.read_csv(
+    points = pd.read_csv(
         filename,
         names=["Chainage", "Val"],
         skipinitialspace=True,
         delim_whitespace=True,
     )
-    nPnts = len(P.Chainage)
-    km = P.Chainage.to_numpy()
-    val = P.Val.to_numpy()
+    # nPnts = len(P.Chainage)
+    km = points.Chainage.to_numpy()
+    val = points.Val.to_numpy()
+
     if len(km.shape) == 0:
         km = km[None]
         val = val[None]
-    if positive:
-        if (val < 0).any():
-            raise Exception(
-                'Values of "{}" in "{}" should be positive. Negative value read for chainage(s): {}'.format(
-                    key, filename, km[val < 0]
-                )
-            )
+
+    if positive and (val < 0).any():
+        raise ValueError(f'Values of "{key}" in {filename} should be positive. Negative value read for chainage(s): {km[val < 0]}')
+
     if len(km) == 1:
         km_thr = None
     else:
         if not (km[1:] > km[:-1]).all():
-            raise Exception(
-                'Chainage values are not increasing in the file "{}" read for "{}".'.format(
-                    filename, key
-                )
+            raise ValueError(
+                f"Chainage values are not increasing in the file {filename} read for {key}."
             )
-        # km_thr = (km[:-1] + km[1:]) / 2
         km_thr = km[1:]
+
     return km_thr, val
 
 
