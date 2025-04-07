@@ -3820,13 +3820,13 @@ Writing a configuration file:
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">val</span> <span class="o">=</span> <span class="n">default</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;No value specified for required keyword </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> in block </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">.&quot;</span>
-                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
         <span class="k">return</span> <span class="n">val</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_bool</span><span class="p">(</span>
@@ -3866,13 +3866,13 @@ Writing a configuration file:
                 <span class="ow">or</span> <span class="p">(</span><span class="n">str_val</span> <span class="o">==</span> <span class="s2">&quot;t&quot;</span><span class="p">)</span>
                 <span class="ow">or</span> <span class="p">(</span><span class="n">str_val</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
             <span class="p">)</span>
-        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">val</span> <span class="o">=</span> <span class="n">default</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;No boolean value specified for required keyword </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> in block </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">.&quot;</span>
-                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 
         <span class="k">return</span> <span class="n">val</span>
 
@@ -3911,13 +3911,13 @@ Writing a configuration file:
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">key</span><span class="p">])</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">val</span> <span class="o">=</span> <span class="n">default</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;No floating point value specified for required keyword </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> in block </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">.&quot;</span>
-                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
         <span class="k">if</span> <span class="n">positive</span> <span class="ow">and</span> <span class="n">val</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Value for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> in block </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2"> must be positive, not </span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">.&quot;</span>
@@ -3959,13 +3959,13 @@ Writing a configuration file:
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">key</span><span class="p">])</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">val</span> <span class="o">=</span> <span class="n">default</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;No integer value specified for required keyword </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> in block </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">.&quot;</span>
-                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
         <span class="k">if</span> <span class="n">positive</span> <span class="ow">and</span> <span class="n">val</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Value for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> in block </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2"> must be positive, not </span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">.&quot;</span>
@@ -4110,11 +4110,11 @@ Writing a configuration file:
         <span class="k">try</span><span class="p">:</span>
             <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
             <span class="n">use_default</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;No value specified for required keyword &quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&quot; in block &quot;</span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s1">&quot;.&#39;</span>
-                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
             <span class="n">use_default</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># if val is value then use that value globally</span>
@@ -4222,10 +4222,10 @@ Writing a configuration file:
                 <span class="n">val</span> <span class="o">=</span> <span class="p">(</span><span class="n">val_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">val_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">val</span> <span class="o">=</span> <span class="p">(</span><span class="n">val_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">val_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;Invalid range specification &quot;</span><span class="si">{</span><span class="n">str_val</span><span class="si">}</span><span class="s1">&quot; for required keyword &quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&quot; in block &quot;</span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s1">&quot;.&#39;</span>
-            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
         <span class="k">return</span> <span class="n">val</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_xy_km</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">linestring</span><span class="o">.</span><span class="n">LineStringAdapter</span><span class="p">:</span>
@@ -5245,13 +5245,13 @@ Writing a configuration file:
             <span class="ow">or</span> <span class="p">(</span><span class="n">str_val</span> <span class="o">==</span> <span class="s2">&quot;t&quot;</span><span class="p">)</span>
             <span class="ow">or</span> <span class="p">(</span><span class="n">str_val</span> <span class="o">==</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
         <span class="p">)</span>
-    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">val</span> <span class="o">=</span> <span class="n">default</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;No boolean value specified for required keyword </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> in block </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
 
     <span class="k">return</span> <span class="n">val</span>
 </code></pre></div></td></tr></table></div>
@@ -5500,13 +5500,13 @@ All floats are accepted (if False), or only positive floats (if True).</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">val</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">key</span><span class="p">])</span>
-    <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">val</span> <span class="o">=</span> <span class="n">default</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;No floating point value specified for required keyword </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> in block </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
     <span class="k">if</span> <span class="n">positive</span> <span class="ow">and</span> <span class="n">val</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Value for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> in block </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2"> must be positive, not </span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">.&quot;</span>
@@ -5758,13 +5758,13 @@ All floats are accepted (if False), or only positive floats (if True).</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">val</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">key</span><span class="p">])</span>
-    <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">val</span> <span class="o">=</span> <span class="n">default</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;No integer value specified for required keyword </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> in block </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
     <span class="k">if</span> <span class="n">positive</span> <span class="ow">and</span> <span class="n">val</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Value for </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> in block </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2"> must be positive, not </span><span class="si">{</span><span class="n">val</span><span class="si">}</span><span class="s2">.&quot;</span>
@@ -6223,11 +6223,11 @@ For each bank a parameter value per bank point (bank chainage location).</p>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
         <span class="n">use_default</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;No value specified for required keyword &quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&quot; in block &quot;</span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s1">&quot;.&#39;</span>
-            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
         <span class="n">use_default</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1"># if val is value then use that value globally</span>
@@ -6580,10 +6580,10 @@ close_plot (bool): Flag indicating whether to close the plot.</p>
             <span class="n">val</span> <span class="o">=</span> <span class="p">(</span><span class="n">val_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">val_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">val</span> <span class="o">=</span> <span class="p">(</span><span class="n">val_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">val_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;Invalid range specification &quot;</span><span class="si">{</span><span class="n">str_val</span><span class="si">}</span><span class="s1">&quot; for required keyword &quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&quot; in block &quot;</span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s1">&quot;.&#39;</span>
-        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
     <span class="k">return</span> <span class="n">val</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -7016,13 +7016,13 @@ typically a string representation of the index.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">key</span><span class="p">]</span>
-    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+    <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">val</span> <span class="o">=</span> <span class="n">default</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ConfigFileError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;No value specified for required keyword </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2"> in block </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">exc</span>
+            <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
     <span class="k">return</span> <span class="n">val</span>
 </code></pre></div></td></tr></table></div>
             </details>
