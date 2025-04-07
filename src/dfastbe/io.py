@@ -399,13 +399,13 @@ class ConfigFile:
         """
         try:
             val = self.config[group][key]
-        except KeyError as exc:
+        except KeyError as e:
             if default is not None:
                 val = default
             else:
                 raise ConfigFileError(
                     f"No value specified for required keyword {key} in block {group}."
-                ) from exc
+                ) from e
         return val
 
     def get_bool(
@@ -445,13 +445,13 @@ class ConfigFile:
                 or (str_val == "t")
                 or (str_val == "1")
             )
-        except KeyError as exc:
+        except KeyError as e:
             if default is not None:
                 val = default
             else:
                 raise ConfigFileError(
                     f"No boolean value specified for required keyword {key} in block {group}."
-                ) from exc
+                ) from e
 
         return val
 
@@ -490,13 +490,13 @@ class ConfigFile:
         """
         try:
             val = float(self.config[group][key])
-        except (KeyError, ValueError) as exc:
+        except (KeyError, ValueError) as e:
             if default is not None:
                 val = default
             else:
                 raise ConfigFileError(
                     f"No floating point value specified for required keyword {key} in block {group}."
-                ) from exc
+                ) from e
         if positive and val < 0.0:
             raise ConfigFileError(
                 f"Value for {key} in block {group} must be positive, not {val}."
@@ -538,13 +538,13 @@ class ConfigFile:
         """
         try:
             val = int(self.config[group][key])
-        except (KeyError, ValueError) as exc:
+        except (KeyError, ValueError) as e:
             if default is not None:
                 val = default
             else:
                 raise ConfigFileError(
                     f"No integer value specified for required keyword {key} in block {group}."
-                ) from exc
+                ) from e
         if positive and val <= 0:
             raise ConfigFileError(
                 f"Value for {key} in block {group} must be positive, not {val}."
@@ -689,11 +689,11 @@ class ConfigFile:
         try:
             filename = self.config[group][key]
             use_default = False
-        except (KeyError, TypeError) as exc:
+        except (KeyError, TypeError) as e:
             if default is None:
                 raise ConfigFileError(
                     f'No value specified for required keyword "{key}" in block "{group}".'
-                ) from exc
+                ) from e
             use_default = True
 
         # if val is value then use that value globally
@@ -801,10 +801,10 @@ class ConfigFile:
                 val = (val_list[1], val_list[0])
             else:
                 val = (val_list[0], val_list[1])
-        except ValueError as exc:
+        except ValueError as e:
             raise ValueError(
                 f'Invalid range specification "{str_val}" for required keyword "{key}" in block "{group}".'
-            ) from exc
+            ) from e
         return val
 
     def get_xy_km(self) -> linestring.LineStringAdapter:
