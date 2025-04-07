@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Dict
 from unittest.mock import patch
 
-import geopandas
+from geopandas import GeoDataFrame
 import netCDF4
 import numpy as np
 import pytest
@@ -549,7 +549,7 @@ class Test_ConfigFile:
 
         bank_lines = config.get_bank_lines("inputs")
 
-        assert isinstance(bank_lines, geopandas.GeoDataFrame)
+        assert isinstance(bank_lines, GeoDataFrame)
         assert len(bank_lines) == 1
         assert list(bank_lines.geometry[0].coords) == [
             (0.0, 0.0),
