@@ -35,13 +35,12 @@ import geopandas as gpd
 import netCDF4
 import numpy as np
 import pandas as pd
+from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString, Point, asLineString, linestring
 from shapely.prepared import prep
-from shapely.geometry import Point, linestring, LineString
-import pathlib
-from dfastio.xyc.models import XYCModel
+
 MAX_RIVER_WIDTH = 1000
 
 
