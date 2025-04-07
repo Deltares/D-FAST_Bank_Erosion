@@ -10,7 +10,6 @@ from unittest.mock import patch
 
 import geopandas
 import netCDF4
-import numpy
 import numpy as np
 import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem
@@ -253,7 +252,7 @@ class Test_ugrid_add:
         facedim = "mesh2d_nFaces"
         #
         varname = "xxx"
-        ldata = numpy.zeros((4132))
+        ldata = np.zeros((4132))
         ldata[1] = 3.14159
         long_name = "added_variable"
         #
@@ -270,10 +269,10 @@ class Test_read_waqua_xyz:
         """
         filename = "tests/files/read_waqua_xyz_test.xyc"
         data = read_waqua_xyz(filename)
-        datar = numpy.array([3.0, 6.0, 9.0, 12.0])
+        datar = np.array([3.0, 6.0, 9.0, 12.0])
         print("data reference: ", datar)
         print("data read     : ", data)
-        assert numpy.shape(data) == (4,)
+        assert np.shape(data) == (4,)
         assert (data == datar).all() == True
 
     def test_read_waqua_xyz_02(self):
@@ -283,10 +282,10 @@ class Test_read_waqua_xyz:
         filename = "tests/files/read_waqua_xyz_test.xyc"
         col = (1, 2)
         data = read_waqua_xyz(filename, col)
-        datar = numpy.array([[2.0, 3.0], [5.0, 6.0], [8.0, 9.0], [11.0, 12.0]])
+        datar = np.array([[2.0, 3.0], [5.0, 6.0], [8.0, 9.0], [11.0, 12.0]])
         print("data reference: ", datar)
         print("data read     : ", data)
-        assert numpy.shape(data) == (4, 2)
+        assert np.shape(data) == (4, 2)
         assert (data == datar).all() == True
 
 
@@ -296,7 +295,7 @@ class Test_write_simona_box:
         Write small SIMONA BOX file.
         """
         filename = "test.box"
-        data = numpy.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+        data = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
         firstm = 0
         firstn = 0
         write_simona_box(filename, data, firstm, firstn)
@@ -314,7 +313,7 @@ class Test_write_simona_box:
         Write small SIMONA BOX file with offset.
         """
         filename = "test.box"
-        data = numpy.array(
+        data = np.array(
             [[0, 0, 0, 0, 0], [0, 0, 1, 2, 3], [0, 0, 4, 5, 6], [0, 0, 7, 8, 9]]
         )
         firstm = 1
@@ -334,7 +333,7 @@ class Test_write_simona_box:
         Write large SIMONA BOX file.
         """
         filename = "test.box"
-        data = numpy.zeros((15, 15))
+        data = np.zeros((15, 15))
         firstm = 0
         firstn = 0
         write_simona_box(filename, data, firstm, firstn)
