@@ -82,15 +82,16 @@ def run(
     """
     language = language.upper()
 
-    config_file = ConfigFile.read(configfile)
     r_dir = Path(__file__).resolve().parent
 
     load_program_texts( r_dir / f"messages.{language}.ini")
     run_mode = run_mode.upper()
     if run_mode == "BANKLINES":
+        config_file = ConfigFile.read(configfile)
         bank_lines = BankLines(config_file)
         bank_lines.detect()
     elif run_mode == "BANKEROSION":
+        config_file = ConfigFile.read(configfile)
         erosion = Erosion(config_file)
         erosion.bankerosion_core()
     elif run_mode == "GUI":
