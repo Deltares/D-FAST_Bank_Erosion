@@ -26,6 +26,7 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
+from dataclasses import dataclass
 from typing import Tuple, List, Dict
 from pathlib import Path
 from dfastbe.kernel import get_km_bins, moving_avg, comp_erosion_eq, comp_erosion, get_km_eroded_volume
@@ -50,6 +51,18 @@ g = 9.81  # gravitational acceleration [m/s2]
 
 X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
+
+
+@dataclass
+class ErosionInputs:
+    ship_data: Dict[str, np.ndarray]
+    dfw0: List[np.ndarray]
+    dfw1: List[np.ndarray]
+    zss: List[np.ndarray]
+    tauc: List[np.ndarray]
+    banktype: List[np.ndarray]
+    taucls_str: List[str]
+
 
 class Erosion:
     def __init__(self, config_file: ConfigFile, gui: bool = False):
