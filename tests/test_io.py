@@ -1,28 +1,38 @@
-from typing import Dict
-import unittest
-from unittest.mock import patch
-
-import geopandas
-import numpy as np
-
-from dfastbe.io import ConfigFile, load_program_texts, log_text, get_text, read_fm_map,\
-    ugrid_add, copy_ugrid, copy_var, read_waqua_xyz, write_simona_box, \
-    get_mesh_and_facedim_names, absolute_path, relative_path, get_filename, \
-    RiverData
-
 import configparser
 import os
-from pathlib import Path
 import platform
-import numpy
-import netCDF4
-from shapely.geometry.linestring import LineString
-import pytest
-from pyfakefs.fake_filesystem import FakeFilesystem
-
 import sys
 from contextlib import contextmanager
 from io import StringIO
+from pathlib import Path
+from typing import Dict
+from unittest.mock import patch
+
+import geopandas
+import netCDF4
+import numpy
+import numpy as np
+import pytest
+from pyfakefs.fake_filesystem import FakeFilesystem
+from shapely.geometry.linestring import LineString
+
+from dfastbe.io import (
+    ConfigFile,
+    RiverData,
+    absolute_path,
+    copy_ugrid,
+    copy_var,
+    get_filename,
+    get_mesh_and_facedim_names,
+    get_text,
+    load_program_texts,
+    log_text,
+    read_fm_map,
+    read_waqua_xyz,
+    relative_path,
+    ugrid_add,
+    write_simona_box,
+)
 
 
 @contextmanager
@@ -43,6 +53,7 @@ class Test_load_program_texts:
         """
         print("current work directory: ", os.getcwd())
         assert load_program_texts("tests/files/messages.UK.ini") == None
+
 
 class Test_log_text:
     def test_log_text_01(self):
@@ -93,12 +104,14 @@ class Test_log_text:
         strref = ['The measure is located on reach ABC']
         assert all_lines == strref
 
+
 class Test_get_filename:
     def test_get_filename_01(self):
         """
         Testing get_filename wrapper for get_text.
         """
         assert get_filename("report.out") == "report.txt"
+
 
 class Test_get_text:
     def test_get_text_01(self):
@@ -117,7 +130,8 @@ class Test_get_text:
         """
         Testing get_text: "confirm" key.
         """
-        assert get_text("confirm") == ['Confirm using "y" ...','']
+        assert get_text("confirm") == ['Confirm using "y" ...', '']
+
 
 class Test_read_fm_map:
     def test_read_fm_map_01(self):
@@ -180,9 +194,12 @@ class Test_read_fm_map:
         varname = "water level"
         with pytest.raises(Exception) as cm:
             datac = read_fm_map(filename, varname)
-        assert str(cm.value) == 'Expected one variable for "water level", but obtained 0.'
+        assert (
+            str(cm.value) == 'Expected one variable for "water level", but obtained 0.'
+        )
 
-class Test_get_mesh_and_facedim_names():
+
+class Test_get_mesh_and_facedim_names:
     def test_get_mesh_and_facedim_names_01(self):
         """
         Testing get_mesh_and_facedim_names.
@@ -191,7 +208,8 @@ class Test_get_mesh_and_facedim_names():
         name_and_dim = get_mesh_and_facedim_names(filename)
         assert name_and_dim == ("mesh2d", "mesh2d_nFaces")
 
-class Test_copy_ugrid():
+
+class Test_copy_ugrid:
     def test_copy_ugrid_01(self):
         """
         Testing copy_ugrid (depends on copy_var).
@@ -207,7 +225,7 @@ class Test_copy_ugrid():
         assert datac[-1][1] == dataref
 
 
-class Test_copy_var():
+class Test_copy_var:
     def test_copy_var_01(self):
         """
         Testing copy_var.
@@ -224,7 +242,8 @@ class Test_copy_var():
         dataref = 3.8871328177527262
         assert datac[1] == dataref
 
-class Test_ugrid_add():
+
+class Test_ugrid_add:
     def test_ugrid_add_01(self):
         """
         Testing ugrid_add.
@@ -243,14 +262,15 @@ class Test_ugrid_add():
         datac = read_fm_map(dst_filename, long_name)
         assert datac[1] == ldata[1]
 
-class Test_read_waqua_xyz():
+
+class Test_read_waqua_xyz:
     def test_read_waqua_xyz_01(self):
         """
         Read WAQUA xyz file default column 2.
         """
         filename = "tests/files/read_waqua_xyz_test.xyc"
         data = read_waqua_xyz(filename)
-        datar = numpy.array([3., 6., 9., 12.])
+        datar = numpy.array([3.0, 6.0, 9.0, 12.0])
         print("data reference: ", datar)
         print("data read     : ", data)
         assert numpy.shape(data) == (4,)
@@ -261,29 +281,32 @@ class Test_read_waqua_xyz():
         Read WAQUA xyz file columns 1 and 2.
         """
         filename = "tests/files/read_waqua_xyz_test.xyc"
-        col = (1,2)
+        col = (1, 2)
         data = read_waqua_xyz(filename, col)
-        datar = numpy.array([[ 2., 3.], [ 5., 6.], [ 8., 9.], [11., 12.]])
+        datar = numpy.array([[2.0, 3.0], [5.0, 6.0], [8.0, 9.0], [11.0, 12.0]])
         print("data reference: ", datar)
         print("data read     : ", data)
-        assert numpy.shape(data) == (4,2)
+        assert numpy.shape(data) == (4, 2)
         assert (data == datar).all() == True
 
-class Test_write_simona_box():
+
+class Test_write_simona_box:
     def test_write_simona_box_01(self):
         """
         Write small SIMONA BOX file.
         """
         filename = "test.box"
-        data = numpy.array([[1, 2, 3],[4, 5, 6],[7, 8, 9]])
+        data = numpy.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
         firstm = 0
         firstn = 0
         write_simona_box(filename, data, firstm, firstn)
         all_lines = open(filename, "r").read().splitlines()
-        all_lines_ref = ['      BOX MNMN=(   1,    1,    3,    3), VARIABLE_VAL=',
-                         '          1.000       2.000       3.000',
-                         '          4.000       5.000       6.000',
-                         '          7.000       8.000       9.000']
+        all_lines_ref = [
+            '      BOX MNMN=(   1,    1,    3,    3), VARIABLE_VAL=',
+            '          1.000       2.000       3.000',
+            '          4.000       5.000       6.000',
+            '          7.000       8.000       9.000',
+        ]
         assert all_lines == all_lines_ref
 
     def test_write_simona_box_02(self):
@@ -291,15 +314,19 @@ class Test_write_simona_box():
         Write small SIMONA BOX file with offset.
         """
         filename = "test.box"
-        data = numpy.array([[0, 0, 0, 0, 0], [0, 0, 1, 2, 3],[0, 0, 4, 5, 6],[0, 0, 7, 8, 9]])
+        data = numpy.array(
+            [[0, 0, 0, 0, 0], [0, 0, 1, 2, 3], [0, 0, 4, 5, 6], [0, 0, 7, 8, 9]]
+        )
         firstm = 1
         firstn = 2
         write_simona_box(filename, data, firstm, firstn)
         all_lines = open(filename, "r").read().splitlines()
-        all_lines_ref = ['      BOX MNMN=(   2,    3,    4,    5), VARIABLE_VAL=',
-                         '          1.000       2.000       3.000',
-                         '          4.000       5.000       6.000',
-                         '          7.000       8.000       9.000']
+        all_lines_ref = [
+            '      BOX MNMN=(   2,    3,    4,    5), VARIABLE_VAL=',
+            '          1.000       2.000       3.000',
+            '          4.000       5.000       6.000',
+            '          7.000       8.000       9.000',
+        ]
         assert all_lines == all_lines_ref
 
     def test_write_simona_box_03(self):
@@ -307,15 +334,22 @@ class Test_write_simona_box():
         Write large SIMONA BOX file.
         """
         filename = "test.box"
-        data = numpy.zeros((15,15))
+        data = numpy.zeros((15, 15))
         firstm = 0
         firstn = 0
         write_simona_box(filename, data, firstm, firstn)
         all_lines = open(filename, "r").read().splitlines()
         all_lines_ref = ['      BOX MNMN=(   1,    1,   15,   10), VARIABLE_VAL=']
-        all_lines_ref.extend(['          0.000       0.000       0.000       0.000       0.000       0.000       0.000       0.000       0.000       0.000']*15)
+        all_lines_ref.extend(
+            [
+                '          0.000       0.000       0.000       0.000       0.000       0.000       0.000       0.000       0.000       0.000'
+            ]
+            * 15
+        )
         all_lines_ref.extend(['      BOX MNMN=(   1,   11,   15,   15), VARIABLE_VAL='])
-        all_lines_ref.extend(['          0.000       0.000       0.000       0.000       0.000']*15)
+        all_lines_ref.extend(
+            ['          0.000       0.000       0.000       0.000       0.000'] * 15
+        )
         self.maxDiff = None
         assert all_lines == all_lines_ref
 
@@ -324,11 +358,20 @@ class Test_write_simona_box():
     platform.system() != "Windows", reason="it will be completely changed"
 )
 class TestAbsolutePath:
-
     def test_absolute_path_01(self):
         """Convert absolute path into relative path using relative_path (Windows)."""
         rootdir = "g:" + os.sep + "some" + os.sep + "dir"
-        afile = "g:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
+        afile = (
+            "g:"
+            + os.sep
+            + "some"
+            + os.sep
+            + "other"
+            + os.sep
+            + "dir"
+            + os.sep
+            + "file.ext"
+        )
         rfile = ".." + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
         assert absolute_path(rootdir, rfile) == afile
 
@@ -341,7 +384,17 @@ class TestAbsolutePath:
     def test_absolute_path_03(self):
         """If path on different drive, it shouldn't be adjusted by relative_path (Windows)."""
         rootdir = "d:" + os.sep + "some" + os.sep + "dir"
-        file = "e:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
+        file = (
+            "e:"
+            + os.sep
+            + "some"
+            + os.sep
+            + "other"
+            + os.sep
+            + "dir"
+            + os.sep
+            + "file.ext"
+        )
         assert absolute_path(rootdir, file) == file
 
 
@@ -358,7 +411,17 @@ class Test_relative_path:
     def test_relative_path_03(self):
         """If path on different drive, it shouldn't be adjusted by relative_path (Windows)."""
         rootdir = "d:" + os.sep + "some" + os.sep + "dir"
-        file = "e:" + os.sep + "some" + os.sep + "other" + os.sep + "dir" + os.sep + "file.ext"
+        file = (
+            "e:"
+            + os.sep
+            + "some"
+            + os.sep
+            + "other"
+            + os.sep
+            + "dir"
+            + os.sep
+            + "file.ext"
+        )
         assert relative_path(rootdir, file) == file
 
 
@@ -704,7 +767,6 @@ class TestConfigFileE2E:
         river_km = config_file.config["General"]["riverkm"]
         assert Path(river_km).exists()
 
-
     def test_write_config_01(self):
         """
         Testing write_config.
@@ -722,15 +784,17 @@ class TestConfigFileE2E:
         config = ConfigFile(config)
         config.write(filename)
         all_lines = open(filename, "r").read().splitlines()
-        all_lines_ref = ['[G 1]',
-                         '  k 1     = V 1',
-                         '',
-                         '[Group 2]',
-                         '  k1      = 1.0 0.1 0.0 0.01',
-                         '  k2      = 2.0 0.2 0.02 0.0',
-                         '',
-                         '[Group 3]',
-                         '  longkey = 3']
+        all_lines_ref = [
+            '[G 1]',
+            '  k 1     = V 1',
+            '',
+            '[Group 2]',
+            '  k1      = 1.0 0.1 0.0 0.01',
+            '  k2      = 2.0 0.2 0.02 0.0',
+            '',
+            '[Group 3]',
+            '  longkey = 3',
+        ]
         assert all_lines == all_lines_ref
         Path(filename).unlink()
 
