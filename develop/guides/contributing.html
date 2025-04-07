@@ -283,26 +283,6 @@
     
     
       <li class="md-tabs__item">
-        <a href="../architecture-design/main-components.html" class="md-tabs__link">
-          
-  
-    
-  
-  Architecture Design
-
-        </a>
-      </li>
-    
-  
-
-      
-        
-  
-  
-  
-    
-    
-      <li class="md-tabs__item">
         <a href="../api/bank_lines.html" class="md-tabs__link">
           
   
@@ -1063,6 +1043,16 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
     
     
       
@@ -1082,7 +1072,7 @@
             
   
   <span class="md-ellipsis">
-    Architecture Design
+    API Reference
     
   </span>
   
@@ -1092,90 +1082,6 @@
         
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
-            <span class="md-nav__icon md-icon"></span>
-            Architecture Design
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../architecture-design/main-components.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    D-FAST Bank Erosion Architecture and Design
-    
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
-    
-    
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-        
-      
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
-        
-          
-          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    API Reference
-    
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             API Reference
           </label>
@@ -1343,10 +1249,10 @@
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1358,8 +1264,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             User Interface
           </label>
@@ -1649,10 +1555,8 @@
 <h3 id="isort"><a class="toclink" href="#isort">Isort</a><a class="headerlink" href="#isort" title="Permanent link">#</a></h3>
 <p>We use <code>isort</code> as an autoformatter.</p>
 <h3 id="commitizen"><a class="toclink" href="#commitizen">Commitizen</a><a class="headerlink" href="#commitizen" title="Permanent link">#</a></h3>
-<ul>
-<li>We use <code>commitizen</code> to automatically bump the version number.</li>
-<li>If you use <a href="https://www.conventionalcommits.org/en/v1.0.0/#summary">conventional commit messages</a>, the <a href="../change-log.html"><code>change-log.md</code></a> is generated automatically. More details below under <a href="#merging">"Merging"</a>.</li>
-</ul>
+<p>We use <code>commitizen</code> to automatically bump the version number.
+If you use <a href="https://www.conventionalcommits.org/en/v1.0.0/#summary">conventional commit messages</a>, the <a href="../change-log"><code>changelog.md</code></a> is generated automatically. More details below under <a href="#merging">"Merging"</a>.</p>
 <h2 id="development"><a class="toclink" href="#development">Development</a><a class="headerlink" href="#development" title="Permanent link">#</a></h2>
 <h3 id="branches"><a class="toclink" href="#branches">Branches</a><a class="headerlink" href="#branches" title="Permanent link">#</a></h3>
 <p>For each issue or feature, a separate branch should be created from the main. To keep the branches organized each branch should be created with a prefix in the name:
@@ -1700,8 +1604,7 @@ To prepare for releasing, please make sure you have a clean checkout of the late
  If you don't know the version tag yet, you can do a dry-run of the next step, for example via:
  <div class="highlight"><pre><span></span><code>cz bump --dry-run --increment PATCH
 </code></pre></div></li>
-<li>In the updated <code>docs/mkdocs/change-log.md</code>, manualCly add links to GitHub PR numbers (or issue numbers) at the 
-   end of each line, if appropriate.
+<li>In the updated <code>docs/changelog.md</code>, manually add links to GitHub PR numbers (or issue numbers) at the end of each line, if appropriate.
      It is recommended to use the macros <code>{{gh_pr(123)}}</code>, resp. <code>{{gh_issue(345)}}</code> to get automatic hyperlinks (where 123 and 345 are GitHub's PR and issue numbers, respectively).</li>
 <li>Use MAJOR, MINOR or PATCH to increment the version
  <div class="highlight"><pre><span></span><code>cz bump --increment {MAJOR,MINOR,PATCH}
@@ -1824,8 +1727,6 @@ poetry publish
     
     
       <script src="../assets/javascripts/bundle.c8b220af.min.js"></script>
-      
-        <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       
     
   </body>
