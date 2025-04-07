@@ -61,9 +61,6 @@ def run(
         configfile (str, optional):
             Path to the configuration file. Defaults to 'dfastbe.cfg'.
 
-    Returns:
-        None
-
     Raises:
         Exception: If an invalid `run_mode` is provided. The valid options are
             'BANKLINES', 'BANKEROSION', or 'GUI'.

@@ -63,7 +63,6 @@ def parse_arguments() -> Tuple[str, str, str]:
 
     Raises:
         LanguageError: If invalid language is specified.
-
     Returns:
         language (str):
             Language identifier ("NL" or "UK").
@@ -73,7 +72,7 @@ def parse_arguments() -> Tuple[str, str, str]:
             Name of the configuration file.
     """
     parser = argparse.ArgumentParser(
-        description="D-FAST Morphological Impact. Example: python -m dfastbe --mode BANKEROSION --config settings.cfg"
+        description="D-FAST Bank Erosion. Example: python -m dfastbe --mode BANKEROSION --config settings.cfg"
     )
     parser.add_argument(
         "--language",
