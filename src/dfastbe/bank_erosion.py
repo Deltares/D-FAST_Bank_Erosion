@@ -142,8 +142,8 @@ class Erosion:
         self, sim: SimulationObject, face_node, banklines, edge_node, edge_face, fe, nnodes, boundary_edge_nrs, stations_coords
     ):
         n_banklines = len(banklines)
-        x_face_coords = _masked_index(sim["x_node"], face_node)
-        y_face_coords = _masked_index(sim["y_node"], face_node)
+        x_face_coords = _apply_masked_indexing(sim["x_node"], face_node)
+        y_face_coords = _apply_masked_indexing(sim["y_node"], face_node)
         x_edge_coords = sim["x_node"][edge_node]
         y_edge_coords = sim["y_node"][edge_node]
 
@@ -542,7 +542,7 @@ class Erosion:
                     # bankheight = maximum bed elevation per cell
                     if sim["zb_location"] == "node":
                         zb = sim["zb_val"]
-                        zb_all_nodes = _masked_index(zb, fnc[bank_index, :])
+                        zb_all_nodes = _apply_masked_indexing(zb, fnc[bank_index, :])
                         zb_bank = zb_all_nodes.max(axis=1)
                         if self.zb_dx > 0.0:
                             if ib == 0:
@@ -781,7 +781,7 @@ class Erosion:
         face_node = sim["facenode"]
         nnodes = sim["nnodes"]
 
-        edge_node, edge_face, fe, boundary_edge_nrs = _derive_topology_arrays(face_node, nnodes)
+        edge_node, edge_face, fe, boundary_edge_nrs = _compute_mesh_topology(face_node, nnodes)
 
         # clip the chainage path to the range of chainages of interest
         km_bounds = self.river_data.station_bounds
@@ -1105,21 +1105,19 @@ class Erosion:
                 plt.show(block=not self.gui)
 
 
-def _masked_index(x0: np.array, idx: np.ma.masked_array) -> np.ma.masked_array:
+def _apply_masked_indexing(x0: np.array, idx: np.ma.masked_array) -> np.ma.masked_array:
     """
     Index one array by another transferring the mask.
 
-    Arguments
-    ---------
-    x0 : np.ndarray
-        A linear array.
-    idx : np.ma.masked_array
-        An index array with possibly masked indices.
+    Args:
+        x0 : np.ndarray
+            A linear array.
+        idx : np.ma.masked_array
+            An index array with possibly masked indices.
 
-    Results
-    -------
-    x1: np.ma.masked_array
-        An array with same shape as idx, with mask.
+    returns:
+        x1: np.ma.masked_array
+            An array with same shape as idx, with mask.
     """
     idx_safe = idx.copy()
     idx_safe.data[np.ma.getmask(idx)] = 0
@@ -1127,7 +1125,7 @@ def _masked_index(x0: np.array, idx: np.ma.masked_array) -> np.ma.masked_array:
     return x1
 
 
-def _derive_topology_arrays(
+def _compute_mesh_topology(
     face_node: np.ndarray, n_nodes: np.ndarray
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
