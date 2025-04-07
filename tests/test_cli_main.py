@@ -1,8 +1,11 @@
 import sys
+
 import matplotlib
+
 matplotlib.use("Agg")
-import pytest
 from unittest.mock import patch
+
+import pytest
 
 # Patch before importing dfastbe.__main__ to prevent Qt5Agg in headless CI
 with patch("matplotlib.use", lambda *args, **kwargs: None):
