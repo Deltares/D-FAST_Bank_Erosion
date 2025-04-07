@@ -45,16 +45,15 @@ def captured_output():
         sys.stdout, sys.stderr = old_out, old_err
 
 
-class Test_load_program_texts:
-    def test_load_program_texts_01(self):
-        """
-        Testing load_program_texts.
-        """
-        print("current work directory: ", os.getcwd())
-        assert load_program_texts("tests/files/messages.UK.ini") == None
+def test_load_program_texts_01():
+    """
+    Testing load_program_texts.
+    """
+    print("current work directory: ", os.getcwd())
+    assert load_program_texts("tests/files/messages.UK.ini") is None
 
 
-class Test_log_text:
+class TestLogText:
     def test_log_text_01(self):
         """
         Testing standard output of a single text without expansion.
@@ -83,9 +82,9 @@ class Test_log_text:
         Testing standard output of a text with expansion.
         """
         key = "reach"
-        dict = {"reach": "ABC"}
+        data = {"reach": "ABC"}
         with captured_output() as (out, err):
-            log_text(key, data=dict)
+            log_text(key, data=data)
         outstr = out.getvalue().splitlines()
         strref = ['The measure is located on reach ABC']
         assert outstr == strref
@@ -95,24 +94,23 @@ class Test_log_text:
         Testing file output of a text with expansion.
         """
         key = "reach"
-        dict = {"reach": "ABC"}
+        data = {"reach": "ABC"}
         filename = "test.log"
         with open(filename, "w") as f:
-            log_text(key, data=dict, file=f)
+            log_text(key, data=data, file=f)
         all_lines = open(filename, "r").read().splitlines()
         strref = ['The measure is located on reach ABC']
         assert all_lines == strref
 
 
-class Test_get_filename:
-    def test_get_filename_01(self):
-        """
-        Testing get_filename wrapper for get_text.
-        """
-        assert get_filename("report.out") == "report.txt"
+def test_get_filename_01():
+    """
+    Testing get_filename wrapper for get_text.
+    """
+    assert get_filename("report.out") == "report.txt"
 
 
-class Test_get_text:
+class TestGetText:
     def test_get_text_01(self):
         """
         Testing get_text: key not found.
@@ -132,7 +130,7 @@ class Test_get_text:
         assert get_text("confirm") == ['Confirm using "y" ...', '']
 
 
-class Test_read_fm_map:
+class TestReadFMMap:
     def test_read_fm_map_01(self):
         """
         Testing read_fm_map: x coordinates of the faces.
@@ -141,7 +139,7 @@ class Test_read_fm_map:
         varname = "x"
         datac = read_fm_map(filename, varname)
         dataref = 41.24417604888325
-        assert datac[1] == dataref
+        assert datac[1] == pytest.approx(dataref)
 
     def test_read_fm_map_02(self):
         """
@@ -172,7 +170,7 @@ class Test_read_fm_map:
         varname = "sea_floor_depth_below_sea_surface"
         datac = read_fm_map(filename, varname)
         dataref = 3.894498393076889
-        assert datac[1] == dataref
+        assert datac[1] == pytest.approx(dataref)
 
     def test_read_fm_map_05(self):
         """
@@ -182,7 +180,7 @@ class Test_read_fm_map:
         varname = "Water level"
         datac = read_fm_map(filename, varname)
         dataref = 3.8871328177527262
-        assert datac[1] == dataref
+        assert datac[1] == pytest.approx(dataref)
 
     def test_read_fm_map_06(self):
         """
@@ -191,30 +189,29 @@ class Test_read_fm_map:
         filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
         varname = "water level"
         with pytest.raises(Exception) as cm:
-            datac = read_fm_map(filename, varname)
+            read_fm_map(filename, varname)
         assert (
             str(cm.value) == 'Expected one variable for "water level", but obtained 0.'
         )
 
 
-class Test_get_mesh_and_facedim_names:
-    def test_get_mesh_and_facedim_names_01(self):
-        """
-        Testing get_mesh_and_facedim_names.
-        """
-        filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
-        name_and_dim = get_mesh_and_facedim_names(filename)
-        assert name_and_dim == ("mesh2d", "mesh2d_nFaces")
+def test_get_mesh_and_facedim_names_01():
+    """
+    Testing get_mesh_and_facedim_names.
+    """
+    filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
+    name_and_dim = get_mesh_and_facedim_names(filename)
+    assert name_and_dim == ("mesh2d", "mesh2d_nFaces")
 
 
-class Test_copy_ugrid:
+class TestCopyUgrid:
     def test_copy_ugrid_01(self):
         """
         Testing copy_ugrid (depends on copy_var).
         """
         src_filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
         dst_filename = "test.nc"
-        meshname, facedim = get_mesh_and_facedim_names(src_filename)
+        meshname, _ = get_mesh_and_facedim_names(src_filename)
         copy_ugrid(src_filename, meshname, dst_filename)
         #
         varname = "face_node_connectivity"
@@ -238,30 +235,29 @@ class Test_copy_var:
         varname = "sea_surface_height"
         datac = read_fm_map(dst_filename, varname)
         dataref = 3.8871328177527262
-        assert datac[1] == dataref
+        assert datac[1] == pytest.approx(dataref)
 
 
-class Test_ugrid_add:
-    def test_ugrid_add_01(self):
-        """
-        Testing ugrid_add.
-        """
-        dst_filename = "test.nc"
-        meshname = "mesh2d"
-        facedim = "mesh2d_nFaces"
-        #
-        varname = "xxx"
-        ldata = np.zeros((4132))
-        ldata[1] = 3.14159
-        long_name = "added_variable"
-        #
-        ugrid_add(dst_filename, varname, ldata, meshname, facedim, long_name)
-        #
-        datac = read_fm_map(dst_filename, long_name)
-        assert datac[1] == ldata[1]
+def test_ugrid_add_01():
+    """
+    Testing ugrid_add.
+    """
+    dst_filename = "test.nc"
+    meshname = "mesh2d"
+    facedim = "mesh2d_nFaces"
+    #
+    varname = "xxx"
+    ldata = np.zeros((4132))
+    ldata[1] = 3.14159
+    long_name = "added_variable"
+    #
+    ugrid_add(dst_filename, varname, ldata, meshname, facedim, long_name)
+    #
+    datac = read_fm_map(dst_filename, long_name)
+    assert datac[1] == ldata[1]
 
 
-class Test_read_waqua_xyz:
+class TestReadWaquaXYZ:
     def test_read_waqua_xyz_01(self):
         """
         Read WAQUA xyz file default column 2.
@@ -288,7 +284,7 @@ class Test_read_waqua_xyz:
         assert (data == datar).all() == True
 
 
-class Test_write_simona_box:
+class TestWriteSimonaBox:
     def test_write_simona_box_01(self):
         """
         Write small SIMONA BOX file.
@@ -358,9 +354,9 @@ class Test_write_simona_box:
 class TestAbsolutePath:
     def test_absolute_path_01(self):
         """Convert absolute path into relative path using relative_path (Windows)."""
-        rootdir = "g:" + os.sep + "some" + os.sep + "dir"
+        rootdir = "q:" + os.sep + "some" + os.sep + "dir"
         afile = (
-            "g:"
+            "q:"
             + os.sep
             + "some"
             + os.sep
@@ -396,7 +392,7 @@ class TestAbsolutePath:
         assert absolute_path(rootdir, file) == file
 
 
-class Test_relative_path:
+class TestRelativePath:
     def test_relative_path_02(self):
         """Empty string should not be adjusted by relative_path."""
         rootdir = "d:" + os.sep + "some" + os.sep + "dir"
@@ -423,7 +419,7 @@ class Test_relative_path:
         assert relative_path(rootdir, file) == file
 
 
-class Test_ConfigFile:
+class TestConfigFile:
     """Test cases for the ConfigFile class."""
 
     @pytest.fixture

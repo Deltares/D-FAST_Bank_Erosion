@@ -1122,9 +1122,8 @@ class RiverData:
         start_i = None
         end_i = None
         for i, c in enumerate(xy_km.coords):
-            if start_i is None:
-                if c[2] >= bounds[0]:
-                    start_i = i
+            if start_i is None and c[2] >= bounds[0]:
+                start_i = i
             if c[2] >= bounds[1]:
                 end_i = i
                 break
@@ -1426,28 +1425,27 @@ def load_program_texts(file_name: Union[str, Path]) -> None:
     file_name : str
         The name of the file to be read and parsed.
     """
-    text: List[str]
-    data: Dict[str, List[str]]
-
     global PROGTEXTS
 
     all_lines = open(file_name, "r").read().splitlines()
-    data = {}
-    text = []
+    data: Dict[str, List[str]] = {}
+    text: List[str] = []
     key = None
     for line in all_lines:
-        rline = line.strip()
-        if rline.startswith("[") and rline.endswith("]"):
+        r_line = line.strip()
+        if r_line.startswith("[") and r_line.endswith("]"):
             if key is not None:
                 data[key] = text
-            key = rline[1:-1]
+            key = r_line[1:-1]
             text = []
         else:
             text.append(line)
     if key in data.keys():
-        raise Exception('Duplicate entry for "{}" in "{}".'.format(key, file_name))
+        raise ValueError(f"Duplicate entry for {key} in {file_name}.")
+
     if key is not None:
         data[key] = text
+
     PROGTEXTS = data
 
 
@@ -1479,7 +1477,7 @@ def log_text(
     None
     """
     str_value = get_text(key)
-    for r in range(repeat):
+    for _ in range(repeat):
         for s in str_value:
             sexp = s.format(**data)
             if file is None:
@@ -1602,7 +1600,7 @@ def read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndarr
                 var = rootgrp.variables[n]
                 break
 
-    elif varname[-12:] == "connectivity":
+    elif varname.endswith("connectivity"):
         # a mesh connectivity variable with corrected index
         varname = mesh2d[0].getncattr(varname)
         var = rootgrp.variables[varname]
@@ -1808,9 +1806,6 @@ def ugrid_add(
     # open destination file
     dst = netCDF4.Dataset(dstfile, "a")
 
-    # check if face dimension exists
-    dim = dst.dimensions[facedim]
-
     # add variable and write data
     var = dst.createVariable(varname, "f8", (facedim,))
     var.mesh = meshname
@@ -1949,8 +1944,8 @@ def write_shp_pnt(xy: np.ndarray, data: Dict[str, np.ndarray], filename: str) ->
     -------
     None
     """
-    xy_Points = [Point(xy1) for xy1 in xy]
-    geom = GeoSeries(xy_Points)
+    xy_points = [Point(xy1) for xy1 in xy]
+    geom = GeoSeries(xy_points)
     write_shp(geom, data, filename)
 
 
@@ -1973,8 +1968,8 @@ def write_shp(geom: GeoSeries, data: Dict[str, np.ndarray], filename: str) -> No
     -------
     None
     """
-    val_DataFrame = pd.DataFrame(data)
-    GeoDataFrame(val_DataFrame, geometry=geom).to_file(filename)
+    df = pd.DataFrame(data)
+    GeoDataFrame(df, geometry=geom).to_file(filename)
 
 
 def write_csv(data: Dict[str, np.ndarray], filename: str) -> None:
@@ -2122,36 +2117,32 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
         Array containing the values.
     """
     # print("Trying to read: ",filename)
-    P = pd.read_csv(
+    points = pd.read_csv(
         filename,
         names=["Chainage", "Val"],
         skipinitialspace=True,
         delim_whitespace=True,
     )
-    nPnts = len(P.Chainage)
-    km = P.Chainage.to_numpy()
-    val = P.Val.to_numpy()
+    # nPnts = len(P.Chainage)
+    km = points.Chainage.to_numpy()
+    val = points.Val.to_numpy()
+
     if len(km.shape) == 0:
         km = km[None]
         val = val[None]
-    if positive:
-        if (val < 0).any():
-            raise Exception(
-                'Values of "{}" in "{}" should be positive. Negative value read for chainage(s): {}'.format(
-                    key, filename, km[val < 0]
-                )
-            )
+
+    if positive and (val < 0).any():
+        raise ValueError(f'Values of "{key}" in {filename} should be positive. Negative value read for chainage(s): {km[val < 0]}')
+
     if len(km) == 1:
         km_thr = None
     else:
         if not (km[1:] > km[:-1]).all():
-            raise Exception(
-                'Chainage values are not increasing in the file "{}" read for "{}".'.format(
-                    filename, key
-                )
+            raise ValueError(
+                f"Chainage values are not increasing in the file {filename} read for {key}."
             )
-        # km_thr = (km[:-1] + km[1:]) / 2
         km_thr = km[1:]
+
     return km_thr, val
 
 
