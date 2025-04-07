@@ -61,19 +61,16 @@ if is_nuitka:
 def parse_arguments() -> Tuple[str, str, str]:
     """Parse the command line arguments.
 
-    Raises
-    ------
-    LanguageError:
-        If invalid language is specified.
+    Raises:
+        LanguageError: If invalid language is specified.
 
-    Returns
-    -------
-    language : str
-        Language identifier ("NL" or "UK").
-    run_mode : str
-        Specification of the run mode ("BANKLINES", "BANKEROSION" or "GUI")
-    config_name : str
-        Name of the configuration file.
+    Returns:
+        language (str):
+            Language identifier ("NL" or "UK").
+        run_mode (str):
+            Specification of the run mode ("BANKLINES", "BANKEROSION" or "GUI")
+        config_name (str):
+            Name of the configuration file.
     """
     parser = argparse.ArgumentParser(
         description="D-FAST Morphological Impact. Example: python -m dfastbe --mode BANKEROSION --config settings.cfg"
