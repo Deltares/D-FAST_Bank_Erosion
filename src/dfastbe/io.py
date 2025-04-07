@@ -2168,14 +2168,14 @@ def sim2nc(oldfile: str) -> str:
         Name of the netCDF file as created by sim2ugrid.m.
     """
     name = Path(oldfile).name
-    if name[:3] == "SDS":
+    if name.startswith("SDS"):
         # SDS-case_map.nc
-        ncfile = oldfile + "_map.nc"
-    elif name[:4] == "trim":
+        ncfile = f"{oldfile}_map.nc"
+    elif name.startswith("trim"):
         # trim-case_map.nc
         ncfile = f"{Path(oldfile).stem}_map.nc"
     else:
-        raise Exception('Unable to determine file type for "{}"'.format(oldfile))
+        raise SimulationFilesError(f'Unable to determine file type for "{oldfile}"')
     return ncfile
 
 
