@@ -103,7 +103,7 @@ def comp_erosion_eq(
     H0 = numpy.maximum(H0, eps)
 
     zup = numpy.minimum(bankheight, zfw_ini + 2 * H0)
-    zdo = numpy.maximum(zfw_ini - 2 * H0, erosion_inputs.zss[ib])
+    zdo = numpy.maximum(zfw_ini - 2 * H0, erosion_inputs.bank_protection_level[ib])
     ht = numpy.maximum(zup - zdo, 0)
     hs = numpy.maximum(bankheight - zfw_ini + 2 * H0, 0)
     dn_eq = ht / mu_slope
@@ -252,14 +252,14 @@ def comp_erosion(
     # total wavedamping coefficient
     mu_tot = (mu_slope / H0) + mu_reed
     # water level along bank line
-    ho_line_ship = numpy.minimum(zfw - erosion_inputs.zss[ib], 2 * H0)
-    ho_line_flow = numpy.minimum(zfw - erosion_inputs.zss[ib], hfw)
+    ho_line_ship = numpy.minimum(zfw - erosion_inputs.bank_protection_level[ib], 2 * H0)
+    ho_line_flow = numpy.minimum(zfw - erosion_inputs.bank_protection_level[ib], hfw)
     h_line_ship = numpy.maximum(bankheight - zfw + ho_line_ship, 0)
     h_line_flow = numpy.maximum(bankheight - zfw + ho_line_flow, 0)
 
     # compute displacement due to flow
     crit_ratio = numpy.ones(velc.shape)
-    mask = (vel > velc) & (zfw > erosion_inputs.zss[ib])
+    mask = (vel > velc) & (zfw > erosion_inputs.bank_protection_level[ib])
     crit_ratio[mask] = (vel[mask] / velc[mask]) ** 2
     dn_flow = E * (crit_ratio - 1) * Teros * sec_year
 
@@ -273,12 +273,12 @@ def comp_erosion(
     dn_ship[~mask] = 0
 
     # compute erosion volume
-    mask = (h_line_ship > 0) & (zfw > erosion_inputs.zss[ib])
+    mask = (h_line_ship > 0) & (zfw > erosion_inputs.bank_protection_level[ib])
     dv_ship = dn_ship * linesize * h_line_ship
     dv_ship[~mask] = 0.0
     dn_ship[~mask] = 0.0
 
-    mask = (h_line_flow > 0) & (zfw > erosion_inputs.zss[ib])
+    mask = (h_line_flow > 0) & (zfw > erosion_inputs.bank_protection_level[ib])
     dv_flow = dn_flow * linesize * h_line_flow
     dv_flow[~mask] = 0.0
     dn_flow[~mask] = 0.0
