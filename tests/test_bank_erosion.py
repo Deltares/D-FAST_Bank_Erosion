@@ -31,34 +31,33 @@ class TestErosion:
         """Fixture to create an instance of the Erosion class."""
         return Erosion(config_file)
 
-    def test__prepare_initial_conditions(
+    def test_prepare_initial_conditions(
         self, erosion_instance: Erosion, config_file: ConfigFile
     ):
         """Test the _prepare_initial_conditions method."""
-        # Arrange
         bank_km_mid = [np.array([3.0, 3.0, 3.0])]
         zfw_ini = [np.array([10, 20, 30])]
         taucls = np.array([1, 1, 1])
-        taucls_str = [
+        taucls_str = (
             "protected",
             "vegetation",
             "good clay",
             "moderate/bad clay",
             "sand",
-        ]
+        )
 
-        # Act
         erosion_inputs = erosion_instance._prepare_initial_conditions(
             config_file, bank_km_mid, zfw_ini
         )
 
-        # Assert
         assert np.array_equal(
             erosion_inputs.ship_data["vship0"][0], np.array([5.0, 5.0, 5.0])
         )
-        assert np.array_equal(erosion_inputs.dfw0[0], np.array([150, 150, 150]))
-        assert np.array_equal(erosion_inputs.dfw1[0], np.array([110, 110, 110]))
-        assert np.array_equal(erosion_inputs.zss[0], np.array([-13, -13, -13]))
+        assert np.array_equal(erosion_inputs.wave_0[0], np.array([150, 150, 150]))
+        assert np.array_equal(erosion_inputs.wave_1[0], np.array([110, 110, 110]))
+        assert np.array_equal(
+            erosion_inputs.bank_protection_level[0], np.array([-13, -13, -13])
+        )
         assert np.array_equal(erosion_inputs.tauc[0], taucls)
         assert erosion_inputs.taucls_str == taucls_str
-        assert len(erosion_inputs.banktype) == 4
+        assert len(erosion_inputs.bank_type) == 4

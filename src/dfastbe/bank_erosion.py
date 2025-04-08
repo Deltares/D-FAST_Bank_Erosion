@@ -368,20 +368,18 @@ class Erosion:
 
         # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
         classes = config_file.get_bool("Erosion", "Classes")
-        taucls = np.array([1e20, 95, 3.0, 0.95, 0.15])
-        taucls_str = ["protected", "vegetation", "good clay", "moderate/bad clay", "sand"]
         if classes:
             banktype = config_file.get_parameter(
                 "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
             )
             tauc = []
             for bank in banktype:
-                tauc.append(taucls[bank])
+                tauc.append(ErosionInputs.taucls[bank])
         else:
             tauc = config_file.get_parameter(
                 "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
             )
-            thr = (taucls[:-1] + taucls[1:]) / 2
+            thr = (ErosionInputs.taucls[:-1] + ErosionInputs.taucls[1:]) / 2
             banktype = [None] * len(thr)
             for ib in range(len(tauc)):
                 bt = np.zeros(tauc[ib].size)
@@ -401,12 +399,11 @@ class Erosion:
 
         return ErosionInputs(
             ship_data=ship_data,
-            dfw0=dfw0,
-            dfw1=dfw1,
-            zss=zss,
+            wave_0=dfw0,
+            wave_1=dfw1,
+            bank_protection_level=zss,
             tauc=tauc,
-            banktype=banktype,
-            taucls_str=taucls_str,
+            bank_type=banktype,
         )
 
     def _process_discharge_levels(
@@ -620,10 +617,10 @@ class Erosion:
                             "draught": Tship[ib],
                             "mu_slp": mu_slope[ib],
                             "dist_fw": distance_fw[ib],
-                            "dfw0": erosion_inputs.dfw0[ib],
-                            "dfw1": erosion_inputs.dfw1[ib],
+                            "dfw0": erosion_inputs.wave_0[ib],
+                            "dfw1": erosion_inputs.wave_1[ib],
                             "hfw": hfw,
-                            "zss": erosion_inputs.zss[ib],
+                            "zss": erosion_inputs.bank_protection_level[ib],
                             "dn": dn_eq1,
                             "dv": dv_eq1,
                         }
@@ -683,11 +680,11 @@ class Erosion:
                         "mu_slp": mu_slope[ib],
                         "mu_reed": mu_reed[ib],
                         "dist_fw": distance_fw[ib],
-                        "dfw0": erosion_inputs.dfw0[ib],
-                        "dfw1": erosion_inputs.dfw1[ib],
+                        "dfw0": erosion_inputs.wave_0[ib],
+                        "dfw1": erosion_inputs.wave_1[ib],
                         "hfw": hfw,
                         "chez": chezy[iq][ib],
-                        "zss": erosion_inputs.zss[ib],
+                        "zss": erosion_inputs.bank_protection_level[ib],
                         "dn": dniqib,
                         "dv": dviqib,
                         "dnship": dn_ship,
@@ -1147,7 +1144,7 @@ class Erosion:
                 "wave influenced range",
                 bank_height,
                 "level of bank",
-                erosion_inputs.zss,
+                erosion_inputs.bank_protection_level,
                 "bank protection level",
                 "elevation",
                 "(water)levels along bank line {ib}",
@@ -1192,7 +1189,7 @@ class Erosion:
                 bbox,
                 self.river_data.masked_profile_arr,
                 bank_line_coords,
-                erosion_inputs.banktype,
+                erosion_inputs.bank_type,
                 erosion_inputs.taucls_str,
                 X_AXIS_TITLE,
                 Y_AXIS_TITLE,
