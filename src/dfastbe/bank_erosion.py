@@ -643,10 +643,29 @@ class Erosion:
                         write_shp(bank_coords_geo, params, f"{str(self.output_dir)}{os.sep}debug.EQ.B{ib + 1}.shp")
                         write_csv(params, f"{str(self.output_dir)}{os.sep}debug.EQ.B{ib + 1}.csv")
 
-                dniqib, dviqib, dn_ship, dn_flow, ship_wave_max_ib, ship_wave_min_ib = comp_erosion(
-                    velocity[iq][ib], bank_height[ib], line_size[ib], water_level[iq][ib], zfw_ini[ib], tauc[ib],
-                    Nship[ib], vship[ib], nwave[ib], ship_type[ib], Tship[ib], t_erosion * self.p_discharge[iq],
-                    mu_slope[ib], mu_reed[ib], distance_fw[ib], dfw0[ib], dfw1[ib], hfw, chezy[iq][ib], zss[ib], RHO, g,
+                dniqib, dviqib, dn_ship, dn_flow, ship_wave_max_ib, ship_wave_min_ib = (
+                    comp_erosion(
+                        velocity[iq][ib],
+                        bank_height[ib],
+                        line_size[ib],
+                        water_level[iq][ib],
+                        zfw_ini[ib],
+                        Nship[ib],
+                        vship[ib],
+                        nwave[ib],
+                        ship_type[ib],
+                        Tship[ib],
+                        t_erosion * self.p_discharge[iq],
+                        mu_slope[ib],
+                        mu_reed[ib],
+                        distance_fw[ib],
+                        hfw,
+                        chezy[iq][ib],
+                        erosion_inputs,
+                        RHO,
+                        g,
+                        ib,
+                    )
                 )
                 ship_wave_max[iq].append(ship_wave_max_ib)
                 ship_wave_min[iq].append(ship_wave_min_ib)
