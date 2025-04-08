@@ -926,7 +926,6 @@ class Erosion:
             banklines,
             face_node,
             sim,
-            hfw_max,
             dn_tot,
             is_right_bank,
             xy_line_eq_list,
@@ -938,14 +937,12 @@ class Erosion:
             km_step,
             dv,
             vol_eq,
-            water_level,
-            ship_wave_max,
-            ship_wave_min,
             bank_height,
             velocity,
             chezy,
             dn_eq,
             erosion_inputs,
+            water_level_data,
         )
         log_text("end_bankerosion")
         timed_logger("-- end analysis --")
@@ -985,7 +982,6 @@ class Erosion:
         banklines,
         face_node,
         sim,
-        hfw_max,
         dn_tot,
         is_right_bank,
         xy_line_eq_list,
@@ -997,14 +993,12 @@ class Erosion:
         km_step,
         dv,
         vol_eq,
-        water_level,
-        ship_wave_max,
-        ship_wave_min,
         bank_height,
         velocity,
         chezy,
         dn_eq,
         erosion_inputs: ErosionInputs,
+        water_level_data: WaterLevelData,
     ):
         # create various plots
         if self.plot_flags["plot_data"]:
@@ -1020,9 +1014,19 @@ class Erosion:
                 km_zoom, xy_zoom = get_zoom_extends(river_axis_km.min(), river_axis_km.max(), self.plot_flags["zoom_km_step"], bank_coords_mid, bank_km_mid)
 
             fig, ax = df_plt.plot1_waterdepth_and_banklines(
-                bbox, self.river_data.masked_profile_arr, banklines, face_node, sim["nnodes"], sim["x_node"],
-                sim["y_node"], sim["h_face"], 1.1 * hfw_max, X_AXIS_TITLE, Y_AXIS_TITLE,
-                "water depth and initial bank lines", "water depth [m]"
+                bbox,
+                self.river_data.masked_profile_arr,
+                banklines,
+                face_node,
+                sim["nnodes"],
+                sim["x_node"],
+                sim["y_node"],
+                sim["h_face"],
+                1.1 * water_level_data.hfw_max,
+                X_AXIS_TITLE,
+                Y_AXIS_TITLE,
+                "water depth and initial bank lines",
+                "water depth [m]",
             )
             if self.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
@@ -1140,9 +1144,9 @@ class Erosion:
             figlist, axlist = df_plt.plot5series_waterlevels_per_bank(
                 bank_km_mid,
                 "river chainage [km]",
-                water_level,
-                ship_wave_max,
-                ship_wave_min,
+                water_level_data.water_level,
+                water_level_data.ship_wave_max,
+                water_level_data.ship_wave_min,
                 "water level at Q{iq}",
                 "average water level",
                 "wave influenced range",
