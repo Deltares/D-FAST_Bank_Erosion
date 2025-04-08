@@ -94,36 +94,36 @@ class Erosion:
 
     def get_ship_parameters(self, bank_km_mid) -> Dict[str, float]:
 
-        vship0 = self.config_file.get_parameter(
+        ship_relative_velocity = self.config_file.get_parameter(
             "Erosion", "VShip", bank_km_mid, positive=True, onefile=True
         )
-        Nship0 = self.config_file.get_parameter(
+        num_ships_year = self.config_file.get_parameter(
             "Erosion", "NShip", bank_km_mid, positive=True, onefile=True
         )
-        nwave0 = self.config_file.get_parameter(
+        num_waves_p_ship = self.config_file.get_parameter(
             "Erosion", "NWave", bank_km_mid, default=5, positive=True, onefile=True
         )
-        Tship0 = self.config_file.get_parameter(
+        ship_draught = self.config_file.get_parameter(
             "Erosion", "Draught", bank_km_mid, positive=True, onefile=True
         )
-        ship0 = self.config_file.get_parameter(
+        ship_type = self.config_file.get_parameter(
             "Erosion", "ShipType", bank_km_mid, valid=[1, 2, 3], onefile=True
         )
         parslope0 = self.config_file.get_parameter(
             "Erosion", "Slope", bank_km_mid, default=20, positive=True, ext="slp"
         )
-        parreed0 = self.config_file.get_parameter(
+        reed_wave_damping_coeff = self.config_file.get_parameter(
             "Erosion", "Reed", bank_km_mid, default=0, positive=True, ext="rdd"
         )
 
         ship_data = {
-            "vship0": vship0,
-            "Nship0": Nship0,
-            "nwave0": nwave0,
-            "Tship0": Tship0,
-            "ship0": ship0,
+            "vship0": ship_relative_velocity,
+            "Nship0": num_ships_year,
+            "nwave0": num_waves_p_ship,
+            "Tship0": ship_draught,
+            "ship0": ship_type,
             "parslope0": parslope0,
-            "parreed0": parreed0,
+            "parreed0": reed_wave_damping_coeff,
         }
         return ship_data
 
@@ -325,7 +325,6 @@ class Erosion:
                         )
                         d1 = ((bp - fwp1) ** 2).sum() ** 0.5
                         if d1 < dbfw:
-                            fwp = fwp1
                             dbfw = d1
                             iseg = ifw
 
@@ -698,7 +697,6 @@ class Erosion:
                     write_csv(params, f"{str(self.output_dir)}{os.sep}debug.Q{iq + 1}.B{ib + 1}.csv")
 
                 # shift bank lines
-
                 if len(dn_tot) == ib:
                     dn_flow_tot.append(dn_flow.copy())
                     dn_ship_tot.append(dn_ship.copy())
@@ -836,7 +834,7 @@ class Erosion:
         face_node = sim["facenode"]
         nnodes = sim["nnodes"]
 
-        edge_node, edge_face, fe, boundary_edge_nrs = _derive_topology_arrays(face_node, nnodes)
+        edge_node, edge_face, face_edge_connectivity, boundary_edge_nrs = _derive_topology_arrays(face_node, nnodes)
 
         # clip the chainage path to the range of chainages of interest
         km_bounds = self.river_data.station_bounds
@@ -852,7 +850,7 @@ class Erosion:
         log_text("intersect_bank_mesh")
 
         x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, bank_line_coords, bank_idx, bank_km_mid, is_right_bank = self.intersect_bank_lines_with_mesh(
-            sim, face_node, banklines, edge_node, edge_face, fe, nnodes, boundary_edge_nrs, stations_coords
+            sim, face_node, banklines, edge_node, edge_face, face_edge_connectivity, nnodes, boundary_edge_nrs, stations_coords
         )
 
         river_axis_km, _, river_axis = self._prepare_river_axis(stations_coords)
@@ -864,7 +862,7 @@ class Erosion:
         km_mid = get_km_bins(km_bin, type=3)  # get mid-points
 
         ifw_face_idx, ifw_numpy = self._prepare_fairway(
-            river_axis, stations_coords, x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, fe, edge_face,
+            river_axis, stations_coords, x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, face_edge_connectivity, edge_face,
             face_node, edge_node, nnodes, boundary_edge_nrs
         )
 
@@ -1289,15 +1287,15 @@ def _derive_topology_arrays(
     edge_node = np.zeros((n_edges, 2), dtype=np.int64)
     face_nr = np.zeros((n_edges,), dtype=np.int64)
     i = 0
-    for iFace in range(n_faces):
-        nEdges = n_nodes[iFace]  # note: nEdges = nNodes
-        for iEdge in range(nEdges):
-            if iEdge == 0:
-                edge_node[i, 1] = face_node[iFace, nEdges - 1]
+    for face_i in range(n_faces):
+        num_edges = n_nodes[face_i]  # note: nEdges = nNodes
+        for edge_i in range(num_edges):
+            if edge_i == 0:
+                edge_node[i, 1] = face_node[face_i, num_edges - 1]
             else:
-                edge_node[i, 1] = face_node[iFace, iEdge - 1]
-            edge_node[i, 0] = face_node[iFace, iEdge]
-            face_nr[i] = iFace
+                edge_node[i, 1] = face_node[face_i, edge_i - 1]
+            edge_node[i, 0] = face_node[face_i, edge_i]
+            face_nr[i] = face_i
             i = i + 1
     edge_node.sort(axis=1)
     i2 = np.argsort(edge_node[:, 1], kind="stable")
@@ -1331,12 +1329,13 @@ def _derive_topology_arrays(
     edge_nr_in_face_order = np.zeros(n_edges, dtype=np.int64)
     edge_nr_in_face_order[i12] = edge_nr
     # create the face edge connectivity array
-    fe = np.zeros(face_node.shape, dtype=np.int64)
+    face_edge_connectivity = np.zeros(face_node.shape, dtype=np.int64)
+
     i = 0
-    for iFace in range(n_faces):
-        nEdges = n_nodes[iFace]  # note: nEdges = nNodes
-        for iEdge in range(nEdges):
-            fe[iFace, iEdge] = edge_nr_in_face_order[i]
+    for face_i in range(n_faces):
+        num_edges = n_nodes[face_i]  # note: num_edges = n_nodes
+        for edge_i in range(num_edges):
+            face_edge_connectivity[face_i, edge_i] = edge_nr_in_face_order[i]
             i = i + 1
 
     # determine the edge face connectivity
@@ -1344,7 +1343,7 @@ def _derive_topology_arrays(
     edge_face[edge_nr[unique_edge], 0] = face_nr[unique_edge]
     edge_face[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
 
-    return edge_node, edge_face, fe, boundary_edge_nrs
+    return edge_node, edge_face, face_edge_connectivity, boundary_edge_nrs
 
 
 class BankLinesResultsError(Exception):
