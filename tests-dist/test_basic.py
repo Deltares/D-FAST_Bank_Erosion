@@ -4,8 +4,6 @@ import sys
 from contextlib import contextmanager
 from io import StringIO
 
-import context
-
 # dfast binary path relative to tstdir
 dfastexe = "../../../dfastbe.dist/dfastbe.exe"
 
@@ -21,48 +19,34 @@ def captured_output():
         sys.stdout, sys.stderr = old_out, old_err
 
 
-class Test_basic:
+class TestBasic:
     def test_basic_00(self):
         """
-        Test whether program runs at all.
+        test getting the help message.
         """
-        cwd = os.getcwd()
-        tstdir = "tests/data/bank_lines"
-        success = False
-        try:
-            os.chdir(tstdir)
-            result = subprocess.run([dfastexe, "--help"])
-            success = result.returncode == 0
-        finally:
-            os.chdir(cwd)
-        #
-        self.maxDiff = None
+        result = subprocess.run([dfastexe, "--help"])
+        success = result.returncode == 0
+
         assert success == True
 
-    def test_basic_01(self):
+    def test_compare_help_message(self):
         """
         Testing program help.
         """
-        cwd = os.getcwd()
-        tstdir = "tests/data/bank_lines"
-        try:
-            os.chdir(tstdir)
-            result = subprocess.run([dfastexe, "--help"], capture_output=True)
-            outstr = result.stdout.decode("UTF-8").splitlines()
-        finally:
-            os.chdir(cwd)
-        #
-        self.maxDiff = None
-        assert outstr == [
-            "usage: dfastbe.exe [-h] [--mode MODE] [--config CONFIG]",
+        result = subprocess.run([dfastexe, "--help"], capture_output=True)
+        help_message = result.stdout.decode("UTF-8").splitlines()
+
+        assert help_message == [
+            "usage: dfastbe.exe [-h] [--language {NL,UK}] [--mode {BANKLINES,BANKEROSION,GUI}] [--config CONFIG]",
             "",
-            "D-FAST Bank Erosion.",
+            "D-FAST Bank Erosion. Example: python -m dfastbe --mode BANKEROSION --config settings.cfg",
             "",
             "optional arguments:",
             "  -h, --help       show this help message and exit",
-            "  --mode MODE      run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is",
-            "                   default)",
-            "  --config CONFIG  name of configuration file ('dfastbe.cfg' is default)",
+            "  --language {NL,UK}    display language 'NL' or 'UK' ('UK' is default)"
+            "  --mode {BANKLINES,BANKEROSION,GUI}",
+            "                        run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is default",
+            "  --config CONFIG       name of the configuration file ('dfastbe.cfg' is default)",
         ]
 
     def test_basic_gui(self):
