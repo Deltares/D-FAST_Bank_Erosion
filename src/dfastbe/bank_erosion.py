@@ -406,7 +406,7 @@ class Erosion:
             wave_1=dfw1,
             bank_protection_level=zss,
             tauc=tauc,
-            banktype=banktype,
+            bank_type=banktype,
             taucls_str=taucls_str,
         )
 
@@ -1177,7 +1177,7 @@ class Erosion:
                 bbox,
                 self.river_data.masked_profile_arr,
                 bank_line_coords,
-                erosion_inputs.banktype,
+                erosion_inputs.bank_type,
                 erosion_inputs.taucls_str,
                 X_AXIS_TITLE,
                 Y_AXIS_TITLE,

@@ -11,5 +11,5 @@ class ErosionInputs:
     wave_1: List[np.ndarray]
     bank_protection_level: List[np.ndarray]
     tauc: List[np.ndarray]
-    banktype: List[np.ndarray]
+    bank_type: List[np.ndarray]
     taucls_str: List[str]
