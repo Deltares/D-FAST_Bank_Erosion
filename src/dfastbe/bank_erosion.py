@@ -422,10 +422,19 @@ class Erosion:
         )
 
     def _process_discharge_levels(
-            self, ship_data, n_banklines, km_mid, km_bin, t_erosion: int, bank_km_mid: List[np.ndarray], bank_line_coords:
-            List[np.ndarray], bank_idx: List[np.ndarray], bp_fw_face_idx: List[np.ndarray], zfw_ini: List[np.ndarray],
-            zss: List[np.ndarray], tauc: List[np.ndarray], dfw0: List[np.ndarray], dfw1: List[np.ndarray],
-            distance_fw: List[np.ndarray], config_file: ConfigFile
+        self,
+        n_banklines,
+        km_mid,
+        km_bin,
+        t_erosion: int,
+        bank_km_mid: List[np.ndarray],
+        bank_line_coords: List[np.ndarray],
+        bank_idx: List[np.ndarray],
+        bp_fw_face_idx: List[np.ndarray],
+        zfw_ini: List[np.ndarray],
+        distance_fw: List[np.ndarray],
+        config_file: ConfigFile,
+        erosion_inputs: ErosionInputs,
     ):
         # initialize arrays for erosion loop over all discharges
         velocity: List[List[np.ndarray]] = []
@@ -457,7 +466,7 @@ class Erosion:
                 "Erosion",
                 f"VShip{iq_str}",
                 bank_km_mid,
-                default=ship_data["vship0"],
+                default=erosion_inputs.ship_data["vship0"],
                 positive=True,
                 onefile=True,
             )
@@ -465,7 +474,7 @@ class Erosion:
                 "Erosion",
                 f"NShip{iq_str}",
                 bank_km_mid,
-                default=ship_data["Nship0"],
+                default=erosion_inputs.ship_data["Nship0"],
                 positive=True,
                 onefile=True,
             )
@@ -473,7 +482,7 @@ class Erosion:
                 "Erosion",
                 f"NWave{iq_str}",
                 bank_km_mid,
-                default=ship_data["nwave0"],
+                default=erosion_inputs.ship_data["nwave0"],
                 positive=True,
                 onefile=True,
             )
@@ -481,7 +490,7 @@ class Erosion:
                 "Erosion",
                 f"Draught{iq_str}",
                 bank_km_mid,
-                default=ship_data["Tship0"],
+                default=erosion_inputs.ship_data["Tship0"],
                 positive=True,
                 onefile=True,
             )
@@ -489,7 +498,7 @@ class Erosion:
                 "Erosion",
                 f"ShipType{iq_str}",
                 bank_km_mid,
-                default=ship_data["ship0"],
+                default=erosion_inputs.ship_data["ship0"],
                 valid=[1, 2, 3],
                 onefile=True,
             )
@@ -498,7 +507,7 @@ class Erosion:
                 "Erosion",
                 f"Slope{iq_str}",
                 bank_km_mid,
-                default=ship_data["parslope0"],
+                default=erosion_inputs.ship_data["parslope0"],
                 positive=True,
                 ext="slp",
             )
@@ -506,7 +515,7 @@ class Erosion:
                 "Erosion",
                 f"Reed{iq_str}",
                 bank_km_mid,
-                default=ship_data["parreed0"],
+                default=erosion_inputs.ship_data["parreed0"],
                 positive=True,
                 ext="rdd",
             )
@@ -597,10 +606,10 @@ class Erosion:
                         Tship[ib],
                         mu_slope[ib],
                         distance_fw[ib],
-                        dfw0[ib],
-                        dfw1[ib],
+                        erosion_inputs.dfw0[ib],
+                        erosion_inputs.dfw1[ib],
                         hfw,
-                        zss[ib],
+                        erosion_inputs.zss[ib],
                         g,
                     )
                     dn_eq.append(dn_eq1)
@@ -624,10 +633,10 @@ class Erosion:
                             "draught": Tship[ib],
                             "mu_slp": mu_slope[ib],
                             "dist_fw": distance_fw[ib],
-                            "dfw0": dfw0[ib],
-                            "dfw1": dfw1[ib],
+                            "dfw0": erosion_inputs.dfw0[ib],
+                            "dfw1": erosion_inputs.dfw1[ib],
                             "hfw": hfw,
-                            "zss": zss[ib],
+                            "zss": erosion_inputs.zss[ib],
                             "dn": dn_eq1,
                             "dv": dv_eq1,
                         }
@@ -659,7 +668,7 @@ class Erosion:
                         "len": line_size[ib],
                         "zw": water_level[iq][ib],
                         "zw0": zfw_ini[ib],
-                        "tauc": tauc[ib],
+                        "tauc": erosion_inputs.tauc[ib],
                         "nship": Nship[ib],
                         "vship": vship[ib],
                         "nwave": nwave[ib],
@@ -668,11 +677,11 @@ class Erosion:
                         "mu_slp": mu_slope[ib],
                         "mu_reed": mu_reed[ib],
                         "dist_fw": distance_fw[ib],
-                        "dfw0": dfw0[ib],
-                        "dfw1": dfw1[ib],
+                        "dfw0": erosion_inputs.dfw0[ib],
+                        "dfw1": erosion_inputs.dfw1[ib],
                         "hfw": hfw,
                         "chez": chezy[iq][ib],
-                        "zss": zss[ib],
+                        "zss": erosion_inputs.zss[ib],
                         "dn": dniqib,
                         "dv": dviqib,
                         "dnship": dn_ship,
@@ -841,15 +850,40 @@ class Erosion:
             ii = bp_fw_face_idx[ib]
             zfw_ini.append(sim["zw_face"][ii])
 
-        ship_data, dfw0, dfw1, zss, tauc, bank_type, taucls_str = self._prepare_initial_conditions(
+        erosion_inputs = self._prepare_initial_conditions(
             config_file, bank_km_mid, zfw_ini
         )
 
         # initialize arrays for erosion loop over all discharges
-        dn_tot, line_size, dn_flow_tot, dn_ship_tot, dn_eq, hfw_max, dv, dv_eq, dv_tot, water_level, ship_wave_max, \
-            ship_wave_min, bank_height, velocity, chezy = self._process_discharge_levels(
-            ship_data, n_banklines, km_mid, km_bin, t_erosion, bank_km_mid, bank_line_coords, bank_idx,
-            bp_fw_face_idx, zfw_ini, zss, tauc, dfw0, dfw1, distance_fw, config_file
+        (
+            dn_tot,
+            line_size,
+            dn_flow_tot,
+            dn_ship_tot,
+            dn_eq,
+            hfw_max,
+            dv,
+            dv_eq,
+            dv_tot,
+            water_level,
+            ship_wave_max,
+            ship_wave_min,
+            bank_height,
+            velocity,
+            chezy,
+        ) = self._process_discharge_levels(
+            n_banklines,
+            km_mid,
+            km_bin,
+            t_erosion,
+            bank_km_mid,
+            bank_line_coords,
+            bank_idx,
+            bp_fw_face_idx,
+            zfw_ini,
+            distance_fw,
+            config_file,
+            erosion_inputs,
         )
 
         bankline_new_list, bankline_eq_list, vol_tot, vol_eq, d_nav, xy_line_eq_list = self._postprocess_erosion_results(
