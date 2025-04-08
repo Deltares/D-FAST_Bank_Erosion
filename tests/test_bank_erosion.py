@@ -35,7 +35,6 @@ class TestErosion:
         self, erosion_instance: Erosion, config_file: ConfigFile
     ):
         """Test the _prepare_initial_conditions method."""
-        # Arrange
         bank_km_mid = [np.array([3.0, 3.0, 3.0])]
         zfw_ini = [np.array([10, 20, 30])]
         taucls = np.array([1, 1, 1])
@@ -47,12 +46,10 @@ class TestErosion:
             "sand",
         ]
 
-        # Act
         erosion_inputs = erosion_instance._prepare_initial_conditions(
             config_file, bank_km_mid, zfw_ini
         )
 
-        # Assert
         assert np.array_equal(
             erosion_inputs.ship_data["vship0"][0], np.array([5.0, 5.0, 5.0])
         )
