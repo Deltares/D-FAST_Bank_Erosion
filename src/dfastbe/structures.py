@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Dict
+from typing import List, Dict, Tuple
 import numpy as np
 
 @dataclass
@@ -12,4 +12,11 @@ class ErosionInputs:
     bank_protection_level: List[np.ndarray]
     tauc: List[np.ndarray]
     bank_type: List[np.ndarray]
-    taucls_str: List[str]
+    taucls: np.array = np.array([1e20, 95, 3.0, 0.95, 0.15])
+    taucls_str: Tuple[str] = (
+        "protected",
+        "vegetation",
+        "good clay",
+        "moderate/bad clay",
+        "sand",
+    )

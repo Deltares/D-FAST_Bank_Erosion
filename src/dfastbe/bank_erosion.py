@@ -369,20 +369,18 @@ class Erosion:
 
         # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
         classes = config_file.get_bool("Erosion", "Classes")
-        taucls = np.array([1e20, 95, 3.0, 0.95, 0.15])
-        taucls_str = ["protected", "vegetation", "good clay", "moderate/bad clay", "sand"]
         if classes:
             banktype = config_file.get_parameter(
                 "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
             )
             tauc = []
             for bank in banktype:
-                tauc.append(taucls[bank])
+                tauc.append(ErosionInputs.taucls[bank])
         else:
             tauc = config_file.get_parameter(
                 "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
             )
-            thr = (taucls[:-1] + taucls[1:]) / 2
+            thr = (ErosionInputs.taucls[:-1] + ErosionInputs.taucls[1:]) / 2
             banktype = [None] * len(thr)
             for ib in range(len(tauc)):
                 bt = np.zeros(tauc[ib].size)
@@ -407,7 +405,6 @@ class Erosion:
             bank_protection_level=zss,
             tauc=tauc,
             bank_type=banktype,
-            taucls_str=taucls_str,
         )
 
     def _process_discharge_levels(

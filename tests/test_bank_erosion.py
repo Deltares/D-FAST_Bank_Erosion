@@ -31,20 +31,20 @@ class TestErosion:
         """Fixture to create an instance of the Erosion class."""
         return Erosion(config_file)
 
-    def test__prepare_initial_conditions(
+    def test_prepare_initial_conditions(
         self, erosion_instance: Erosion, config_file: ConfigFile
     ):
         """Test the _prepare_initial_conditions method."""
         bank_km_mid = [np.array([3.0, 3.0, 3.0])]
         zfw_ini = [np.array([10, 20, 30])]
         taucls = np.array([1, 1, 1])
-        taucls_str = [
+        taucls_str = (
             "protected",
             "vegetation",
             "good clay",
             "moderate/bad clay",
             "sand",
-        ]
+        )
 
         erosion_inputs = erosion_instance._prepare_initial_conditions(
             config_file, bank_km_mid, zfw_ini
