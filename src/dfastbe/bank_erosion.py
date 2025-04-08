@@ -724,6 +724,7 @@ class Erosion:
             water_level=water_level,
             ship_wave_max=ship_wave_max,
             ship_wave_min=ship_wave_min,
+            velocity=velocity,
         )
 
         return (
@@ -736,7 +737,6 @@ class Erosion:
             dv_eq,
             dv_tot,
             bank_height,
-            velocity,
             chezy,
             water_level_data,
         )
@@ -889,7 +889,6 @@ class Erosion:
             dv_eq,
             dv_tot,
             bank_height,
-            velocity,
             chezy,
             water_level_data,
         ) = self._process_discharge_levels(
