@@ -606,10 +606,9 @@ class Erosion:
                         Tship[ib],
                         mu_slope[ib],
                         distance_fw[ib],
-                        erosion_inputs.dfw0[ib],
-                        erosion_inputs.dfw1[ib],
                         hfw,
-                        erosion_inputs.zss[ib],
+                        erosion_inputs,
+                        ib,
                         g,
                     )
                     dn_eq.append(dn_eq1)

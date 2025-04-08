@@ -27,6 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 from typing import Tuple, List
+from dfastbe.bank_erosion import ErosionInputs
 
 import numpy
 import math
@@ -42,10 +43,9 @@ def comp_erosion_eq(
     Tship: numpy.ndarray,
     mu_slope: numpy.ndarray,
     distance_fw: numpy.ndarray,
-    dfw0: numpy.ndarray,
-    dfw1: numpy.ndarray,
     hfw: numpy.ndarray,
-    zss: numpy.ndarray,
+    erosion_inputs: ErosionInputs,
+    ib: int,
     g: float,
 ) -> Tuple[numpy.ndarray, numpy.ndarray]:
     """
@@ -90,11 +90,20 @@ def comp_erosion_eq(
     eps = sys.float_info.epsilon
 
     # ship induced wave height at the beginning of the foreshore
-    H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, ship_type, Tship, vship, g)
+    H0 = comp_hw_ship_at_bank(
+        distance_fw,
+        erosion_inputs.dfw0[ib],
+        erosion_inputs.dfw1[ib],
+        hfw,
+        ship_type,
+        Tship,
+        vship,
+        g,
+    )
     H0 = numpy.maximum(H0, eps)
 
     zup = numpy.minimum(bankheight, zfw_ini + 2 * H0)
-    zdo = numpy.maximum(zfw_ini - 2 * H0, zss)
+    zdo = numpy.maximum(zfw_ini - 2 * H0, erosion_inputs.zss[ib])
     ht = numpy.maximum(zup - zdo, 0)
     hs = numpy.maximum(bankheight - zfw_ini + 2 * H0, 0)
     dn_eq = ht / mu_slope
