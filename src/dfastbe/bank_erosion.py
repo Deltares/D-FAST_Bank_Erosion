@@ -353,9 +353,9 @@ class Erosion:
 
         return bp_fw_face_idx, distance_fw
 
-    def _prepare_initial_conditions(self, config_file, bank_km_mid, zfw_ini) -> Tuple[
-        np.ndarray, np.ndarray, Dict[str, np.ndarray], np.ndarray, List[np.ndarray], List[np.ndarray]
-    ]:
+    def _prepare_initial_conditions(
+        self, config_file: ConfigFile, bank_km_mid, zfw_ini
+    ) -> ErosionInputs:
         # wave reduction s0, s1
         dfw0 = config_file.get_parameter(
             "Erosion",
@@ -387,8 +387,8 @@ class Erosion:
                 "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
             )
             tauc = []
-            for ib in range(len(banktype)):
-                tauc.append(taucls[banktype[ib]])
+            for bank in banktype:
+                tauc.append(taucls[bank])
         else:
             tauc = config_file.get_parameter(
                 "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
@@ -411,7 +411,15 @@ class Erosion:
             mask = zss[ib] == zss_miss
             zss[ib][mask] = zfw_ini[ib][mask] - 1
 
-        return ship_data, dfw0, dfw1, zss, tauc, banktype, taucls_str
+        return ErosionInputs(
+            ship_data=ship_data,
+            dfw0=dfw0,
+            dfw1=dfw1,
+            zss=zss,
+            tauc=tauc,
+            banktype=banktype,
+            taucls_str=taucls_str,
+        )
 
     def _process_discharge_levels(
             self, ship_data, n_banklines, km_mid, km_bin, t_erosion: int, bank_km_mid: List[np.ndarray], bank_line_coords:
