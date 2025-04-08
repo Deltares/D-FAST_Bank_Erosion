@@ -32,6 +32,7 @@ from dfastbe.bank_lines import BankLines
 from dfastbe.gui import main
 from dfastbe.io import load_program_texts
 from dfastbe import __file__
+R_DIR = Path(__file__).resolve().parent
 
 def run(
     language: str = "UK",
@@ -60,9 +61,6 @@ def run(
         configfile (str, optional):
             Path to the configuration file. Defaults to 'dfastbe.cfg'.
 
-    Returns:
-        None
-
     Raises:
         Exception: If an invalid `run_mode` is provided. The valid options are
             'BANKLINES', 'BANKEROSION', or 'GUI'.
@@ -81,24 +79,19 @@ def run(
         ```
     """
     language = language.upper()
-
-    r_dir = Path(__file__).resolve().parent
-
-    load_program_texts( r_dir / f"messages.{language}.ini")
+    load_program_texts( R_DIR / f"messages.{language}.ini")
     run_mode = run_mode.upper()
-    if run_mode == "BANKLINES":
-        config_file = ConfigFile.read(configfile)
-        bank_lines = BankLines(config_file)
-        bank_lines.detect()
-    elif run_mode == "BANKEROSION":
-        config_file = ConfigFile.read(configfile)
-        erosion = Erosion(config_file)
-        erosion.bankerosion_core()
-    elif run_mode == "GUI":
+
+    if run_mode == "GUI":
         main(configfile)
     else:
-        raise Exception(
-            "Invalid run mode '{}' specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'.".format(
-                run_mode
-            )
-        )
+        config_file = ConfigFile.read(configfile)
+
+        if run_mode == "BANKLINES":
+            bank_lines = BankLines(config_file)
+            bank_lines.detect()
+        elif run_mode == "BANKEROSION":
+            erosion = Erosion(config_file)
+            erosion.bankerosion_core()
+        else:
+            raise ValueError(f"Invalid run mode {run_mode} specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'.")

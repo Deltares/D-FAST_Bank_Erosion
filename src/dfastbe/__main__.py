@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Copyright (C) 2020 Stichting Deltares.
 
@@ -27,74 +26,85 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Optional, Tuple
+import argparse
+import os
+from pathlib import Path
+from typing import Tuple
 
 import matplotlib
+
+from dfastbe.cmd import run
+
 matplotlib.use("Qt5Agg")
 
-import argparse
-import dfastbe.cmd
+
+# ------------------------------------------------------------------------------
+# Needed for Nuitka compilation
+# ------------------------------------------------------------------------------
+
+is_nuitka = "__compiled__" in globals()
+if is_nuitka:
+    root = str(Path(__file__).parent)
+    os.environ["GDAL_DATA"] = root + os.sep + "gdal"
+    os.environ["PROJ_LIB"] = root + os.sep + "proj"
+    os.environ["MATPLOTLIBDATA"] = root + os.sep + "matplotlib" + os.sep + "mpl-data"
+    os.environ["TCL_LIBRARY"] = root + os.sep + "lib" + os.sep + "tcl8.6"
+    proj_lib_dirs = os.environ.get("PROJ_LIB", "")
+    import pyproj.datadir
+
+    pyproj.datadir.set_data_dir(root + os.sep + "proj")
+    import pyproj
+
+# ------------------------------------------------------------------------------
 
 
 def parse_arguments() -> Tuple[str, str, str]:
+    """Parse the command line arguments.
+
+    Raises:
+        LanguageError: If invalid language is specified.
+    Returns:
+        language (str):
+            Language identifier ("NL" or "UK").
+        run_mode (str):
+            Specification of the run mode ("BANKLINES", "BANKEROSION" or "GUI")
+        config_name (str):
+            Name of the configuration file.
     """
-    Parse the command line arguments.
-
-    Arguments
-    ---------
-    None
-
-    Raises
-    ------
-    Exception
-        If invalid language is specified.
-
-    Returns
-    -------
-    language : str
-        Language identifier ("NL" or "UK").
-    runmode : str
-        Specification of the run mode ("BANKLINES", "BANKEROSION" or "GUI")
-    config_name : str
-        Name of the configuration file.
-    """
-    parser = argparse.ArgumentParser(description="D-FAST Bank Erosion.")
-    
+    parser = argparse.ArgumentParser(
+        description="D-FAST Bank Erosion. Example: python -m dfastbe --mode BANKEROSION --config settings.cfg"
+    )
     parser.add_argument(
         "--language",
-        choices=["UK", "NL"],
         default="UK",
-        help=argparse.SUPPRESS
+        choices=["NL", "UK"],
+        help="display language 'NL' or 'UK' ('UK' is default)",
     )
-
     parser.add_argument(
         "--mode",
+        choices=["BANKLINES", "BANKEROSION", "GUI"],
         default="GUI",
-        help="run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is default)"
+        help="run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is default)",
     )
-
     parser.add_argument(
         "--config",
         default="dfastbe.cfg",
-        help="name of configuration file ('dfastbe.cfg' is default)"
+        help="name of the configuration file ('dfastbe.cfg' is default)",
     )
-
     args = parser.parse_args()
 
-    language = args.__dict__["language"].upper()
-    runmode = args.__dict__["mode"].upper()
-    configfile = args.__dict__["config"]
-    if language not in ["NL", "UK"]:
-        raise Exception(
-            "Incorrect language '{}' specified. Should read 'NL' or 'UK'.".format(
-                language
-            )
-        )
-    return language, runmode, configfile
+    language = args.language
+    run_mode = args.mode
+    configfile = args.config
+
+    return language, run_mode, configfile
+
 
 def main():
-    language, runmode, configfile = parse_arguments()
-    dfastbe.cmd.run(language, runmode, configfile)
+    """Main function to run the D-FAST Bank Erosion application."""
+    language, run_mode, configfile = parse_arguments()
+    run(language, run_mode, configfile)
+
 
 if __name__ == "__main__":
     main()
