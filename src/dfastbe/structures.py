@@ -13,3 +13,11 @@ class ErosionInputs:
     tauc: List[np.ndarray]
     banktype: List[np.ndarray]
     taucls_str: List[str]
+
+
+@dataclass
+class WaterLevelData:
+    hfw_max: float
+    water_level: List[List[np.ndarray]]
+    ship_wave_max: List[List[np.ndarray]]
+    ship_wave_min: List[List[np.ndarray]]
