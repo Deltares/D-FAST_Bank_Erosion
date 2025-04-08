@@ -3,7 +3,7 @@ name: Deploy MkDocs
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
       - '**'  # Match all branches for pull requests
