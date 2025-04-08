@@ -20,3 +20,14 @@ class ErosionInputs:
         "moderate/bad clay",
         "sand",
     )
+
+
+@dataclass
+class WaterLevelData:
+    """Class to hold water level data."""
+
+    hfw_max: float
+    water_level: List[List[np.ndarray]]
+    ship_wave_max: List[List[np.ndarray]]
+    ship_wave_min: List[List[np.ndarray]]
+    velocity: List[List[np.ndarray]]
