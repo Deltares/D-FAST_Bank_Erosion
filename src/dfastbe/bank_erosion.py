@@ -40,7 +40,7 @@ import matplotlib.pyplot as plt
 from dfastbe import __version__
 from dfastbe.io import ConfigFile, log_text, read_simulation_data, \
     write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData, SimulationObject
-from dfastbe.structures import ErosionInputs
+from dfastbe.structures import ErosionInputs, WaterLevelData
 
 from dfastbe.utils import timed_logger
 from dfastbe.kernel import get_zoom_extends, get_bbox
@@ -721,8 +721,27 @@ class Erosion:
                 km_mid, dvol_bank, str(self.output_dir) + os.sep + erovol_file
             )
 
-        return dn_tot, line_size, dn_flow_tot, dn_ship_tot, dn_eq, hfw_max, dv, dv_eq, dv_tot, water_level, ship_wave_max, \
-            ship_wave_min, bank_height, velocity, chezy
+        water_level_data = WaterLevelData(
+            hfw_max=hfw_max,
+            water_level=water_level,
+            ship_wave_max=ship_wave_max,
+            ship_wave_min=ship_wave_min,
+        )
+
+        return (
+            dn_tot,
+            line_size,
+            dn_flow_tot,
+            dn_ship_tot,
+            dn_eq,
+            dv,
+            dv_eq,
+            dv_tot,
+            bank_height,
+            velocity,
+            chezy,
+            water_level_data,
+        )
 
     def _postprocess_erosion_results(
         self,
@@ -868,16 +887,13 @@ class Erosion:
             dn_flow_tot,
             dn_ship_tot,
             dn_eq,
-            hfw_max,
             dv,
             dv_eq,
             dv_tot,
-            water_level,
-            ship_wave_max,
-            ship_wave_min,
             bank_height,
             velocity,
             chezy,
+            water_level_data,
         ) = self._process_discharge_levels(
             n_banklines,
             km_mid,
