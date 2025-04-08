@@ -27,7 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 from typing import Tuple, List
-from dfastbe.bank_erosion import ErosionInputs
+from dfastbe.structures import ErosionInputs
 
 import numpy
 import math
@@ -44,7 +44,7 @@ def comp_erosion_eq(
     mu_slope: numpy.ndarray,
     distance_fw: numpy.ndarray,
     hfw: numpy.ndarray,
-    erosion_inputs: ErosionInputs,
+    erosion_inputs: "ErosionInputs",
     ib: int,
     g: float,
 ) -> Tuple[numpy.ndarray, numpy.ndarray]:
@@ -129,7 +129,7 @@ def comp_erosion(
     distance_fw: numpy.ndarray,
     hfw: numpy.ndarray,
     chezy: numpy.ndarray,
-    erosion_inputs: ErosionInputs,
+    erosion_inputs: "ErosionInputs",
     rho: float,
     g: float,
     ib: int,
