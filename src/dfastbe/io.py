@@ -39,7 +39,6 @@ from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString, Point
-from shapely.prepared import prep
 
 MAX_RIVER_WIDTH = 1000
 
@@ -1338,7 +1337,7 @@ def read_simulation_data(
 
 
 def clip_simulation_data(
-    sim: SimulationObject, river_profile: np.ndarray, max_distance: float
+    sim: SimulationObject, river_profile: LineString, max_distance: float
 ) -> SimulationObject:
     """
     Clip the simulation mesh and data to the area of interest sufficiently close to the reference line.
@@ -1347,7 +1346,7 @@ def clip_simulation_data(
     ---------
     sim : SimulationObject
         Simulation data: mesh, bed levels, water levels, velocities, etc.
-    river_profile : np.ndarray
+    river_profile : LineString
         Reference line.
     max_distance : float
         Maximum distance between the reference line and a point in the area of
@@ -1366,7 +1365,7 @@ def clip_simulation_data(
     y_min = bbox.coords[0][1]
     y_max = bbox.coords[2][1]
 
-    xy_b_prep = prep(xy_buffer)
+    xy_b_prep = xy_buffer.prepare()
     x = sim["x_node"]
     y = sim["y_node"]
     nnodes = x.shape

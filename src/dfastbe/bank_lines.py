@@ -8,7 +8,7 @@ import geopandas as gpd
 import numpy as np
 from matplotlib import pyplot as plt
 from shapely.geometry.polygon import Polygon
-from shapely.ops import cascaded_union, linemerge
+from shapely import union_all, linemerge
 
 from dfastbe import __version__
 from dfastbe import plotting as df_plt
@@ -318,7 +318,7 @@ class BankLines:
                         nnodes, x_node[i], y_node[i], wet_node[i], h_node[i], h0
                     )
         lines = [line for line in lines if line is not None and not line.is_empty]
-        multi_line = cascaded_union(lines)
+        multi_line = union_all(lines)
         merged_line = linemerge(multi_line)
 
         return gpd.GeoSeries(merged_line)
