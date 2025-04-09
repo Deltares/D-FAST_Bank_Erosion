@@ -27,7 +27,7 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Dict, List, Tuple, Union
+from typing import List, Tuple
 from dfastbe.io import SimulationObject
 from dfastbe.structures import MeshData
 
@@ -38,7 +38,6 @@ import numpy
 import math
 import shapely
 import geopandas
-import sys
 
 
 def project_km_on_line(
@@ -264,42 +263,37 @@ def intersect_line_mesh(
     mesh_data: MeshData,
     d_thresh: float = 0.001,
 ) -> Tuple[numpy.ndarray, numpy.ndarray]:
-    """
-    Intersect a (bank) line with an unstructured mesh and return the intersection coordinates and mesh face indices.
+    """Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.
 
-    Arguments
-    ---------
-    bp : numpy.ndarray
-        Array containing the x,y-coordinates of the (bank) line.
-    xf : numpy.ma.masked_array
-        Array containing the x-coordinates of the corner points of each mesh face.
-    yf : numpy.ma.masked_array
-        Array containing the y-coordinates of the corner points of each mesh face.
-    xe : numpy.ndarray
-        Array containing the x-coordinates of the end points of each mesh edge.
-    ye : numpy.ndarray
-        Array containing the y-coordinates of the end points of each mesh edge.
-    fe : numpy.ma.masked_array
-        Array containg the mesh face-edge connectivity.
-    ef : numpy.ndarray
-        Array containg the mesh edge-face connectivity.
-    fn : numpy.ma.masked_array
-        Array containg the mesh face-node connectivity.
-    en : numpy.ndarray
-        Array containg the mesh edge-node connectivity.
-    nnodes : numpy.ndarray
-        Array containg the number of nodes/edges per face.
-    boundary_edge_nrs : numpy.ndarray
-        Array containing the indices of the domain boundary edges.
-    d_thresh : float
-        Distance threshold.
-        
-    Returns
-    -------
-    crds : numpy.ndarray
-        Array containing the x,y-coordinates of the (bank) line intersected by the mesh.
-    idx : numpy.ndarray
-        Array containing the indices of the mesh faces in which each line segment of crds is located.
+    This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.
+    It calculates the intersection points and identifies the mesh faces corresponding to each segment of the line.
+
+    Args:
+        bp (numpy.ndarray):
+            A 2D array of shape (N, 2) containing the x, y coordinates of the line to be intersected with the mesh.
+        mesh_data (MeshData):
+            An instance of the `MeshData` class containing mesh-related data, such as face coordinates, edge coordinates,
+            and connectivity information.
+        d_thresh (float, optional):
+            A distance threshold for filtering out very small segments. Segments shorter than this threshold will be removed.
+            Defaults to 0.001.
+
+    Returns:
+        Tuple[numpy.ndarray, numpy.ndarray]:
+            A tuple containing:
+            - `crds` (numpy.ndarray): A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.
+            - `idx` (numpy.ndarray): A 1D array of shape (M-1,) containing the indices of the mesh faces corresponding to
+              each segment of the intersected line.
+
+    Raises:
+        Exception:
+            If the line starts outside the mesh and cannot be associated with any mesh face, or if the line crosses
+            ambiguous regions (e.g., edges shared by multiple faces).
+
+    Notes:
+        - The function uses Shapely geometry operations to determine whether points are inside polygons or on edges.
+        - The function handles cases where the line starts outside the mesh, crosses multiple edges, or ends on a node.
+        - Tiny segments shorter than `d_thresh` are removed from the output.
     """
     crds = numpy.zeros((len(bp), 2))
     idx = numpy.zeros(len(bp), dtype=numpy.int64)
@@ -876,8 +870,10 @@ def get_slices_core(
         Reduced array containing only the indices of the sliced edges.
     """
     a, b, slices = get_slices_ab(
-        edges,
-        mesh_data,
+        mesh_data.x_edge_coords[edges, 0],
+        mesh_data.x_edge_coords[edges, 1],
+        mesh_data.y_edge_coords[edges, 0],
+        mesh_data.y_edge_coords[edges, 1],
         bpj1[0],
         bpj1[1],
         bpj[0],
@@ -890,8 +886,10 @@ def get_slices_core(
 
 
 def get_slices_ab(
-    edges: numpy.ndarray,
-    mesh_data: MeshData,
+    X0: numpy.ndarray,
+    X1: numpy.ndarray,
+    Y0: numpy.ndarray,
+    Y1: numpy.ndarray,
     xi0: float,
     yi0: float,
     xi1: float,
@@ -934,20 +932,14 @@ def get_slices_ab(
     slices : numpy.ndarray
         Array containing a flag indicating whether the edge is sliced at a valid location.
     """
-    dX = mesh_data.x_edge_coords[edges, 1] - mesh_data.x_edge_coords[edges, 0]
-    dY = mesh_data.y_edge_coords[edges, 1] - mesh_data.y_edge_coords[edges, 0]
+    dX = X1 - X0
+    dY = Y1 - Y0
     dxi = xi1 - xi0
     dyi = yi1 - yi0
     det = dX * dyi - dY * dxi
     det[det == 0] = 1e-10
-    a = (
-        dyi * (xi0 - mesh_data.x_edge_coords[edges, 0])
-        - dxi * (yi0 - mesh_data.y_edge_coords[edges, 0])
-    ) / det  # along mesh edge
-    b = (
-        dY * (xi0 - mesh_data.x_edge_coords[edges, 0])
-        - dX * (yi0 - mesh_data.y_edge_coords[edges, 0])
-    ) / det  # along bank line
+    a = (dyi * (xi0 - X0) - dxi * (yi0 - Y0)) / det  # along mesh edge
+    b = (dY * (xi0 - X0) - dX * (yi0 - Y0)) / det  # along bank line
     if bmax1:
         slices = numpy.nonzero((b > bmin) & (b <= 1) & (a >= 0) & (a <= 1))[0]
     else:
