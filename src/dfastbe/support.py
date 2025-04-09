@@ -334,7 +334,9 @@ def intersect_line_mesh(
                                 mesh_data.x_face_coords[
                                     k : k + 1, : mesh_data.n_nodes[k]
                                 ],
-                                mesh_data.n_nodes[k : k + 1, : mesh_data.n_nodes[k]],
+                                mesh_data.y_face_coords[
+                                    k : k + 1, : mesh_data.n_nodes[k]
+                                ],
                             ),
                             axis=0,
                         ).T
@@ -352,7 +354,9 @@ def intersect_line_mesh(
                                 mesh_data.x_face_coords[
                                     k : k + 1, : mesh_data.n_nodes[k]
                                 ],
-                                mesh_data.n_nodes[k : k + 1, : mesh_data.n_nodes[k]],
+                                mesh_data.y_face_coords[
+                                    k : k + 1, : mesh_data.n_nodes[k]
+                                ],
                             ),
                             axis=0,
                         ).T
@@ -443,7 +447,7 @@ def intersect_line_mesh(
                                             index : index + 1,
                                             : mesh_data.n_nodes[index],
                                         ],
-                                        mesh_data.n_nodes[
+                                        mesh_data.y_face_coords[
                                             index : index + 1,
                                             : mesh_data.n_nodes[index],
                                         ],
