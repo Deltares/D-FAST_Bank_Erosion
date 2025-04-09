@@ -2,7 +2,7 @@ name: docs
 on:
   push:
     branches:
-      - main
+      - master
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -12,7 +12,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.13
+          python-version: 3.9
 
       - name: Run image
         uses: abatilo/actions-poetry@v2.3.0
@@ -39,4 +39,4 @@ jobs:
           git config --global user.name '${{ github.actor }}'
           git config --global user.email '${{ github.actor }}@users.noreply.github.com'
 
-      - run: poetry run mike deploy --push main
+      - run: poetry run mike deploy --push master
