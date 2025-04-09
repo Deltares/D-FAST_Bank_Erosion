@@ -1351,6 +1351,7 @@ def _compute_mesh_topology(
         edge_node=edge_node,
         edge_face=edge_face,
         face_edge_connectivity=face_edge_connectivity,
+        boundary_edge_nrs=boundary_edge_nrs,
     )
 
 
