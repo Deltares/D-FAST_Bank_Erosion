@@ -786,40 +786,44 @@ def get_slices(
     bpj1: numpy.ndarray,
     mesh_data: MeshData,
 ) -> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]:
-    """
-    Intersect a (bank) line with an unstructured mesh and return the intersection coordinates and mesh face indices.
+    """Calculate the intersection of a line segment with the edges of a mesh face.
 
-    Arguments
-    ---------
-    index : int
-        index of the current face.
-    prev_b : float
-        offset of previous slice.
-    bpj : numpy.ndarray
-        1x2 array containing the x,y-coordinates of a bank point.
-    bpj : numpy.ndarray
-        1x2 array containing the x,y-coordinates of the previous bank point.
-    xe : numpy.ndarray
-        Array containing the x-coordinates of the end points of each mesh edge.
-    ye : numpy.ndarray
-        Array containing the y-coordinates of the end points of each mesh edge.
-    fe : numpy.ndarray
-        Array containg the mesh face-edge connectivity.
-    nnodes: numpy.ndarray
-        Array containing the number of nodes per face.
-    en : numpy.ndarray
-        Array containg the mesh edge-node connectivity.
-    boundary_edge_nrs : numpy.ndarray
-        Array containing the indices of the domain boundary edges.
-        
-    Returns
-    -------
-    b : numpy.ndarray
-        Array containing relative distance along the segment bpj1-bpj at which the slice occurs.
-    edges : numpy.ndarray
-        Array containing all considered edges.
-    nodes : numpu.ndarray
-        Array containing flags indicating whether the slices was at a node.
+    This function determines where a line segment (defined by two points) intersects the edges of a mesh face.
+    It returns the relative distances along the segment and the edges where the intersections occur, as well as
+    flags indicating whether the intersections occur at nodes.
+
+    Args:
+        index (int):
+            Index of the current mesh face. If `index` is negative, the function assumes the segment intersects
+            the boundary edges of the mesh.
+        prev_b (float):
+            The relative distance along the previous segment where the last intersection occurred. Used to filter
+            intersections along the current segment.
+        bpj (numpy.ndarray):
+            A 1D array of shape (2,) containing the x, y coordinates of the current point of the line segment.
+        bpj1 (numpy.ndarray):
+            A 1D array of shape (2,) containing the x, y coordinates of the previous point of the line segment.
+        mesh_data (MeshData):
+            An instance of the `MeshData` class containing mesh-related data, such as edge coordinates, face-edge
+            connectivity, and edge-node connectivity.
+
+    Returns:
+        Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]:
+            A tuple containing:
+            - `b` (numpy.ndarray): Relative distances along the segment `bpj1-bpj` where the intersections occur.
+            - `edges` (numpy.ndarray): Indices of the edges that are intersected by the segment.
+            - `nodes` (numpy.ndarray): Flags indicating whether the intersections occur at nodes. A value of `-1`
+              indicates no intersection at a node, while other values correspond to node indices.
+
+    Raises:
+        ValueError:
+            If the input data is invalid or inconsistent.
+
+    Notes:
+        - If `index` is negative, the function assumes the segment intersects the boundary edges of the mesh.
+        - The function uses the `get_slices_core` helper function to calculate the intersections.
+        - Intersections at nodes are flagged in the `nodes` array, with the corresponding node indices.
+
     """
     if index < 0:
         edges = mesh_data.boundary_edge_nrs
@@ -840,34 +844,52 @@ def get_slices_core(
     bmin: float,
     bmax1: bool = True,
 ) -> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]:
-    """
-    Intersect a (bank) line with an unstructured mesh and return the intersection coordinates and mesh face indices.
+    """Calculate the intersection of a line segment with multiple mesh edges.
 
-    Arguments
-    ---------
-    edges : numpy.ndarray
-        Array containing indices of the edges to check for slicing.
-    xe : numpy.ndarray
-        Array containing the x-coordinates of the end points of each mesh edge.
-    ye : numpy.ndarray
-        Array containing the y-coordinates of the end points of each mesh edge.
-    bpj1 : numpy.ndarray
-        1x2 array containing the x,y-coordinates of the previous bank point.
-    bpj : numpy.ndarray
-        1x2 array containing the x,y-coordinates of a bank point.
-    bmin : float
-        Minimum relative distance from bpj1 at which slice should occur.
-    bmax1 : bool
-        Flag indicating whether the the relative distance along the segment bpj1-bpj should be limited to 1.
-        
-    Returns
-    -------
-    a : numpy.ndarray
-        Array containing relative distance along the edges at which the slice occurs.
-    b : numpy.ndarray
-        Array containing relative distance along the segment bpj1-bpj at which the slice occurs.
-    edges : numpy.ndarray
-        Reduced array containing only the indices of the sliced edges.
+    This function determines where a line segment intersects a set of mesh edges.
+    It calculates the relative distances along the segment and the edges where
+    the intersections occur, and returns the indices of the intersected edges.
+
+    Args:
+        edges (numpy.ndarray):
+            Array containing the indices of the edges to check for intersections.
+        mesh_data (MeshData):
+            An instance of the `MeshData` class containing mesh-related data,
+            such as edge coordinates and connectivity information.
+        bpj1 (numpy.ndarray):
+            A 1D array of shape (2,) containing the x, y coordinates of the
+            starting point of the line segment.
+        bpj (numpy.ndarray):
+            A 1D array of shape (2,) containing the x, y coordinates of the
+            ending point of the line segment.
+        bmin (float):
+            Minimum relative distance along the segment `bpj1-bpj` at which
+            intersections should be considered valid.
+        bmax1 (bool, optional):
+            If True, limits the relative distance along the segment `bpj1-bpj`
+            to a maximum of 1. Defaults to True.
+
+    Returns:
+        Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]:
+            A tuple containing:
+            - `a` (numpy.ndarray): Relative distances along the edges where the
+              intersections occur.
+            - `b` (numpy.ndarray): Relative distances along the segment `bpj1-bpj`
+              where the intersections occur.
+            - `edges` (numpy.ndarray): Indices of the edges that are intersected
+              by the segment.
+
+    Raises:
+        ValueError:
+            If the input data is invalid or inconsistent.
+
+    Notes:
+        - The function uses the `get_slices_ab` helper function to calculate the
+          relative distances `a` and `b` for each edge.
+        - The `bmin` parameter is used to filter out intersections that occur
+          too close to the starting point of the segment.
+        - If `bmax1` is True, intersections beyond the endpoint of the segment
+          are ignored.
     """
     a, b, slices = get_slices_ab(
         mesh_data.x_edge_coords[edges, 0],
