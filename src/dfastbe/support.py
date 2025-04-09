@@ -41,7 +41,7 @@ from shapely.geometry import (
     Polygon,
     MultiLineString,
 )
-import shapely
+from shapely import union_all, line_merge
 import geopandas
 import sys
 
@@ -1515,16 +1515,16 @@ def sort_connect_bank_lines(
 
     Arguments
     ---------
-    banklines : shapely.geometry.multilinestring.MultiLineString
+    banklines : MultiLineString
         Unordered set of bank line segments.
-    xykm : shapely.geometry.linestring.LineString
+    xykm : LineString
         Array containing x,y,chainage values.
     right_bank : bool
         Flag indicating whether line is on the right (or not).
-    
+
     Returns
     -------
-    bank : shapely.geometry.linestring.LineString
+    bank : LineString
         The detected bank line.
     """
 
@@ -1728,7 +1728,7 @@ def convert_search_lines_to_bank_polygons(
 
 
 def clip_simdata(
-    sim: SimulationObject, xykm: numpy.ndarray, maxmaxd: float
+    sim: SimulationObject, xykm: LineString, maxmaxd: float
 ) -> SimulationObject:
     """
     Clip the simulation mesh and data to the area of interest sufficiently close to the reference line.
@@ -1737,13 +1737,13 @@ def clip_simdata(
     ---------
     sim : SimulationObject
         Simulation data: mesh, bed levels, water levels, velocities, etc.
-    xykm : numpy.ndarray
+    xykm : LineString
         Reference line.
     maxmaxd : float
         Maximum distance between the reference line and a point in the area of
         interest defined based on the search lines for the banks and the search
         distance.
-    
+
     Returns
     -------
     sim1 : SimulationObject
@@ -1757,7 +1757,7 @@ def clip_simdata(
     ymin = bbox.coords[0][1]
     ymax = bbox.coords[2][1]
 
-    xybprep = shapely.prepared.prep(xybuffer)
+    xybprep = xybuffer.prepare()
     x = sim["x_node"]
     y = sim["y_node"]
     nnodes = x.shape
@@ -1857,8 +1857,8 @@ def get_banklines(sim: SimulationObject, h0: float) -> geopandas.GeoSeries:
             else:
                 Lines[i] = poly_to_line(nnodes, X[i], Y[i], WET_node[i], H_node[i], h0)
     Lines = [line for line in Lines if not line is None and not line.is_empty]
-    multi_line = shapely.ops.cascaded_union(Lines)
-    merged_line = shapely.ops.linemerge(multi_line)
+    multi_line = union_all(Lines)
+    merged_line = linemerge(multi_line)
     return geopandas.GeoSeries(merged_line)
 
 
@@ -1905,7 +1905,7 @@ def poly_to_line(
         return None
     else:
         multi_line = MultiLineString(Lines)
-        merged_line = shapely.ops.linemerge(multi_line)
+        merged_line = linemerge(multi_line)
         return merged_line
 
 
