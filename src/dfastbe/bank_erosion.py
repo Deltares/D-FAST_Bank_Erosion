@@ -223,13 +223,10 @@ class Erosion:
         return river_axis_km, river_axis_numpy, river_axis
 
     def _prepare_fairway(
-            self, river_axis: LineString, stations_coords: np.ndarray,
-            x_face_coords: np.ndarray, y_face_coords: np.ndarray,
-            x_edge_coords: np.ndarray, y_edge_coords: np.ndarray,
-            fe: np.ndarray, edge_face: np.ndarray,
-            face_node: np.ndarray, edge_node: np.ndarray,
-            nnodes: int, boundary_edge_nrs: np.ndarray
-            # ) -> Tuple[np.ndarray, np.ndarray, List[int], List[int]]
+        self,
+        river_axis: LineString,
+        stations_coords: np.ndarray,
+        mesh_data: MeshData,
     ):
         # read fairway file
         fairway_file = self.config_file.get_str("Erosion", "Fairway")
@@ -252,9 +249,7 @@ class Erosion:
 
         # intersect fairway and mesh
         log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
-        ifw_numpy, ifw_face_idx = intersect_line_mesh(
-            fairway_numpy, x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, fe, edge_face, face_node, edge_node, nnodes, boundary_edge_nrs
-        )
+        ifw_numpy, ifw_face_idx = intersect_line_mesh(fairway_numpy, mesh_data)
         if self.debug:
             write_shp_pnt((ifw_numpy[:-1] + ifw_numpy[1:]) / 2, {"iface": ifw_face_idx},
                 f"{str(self.output_dir)}{os.sep}fairway_face_indices.shp",
@@ -845,9 +840,7 @@ class Erosion:
         log_text("intersect_bank_mesh")
 
         bank_line_coords, bank_idx, bank_km_mid, is_right_bank = (
-            self.intersect_bank_lines_with_mesh(
-                sim, banklines, stations_coords, mesh_data
-            )
+            self.intersect_bank_lines_with_mesh(banklines, stations_coords, mesh_data)
         )
 
         river_axis_km, _, river_axis = self._prepare_river_axis(stations_coords)
@@ -917,13 +910,10 @@ class Erosion:
             river_axis_km,
             bank_km_mid,
             banklines,
-            face_node,
             sim,
             dn_tot,
             is_right_bank,
             xy_line_eq_list,
-            x_edge_coords,
-            y_edge_coords,
             d_nav,
             t_erosion,
             km_mid,
@@ -935,6 +925,7 @@ class Erosion:
             dn_eq,
             erosion_inputs,
             water_level_data,
+            mesh_data,
         )
         log_text("end_bankerosion")
         timed_logger("-- end analysis --")
