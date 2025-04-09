@@ -790,12 +790,7 @@ def get_slices(
     prev_b: float,
     bpj: numpy.ndarray,
     bpj1: numpy.ndarray,
-    xe: numpy.ndarray,
-    ye: numpy.ndarray,
-    fe: numpy.ndarray,
-    nnodes: numpy.ndarray,
-    en: numpy.ndarray,
-    boundary_edge_nrs: numpy.ndarray,
+    mesh_data: MeshData,
 ) -> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]:
     """
     Intersect a (bank) line with an unstructured mesh and return the intersection coordinates and mesh face indices.
@@ -833,20 +828,19 @@ def get_slices(
         Array containing flags indicating whether the slices was at a node.
     """
     if index < 0:
-        edges = boundary_edge_nrs
+        edges = mesh_data.boundary_edge_nrs
     else:
-        edges = fe[index, : nnodes[index]]
-    a, b, edges = get_slices_core(edges, xe, ye, bpj1, bpj, prev_b, True)
+        edges = mesh_data.face_edge_connectivity[index, : mesh_data.n_nodes[index]]
+    a, b, edges = get_slices_core(edges, mesh_data, bpj1, bpj, prev_b, True)
     nodes = -numpy.ones(a.shape, dtype=numpy.int64)
-    nodes[a == 0] = en[edges[a == 0], 0]
-    nodes[a == 1] = en[edges[a == 1], 1]
+    nodes[a == 0] = mesh_data.edge_node[edges[a == 0], 0]
+    nodes[a == 1] = mesh_data.edge_node[edges[a == 1], 1]
     return b, edges, nodes
 
 
 def get_slices_core(
     edges: numpy.ndarray,
-    xe: numpy.ndarray,
-    ye: numpy.ndarray,
+    mesh_data: MeshData,
     bpj1: numpy.ndarray,
     bpj: numpy.ndarray,
     bmin: float,
@@ -882,10 +876,12 @@ def get_slices_core(
         Reduced array containing only the indices of the sliced edges.
     """
     a, b, slices = get_slices_ab(
-        xe[edges, 0],
-        ye[edges, 0],
-        xe[edges, 1],
-        ye[edges, 1],
+        # mesh_data.x_edge_coords[edges, 0],
+        # mesh_data.y_edge_coords[edges, 0],
+        # mesh_data.x_edge_coords[edges, 1],
+        # mesh_data.y_edge_coords[edges, 1],
+        edges,
+        mesh_data,
         bpj1[0],
         bpj1[1],
         bpj[0],
@@ -898,10 +894,8 @@ def get_slices_core(
 
 
 def get_slices_ab(
-    X0: numpy.ndarray,
-    Y0: numpy.ndarray,
-    X1: numpy.ndarray,
-    Y1: numpy.ndarray,
+    edges: numpy.ndarray,
+    mesh_data: MeshData,
     xi0: float,
     yi0: float,
     xi1: float,
