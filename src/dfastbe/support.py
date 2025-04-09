@@ -891,8 +891,8 @@ def get_slices_core(
     """
     a, b, slices = get_slices_ab(
         mesh_data.x_edge_coords[edges, 0],
-        mesh_data.x_edge_coords[edges, 1],
         mesh_data.y_edge_coords[edges, 0],
+        mesh_data.x_edge_coords[edges, 1],
         mesh_data.y_edge_coords[edges, 1],
         bpj1[0],
         bpj1[1],
@@ -907,8 +907,8 @@ def get_slices_core(
 
 def get_slices_ab(
     X0: numpy.ndarray,
-    X1: numpy.ndarray,
     Y0: numpy.ndarray,
+    X1: numpy.ndarray,
     Y1: numpy.ndarray,
     xi0: float,
     yi0: float,
