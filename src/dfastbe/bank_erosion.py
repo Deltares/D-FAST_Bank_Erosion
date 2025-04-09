@@ -834,7 +834,7 @@ class Erosion:
 
         log_text("derive_topology")
 
-        edge_node, edge_face, face_edge_connectivity, boundary_edge_nrs = _compute_mesh_topology(face_node, nnodes)
+        mesh_data = _compute_mesh_topology(sim)
 
         # clip the chainage path to the range of chainages of interest
         km_bounds = self.river_data.station_bounds
@@ -849,8 +849,10 @@ class Erosion:
         # map bank lines to mesh cells
         log_text("intersect_bank_mesh")
 
-        x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, bank_line_coords, bank_idx, bank_km_mid, is_right_bank = self.intersect_bank_lines_with_mesh(
-            sim, face_node, banklines, edge_node, edge_face, face_edge_connectivity, nnodes, boundary_edge_nrs, stations_coords
+        bank_line_coords, bank_idx, bank_km_mid, is_right_bank = (
+            self.intersect_bank_lines_with_mesh(
+                sim, banklines, stations_coords, mesh_data
+            )
         )
 
         river_axis_km, _, river_axis = self._prepare_river_axis(stations_coords)
@@ -862,8 +864,7 @@ class Erosion:
         km_mid = get_km_bins(km_bin, type=3)  # get mid-points
 
         ifw_face_idx, ifw_numpy = self._prepare_fairway(
-            river_axis, stations_coords, x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, face_edge_connectivity, edge_face,
-            face_node, edge_node, nnodes, boundary_edge_nrs
+            river_axis, stations_coords, mesh_data
         )
 
         bp_fw_face_idx, distance_fw = self._map_bank_to_fairway(bank_line_coords, bank_km_mid, ifw_numpy, ifw_face_idx)
