@@ -29,6 +29,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
 from typing import Dict, List, Tuple, Union
 from dfastbe.io import SimulationObject
+from dfastbe.structures import MeshData
 
 # import matplotlib
 # import matplotlib.pyplot
@@ -260,16 +261,7 @@ def xykm_bin(xykm: numpy.ndarray, km_bin: Tuple[float, float, float]) -> numpy.n
 
 def intersect_line_mesh(
     bp: numpy.ndarray,
-    xf: numpy.ma.masked_array,
-    yf: numpy.ma.masked_array,
-    xe: numpy.ndarray,
-    ye: numpy.ndarray,
-    fe: numpy.ma.masked_array,
-    ef: numpy.ndarray,
-    fn: numpy.ma.masked_array,
-    en: numpy.ndarray,
-    nnodes: numpy.ndarray,
-    boundary_edge_nrs: numpy.ndarray,
+    mesh_data: MeshData,
     d_thresh: float = 0.001,
 ) -> Tuple[numpy.ndarray, numpy.ndarray]:
     """
@@ -322,8 +314,8 @@ def intersect_line_mesh(
             print("Current location: {}, {}".format(bpj[0], bpj[1]))
         if j == 0:
             # first bp inside or outside?
-            dx = xf - bpj[0]
-            dy = yf - bpj[1]
+            dx = mesh_data.x_face_coords - bpj[0]
+            dy = mesh_data.y_face_coords - bpj[1]
             possible_cells = numpy.nonzero(
                 ~(
                     (dx < 0).all(axis=1)
@@ -346,7 +338,12 @@ def intersect_line_mesh(
                 for k in possible_cells:
                     polygon_k = shapely.geometry.Polygon(
                         numpy.concatenate(
-                            (xf[k : k + 1, : nnodes[k]], yf[k : k + 1, : nnodes[k]]),
+                            (
+                                mesh_data.x_face_coords[
+                                    k : k + 1, : mesh_data.n_nodes[k]
+                                ],
+                                mesh_data.n_nodes[k : k + 1, : mesh_data.n_nodes[k]],
+                            ),
                             axis=0,
                         ).T
                     )
@@ -359,7 +356,12 @@ def intersect_line_mesh(
                     on_edge: List[int] = []
                     for k in possible_cells:
                         nd = numpy.concatenate(
-                            (xf[k : k + 1, : nnodes[k]], yf[k : k + 1, : nnodes[k]]),
+                            (
+                                mesh_data.x_face_coords[
+                                    k : k + 1, : mesh_data.n_nodes[k]
+                                ],
+                                mesh_data.n_nodes[k : k + 1, : mesh_data.n_nodes[k]],
+                            ),
                             axis=0,
                         ).T
                         line_k = shapely.geometry.LineString(
@@ -403,12 +405,7 @@ def intersect_line_mesh(
                             prev_b,
                             bpj,
                             bpj1,
-                            xe,
-                            ye,
-                            fe,
-                            nnodes,
-                            en,
-                            boundary_edge_nrs,
+                            mesh_data,
                         )
                         b = numpy.concatenate((b, b1), axis=0)
                         edges = numpy.concatenate((edges, edges1), axis=0)
@@ -432,12 +429,7 @@ def intersect_line_mesh(
                         prev_b,
                         bpj,
                         bpj1,
-                        xe,
-                        ye,
-                        fe,
-                        nnodes,
-                        en,
-                        boundary_edge_nrs,
+                        mesh_data,
                     )
 
                 if len(edges) == 0:
@@ -456,8 +448,14 @@ def intersect_line_mesh(
                             polygon_k = shapely.geometry.Polygon(
                                 numpy.concatenate(
                                     (
-                                        xf[index : index + 1, : nnodes[index]],
-                                        yf[index : index + 1, : nnodes[index]],
+                                        mesh_data.x_face_coords[
+                                            index : index + 1,
+                                            : mesh_data.n_nodes[index],
+                                        ],
+                                        mesh_data.n_nodes[
+                                            index : index + 1,
+                                            : mesh_data.n_nodes[index],
+                                        ],
                                     ),
                                     axis=0,
                                 ).T
@@ -490,7 +488,7 @@ def intersect_line_mesh(
                     # slice location identified ...
                     node = nodes[0]
                     edge = edges[0]
-                    faces = ef[edge]
+                    faces = mesh_data.edge_face[edge]
                     prev_b = b[0]
 
                     if node >= 0:
@@ -502,8 +500,12 @@ def intersect_line_mesh(
                                 )
                             )
                         # figure out where we will be heading afterwards ...
-                        all_node_edges = numpy.nonzero((en == node).any(axis=1))[0]
-                        all_node_faces = numpy.unique(ef[all_node_edges])
+                        all_node_edges = numpy.nonzero(
+                            (mesh_data.edge_node == node).any(axis=1)
+                        )[0]
+                        all_node_faces = numpy.unique(
+                            mesh_data.edge_face[all_node_edges]
+                        )
                         if b[0] < 1.0:
                             # segment passes through node and enter non-neighbouring cell ...
                             # direction of current segment from bpj1 to bpj
@@ -543,17 +545,25 @@ def intersect_line_mesh(
                                 )
                             )
                         for ie in all_node_edges:
-                            if en[ie, 0] == node:
+                            if mesh_data.edge_node[ie, 0] == node:
                                 theta_edge = math.atan2(
-                                    ye[ie, 1] - ye[ie, 0], xe[ie, 1] - xe[ie, 0]
+                                    mesh_data.y_edge_coords[ie, 1]
+                                    - mesh_data.y_edge_coords[ie, 0],
+                                    mesh_data.x_edge_coords[ie, 1]
+                                    - mesh_data.x_edge_coords[ie, 0],
                                 )
                             else:
                                 theta_edge = math.atan2(
-                                    ye[ie, 0] - ye[ie, 1], xe[ie, 0] - xe[ie, 1]
+                                    mesh_data.y_edge_coords[ie, 0]
+                                    - mesh_data.y_edge_coords[ie, 1],
+                                    mesh_data.x_edge_coords[ie, 0]
+                                    - mesh_data.x_edge_coords[ie, 1],
                                 )
                             if verbose:
                                 print(
-                                    "{}: edge {} connects {}".format(j, ie, en[ie, :])
+                                    "{}: edge {} connects {}".format(
+                                        j, ie, mesh_data.edge_node[ie, :]
+                                    )
                                 )
                                 print(
                                     "{}: edge {} theta is {}".format(j, ie, theta_edge)
@@ -597,7 +607,7 @@ def intersect_line_mesh(
                         if left_edge == right_edge:
                             if verbose:
                                 print("{}: continue along edge {}".format(j, left_edge))
-                            index0 = ef[left_edge, :]
+                            index0 = mesh_data.edge_face[left_edge, :]
                         else:
                             if verbose:
                                 print(
@@ -605,15 +615,15 @@ def intersect_line_mesh(
                                         j, left_edge, right_edge
                                     )
                                 )
-                            left_faces = ef[left_edge, :]
-                            right_faces = ef[right_edge, :]
+                            left_faces = mesh_data.edge_face[left_edge, :]
+                            right_faces = mesh_data.edge_face[right_edge, :]
                             if (
                                 left_faces[0] in right_faces
                                 and left_faces[1] in right_faces
                             ):
                                 # the two edges are shared by two faces ... check first face
-                                fn1 = fn[left_faces[0]]
-                                fe1 = fe[left_faces[0]]
+                                fn1 = mesh_data.face_node[left_faces[0]]
+                                fe1 = mesh_data.face_edge_connectivity[left_faces[0]]
                                 if verbose:
                                     print(
                                         "{}: those edges are shared by two faces: {}".format(
@@ -676,7 +686,10 @@ def intersect_line_mesh(
                         if verbose:
                             print("{}: moving in direction theta = {}".format(j, theta))
                         theta_edge = math.atan2(
-                            ye[edge, 1] - ye[edge, 0], xe[edge, 1] - xe[edge, 0]
+                            mesh_data.y_edge_coords[edge, 1]
+                            - mesh_data.y_edge_coords[edge, 0],
+                            mesh_data.x_edge_coords[edge, 1]
+                            - mesh_data.x_edge_coords[edge, 0],
                         )
                         if theta == theta_edge or theta == -theta_edge:
                             # aligned with edge
@@ -685,9 +698,9 @@ def intersect_line_mesh(
                             index0 = faces
                         else:
                             # check whether the (extended) segment slices any edge of faces[0]
-                            fe1 = fe[faces[0]]
+                            fe1 = mesh_data.face_edge_connectivity[faces[0]]
                             a, b, edges = get_slices_core(
-                                fe1, xe, ye, bpj, bp[j + 1], 0.0, False
+                                fe1, mesh_data, bpj, bp[j + 1], 0.0, False
                             )
                             if len(edges) > 0:
                                 # yes, a slice (typically 1, but could be 2 if it slices at a node
