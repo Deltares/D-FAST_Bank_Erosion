@@ -1232,26 +1232,36 @@ def _apply_masked_indexing(x0: np.array, idx: np.ma.masked_array) -> np.ma.maske
 def _compute_mesh_topology(
     sim: SimulationObject,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Derive the secondary topology arrays from the face_node_connectivity.
+    """Derive secondary topology arrays from the face-node connectivity of the mesh.
 
-    Arguments
-    ---------
-    face_node : np.ndarray
-        An N x M array containing the node indices (max M) for each of the N mesh faces.
-    n_nodes: np.ndarray
-        A array of length N containing the number of nodes for each one of the N mesh faces.
+    This function computes the edge-node, edge-face, and face-edge connectivity arrays,
+    as well as the boundary edges of the mesh, based on the face-node connectivity provided
+    in the simulation data.
 
-    Results
-    -------
-    edge_node : np.ndarray
-        An L x 2 array containing the node indices (2) for each of the L mesh edges.
-    edge_face : np.ndarray
-        An L x 2 array containing the face indices (max 2) for each of the L mesh edges.
-    fe : np.ndarray
-        An N x M array containing the edge indices (max M) for each of the N mesh faces.
-    boundary_edge_nrs : np.ndarray
-        A array of length K containing the edge indices making the mesh outer (or inner) boundary.
+    Args:
+        sim (SimulationObject):
+            A simulation object containing mesh-related data, including face-node connectivity
+            (`facenode`), the number of nodes per face (`nnodes`), and node coordinates (`x_node`, `y_node`).
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+            A tuple containing:
+            - `edge_node` (np.ndarray): An L x 2 array containing the node indices for each of the L mesh edges.
+            - `edge_face` (np.ndarray): An L x 2 array containing the face indices for each of the L mesh edges.
+              Each edge can belong to up to two faces.
+            - `face_edge_connectivity` (np.ndarray): An N x M array containing the edge indices for each of the
+              N mesh faces, where M is the maximum number of edges per face.
+            - `boundary_edge_nrs` (np.ndarray): A 1D array containing the indices of the edges that form the
+              outer (or inner) boundary of the mesh.
+
+    Raises:
+        KeyError:
+            If required keys (e.g., `facenode`, `nnodes`, `x_node`, `y_node`) are missing from the `sim` object.
+
+    Notes:
+        - The function identifies unique edges by sorting and comparing node indices.
+        - Boundary edges are identified as edges that belong to only one face.
+        - The function assumes that the mesh is well-formed, with consistent face-node connectivity.
     """
 
     # get a sorted list of edge node connections (shared edges occur twice)
@@ -1332,7 +1342,7 @@ def _compute_mesh_topology(
         face_node=face_node,
         n_nodes=n_nodes,
         edge_node=edge_node,
-        edge_face=edge_face,
+        edge_face_connectivity=edge_face,
         face_edge_connectivity=face_edge_connectivity,
         boundary_edge_nrs=boundary_edge_nrs,
     )

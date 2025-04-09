@@ -483,7 +483,7 @@ def intersect_line_mesh(
                     # slice location identified ...
                     node = nodes[0]
                     edge = edges[0]
-                    faces = mesh_data.edge_face[edge]
+                    faces = mesh_data.edge_face_connectivity[edge]
                     prev_b = b[0]
 
                     if node >= 0:
@@ -599,7 +599,7 @@ def intersect_line_mesh(
                         if left_edge == right_edge:
                             if verbose:
                                 print("{}: continue along edge {}".format(j, left_edge))
-                            index0 = mesh_data.edge_face[left_edge, :]
+                            index0 = mesh_data.edge_face_connectivity[left_edge, :]
                         else:
                             if verbose:
                                 print(
@@ -607,8 +607,10 @@ def intersect_line_mesh(
                                         j, left_edge, right_edge
                                     )
                                 )
-                            left_faces = mesh_data.edge_face[left_edge, :]
-                            right_faces = mesh_data.edge_face[right_edge, :]
+                            left_faces = mesh_data.edge_face_connectivity[left_edge, :]
+                            right_faces = mesh_data.edge_face_connectivity[
+                                right_edge, :
+                            ]
                             if (
                                 left_faces[0] in right_faces
                                 and left_faces[1] in right_faces
