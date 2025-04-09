@@ -28,8 +28,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 from typing import List, Tuple, Optional
-import shapely
 
+from shapely.geometry import LineString, Polygon
 import matplotlib
 import matplotlib.pyplot
 import geopandas
@@ -229,8 +229,8 @@ def plot_mesh_patches(
 def plot_detect1(
     bbox: Tuple[float, float, float, float],
     xykm: numpy.ndarray,
-    bankareas: List[shapely.geometry.polygon.Polygon],
-    bank: List[shapely.geometry.linestring.LineString],
+    bankareas: List[Polygon],
+    bank: List[LineString],
     fn: numpy.ndarray,
     nnodes: numpy.ndarray,
     xn: numpy.ndarray,
@@ -246,19 +246,19 @@ def plot_detect1(
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank line detection plot.
-    
+
     The figure contains a map of the water depth, the chainage, and detected
     bank lines.
-    
+
     Arguments
     ---------
     bbox : Tuple[float, float, float, float]
         Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
     xykm : numpy.ndarray
         Array containing the x, y, and chainage; unit m for x and y, km for chainage.
-    bankareas : List[shapely.geometry.polygon.Polygon]
+    bankareas : List[Polygon]
         List of bank polygons.
-    bank : List[shapely.geometry.linestring.LineString]
+    bank : List[LineString]
         List of bank lines.
     fn : numpy.ndarray
         N x M array listing the nodes (max M) per face (total N) of the mesh.
@@ -284,7 +284,7 @@ def plot_detect1(
         Label for the bank search areas.
     bankline_txt : str
         Label for the identified bank lines.
-    
+
     Returns
     -------
     fig : matplotlib.figure.Figure:
