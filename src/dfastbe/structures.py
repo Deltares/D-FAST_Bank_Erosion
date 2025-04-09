@@ -31,3 +31,12 @@ class WaterLevelData:
     ship_wave_max: List[List[np.ndarray]]
     ship_wave_min: List[List[np.ndarray]]
     velocity: List[List[np.ndarray]]
+
+
+@dataclass
+class MeshData:
+    face_node: np.ndarray
+    x_edge_coords: np.ndarray
+    y_edge_coords: np.ndarray
+    river_axis_km: np.ndarray
+    bbox: np.ndarray
