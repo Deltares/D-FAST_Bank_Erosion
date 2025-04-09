@@ -35,8 +35,14 @@ class WaterLevelData:
 
 @dataclass
 class MeshData:
-    face_node: np.ndarray
+    """Class to hold mesh-related data."""
+    x_face_coords: np.ndarray
+    y_face_coords: np.ndarray
     x_edge_coords: np.ndarray
     y_edge_coords: np.ndarray
+    face_node: np.ndarray
+    edge_node: np.ndarray
+    edge_face: np.ndarray
+    face_edge_connectivity: np.ndarray
     river_axis_km: np.ndarray
     bbox: np.ndarray
