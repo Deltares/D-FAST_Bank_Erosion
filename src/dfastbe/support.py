@@ -876,10 +876,6 @@ def get_slices_core(
         Reduced array containing only the indices of the sliced edges.
     """
     a, b, slices = get_slices_ab(
-        # mesh_data.x_edge_coords[edges, 0],
-        # mesh_data.y_edge_coords[edges, 0],
-        # mesh_data.x_edge_coords[edges, 1],
-        # mesh_data.y_edge_coords[edges, 1],
         edges,
         mesh_data,
         bpj1[0],
@@ -938,15 +934,20 @@ def get_slices_ab(
     slices : numpy.ndarray
         Array containing a flag indicating whether the edge is sliced at a valid location.
     """
-    dX = X1 - X0
-    dY = Y1 - Y0
+    dX = mesh_data.x_edge_coords[edges, 1] - mesh_data.x_edge_coords[edges, 0]
+    dY = mesh_data.y_edge_coords[edges, 1] - mesh_data.y_edge_coords[edges, 0]
     dxi = xi1 - xi0
     dyi = yi1 - yi0
     det = dX * dyi - dY * dxi
     det[det == 0] = 1e-10
-    a = (dyi * (xi0 - X0) - dxi * (yi0 - Y0)) / det  # along mesh edge
-    b = (dY * (xi0 - X0) - dX * (yi0 - Y0)) / det  # along bank line
-    # eps = numpy.finfo(float).eps
+    a = (
+        dyi * (xi0 - mesh_data.x_edge_coords[edges, 0])
+        - dxi * (yi0 - mesh_data.y_edge_coords[edges, 0])
+    ) / det  # along mesh edge
+    b = (
+        dY * (xi0 - mesh_data.x_edge_coords[edges, 0])
+        - dX * (yi0 - mesh_data.y_edge_coords[edges, 0])
+    ) / det  # along bank line
     if bmax1:
         slices = numpy.nonzero((b > bmin) & (b <= 1) & (a >= 0) & (a <= 1))[0]
     else:
