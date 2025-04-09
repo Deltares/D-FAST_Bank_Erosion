@@ -41,6 +41,7 @@ class MeshData:
     x_edge_coords: np.ndarray
     y_edge_coords: np.ndarray
     face_node: np.ndarray
+    n_nodes: np.ndarray
     edge_node: np.ndarray
     edge_face: np.ndarray
     face_edge_connectivity: np.ndarray

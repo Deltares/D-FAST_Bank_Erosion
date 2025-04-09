@@ -43,7 +43,7 @@ from dfastbe.support import on_right_side, project_km_on_line, intersect_line_me
 from dfastbe import plotting as df_plt
 from dfastbe.io import ConfigFile, log_text, read_simulation_data, \
     write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData, SimulationObject
-from dfastbe.structures import ErosionInputs, WaterLevelData
+from dfastbe.structures import ErosionInputs, WaterLevelData, MeshData
 from dfastbe.utils import timed_logger
 
 
@@ -141,13 +141,17 @@ class Erosion:
         return sim_files, p_discharge
 
     def intersect_bank_lines_with_mesh(
-        self, sim: SimulationObject, face_node, banklines, edge_node, edge_face, fe, nnodes, boundary_edge_nrs, stations_coords
+        self,
+        face_node,
+        banklines,
+        edge_node,
+        edge_face,
+        fe,
+        nnodes,
+        boundary_edge_nrs,
+        stations_coords,
     ):
         n_banklines = len(banklines)
-        x_face_coords = _apply_masked_indexing(sim["x_node"], face_node)
-        y_face_coords = _apply_masked_indexing(sim["y_node"], face_node)
-        x_edge_coords = sim["x_node"][edge_node]
-        y_edge_coords = sim["y_node"][edge_node]
 
         bank_line_coords = []
         bank_face_indices = []
@@ -829,8 +833,6 @@ class Erosion:
         log_text("-")
 
         log_text("derive_topology")
-        face_node = sim["facenode"]
-        nnodes = sim["nnodes"]
 
         edge_node, edge_face, face_edge_connectivity, boundary_edge_nrs = _compute_mesh_topology(face_node, nnodes)
 
@@ -1249,7 +1251,7 @@ def _apply_masked_indexing(x0: np.array, idx: np.ma.masked_array) -> np.ma.maske
 
 
 def _compute_mesh_topology(
-    face_node: np.ndarray, n_nodes: np.ndarray
+    sim: SimulationObject,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Derive the secondary topology arrays from the face_node_connectivity.
@@ -1275,6 +1277,8 @@ def _compute_mesh_topology(
 
     # get a sorted list of edge node connections (shared edges occur twice)
     # face_nr contains the face index to which the edge belongs
+    face_node = sim["facenode"]
+    n_nodes = sim["nnodes"]
     n_faces = face_node.shape[0]
     n_edges = sum(n_nodes)
     edge_node = np.zeros((n_edges, 2), dtype=np.int64)
@@ -1336,7 +1340,22 @@ def _compute_mesh_topology(
     edge_face[edge_nr[unique_edge], 0] = face_nr[unique_edge]
     edge_face[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
 
-    return edge_node, edge_face, face_edge_connectivity, boundary_edge_nrs
+    x_face_coords = _apply_masked_indexing(sim["x_node"], face_node)
+    y_face_coords = _apply_masked_indexing(sim["y_node"], face_node)
+    x_edge_coords = sim["x_node"][edge_node]
+    y_edge_coords = sim["y_node"][edge_node]
+
+    return MeshData(
+        x_face_coords=x_face_coords,
+        y_face_coords=y_face_coords,
+        x_edge_coords=x_edge_coords,
+        y_edge_coords=y_edge_coords,
+        face_node=face_node,
+        n_nodes=n_nodes,
+        edge_node=edge_node,
+        edge_face=edge_face,
+        face_edge_connectivity=face_edge_connectivity,
+    )
 
 
 class BankLinesResultsError(Exception):
