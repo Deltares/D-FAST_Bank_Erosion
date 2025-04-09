@@ -299,10 +299,8 @@ def intersect_line_mesh(
     idx = numpy.zeros(len(bp), dtype=numpy.int64)
     verbose = False
     l = 0
-    #
     index: int
     vindex: numpy.ndarray
-    nprint = 0
     for j, bpj in enumerate(bp):
         if verbose:
             print("Current location: {}, {}".format(bpj[0], bpj[1]))
@@ -386,7 +384,6 @@ def intersect_line_mesh(
             # second or later point
             bpj1 = bp[j - 1]
             prev_b = 0
-            prev_pnt = bpj1
             while True:
                 if index == -2:
                     b = numpy.zeros(0)
@@ -497,9 +494,6 @@ def intersect_line_mesh(
                         all_node_edges = numpy.nonzero(
                             (mesh_data.edge_node == node).any(axis=1)
                         )[0]
-                        all_node_faces = numpy.unique(
-                            mesh_data.edge_face[all_node_edges]
-                        )
                         if b[0] < 1.0:
                             # segment passes through node and enter non-neighbouring cell ...
                             # direction of current segment from bpj1 to bpj
