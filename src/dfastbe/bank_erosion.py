@@ -142,14 +142,9 @@ class Erosion:
 
     def intersect_bank_lines_with_mesh(
         self,
-        face_node,
         banklines,
-        edge_node,
-        edge_face,
-        fe,
-        nnodes,
-        boundary_edge_nrs,
         stations_coords,
+        mesh_data: MeshData,
     ):
         n_banklines = len(banklines)
 
@@ -160,7 +155,7 @@ class Erosion:
             log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
 
             coords_along_bank, face_indices = intersect_line_mesh(
-                line_coords, x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, fe, edge_face, face_node, edge_node, nnodes, boundary_edge_nrs
+                line_coords, mesh_data
             )
             bank_line_coords.append(coords_along_bank)
             bank_face_indices.append(face_indices)
@@ -190,7 +185,7 @@ class Erosion:
             else:
                 log_text("left_side_bank", data={"ib": bank_index + 1})
 
-        return x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, bank_line_coords, bank_face_indices, bank_km_mid, is_right_bank
+        return bank_line_coords, bank_face_indices, bank_km_mid, is_right_bank
 
     def _prepare_river_axis(self, stations_coords: np.ndarray) -> Tuple[np.ndarray, np.ndarray, LineString]:
         # read river axis file
