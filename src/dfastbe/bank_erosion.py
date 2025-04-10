@@ -1244,15 +1244,17 @@ def _compute_mesh_topology(
             (`facenode`), the number of nodes per face (`nnodes`), and node coordinates (`x_node`, `y_node`).
 
     Returns:
-        Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-            A tuple containing:
-            - `edge_node` (np.ndarray): An L x 2 array containing the node indices for each of the L mesh edges.
-            - `edge_face` (np.ndarray): An L x 2 array containing the face indices for each of the L mesh edges.
-              Each edge can belong to up to two faces.
-            - `face_edge_connectivity` (np.ndarray): An N x M array containing the edge indices for each of the
-              N mesh faces, where M is the maximum number of edges per face.
-            - `boundary_edge_nrs` (np.ndarray): A 1D array containing the indices of the edges that form the
-              outer (or inner) boundary of the mesh.
+        MeshData: a dataclass containing the following attributes:
+            - `x_face_coords`: x-coordinates of face nodes
+            - `y_face_coords`: y-coordinates of face nodes
+            - `x_edge_coords`: x-coordinates of edge nodes
+            - `y_edge_coords`: y-coordinates of edge nodes
+            - `face_node`: the node indices for each of the mesh faces.
+            - `n_nodes`: number of nodes per face
+            - `edge_node`: the node indices for each of the mesh edges.
+            - `edge_face_connectivity`: the face indices for each of the mesh edge
+            - `face_edge_connectivity`: the edge indices for each of the mesh face
+            - `boundary_edge_nrs`: indices of boundary edges
 
     Raises:
         KeyError:
