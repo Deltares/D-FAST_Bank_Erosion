@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Dict, Tuple
 
 import numpy as np
@@ -60,4 +60,4 @@ class BankData:
     bank_face_indices: List[np.ndarray]
     bank_lines: GeoDataFrame
     n_bank_lines: int
-    line_size: List[np.ndarray] = []
+    line_size: List[np.ndarray] = field(default_factory=list)
