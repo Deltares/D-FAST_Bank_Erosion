@@ -753,34 +753,31 @@ class Erosion:
 
     def _postprocess_erosion_results(
         self,
-        bank_line_coords: List[np.ndarray],
         dn_tot: List[np.ndarray],
         line_size: List[np.ndarray],
-        is_right_bank: List[bool],
         dn_eq: List[np.ndarray],
         dv_eq: List[np.ndarray],
         dv_tot: List[np.ndarray],
-        bank_km_mid: List[np.ndarray],
         km_bin: Tuple[float, float, float],
-        n_banklines: int,
         km_mid,
         dn_flow_tot,
         dn_ship_tot,
+        bank_data: BankData,
     ):
         log_text("=")
-        d_nav = np.zeros(n_banklines)
-        dn_max = np.zeros(n_banklines)
-        d_nav_flow = np.zeros(n_banklines)
-        d_nav_ship = np.zeros(n_banklines)
-        d_nav_eq = np.zeros(n_banklines)
-        dn_max_eq = np.zeros(n_banklines)
-        vol_eq = np.zeros((len(km_mid), n_banklines))
-        vol_tot = np.zeros((len(km_mid), n_banklines))
+        d_nav = np.zeros(bank_data.n_bank_lines)
+        dn_max = np.zeros(bank_data.n_bank_lines)
+        d_nav_flow = np.zeros(bank_data.n_bank_lines)
+        d_nav_ship = np.zeros(bank_data.n_bank_lines)
+        d_nav_eq = np.zeros(bank_data.n_bank_lines)
+        dn_max_eq = np.zeros(bank_data.n_bank_lines)
+        vol_eq = np.zeros((len(km_mid), bank_data.n_bank_lines))
+        vol_tot = np.zeros((len(km_mid), bank_data.n_bank_lines))
         xy_line_new_list = []
         bankline_new_list = []
         xy_line_eq_list = []
         bankline_eq_list = []
-        for ib, bank_coords in enumerate(bank_line_coords):
+        for ib, bank_coords in enumerate(bank_data.bank_line_coords):
             d_nav[ib] = (dn_tot[ib] * line_size[ib]).sum() / line_size[ib].sum()
             dn_max[ib] = dn_tot[ib].max()
             d_nav_flow[ib] = (dn_flow_tot[ib] * line_size[ib]).sum() / line_size[ib].sum()
@@ -794,23 +791,23 @@ class Erosion:
             log_text("bank_dnaveq", data={"v": d_nav_eq[ib]})
             log_text("bank_dnmaxeq", data={"v": dn_max_eq[ib]})
 
-            xy_line_new = move_line(bank_coords, dn_tot[ib], is_right_bank[ib])
+            xy_line_new = move_line(
+                bank_coords, dn_tot[ib], bank_data.is_right_bank[ib]
+            )
             xy_line_new_list.append(xy_line_new)
             bankline_new_list.append(LineString(xy_line_new))
 
-            xy_line_eq = move_line(bank_coords, dn_eq[ib], is_right_bank[ib])
+            xy_line_eq = move_line(bank_coords, dn_eq[ib], bank_data.is_right_bank[ib])
             xy_line_eq_list.append(xy_line_eq)
             bankline_eq_list.append(LineString(xy_line_eq))
 
-            dvol_eq = get_km_eroded_volume(
-                bank_km_mid[ib], dv_eq[ib], km_bin
-            )
+            dvol_eq = get_km_eroded_volume(bank_data.bank_km_mid[ib], dv_eq[ib], km_bin)
             vol_eq[:, ib] = dvol_eq
             dvol_tot = get_km_eroded_volume(
-                bank_km_mid[ib], dv_tot[ib], km_bin
+                bank_data.bank_km_mid[ib], dv_tot[ib], km_bin
             )
             vol_tot[:, ib] = dvol_tot
-            if ib < n_banklines - 1:
+            if ib < bank_data.n_bank_lines - 1:
                 log_text("-")
 
         return bankline_new_list, bankline_eq_list, vol_tot, vol_eq, d_nav, xy_line_eq_list
@@ -900,17 +897,27 @@ class Erosion:
             km_mid,
             km_bin,
             t_erosion,
-            bank_data,
             bp_fw_face_idx,
             zfw_ini,
             distance_fw,
             config_file,
             erosion_inputs,
+            bank_data,
         )
 
-        bankline_new_list, bankline_eq_list, vol_tot, vol_eq, d_nav, xy_line_eq_list = self._postprocess_erosion_results(
-            bank_line_coords, dn_tot, line_size, is_right_bank, dn_eq, dv_eq, dv_tot, bank_km_mid, km_bin,
-            n_banklines, km_mid, dn_flow_tot, dn_ship_tot,
+        bankline_new_list, bankline_eq_list, vol_tot, vol_eq, d_nav, xy_line_eq_list = (
+            self._postprocess_erosion_results(
+                dn_tot,
+                line_size,
+                dn_eq,
+                dv_eq,
+                dv_tot,
+                km_bin,
+                km_mid,
+                dn_flow_tot,
+                dn_ship_tot,
+                bank_data,
+            )
         )
 
         self._write_bankline_shapefiles(bankline_new_list, bankline_eq_list)
