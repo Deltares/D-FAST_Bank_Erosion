@@ -150,7 +150,7 @@ class Erosion:
         bank_line_coords = []
         bank_face_indices = []
         for bank_index in range(n_banklines):
-            line_coords = np.array(banklines.geometry[bank_index])
+            line_coords = np.array(banklines.geometry[bank_index].coords)
             log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
 
             coords_along_bank, face_indices = intersect_line_mesh(
@@ -189,7 +189,7 @@ class Erosion:
     def _prepare_river_axis(self, stations_coords: np.ndarray) -> Tuple[np.ndarray, np.ndarray, LineString]:
         # read river axis file
         river_axis = self.river_data.read_river_axis()
-        river_axis_numpy = np.array(river_axis)
+        river_axis_numpy = np.array(river_axis.coords)
         # optional sorting --> see 04_Waal_D3D example
         # check: sum all distances and determine maximum distance ...
         # if maximum > alpha * sum then perform sort

@@ -379,7 +379,7 @@ def plot1_waterdepth_and_banklines(
     chainage_markers(xykm, ax, ndec=0, scale=scale)
     ax.plot(xykm[:, 0] / scale, xykm[:, 1] / scale, linestyle="--", color="k")
     for bl in banklines.geometry:
-        bp = numpy.array(bl)
+        bp = numpy.array(bl.coords)
         ax.plot(bp[:, 0] / scale, bp[:, 1] / scale, color="k")
     p = plot_mesh_patches(ax, fn, nnodes, xn, yn, h, 0, hmax)
     cbar = fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=waterdepth_txt)
