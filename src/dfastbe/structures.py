@@ -33,3 +33,18 @@ class WaterLevelData:
     velocity: List[List[np.ndarray]]
     bank_height: List[np.ndarray]
     chezy: List[List[np.ndarray]]
+
+
+@dataclass
+class MeshData:
+    """Class to hold mesh-related data."""
+    x_face_coords: np.ndarray
+    y_face_coords: np.ndarray
+    x_edge_coords: np.ndarray
+    y_edge_coords: np.ndarray
+    face_node: np.ndarray
+    n_nodes: np.ndarray
+    edge_node: np.ndarray
+    edge_face_connectivity: np.ndarray
+    face_edge_connectivity: np.ndarray
+    boundary_edge_nrs: np.ndarray

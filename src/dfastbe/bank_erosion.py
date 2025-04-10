@@ -43,7 +43,7 @@ from dfastbe.support import on_right_side, project_km_on_line, intersect_line_me
 from dfastbe import plotting as df_plt
 from dfastbe.io import ConfigFile, log_text, read_simulation_data, \
     write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData, SimulationObject
-from dfastbe.structures import ErosionInputs, WaterLevelData
+from dfastbe.structures import ErosionInputs, WaterLevelData, MeshData
 from dfastbe.utils import timed_logger
 
 
@@ -141,13 +141,12 @@ class Erosion:
         return sim_files, p_discharge
 
     def intersect_bank_lines_with_mesh(
-        self, sim: SimulationObject, face_node, banklines, edge_node, edge_face, fe, nnodes, boundary_edge_nrs, stations_coords
+        self,
+        banklines,
+        stations_coords,
+        mesh_data: MeshData,
     ):
         n_banklines = len(banklines)
-        x_face_coords = _apply_masked_indexing(sim["x_node"], face_node)
-        y_face_coords = _apply_masked_indexing(sim["y_node"], face_node)
-        x_edge_coords = sim["x_node"][edge_node]
-        y_edge_coords = sim["y_node"][edge_node]
 
         bank_line_coords = []
         bank_face_indices = []
@@ -156,7 +155,7 @@ class Erosion:
             log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
 
             coords_along_bank, face_indices = intersect_line_mesh(
-                line_coords, x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, fe, edge_face, face_node, edge_node, nnodes, boundary_edge_nrs
+                line_coords, mesh_data
             )
             bank_line_coords.append(coords_along_bank)
             bank_face_indices.append(face_indices)
@@ -186,7 +185,7 @@ class Erosion:
             else:
                 log_text("left_side_bank", data={"ib": bank_index + 1})
 
-        return x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, bank_line_coords, bank_face_indices, bank_km_mid, is_right_bank
+        return bank_line_coords, bank_face_indices, bank_km_mid, is_right_bank
 
     def _prepare_river_axis(self, stations_coords: np.ndarray) -> Tuple[np.ndarray, np.ndarray, LineString]:
         # read river axis file
@@ -224,13 +223,10 @@ class Erosion:
         return river_axis_km, river_axis_numpy, river_axis
 
     def _prepare_fairway(
-            self, river_axis: LineString, stations_coords: np.ndarray,
-            x_face_coords: np.ndarray, y_face_coords: np.ndarray,
-            x_edge_coords: np.ndarray, y_edge_coords: np.ndarray,
-            fe: np.ndarray, edge_face: np.ndarray,
-            face_node: np.ndarray, edge_node: np.ndarray,
-            nnodes: int, boundary_edge_nrs: np.ndarray
-            # ) -> Tuple[np.ndarray, np.ndarray, List[int], List[int]]
+        self,
+        river_axis: LineString,
+        stations_coords: np.ndarray,
+        mesh_data: MeshData,
     ):
         # read fairway file
         fairway_file = self.config_file.get_str("Erosion", "Fairway")
@@ -253,9 +249,7 @@ class Erosion:
 
         # intersect fairway and mesh
         log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
-        ifw_numpy, ifw_face_idx = intersect_line_mesh(
-            fairway_numpy, x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, fe, edge_face, face_node, edge_node, nnodes, boundary_edge_nrs
-        )
+        ifw_numpy, ifw_face_idx = intersect_line_mesh(fairway_numpy, mesh_data)
         if self.debug:
             write_shp_pnt((ifw_numpy[:-1] + ifw_numpy[1:]) / 2, {"iface": ifw_face_idx},
                 f"{str(self.output_dir)}{os.sep}fairway_face_indices.shp",
@@ -839,10 +833,8 @@ class Erosion:
         log_text("-")
 
         log_text("derive_topology")
-        face_node = sim["facenode"]
-        nnodes = sim["nnodes"]
 
-        edge_node, edge_face, face_edge_connectivity, boundary_edge_nrs = _compute_mesh_topology(face_node, nnodes)
+        mesh_data = _compute_mesh_topology(sim)
 
         # clip the chainage path to the range of chainages of interest
         km_bounds = self.river_data.station_bounds
@@ -857,8 +849,8 @@ class Erosion:
         # map bank lines to mesh cells
         log_text("intersect_bank_mesh")
 
-        x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, bank_line_coords, bank_idx, bank_km_mid, is_right_bank = self.intersect_bank_lines_with_mesh(
-            sim, face_node, banklines, edge_node, edge_face, face_edge_connectivity, nnodes, boundary_edge_nrs, stations_coords
+        bank_line_coords, bank_idx, bank_km_mid, is_right_bank = (
+            self.intersect_bank_lines_with_mesh(banklines, stations_coords, mesh_data)
         )
 
         river_axis_km, _, river_axis = self._prepare_river_axis(stations_coords)
@@ -870,8 +862,7 @@ class Erosion:
         km_mid = get_km_bins(km_bin, type=3)  # get mid-points
 
         ifw_face_idx, ifw_numpy = self._prepare_fairway(
-            river_axis, stations_coords, x_face_coords, y_face_coords, x_edge_coords, y_edge_coords, face_edge_connectivity, edge_face,
-            face_node, edge_node, nnodes, boundary_edge_nrs
+            river_axis, stations_coords, mesh_data
         )
 
         bp_fw_face_idx, distance_fw = self._map_bank_to_fairway(bank_line_coords, bank_km_mid, ifw_numpy, ifw_face_idx)
@@ -927,13 +918,10 @@ class Erosion:
             river_axis_km,
             bank_km_mid,
             banklines,
-            face_node,
             sim,
             dn_tot,
             is_right_bank,
             xy_line_eq_list,
-            x_edge_coords,
-            y_edge_coords,
             d_nav,
             t_erosion,
             km_mid,
@@ -943,6 +931,7 @@ class Erosion:
             dn_eq,
             erosion_inputs,
             water_level_data,
+            mesh_data,
         )
         log_text("end_bankerosion")
         timed_logger("-- end analysis --")
@@ -980,13 +969,10 @@ class Erosion:
         river_axis_km,
         bank_km_mid,
         banklines,
-        face_node,
         sim,
         dn_tot,
         is_right_bank,
         xy_line_eq_list,
-        x_edge_coords,
-        y_edge_coords,
         d_nav,
         t_erosion,
         km_mid,
@@ -996,6 +982,7 @@ class Erosion:
         dn_eq,
         erosion_inputs: ErosionInputs,
         water_level_data: WaterLevelData,
+        mesh_data: MeshData,
     ):
         # create various plots
         if self.plot_flags["plot_data"]:
@@ -1014,7 +1001,7 @@ class Erosion:
                 bbox,
                 self.river_data.masked_profile_arr,
                 banklines,
-                face_node,
+                mesh_data.face_node,
                 sim["nnodes"],
                 sim["x_node"],
                 sim["y_node"],
@@ -1043,12 +1030,12 @@ class Erosion:
                 is_right_bank,
                 d_nav,
                 xy_line_eq_list,
-                x_edge_coords,
-                y_edge_coords,
+                mesh_data.x_edge_coords,
+                mesh_data.y_edge_coords,
                 X_AXIS_TITLE,
                 Y_AXIS_TITLE,
                 "eroded distance and equilibrium bank location",
-                "eroded during {t} year".format(t=t_erosion),
+                f"eroded during {t_erosion} year",
                 "eroded distance [m]",
                 "equilibrium location",
             )
@@ -1068,9 +1055,7 @@ class Erosion:
                 "river chainage [km]",
                 dv,
                 "eroded volume [m^3]",
-                "eroded volume per {ds} chainage km ({t} years)".format(
-                    ds=km_step, t=t_erosion
-                ),
+                f"eroded volume per {km_step} chainage km ({t_erosion} years)",
                 "Q{iq}",
                 "Bank {ib}",
             )
@@ -1090,9 +1075,7 @@ class Erosion:
                 "river chainage [km]",
                 dv,
                 "eroded volume [m^3]",
-                "eroded volume per {ds} chainage km ({t} years)".format(
-                    ds=km_step, t=t_erosion
-                ),
+                f"eroded volume per {km_step} chainage km ({t_erosion} years)",
                 "Q{iq}",
             )
             if self.plot_flags["save_plot"]:
@@ -1109,9 +1092,7 @@ class Erosion:
                 "river chainage [km]",
                 dv,
                 "eroded volume [m^3]",
-                "eroded volume per {ds} chainage km ({t} years)".format(
-                    ds=km_step, t=t_erosion
-                ),
+                f"eroded volume per {km_step} chainage km ({t_erosion} years)",
                 "Bank {ib}",
             )
             if self.plot_flags["save_plot"]:
@@ -1128,7 +1109,7 @@ class Erosion:
                 "river chainage [km]",
                 vol_eq,
                 "eroded volume [m^3]",
-                "eroded volume per {ds} chainage km (equilibrium)".format(ds=km_step),
+                f"eroded volume per {km_step} chainage km (equilibrium)",
             )
             if self.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
@@ -1253,32 +1234,46 @@ def _apply_masked_indexing(x0: np.array, idx: np.ma.masked_array) -> np.ma.maske
 
 
 def _compute_mesh_topology(
-    face_node: np.ndarray, n_nodes: np.ndarray
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Derive the secondary topology arrays from the face_node_connectivity.
+    sim: SimulationObject,
+) -> MeshData:
+    """Derive secondary topology arrays from the face-node connectivity of the mesh.
 
-    Arguments
-    ---------
-    face_node : np.ndarray
-        An N x M array containing the node indices (max M) for each of the N mesh faces.
-    n_nodes: np.ndarray
-        A array of length N containing the number of nodes for each one of the N mesh faces.
+    This function computes the edge-node, edge-face, and face-edge connectivity arrays,
+    as well as the boundary edges of the mesh, based on the face-node connectivity provided
+    in the simulation data.
 
-    Results
-    -------
-    edge_node : np.ndarray
-        An L x 2 array containing the node indices (2) for each of the L mesh edges.
-    edge_face : np.ndarray
-        An L x 2 array containing the face indices (max 2) for each of the L mesh edges.
-    fe : np.ndarray
-        An N x M array containing the edge indices (max M) for each of the N mesh faces.
-    boundary_edge_nrs : np.ndarray
-        A array of length K containing the edge indices making the mesh outer (or inner) boundary.
+    Args:
+        sim (SimulationObject):
+            A simulation object containing mesh-related data, including face-node connectivity
+            (`facenode`), the number of nodes per face (`nnodes`), and node coordinates (`x_node`, `y_node`).
+
+    Returns:
+        MeshData: a dataclass containing the following attributes:
+            - `x_face_coords`: x-coordinates of face nodes
+            - `y_face_coords`: y-coordinates of face nodes
+            - `x_edge_coords`: x-coordinates of edge nodes
+            - `y_edge_coords`: y-coordinates of edge nodes
+            - `face_node`: the node indices for each of the mesh faces.
+            - `n_nodes`: number of nodes per face
+            - `edge_node`: the node indices for each of the mesh edges.
+            - `edge_face_connectivity`: the face indices for each of the mesh edge
+            - `face_edge_connectivity`: the edge indices for each of the mesh face
+            - `boundary_edge_nrs`: indices of boundary edges
+
+    Raises:
+        KeyError:
+            If required keys (e.g., `facenode`, `nnodes`, `x_node`, `y_node`) are missing from the `sim` object.
+
+    Notes:
+        - The function identifies unique edges by sorting and comparing node indices.
+        - Boundary edges are identified as edges that belong to only one face.
+        - The function assumes that the mesh is well-formed, with consistent face-node connectivity.
     """
 
     # get a sorted list of edge node connections (shared edges occur twice)
     # face_nr contains the face index to which the edge belongs
+    face_node = sim["facenode"]
+    n_nodes = sim["nnodes"]
     n_faces = face_node.shape[0]
     n_edges = sum(n_nodes)
     edge_node = np.zeros((n_edges, 2), dtype=np.int64)
@@ -1340,7 +1335,23 @@ def _compute_mesh_topology(
     edge_face[edge_nr[unique_edge], 0] = face_nr[unique_edge]
     edge_face[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
 
-    return edge_node, edge_face, face_edge_connectivity, boundary_edge_nrs
+    x_face_coords = _apply_masked_indexing(sim["x_node"], face_node)
+    y_face_coords = _apply_masked_indexing(sim["y_node"], face_node)
+    x_edge_coords = sim["x_node"][edge_node]
+    y_edge_coords = sim["y_node"][edge_node]
+
+    return MeshData(
+        x_face_coords=x_face_coords,
+        y_face_coords=y_face_coords,
+        x_edge_coords=x_edge_coords,
+        y_edge_coords=y_edge_coords,
+        face_node=face_node,
+        n_nodes=n_nodes,
+        edge_node=edge_node,
+        edge_face_connectivity=edge_face,
+        face_edge_connectivity=face_edge_connectivity,
+        boundary_edge_nrs=boundary_edge_nrs,
+    )
 
 
 class BankLinesResultsError(Exception):
