@@ -6,8 +6,18 @@ from geopandas import GeoDataFrame
 
 @dataclass
 class ErosionInputs:
-    """Class to hold erosion inputs."""
+    """Class to hold erosion inputs.
 
+    args:
+        ship_data (Dict[str, np.ndarray]): Ship data.
+        wave_fairway_distance_0 (List[np.ndarray]): Wave fairway distance 0.
+        wave_fairway_distance_1 (List[np.ndarray]): Wave fairway distance 1.
+        bank_protection_level (List[np.ndarray]): Bank protection level.
+        tauc (List[np.ndarray]): Tau critical values.
+        bank_type (List[np.ndarray]): Bank type.
+        taucls (np.ndarray): Tau critical values for different bank types.
+        taucls_str (Tuple[str]): String representation of tau critical values.
+    """
     ship_data: Dict[str, np.ndarray]
     wave_fairway_distance_0: List[np.ndarray]
     wave_fairway_distance_1: List[np.ndarray]
