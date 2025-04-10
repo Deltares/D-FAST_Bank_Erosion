@@ -394,8 +394,8 @@ class Erosion:
 
         return ErosionInputs(
             ship_data=ship_data,
-            wave_0=dfw0,
-            wave_1=dfw1,
+            wave_fairway_distance_0=dfw0,
+            wave_fairway_distance_1=dfw1,
             bank_protection_level=zss,
             tauc=tauc,
             bank_type=banktype,
@@ -415,7 +415,17 @@ class Erosion:
         distance_fw: List[np.ndarray],
         config_file: ConfigFile,
         erosion_inputs: ErosionInputs,
-    ):
+    ) -> Tuple[
+        List[np.ndarray],
+        List[np.ndarray],
+        List[np.ndarray],
+        List[np.ndarray],
+        List[np.ndarray],
+        List[List[np.ndarray]],
+        List[np.ndarray],
+        List[np.ndarray],
+        WaterLevelData,
+    ]:
         # initialize arrays for erosion loop over all discharges
         velocity: List[List[np.ndarray]] = []
         bank_height: List[np.ndarray] = []
@@ -612,8 +622,8 @@ class Erosion:
                             "draught": Tship[ib],
                             "mu_slp": mu_slope[ib],
                             "dist_fw": distance_fw[ib],
-                            "dfw0": erosion_inputs.wave_0[ib],
-                            "dfw1": erosion_inputs.wave_1[ib],
+                            "dfw0": erosion_inputs.wave_fairway_distance_0[ib],
+                            "dfw1": erosion_inputs.wave_fairway_distance_1[ib],
                             "hfw": hfw,
                             "zss": erosion_inputs.bank_protection_level[ib],
                             "dn": dn_eq1,
@@ -675,8 +685,8 @@ class Erosion:
                         "mu_slp": mu_slope[ib],
                         "mu_reed": mu_reed[ib],
                         "dist_fw": distance_fw[ib],
-                        "dfw0": erosion_inputs.wave_0[ib],
-                        "dfw1": erosion_inputs.wave_1[ib],
+                        "dfw0": erosion_inputs.wave_fairway_distance_0[ib],
+                        "dfw1": erosion_inputs.wave_fairway_distance_1[ib],
                         "hfw": hfw,
                         "chez": chezy[iq][ib],
                         "zss": erosion_inputs.bank_protection_level[ib],
@@ -717,6 +727,8 @@ class Erosion:
             ship_wave_max=ship_wave_max,
             ship_wave_min=ship_wave_min,
             velocity=velocity,
+            bank_height=bank_height,
+            chezy=chezy,
         )
 
         return (
@@ -728,8 +740,6 @@ class Erosion:
             dv,
             dv_eq,
             dv_tot,
-            bank_height,
-            chezy,
             water_level_data,
         )
 
@@ -877,8 +887,6 @@ class Erosion:
             dv,
             dv_eq,
             dv_tot,
-            bank_height,
-            chezy,
             water_level_data,
         ) = self._process_discharge_levels(
             n_banklines,
@@ -920,8 +928,6 @@ class Erosion:
             km_step,
             dv,
             vol_eq,
-            bank_height,
-            chezy,
             dn_eq,
             erosion_inputs,
             water_level_data,
@@ -973,8 +979,6 @@ class Erosion:
         km_step,
         dv,
         vol_eq,
-        bank_height,
-        chezy,
         dn_eq,
         erosion_inputs: ErosionInputs,
         water_level_data: WaterLevelData,
@@ -1124,7 +1128,7 @@ class Erosion:
                 "water level at Q{iq}",
                 "average water level",
                 "wave influenced range",
-                bank_height,
+                water_level_data.bank_height,
                 "level of bank",
                 erosion_inputs.bank_protection_level,
                 "bank protection level",
@@ -1148,7 +1152,7 @@ class Erosion:
                 water_level_data.velocity,
                 "velocity at Q{iq}",
                 erosion_inputs.tauc,
-                chezy[0],
+                water_level_data.chezy[0],
                 RHO,
                 g,
                 "critical velocity",

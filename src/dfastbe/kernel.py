@@ -92,8 +92,8 @@ def comp_erosion_eq(
     # ship induced wave height at the beginning of the foreshore
     H0 = comp_hw_ship_at_bank(
         distance_fw,
-        erosion_inputs.wave_0[ib],
-        erosion_inputs.wave_1[ib],
+        erosion_inputs.wave_fairway_distance_0[ib],
+        erosion_inputs.wave_fairway_distance_1[ib],
         hfw,
         ship_type,
         Tship,
@@ -228,8 +228,8 @@ def comp_erosion(
     # ship induced wave height at the beginning of the foreshore
     H0 = comp_hw_ship_at_bank(
         distance_fw,
-        erosion_inputs.wave_0[ib],
-        erosion_inputs.wave_1[ib],
+        erosion_inputs.wave_fairway_distance_0[ib],
+        erosion_inputs.wave_fairway_distance_1[ib],
         hfw,
         ship_type,
         Tship,

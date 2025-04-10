@@ -7,8 +7,8 @@ class ErosionInputs:
     """Class to hold erosion inputs."""
 
     ship_data: Dict[str, np.ndarray]
-    wave_0: List[np.ndarray]
-    wave_1: List[np.ndarray]
+    wave_fairway_distance_0: List[np.ndarray]
+    wave_fairway_distance_1: List[np.ndarray]
     bank_protection_level: List[np.ndarray]
     tauc: List[np.ndarray]
     bank_type: List[np.ndarray]
@@ -31,6 +31,8 @@ class WaterLevelData:
     ship_wave_max: List[List[np.ndarray]]
     ship_wave_min: List[List[np.ndarray]]
     velocity: List[List[np.ndarray]]
+    bank_height: List[np.ndarray]
+    chezy: List[List[np.ndarray]]
 
 
 @dataclass

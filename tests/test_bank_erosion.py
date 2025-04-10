@@ -53,8 +53,12 @@ class TestErosion:
         assert np.array_equal(
             erosion_inputs.ship_data["vship0"][0], np.array([5.0, 5.0, 5.0])
         )
-        assert np.array_equal(erosion_inputs.wave_0[0], np.array([150, 150, 150]))
-        assert np.array_equal(erosion_inputs.wave_1[0], np.array([110, 110, 110]))
+        assert np.array_equal(
+            erosion_inputs.wave_fairway_distance_0[0], np.array([150, 150, 150])
+        )
+        assert np.array_equal(
+            erosion_inputs.wave_fairway_distance_1[0], np.array([110, 110, 110])
+        )
         assert np.array_equal(
             erosion_inputs.bank_protection_level[0], np.array([-13, -13, -13])
         )
