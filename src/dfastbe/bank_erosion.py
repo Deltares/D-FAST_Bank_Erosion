@@ -43,7 +43,7 @@ from dfastbe.support import on_right_side, project_km_on_line, intersect_line_me
 from dfastbe import plotting as df_plt
 from dfastbe.io import ConfigFile, log_text, read_simulation_data, \
     write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData, SimulationObject
-from dfastbe.structures import ErosionInputs, WaterLevelData, MeshData
+from dfastbe.structures import ErosionInputs, WaterLevelData, MeshData, BankData
 from dfastbe.utils import timed_logger
 
 
@@ -142,16 +142,16 @@ class Erosion:
 
     def intersect_bank_lines_with_mesh(
         self,
-        banklines,
+        bank_lines,
         stations_coords,
         mesh_data: MeshData,
-    ):
-        n_banklines = len(banklines)
+    ) -> BankData:
+        n_bank_lines = len(bank_lines)
 
         bank_line_coords = []
         bank_face_indices = []
-        for bank_index in range(n_banklines):
-            line_coords = np.array(banklines.geometry[bank_index])
+        for bank_index in range(n_bank_lines):
+            line_coords = np.array(bank_lines.geometry[bank_index])
             log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
 
             coords_along_bank, face_indices = intersect_line_mesh(
@@ -162,8 +162,8 @@ class Erosion:
 
         # linking bank lines to chainage
         log_text("chainage_to_banks")
-        bank_km_mid = [None] * n_banklines
-        is_right_bank = [True] * n_banklines
+        bank_km_mid = [None] * n_bank_lines
+        is_right_bank = [True] * n_bank_lines
         for bank_index, coords in enumerate(bank_line_coords):
             segment_mid_points = (coords[:-1, :] + coords[1:, :]) / 2
             chainage_mid_points = project_km_on_line(segment_mid_points, self.river_data.masked_profile_arr)
@@ -185,7 +185,14 @@ class Erosion:
             else:
                 log_text("left_side_bank", data={"ib": bank_index + 1})
 
-        return bank_line_coords, bank_face_indices, bank_km_mid, is_right_bank
+        return BankData(
+            bank_line_coords=bank_line_coords,
+            bank_face_indices=bank_face_indices,
+            bank_km_mid=bank_km_mid,
+            is_right_bank=is_right_bank,
+            bank_lines=bank_lines,
+            n_bank_lines=n_bank_lines,
+        )
 
     def _prepare_river_axis(self, stations_coords: np.ndarray) -> Tuple[np.ndarray, np.ndarray, LineString]:
         # read river axis file
@@ -842,15 +849,13 @@ class Erosion:
 
         stations_coords = self.river_data.masked_profile_arr[:, :2]
 
-        # read bank lines
         banklines = config_file.get_bank_lines(str(self.bank_dir))
-        n_banklines = len(banklines)
 
         # map bank lines to mesh cells
         log_text("intersect_bank_mesh")
 
-        bank_line_coords, bank_idx, bank_km_mid, is_right_bank = (
-            self.intersect_bank_lines_with_mesh(banklines, stations_coords, mesh_data)
+        bank_data = self.intersect_bank_lines_with_mesh(
+            banklines, stations_coords, mesh_data
         )
 
         river_axis_km, _, river_axis = self._prepare_river_axis(stations_coords)

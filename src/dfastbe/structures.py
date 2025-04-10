@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Dict, Tuple
+
 import numpy as np
+from geopandas import GeoDataFrame
 
 @dataclass
 class ErosionInputs:
@@ -56,6 +58,7 @@ class BankData:
     is_right_bank: List[bool]
     bank_km_mid: List[np.ndarray]
     bank_line_coords: List[np.ndarray]
-    banklines: GeoDataFrame
-    xy_line_eq_list: List[np.ndarray]
-    bank_type: List[np.ndarray]
+    bank_lines: GeoDataFrame
+    n_bank_lines: int
+    xy_line_eq_list: List[np.ndarray] = np.array([])
+    bank_type: List[np.ndarray] = np.array([])
