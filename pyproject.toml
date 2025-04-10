@@ -11,12 +11,14 @@ python = "~3.10.0"
 numpy = "^1.26.4"
 netcdf4 = "^1.7.2"
 pandas = "^1.5.3"
-pyqt5 = "^5.15.11"
-pyqt5-qt5 = "5.15.2"
 matplotlib = "3.8.4"
 geopandas = "^0.14.4"
 shapely = "^2.1.0"
 dfastio = { git = "https://github.com/Deltares/D-FAST_Commons.git", tag = "0.1.0-alpha.2" }
+
+[tool.poetry.group.gui.dependencies]
+pyqt5 = "^5.15.11"
+pyqt5-qt5 = "5.15.2"
 
 [tool.poetry.group.binary.dependencies]
 cftime  = ">=1.6.3"
