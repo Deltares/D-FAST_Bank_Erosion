@@ -878,12 +878,12 @@ class Erosion:
 
         # water level at fairway
         zfw_ini = []
-        for ib in range(n_banklines):
+        for ib in range(bank_data.n_bank_lines):
             ii = bp_fw_face_idx[ib]
             zfw_ini.append(sim["zw_face"][ii])
 
         erosion_inputs = self._prepare_initial_conditions(
-            config_file, bank_km_mid, zfw_ini
+            config_file, bank_data.bank_km_mid, zfw_ini
         )
 
         # initialize arrays for erosion loop over all discharges
