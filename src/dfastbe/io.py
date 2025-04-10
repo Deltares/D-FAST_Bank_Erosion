@@ -634,7 +634,7 @@ class ConfigFile:
             xy_bank = XYCModel.read(xyc_file)
             bankline_list.append(LineString(xy_bank))
             b += 1
-        bankline_series = GeoSeries(bankline_list)
+        bankline_series = GeoSeries(bankline_list, crs="EPSG:28992")
         banklines = GeoDataFrame(geometry=bankline_series)
         return banklines
 
@@ -1931,7 +1931,7 @@ def write_shp_pnt(xy: np.ndarray, data: Dict[str, np.ndarray], filename: str) ->
     None
     """
     xy_points = [Point(xy1) for xy1 in xy]
-    geom = GeoSeries(xy_points)
+    geom = GeoSeries(xy_points, crs="EPSG:28992")
     write_shp(geom, data, filename)
 
 

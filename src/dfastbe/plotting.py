@@ -300,8 +300,10 @@ def plot_detect1(
     chainage_markers(xykm, ax, ndec=0, scale=scale)
     p = plot_mesh_patches(ax, fn, nnodes, xn, yn, h, 0, hmax, scale=scale)
     for b, bankarea in enumerate(bankareas):
-        geopandas.GeoSeries(bankarea).plot(ax=ax, alpha=0.2, color="k")
-        geopandas.GeoSeries(bank[b]).plot(ax=ax, color="r")
+        geopandas.GeoSeries(bankarea, crs="EPSG:28992").plot(
+            ax=ax, alpha=0.2, color="k"
+        )
+        geopandas.GeoSeries(bank[b], crs="EPSG:28992").plot(ax=ax, color="r")
     cbar = fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=waterdepth_txt)
     #
     shaded = matplotlib.patches.Patch(color="k", alpha=0.2)

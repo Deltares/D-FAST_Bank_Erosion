@@ -1859,7 +1859,7 @@ def get_banklines(sim: SimulationObject, h0: float) -> geopandas.GeoSeries:
     Lines = [line for line in Lines if not line is None and not line.is_empty]
     multi_line = union_all(Lines)
     merged_line = line_merge(multi_line)
-    return geopandas.GeoSeries(merged_line)
+    return geopandas.GeoSeries(merged_line, crs="EPSG:28992")
 
 
 def poly_to_line(

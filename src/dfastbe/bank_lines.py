@@ -236,15 +236,15 @@ class BankLines:
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
         bank_file = self.bank_output_dir / f"{bank_name}.shp"
         log_text("save_banklines", data={"file": bank_file})
-        gpd.GeoSeries(bank).to_file(bank_file)
+        gpd.GeoSeries(bank, crs="EPSG:28992").to_file(bank_file)
 
-        gpd.GeoSeries(clipped_banklines).to_file(
+        gpd.GeoSeries(clipped_banklines, crs="EPSG:28992").to_file(
             self.bank_output_dir / f"{BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE}{EXTENSION}"
         )
         banklines.to_file(
             self.bank_output_dir / f"{RAW_DETECTED_BANKLINE_FRAGMENTS_FILE}{EXTENSION}"
         )
-        gpd.GeoSeries(bank_areas).to_file(
+        gpd.GeoSeries(bank_areas, crs="EPSG:28992").to_file(
             self.bank_output_dir / f"{BANK_AREAS_FILE}{EXTENSION}"
         )
 
@@ -321,7 +321,7 @@ class BankLines:
         multi_line = union_all(lines)
         merged_line = line_merge(multi_line)
 
-        return gpd.GeoSeries(merged_line)
+        return gpd.GeoSeries(merged_line, crs="EPSG:28992")
 
     @staticmethod
     def _convert_search_lines_to_bank_polygons(

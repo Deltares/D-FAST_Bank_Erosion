@@ -589,7 +589,9 @@ class Erosion:
                     if self.debug:
                         bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
                         bank_coords_points = [Point(xy1) for xy1 in bcrds_mid]
-                        bank_coords_geo = GeoSeries(bank_coords_points)
+                        bank_coords_geo = GeoSeries(
+                            bank_coords_points, crs="EPSG:28992"
+                        )
                         params = {
                             "chainage": bank_km_mid[ib],
                             "x": bcrds_mid[:, 0],
@@ -627,7 +629,7 @@ class Erosion:
                     bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
 
                     bank_coords_points = [Point(xy1) for xy1 in bcrds_mid]
-                    bank_coords_geo = GeoSeries(bank_coords_points)
+                    bank_coords_geo = GeoSeries(bank_coords_points, crs="EPSG:28992")
                     params = {
                         "chainage": bank_km_mid[ib],
                         "x": bcrds_mid[:, 0],
@@ -850,7 +852,7 @@ class Erosion:
         timed_logger("-- end analysis --")
 
     def _write_bankline_shapefiles(self, bankline_new_list, bankline_eq_list):
-        bankline_new_series = GeoSeries(bankline_new_list)
+        bankline_new_series = GeoSeries(bankline_new_list, crs="EPSG:28992")
         bank_lines_new = GeoDataFrame(geometry=bankline_new_series)
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
 
@@ -858,7 +860,7 @@ class Erosion:
         log_text("save_banklines", data={"file": str(bank_file)})
         bank_lines_new.to_file(bank_file)
 
-        bankline_eq_series = GeoSeries(bankline_eq_list)
+        bankline_eq_series = GeoSeries(bankline_eq_list, crs="EPSG:28992")
         banklines_eq = GeoDataFrame(geometry=bankline_eq_series)
 
         bank_file = self.output_dir / f"{bank_name}_eq.shp"
