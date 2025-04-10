@@ -148,10 +148,11 @@ class Erosion:
 
     def intersect_bank_lines_with_mesh(
         self,
-        bank_lines,
-        stations_coords,
+        config_file: ConfigFile,
+        stations_coords: np.ndarray,
         mesh_data: MeshData,
     ) -> BankData:
+        bank_lines = config_file.get_bank_lines(str(self.bank_dir))
         n_bank_lines = len(bank_lines)
 
         bank_line_coords = []
@@ -897,13 +898,11 @@ class Erosion:
 
         stations_coords = self.river_data.masked_profile_arr[:, :2]
 
-        banklines = config_file.get_bank_lines(str(self.bank_dir))
-
         # map bank lines to mesh cells
         log_text("intersect_bank_mesh")
 
         bank_data = self.intersect_bank_lines_with_mesh(
-            banklines, stations_coords, mesh_data
+            config_file, stations_coords, mesh_data
         )
 
         river_axis_km, _, river_axis = self._prepare_river_axis(stations_coords)
