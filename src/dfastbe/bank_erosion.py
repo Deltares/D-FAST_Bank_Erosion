@@ -421,7 +421,17 @@ class Erosion:
         distance_fw: List[np.ndarray],
         config_file: ConfigFile,
         erosion_inputs: ErosionInputs,
-    ):
+    ) -> Tuple[
+        List[np.ndarray],
+        List[np.ndarray],
+        List[np.ndarray],
+        List[np.ndarray],
+        List[np.ndarray],
+        List[List[np.ndarray]],
+        List[np.ndarray],
+        List[np.ndarray],
+        WaterLevelData,
+    ]:
         # initialize arrays for erosion loop over all discharges
         velocity: List[List[np.ndarray]] = []
         bank_height: List[np.ndarray] = []
