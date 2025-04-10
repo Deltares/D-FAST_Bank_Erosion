@@ -723,6 +723,8 @@ class Erosion:
             ship_wave_max=ship_wave_max,
             ship_wave_min=ship_wave_min,
             velocity=velocity,
+            bank_height=bank_height,
+            chezy=chezy,
         )
 
         return (
