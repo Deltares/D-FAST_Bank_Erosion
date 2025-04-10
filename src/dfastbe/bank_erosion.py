@@ -271,9 +271,7 @@ class Erosion:
         return FairwayData(ifw_face_idx, ifw_numpy)
 
     def _map_bank_to_fairway(
-        self,
-        bank_data: BankData,
-        fairway_data: FairwayData,
+        self, bank_data: BankData, fairway_data: FairwayData, sim: SimulationObject
     ):
         # distance fairway-bankline (bankfairway)
         log_text("bank_distance_fairway")
@@ -378,17 +376,24 @@ class Erosion:
                     + f"/bank_{ib + 1}_chainage_and_fairway_face_idx.shp",
                 )
 
-        bank_data.bp_fw_face_idx = bp_fw_face_idx
-        bank_data.distance_fw = distance_fw
+        fairway_data.bp_fw_face_idx = bp_fw_face_idx
+        fairway_data.distance_fw = distance_fw
+
+        # water level at fairway
+        zfw_ini = []
+        for ib in range(bank_data.n_bank_lines):
+            ii = fairway_data.bp_fw_face_idx[ib]
+            zfw_ini.append(sim["zw_face"][ii])
+        fairway_data.zfw_ini = zfw_ini
 
     def _prepare_initial_conditions(
-        self, config_file: ConfigFile, bank_km_mid, zfw_ini
+        self, config_file: ConfigFile, bank_data: BankData, fairway_data: FairwayData
     ) -> ErosionInputs:
         # wave reduction s0, s1
         dfw0 = config_file.get_parameter(
             "Erosion",
             "Wave0",
-            bank_km_mid,
+            bank_data.bank_km_mid,
             default=200,
             positive=True,
             onefile=True,
@@ -396,7 +401,7 @@ class Erosion:
         dfw1 = config_file.get_parameter(
             "Erosion",
             "Wave1",
-            bank_km_mid,
+            bank_data.bank_km_mid,
             default=150,
             positive=True,
             onefile=True,
@@ -404,20 +409,20 @@ class Erosion:
 
         # save 1_banklines
         # read vship, nship, nwave, draught (tship), shiptype ... independent of level number
-        ship_data = self.get_ship_parameters(bank_km_mid)
+        ship_data = self.get_ship_parameters(bank_data.bank_km_mid)
 
         # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
         classes = config_file.get_bool("Erosion", "Classes")
         if classes:
             banktype = config_file.get_parameter(
-                "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
+                "Erosion", "BankType", bank_data.bank_km_mid, default=0, ext=".btp"
             )
             tauc = []
             for bank in banktype:
                 tauc.append(ErosionInputs.taucls[bank])
         else:
             tauc = config_file.get_parameter(
-                "Erosion", "BankType", bank_km_mid, default=0, ext=".btp"
+                "Erosion", "BankType", bank_data.bank_km_mid, default=0, ext=".btp"
             )
             thr = (ErosionInputs.taucls[:-1] + ErosionInputs.taucls[1:]) / 2
             banktype = [None] * len(thr)
@@ -430,12 +435,16 @@ class Erosion:
         # read bank protection level zss
         zss_miss = -1000
         zss = config_file.get_parameter(
-            "Erosion", "ProtectionLevel", bank_km_mid, default=zss_miss, ext=".bpl"
+            "Erosion",
+            "ProtectionLevel",
+            bank_data.bank_km_mid,
+            default=zss_miss,
+            ext=".bpl",
         )
         # if zss undefined, set zss equal to zfw_ini - 1
         for ib in range(len(zss)):
             mask = zss[ib] == zss_miss
-            zss[ib][mask] = zfw_ini[ib][mask] - 1
+            zss[ib][mask] = fairway_data.zfw_ini[ib][mask] - 1
 
         return ErosionInputs(
             ship_data=ship_data,
@@ -726,7 +735,7 @@ class Erosion:
                         "draught": Tship[ib],
                         "mu_slp": mu_slope[ib],
                         "mu_reed": mu_reed[ib],
-                        "dist_fw": distance_fw[ib],
+                        "dist_fw": fairway_data.distance_fw[ib],
                         "dfw0": erosion_inputs.wave_fairway_distance_0[ib],
                         "dfw1": erosion_inputs.wave_fairway_distance_1[ib],
                         "hfw": hfw,
@@ -907,17 +916,10 @@ class Erosion:
 
         fairway_data = self._prepare_fairway(river_axis, stations_coords, mesh_data)
 
-        self._map_bank_to_fairway(bank_data, fairway_data)
-
-        # water level at fairway
-        zfw_ini = []
-        for ib in range(bank_data.n_bank_lines):
-            ii = fairway_data.bp_fw_face_idx[ib]
-            zfw_ini.append(sim["zw_face"][ii])
-        fairway_data.zfw_ini = zfw_ini
+        self._map_bank_to_fairway(bank_data, fairway_data, sim)
 
         erosion_inputs = self._prepare_initial_conditions(
-            config_file, bank_data.bank_km_mid, fairway_data.zfw_ini
+            config_file, bank_data, fairway_data
         )
 
         # initialize arrays for erosion loop over all discharges
