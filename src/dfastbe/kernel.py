@@ -27,6 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 from typing import Tuple, List
+from dfastbe.structures import ErosionInputs
 
 import numpy
 import math
@@ -42,10 +43,9 @@ def comp_erosion_eq(
     Tship: numpy.ndarray,
     mu_slope: numpy.ndarray,
     distance_fw: numpy.ndarray,
-    dfw0: numpy.ndarray,
-    dfw1: numpy.ndarray,
     hfw: numpy.ndarray,
-    zss: numpy.ndarray,
+    erosion_inputs: "ErosionInputs",
+    ib: int,
     g: float,
 ) -> Tuple[numpy.ndarray, numpy.ndarray]:
     """
@@ -90,11 +90,20 @@ def comp_erosion_eq(
     eps = sys.float_info.epsilon
 
     # ship induced wave height at the beginning of the foreshore
-    H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, ship_type, Tship, vship, g)
+    H0 = comp_hw_ship_at_bank(
+        distance_fw,
+        erosion_inputs.wave_fairway_distance_0[ib],
+        erosion_inputs.wave_fairway_distance_1[ib],
+        hfw,
+        ship_type,
+        Tship,
+        vship,
+        g,
+    )
     H0 = numpy.maximum(H0, eps)
 
     zup = numpy.minimum(bankheight, zfw_ini + 2 * H0)
-    zdo = numpy.maximum(zfw_ini - 2 * H0, zss)
+    zdo = numpy.maximum(zfw_ini - 2 * H0, erosion_inputs.bank_protection_level[ib])
     ht = numpy.maximum(zup - zdo, 0)
     hs = numpy.maximum(bankheight - zfw_ini + 2 * H0, 0)
     dn_eq = ht / mu_slope
@@ -109,7 +118,6 @@ def comp_erosion(
     linesize: numpy.ndarray,
     zfw: numpy.ndarray,
     zfw_ini: numpy.ndarray,
-    tauc: numpy.ndarray,
     Nship: numpy.ndarray,
     vship: numpy.ndarray,
     nwave: numpy.ndarray,
@@ -119,14 +127,20 @@ def comp_erosion(
     mu_slope: numpy.ndarray,
     mu_reed: numpy.ndarray,
     distance_fw: numpy.ndarray,
-    dfw0: numpy.ndarray,
-    dfw1: numpy.ndarray,
     hfw: numpy.ndarray,
     chezy: numpy.ndarray,
-    zss: numpy.ndarray,
+    erosion_inputs: "ErosionInputs",
     rho: float,
     g: float,
-) -> [numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray, numpy.ndarray]:
+    ib: int,
+) -> [
+    numpy.ndarray,
+    numpy.ndarray,
+    numpy.ndarray,
+    numpy.ndarray,
+    numpy.ndarray,
+    numpy.ndarray,
+]:
     """
     Compute the bank erosion during a specific discharge level.
     
@@ -212,31 +226,40 @@ def comp_erosion(
     vel = velocity
 
     # ship induced wave height at the beginning of the foreshore
-    H0 = comp_hw_ship_at_bank(distance_fw, dfw0, dfw1, hfw, ship_type, Tship, vship, g)
+    H0 = comp_hw_ship_at_bank(
+        distance_fw,
+        erosion_inputs.wave_fairway_distance_0[ib],
+        erosion_inputs.wave_fairway_distance_1[ib],
+        hfw,
+        ship_type,
+        Tship,
+        vship,
+        g,
+    )
     H0 = numpy.maximum(H0, eps)
 
     # compute erosion parameters for each line part
 
     # erosion coefficient
-    E = 0.2 * numpy.sqrt(tauc) * 1e-6
+    E = 0.2 * numpy.sqrt(erosion_inputs.tauc[ib]) * 1e-6
 
     # critical velocity
-    velc = numpy.sqrt(tauc / rho * chezy ** 2 / g)
+    velc = numpy.sqrt(erosion_inputs.tauc[ib] / rho * chezy**2 / g)
 
     # strength
-    cE = 1.85e-4 / tauc
+    cE = 1.85e-4 / erosion_inputs.tauc[ib]
 
     # total wavedamping coefficient
     mu_tot = (mu_slope / H0) + mu_reed
     # water level along bank line
-    ho_line_ship = numpy.minimum(zfw - zss, 2 * H0)
-    ho_line_flow = numpy.minimum(zfw - zss, hfw)
+    ho_line_ship = numpy.minimum(zfw - erosion_inputs.bank_protection_level[ib], 2 * H0)
+    ho_line_flow = numpy.minimum(zfw - erosion_inputs.bank_protection_level[ib], hfw)
     h_line_ship = numpy.maximum(bankheight - zfw + ho_line_ship, 0)
     h_line_flow = numpy.maximum(bankheight - zfw + ho_line_flow, 0)
 
     # compute displacement due to flow
     crit_ratio = numpy.ones(velc.shape)
-    mask = (vel > velc) & (zfw > zss)
+    mask = (vel > velc) & (zfw > erosion_inputs.bank_protection_level[ib])
     crit_ratio[mask] = (vel[mask] / velc[mask]) ** 2
     dn_flow = E * (crit_ratio - 1) * Teros * sec_year
 
@@ -250,12 +273,12 @@ def comp_erosion(
     dn_ship[~mask] = 0
 
     # compute erosion volume
-    mask = (h_line_ship > 0) & (zfw > zss)
+    mask = (h_line_ship > 0) & (zfw > erosion_inputs.bank_protection_level[ib])
     dv_ship = dn_ship * linesize * h_line_ship
     dv_ship[~mask] = 0.0
     dn_ship[~mask] = 0.0
 
-    mask = (h_line_flow > 0) & (zfw > zss)
+    mask = (h_line_flow > 0) & (zfw > erosion_inputs.bank_protection_level[ib])
     dv_flow = dn_flow * linesize * h_line_flow
     dv_flow[~mask] = 0.0
     dn_flow[~mask] = 0.0
