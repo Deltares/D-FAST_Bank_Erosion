@@ -54,10 +54,10 @@ class MeshData:
 
 @dataclass
 class BankData:
-    bank_idx: List[int]
     is_right_bank: List[bool]
     bank_km_mid: List[np.ndarray]
     bank_line_coords: List[np.ndarray]
+    bank_face_indices: List[np.ndarray]
     bank_lines: GeoDataFrame
     n_bank_lines: int
     xy_line_eq_list: List[np.ndarray] = np.array([])
