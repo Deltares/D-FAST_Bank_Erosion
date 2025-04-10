@@ -451,12 +451,10 @@ class Erosion:
         km_mid,
         km_bin,
         t_erosion: int,
-        bp_fw_face_idx: List[np.ndarray],
-        zfw_ini: List[np.ndarray],
-        distance_fw: List[np.ndarray],
         config_file: ConfigFile,
         erosion_inputs: ErosionInputs,
         bank_data: BankData,
+        fairway_data: FairwayData,
     ) -> Tuple[
         List[np.ndarray],
         List[np.ndarray],
@@ -623,7 +621,7 @@ class Erosion:
                         bank_height.append(None)
 
                 # get water depth along fairway
-                ii = bp_fw_face_idx[ib]
+                ii = fairway_data.bp_fw_face_idx[ib]
                 hfw = sim["h_face"][ii]
                 hfw_max = max(hfw_max, hfw.max())
                 water_level[iq].append(sim["zw_face"][ii])
@@ -634,12 +632,12 @@ class Erosion:
                     dn_eq1, dv_eq1 = comp_erosion_eq(
                         bank_height[ib],
                         line_size[ib],
-                        zfw_ini[ib],
+                        fairway_data.zfw_ini[ib],
                         vship[ib],
                         ship_type[ib],
                         Tship[ib],
                         mu_slope[ib],
-                        distance_fw[ib],
+                        fairway_data.distance_fw[ib],
                         hfw,
                         erosion_inputs,
                         ib,
@@ -656,16 +654,16 @@ class Erosion:
                             "chainage": bank_data.bank_km_mid[ib],
                             "x": bcrds_mid[:, 0],
                             "y": bcrds_mid[:, 1],
-                            "iface_fw": bp_fw_face_idx[ib],  # ii
+                            "iface_fw": fairway_data.bp_fw_face_idx[ib],  # ii
                             "iface_bank": bank_data.bank_idx[ib],  # bank_index
                             "zb": bank_height[ib],
                             "len": line_size[ib],
-                            "zw0": zfw_ini[ib],
+                            "zw0": fairway_data.zfw_ini[ib],
                             "vship": vship[ib],
                             "shiptype": ship_type[ib],
                             "draught": Tship[ib],
                             "mu_slp": mu_slope[ib],
-                            "dist_fw": distance_fw[ib],
+                            "dist_fw": fairway_data.distance_fw[ib],
                             "dfw0": erosion_inputs.wave_fairway_distance_0[ib],
                             "dfw1": erosion_inputs.wave_fairway_distance_1[ib],
                             "hfw": hfw,
@@ -683,7 +681,7 @@ class Erosion:
                         bank_height[ib],
                         line_size[ib],
                         water_level[iq][ib],
-                        zfw_ini[ib],
+                        fairway_data.zfw_ini[ib],
                         Nship[ib],
                         vship[ib],
                         nwave[ib],
@@ -692,7 +690,7 @@ class Erosion:
                         t_erosion * self.p_discharge[iq],
                         mu_slope[ib],
                         mu_reed[ib],
-                        distance_fw[ib],
+                        fairway_data.distance_fw[ib],
                         hfw,
                         chezy[iq][ib],
                         erosion_inputs,
@@ -713,13 +711,13 @@ class Erosion:
                         "chainage": bank_data.bank_km_mid[ib],
                         "x": bcrds_mid[:, 0],
                         "y": bcrds_mid[:, 1],
-                        "iface_fw": bp_fw_face_idx[ib],  # ii
+                        "iface_fw": fairway_data.bp_fw_face_idx[ib],  # ii
                         "iface_bank": bank_data.bank_face_indices[ib],  # bank_index
                         "u": velocity[iq][ib],
                         "zb": bank_height[ib],
                         "len": line_size[ib],
                         "zw": water_level[iq][ib],
-                        "zw0": zfw_ini[ib],
+                        "zw0": fairway_data.zfw_ini[ib],
                         "tauc": erosion_inputs.tauc[ib],
                         "nship": Nship[ib],
                         "vship": vship[ib],
@@ -914,11 +912,12 @@ class Erosion:
         # water level at fairway
         zfw_ini = []
         for ib in range(bank_data.n_bank_lines):
-            ii = bp_fw_face_idx[ib]
+            ii = fairway_data.bp_fw_face_idx[ib]
             zfw_ini.append(sim["zw_face"][ii])
+        fairway_data.zfw_ini = zfw_ini
 
         erosion_inputs = self._prepare_initial_conditions(
-            config_file, bank_data.bank_km_mid, zfw_ini
+            config_file, bank_data.bank_km_mid, fairway_data.zfw_ini
         )
 
         # initialize arrays for erosion loop over all discharges
@@ -935,12 +934,10 @@ class Erosion:
             km_mid,
             km_bin,
             t_erosion,
-            bp_fw_face_idx,
-            zfw_ini,
-            distance_fw,
             config_file,
             erosion_inputs,
             bank_data,
+            fairway_data,
         )
 
         bankline_new_list, bankline_eq_list, vol_tot, vol_eq, d_nav, xy_line_eq_list = (
