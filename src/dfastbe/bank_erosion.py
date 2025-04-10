@@ -266,8 +266,7 @@ class Erosion:
 
     def _map_bank_to_fairway(
         self,
-        bank_line_coords: List[np.ndarray],
-        bank_km_mid: List[np.ndarray],
+        bank_data: BankData,
         ifw_numpy: np.ndarray,
         ifw_face_idx: np.ndarray,
     ) -> Tuple[List[np.ndarray], List[np.ndarray]]:
@@ -276,7 +275,7 @@ class Erosion:
         distance_fw = []
         bp_fw_face_idx = []
         nfw = len(ifw_face_idx)
-        for ib, bcrds in enumerate(bank_line_coords):
+        for ib, bcrds in enumerate(bank_data.bank_line_coords):
             bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
             distance_fw.append(np.zeros(len(bcrds_mid)))
             bp_fw_face_idx.append(np.zeros(len(bcrds_mid), dtype=np.int64))
@@ -336,10 +335,13 @@ class Erosion:
             if self.debug:
                 write_shp_pnt(
                     bcrds_mid,
-                    {"chainage": bank_km_mid[ib], "iface_fw": bp_fw_face_idx[ib]},
+                    {
+                        "chainage": bank_data.bank_km_mid[ib],
+                        "iface_fw": bp_fw_face_idx[ib],
+                    },
                     str(self.output_dir)
                     + f"/bank_{ib + 1}_chainage_and_fairway_face_idx.shp",
-                    )
+                )
 
         return bp_fw_face_idx, distance_fw
 
@@ -870,7 +872,9 @@ class Erosion:
             river_axis, stations_coords, mesh_data
         )
 
-        bp_fw_face_idx, distance_fw = self._map_bank_to_fairway(bank_line_coords, bank_km_mid, ifw_numpy, ifw_face_idx)
+        bp_fw_face_idx, distance_fw = self._map_bank_to_fairway(
+            bank_data, ifw_numpy, ifw_face_idx
+        )
 
         # water level at fairway
         zfw_ini = []
