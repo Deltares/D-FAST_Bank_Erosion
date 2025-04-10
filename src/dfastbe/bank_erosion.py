@@ -736,8 +736,6 @@ class Erosion:
             dv,
             dv_eq,
             dv_tot,
-            bank_height,
-            chezy,
             water_level_data,
         )
 
@@ -888,8 +886,6 @@ class Erosion:
             dv,
             dv_eq,
             dv_tot,
-            bank_height,
-            chezy,
             water_level_data,
         ) = self._process_discharge_levels(
             n_banklines,
