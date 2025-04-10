@@ -60,5 +60,3 @@ class BankData:
     bank_face_indices: List[np.ndarray]
     bank_lines: GeoDataFrame
     n_bank_lines: int
-    xy_line_eq_list: List[np.ndarray] = np.array([])
-    bank_type: List[np.ndarray] = np.array([])
