@@ -1231,7 +1231,7 @@ def _apply_masked_indexing(x0: np.array, idx: np.ma.masked_array) -> np.ma.maske
 
 def _compute_mesh_topology(
     sim: SimulationObject,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+) -> MeshData:
     """Derive secondary topology arrays from the face-node connectivity of the mesh.
 
     This function computes the edge-node, edge-face, and face-edge connectivity arrays,
