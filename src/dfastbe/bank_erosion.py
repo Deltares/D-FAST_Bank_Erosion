@@ -515,9 +515,9 @@ class Erosion:
                 positive=True,
                 ext="rdd",
             )
-            mu_slope = [None] * bank_data.n_banklines
-            mu_reed = [None] * bank_data.n_banklines
-            for ib in range(bank_data.n_banklines):
+            mu_slope = [None] * bank_data.n_bank_lines
+            mu_reed = [None] * bank_data.n_bank_lines
+            for ib in range(bank_data.n_bank_lines):
                 mus = parslope[ib].copy()
                 mus[mus > 0] = 1 / mus[mus > 0]
                 mu_slope[ib] = mus
@@ -538,7 +538,7 @@ class Erosion:
             ship_wave_max.append([])
             ship_wave_min.append([])
 
-            dvol_bank = np.zeros((len(km_mid), bank_data.n_banklines))
+            dvol_bank = np.zeros((len(km_mid), bank_data.n_bank_lines))
             hfw_max = 0
             for ib, bcrds in enumerate(bank_data.bank_line_coords):
                 # determine velocity along banks ...
@@ -738,10 +738,10 @@ class Erosion:
             bank_height=bank_height,
             chezy=chezy,
         )
+        bank_data.line_size = line_size
 
         return (
             dn_tot,
-            line_size,
             dn_flow_tot,
             dn_ship_tot,
             dn_eq,
@@ -754,7 +754,6 @@ class Erosion:
     def _postprocess_erosion_results(
         self,
         dn_tot: List[np.ndarray],
-        line_size: List[np.ndarray],
         dn_eq: List[np.ndarray],
         dv_eq: List[np.ndarray],
         dv_tot: List[np.ndarray],
@@ -778,11 +777,19 @@ class Erosion:
         xy_line_eq_list = []
         bankline_eq_list = []
         for ib, bank_coords in enumerate(bank_data.bank_line_coords):
-            d_nav[ib] = (dn_tot[ib] * line_size[ib]).sum() / line_size[ib].sum()
+            d_nav[ib] = (
+                dn_tot[ib] * bank_data.line_size[ib]
+            ).sum() / bank_data.line_size[ib].sum()
             dn_max[ib] = dn_tot[ib].max()
-            d_nav_flow[ib] = (dn_flow_tot[ib] * line_size[ib]).sum() / line_size[ib].sum()
-            d_nav_ship[ib] = (dn_ship_tot[ib] * line_size[ib]).sum() / line_size[ib].sum()
-            d_nav_eq[ib] = (dn_eq[ib] * line_size[ib]).sum() / line_size[ib].sum()
+            d_nav_flow[ib] = (
+                dn_flow_tot[ib] * bank_data.line_size[ib]
+            ).sum() / bank_data.line_size[ib].sum()
+            d_nav_ship[ib] = (
+                dn_ship_tot[ib] * bank_data.line_size[ib]
+            ).sum() / bank_data.line_size[ib].sum()
+            d_nav_eq[ib] = (
+                dn_eq[ib] * bank_data.line_size[ib]
+            ).sum() / bank_data.line_size[ib].sum()
             dn_max_eq[ib] = dn_eq[ib].max()
             log_text("bank_dnav", data={"ib": ib + 1, "v": d_nav[ib]})
             log_text("bank_dnavflow", data={"v": d_nav_flow[ib]})
@@ -885,7 +892,6 @@ class Erosion:
         # initialize arrays for erosion loop over all discharges
         (
             dn_tot,
-            line_size,
             dn_flow_tot,
             dn_ship_tot,
             dn_eq,
@@ -908,7 +914,6 @@ class Erosion:
         bankline_new_list, bankline_eq_list, vol_tot, vol_eq, d_nav, xy_line_eq_list = (
             self._postprocess_erosion_results(
                 dn_tot,
-                line_size,
                 dn_eq,
                 dv_eq,
                 dv_tot,
