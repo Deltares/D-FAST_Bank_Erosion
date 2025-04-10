@@ -46,5 +46,3 @@ class MeshData:
     edge_face_connectivity: np.ndarray
     face_edge_connectivity: np.ndarray
     boundary_edge_nrs: np.ndarray
-    river_axis_km: np.ndarray = np.array([])
-    bbox: np.ndarray = np.array([])
