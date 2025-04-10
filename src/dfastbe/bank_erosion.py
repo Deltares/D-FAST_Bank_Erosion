@@ -925,14 +925,9 @@ class Erosion:
 
         # create various plots
         self._generate_plots(
-            n_banklines,
-            bank_line_coords,
             river_axis_km,
-            bank_km_mid,
-            banklines,
             sim,
             dn_tot,
-            is_right_bank,
             xy_line_eq_list,
             d_nav,
             t_erosion,
@@ -944,6 +939,7 @@ class Erosion:
             erosion_inputs,
             water_level_data,
             mesh_data,
+            bank_data,
         )
         log_text("end_bankerosion")
         timed_logger("-- end analysis --")
@@ -976,14 +972,9 @@ class Erosion:
 
     def _generate_plots(
         self,
-        n_banklines,
-        bank_line_coords,
         river_axis_km,
-        bank_km_mid,
-        banklines,
         sim,
         dn_tot,
-        is_right_bank,
         xy_line_eq_list,
         d_nav,
         t_erosion,
@@ -995,6 +986,7 @@ class Erosion:
         erosion_inputs: ErosionInputs,
         water_level_data: WaterLevelData,
         mesh_data: MeshData,
+        bank_data: BankData,
     ):
         # create various plots
         if self.plot_flags["plot_data"]:
@@ -1005,14 +997,20 @@ class Erosion:
 
             if self.plot_flags["save_plot_zoomed"]:
                 bank_coords_mid = []
-                for ib in range(n_banklines):
-                    bank_coords_mid.append((bank_line_coords[ib][:-1, :] + bank_line_coords[ib][1:, :]) / 2)
+                for ib in range(bank_data.n_bank_lines):
+                    bank_coords_mid.append(
+                        (
+                            bank_data.bank_line_coords[ib][:-1, :]
+                            + bank_data.bank_line_coords[ib][1:, :]
+                        )
+                        / 2
+                    )
                 km_zoom, xy_zoom = get_zoom_extends(river_axis_km.min(), river_axis_km.max(), self.plot_flags["zoom_km_step"], bank_coords_mid, bank_km_mid)
 
             fig, ax = df_plt.plot1_waterdepth_and_banklines(
                 bbox,
                 self.river_data.masked_profile_arr,
-                banklines,
+                bank_data.bank_lines,
                 mesh_data.face_node,
                 sim["nnodes"],
                 sim["x_node"],
@@ -1037,9 +1035,9 @@ class Erosion:
             fig, ax = df_plt.plot2_eroded_distance_and_equilibrium(
                 bbox,
                 self.river_data.masked_profile_arr,
-                bank_line_coords,
+                bank_data.bank_line_coords,
                 dn_tot,
-                is_right_bank,
+                bank_data.is_right_bank,
                 d_nav,
                 xy_line_eq_list,
                 mesh_data.x_edge_coords,
@@ -1132,7 +1130,7 @@ class Erosion:
                 df_plt.savefig(fig, fig_path)
 
             figlist, axlist = df_plt.plot5series_waterlevels_per_bank(
-                bank_km_mid,
+                bank_data.bank_km_mid,
                 "river chainage [km]",
                 water_level_data.water_level,
                 water_level_data.ship_wave_max,
@@ -1159,7 +1157,7 @@ class Erosion:
                     df_plt.savefig(fig, fig_file)
 
             figlist, axlist = df_plt.plot6series_velocity_per_bank(
-                bank_km_mid,
+                bank_data.bank_km_mid,
                 "river chainage [km]",
                 water_level_data.velocity,
                 "velocity at Q{iq}",
@@ -1186,7 +1184,7 @@ class Erosion:
             fig, ax = df_plt.plot7_banktype(
                 bbox,
                 self.river_data.masked_profile_arr,
-                bank_line_coords,
+                bank_data.bank_line_coords,
                 erosion_inputs.bank_type,
                 erosion_inputs.taucls_str,
                 X_AXIS_TITLE,
@@ -1202,7 +1200,7 @@ class Erosion:
                 df_plt.savefig(fig, fig_file)
 
             fig, ax = df_plt.plot8_eroded_distance(
-                bank_km_mid,
+                bank_data.bank_km_mid,
                 "river chainage [km]",
                 dn_tot,
                 "Bank {ib}",
