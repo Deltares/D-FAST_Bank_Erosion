@@ -851,7 +851,7 @@ class Erosion:
 
     def _write_bankline_shapefiles(self, bankline_new_list, bankline_eq_list):
         bankline_new_series = GeoSeries(bankline_new_list)
-        bank_lines_new = GeoDataFrame.from_features(bankline_new_series)
+        bank_lines_new = GeoDataFrame(geometry=bankline_new_series)
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
 
         bank_file = self.output_dir / f"{bank_name}_new.shp"
@@ -859,7 +859,7 @@ class Erosion:
         bank_lines_new.to_file(bank_file)
 
         bankline_eq_series = GeoSeries(bankline_eq_list)
-        banklines_eq = GeoDataFrame.from_features(bankline_eq_series)
+        banklines_eq = GeoDataFrame(geometry=bankline_eq_series)
 
         bank_file = self.output_dir / f"{bank_name}_eq.shp"
         log_text("save_banklines", data={"file": str(bank_file)})

@@ -635,7 +635,7 @@ class ConfigFile:
             bankline_list.append(LineString(xy_bank))
             b += 1
         bankline_series = GeoSeries(bankline_list)
-        banklines = GeoDataFrame.from_features(bankline_series)
+        banklines = GeoDataFrame(geometry=bankline_series)
         return banklines
 
     def get_parameter(
