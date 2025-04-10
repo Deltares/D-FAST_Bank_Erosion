@@ -39,6 +39,7 @@ from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString, Point
+from shapely import prepare
 
 MAX_RIVER_WIDTH = 1000
 
@@ -1083,7 +1084,7 @@ class RiverData:
             "clip_chainage", data={"low": self.start_station, "high": self.end_station}
         )
         self.masked_profile: LineString = self.mask_profile(self.station_bounds)
-        self.masked_profile_arr = np.array(self.masked_profile)
+        self.masked_profile_arr = np.array(self.masked_profile.coords)
 
     @property
     def bank_search_lines(self) -> List[LineString]:
@@ -1365,13 +1366,13 @@ def clip_simulation_data(
     y_min = bbox.coords[0][1]
     y_max = bbox.coords[2][1]
 
-    xy_b_prep = xy_buffer.prepare()
+    prepare(xy_buffer)
     x = sim["x_node"]
     y = sim["y_node"]
     nnodes = x.shape
     keep = (x > x_min) & (x < x_max) & (y > y_min) & (y < y_max)
     for i in range(x.size):
-        if keep[i] and not xy_b_prep.contains(Point((x[i], y[i]))):
+        if keep[i] and not xy_buffer.contains(Point((x[i], y[i]))):
             keep[i] = False
 
     fnc = sim["facenode"]

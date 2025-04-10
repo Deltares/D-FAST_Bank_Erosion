@@ -1529,7 +1529,7 @@ def sort_connect_bank_lines(
     """
 
     # convert MultiLineString into list of LineStrings that can be modified later
-    banklines_list = [line for line in banklines]
+    banklines_list = [line for line in banklines.geoms]
 
     # loop over banklines and determine minimum/maximum projected length
     # print("numpy init")

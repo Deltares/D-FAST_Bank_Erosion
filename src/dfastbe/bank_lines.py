@@ -127,7 +127,7 @@ class BankLines:
         to_right = [True] * river_data.num_search_lines
         for ib in range(river_data.num_search_lines):
             to_right[ib] = on_right_side(
-                np.array(masked_search_lines[ib]), stations_coords
+                np.array(masked_search_lines[ib].coords), stations_coords
             )
 
         # clip simulation data to boundaries ...
