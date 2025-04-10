@@ -48,3 +48,14 @@ class MeshData:
     edge_face_connectivity: np.ndarray
     face_edge_connectivity: np.ndarray
     boundary_edge_nrs: np.ndarray
+
+
+@dataclass
+class BankData:
+    bank_idx: List[int]
+    is_right_bank: List[bool]
+    bank_km_mid: List[np.ndarray]
+    bank_line_coords: List[np.ndarray]
+    banklines: GeoDataFrame
+    xy_line_eq_list: List[np.ndarray]
+    bank_type: List[np.ndarray]
