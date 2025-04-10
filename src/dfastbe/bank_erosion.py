@@ -43,7 +43,13 @@ from dfastbe.support import on_right_side, project_km_on_line, intersect_line_me
 from dfastbe import plotting as df_plt
 from dfastbe.io import ConfigFile, log_text, read_simulation_data, \
     write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData, SimulationObject
-from dfastbe.structures import ErosionInputs, WaterLevelData, MeshData, BankData
+from dfastbe.structures import (
+    ErosionInputs,
+    WaterLevelData,
+    MeshData,
+    BankData,
+    FairwayData,
+)
 from dfastbe.utils import timed_logger
 
 
@@ -262,27 +268,26 @@ class Erosion:
                 f"{str(self.output_dir)}{os.sep}fairway_face_indices.shp",
             )
 
-        return ifw_face_idx, ifw_numpy
+        return FairwayData(ifw_face_idx, ifw_numpy)
 
     def _map_bank_to_fairway(
         self,
         bank_data: BankData,
-        ifw_numpy: np.ndarray,
-        ifw_face_idx: np.ndarray,
-    ) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+        fairway_data: FairwayData,
+    ):
         # distance fairway-bankline (bankfairway)
         log_text("bank_distance_fairway")
         distance_fw = []
         bp_fw_face_idx = []
-        nfw = len(ifw_face_idx)
+        nfw = len(fairway_data.ifw_face_idx)
         for ib, bcrds in enumerate(bank_data.bank_line_coords):
             bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
             distance_fw.append(np.zeros(len(bcrds_mid)))
             bp_fw_face_idx.append(np.zeros(len(bcrds_mid), dtype=np.int64))
             for ip, bp in enumerate(bcrds_mid):
                 # find closest fairway support node
-                ifw = np.argmin(((bp - ifw_numpy) ** 2).sum(axis=1))
-                fwp = ifw_numpy[ifw]
+                ifw = np.argmin(((bp - fairway_data.ifw_numpy) ** 2).sum(axis=1))
+                fwp = fairway_data.ifw_numpy[ifw]
                 dbfw = ((bp - fwp) ** 2).sum() ** 0.5
                 # If fairway support node is also the closest projected fairway point, then it likely
                 # that that point is one of the original support points (a corner) of the fairway path
@@ -294,17 +299,32 @@ class Erosion:
                 iseg = max(ifw - 1, 0)
                 if ifw > 0:
                     alpha = (
-                                    (ifw_numpy[ifw, 0] - ifw_numpy[ifw - 1, 0])
-                                    * (bp[0] - ifw_numpy[ifw - 1, 0])
-                                    + (ifw_numpy[ifw, 1] - ifw_numpy[ifw - 1, 1])
-                                    * (bp[1] - ifw_numpy[ifw - 1, 1])
-                            ) / (
-                                    (ifw_numpy[ifw, 0] - ifw_numpy[ifw - 1, 0]) ** 2
-                                    + (ifw_numpy[ifw, 1] - ifw_numpy[ifw - 1, 1]) ** 2
-                            )
+                        (
+                            fairway_data.ifw_numpy[ifw, 0]
+                            - fairway_data.ifw_numpy[ifw - 1, 0]
+                        )
+                        * (bp[0] - fairway_data.ifw_numpy[ifw - 1, 0])
+                        + (
+                            fairway_data.ifw_numpy[ifw, 1]
+                            - fairway_data.ifw_numpy[ifw - 1, 1]
+                        )
+                        * (bp[1] - fairway_data.ifw_numpy[ifw - 1, 1])
+                    ) / (
+                        (
+                            fairway_data.ifw_numpy[ifw, 0]
+                            - fairway_data.ifw_numpy[ifw - 1, 0]
+                        )
+                        ** 2
+                        + (
+                            fairway_data.ifw_numpy[ifw, 1]
+                            - fairway_data.ifw_numpy[ifw - 1, 1]
+                        )
+                        ** 2
+                    )
                     if alpha > 0 and alpha < 1:
-                        fwp1 = ifw_numpy[ifw - 1] + alpha * (
-                                ifw_numpy[ifw] - ifw_numpy[ifw - 1]
+                        fwp1 = fairway_data.ifw_numpy[ifw - 1] + alpha * (
+                            fairway_data.ifw_numpy[ifw]
+                            - fairway_data.ifw_numpy[ifw - 1]
                         )
                         d1 = ((bp - fwp1) ** 2).sum() ** 0.5
                         if d1 < dbfw:
@@ -312,24 +332,39 @@ class Erosion:
                             # projected point located on segment before, which corresponds to initial choice: iseg = ifw - 1
                 if ifw < nfw:
                     alpha = (
-                                    (ifw_numpy[ifw + 1, 0] - ifw_numpy[ifw, 0])
-                                    * (bp[0] - ifw_numpy[ifw, 0])
-                                    + (ifw_numpy[ifw + 1, 1] - ifw_numpy[ifw, 1])
-                                    * (bp[1] - ifw_numpy[ifw, 1])
-                            ) / (
-                                    (ifw_numpy[ifw + 1, 0] - ifw_numpy[ifw, 0]) ** 2
-                                    + (ifw_numpy[ifw + 1, 1] - ifw_numpy[ifw, 1]) ** 2
-                            )
+                        (
+                            fairway_data.ifw_numpy[ifw + 1, 0]
+                            - fairway_data.ifw_numpy[ifw, 0]
+                        )
+                        * (bp[0] - fairway_data.ifw_numpy[ifw, 0])
+                        + (
+                            fairway_data.ifw_numpy[ifw + 1, 1]
+                            - fairway_data.ifw_numpy[ifw, 1]
+                        )
+                        * (bp[1] - fairway_data.ifw_numpy[ifw, 1])
+                    ) / (
+                        (
+                            fairway_data.ifw_numpy[ifw + 1, 0]
+                            - fairway_data.ifw_numpy[ifw, 0]
+                        )
+                        ** 2
+                        + (
+                            fairway_data.ifw_numpy[ifw + 1, 1]
+                            - fairway_data.ifw_numpy[ifw, 1]
+                        )
+                        ** 2
+                    )
                     if alpha > 0 and alpha < 1:
-                        fwp1 = ifw_numpy[ifw] + alpha * (
-                                ifw_numpy[ifw + 1] - ifw_numpy[ifw]
+                        fwp1 = fairway_data.ifw_numpy[ifw] + alpha * (
+                            fairway_data.ifw_numpy[ifw + 1]
+                            - fairway_data.ifw_numpy[ifw]
                         )
                         d1 = ((bp - fwp1) ** 2).sum() ** 0.5
                         if d1 < dbfw:
                             dbfw = d1
                             iseg = ifw
 
-                bp_fw_face_idx[ib][ip] = ifw_face_idx[iseg]
+                bp_fw_face_idx[ib][ip] = fairway_data.ifw_face_idx[iseg]
                 distance_fw[ib][ip] = dbfw
 
             if self.debug:
@@ -343,7 +378,8 @@ class Erosion:
                     + f"/bank_{ib + 1}_chainage_and_fairway_face_idx.shp",
                 )
 
-        return bp_fw_face_idx, distance_fw
+        bank_data.bp_fw_face_idx = bp_fw_face_idx
+        bank_data.distance_fw = distance_fw
 
     def _prepare_initial_conditions(
         self, config_file: ConfigFile, bank_km_mid, zfw_ini
@@ -871,13 +907,9 @@ class Erosion:
         km_bin = (river_axis_km.min(), river_axis_km.max(), km_step)
         km_mid = get_km_bins(km_bin, type=3)  # get mid-points
 
-        ifw_face_idx, ifw_numpy = self._prepare_fairway(
-            river_axis, stations_coords, mesh_data
-        )
+        fairway_data = self._prepare_fairway(river_axis, stations_coords, mesh_data)
 
-        bp_fw_face_idx, distance_fw = self._map_bank_to_fairway(
-            bank_data, ifw_numpy, ifw_face_idx
-        )
+        self._map_bank_to_fairway(bank_data, fairway_data)
 
         # water level at fairway
         zfw_ini = []

@@ -109,6 +109,6 @@ class FairwayData:
     """
     ifw_face_idx: np.ndarray
     ifw_numpy: np.ndarray
-    bp_fw_face_idx: np.ndarray
-    distance_fw: np.ndarray
-    zfw_ini: List[np.ndarray]
+    bp_fw_face_idx: np.ndarray = np.array([])
+    distance_fw: np.ndarray = np.array([])
+    zfw_ini: List[np.ndarray] = field(default_factory=list)
