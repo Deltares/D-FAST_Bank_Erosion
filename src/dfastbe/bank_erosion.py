@@ -738,7 +738,7 @@ class Erosion:
             bank_height=bank_height,
             chezy=chezy,
         )
-        bank_data.line_size = line_size
+        bank_data.bank_line_size = line_size
 
         return (
             dn_tot,
@@ -778,18 +778,18 @@ class Erosion:
         bankline_eq_list = []
         for ib, bank_coords in enumerate(bank_data.bank_line_coords):
             d_nav[ib] = (
-                dn_tot[ib] * bank_data.line_size[ib]
-            ).sum() / bank_data.line_size[ib].sum()
+                dn_tot[ib] * bank_data.bank_line_size[ib]
+            ).sum() / bank_data.bank_line_size[ib].sum()
             dn_max[ib] = dn_tot[ib].max()
             d_nav_flow[ib] = (
-                dn_flow_tot[ib] * bank_data.line_size[ib]
-            ).sum() / bank_data.line_size[ib].sum()
+                dn_flow_tot[ib] * bank_data.bank_line_size[ib]
+            ).sum() / bank_data.bank_line_size[ib].sum()
             d_nav_ship[ib] = (
-                dn_ship_tot[ib] * bank_data.line_size[ib]
-            ).sum() / bank_data.line_size[ib].sum()
+                dn_ship_tot[ib] * bank_data.bank_line_size[ib]
+            ).sum() / bank_data.bank_line_size[ib].sum()
             d_nav_eq[ib] = (
-                dn_eq[ib] * bank_data.line_size[ib]
-            ).sum() / bank_data.line_size[ib].sum()
+                dn_eq[ib] * bank_data.bank_line_size[ib]
+            ).sum() / bank_data.bank_line_size[ib].sum()
             dn_max_eq[ib] = dn_eq[ib].max()
             log_text("bank_dnav", data={"ib": ib + 1, "v": d_nav[ib]})
             log_text("bank_dnavflow", data={"v": d_nav_flow[ib]})
