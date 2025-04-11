@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from io import StringIO
 from pathlib import Path
 from typing import Dict
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import netCDF4
 import numpy as np
@@ -16,6 +16,8 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry.linestring import LineString
 
 from dfastbe.io import (
+    SimulationObject,
+    SimulationFilesError,
     ConfigFile,
     RiverData,
     absolute_path,
@@ -51,6 +53,74 @@ def test_load_program_texts_01():
     """
     print("current work directory: ", os.getcwd())
     assert load_program_texts("tests/files/messages.UK.ini") is None
+
+
+class TestSimulationData:
+    def test_read_simulation_data(self):
+
+        file_name = "test_map.nc"
+        mock_x_node = np.array([0.0, 1.0, 2.0])
+        mock_y_node = np.array([0.0, 1.0, 2.0])
+        mock_facenode = MagicMock()
+        mock_facenode.data = np.array([[0, 1, 2], [2, 3, 4]])
+        mock_facenode.mask = np.array([[False, False, False], [False, False, False]])
+        mock_zb_val = np.array([10.0, 20.0, 30.0])
+        mock_zw_face = np.array([1.0, 2.0, 3.0])
+        mock_h_face = np.array([0.5, 1.0, 1.5])
+        mock_ucx_face = np.array([0.1, 0.2, 0.3])
+        mock_ucy_face = np.array([0.4, 0.5, 0.6])
+        mock_chz_face = np.array([30.0, 40.0, 50.0])
+
+        with patch("dfastbe.io.read_fm_map") as mock_read_fm_map, patch(
+            "netCDF4.Dataset"
+        ) as mock_dataset:
+            mock_read_fm_map.side_effect = [
+                mock_x_node,  # x_node
+                mock_y_node,  # y_node
+                mock_facenode,  # facenode
+                mock_zb_val,  # zb_val
+                mock_zw_face,  # zw_face
+                mock_h_face,  # h_face
+                mock_ucx_face,  # ucx_face
+                mock_ucy_face,  # ucy_face
+                mock_chz_face,  # chz_face
+            ]
+
+            mock_root_group = MagicMock()
+            mock_root_group.converted_from = "SIMONA"
+            mock_dataset.return_value = mock_root_group
+
+            sim_object = SimulationObject.read_simulation_data(file_name)
+
+            assert isinstance(sim_object, SimulationObject)
+            assert np.array_equal(sim_object.x_node, mock_x_node)
+            assert np.array_equal(sim_object.y_node, mock_y_node)
+            assert np.array_equal(sim_object.facenode.data, mock_facenode.data)
+            assert np.array_equal(sim_object.zb_val, mock_zb_val)
+            assert np.array_equal(sim_object.zw_face, mock_zw_face)
+            assert np.array_equal(sim_object.h_face, mock_h_face)
+            assert np.array_equal(sim_object.ucx_face, mock_ucx_face)
+            assert np.array_equal(sim_object.ucy_face, mock_ucy_face)
+            assert np.array_equal(sim_object.chz_face, mock_chz_face)
+            assert sim_object.dh0 == 0.1  # Based on the mocked "SIMONA" source
+
+            mock_read_fm_map.assert_any_call(file_name, "x", location="node")
+            mock_read_fm_map.assert_any_call(file_name, "y", location="node")
+            mock_read_fm_map.assert_any_call(file_name, "face_node_connectivity")
+            mock_read_fm_map.assert_any_call(file_name, "altitude", location="node")
+            mock_read_fm_map.assert_any_call(file_name, "Water level")
+            mock_read_fm_map.assert_any_call(
+                file_name, "sea_floor_depth_below_sea_surface"
+            )
+            mock_read_fm_map.assert_any_call(file_name, "sea_water_x_velocity")
+            mock_read_fm_map.assert_any_call(file_name, "sea_water_y_velocity")
+            mock_read_fm_map.assert_any_call(file_name, "Chezy roughness")
+
+    def test_read_simulation_data_invalid_file(self):
+        invalid_file_name = "invalid_file.nc"
+
+        with pytest.raises(SimulationFilesError):
+            SimulationObject.read_simulation_data(invalid_file_name)
 
 
 class TestLogText:
