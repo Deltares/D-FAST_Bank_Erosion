@@ -130,13 +130,13 @@ class BankLines:
 
         # clip simulation data to boundaries ...
         log_text("clip_data")
-        sim = SimulationObject.clip_simulation_data(
+        SimulationObject.clip_simulation_data(
             self.simulation_data, river_profile, max_distance
         )
 
         # derive bank lines (get_banklines)
         log_text("identify_banklines")
-        banklines = self._get_bank_lines(sim, self.h0)
+        banklines = self._get_bank_lines(self.simulation_data, self.h0)
 
         # clip the set of detected bank lines to the bank areas
         log_text("simplify_banklines")
@@ -174,7 +174,7 @@ class BankLines:
         bank: List,
         km_bounds,
         bank_areas,
-        sim,
+        sim: SimulationObject,
     ):
         """Plot the bank lines and the simulation data."""
         log_text("=")
@@ -207,8 +207,8 @@ class BankLines:
             sim.nnodes,
             sim.x_node,
             sim.y_node,
-            sim["h_face"],
-            1.1 * sim["h_face"].max(),
+            sim.h_face,
+            1.1 * sim.h_face.max(),
             "x-coordinate [m]",
             "y-coordinate [m]",
             "water depth and detected bank lines",
