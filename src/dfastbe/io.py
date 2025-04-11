@@ -44,7 +44,7 @@ from shapely.prepared import prep
 MAX_RIVER_WIDTH = 1000
 
 
-class SimulationObject(TypedDict):
+class SimulationObject:
     x_node: np.ndarray
     y_node: np.ndarray
     nnodes: np.ndarray
