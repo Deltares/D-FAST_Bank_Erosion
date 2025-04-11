@@ -98,7 +98,7 @@ class BankData:
         bank_line_size (List[np.ndarray]): Size of each individual bank line.
     """
     is_right_bank: List[bool]
-    bank_km_mid: List[np.ndarray]
+    bank_chainage_midpoints: List[np.ndarray]
     bank_line_coords: List[np.ndarray]
     bank_face_indices: List[np.ndarray]
     bank_lines: GeoDataFrame
