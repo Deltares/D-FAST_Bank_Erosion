@@ -155,12 +155,10 @@ class BankLines:
         if self.plot_flags["plot_data"]:
             self.plot(
                 river_data.masked_profile_arr,
-                self.plot_flags,
                 river_data.num_search_lines,
                 bank,
                 km_bounds,
                 bank_areas,
-                sim,
             )
 
         log_text("end_banklines")
@@ -169,12 +167,10 @@ class BankLines:
     def plot(
         self,
         xy_km_numpy: np.ndarray,
-        plot_flags: Dict[str, bool],
         n_search_lines: int,
         bank: List,
         km_bounds,
         bank_areas,
-        sim: SimulationObject,
     ):
         """Plot the bank lines and the simulation data."""
         log_text("=")
@@ -182,7 +178,7 @@ class BankLines:
         i_fig = 0
         bbox = get_bbox(xy_km_numpy)
 
-        if plot_flags["save_plot_zoomed"]:
+        if self.plot_flags["save_plot_zoomed"]:
             bank_crds: List[np.ndarray] = []
             bank_km: List[np.ndarray] = []
             for ib in range(n_search_lines):
@@ -193,7 +189,7 @@ class BankLines:
             km_zoom, xy_zoom = get_zoom_extends(
                 km_bounds[0],
                 km_bounds[1],
-                plot_flags["zoom_km_step"],
+                self.plot_flags["zoom_km_step"],
                 bank_crds,
                 bank_km,
             )
@@ -203,12 +199,12 @@ class BankLines:
             xy_km_numpy,
             bank_areas,
             bank,
-            sim.facenode,
-            sim.nnodes,
-            sim.x_node,
-            sim.y_node,
-            sim.h_face,
-            1.1 * sim.h_face.max(),
+            self.simulation_data.facenode,
+            self.simulation_data.nnodes,
+            self.simulation_data.x_node,
+            self.simulation_data.y_node,
+            self.simulation_data.h_face,
+            1.1 * self.simulation_data.h_face.max(),
             "x-coordinate [m]",
             "y-coordinate [m]",
             "water depth and detected bank lines",
@@ -216,14 +212,16 @@ class BankLines:
             "bank search area",
             "detected bank line",
         )
-        if plot_flags["save_plot"]:
+        if self.plot_flags["save_plot"]:
             i_fig = i_fig + 1
-            fig_base = f"{plot_flags.get('fig_dir')}{os.sep}{i_fig}_banklinedetection"
-            if plot_flags["save_plot_zoomed"]:
+            fig_base = (
+                f"{self.plot_flags.get('fig_dir')}{os.sep}{i_fig}_banklinedetection"
+            )
+            if self.plot_flags["save_plot_zoomed"]:
                 df_plt.zoom_xy_and_save(
-                    fig, ax, fig_base, plot_flags.get("plot_ext"), xy_zoom, scale=1
+                    fig, ax, fig_base, self.plot_flags.get("plot_ext"), xy_zoom, scale=1
                 )
-            fig_file = fig_base + plot_flags["plot_ext"]
+            fig_file = fig_base + self.plot_flags["plot_ext"]
             df_plt.savefig(fig, fig_file)
 
         if self.plot_flags["close_plot"]:

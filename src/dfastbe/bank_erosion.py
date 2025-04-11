@@ -977,7 +977,7 @@ class Erosion:
         river_axis_km,
         bank_km_mid,
         banklines,
-        sim,
+        sim: SimulationObject,
         dn_tot,
         is_right_bank,
         xy_line_eq_list,
