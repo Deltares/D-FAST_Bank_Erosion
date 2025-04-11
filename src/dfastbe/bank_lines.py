@@ -203,10 +203,10 @@ class BankLines:
             xy_km_numpy,
             bank_areas,
             bank,
-            sim["facenode"],
-            sim["nnodes"],
-            sim["x_node"],
-            sim["y_node"],
+            sim.facenode,
+            sim.nnodes,
+            sim.x_node,
+            sim.y_node,
             sim["h_face"],
             1.1 * sim["h_face"].max(),
             "x-coordinate [m]",
@@ -265,15 +265,15 @@ class BankLines:
         banklines (geopandas.GeoSeries):
             The collection of all detected bank segments in the remaining model area.
         """
-        fnc = sim["facenode"]
-        n_nodes = sim["nnodes"]
+        fnc = sim.facenode
+        n_nodes = sim.nnodes
         max_nnodes = fnc.shape[1]
-        x_node = sim["x_node"][fnc]
-        y_node = sim["y_node"][fnc]
-        zb = sim["zb_val"][fnc]
-        zw = sim["zw_face"]
+        x_node = sim.x_node[fnc]
+        y_node = sim.y_node[fnc]
+        zb = sim.zb_val[fnc]
+        zw = sim.zw_face
 
-        nnodes_total = len(sim["x_node"])
+        nnodes_total = len(sim.x_node)
         try:
             mask = ~fnc.mask
             non_masked = sum(mask.reshape(fnc.size))
@@ -288,7 +288,7 @@ class BankLines:
         zw_node = np.bincount(f_nc_m, weights=zwm, minlength=nnodes_total)
         n_val = np.bincount(f_nc_m, weights=np.ones(non_masked), minlength=nnodes_total)
         zw_node = zw_node / np.maximum(n_val, 1)
-        zw_node[n_val == 0] = sim["zb_val"][n_val == 0]
+        zw_node[n_val == 0] = sim.zb_val[n_val == 0]
 
         h_node = zw_node[fnc] - zb
         wet_node = h_node > h0
