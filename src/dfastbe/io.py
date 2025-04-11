@@ -56,6 +56,7 @@ class SimulationObject:
     ucx_face: np.ndarray
     ucy_face: np.ndarray
     chz_face: np.ndarray
+    dh0: float = 0.01
 
     @classmethod
     def read_simulation_data(
@@ -96,6 +97,7 @@ class SimulationObject:
             "ucx_face": dum,
             "ucy_face": dum,
             "chz_face": dum,
+            "dh0": dum,
         }
         # determine the file type
         name = Path(file_name).name
@@ -140,6 +142,7 @@ class SimulationObject:
                     dh0 = 0.01
             except:
                 dh0 = 0.01
+            sim["dh0"] = dh0
 
         elif name.startswith("SDS"):
             raise SimulationFilesError(
@@ -152,7 +155,7 @@ class SimulationObject:
         else:
             raise SimulationFilesError(f"Unable to determine file type for {name}")
 
-        return sim, dh0
+        return cls(**sim)
 
     def clip_simulation_data(
         sim: SimulationObject, river_profile: np.ndarray, max_distance: float
