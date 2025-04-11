@@ -49,7 +49,7 @@ from dfastbe.io import (
     write_shp,
     write_csv,
     RiverData,
-    SimulationObject,
+    SimulationData,
 )
 from dfastbe.structures import ErosionInputs, WaterLevelData, MeshData
 from dfastbe.utils import timed_logger
@@ -528,7 +528,7 @@ class Erosion:
             log_text("-", indent="  ")
             log_text("read_simdata", data={"file": self.sim_files[iq]}, indent="  ")
             log_text("-", indent="  ")
-            sim = SimulationObject.read_simulation_data(self.sim_files[iq], indent="  ")
+            sim = SimulationData.read_simulation_data(self.sim_files[iq], indent="  ")
             log_text("-", indent="  ")
             fnc = sim.facenode
 
@@ -837,7 +837,7 @@ class Erosion:
         log_text("-")
         log_text("read_simdata", data={"file": sim_file})
         log_text("-")
-        sim = SimulationObject.read_simulation_data(sim_file)
+        sim = SimulationData.read_simulation_data(sim_file)
         log_text("-")
 
         log_text("derive_topology")
@@ -977,7 +977,7 @@ class Erosion:
         river_axis_km,
         bank_km_mid,
         banklines,
-        sim: SimulationObject,
+        sim: SimulationData,
         dn_tot,
         is_right_bank,
         xy_line_eq_list,
@@ -1242,7 +1242,7 @@ def _apply_masked_indexing(x0: np.array, idx: np.ma.masked_array) -> np.ma.maske
 
 
 def _compute_mesh_topology(
-    sim: SimulationObject,
+    sim: SimulationData,
 ) -> MeshData:
     """Derive secondary topology arrays from the face-node connectivity of the mesh.
 
@@ -1251,7 +1251,7 @@ def _compute_mesh_topology(
     in the simulation data.
 
     Args:
-        sim (SimulationObject):
+        sim (SimulationData):
             A simulation object containing mesh-related data, including face-node connectivity
             (`facenode`), the number of nodes per face (`nnodes`), and node coordinates (`x_node`, `y_node`).
 

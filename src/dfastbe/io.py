@@ -44,7 +44,7 @@ from shapely.prepared import prep
 MAX_RIVER_WIDTH = 1000
 
 
-class SimulationObject:
+class SimulationData:
 
     def __init__(
         self,
@@ -75,9 +75,7 @@ class SimulationObject:
         self.dh0 = dh0
 
     @classmethod
-    def read_simulation_data(
-        cls, file_name: str, indent: str = ""
-    ) -> "SimulationObject":
+    def read_simulation_data(cls, file_name: str, indent: str = "") -> "SimulationData":
         """Read a default set of quantities from a UGRID netCDF file.
 
         Supported files are coming from D-Flow FM (or similar).
@@ -94,7 +92,7 @@ class SimulationObject:
                 If the file is not recognized as a D-Flow FM map-file.
 
         Returns
-            SimulationObject: Dictionary containing the data read from the simulation output file.
+            SimulationData: Dictionary containing the data read from the simulation output file.
             float: Threshold depth for detecting drying and flooding.
         """
         name = Path(file_name).name
@@ -171,7 +169,7 @@ class SimulationObject:
         that is sufficiently close to the reference line.
 
         Args:
-            sim (SimulationObject):
+            sim (SimulationData):
                 Simulation data: mesh, bed levels, water levels, velocities, etc.
             river_profile (np.ndarray):
                 Reference line.

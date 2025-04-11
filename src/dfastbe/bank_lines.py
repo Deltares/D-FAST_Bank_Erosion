@@ -15,7 +15,7 @@ from dfastbe import plotting as df_plt
 from dfastbe.io import (
     ConfigFile,
     RiverData,
-    SimulationObject,
+    SimulationData,
     log_text,
 )
 from dfastbe.kernel import get_bbox, get_zoom_extends
@@ -61,11 +61,11 @@ class BankLines:
 
         self.simulation_data, self.h0 = self._get_simulation_data()
 
-    def _get_simulation_data(self) -> Tuple[SimulationObject, float]:
+    def _get_simulation_data(self) -> Tuple[SimulationData, float]:
         # read simulation data and drying flooding threshold dh0
         sim_file = self.config_file.get_sim_file("Detect", "")
         log_text("read_simdata", data={"file": sim_file})
-        simulation_data = SimulationObject.read_simulation_data(sim_file)
+        simulation_data = SimulationData.read_simulation_data(sim_file)
         # increase critical water depth h0 by flooding threshold dh0
         # get critical water depth used for defining bank line (default = 0.0 m)
         critical_water_depth = self.config_file.get_float(
@@ -130,7 +130,7 @@ class BankLines:
 
         # clip simulation data to boundaries ...
         log_text("clip_data")
-        SimulationObject.clip_simulation_data(
+        SimulationData.clip_simulation_data(
             self.simulation_data, river_profile, max_distance
         )
 
@@ -247,14 +247,14 @@ class BankLines:
         )
 
     @staticmethod
-    def _get_bank_lines(sim: SimulationObject, h0: float) -> gpd.GeoSeries:
+    def _get_bank_lines(sim: SimulationData, h0: float) -> gpd.GeoSeries:
         """
         Detect all possible bank line segments based on simulation data.
 
         Use a critical water depth h0 as a water depth threshold for dry/wet boundary.
 
         Args:
-            sim (SimulationObject):
+            sim (SimulationData):
                 Simulation data: mesh, bed levels, water levels, velocities, etc.
             h0 (float):
                 Critical water depth for determining the banks.

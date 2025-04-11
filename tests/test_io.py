@@ -16,7 +16,7 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry.linestring import LineString
 
 from dfastbe.io import (
-    SimulationObject,
+    SimulationData,
     SimulationFilesError,
     ConfigFile,
     RiverData,
@@ -90,9 +90,9 @@ class TestSimulationData:
             mock_root_group.converted_from = "SIMONA"
             mock_dataset.return_value = mock_root_group
 
-            sim_object = SimulationObject.read_simulation_data(file_name)
+            sim_object = SimulationData.read_simulation_data(file_name)
 
-            assert isinstance(sim_object, SimulationObject)
+            assert isinstance(sim_object, SimulationData)
             assert np.array_equal(sim_object.x_node, mock_x_node)
             assert np.array_equal(sim_object.y_node, mock_y_node)
             assert np.array_equal(sim_object.facenode.data, mock_facenode.data)
@@ -120,7 +120,7 @@ class TestSimulationData:
         invalid_file_name = "invalid_file.nc"
 
         with pytest.raises(SimulationFilesError):
-            SimulationObject.read_simulation_data(invalid_file_name)
+            SimulationData.read_simulation_data(invalid_file_name)
 
 
 class TestLogText:
