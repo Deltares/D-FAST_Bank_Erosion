@@ -38,7 +38,7 @@ class TestErosion:
     ):
         """Test the _prepare_initial_conditions method."""
         mock_bank_data = MagicMock(type=BankData)
-        mock_bank_data.bank_km_mid = [np.array([3.0, 3.0, 3.0])]
+        mock_bank_data.bank_chainage_midpoints = [np.array([3.0, 3.0, 3.0])]
         mock_fairway_data = MagicMock(type=FairwayData)
         mock_fairway_data.fairway_initial_water_levels = [np.array([10, 20, 30])]
         taucls = np.array([1, 1, 1])
