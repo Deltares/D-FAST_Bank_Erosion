@@ -56,7 +56,7 @@ class SimulationObject:
     ucx_face: np.ndarray
     ucy_face: np.ndarray
     chz_face: np.ndarray
-    dh0: float = 0.01
+    dh0: float
 
     @classmethod
     def read_simulation_data(
@@ -157,9 +157,7 @@ class SimulationObject:
 
         return cls(**sim)
 
-    def clip_simulation_data(
-        sim: SimulationObject, river_profile: np.ndarray, max_distance: float
-    ) -> SimulationObject:
+    def clip_simulation_data(self, river_profile: np.ndarray, max_distance: float):
         """
         Clip the simulation mesh and data to the area of interest sufficiently close to the reference line.
 
@@ -187,35 +185,33 @@ class SimulationObject:
         y_max = bbox.coords[2][1]
 
         xy_b_prep = prep(xy_buffer)
-        x = sim["x_node"]
-        y = sim["y_node"]
+        x = self.x_node
+        y = self.y_node
         nnodes = x.shape
         keep = (x > x_min) & (x < x_max) & (y > y_min) & (y < y_max)
         for i in range(x.size):
             if keep[i] and not xy_b_prep.contains(Point((x[i], y[i]))):
                 keep[i] = False
 
-        fnc = sim["facenode"]
+        fnc = self.facenode
         keep_face = keep[fnc].all(axis=1)
         renum = np.zeros(nnodes, dtype=np.int)
         renum[keep] = range(sum(keep))
-        sim["facenode"] = renum[fnc[keep_face]]
+        self.facenode = renum[fnc[keep_face]]
 
-        sim["x_node"] = x[keep]
-        sim["y_node"] = y[keep]
-        if sim["zb_location"] == "node":
-            sim["zb_val"] = sim["zb_val"][keep]
+        self.x_node = x[keep]
+        self.y_node = y[keep]
+        if self.zb_location == "node":
+            self.zb_val = self.zb_val[keep]
         else:
-            sim["zb_val"] = sim["zb_val"][keep_face]
+            self.zb_val = self.zb_val[keep_face]
 
-        sim["nnodes"] = sim["nnodes"][keep_face]
-        sim["zw_face"] = sim["zw_face"][keep_face]
-        sim["h_face"] = sim["h_face"][keep_face]
-        sim["ucx_face"] = sim["ucx_face"][keep_face]
-        sim["ucy_face"] = sim["ucy_face"][keep_face]
-        sim["chz_face"] = sim["chz_face"][keep_face]
-
-        return sim
+        self.nnodes = self.nnodes[keep_face]
+        self.zw_face = self.zw_face[keep_face]
+        self.h_face = self.h_face[keep_face]
+        self.ucx_face = self.ucx_face[keep_face]
+        self.ucy_face = self.ucy_face[keep_face]
+        self.chz_face = self.chz_face[keep_face]
 
 
 PROGTEXTS: Dict[str, List[str]]
