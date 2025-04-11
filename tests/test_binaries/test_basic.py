@@ -3,9 +3,11 @@ import subprocess
 import sys
 from contextlib import contextmanager
 from io import StringIO
+from pathlib import Path
 
-# dfast binary path relative to tstdir
-dfastexe = "../../../dfastbe.dist/dfastbe.exe"
+# dfast binary path
+repo_root = Path(__file__).resolve().parent.parent.parent
+exe_path = repo_root / "dfastbe.dist/dfastbe.exe"
 
 
 @contextmanager
@@ -24,7 +26,7 @@ class TestBasic:
         """
         test getting the help message.
         """
-        result = subprocess.run([dfastexe, "--help"])
+        result = subprocess.run([exe_path, "--help"])
         success = result.returncode == 0
 
         assert success == True
@@ -33,7 +35,7 @@ class TestBasic:
         """
         Testing program help.
         """
-        result = subprocess.run([dfastexe, "--help"], capture_output=True)
+        result = subprocess.run([exe_path, "--help"], capture_output=True)
         help_message = result.stdout.decode("UTF-8").splitlines()
 
         assert help_message == [
@@ -56,20 +58,21 @@ class TestBasic:
         If GUI does not start test will fail.
         """
         cwd = os.getcwd()
-        tstdir = "tests/data/bank_lines"
+        test_dir = "tests/data/bank_lines"
+
         try:
-            os.chdir(tstdir)
+            os.chdir(test_dir)
             try:
                 process = subprocess.Popen(
-                    dfastexe, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                    exe_path, stdout=subprocess.PIPE, stderr=subprocess.PIPE
                 )
                 process.wait(timeout=1)
-
             except subprocess.TimeoutExpired:
                 process.kill()
 
             assert (
                 process.returncode is None
             ), f"Process returned exit code: {process.returncode}, please run the dfastbe.exe to find the specific error."
+
         finally:
             os.chdir(cwd)
