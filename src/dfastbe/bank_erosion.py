@@ -41,8 +41,16 @@ from dfastbe.kernel import get_km_bins, moving_avg, comp_erosion_eq, comp_erosio
                             get_zoom_extends, get_bbox
 from dfastbe.support import on_right_side, project_km_on_line, intersect_line_mesh, move_line
 from dfastbe import plotting as df_plt
-from dfastbe.io import ConfigFile, log_text, read_simulation_data, \
-    write_shp_pnt, write_km_eroded_volumes, write_shp, write_csv, RiverData, SimulationObject
+from dfastbe.io import (
+    ConfigFile,
+    log_text,
+    write_shp_pnt,
+    write_km_eroded_volumes,
+    write_shp,
+    write_csv,
+    RiverData,
+    SimulationObject,
+)
 from dfastbe.structures import ErosionInputs, WaterLevelData, MeshData
 from dfastbe.utils import timed_logger
 
@@ -520,7 +528,7 @@ class Erosion:
             log_text("-", indent="  ")
             log_text("read_simdata", data={"file": self.sim_files[iq]}, indent="  ")
             log_text("-", indent="  ")
-            sim, _ = read_simulation_data(self.sim_files[iq], indent="  ")
+            sim = SimulationObject.read_simulation_data(self.sim_files[iq], indent="  ")
             log_text("-", indent="  ")
             fnc = sim["facenode"]
 
@@ -829,7 +837,7 @@ class Erosion:
         log_text("-")
         log_text("read_simdata", data={"file": sim_file})
         log_text("-")
-        sim, _ = read_simulation_data(sim_file)
+        sim = SimulationObject.read_simulation_data(sim_file)
         log_text("-")
 
         log_text("derive_topology")

@@ -16,9 +16,7 @@ from dfastbe.io import (
     ConfigFile,
     RiverData,
     SimulationObject,
-    clip_simulation_data,
     log_text,
-    read_simulation_data,
 )
 from dfastbe.kernel import get_bbox, get_zoom_extends
 from dfastbe.support import (
@@ -67,13 +65,13 @@ class BankLines:
         # read simulation data and drying flooding threshold dh0
         sim_file = self.config_file.get_sim_file("Detect", "")
         log_text("read_simdata", data={"file": sim_file})
-        simulation_data, dh0 = read_simulation_data(sim_file)
+        simulation_data = SimulationObject.read_simulation_data(sim_file)
         # increase critical water depth h0 by flooding threshold dh0
         # get critical water depth used for defining bank line (default = 0.0 m)
         critical_water_depth = self.config_file.get_float(
             "Detect", "WaterDepth", default=0
         )
-        h0 = critical_water_depth + dh0
+        h0 = critical_water_depth + simulation_data.dh0
         return simulation_data, h0
 
     @property
@@ -132,7 +130,9 @@ class BankLines:
 
         # clip simulation data to boundaries ...
         log_text("clip_data")
-        sim = clip_simulation_data(self.simulation_data, river_profile, max_distance)
+        sim = SimulationObject.clip_simulation_data(
+            self.simulation_data, river_profile, max_distance
+        )
 
         # derive bank lines (get_banklines)
         log_text("identify_banklines")
