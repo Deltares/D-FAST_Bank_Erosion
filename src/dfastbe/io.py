@@ -75,7 +75,7 @@ class SimulationData:
         self.dh0 = dh0
 
     @classmethod
-    def read_simulation_data(cls, file_name: str, indent: str = "") -> "SimulationData":
+    def read(cls, file_name: str, indent: str = "") -> "SimulationData":
         """Read a default set of quantities from a UGRID netCDF file.
 
         Supported files are coming from D-Flow FM (or similar).

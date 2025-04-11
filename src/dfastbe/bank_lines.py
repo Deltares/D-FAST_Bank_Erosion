@@ -65,7 +65,7 @@ class BankLines:
         # read simulation data and drying flooding threshold dh0
         sim_file = self.config_file.get_sim_file("Detect", "")
         log_text("read_simdata", data={"file": sim_file})
-        simulation_data = SimulationData.read_simulation_data(sim_file)
+        simulation_data = SimulationData.read(sim_file)
         # increase critical water depth h0 by flooding threshold dh0
         # get critical water depth used for defining bank line (default = 0.0 m)
         critical_water_depth = self.config_file.get_float(

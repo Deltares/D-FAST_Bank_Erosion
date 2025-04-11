@@ -90,7 +90,7 @@ class TestSimulationData:
             mock_root_group.converted_from = "SIMONA"
             mock_dataset.return_value = mock_root_group
 
-            sim_object = SimulationData.read_simulation_data(file_name)
+            sim_object = SimulationData.read(file_name)
 
             assert isinstance(sim_object, SimulationData)
             assert np.array_equal(sim_object.x_node, mock_x_node)
@@ -120,7 +120,7 @@ class TestSimulationData:
         invalid_file_name = "invalid_file.nc"
 
         with pytest.raises(SimulationFilesError):
-            SimulationData.read_simulation_data(invalid_file_name)
+            SimulationData.read(invalid_file_name)
 
 
 class TestLogText:

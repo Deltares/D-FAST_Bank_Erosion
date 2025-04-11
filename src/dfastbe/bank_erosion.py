@@ -528,7 +528,7 @@ class Erosion:
             log_text("-", indent="  ")
             log_text("read_simdata", data={"file": self.sim_files[iq]}, indent="  ")
             log_text("-", indent="  ")
-            sim = SimulationData.read_simulation_data(self.sim_files[iq], indent="  ")
+            sim = SimulationData.read(self.sim_files[iq], indent="  ")
             log_text("-", indent="  ")
             fnc = sim.facenode
 
@@ -837,7 +837,7 @@ class Erosion:
         log_text("-")
         log_text("read_simdata", data={"file": sim_file})
         log_text("-")
-        sim = SimulationData.read_simulation_data(sim_file)
+        sim = SimulationData.read(sim_file)
         log_text("-")
 
         log_text("derive_topology")
