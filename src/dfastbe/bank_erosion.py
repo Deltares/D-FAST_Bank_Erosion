@@ -530,7 +530,7 @@ class Erosion:
             log_text("-", indent="  ")
             sim = SimulationObject.read_simulation_data(self.sim_files[iq], indent="  ")
             log_text("-", indent="  ")
-            fnc = sim["facenode"]
+            fnc = sim.facenode
 
             log_text("bank_erosion", indent="  ")
             velocity.append([])
@@ -551,10 +551,10 @@ class Erosion:
 
                 bank_index = bank_idx[ib]
                 vel_bank = (
-                        np.absolute(
-                            sim["ucx_face"][bank_index] * dx + sim["ucy_face"][bank_index] * dy
-                        )
-                        / line_size[ib]
+                    np.absolute(
+                        sim.zb_val[bank_index] * dx + sim.zb_val[bank_index] * dy
+                    )
+                    / line_size[ib]
                 )
                 if self.vel_dx > 0.0:
                     if ib == 0:
@@ -567,8 +567,8 @@ class Erosion:
                 if iq == 0:
                     # determine velocity and bankheight along banks ...
                     # bankheight = maximum bed elevation per cell
-                    if sim["zb_location"] == "node":
-                        zb = sim["zb_val"]
+                    if sim.zb_location == "node":
+                        zb = sim.zb_val
                         zb_all_nodes = _apply_masked_indexing(zb, fnc[bank_index, :])
                         zb_bank = zb_all_nodes.max(axis=1)
                         if self.zb_dx > 0.0:
@@ -588,10 +588,10 @@ class Erosion:
 
                 # get water depth along fairway
                 ii = bp_fw_face_idx[ib]
-                hfw = sim["h_face"][ii]
+                hfw = sim.zb_val[ii]
                 hfw_max = max(hfw_max, hfw.max())
-                water_level[iq].append(sim["zw_face"][ii])
-                chez = sim["chz_face"][ii]
+                water_level[iq].append(sim.zb_val[ii])
+                chez = sim.zb_val[ii]
                 chezy[iq].append(0 * chez + chez.mean())
 
                 if iq == self.num_levels - 1:  # ref_level:
@@ -879,7 +879,7 @@ class Erosion:
         zfw_ini = []
         for ib in range(n_banklines):
             ii = bp_fw_face_idx[ib]
-            zfw_ini.append(sim["zw_face"][ii])
+            zfw_ini.append(sim.zw_face[ii])
 
         erosion_inputs = self._prepare_initial_conditions(
             config_file, bank_km_mid, zfw_ini
@@ -1010,10 +1010,10 @@ class Erosion:
                 self.river_data.masked_profile_arr,
                 banklines,
                 mesh_data.face_node,
-                sim["nnodes"],
-                sim["x_node"],
-                sim["y_node"],
-                sim["h_face"],
+                sim.nnodes,
+                sim.x_node,
+                sim.x_node,
+                sim.zb_val,
                 1.1 * water_level_data.hfw_max,
                 X_AXIS_TITLE,
                 Y_AXIS_TITLE,
@@ -1280,8 +1280,8 @@ def _compute_mesh_topology(
 
     # get a sorted list of edge node connections (shared edges occur twice)
     # face_nr contains the face index to which the edge belongs
-    face_node = sim["facenode"]
-    n_nodes = sim["nnodes"]
+    face_node = sim.facenode
+    n_nodes = sim.nnodes
     n_faces = face_node.shape[0]
     n_edges = sum(n_nodes)
     edge_node = np.zeros((n_edges, 2), dtype=np.int64)
@@ -1343,10 +1343,10 @@ def _compute_mesh_topology(
     edge_face[edge_nr[unique_edge], 0] = face_nr[unique_edge]
     edge_face[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
 
-    x_face_coords = _apply_masked_indexing(sim["x_node"], face_node)
-    y_face_coords = _apply_masked_indexing(sim["y_node"], face_node)
-    x_edge_coords = sim["x_node"][edge_node]
-    y_edge_coords = sim["y_node"][edge_node]
+    x_face_coords = _apply_masked_indexing(sim.x_node, face_node)
+    y_face_coords = _apply_masked_indexing(sim.x_node, face_node)
+    x_edge_coords = sim.x_node[edge_node]
+    y_edge_coords = sim.x_node[edge_node]
 
     return MeshData(
         x_face_coords=x_face_coords,
