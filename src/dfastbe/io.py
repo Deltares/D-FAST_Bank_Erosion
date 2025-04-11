@@ -45,7 +45,26 @@ MAX_RIVER_WIDTH = 1000
 
 
 class SimulationData:
+    """Class to hold simulation data.
 
+    This class contains the simulation data read from a UGRID netCDF file.
+    It includes methods to read the data from the file and clip the simulation
+    mesh to a specified area of interest.
+
+    Args:
+        x_node (np.ndarray): X-coordinates of the nodes.
+        y_node (np.ndarray): Y-coordinates of the nodes.
+        nnodes (np.ndarray): Number of nodes in each face.
+        facenode (np.ma.masked_array): Face-node connectivity array.
+        zb_location (np.ndarray): Location of the bed levels.
+        zb_val (np.ndarray): Bed levels.
+        zw_face (np.ndarray): Water levels at the faces.
+        h_face (np.ndarray): Water depths at the faces.
+        ucx_face (np.ndarray): X-component of the velocity at the faces.
+        ucy_face (np.ndarray): Y-component of the velocity at the faces.
+        chz_face (np.ndarray): Chezy roughness values at the faces.
+        dh0 (float): Threshold depth for detecting drying and flooding.
+    """
     def __init__(
         self,
         x_node: np.ndarray,
@@ -80,12 +99,11 @@ class SimulationData:
 
         Supported files are coming from D-Flow FM (or similar).
 
-        Arguments
-        ---------
-        file_name (str):
-            Name of the simulation output file to be read.
-        indent (str):
-            String to use for each line as indentation (default empty).
+        Args:
+            file_name (str):
+                Name of the simulation output file to be read.
+            indent (str):
+                String to use for each line as indentation (default empty).
 
         Raises:
             SimulationFilesError
