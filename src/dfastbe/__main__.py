@@ -78,7 +78,7 @@ def parse_arguments() -> Tuple[str, str, str]:
         "--language",
         default="UK",
         choices=["NL", "UK"],
-        help="display language 'NL' or 'UK' ('UK' is default)",
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--mode",
