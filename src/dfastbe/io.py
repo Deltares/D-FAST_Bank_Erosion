@@ -109,9 +109,25 @@ class SimulationData:
             SimulationFilesError
                 If the file is not recognized as a D-Flow FM map-file.
 
-        Returns
+        Returns:
             SimulationData: Dictionary containing the data read from the simulation output file.
             float: Threshold depth for detecting drying and flooding.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import SimulationData
+            >>> sim_data = SimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
+            No message found for read_grid
+            No message found for read_bathymetry
+            No message found for read_water_level
+            No message found for read_water_depth
+            No message found for read_velocity
+            No message found for read_chezy
+            No message found for read_drywet
+            >>> print(sim_data.x_node[0:3])
+            [194949.796875 194966.515625 194982.8125  ]
+
+            ```
         """
         name = Path(file_name).name
         if name.endswith("map.nc"):
@@ -180,7 +196,9 @@ class SimulationData:
             dh0=dh0,
         )
 
-    def clip_simulation_data(self, river_profile: np.ndarray, max_distance: float):
+    def apply_clipping_to_simulation_data(
+        self, river_profile: np.ndarray, max_distance: float
+    ):
         """Clip the simulation mesh.
 
         Clipping data to the area of interest,
@@ -563,7 +581,7 @@ class ConfigFile:
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> result = config_file.get_str("General", "BankDir")
-            >>> expected = Path("tests/data/erosion/output/banklines")
+            >>> expected = Path("tests/data/erosion/output/banklines").resolve()
             >>> str(expected) == result
             True
 
@@ -739,7 +757,7 @@ class ConfigFile:
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> result = config_file.get_sim_file("Erosion", "1")
-            >>> expected = Path("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
+            >>> expected = Path("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc").resolve()
             >>> str(expected) == result
             True
 
