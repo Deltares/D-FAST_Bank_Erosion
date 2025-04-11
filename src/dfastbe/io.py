@@ -57,9 +57,10 @@ class SimulationObject:
     ucy_face: np.ndarray
     chz_face: np.ndarray
 
+    @classmethod
     def read_simulation_data(
-        file_name: str, indent: str = ""
-    ) -> Tuple[SimulationObject, float]:
+        cls, file_name: str, indent: str = ""
+    ) -> "SimulationObject":
         """
         Read a default set of quantities from a UGRID netCDF file coming from D-Flow FM (or similar).
 
