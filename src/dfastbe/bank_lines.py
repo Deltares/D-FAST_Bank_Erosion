@@ -8,7 +8,7 @@ import geopandas as gpd
 import numpy as np
 from matplotlib import pyplot as plt
 from shapely.geometry.polygon import Polygon
-from shapely.ops import cascaded_union, linemerge
+from shapely import union_all, line_merge
 
 from dfastbe import __version__
 from dfastbe import plotting as df_plt
@@ -127,7 +127,7 @@ class BankLines:
         to_right = [True] * river_data.num_search_lines
         for ib in range(river_data.num_search_lines):
             to_right[ib] = on_right_side(
-                np.array(masked_search_lines[ib]), stations_coords
+                np.array(masked_search_lines[ib].coords), stations_coords
             )
 
         # clip simulation data to boundaries ...
@@ -236,15 +236,15 @@ class BankLines:
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
         bank_file = self.bank_output_dir / f"{bank_name}.shp"
         log_text("save_banklines", data={"file": bank_file})
-        gpd.GeoSeries(bank).to_file(bank_file)
+        gpd.GeoSeries(bank, crs="EPSG:28992").to_file(bank_file)
 
-        gpd.GeoSeries(clipped_banklines).to_file(
+        gpd.GeoSeries(clipped_banklines, crs="EPSG:28992").to_file(
             self.bank_output_dir / f"{BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE}{EXTENSION}"
         )
         banklines.to_file(
             self.bank_output_dir / f"{RAW_DETECTED_BANKLINE_FRAGMENTS_FILE}{EXTENSION}"
         )
-        gpd.GeoSeries(bank_areas).to_file(
+        gpd.GeoSeries(bank_areas, crs="EPSG:28992").to_file(
             self.bank_output_dir / f"{BANK_AREAS_FILE}{EXTENSION}"
         )
 
@@ -318,10 +318,10 @@ class BankLines:
                         nnodes, x_node[i], y_node[i], wet_node[i], h_node[i], h0
                     )
         lines = [line for line in lines if line is not None and not line.is_empty]
-        multi_line = cascaded_union(lines)
-        merged_line = linemerge(multi_line)
+        multi_line = union_all(lines)
+        merged_line = line_merge(multi_line)
 
-        return gpd.GeoSeries(merged_line)
+        return gpd.GeoSeries(merged_line, crs="EPSG:28992")
 
     @staticmethod
     def _convert_search_lines_to_bank_polygons(

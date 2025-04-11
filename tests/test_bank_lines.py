@@ -24,7 +24,7 @@ def test_bank_lines():
     assert all(fragments.columns == ["FID", "geometry"])
     geom = fragments.loc[0, "geometry"]
     assert isinstance(geom, MultiLineString)
-    assert len(geom) == 22
+    assert len(geom.geoms) == 22
 
     # check the bank areas
     file_2 = test_r_dir / "output/banklines/bank_areas.shp"

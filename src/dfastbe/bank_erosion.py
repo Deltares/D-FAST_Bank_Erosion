@@ -151,7 +151,7 @@ class Erosion:
         bank_line_coords = []
         bank_face_indices = []
         for bank_index in range(n_banklines):
-            line_coords = np.array(banklines.geometry[bank_index])
+            line_coords = np.array(banklines.geometry[bank_index].coords)
             log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
 
             coords_along_bank, face_indices = intersect_line_mesh(
@@ -190,7 +190,7 @@ class Erosion:
     def _prepare_river_axis(self, stations_coords: np.ndarray) -> Tuple[np.ndarray, np.ndarray, LineString]:
         # read river axis file
         river_axis = self.river_data.read_river_axis()
-        river_axis_numpy = np.array(river_axis)
+        river_axis_numpy = np.array(river_axis.coords)
         # optional sorting --> see 04_Waal_D3D example
         # check: sum all distances and determine maximum distance ...
         # if maximum > alpha * sum then perform sort
@@ -607,7 +607,9 @@ class Erosion:
                     if self.debug:
                         bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
                         bank_coords_points = [Point(xy1) for xy1 in bcrds_mid]
-                        bank_coords_geo = GeoSeries(bank_coords_points)
+                        bank_coords_geo = GeoSeries(
+                            bank_coords_points, crs="EPSG:28992"
+                        )
                         params = {
                             "chainage": bank_km_mid[ib],
                             "x": bcrds_mid[:, 0],
@@ -664,7 +666,7 @@ class Erosion:
                     bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
 
                     bank_coords_points = [Point(xy1) for xy1 in bcrds_mid]
-                    bank_coords_geo = GeoSeries(bank_coords_points)
+                    bank_coords_geo = GeoSeries(bank_coords_points, crs="EPSG:28992")
                     params = {
                         "chainage": bank_km_mid[ib],
                         "x": bcrds_mid[:, 0],
@@ -937,16 +939,16 @@ class Erosion:
         timed_logger("-- end analysis --")
 
     def _write_bankline_shapefiles(self, bankline_new_list, bankline_eq_list):
-        bankline_new_series = GeoSeries(bankline_new_list)
-        bank_lines_new = GeoDataFrame.from_features(bankline_new_series)
+        bankline_new_series = GeoSeries(bankline_new_list, crs="EPSG:28992")
+        bank_lines_new = GeoDataFrame(geometry=bankline_new_series)
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
 
         bank_file = self.output_dir / f"{bank_name}_new.shp"
         log_text("save_banklines", data={"file": str(bank_file)})
         bank_lines_new.to_file(bank_file)
 
-        bankline_eq_series = GeoSeries(bankline_eq_list)
-        banklines_eq = GeoDataFrame.from_features(bankline_eq_series)
+        bankline_eq_series = GeoSeries(bankline_eq_list, crs="EPSG:28992")
+        banklines_eq = GeoDataFrame(geometry=bankline_eq_series)
 
         bank_file = self.output_dir / f"{bank_name}_eq.shp"
         log_text("save_banklines", data={"file": str(bank_file)})

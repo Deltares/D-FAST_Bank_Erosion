@@ -36,7 +36,13 @@ from dfastbe.structures import MeshData
 
 import numpy
 import math
-import shapely
+from shapely.geometry import (
+    LineString,
+    Point,
+    Polygon,
+    MultiLineString,
+)
+from shapely import union_all, line_merge
 import geopandas
 
 
@@ -326,9 +332,9 @@ def intersect_line_mesh(
                 # using numpy math might be faster, but since it's should only be for a few points let's use Shapely
                 # a point on the edge of a polygon is not contained in the polygon.
                 # a point on the edge of two polygons will thus be considered outside the mesh whereas it actually isn't.
-                pnt = shapely.geometry.Point(bp[0])
+                pnt = Point(bp[0])
                 for k in possible_cells:
-                    polygon_k = shapely.geometry.Polygon(
+                    polygon_k = Polygon(
                         numpy.concatenate(
                             (
                                 mesh_data.x_face_coords[
@@ -360,9 +366,7 @@ def intersect_line_mesh(
                             ),
                             axis=0,
                         ).T
-                        line_k = shapely.geometry.LineString(
-                            numpy.concatenate(nd, nd[0:1], axis=0)
-                        )
+                        line_k = LineString(numpy.concatenate(nd, nd[0:1], axis=0))
                         if line_k.contains(pnt):
                             on_edge.append(k)
                     if on_edge == []:
@@ -439,8 +443,8 @@ def intersect_line_mesh(
                         else:
                             print("{}: -- no slices along this segment --".format(j))
                         if index >= 0:
-                            pnt = shapely.geometry.Point(bpj)
-                            polygon_k = shapely.geometry.Polygon(
+                            pnt = Point(bpj)
+                            polygon_k = Polygon(
                                 numpy.concatenate(
                                     (
                                         mesh_data.x_face_coords[
@@ -1033,9 +1037,9 @@ def map_line_mesh(
             else:
                 # one or more possible cells, check whether it's really inside one of them
                 # using numpy math might be faster, but since it's should only be for a few points let's using shapely
-                pnt = shapely.geometry.Point(bp[0])
+                pnt = Point(bp[0])
                 for k in possible_cells:
-                    polygon_k = shapely.geometry.Polygon(
+                    polygon_k = Polygon(
                         numpy.concatenate(
                             (xf[k : k + 1, : nnodes[k]], yf[k : k + 1, : nnodes[k]]),
                             axis=0,
@@ -1500,8 +1504,8 @@ def add_point(
 
 
 def clip_bank_lines(
-    banklines: geopandas.geoseries.GeoSeries, bankarea: shapely.geometry.polygon.Polygon
-) -> shapely.geometry.multilinestring.MultiLineString:
+    banklines: geopandas.geoseries.GeoSeries, bankarea: Polygon
+) -> MultiLineString:
     """
     Clip the bank line segments to the area of interest.
 
@@ -1509,12 +1513,12 @@ def clip_bank_lines(
     ---------
     banklines : geopandas.geoseries.GeoSeries
         Unordered set of bank line segments.
-    bankarea : shapely.geometry.polygon.Polygon
+    bankarea : Polygon
         A search area corresponding to one of the bank search lines.
-    
+
     Returns
     -------
-    clipped_banklines : shapely.geometry.multilinestring.MultiLineString
+    clipped_banklines : MultiLineString
         Unordered set of bank line segments, clipped to bank area.
     """
     # intersection returns one MultiLineString object
@@ -1524,30 +1528,30 @@ def clip_bank_lines(
 
 
 def sort_connect_bank_lines(
-    banklines: shapely.geometry.multilinestring.MultiLineString,
-    xykm: shapely.geometry.linestring.LineString,
+    banklines: MultiLineString,
+    xykm: LineString,
     right_bank: bool,
-) -> shapely.geometry.LineString:
+) -> LineString:
     """
     Connect the bank line segments to bank lines.
 
     Arguments
     ---------
-    banklines : shapely.geometry.multilinestring.MultiLineString
+    banklines : MultiLineString
         Unordered set of bank line segments.
-    xykm : shapely.geometry.linestring.LineString
+    xykm : LineString
         Array containing x,y,chainage values.
     right_bank : bool
         Flag indicating whether line is on the right (or not).
-    
+
     Returns
     -------
-    bank : shapely.geometry.linestring.LineString
+    bank : LineString
         The detected bank line.
     """
 
     # convert MultiLineString into list of LineStrings that can be modified later
-    banklines_list = [line for line in banklines]
+    banklines_list = [line for line in banklines.geoms]
 
     # loop over banklines and determine minimum/maximum projected length
     # print("numpy init")
@@ -1560,7 +1564,7 @@ def sort_connect_bank_lines(
         minloc = 1e20
         maxloc = -1
         for j, p in enumerate(bl.coords):
-            loc = xykm.project(shapely.geometry.Point(p))
+            loc = xykm.project(Point(p))
             if loc < minloc:
                 minloc = loc
                 minj = j
@@ -1593,16 +1597,12 @@ def sort_connect_bank_lines(
                 op = op2
             else:
                 op = op1
-            banklines_list[i] = shapely.geometry.LineString(op)
+            banklines_list[i] = LineString(op)
         else:
             if minj < maxj:
-                banklines_list[i] = shapely.geometry.LineString(
-                    bl.coords[minj : maxj + 1]
-                )
+                banklines_list[i] = LineString(bl.coords[minj : maxj + 1])
             else:  # minj > maxj
-                banklines_list[i] = shapely.geometry.LineString(
-                    bl.coords[maxj : minj + 1][::-1]
-                )
+                banklines_list[i] = LineString(bl.coords[maxj : minj + 1][::-1])
         lengths[i] = maxloc - minloc
 
     # print("select lines by length")
@@ -1630,9 +1630,9 @@ def sort_connect_bank_lines(
                         # a line string of a single point would remain
                         lengths[j] = 0
                         break
-                    loc = xykm.project(shapely.geometry.Point(p))
+                    loc = xykm.project(Point(p))
                     if loc >= maxlocs[i]:
-                        banklines_list[j] = shapely.geometry.LineString(bl.coords[k:])
+                        banklines_list[j] = LineString(bl.coords[k:])
                         minlocs[j] = loc
                         break
         # if line partially overlaps ... but stick out on the low side
@@ -1648,9 +1648,9 @@ def sort_connect_bank_lines(
                         # a line string of a single point would remain
                         lengths[j] = 0
                         break
-                    loc = xykm.project(shapely.geometry.Point(p))
+                    loc = xykm.project(Point(p))
                     if loc <= minlocs[i]:
-                        banklines_list[j] = shapely.geometry.LineString(bl.coords[:k])
+                        banklines_list[j] = LineString(bl.coords[:k])
                         maxlocs[j] = loc
                         break
 
@@ -1660,31 +1660,31 @@ def sort_connect_bank_lines(
     new_bank_coords = []
     for i in idx2[idx]:
         new_bank_coords.extend(banklines_list[i].coords)
-    bank = shapely.geometry.LineString(new_bank_coords)
+    bank = LineString(new_bank_coords)
 
     return bank
 
 
 def clip_search_lines(
-    line: List[shapely.geometry.linestring.LineStringAdapter],
-    xykm: shapely.geometry.linestring.LineStringAdapter,
+    line: List[LineString],
+    xykm: LineString,
     max_river_width: float = 1000,
-) -> Tuple[List[shapely.geometry.linestring.LineStringAdapter], float]:
+) -> Tuple[List[LineString], float]:
     """
     Clip the list of lines to the envelope of certain size surrounding a reference line.
 
     Arguments
     ---------
-    line : List[shapely.geometry.linestring.LineStringAdapter]
+    line : List[LineString]
         List of search lines to be clipped.
-    xykm : shapely.geometry.linestring.LineStringAdapter
+    xykm : LineString
         Reference line.
     max_river_width: float
         Maximum distance away from xykm.
-    
+
     Returns
     -------
-    line : List[shapely.geometry.linestring.LineStringAdapter]
+    line : List[LineString]
         List of clipped search lines.
     maxmaxd: float
         Maximum distance from any point within line to reference line.
@@ -1715,12 +1715,7 @@ def clip_search_lines(
 
         # Determine the maximum distance from a point on this line to the reference line.
         line_simplified = line[b].simplify(1)
-        maxd = max(
-            [
-                shapely.geometry.Point(c).distance(xy_simplified)
-                for c in line_simplified.coords
-            ]
-        )
+        maxd = max([Point(c).distance(xy_simplified) for c in line_simplified.coords])
 
         # Increase the value of maxd by 2 to account for error introduced by using simplified lines.
         maxmaxd = max(maxmaxd, maxd + 2)
@@ -1755,7 +1750,7 @@ def convert_search_lines_to_bank_polygons(
 
 
 def clip_simdata(
-    sim: SimulationObject, xykm: numpy.ndarray, maxmaxd: float
+    sim: SimulationObject, xykm: LineString, maxmaxd: float
 ) -> SimulationObject:
     """
     Clip the simulation mesh and data to the area of interest sufficiently close to the reference line.
@@ -1764,13 +1759,13 @@ def clip_simdata(
     ---------
     sim : SimulationObject
         Simulation data: mesh, bed levels, water levels, velocities, etc.
-    xykm : numpy.ndarray
+    xykm : LineString
         Reference line.
     maxmaxd : float
         Maximum distance between the reference line and a point in the area of
         interest defined based on the search lines for the banks and the search
         distance.
-    
+
     Returns
     -------
     sim1 : SimulationObject
@@ -1784,13 +1779,13 @@ def clip_simdata(
     ymin = bbox.coords[0][1]
     ymax = bbox.coords[2][1]
 
-    xybprep = shapely.prepared.prep(xybuffer)
+    xybprep = xybuffer.prepare()
     x = sim["x_node"]
     y = sim["y_node"]
     nnodes = x.shape
     keep = (x > xmin) & (x < xmax) & (y > ymin) & (y < ymax)
     for i in range(x.size):
-        if keep[i] and not xybprep.contains(shapely.geometry.Point((x[i], y[i]))):
+        if keep[i] and not xybprep.contains(Point((x[i], y[i]))):
             keep[i] = False
 
     fnc = sim["facenode"]
@@ -1884,9 +1879,9 @@ def get_banklines(sim: SimulationObject, h0: float) -> geopandas.GeoSeries:
             else:
                 Lines[i] = poly_to_line(nnodes, X[i], Y[i], WET_node[i], H_node[i], h0)
     Lines = [line for line in Lines if not line is None and not line.is_empty]
-    multi_line = shapely.ops.cascaded_union(Lines)
-    merged_line = shapely.ops.linemerge(multi_line)
-    return geopandas.GeoSeries(merged_line)
+    multi_line = union_all(Lines)
+    merged_line = line_merge(multi_line)
+    return geopandas.GeoSeries(merged_line, crs="EPSG:28992")
 
 
 def poly_to_line(
@@ -1931,8 +1926,8 @@ def poly_to_line(
     if len(Lines) == 0:
         return None
     else:
-        multi_line = shapely.geometry.MultiLineString(Lines)
-        merged_line = shapely.ops.linemerge(multi_line)
+        multi_line = MultiLineString(Lines)
+        merged_line = line_merge(multi_line)
         return merged_line
 
 
@@ -2003,7 +1998,7 @@ def tri_to_line(
     if xl == xr and yl == yr:
         Line = None
     else:
-        Line = shapely.geometry.asLineString([[xl, yl], [xr, yr]])
+        Line = LineString([[xl, yl], [xr, yr]])
     return Line
 
 
