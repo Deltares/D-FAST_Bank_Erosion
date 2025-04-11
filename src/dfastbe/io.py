@@ -29,7 +29,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from configparser import ConfigParser
 from configparser import Error as ConfigparserError
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, TypedDict, Union
+from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, Union
 
 import geopandas as gpd
 import netCDF4
