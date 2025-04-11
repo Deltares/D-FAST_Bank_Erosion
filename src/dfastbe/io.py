@@ -45,18 +45,34 @@ MAX_RIVER_WIDTH = 1000
 
 
 class SimulationObject:
-    x_node: np.ndarray
-    y_node: np.ndarray
-    nnodes: np.ndarray
-    facenode: np.ma.masked_array
-    zb_location: np.ndarray
-    zb_val: np.ndarray
-    zw_face: np.ndarray
-    h_face: np.ndarray
-    ucx_face: np.ndarray
-    ucy_face: np.ndarray
-    chz_face: np.ndarray
-    dh0: float
+
+    def __init__(
+        self,
+        x_node: np.ndarray,
+        y_node: np.ndarray,
+        nnodes: np.ndarray,
+        facenode: np.ma.masked_array,
+        zb_location: np.ndarray,
+        zb_val: np.ndarray,
+        zw_face: np.ndarray,
+        h_face: np.ndarray,
+        ucx_face: np.ndarray,
+        ucy_face: np.ndarray,
+        chz_face: np.ndarray,
+        dh0: float,
+    ):
+        self.x_node = x_node
+        self.y_node = y_node
+        self.nnodes = nnodes
+        self.facenode = facenode
+        self.zb_location = zb_location
+        self.zb_val = zb_val
+        self.zw_face = zw_face
+        self.h_face = h_face
+        self.ucx_face = ucx_face
+        self.ucy_face = ucy_face
+        self.chz_face = chz_face
+        self.dh0 = dh0
 
     @classmethod
     def read_simulation_data(
