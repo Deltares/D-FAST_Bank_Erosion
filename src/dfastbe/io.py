@@ -1289,7 +1289,7 @@ def read_simulation_data(
         if f_nc.mask.shape == ():
             # all faces have the same number of nodes
             sim["nnodes"] = (
-                np.ones(f_nc.data.shape[0], dtype=np.int) * f_nc.data.shape[1]
+                np.ones(f_nc.data.shape[0], dtype=int) * f_nc.data.shape[1]
             )
         else:
             # varying number of nodes
@@ -1377,7 +1377,7 @@ def clip_simulation_data(
 
     fnc = sim["facenode"]
     keep_face = keep[fnc].all(axis=1)
-    renum = np.zeros(nnodes, dtype=np.int)
+    renum = np.zeros(nnodes, dtype=int)
     renum[keep] = range(sum(keep))
     sim["facenode"] = renum[fnc[keep_face]]
 
