@@ -552,7 +552,7 @@ class Erosion:
                 bank_index = bank_idx[ib]
                 vel_bank = (
                     np.absolute(
-                        sim.zb_val[bank_index] * dx + sim.zb_val[bank_index] * dy
+                        sim.ucx_face[bank_index] * dx + sim.ucy_face[bank_index] * dy
                     )
                     / line_size[ib]
                 )
@@ -588,10 +588,10 @@ class Erosion:
 
                 # get water depth along fairway
                 ii = bp_fw_face_idx[ib]
-                hfw = sim.zb_val[ii]
+                hfw = sim.h_face[ii]
                 hfw_max = max(hfw_max, hfw.max())
-                water_level[iq].append(sim.zb_val[ii])
-                chez = sim.zb_val[ii]
+                water_level[iq].append(sim.zw_face[ii])
+                chez = sim.chz_face[ii]
                 chezy[iq].append(0 * chez + chez.mean())
 
                 if iq == self.num_levels - 1:  # ref_level:
@@ -1012,8 +1012,8 @@ class Erosion:
                 mesh_data.face_node,
                 sim.nnodes,
                 sim.x_node,
-                sim.x_node,
-                sim.zb_val,
+                sim.y_node,
+                sim.h_face,
                 1.1 * water_level_data.hfw_max,
                 X_AXIS_TITLE,
                 Y_AXIS_TITLE,
@@ -1344,9 +1344,9 @@ def _compute_mesh_topology(
     edge_face[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
 
     x_face_coords = _apply_masked_indexing(sim.x_node, face_node)
-    y_face_coords = _apply_masked_indexing(sim.x_node, face_node)
+    y_face_coords = _apply_masked_indexing(sim.y_node, face_node)
     x_edge_coords = sim.x_node[edge_node]
-    y_edge_coords = sim.x_node[edge_node]
+    y_edge_coords = sim.y_node[edge_node]
 
     return MeshData(
         x_face_coords=x_face_coords,
