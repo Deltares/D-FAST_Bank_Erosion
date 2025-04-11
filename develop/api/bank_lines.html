@@ -1961,11 +1961,11 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_simulation_data</span><span class="p">()</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_simulation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">SimulationObject</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_simulation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">SimulationData</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
         <span class="c1"># read simulation data and drying flooding threshold dh0</span>
         <span class="n">sim_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_sim_file</span><span class="p">(</span><span class="s2">&quot;Detect&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_simdata&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">sim_file</span><span class="p">})</span>
-        <span class="n">simulation_data</span> <span class="o">=</span> <span class="n">SimulationObject</span><span class="o">.</span><span class="n">read_simulation_data</span><span class="p">(</span><span class="n">sim_file</span><span class="p">)</span>
+        <span class="n">simulation_data</span> <span class="o">=</span> <span class="n">SimulationData</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">sim_file</span><span class="p">)</span>
         <span class="c1"># increase critical water depth h0 by flooding threshold dh0</span>
         <span class="c1"># get critical water depth used for defining bank line (default = 0.0 m)</span>
         <span class="n">critical_water_depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span>
@@ -2030,7 +2030,7 @@
 
         <span class="c1"># clip simulation data to boundaries ...</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;clip_data&quot;</span><span class="p">)</span>
-        <span class="n">SimulationObject</span><span class="o">.</span><span class="n">clip_simulation_data</span><span class="p">(</span>
+        <span class="n">SimulationData</span><span class="o">.</span><span class="n">clip_simulation_data</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="n">river_profile</span><span class="p">,</span> <span class="n">max_distance</span>
         <span class="p">)</span>
 
@@ -2147,14 +2147,14 @@
         <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_bank_lines</span><span class="p">(</span><span class="n">sim</span><span class="p">:</span> <span class="n">SimulationObject</span><span class="p">,</span> <span class="n">h0</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_bank_lines</span><span class="p">(</span><span class="n">sim</span><span class="p">:</span> <span class="n">SimulationData</span><span class="p">,</span> <span class="n">h0</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Detect all possible bank line segments based on simulation data.</span>
 
 <span class="sd">        Use a critical water depth h0 as a water depth threshold for dry/wet boundary.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            sim (SimulationObject):</span>
+<span class="sd">            sim (SimulationData):</span>
 <span class="sd">                Simulation data: mesh, bed levels, water levels, velocities, etc.</span>
 <span class="sd">            h0 (float):</span>
 <span class="sd">                Critical water depth for determining the banks.</span>
@@ -2529,7 +2529,7 @@ Flag indicating whether this routine is called from the GUI.</p>
 
     <span class="c1"># clip simulation data to boundaries ...</span>
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;clip_data&quot;</span><span class="p">)</span>
-    <span class="n">SimulationObject</span><span class="o">.</span><span class="n">clip_simulation_data</span><span class="p">(</span>
+    <span class="n">SimulationData</span><span class="o">.</span><span class="n">clip_simulation_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="n">river_profile</span><span class="p">,</span> <span class="n">max_distance</span>
     <span class="p">)</span>
 

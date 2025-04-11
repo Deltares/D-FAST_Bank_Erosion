@@ -3252,7 +3252,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
             <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_simdata&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_files</span><span class="p">[</span><span class="n">iq</span><span class="p">]},</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
             <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
-            <span class="n">sim</span> <span class="o">=</span> <span class="n">SimulationObject</span><span class="o">.</span><span class="n">read_simulation_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim_files</span><span class="p">[</span><span class="n">iq</span><span class="p">],</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
+            <span class="n">sim</span> <span class="o">=</span> <span class="n">SimulationData</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sim_files</span><span class="p">[</span><span class="n">iq</span><span class="p">],</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
             <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
             <span class="n">fnc</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">facenode</span>
 
@@ -3561,7 +3561,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_simdata&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">sim_file</span><span class="p">})</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
-        <span class="n">sim</span> <span class="o">=</span> <span class="n">SimulationObject</span><span class="o">.</span><span class="n">read_simulation_data</span><span class="p">(</span><span class="n">sim_file</span><span class="p">)</span>
+        <span class="n">sim</span> <span class="o">=</span> <span class="n">SimulationData</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">sim_file</span><span class="p">)</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
 
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;derive_topology&quot;</span><span class="p">)</span>
@@ -3701,7 +3701,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">river_axis_km</span><span class="p">,</span>
         <span class="n">bank_km_mid</span><span class="p">,</span>
         <span class="n">banklines</span><span class="p">,</span>
-        <span class="n">sim</span><span class="p">:</span> <span class="n">SimulationObject</span><span class="p">,</span>
+        <span class="n">sim</span><span class="p">:</span> <span class="n">SimulationData</span><span class="p">,</span>
         <span class="n">dn_tot</span><span class="p">,</span>
         <span class="n">is_right_bank</span><span class="p">,</span>
         <span class="n">xy_line_eq_list</span><span class="p">,</span>
@@ -4143,7 +4143,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_simdata&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">sim_file</span><span class="p">})</span>
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
-    <span class="n">sim</span> <span class="o">=</span> <span class="n">SimulationObject</span><span class="o">.</span><span class="n">read_simulation_data</span><span class="p">(</span><span class="n">sim_file</span><span class="p">)</span>
+    <span class="n">sim</span> <span class="o">=</span> <span class="n">SimulationData</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">sim_file</span><span class="p">)</span>
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
 
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;derive_topology&quot;</span><span class="p">)</span>
