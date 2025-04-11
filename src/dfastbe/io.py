@@ -29,7 +29,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from configparser import ConfigParser
 from configparser import Error as ConfigparserError
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, TypedDict, Union
+from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, Union
 
 import geopandas as gpd
 import netCDF4
@@ -44,18 +44,239 @@ from shapely.prepared import prep
 MAX_RIVER_WIDTH = 1000
 
 
-class SimulationObject(TypedDict):
-    x_node: np.ndarray
-    y_node: np.ndarray
-    nnodes: np.ndarray
-    facenode: np.ma.masked_array
-    zb_location: np.ndarray
-    zb_val: np.ndarray
-    zw_face: np.ndarray
-    h_face: np.ndarray
-    ucx_face: np.ndarray
-    ucy_face: np.ndarray
-    chz_face: np.ndarray
+class SimulationData:
+    """Class to hold simulation data.
+
+    This class contains the simulation data read from a UGRID netCDF file.
+    It includes methods to read the data from the file and clip the simulation
+    mesh to a specified area of interest.
+
+    Args:
+        x_node (np.ndarray): X-coordinates of the nodes.
+        y_node (np.ndarray): Y-coordinates of the nodes.
+        nnodes (np.ndarray): Number of nodes in each face.
+        facenode (np.ma.masked_array): Face-node connectivity array.
+        zb_location (np.ndarray): Location of the bed levels.
+        zb_val (np.ndarray): Bed levels.
+        zw_face (np.ndarray): Water levels at the faces.
+        h_face (np.ndarray): Water depths at the faces.
+        ucx_face (np.ndarray): X-component of the velocity at the faces.
+        ucy_face (np.ndarray): Y-component of the velocity at the faces.
+        chz_face (np.ndarray): Chezy roughness values at the faces.
+        dh0 (float): Threshold depth for detecting drying and flooding.
+    """
+    def __init__(
+        self,
+        x_node: np.ndarray,
+        y_node: np.ndarray,
+        nnodes: np.ndarray,
+        facenode: np.ma.masked_array,
+        zb_location: np.ndarray,
+        zb_val: np.ndarray,
+        zw_face: np.ndarray,
+        h_face: np.ndarray,
+        ucx_face: np.ndarray,
+        ucy_face: np.ndarray,
+        chz_face: np.ndarray,
+        dh0: float,
+    ):
+        self.x_node = x_node
+        self.y_node = y_node
+        self.nnodes = nnodes
+        self.facenode = facenode
+        self.zb_location = zb_location
+        self.zb_val = zb_val
+        self.zw_face = zw_face
+        self.h_face = h_face
+        self.ucx_face = ucx_face
+        self.ucy_face = ucy_face
+        self.chz_face = chz_face
+        self.dh0 = dh0
+
+    @classmethod
+    def read(cls, file_name: str, indent: str = "") -> "SimulationData":
+        """Read a default set of quantities from a UGRID netCDF file.
+
+        Supported files are coming from D-Flow FM (or similar).
+
+        Args:
+            file_name (str):
+                Name of the simulation output file to be read.
+            indent (str):
+                String to use for each line as indentation (default empty).
+
+        Raises:
+            SimulationFilesError
+                If the file is not recognized as a D-Flow FM map-file.
+
+        Returns:
+            SimulationData: Dictionary containing the data read from the simulation output file.
+            float: Threshold depth for detecting drying and flooding.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import SimulationData
+            >>> sim_data = SimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
+            No message found for read_grid
+            No message found for read_bathymetry
+            No message found for read_water_level
+            No message found for read_water_depth
+            No message found for read_velocity
+            No message found for read_chezy
+            No message found for read_drywet
+            >>> print(sim_data.x_node[0:3])
+            [194949.796875 194966.515625 194982.8125  ]
+
+            ```
+        """
+        name = Path(file_name).name
+        if name.endswith("map.nc"):
+            log_text("read_grid", indent=indent)
+            x_node = read_fm_map(file_name, "x", location="node")
+            y_node = read_fm_map(file_name, "y", location="node")
+            f_nc = read_fm_map(file_name, "face_node_connectivity")
+            if f_nc.mask.shape == ():
+                # all faces have the same number of nodes
+                nnodes = np.ones(f_nc.data.shape[0], dtype=np.int) * f_nc.data.shape[1]
+            else:
+                # varying number of nodes
+                nnodes = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
+            f_nc.data[f_nc.mask] = 0
+
+            facenode = f_nc
+            log_text("read_bathymetry", indent=indent)
+            zb_location = "node"
+            zb_val = read_fm_map(file_name, "altitude", location="node")
+            log_text("read_water_level", indent=indent)
+            zw_face = read_fm_map(file_name, "Water level")
+            log_text("read_water_depth", indent=indent)
+            h_face = np.maximum(
+                read_fm_map(file_name, "sea_floor_depth_below_sea_surface"), 0.0
+            )
+            log_text("read_velocity", indent=indent)
+            ucx_face = read_fm_map(file_name, "sea_water_x_velocity")
+            ucy_face = read_fm_map(file_name, "sea_water_y_velocity")
+            log_text("read_chezy", indent=indent)
+            chz_face = read_fm_map(file_name, "Chezy roughness")
+
+            log_text("read_drywet", indent=indent)
+            root_group = netCDF4.Dataset(file_name)
+            try:
+                file_source = root_group.converted_from
+                if file_source == "SIMONA":
+                    dh0 = 0.1
+                else:
+                    dh0 = 0.01
+            except:
+                dh0 = 0.01
+
+        elif name.startswith("SDS"):
+            raise SimulationFilesError(
+                f"WAQUA output files not yet supported. Unable to process {name}"
+            )
+        elif name.startswith("trim"):
+            raise SimulationFilesError(
+                f"Delft3D map files not yet supported. Unable to process {name}"
+            )
+        else:
+            raise SimulationFilesError(f"Unable to determine file type for {name}")
+
+        return cls(
+            x_node=x_node,
+            y_node=y_node,
+            nnodes=nnodes,
+            facenode=facenode,
+            zb_location=zb_location,
+            zb_val=zb_val,
+            zw_face=zw_face,
+            h_face=h_face,
+            ucx_face=ucx_face,
+            ucy_face=ucy_face,
+            chz_face=chz_face,
+            dh0=dh0,
+        )
+
+    def apply_clipping_to_simulation_data(
+        self, river_profile: np.ndarray, max_distance: float
+    ):
+        """Clip the simulation mesh.
+
+        Clipping data to the area of interest,
+        that is sufficiently close to the reference line.
+
+        Args:
+            sim (SimulationData):
+                Simulation data: mesh, bed levels, water levels, velocities, etc.
+            river_profile (np.ndarray):
+                Reference line.
+            max_distance (float):
+                Maximum distance between the reference line and a point in the area of
+                interest defined based on the search lines for the banks and the search
+                distance.
+
+        Notes:
+            The function uses the Shapely library to create a buffer around the river
+            profile and checks if the nodes are within that buffer. If they are not,
+            they are removed from the simulation data.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import SimulationData
+            >>> sim_data = SimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
+            No message found for read_grid
+            No message found for read_bathymetry
+            No message found for read_water_level
+            No message found for read_water_depth
+            No message found for read_velocity
+            No message found for read_chezy
+            No message found for read_drywet
+            >>> river_profile = LineString([
+            ... [194949.796875, 361366.90625],
+            ... [194966.515625, 361399.46875],
+            ... [194982.8125, 361431.03125]
+            ... ])
+            >>> max_distance = 10.0
+            >>> sim_data.apply_clipping_to_simulation_data(river_profile, max_distance)
+            >>> print(sim_data.x_node)
+            [194949.796875 194966.515625 194982.8125  ]
+
+            ```
+        """
+        xy_buffer = river_profile.buffer(max_distance + max_distance)
+        bbox = xy_buffer.envelope.exterior
+        x_min = bbox.coords[0][0]
+        x_max = bbox.coords[1][0]
+        y_min = bbox.coords[0][1]
+        y_max = bbox.coords[2][1]
+
+        xy_b_prep = prep(xy_buffer)
+        x = self.x_node
+        y = self.y_node
+        nnodes = x.shape
+        keep = (x > x_min) & (x < x_max) & (y > y_min) & (y < y_max)
+        for i in range(x.size):
+            if keep[i] and not xy_b_prep.contains(Point((x[i], y[i]))):
+                keep[i] = False
+
+        fnc = self.facenode
+        keep_face = keep[fnc].all(axis=1)
+        renum = np.zeros(nnodes, dtype=np.int)
+        renum[keep] = range(sum(keep))
+        self.facenode = renum[fnc[keep_face]]
+
+        self.x_node = x[keep]
+        self.y_node = y[keep]
+        if self.zb_location == "node":
+            self.zb_val = self.zb_val[keep]
+        else:
+            self.zb_val = self.zb_val[keep_face]
+
+        self.nnodes = self.nnodes[keep_face]
+        self.zw_face = self.zw_face[keep_face]
+        self.h_face = self.h_face[keep_face]
+        self.ucx_face = self.ucx_face[keep_face]
+        self.ucy_face = self.ucy_face[keep_face]
+        self.chz_face = self.chz_face[keep_face]
 
 
 PROGTEXTS: Dict[str, List[str]]
@@ -388,7 +609,7 @@ class ConfigFile:
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> result = config_file.get_str("General", "BankDir")
-            >>> expected = Path("tests/data/erosion/output/banklines")
+            >>> expected = Path("tests/data/erosion/output/banklines").resolve()
             >>> str(expected) == result
             True
 
@@ -564,7 +785,7 @@ class ConfigFile:
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> result = config_file.get_sim_file("Erosion", "1")
-            >>> expected = Path("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
+            >>> expected = Path("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc").resolve()
             >>> str(expected) == result
             True
 
@@ -1252,164 +1473,6 @@ class RiverData:
         log_text("read_river_axis", data={"file": river_axis_file})
         river_axis = XYCModel.read(river_axis_file)
         return river_axis
-
-
-def read_simulation_data(
-    file_name: str, indent: str = ""
-) -> Tuple[SimulationObject, float]:
-    """
-    Read a default set of quantities from a UGRID netCDF file coming from D-Flow FM (or similar).
-
-    Arguments
-    ---------
-    file_name : str
-        Name of the simulation output file to be read.
-    indent : str
-        String to use for each line as indentation (default empty).
-
-    Raises
-    ------
-    Exception
-        If the file is not recognized as a D-Flow FM map-file.
-
-    Returns
-    -------
-    sim : SimulationObject
-        Dictionary containing the data read from the simulation output file.
-    dh0 : float
-        Threshold depth for detecting drying and flooding.
-    """
-    dum = np.array([])
-    sim: SimulationObject = {
-        "x_node": dum,
-        "y_node": dum,
-        "nnodes": dum,
-        "facenode": dum,
-        "zb_location": dum,
-        "zb_val": dum,
-        "zw_face": dum,
-        "h_face": dum,
-        "ucx_face": dum,
-        "ucy_face": dum,
-        "chz_face": dum,
-    }
-    # determine the file type
-    name = Path(file_name).name
-    if name.endswith("map.nc"):
-        log_text("read_grid", indent=indent)
-        sim["x_node"] = read_fm_map(file_name, "x", location="node")
-        sim["y_node"] = read_fm_map(file_name, "y", location="node")
-        f_nc = read_fm_map(file_name, "face_node_connectivity")
-        if f_nc.mask.shape == ():
-            # all faces have the same number of nodes
-            sim["nnodes"] = (
-                np.ones(f_nc.data.shape[0], dtype=np.int) * f_nc.data.shape[1]
-            )
-        else:
-            # varying number of nodes
-            sim["nnodes"] = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
-        f_nc.data[f_nc.mask] = 0
-
-        sim["facenode"] = f_nc
-        log_text("read_bathymetry", indent=indent)
-        sim["zb_location"] = "node"
-        sim["zb_val"] = read_fm_map(file_name, "altitude", location="node")
-        log_text("read_water_level", indent=indent)
-        sim["zw_face"] = read_fm_map(file_name, "Water level")
-        log_text("read_water_depth", indent=indent)
-        sim["h_face"] = np.maximum(
-            read_fm_map(file_name, "sea_floor_depth_below_sea_surface"), 0.0
-        )
-        log_text("read_velocity", indent=indent)
-        sim["ucx_face"] = read_fm_map(file_name, "sea_water_x_velocity")
-        sim["ucy_face"] = read_fm_map(file_name, "sea_water_y_velocity")
-        log_text("read_chezy", indent=indent)
-        sim["chz_face"] = read_fm_map(file_name, "Chezy roughness")
-
-        log_text("read_drywet", indent=indent)
-        root_group = netCDF4.Dataset(file_name)
-        try:
-            file_source = root_group.converted_from
-            if file_source == "SIMONA":
-                dh0 = 0.1
-            else:
-                dh0 = 0.01
-        except:
-            dh0 = 0.01
-
-    elif name.startswith("SDS"):
-        raise SimulationFilesError(
-            f"WAQUA output files not yet supported. Unable to process {name}"
-        )
-    elif name.startswith("trim"):
-        raise SimulationFilesError(
-            f"Delft3D map files not yet supported. Unable to process {name}"
-        )
-    else:
-        raise SimulationFilesError(f"Unable to determine file type for {name}")
-
-    return sim, dh0
-
-
-def clip_simulation_data(
-    sim: SimulationObject, river_profile: np.ndarray, max_distance: float
-) -> SimulationObject:
-    """
-    Clip the simulation mesh and data to the area of interest sufficiently close to the reference line.
-
-    Arguments
-    ---------
-    sim : SimulationObject
-        Simulation data: mesh, bed levels, water levels, velocities, etc.
-    river_profile : np.ndarray
-        Reference line.
-    max_distance : float
-        Maximum distance between the reference line and a point in the area of
-        interest defined based on the search lines for the banks and the search
-        distance.
-
-    Returns
-    -------
-    sim1 : SimulationObject
-        Clipped simulation data: mesh, bed levels, water levels, velocities, etc.
-    """
-    xy_buffer = river_profile.buffer(max_distance + max_distance)
-    bbox = xy_buffer.envelope.exterior
-    x_min = bbox.coords[0][0]
-    x_max = bbox.coords[1][0]
-    y_min = bbox.coords[0][1]
-    y_max = bbox.coords[2][1]
-
-    xy_b_prep = prep(xy_buffer)
-    x = sim["x_node"]
-    y = sim["y_node"]
-    nnodes = x.shape
-    keep = (x > x_min) & (x < x_max) & (y > y_min) & (y < y_max)
-    for i in range(x.size):
-        if keep[i] and not xy_b_prep.contains(Point((x[i], y[i]))):
-            keep[i] = False
-
-    fnc = sim["facenode"]
-    keep_face = keep[fnc].all(axis=1)
-    renum = np.zeros(nnodes, dtype=np.int)
-    renum[keep] = range(sum(keep))
-    sim["facenode"] = renum[fnc[keep_face]]
-
-    sim["x_node"] = x[keep]
-    sim["y_node"] = y[keep]
-    if sim["zb_location"] == "node":
-        sim["zb_val"] = sim["zb_val"][keep]
-    else:
-        sim["zb_val"] = sim["zb_val"][keep_face]
-
-    sim["nnodes"] = sim["nnodes"][keep_face]
-    sim["zw_face"] = sim["zw_face"][keep_face]
-    sim["h_face"] = sim["h_face"][keep_face]
-    sim["ucx_face"] = sim["ucx_face"][keep_face]
-    sim["ucy_face"] = sim["ucy_face"][keep_face]
-    sim["chz_face"] = sim["chz_face"][keep_face]
-
-    return sim
 
 
 def load_program_texts(file_name: Union[str, Path]) -> None:

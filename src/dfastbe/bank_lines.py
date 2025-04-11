@@ -15,10 +15,8 @@ from dfastbe import plotting as df_plt
 from dfastbe.io import (
     ConfigFile,
     RiverData,
-    SimulationObject,
-    clip_simulation_data,
+    SimulationData,
     log_text,
-    read_simulation_data,
 )
 from dfastbe.kernel import get_bbox, get_zoom_extends
 from dfastbe.support import (
@@ -63,17 +61,17 @@ class BankLines:
 
         self.simulation_data, self.h0 = self._get_simulation_data()
 
-    def _get_simulation_data(self) -> Tuple[SimulationObject, float]:
+    def _get_simulation_data(self) -> Tuple[SimulationData, float]:
         # read simulation data and drying flooding threshold dh0
         sim_file = self.config_file.get_sim_file("Detect", "")
         log_text("read_simdata", data={"file": sim_file})
-        simulation_data, dh0 = read_simulation_data(sim_file)
+        simulation_data = SimulationData.read(sim_file)
         # increase critical water depth h0 by flooding threshold dh0
         # get critical water depth used for defining bank line (default = 0.0 m)
         critical_water_depth = self.config_file.get_float(
             "Detect", "WaterDepth", default=0
         )
-        h0 = critical_water_depth + dh0
+        h0 = critical_water_depth + simulation_data.dh0
         return simulation_data, h0
 
     @property
@@ -132,11 +130,13 @@ class BankLines:
 
         # clip simulation data to boundaries ...
         log_text("clip_data")
-        sim = clip_simulation_data(self.simulation_data, river_profile, max_distance)
+        SimulationData.apply_clipping_to_simulation_data(
+            self.simulation_data, river_profile, max_distance
+        )
 
         # derive bank lines (get_banklines)
         log_text("identify_banklines")
-        banklines = self._get_bank_lines(sim, self.h0)
+        banklines = self._get_bank_lines(self.simulation_data, self.h0)
 
         # clip the set of detected bank lines to the bank areas
         log_text("simplify_banklines")
@@ -155,12 +155,10 @@ class BankLines:
         if self.plot_flags["plot_data"]:
             self.plot(
                 river_data.masked_profile_arr,
-                self.plot_flags,
                 river_data.num_search_lines,
                 bank,
                 km_bounds,
                 bank_areas,
-                sim,
             )
 
         log_text("end_banklines")
@@ -169,12 +167,10 @@ class BankLines:
     def plot(
         self,
         xy_km_numpy: np.ndarray,
-        plot_flags: Dict[str, bool],
         n_search_lines: int,
         bank: List,
         km_bounds,
         bank_areas,
-        sim,
     ):
         """Plot the bank lines and the simulation data."""
         log_text("=")
@@ -182,7 +178,7 @@ class BankLines:
         i_fig = 0
         bbox = get_bbox(xy_km_numpy)
 
-        if plot_flags["save_plot_zoomed"]:
+        if self.plot_flags["save_plot_zoomed"]:
             bank_crds: List[np.ndarray] = []
             bank_km: List[np.ndarray] = []
             for ib in range(n_search_lines):
@@ -193,7 +189,7 @@ class BankLines:
             km_zoom, xy_zoom = get_zoom_extends(
                 km_bounds[0],
                 km_bounds[1],
-                plot_flags["zoom_km_step"],
+                self.plot_flags["zoom_km_step"],
                 bank_crds,
                 bank_km,
             )
@@ -203,12 +199,12 @@ class BankLines:
             xy_km_numpy,
             bank_areas,
             bank,
-            sim["facenode"],
-            sim["nnodes"],
-            sim["x_node"],
-            sim["y_node"],
-            sim["h_face"],
-            1.1 * sim["h_face"].max(),
+            self.simulation_data.facenode,
+            self.simulation_data.nnodes,
+            self.simulation_data.x_node,
+            self.simulation_data.y_node,
+            self.simulation_data.h_face,
+            1.1 * self.simulation_data.h_face.max(),
             "x-coordinate [m]",
             "y-coordinate [m]",
             "water depth and detected bank lines",
@@ -216,14 +212,16 @@ class BankLines:
             "bank search area",
             "detected bank line",
         )
-        if plot_flags["save_plot"]:
+        if self.plot_flags["save_plot"]:
             i_fig = i_fig + 1
-            fig_base = f"{plot_flags.get('fig_dir')}{os.sep}{i_fig}_banklinedetection"
-            if plot_flags["save_plot_zoomed"]:
+            fig_base = (
+                f"{self.plot_flags.get('fig_dir')}{os.sep}{i_fig}_banklinedetection"
+            )
+            if self.plot_flags["save_plot_zoomed"]:
                 df_plt.zoom_xy_and_save(
-                    fig, ax, fig_base, plot_flags.get("plot_ext"), xy_zoom, scale=1
+                    fig, ax, fig_base, self.plot_flags.get("plot_ext"), xy_zoom, scale=1
                 )
-            fig_file = fig_base + plot_flags["plot_ext"]
+            fig_file = fig_base + self.plot_flags["plot_ext"]
             df_plt.savefig(fig, fig_file)
 
         if self.plot_flags["close_plot"]:
@@ -249,14 +247,14 @@ class BankLines:
         )
 
     @staticmethod
-    def _get_bank_lines(sim: SimulationObject, h0: float) -> gpd.GeoSeries:
+    def _get_bank_lines(sim: SimulationData, h0: float) -> gpd.GeoSeries:
         """
         Detect all possible bank line segments based on simulation data.
 
         Use a critical water depth h0 as a water depth threshold for dry/wet boundary.
 
         Args:
-            sim (SimulationObject):
+            sim (SimulationData):
                 Simulation data: mesh, bed levels, water levels, velocities, etc.
             h0 (float):
                 Critical water depth for determining the banks.
@@ -265,15 +263,15 @@ class BankLines:
         banklines (geopandas.GeoSeries):
             The collection of all detected bank segments in the remaining model area.
         """
-        fnc = sim["facenode"]
-        n_nodes = sim["nnodes"]
+        fnc = sim.facenode
+        n_nodes = sim.nnodes
         max_nnodes = fnc.shape[1]
-        x_node = sim["x_node"][fnc]
-        y_node = sim["y_node"][fnc]
-        zb = sim["zb_val"][fnc]
-        zw = sim["zw_face"]
+        x_node = sim.x_node[fnc]
+        y_node = sim.y_node[fnc]
+        zb = sim.zb_val[fnc]
+        zw = sim.zw_face
 
-        nnodes_total = len(sim["x_node"])
+        nnodes_total = len(sim.x_node)
         try:
             mask = ~fnc.mask
             non_masked = sum(mask.reshape(fnc.size))
@@ -288,7 +286,7 @@ class BankLines:
         zw_node = np.bincount(f_nc_m, weights=zwm, minlength=nnodes_total)
         n_val = np.bincount(f_nc_m, weights=np.ones(non_masked), minlength=nnodes_total)
         zw_node = zw_node / np.maximum(n_val, 1)
-        zw_node[n_val == 0] = sim["zb_val"][n_val == 0]
+        zw_node[n_val == 0] = sim.zb_val[n_val == 0]
 
         h_node = zw_node[fnc] - zb
         wet_node = h_node > h0

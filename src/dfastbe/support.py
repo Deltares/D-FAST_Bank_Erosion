@@ -28,7 +28,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 from typing import List, Tuple
-from dfastbe.io import SimulationObject
+from dfastbe.io import SimulationData
 from dfastbe.structures import MeshData
 
 # import matplotlib
@@ -1755,14 +1755,14 @@ def convert_search_lines_to_bank_polygons(
 
 
 def clip_simdata(
-    sim: SimulationObject, xykm: numpy.ndarray, maxmaxd: float
-) -> SimulationObject:
+    sim: SimulationData, xykm: numpy.ndarray, maxmaxd: float
+) -> SimulationData:
     """
     Clip the simulation mesh and data to the area of interest sufficiently close to the reference line.
 
     Arguments
     ---------
-    sim : SimulationObject
+    sim : SimulationData
         Simulation data: mesh, bed levels, water levels, velocities, etc.
     xykm : numpy.ndarray
         Reference line.
@@ -1773,7 +1773,7 @@ def clip_simdata(
     
     Returns
     -------
-    sim1 : SimulationObject
+    sim1 : SimulationData
         Clipped simulation data: mesh, bed levels, water levels, velocities, etc.
     """
     maxdx = maxmaxd
@@ -1816,7 +1816,7 @@ def clip_simdata(
     return sim
 
 
-def get_banklines(sim: SimulationObject, h0: float) -> geopandas.GeoSeries:
+def get_banklines(sim: SimulationData, h0: float) -> geopandas.GeoSeries:
     """
     Detect all possible bank line segments based on simulation data.
     
@@ -1824,7 +1824,7 @@ def get_banklines(sim: SimulationObject, h0: float) -> geopandas.GeoSeries:
 
     Arguments
     ---------
-    sim : SimulationObject
+    sim : SimulationData
         Simulation data: mesh, bed levels, water levels, velocities, etc.
     h0 : float
         Critical water depth for determining the banks.
