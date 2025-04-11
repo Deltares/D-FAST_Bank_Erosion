@@ -38,7 +38,6 @@ class ErosionInputs:
 class WaterLevelData:
     """Class to hold water level data.
     args:
-        zfw_ini (List[np.ndarray]): Initial water level.
         hfw_max (float): Maximum water level.
         water_level (List[List[np.ndarray]]): Water level data.
         ship_wave_max (List[List[np.ndarray]]): Maximum ship wave data.
