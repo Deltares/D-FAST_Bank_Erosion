@@ -56,8 +56,8 @@ def test_load_program_texts_01():
 
 
 class TestSimulationData:
-    def test_read_simulation_data(self):
 
+    def test_read_simulation_data(self):
         file_name = "test_map.nc"
         mock_x_node = np.array([0.0, 1.0, 2.0])
         mock_y_node = np.array([0.0, 1.0, 2.0])
@@ -75,15 +75,15 @@ class TestSimulationData:
             "netCDF4.Dataset"
         ) as mock_dataset:
             mock_read_fm_map.side_effect = [
-                mock_x_node,  # x_node
-                mock_y_node,  # y_node
-                mock_facenode,  # facenode
-                mock_zb_val,  # zb_val
-                mock_zw_face,  # zw_face
-                mock_h_face,  # h_face
-                mock_ucx_face,  # ucx_face
-                mock_ucy_face,  # ucy_face
-                mock_chz_face,  # chz_face
+                mock_x_node,
+                mock_y_node,
+                mock_facenode,
+                mock_zb_val,
+                mock_zw_face,
+                mock_h_face,
+                mock_ucx_face,
+                mock_ucy_face,
+                mock_chz_face,
             ]
 
             mock_root_group = MagicMock()
@@ -102,7 +102,7 @@ class TestSimulationData:
             assert np.array_equal(sim_object.ucx_face, mock_ucx_face)
             assert np.array_equal(sim_object.ucy_face, mock_ucy_face)
             assert np.array_equal(sim_object.chz_face, mock_chz_face)
-            assert sim_object.dh0 == 0.1  # Based on the mocked "SIMONA" source
+            assert sim_object.dh0 == 0.1
 
             mock_read_fm_map.assert_any_call(file_name, "x", location="node")
             mock_read_fm_map.assert_any_call(file_name, "y", location="node")
@@ -124,7 +124,6 @@ class TestSimulationData:
 
     @pytest.fixture
     def sim_data(self) -> SimulationData:
-        # Mock simulation data
         x_node = np.array([194949.796875, 194966.515625, 194982.8125, 195000.0])
         y_node = np.array([361366.90625, 361399.46875, 361431.03125, 361450.0])
         nnodes = np.array([4, 4])
@@ -141,7 +140,6 @@ class TestSimulationData:
         chz_face = np.array([30.0, 40.0])
         dh0 = 0.1
 
-        # Create a SimulationData object
         sim_data = SimulationData(
             x_node=x_node,
             y_node=y_node,
@@ -159,8 +157,6 @@ class TestSimulationData:
         return sim_data
 
     def test_apply_clipping_to_simulation_data(self, sim_data: SimulationData):
-
-        # Define a river profile as a LineString
         river_profile = LineString(
             [
                 [194949.796875, 361366.90625],
@@ -168,23 +164,15 @@ class TestSimulationData:
                 [194982.8125, 361431.03125],
             ]
         )
-
-        # Define the maximum distance for clipping
         max_distance = 10.0
-
-        # Apply clipping
         sim_data.apply_clipping_to_simulation_data(river_profile, max_distance)
 
-        # Assertions
-        # Check that nodes outside the buffer are removed
         assert np.array_equal(
             sim_data.x_node, np.array([194949.796875, 194966.515625, 194982.8125])
         )
         assert np.array_equal(
             sim_data.y_node, np.array([361366.90625, 361399.46875, 361431.03125])
         )
-
-        # Check that other attributes are updated correctly
         assert np.array_equal(sim_data.zb_val, np.array([10.0, 20.0, 30.0]))
         assert sim_data.nnodes.size == 0
         assert sim_data.zw_face.size == 0
@@ -196,8 +184,6 @@ class TestSimulationData:
     def test_apply_clipping_to_simulation_data_no_nodes_in_buffer(
         self, sim_data: SimulationData
     ):
-
-        # Define a river profile as a LineString
         river_profile = LineString(
             [
                 [194900.0, 361300.0],
@@ -205,15 +191,10 @@ class TestSimulationData:
                 [194920.0, 361320.0],
             ]
         )
-
-        # Define the maximum distance for clipping
         max_distance = 10.0
 
-        # Apply clipping
         sim_data.apply_clipping_to_simulation_data(river_profile, max_distance)
 
-        # Assertions
-        # Check that all nodes are removed since none are within the buffer
         assert sim_data.x_node.size == 0
         assert sim_data.y_node.size == 0
         assert sim_data.zb_val.size == 0
