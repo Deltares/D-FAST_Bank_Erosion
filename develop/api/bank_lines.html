@@ -2030,7 +2030,7 @@
 
         <span class="c1"># clip simulation data to boundaries ...</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;clip_data&quot;</span><span class="p">)</span>
-        <span class="n">SimulationData</span><span class="o">.</span><span class="n">clip_simulation_data</span><span class="p">(</span>
+        <span class="n">SimulationData</span><span class="o">.</span><span class="n">apply_clipping_to_simulation_data</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="n">river_profile</span><span class="p">,</span> <span class="n">max_distance</span>
         <span class="p">)</span>
 
@@ -2529,7 +2529,7 @@ Flag indicating whether this routine is called from the GUI.</p>
 
     <span class="c1"># clip simulation data to boundaries ...</span>
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;clip_data&quot;</span><span class="p">)</span>
-    <span class="n">SimulationData</span><span class="o">.</span><span class="n">clip_simulation_data</span><span class="p">(</span>
+    <span class="n">SimulationData</span><span class="o">.</span><span class="n">apply_clipping_to_simulation_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="n">river_profile</span><span class="p">,</span> <span class="n">max_distance</span>
     <span class="p">)</span>
 
