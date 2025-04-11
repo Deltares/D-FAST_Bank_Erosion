@@ -23,7 +23,10 @@ def captured_output():
         sys.stdout, sys.stderr = old_out, old_err
 
 
+@pytest.mark.binaries
 class TestBatchMode:
+    config_file = "meuse_manual.cfg"
+
     def test_batch_mode_00(self):
         """
         Testing batch_mode: missing configuration file.
@@ -50,16 +53,11 @@ class TestBatchMode:
 
         assert out_str[-1] == "FileNotFoundError: The Config-File: config.cfg does not exist"
 
-    @pytest.mark.parametrize(
-        "test_dir, config_file",
-        [
-            ("tests/data/bank_lines", "Meuse_manual.cfg"),
-        ],
-    )
-    def test_bank_lines(self, test_dir, config_file):
+    def test_bank_lines(self):
         """
         Testing the bank line detection mode.
         """
+        test_dir = "tests/data/bank_lines"
         cwd = os.getcwd()
         try:
             os.chdir(test_dir)
@@ -69,7 +67,7 @@ class TestBatchMode:
                     "--mode",
                     "BANKLINES",
                     "--config",
-                    config_file,
+                    self.config_file,
                 ],
                 capture_output=True,
             )
@@ -80,16 +78,11 @@ class TestBatchMode:
         success_string = "===    Bank line detection ended successfully!    ==="
         assert success_string in out_str
 
-    @pytest.mark.parametrize(
-        "test_dir, config_file",
-        [
-            ("tests/data/erosion", "meuse_manual.cfg"),
-        ],
-    )
-    def test_bank_erosion(self, test_dir, config_file):
+    def test_bank_erosion(self):
         """
         Testing the bank erosion mode.
         """
+        test_dir = "tests/data/erosion"
         cwd = os.getcwd()
         try:
             os.chdir(test_dir)
@@ -99,7 +92,7 @@ class TestBatchMode:
                     "--mode",
                     "BANKEROSION",
                     "--config",
-                    config_file,
+                    self.config_file,
                 ],
                 capture_output=True,
             )

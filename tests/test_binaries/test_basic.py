@@ -1,3 +1,4 @@
+import pytest
 import os
 import subprocess
 import sys
@@ -21,6 +22,7 @@ def captured_output():
         sys.stdout, sys.stderr = old_out, old_err
 
 
+@pytest.mark.binaries
 class TestBasic:
     def test_basic_00(self):
         """
