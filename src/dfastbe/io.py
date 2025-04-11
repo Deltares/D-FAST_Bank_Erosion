@@ -213,6 +213,34 @@ class SimulationData:
                 Maximum distance between the reference line and a point in the area of
                 interest defined based on the search lines for the banks and the search
                 distance.
+
+        Notes:
+            The function uses the Shapely library to create a buffer around the river
+            profile and checks if the nodes are within that buffer. If they are not,
+            they are removed from the simulation data.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import SimulationData
+            >>> sim_data = SimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
+            No message found for read_grid
+            No message found for read_bathymetry
+            No message found for read_water_level
+            No message found for read_water_depth
+            No message found for read_velocity
+            No message found for read_chezy
+            No message found for read_drywet
+            >>> river_profile = LineString([
+            ... [194949.796875, 361366.90625],
+            ... [194966.515625, 361399.46875],
+            ... [194982.8125, 361431.03125]
+            ... ])
+            >>> max_distance = 10.0
+            >>> sim_data.apply_clipping_to_simulation_data(river_profile, max_distance)
+            >>> print(sim_data.x_node)
+            [194949.796875 194966.515625 194982.8125  ]
+
+            ```
         """
         xy_buffer = river_profile.buffer(max_distance + max_distance)
         bbox = xy_buffer.envelope.exterior
