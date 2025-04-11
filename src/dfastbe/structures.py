@@ -111,14 +111,14 @@ class FairwayData:
     """Class to hold fairway-related data.
 
     args:
-        ifw_face_idx (np.ndarray): Index of the fairway faces.
-        ifw_numpy (np.ndarray): Numpy array for fairway data.
-        bp_fw_face_idx (np.ndarray): Index of the bank protection fairway faces.
-        distance_fw (np.ndarray): Distance to the fairway.
-        zfw_ini (List[np.ndarray]): Initial water level in the fairway.
+        fairway_face_indices (np.ndarray): Indices of the fairway faces.
+        fairway_data (np.ndarray): Numpy array containing fairway-related data.
+        bank_protection_fairway_face_indices (np.ndarray): Indices of the bank protection fairway faces.
+        fairway_distances (np.ndarray): Distances from the banks to the fairway.
+        fairway_initial_water_levels (List[np.ndarray]): Initial water levels in the fairway.
     """
-    ifw_face_idx: np.ndarray
-    ifw_numpy: np.ndarray
-    bp_fw_face_idx: np.ndarray = np.array([])
-    distance_fw: np.ndarray = np.array([])
-    zfw_ini: List[np.ndarray] = field(default_factory=list)
+    fairway_face_indices: np.ndarray
+    fairway_data: np.ndarray
+    bank_protection_fairway_face_indices: np.ndarray = np.array([])
+    fairway_distances: np.ndarray = np.array([])
+    fairway_initial_water_levels: List[np.ndarray] = field(default_factory=list)

@@ -263,13 +263,15 @@ class Erosion:
 
         # intersect fairway and mesh
         log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
-        ifw_numpy, ifw_face_idx = intersect_line_mesh(fairway_numpy, mesh_data)
+        ifw_numpy, fairway_face_indices = intersect_line_mesh(fairway_numpy, mesh_data)
         if self.debug:
-            write_shp_pnt((ifw_numpy[:-1] + ifw_numpy[1:]) / 2, {"iface": ifw_face_idx},
+            write_shp_pnt(
+                (ifw_numpy[:-1] + ifw_numpy[1:]) / 2,
+                {"iface": fairway_face_indices},
                 f"{str(self.output_dir)}{os.sep}fairway_face_indices.shp",
             )
 
-        return FairwayData(ifw_face_idx, ifw_numpy)
+        return FairwayData(fairway_face_indices, ifw_numpy)
 
     def _map_bank_to_fairway(
         self, bank_data: BankData, fairway_data: FairwayData, sim: SimulationObject
@@ -278,15 +280,15 @@ class Erosion:
         log_text("bank_distance_fairway")
         distance_fw = []
         bp_fw_face_idx = []
-        nfw = len(fairway_data.ifw_face_idx)
+        nfw = len(fairway_data.fairway_face_indices)
         for ib, bcrds in enumerate(bank_data.bank_line_coords):
             bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
             distance_fw.append(np.zeros(len(bcrds_mid)))
             bp_fw_face_idx.append(np.zeros(len(bcrds_mid), dtype=np.int64))
             for ip, bp in enumerate(bcrds_mid):
                 # find closest fairway support node
-                ifw = np.argmin(((bp - fairway_data.ifw_numpy) ** 2).sum(axis=1))
-                fwp = fairway_data.ifw_numpy[ifw]
+                ifw = np.argmin(((bp - fairway_data.fairway_data) ** 2).sum(axis=1))
+                fwp = fairway_data.fairway_data[ifw]
                 dbfw = ((bp - fwp) ** 2).sum() ** 0.5
                 # If fairway support node is also the closest projected fairway point, then it likely
                 # that that point is one of the original support points (a corner) of the fairway path
@@ -299,31 +301,31 @@ class Erosion:
                 if ifw > 0:
                     alpha = (
                         (
-                            fairway_data.ifw_numpy[ifw, 0]
-                            - fairway_data.ifw_numpy[ifw - 1, 0]
+                            fairway_data.fairway_data[ifw, 0]
+                            - fairway_data.fairway_data[ifw - 1, 0]
                         )
-                        * (bp[0] - fairway_data.ifw_numpy[ifw - 1, 0])
+                        * (bp[0] - fairway_data.fairway_data[ifw - 1, 0])
                         + (
-                            fairway_data.ifw_numpy[ifw, 1]
-                            - fairway_data.ifw_numpy[ifw - 1, 1]
+                            fairway_data.fairway_data[ifw, 1]
+                            - fairway_data.fairway_data[ifw - 1, 1]
                         )
-                        * (bp[1] - fairway_data.ifw_numpy[ifw - 1, 1])
+                        * (bp[1] - fairway_data.fairway_data[ifw - 1, 1])
                     ) / (
                         (
-                            fairway_data.ifw_numpy[ifw, 0]
-                            - fairway_data.ifw_numpy[ifw - 1, 0]
+                            fairway_data.fairway_data[ifw, 0]
+                            - fairway_data.fairway_data[ifw - 1, 0]
                         )
                         ** 2
                         + (
-                            fairway_data.ifw_numpy[ifw, 1]
-                            - fairway_data.ifw_numpy[ifw - 1, 1]
+                            fairway_data.fairway_data[ifw, 1]
+                            - fairway_data.fairway_data[ifw - 1, 1]
                         )
                         ** 2
                     )
                     if alpha > 0 and alpha < 1:
-                        fwp1 = fairway_data.ifw_numpy[ifw - 1] + alpha * (
-                            fairway_data.ifw_numpy[ifw]
-                            - fairway_data.ifw_numpy[ifw - 1]
+                        fwp1 = fairway_data.fairway_data[ifw - 1] + alpha * (
+                            fairway_data.fairway_data[ifw]
+                            - fairway_data.fairway_data[ifw - 1]
                         )
                         d1 = ((bp - fwp1) ** 2).sum() ** 0.5
                         if d1 < dbfw:
@@ -332,38 +334,38 @@ class Erosion:
                 if ifw < nfw:
                     alpha = (
                         (
-                            fairway_data.ifw_numpy[ifw + 1, 0]
-                            - fairway_data.ifw_numpy[ifw, 0]
+                            fairway_data.fairway_data[ifw + 1, 0]
+                            - fairway_data.fairway_data[ifw, 0]
                         )
-                        * (bp[0] - fairway_data.ifw_numpy[ifw, 0])
+                        * (bp[0] - fairway_data.fairway_data[ifw, 0])
                         + (
-                            fairway_data.ifw_numpy[ifw + 1, 1]
-                            - fairway_data.ifw_numpy[ifw, 1]
+                            fairway_data.fairway_data[ifw + 1, 1]
+                            - fairway_data.fairway_data[ifw, 1]
                         )
-                        * (bp[1] - fairway_data.ifw_numpy[ifw, 1])
+                        * (bp[1] - fairway_data.fairway_data[ifw, 1])
                     ) / (
                         (
-                            fairway_data.ifw_numpy[ifw + 1, 0]
-                            - fairway_data.ifw_numpy[ifw, 0]
+                            fairway_data.fairway_data[ifw + 1, 0]
+                            - fairway_data.fairway_data[ifw, 0]
                         )
                         ** 2
                         + (
-                            fairway_data.ifw_numpy[ifw + 1, 1]
-                            - fairway_data.ifw_numpy[ifw, 1]
+                            fairway_data.fairway_data[ifw + 1, 1]
+                            - fairway_data.fairway_data[ifw, 1]
                         )
                         ** 2
                     )
                     if alpha > 0 and alpha < 1:
-                        fwp1 = fairway_data.ifw_numpy[ifw] + alpha * (
-                            fairway_data.ifw_numpy[ifw + 1]
-                            - fairway_data.ifw_numpy[ifw]
+                        fwp1 = fairway_data.fairway_data[ifw] + alpha * (
+                            fairway_data.fairway_data[ifw + 1]
+                            - fairway_data.fairway_data[ifw]
                         )
                         d1 = ((bp - fwp1) ** 2).sum() ** 0.5
                         if d1 < dbfw:
                             dbfw = d1
                             iseg = ifw
 
-                bp_fw_face_idx[ib][ip] = fairway_data.ifw_face_idx[iseg]
+                bp_fw_face_idx[ib][ip] = fairway_data.fairway_face_indices[iseg]
                 distance_fw[ib][ip] = dbfw
 
             if self.debug:
@@ -377,15 +379,15 @@ class Erosion:
                     + f"/bank_{ib + 1}_chainage_and_fairway_face_idx.shp",
                 )
 
-        fairway_data.bp_fw_face_idx = bp_fw_face_idx
-        fairway_data.distance_fw = distance_fw
+        fairway_data.bank_protection_fairway_face_indices = bp_fw_face_idx
+        fairway_data.fairway_distances = distance_fw
 
         # water level at fairway
         zfw_ini = []
         for ib in range(bank_data.n_bank_lines):
-            ii = fairway_data.bp_fw_face_idx[ib]
+            ii = fairway_data.bank_protection_fairway_face_indices[ib]
             zfw_ini.append(sim["zw_face"][ii])
-        fairway_data.zfw_ini = zfw_ini
+        fairway_data.fairway_initial_water_levels = zfw_ini
 
     def _prepare_initial_conditions(
         self, config_file: ConfigFile, bank_data: BankData, fairway_data: FairwayData
@@ -445,7 +447,7 @@ class Erosion:
         # if zss undefined, set zss equal to zfw_ini - 1
         for ib in range(len(zss)):
             mask = zss[ib] == zss_miss
-            zss[ib][mask] = fairway_data.zfw_ini[ib][mask] - 1
+            zss[ib][mask] = fairway_data.fairway_initial_water_levels[ib][mask] - 1
 
         return ErosionInputs(
             ship_data=ship_data,
@@ -631,7 +633,7 @@ class Erosion:
                         bank_height.append(None)
 
                 # get water depth along fairway
-                ii = fairway_data.bp_fw_face_idx[ib]
+                ii = fairway_data.bank_protection_fairway_face_indices[ib]
                 hfw = sim["h_face"][ii]
                 hfw_max = max(hfw_max, hfw.max())
                 water_level[iq].append(sim["zw_face"][ii])
@@ -642,12 +644,12 @@ class Erosion:
                     dn_eq1, dv_eq1 = comp_erosion_eq(
                         bank_height[ib],
                         line_size[ib],
-                        fairway_data.zfw_ini[ib],
+                        fairway_data.fairway_initial_water_levels[ib],
                         vship[ib],
                         ship_type[ib],
                         Tship[ib],
                         mu_slope[ib],
-                        fairway_data.distance_fw[ib],
+                        fairway_data.fairway_distances[ib],
                         hfw,
                         erosion_inputs,
                         ib,
@@ -664,16 +666,18 @@ class Erosion:
                             "chainage": bank_data.bank_km_mid[ib],
                             "x": bcrds_mid[:, 0],
                             "y": bcrds_mid[:, 1],
-                            "iface_fw": fairway_data.bp_fw_face_idx[ib],  # ii
+                            "iface_fw": fairway_data.bank_protection_fairway_face_indices[
+                                ib
+                            ],  # ii
                             "iface_bank": bank_data.bank_idx[ib],  # bank_index
                             "zb": bank_height[ib],
                             "len": line_size[ib],
-                            "zw0": fairway_data.zfw_ini[ib],
+                            "zw0": fairway_data.fairway_initial_water_levels[ib],
                             "vship": vship[ib],
                             "shiptype": ship_type[ib],
                             "draught": Tship[ib],
                             "mu_slp": mu_slope[ib],
-                            "dist_fw": fairway_data.distance_fw[ib],
+                            "dist_fw": fairway_data.fairway_distances[ib],
                             "dfw0": erosion_inputs.wave_fairway_distance_0[ib],
                             "dfw1": erosion_inputs.wave_fairway_distance_1[ib],
                             "hfw": hfw,
@@ -691,7 +695,7 @@ class Erosion:
                         bank_height[ib],
                         line_size[ib],
                         water_level[iq][ib],
-                        fairway_data.zfw_ini[ib],
+                        fairway_data.fairway_initial_water_levels[ib],
                         Nship[ib],
                         vship[ib],
                         nwave[ib],
@@ -700,7 +704,7 @@ class Erosion:
                         t_erosion * self.p_discharge[iq],
                         mu_slope[ib],
                         mu_reed[ib],
-                        fairway_data.distance_fw[ib],
+                        fairway_data.fairway_distances[ib],
                         hfw,
                         chezy[iq][ib],
                         erosion_inputs,
@@ -721,13 +725,15 @@ class Erosion:
                         "chainage": bank_data.bank_km_mid[ib],
                         "x": bcrds_mid[:, 0],
                         "y": bcrds_mid[:, 1],
-                        "iface_fw": fairway_data.bp_fw_face_idx[ib],  # ii
+                        "iface_fw": fairway_data.bank_protection_fairway_face_indices[
+                            ib
+                        ],  # ii
                         "iface_bank": bank_data.bank_face_indices[ib],  # bank_index
                         "u": velocity[iq][ib],
                         "zb": bank_height[ib],
                         "len": line_size[ib],
                         "zw": water_level[iq][ib],
-                        "zw0": fairway_data.zfw_ini[ib],
+                        "zw0": fairway_data.fairway_initial_water_levels[ib],
                         "tauc": erosion_inputs.tauc[ib],
                         "nship": Nship[ib],
                         "vship": vship[ib],
@@ -736,7 +742,7 @@ class Erosion:
                         "draught": Tship[ib],
                         "mu_slp": mu_slope[ib],
                         "mu_reed": mu_reed[ib],
-                        "dist_fw": fairway_data.distance_fw[ib],
+                        "dist_fw": fairway_data.fairway_distances[ib],
                         "dfw0": erosion_inputs.wave_fairway_distance_0[ib],
                         "dfw1": erosion_inputs.wave_fairway_distance_1[ib],
                         "hfw": hfw,
