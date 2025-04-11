@@ -54,15 +54,18 @@ class Test_basic:
         #
         self.maxDiff = None
         assert outstr == [
-            "usage: dfastbe.exe [-h] [--mode MODE] [--config CONFIG]",
+            "usage: dfastbe [-h] [--mode {BANKLINES,BANKEROSION,GUI}] [--config CONFIG]",
             "",
-            "D-FAST Bank Erosion.",
+            "D-FAST Bank Erosion. Example: python -m dfastbe --mode BANKEROSION --config",
+            "settings.cfg",
             "",
             "optional arguments:",
-            "  -h, --help       show this help message and exit",
-            "  --mode MODE      run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is",
-            "                   default)",
-            "  --config CONFIG  name of configuration file ('dfastbe.cfg' is default)",
+            "  -h, --help            show this help message and exit",
+            "  --mode {BANKLINES,BANKEROSION,GUI}
+                                     run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is",
+            "                        default)",
+            "  --config CONFIG       name of configuration file ('dfastbe.cfg' is",
+            "                        default)",
         ]
 
     def test_basic_gui(self):
