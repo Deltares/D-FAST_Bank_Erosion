@@ -62,75 +62,54 @@ class SimulationObject:
     def read_simulation_data(
         cls, file_name: str, indent: str = ""
     ) -> "SimulationObject":
-        """
-        Read a default set of quantities from a UGRID netCDF file coming from D-Flow FM (or similar).
+        """Read a default set of quantities from a UGRID netCDF file.
+
+        Supported files are coming from D-Flow FM (or similar).
 
         Arguments
         ---------
-        file_name : str
+        file_name (str):
             Name of the simulation output file to be read.
-        indent : str
+        indent (str):
             String to use for each line as indentation (default empty).
 
-        Raises
-        ------
-        Exception
-            If the file is not recognized as a D-Flow FM map-file.
+        Raises:
+            SimulationFilesError
+                If the file is not recognized as a D-Flow FM map-file.
 
         Returns
-        -------
-        sim : SimulationObject
-            Dictionary containing the data read from the simulation output file.
-        dh0 : float
-            Threshold depth for detecting drying and flooding.
+            SimulationObject: Dictionary containing the data read from the simulation output file.
+            float: Threshold depth for detecting drying and flooding.
         """
-        dum = np.array([])
-        sim: SimulationObject = {
-            "x_node": dum,
-            "y_node": dum,
-            "nnodes": dum,
-            "facenode": dum,
-            "zb_location": dum,
-            "zb_val": dum,
-            "zw_face": dum,
-            "h_face": dum,
-            "ucx_face": dum,
-            "ucy_face": dum,
-            "chz_face": dum,
-            "dh0": dum,
-        }
-        # determine the file type
         name = Path(file_name).name
         if name.endswith("map.nc"):
             log_text("read_grid", indent=indent)
-            sim["x_node"] = read_fm_map(file_name, "x", location="node")
-            sim["y_node"] = read_fm_map(file_name, "y", location="node")
+            x_node = read_fm_map(file_name, "x", location="node")
+            y_node = read_fm_map(file_name, "y", location="node")
             f_nc = read_fm_map(file_name, "face_node_connectivity")
             if f_nc.mask.shape == ():
                 # all faces have the same number of nodes
-                sim["nnodes"] = (
-                    np.ones(f_nc.data.shape[0], dtype=np.int) * f_nc.data.shape[1]
-                )
+                nnodes = np.ones(f_nc.data.shape[0], dtype=np.int) * f_nc.data.shape[1]
             else:
                 # varying number of nodes
-                sim["nnodes"] = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
+                nnodes = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
             f_nc.data[f_nc.mask] = 0
 
-            sim["facenode"] = f_nc
+            facenode = f_nc
             log_text("read_bathymetry", indent=indent)
-            sim["zb_location"] = "node"
-            sim["zb_val"] = read_fm_map(file_name, "altitude", location="node")
+            zb_location = "node"
+            zb_val = read_fm_map(file_name, "altitude", location="node")
             log_text("read_water_level", indent=indent)
-            sim["zw_face"] = read_fm_map(file_name, "Water level")
+            zw_face = read_fm_map(file_name, "Water level")
             log_text("read_water_depth", indent=indent)
-            sim["h_face"] = np.maximum(
+            h_face = np.maximum(
                 read_fm_map(file_name, "sea_floor_depth_below_sea_surface"), 0.0
             )
             log_text("read_velocity", indent=indent)
-            sim["ucx_face"] = read_fm_map(file_name, "sea_water_x_velocity")
-            sim["ucy_face"] = read_fm_map(file_name, "sea_water_y_velocity")
+            ucx_face = read_fm_map(file_name, "sea_water_x_velocity")
+            ucy_face = read_fm_map(file_name, "sea_water_y_velocity")
             log_text("read_chezy", indent=indent)
-            sim["chz_face"] = read_fm_map(file_name, "Chezy roughness")
+            chz_face = read_fm_map(file_name, "Chezy roughness")
 
             log_text("read_drywet", indent=indent)
             root_group = netCDF4.Dataset(file_name)
@@ -142,7 +121,6 @@ class SimulationObject:
                     dh0 = 0.01
             except:
                 dh0 = 0.01
-            sim["dh0"] = dh0
 
         elif name.startswith("SDS"):
             raise SimulationFilesError(
@@ -155,27 +133,36 @@ class SimulationObject:
         else:
             raise SimulationFilesError(f"Unable to determine file type for {name}")
 
-        return cls(**sim)
+        return cls(
+            x_node=x_node,
+            y_node=y_node,
+            nnodes=nnodes,
+            facenode=facenode,
+            zb_location=zb_location,
+            zb_val=zb_val,
+            zw_face=zw_face,
+            h_face=h_face,
+            ucx_face=ucx_face,
+            ucy_face=ucy_face,
+            chz_face=chz_face,
+            dh0=dh0,
+        )
 
     def clip_simulation_data(self, river_profile: np.ndarray, max_distance: float):
-        """
-        Clip the simulation mesh and data to the area of interest sufficiently close to the reference line.
+        """Clip the simulation mesh.
 
-        Arguments
-        ---------
-        sim : SimulationObject
-            Simulation data: mesh, bed levels, water levels, velocities, etc.
-        river_profile : np.ndarray
-            Reference line.
-        max_distance : float
-            Maximum distance between the reference line and a point in the area of
-            interest defined based on the search lines for the banks and the search
-            distance.
+        Clipping data to the area of interest,
+        that is sufficiently close to the reference line.
 
-        Returns
-        -------
-        sim1 : SimulationObject
-            Clipped simulation data: mesh, bed levels, water levels, velocities, etc.
+        Args:
+            sim (SimulationObject):
+                Simulation data: mesh, bed levels, water levels, velocities, etc.
+            river_profile (np.ndarray):
+                Reference line.
+            max_distance (float):
+                Maximum distance between the reference line and a point in the area of
+                interest defined based on the search lines for the banks and the search
+                distance.
         """
         xy_buffer = river_profile.buffer(max_distance + max_distance)
         bbox = xy_buffer.envelope.exterior
