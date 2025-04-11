@@ -122,6 +122,108 @@ class TestSimulationData:
         with pytest.raises(SimulationFilesError):
             SimulationData.read(invalid_file_name)
 
+    @pytest.fixture
+    def sim_data(self) -> SimulationData:
+        # Mock simulation data
+        x_node = np.array([194949.796875, 194966.515625, 194982.8125, 195000.0])
+        y_node = np.array([361366.90625, 361399.46875, 361431.03125, 361450.0])
+        nnodes = np.array([4, 4])
+        facenode = np.ma.masked_array(
+            data=[[0, 1, 2, 3], [1, 2, 3, 0]],
+            mask=[[False, False, False, False], [False, False, False, False]],
+        )
+        zb_location = "node"
+        zb_val = np.array([10.0, 20.0, 30.0, 40.0])
+        zw_face = np.array([1.0, 2.0])
+        h_face = np.array([0.5, 1.0])
+        ucx_face = np.array([0.1, 0.2])
+        ucy_face = np.array([0.4, 0.5])
+        chz_face = np.array([30.0, 40.0])
+        dh0 = 0.1
+
+        # Create a SimulationData object
+        sim_data = SimulationData(
+            x_node=x_node,
+            y_node=y_node,
+            nnodes=nnodes,
+            facenode=facenode,
+            zb_location=zb_location,
+            zb_val=zb_val,
+            zw_face=zw_face,
+            h_face=h_face,
+            ucx_face=ucx_face,
+            ucy_face=ucy_face,
+            chz_face=chz_face,
+            dh0=dh0,
+        )
+        return sim_data
+
+    def test_apply_clipping_to_simulation_data(self, sim_data: SimulationData):
+
+        # Define a river profile as a LineString
+        river_profile = LineString(
+            [
+                [194949.796875, 361366.90625],
+                [194966.515625, 361399.46875],
+                [194982.8125, 361431.03125],
+            ]
+        )
+
+        # Define the maximum distance for clipping
+        max_distance = 10.0
+
+        # Apply clipping
+        sim_data.apply_clipping_to_simulation_data(river_profile, max_distance)
+
+        # Assertions
+        # Check that nodes outside the buffer are removed
+        assert np.array_equal(
+            sim_data.x_node, np.array([194949.796875, 194966.515625, 194982.8125])
+        )
+        assert np.array_equal(
+            sim_data.y_node, np.array([361366.90625, 361399.46875, 361431.03125])
+        )
+
+        # Check that other attributes are updated correctly
+        assert np.array_equal(sim_data.zb_val, np.array([10.0, 20.0, 30.0]))
+        assert sim_data.nnodes.size == 0
+        assert sim_data.zw_face.size == 0
+        assert sim_data.h_face.size == 0
+        assert sim_data.ucx_face.size == 0
+        assert sim_data.ucy_face.size == 0
+        assert sim_data.chz_face.size == 0
+
+    def test_apply_clipping_to_simulation_data_no_nodes_in_buffer(
+        self, sim_data: SimulationData
+    ):
+
+        # Define a river profile as a LineString
+        river_profile = LineString(
+            [
+                [194900.0, 361300.0],
+                [194910.0, 361310.0],
+                [194920.0, 361320.0],
+            ]
+        )
+
+        # Define the maximum distance for clipping
+        max_distance = 10.0
+
+        # Apply clipping
+        sim_data.apply_clipping_to_simulation_data(river_profile, max_distance)
+
+        # Assertions
+        # Check that all nodes are removed since none are within the buffer
+        assert sim_data.x_node.size == 0
+        assert sim_data.y_node.size == 0
+        assert sim_data.zb_val.size == 0
+        assert sim_data.nnodes.size == 0
+        assert sim_data.zw_face.size == 0
+        assert sim_data.h_face.size == 0
+        assert sim_data.ucx_face.size == 0
+        assert sim_data.ucy_face.size == 0
+        assert sim_data.chz_face.size == 0
+
 
 class TestLogText:
     def test_log_text_01(self):
