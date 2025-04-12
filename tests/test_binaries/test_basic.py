@@ -38,8 +38,7 @@ class TestBasic:
         Testing program help.
         """
         result = subprocess.run([exe_path, "--help"], capture_output=True)
-        help_message = result.stdout.decode("UTF-8").splitlines()
-
+        help_message = result.stdout.decode("UTF-8")
         assert "usage: dfastbe.exe" in help_message
 
     def test_basic_gui(self):
