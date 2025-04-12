@@ -1,30 +1,12 @@
 import pytest
 import os
 import subprocess
-import sys
-from contextlib import contextmanager
-from io import StringIO
 from pathlib import Path
-
-# dfast binary path
-repo_root = Path(__file__).resolve().parent.parent.parent
-exe_path = repo_root / "dfastbe.dist/dfastbe.exe"
-
-
-@contextmanager
-def captured_output():
-    new_out, new_err = StringIO(), StringIO()
-    old_out, old_err = sys.stdout, sys.stderr
-    try:
-        sys.stdout, sys.stderr = new_out, new_err
-        yield sys.stdout, sys.stderr
-    finally:
-        sys.stdout, sys.stderr = old_out, old_err
 
 
 @pytest.mark.binaries
 class TestBasic:
-    def test_basic_00(self):
+    def test_basic_00(self, exe_path: Path):
         """
         test getting the help message.
         """
@@ -33,7 +15,7 @@ class TestBasic:
 
         assert success == True
 
-    def test_compare_help_message(self):
+    def test_compare_help_message(self, exe_path: Path):
         """
         Testing program help.
         """
@@ -41,7 +23,7 @@ class TestBasic:
         help_message = result.stdout.decode("UTF-8")
         assert "usage: dfastbe.exe" in help_message
 
-    def test_basic_gui(self):
+    def test_basic_gui(self, exe_path: Path):
         """
         Testing startup of the GUI.
         GUI will be started and closed.
