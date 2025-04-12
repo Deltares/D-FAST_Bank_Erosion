@@ -18,7 +18,7 @@ class TestMyFunctionality:
         pass
 ```
 
-# Binaries 
+# Binaries
 
 ## Creating tests for the binaries
 - all tests that are using the binaries are located in `tests/test_binaries`.
@@ -39,7 +39,7 @@ def test_my_functionality():
 ```
 
 # Teamcity Pipelines
-The team city pipelines have hard coded steps that locate the dfast built binaries, and also hard coded steps to 
+The team city pipelines have hard coded steps that locate the dfast built binaries, and also hard coded steps to
 trigger the tests. This is a work in progress.
 - The build step that triggers testing the binaries uses the following command
 ```shell
