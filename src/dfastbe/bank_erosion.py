@@ -379,13 +379,13 @@ class Erosion:
                     + f"/bank_{ib + 1}_chainage_and_fairway_face_idx.shp",
                 )
 
-        fairway_data.bank_protection_fairway_face_indices = bp_fw_face_idx
+        bank_data.fairway_face_indices = bp_fw_face_idx
         bank_data.fairway_distances = distance_fw
 
         # water level at fairway
         zfw_ini = []
         for ib in range(bank_data.n_bank_lines):
-            ii = fairway_data.bank_protection_fairway_face_indices[ib]
+            ii = bank_data.fairway_face_indices[ib]
             zfw_ini.append(sim["zw_face"][ii])
         fairway_data.fairway_initial_water_levels = zfw_ini
 
@@ -643,7 +643,7 @@ class Erosion:
                         bank_height.append(None)
 
                 # get water depth along fairway
-                ii = fairway_data.bank_protection_fairway_face_indices[ib]
+                ii = bank_data.fairway_face_indices[ib]
                 hfw = sim["h_face"][ii]
                 hfw_max = max(hfw_max, hfw.max())
                 water_level[iq].append(sim["zw_face"][ii])
@@ -676,9 +676,7 @@ class Erosion:
                             "chainage": bank_data.bank_chainage_midpoints[ib],
                             "x": bcrds_mid[:, 0],
                             "y": bcrds_mid[:, 1],
-                            "iface_fw": fairway_data.bank_protection_fairway_face_indices[
-                                ib
-                            ],
+                            "iface_fw": bank_data.fairway_face_indices[ib],
                             "iface_bank": bank_data.bank_face_indices[ib],  # bank_index
                             "zb": bank_height[ib],
                             "len": line_size[ib],
@@ -735,9 +733,7 @@ class Erosion:
                         "chainage": bank_data.bank_chainage_midpoints[ib],
                         "x": bcrds_mid[:, 0],
                         "y": bcrds_mid[:, 1],
-                        "iface_fw": fairway_data.bank_protection_fairway_face_indices[
-                            ib
-                        ],  # ii
+                        "iface_fw": bank_data.fairway_face_indices[ib],
                         "iface_bank": bank_data.bank_face_indices[ib],  # bank_index
                         "u": velocity[iq][ib],
                         "zb": bank_height[ib],
