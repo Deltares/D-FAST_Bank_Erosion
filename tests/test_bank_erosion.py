@@ -55,7 +55,7 @@ class TestErosion:
         )
 
         assert np.array_equal(
-            erosion_inputs.ship_data["vship0"][0], np.array([5.0, 5.0, 5.0])
+            erosion_inputs.shipping_data["vship0"][0], np.array([5.0, 5.0, 5.0])
         )
         assert np.array_equal(
             erosion_inputs.wave_fairway_distance_0[0], np.array([150, 150, 150])

@@ -388,7 +388,7 @@ class ConfigFile:
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> result = config_file.get_str("General", "BankDir")
-            >>> expected = Path("tests/data/erosion/output/banklines")
+            >>> expected = Path("tests/data/erosion/output/banklines").resolve()
             >>> str(expected) == result
             True
 
@@ -564,7 +564,7 @@ class ConfigFile:
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> result = config_file.get_sim_file("Erosion", "1")
-            >>> expected = Path("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
+            >>> expected = Path("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc").resolve()
             >>> str(expected) == result
             True
 
