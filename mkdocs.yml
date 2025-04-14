@@ -113,6 +113,7 @@ nav:
           - guides/developer-instructions.md
           - guides/pre-commit-hooks.md
           - guides/doctest.md
+          - guides/testing.md
   - Architecture Design:
       - architecture-design/main-components.md
   - API Reference:
