@@ -793,12 +793,16 @@ class Erosion:
                 km_mid, dvol_bank, str(self.output_dir) + os.sep + erovol_file
             )
 
+        t_erosion = config_file.get_int("Erosion", "TErosion", positive=True)
+        log_text("total_time", data={"t": t_erosion})
+
         erosion_results = ErosionResults(
             dn_eq=dn_eq,
             dn_tot=dn_tot,
             dv=dv,
             dv_eq=dv_eq,
             dv_tot=dv_tot,
+            t_erosion=t_erosion,
         )
 
         water_level_data = WaterLevelData(
@@ -901,10 +905,6 @@ class Erosion:
         )
         log_text("-")
         config_file = self.config_file
-
-        # get simulation time terosion
-        t_erosion = config_file.get_int("Erosion", "TErosion", positive=True)
-        log_text("total_time", data={"t": t_erosion})
 
         # read simulation data (get_sim_data)
         sim_file = config_file.get_sim_file("Erosion", str(self.ref_level + 1))

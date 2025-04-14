@@ -168,18 +168,18 @@ class ErosionResults:
             Eroded volume at equilibrium for each bank line.
         dv_tot (List[np.ndarray]):
             Total eroded volume for each bank line.
+        t_erosion (int):
+            Time over which erosion is calculated.
         d_nav (np.ndarray):
             Average erosion rate data.
         vol_eq (np.ndarray):
             Volume data for equilibrium.
-        t_erosion (int):
-            Time over which erosion is calculated.
     """
     dn_eq: List[np.ndarray]
     dn_tot: List[np.ndarray]
     dv: List[List[np.ndarray]]
     dv_eq: List[np.ndarray]
     dv_tot: List[np.ndarray]
+    t_erosion: int
     d_nav: np.ndarray = np.array([])
     vol_eq: np.ndarray = np.array([])
-    t_erosion: int
