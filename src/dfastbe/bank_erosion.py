@@ -151,7 +151,7 @@ class Erosion:
         bank_line_coords = []
         bank_face_indices = []
         for bank_index in range(n_banklines):
-            line_coords = np.array(banklines.geometry[bank_index])
+            line_coords = np.array(banklines.geometry[bank_index].coords)
             log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
 
             coords_along_bank, face_indices = intersect_line_mesh(
@@ -187,10 +187,12 @@ class Erosion:
 
         return bank_line_coords, bank_face_indices, bank_km_mid, is_right_bank
 
-    def _prepare_river_axis(self, stations_coords: np.ndarray) -> Tuple[np.ndarray, np.ndarray, LineString]:
+    def _prepare_river_axis(
+        self, stations_coords: np.ndarray, config_file: ConfigFile
+    ) -> Tuple[np.ndarray, np.ndarray, LineString]:
         # read river axis file
         river_axis = self.river_data.read_river_axis()
-        river_axis_numpy = np.array(river_axis)
+        river_axis_numpy = np.array(river_axis.coords)
         # optional sorting --> see 04_Waal_D3D example
         # check: sum all distances and determine maximum distance ...
         # if maximum > alpha * sum then perform sort
@@ -205,7 +207,10 @@ class Erosion:
         log_text("chainage_to_axis")
         river_axis_km = project_km_on_line(river_axis_numpy, self.river_data.masked_profile_arr)
         write_shp_pnt(
-            river_axis_numpy, {"chainage": river_axis_km}, f"{str(self.output_dir)}{os.sep}river_axis_chainage.shp"
+            river_axis_numpy,
+            {"chainage": river_axis_km},
+            f"{str(self.output_dir)}{os.sep}river_axis_chainage.shp",
+            config_file,
         )
 
         # clip river axis to reach of interest
@@ -227,6 +232,7 @@ class Erosion:
         river_axis: LineString,
         stations_coords: np.ndarray,
         mesh_data: MeshData,
+        config_file: ConfigFile,
     ):
         # read fairway file
         fairway_file = self.config_file.get_str("Erosion", "Fairway")
@@ -236,7 +242,12 @@ class Erosion:
         log_text("chainage_to_fairway")
         fairway_numpy = np.array(river_axis.coords)
         fairway_km = project_km_on_line(fairway_numpy, self.river_data.masked_profile_arr)
-        write_shp_pnt(fairway_numpy, {"chainage": fairway_km}, str(self.output_dir) + os.sep + "fairway_chainage.shp")
+        write_shp_pnt(
+            fairway_numpy,
+            {"chainage": fairway_km},
+            str(self.output_dir) + os.sep + "fairway_chainage.shp",
+            config_file,
+        )
 
         # clip fairway to reach of interest
         i1 = np.argmin(((stations_coords[0] - fairway_numpy) ** 2).sum(axis=1))
@@ -251,8 +262,11 @@ class Erosion:
         log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
         ifw_numpy, ifw_face_idx = intersect_line_mesh(fairway_numpy, mesh_data)
         if self.debug:
-            write_shp_pnt((ifw_numpy[:-1] + ifw_numpy[1:]) / 2, {"iface": ifw_face_idx},
+            write_shp_pnt(
+                (ifw_numpy[:-1] + ifw_numpy[1:]) / 2,
+                {"iface": ifw_face_idx},
                 f"{str(self.output_dir)}{os.sep}fairway_face_indices.shp",
+                config_file,
             )
 
         return ifw_face_idx, ifw_numpy
@@ -263,6 +277,7 @@ class Erosion:
         bank_km_mid: List[np.ndarray],
         ifw_numpy: np.ndarray,
         ifw_face_idx: np.ndarray,
+        config_file: ConfigFile,
     ) -> Tuple[List[np.ndarray], List[np.ndarray]]:
         # distance fairway-bankline (bankfairway)
         log_text("bank_distance_fairway")
@@ -330,9 +345,9 @@ class Erosion:
                 write_shp_pnt(
                     bcrds_mid,
                     {"chainage": bank_km_mid[ib], "iface_fw": bp_fw_face_idx[ib]},
-                    str(self.output_dir)
-                    + f"/bank_{ib + 1}_chainage_and_fairway_face_idx.shp",
-                    )
+                    f"{self.output_dir}/bank_{ib + 1}_chainage_and_fairway_face_idx.shp",
+                    config_file,
+                )
 
         return bp_fw_face_idx, distance_fw
 
@@ -607,7 +622,9 @@ class Erosion:
                     if self.debug:
                         bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
                         bank_coords_points = [Point(xy1) for xy1 in bcrds_mid]
-                        bank_coords_geo = GeoSeries(bank_coords_points)
+                        bank_coords_geo = GeoSeries(
+                            bank_coords_points, crs=config_file.crs
+                        )
                         params = {
                             "chainage": bank_km_mid[ib],
                             "x": bcrds_mid[:, 0],
@@ -664,7 +681,7 @@ class Erosion:
                     bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
 
                     bank_coords_points = [Point(xy1) for xy1 in bcrds_mid]
-                    bank_coords_geo = GeoSeries(bank_coords_points)
+                    bank_coords_geo = GeoSeries(bank_coords_points, crs=config_file.crs)
                     params = {
                         "chainage": bank_km_mid[ib],
                         "x": bcrds_mid[:, 0],
@@ -853,7 +870,9 @@ class Erosion:
             self.intersect_bank_lines_with_mesh(banklines, stations_coords, mesh_data)
         )
 
-        river_axis_km, _, river_axis = self._prepare_river_axis(stations_coords)
+        river_axis_km, _, river_axis = self._prepare_river_axis(
+            stations_coords, config_file
+        )
 
         # get output interval
         km_step = config_file.get_float("Erosion", "OutputInterval", 1.0)
@@ -862,10 +881,12 @@ class Erosion:
         km_mid = get_km_bins(km_bin, type=3)  # get mid-points
 
         ifw_face_idx, ifw_numpy = self._prepare_fairway(
-            river_axis, stations_coords, mesh_data
+            river_axis, stations_coords, mesh_data, config_file
         )
 
-        bp_fw_face_idx, distance_fw = self._map_bank_to_fairway(bank_line_coords, bank_km_mid, ifw_numpy, ifw_face_idx)
+        bp_fw_face_idx, distance_fw = self._map_bank_to_fairway(
+            bank_line_coords, bank_km_mid, ifw_numpy, ifw_face_idx, config_file
+        )
 
         # water level at fairway
         zfw_ini = []
@@ -908,7 +929,9 @@ class Erosion:
             n_banklines, km_mid, dn_flow_tot, dn_ship_tot,
         )
 
-        self._write_bankline_shapefiles(bankline_new_list, bankline_eq_list)
+        self._write_bankline_shapefiles(
+            bankline_new_list, bankline_eq_list, config_file
+        )
         self._write_volume_outputs(vol_tot, vol_eq, km_mid)
 
         # create various plots
@@ -936,17 +959,19 @@ class Erosion:
         log_text("end_bankerosion")
         timed_logger("-- end analysis --")
 
-    def _write_bankline_shapefiles(self, bankline_new_list, bankline_eq_list):
-        bankline_new_series = GeoSeries(bankline_new_list)
-        bank_lines_new = GeoDataFrame.from_features(bankline_new_series)
+    def _write_bankline_shapefiles(
+        self, bankline_new_list, bankline_eq_list, config_file: ConfigFile
+    ):
+        bankline_new_series = GeoSeries(bankline_new_list, crs=config_file.crs)
+        bank_lines_new = GeoDataFrame(geometry=bankline_new_series)
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
 
         bank_file = self.output_dir / f"{bank_name}_new.shp"
         log_text("save_banklines", data={"file": str(bank_file)})
         bank_lines_new.to_file(bank_file)
 
-        bankline_eq_series = GeoSeries(bankline_eq_list)
-        banklines_eq = GeoDataFrame.from_features(bankline_eq_series)
+        bankline_eq_series = GeoSeries(bankline_eq_list, crs=config_file.crs)
+        banklines_eq = GeoDataFrame(geometry=bankline_eq_series)
 
         bank_file = self.output_dir / f"{bank_name}_eq.shp"
         log_text("save_banklines", data={"file": str(bank_file)})
