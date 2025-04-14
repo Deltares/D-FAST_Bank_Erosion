@@ -476,7 +476,6 @@ class Erosion:
         self,
         km_mid,
         km_bin,
-        t_erosion: int,
         config_file: ConfigFile,
         erosion_inputs: ErosionInputs,
         bank_data: BankData,
@@ -799,6 +798,8 @@ class Erosion:
         erosion_results = ErosionResults(
             dn_eq=dn_eq,
             dn_tot=dn_tot,
+            dn_flow_tot=dn_flow_tot,
+            dn_ship_tot=dn_ship_tot,
             dv=dv,
             dv_eq=dv_eq,
             dv_tot=dv_tot,
@@ -817,8 +818,6 @@ class Erosion:
         bank_data.bank_line_size = line_size
 
         return (
-            dn_flow_tot,
-            dn_ship_tot,
             erosion_results,
             water_level_data,
         )
@@ -948,16 +947,13 @@ class Erosion:
         )
 
         # initialize arrays for erosion loop over all discharges
-        (dn_flow_tot, dn_ship_tot, water_level_data, erosion_results) = (
-            self._process_discharge_levels(
-                km_mid,
-                km_bin,
-                t_erosion,
-                config_file,
-                erosion_inputs,
-                bank_data,
-                fairway_data,
-            )
+        (water_level_data, erosion_results) = self._process_discharge_levels(
+            km_mid,
+            km_bin,
+            config_file,
+            erosion_inputs,
+            bank_data,
+            fairway_data,
         )
 
         bankline_new_list, bankline_eq_list, vol_tot, vol_eq, d_nav, xy_line_eq_list = (
