@@ -161,6 +161,7 @@ class BankLines:
                 km_bounds,
                 bank_areas,
                 sim,
+                config_file,
             )
 
         log_text("end_banklines")
@@ -175,6 +176,7 @@ class BankLines:
         km_bounds,
         bank_areas,
         sim,
+        config_file: ConfigFile,
     ):
         """Plot the bank lines and the simulation data."""
         log_text("=")
@@ -215,6 +217,7 @@ class BankLines:
             "water depth [m]",
             "bank search area",
             "detected bank line",
+            config_file,
         )
         if plot_flags["save_plot"]:
             i_fig = i_fig + 1
