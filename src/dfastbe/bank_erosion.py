@@ -507,6 +507,10 @@ class Erosion:
         dv_tot: List[np.ndarray] = []
         dn_eq: List[np.ndarray] = []
         dv_eq: List[np.ndarray] = []
+
+        t_erosion = config_file.get_int("Erosion", "TErosion", positive=True)
+        log_text("total_time", data={"t": t_erosion})
+
         for iq in range(self.num_levels):
             log_text(
                 "discharge_header",
@@ -792,9 +796,6 @@ class Erosion:
                 km_mid, dvol_bank, str(self.output_dir) + os.sep + erovol_file
             )
 
-        t_erosion = config_file.get_int("Erosion", "TErosion", positive=True)
-        log_text("total_time", data={"t": t_erosion})
-
         erosion_results = ErosionResults(
             dn_eq=dn_eq,
             dn_tot=dn_tot,
@@ -824,15 +825,10 @@ class Erosion:
 
     def _postprocess_erosion_results(
         self,
-        dn_tot: List[np.ndarray],
-        dn_eq: List[np.ndarray],
-        dv_eq: List[np.ndarray],
-        dv_tot: List[np.ndarray],
         km_bin: Tuple[float, float, float],
         km_mid,
-        dn_flow_tot,
-        dn_ship_tot,
         bank_data: BankData,
+        erosion_results: ErosionResults,
     ):
         log_text("=")
         d_nav = np.zeros(bank_data.n_bank_lines)
@@ -849,19 +845,19 @@ class Erosion:
         bankline_eq_list = []
         for ib, bank_coords in enumerate(bank_data.bank_line_coords):
             d_nav[ib] = (
-                dn_tot[ib] * bank_data.bank_line_size[ib]
+                erosion_results.dn_tot[ib] * bank_data.bank_line_size[ib]
             ).sum() / bank_data.bank_line_size[ib].sum()
-            dn_max[ib] = dn_tot[ib].max()
+            dn_max[ib] = erosion_results.dn_tot[ib].max()
             d_nav_flow[ib] = (
-                dn_flow_tot[ib] * bank_data.bank_line_size[ib]
+                erosion_results.dn_flow_tot[ib] * bank_data.bank_line_size[ib]
             ).sum() / bank_data.bank_line_size[ib].sum()
             d_nav_ship[ib] = (
-                dn_ship_tot[ib] * bank_data.bank_line_size[ib]
+                erosion_results.dn_ship_tot[ib] * bank_data.bank_line_size[ib]
             ).sum() / bank_data.bank_line_size[ib].sum()
             d_nav_eq[ib] = (
-                dn_eq[ib] * bank_data.bank_line_size[ib]
+                erosion_results.dn_eq[ib] * bank_data.bank_line_size[ib]
             ).sum() / bank_data.bank_line_size[ib].sum()
-            dn_max_eq[ib] = dn_eq[ib].max()
+            dn_max_eq[ib] = erosion_results.dn_eq[ib].max()
             log_text("bank_dnav", data={"ib": ib + 1, "v": d_nav[ib]})
             log_text("bank_dnavflow", data={"v": d_nav_flow[ib]})
             log_text("bank_dnavship", data={"v": d_nav_ship[ib]})
@@ -870,27 +866,35 @@ class Erosion:
             log_text("bank_dnmaxeq", data={"v": dn_max_eq[ib]})
 
             xy_line_new = move_line(
-                bank_coords, dn_tot[ib], bank_data.is_right_bank[ib]
+                bank_coords, erosion_results.dn_tot[ib], bank_data.is_right_bank[ib]
             )
             xy_line_new_list.append(xy_line_new)
             bankline_new_list.append(LineString(xy_line_new))
 
-            xy_line_eq = move_line(bank_coords, dn_eq[ib], bank_data.is_right_bank[ib])
+            xy_line_eq = move_line(
+                bank_coords, erosion_results.dn_eq[ib], bank_data.is_right_bank[ib]
+            )
             xy_line_eq_list.append(xy_line_eq)
             bankline_eq_list.append(LineString(xy_line_eq))
 
             dvol_eq = get_km_eroded_volume(
-                bank_data.bank_chainage_midpoints[ib], dv_eq[ib], km_bin
+                bank_data.bank_chainage_midpoints[ib], erosion_results.dv_eq[ib], km_bin
             )
             vol_eq[:, ib] = dvol_eq
             dvol_tot = get_km_eroded_volume(
-                bank_data.bank_chainage_midpoints[ib], dv_tot[ib], km_bin
+                bank_data.bank_chainage_midpoints[ib],
+                erosion_results.dv_tot[ib],
+                km_bin,
             )
             vol_tot[:, ib] = dvol_tot
             if ib < bank_data.n_bank_lines - 1:
                 log_text("-")
 
-        return bankline_new_list, bankline_eq_list, vol_tot, vol_eq, d_nav, xy_line_eq_list
+        erosion_results.d_nav = d_nav
+        erosion_results.vol_eq = vol_eq
+        erosion_results.vol_tot = vol_tot
+
+        return bankline_new_list, bankline_eq_list, xy_line_eq_list
 
     def bankerosion_core(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
@@ -956,17 +960,12 @@ class Erosion:
             fairway_data,
         )
 
-        bankline_new_list, bankline_eq_list, vol_tot, vol_eq, d_nav, xy_line_eq_list = (
+        bankline_new_list, bankline_eq_list, xy_line_eq_list = (
             self._postprocess_erosion_results(
-                dn_tot,
-                dn_eq,
-                dv_eq,
-                dv_tot,
                 km_bin,
                 km_mid,
-                dn_flow_tot,
-                dn_ship_tot,
                 bank_data,
+                erosion_results,
             )
         )
 

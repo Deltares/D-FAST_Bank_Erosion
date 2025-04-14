@@ -188,4 +188,5 @@ class ErosionResults:
     dv_tot: List[np.ndarray]
     t_erosion: int
     d_nav: np.ndarray = np.array([])
+    vol_tot: np.ndarray = np.array([])
     vol_eq: np.ndarray = np.array([])
