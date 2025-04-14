@@ -220,7 +220,8 @@ class TestCopyUgrid:
         assert datac[-1][1] == dataref
 
 
-class Test_copy_var:
+class TestCopyVar:
+
     def test_copy_var_01(self):
         """
         Testing copy_var.
