@@ -74,15 +74,24 @@ by first starting a poetry shell with the virtual D-FAST_Bank_Erosion environmen
 If you need to switch between Python versions (e.g., from Python 3.9 to Python 3.10), you can configure Poetry to use a specific Python version. Follow these steps:
 
 1. **Verify python version in `pyproject.toml`**:
-The `pyproject.toml` specifies which python version is supported. Please verify that the python version you wish to use is supported. For example the following configuration:
+The `pyproject.toml` specifies which python version is supported. Please verify that the python version you wish to use is supported. For example, the following configuration:
 ```toml
 [tool.poetry.dependencies]
 python = "~3.10"
 ```
-Indicates that the project supports Python 3.10 with any minor version (e.g., 3.10.1, 3.10.2, etc.).
+It Indicates that the project supports Python 3.10 with any minor version (e.g., 3.10.1, 3.10.2, etc.).
 
 2. **Check Installed Python Versions**:
-Ensure that the desired Python version (e.g., Python 3.10) is installed on your system. You can check the available versions by running: `python --version python3.10 --version`.
+Ensure that the desired Python version (e.g., Python 3.10) is installed on your system. 
+You can check the available versions by running:
+on windows:
+```shell
+python --version
+``` 
+or on Linux:
+```shell
+python3 --version 
+```
 
 3. **Set the Python Version for Poetry**:
 Use the `poetry env use` command to specify the Python version for your project. For example: `poetry env use python3.10`. This will create a new virtual environment using Python 3.10.
@@ -96,16 +105,3 @@ If you switch Python versions, you may need to reinstall your dependencies. Run:
 6. **Test the Installation**: Run the test suite to ensure everything works correctly with the new Python version: 
 `poetry run pytest`.
 
-## Frequently asked questions
-- How to fix "File ... does not exist" errors during `poetry install` as in the example below?
-```
-  * Installing six (1.16.0)
-
-  ValueError
-
-  File \C:\Users\dam_ar\AppData\Local\pypoetry\Cache\artifacts\48\e6\04\8118155ae3ec3a16dd2a213bbf7a7d8a62c596b2e90f73a22c896269f1\six-1.16.0-py2.py3-none-any.whl does not exist
-```
-  This may occur when a conda environment was activated.
-  Delete the `AppData\Local\pypoetry\Cache` directory.
-  Then run `conda deactivate` to return to the base environment.
-  Finally, rerun `poetry install`.
