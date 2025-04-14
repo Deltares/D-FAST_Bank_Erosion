@@ -623,7 +623,7 @@ class Erosion:
                         bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
                         bank_coords_points = [Point(xy1) for xy1 in bcrds_mid]
                         bank_coords_geo = GeoSeries(
-                            bank_coords_points, crs="EPSG:28992"
+                            bank_coords_points, crs=config_file.crs
                         )
                         params = {
                             "chainage": bank_km_mid[ib],
