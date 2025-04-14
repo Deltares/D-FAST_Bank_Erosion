@@ -970,7 +970,7 @@ class Erosion:
         )
 
         self._write_bankline_shapefiles(bankline_new_list, bankline_eq_list)
-        self._write_volume_outputs(vol_tot, vol_eq, km_mid)
+        self._write_volume_outputs(erosion_results, km_mid)
 
         # create various plots
         self._generate_plots(
@@ -1009,7 +1009,7 @@ class Erosion:
         log_text("save_banklines", data={"file": str(bank_file)})
         banklines_eq.to_file(bank_file)
 
-    def _write_volume_outputs(self, vol_tot, vol_eq, km_mid):
+    def _write_volume_outputs(self, erosion_results: ErosionResults, km_mid):
         erosion_vol_file = self.config_file.get_str("Erosion", "EroVol", default="erovol.evo")
         log_text("save_tot_erovol", data={"file": erosion_vol_file})
         write_km_eroded_volumes(km_mid, vol_tot, str(self.output_dir) + os.sep + erosion_vol_file)
