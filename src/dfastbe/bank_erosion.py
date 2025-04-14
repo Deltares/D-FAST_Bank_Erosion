@@ -948,23 +948,16 @@ class Erosion:
         )
 
         # initialize arrays for erosion loop over all discharges
-        (
-            dn_tot,
-            dn_flow_tot,
-            dn_ship_tot,
-            dn_eq,
-            dv,
-            dv_eq,
-            dv_tot,
-            water_level_data,
-        ) = self._process_discharge_levels(
-            km_mid,
-            km_bin,
-            t_erosion,
-            config_file,
-            erosion_inputs,
-            bank_data,
-            fairway_data,
+        (dn_flow_tot, dn_ship_tot, water_level_data, erosion_results) = (
+            self._process_discharge_levels(
+                km_mid,
+                km_bin,
+                t_erosion,
+                config_file,
+                erosion_inputs,
+                bank_data,
+                fairway_data,
+            )
         )
 
         bankline_new_list, bankline_eq_list, vol_tot, vol_eq, d_nav, xy_line_eq_list = (

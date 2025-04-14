@@ -173,7 +173,7 @@ class ErosionResults:
         vol_eq (np.ndarray):
             Volume data for equilibrium.
         t_erosion (int):
-            Erosion time step.
+            Time over which erosion is calculated.
     """
     dn_eq: List[np.ndarray]
     dn_tot: List[np.ndarray]
