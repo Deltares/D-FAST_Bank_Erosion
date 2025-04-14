@@ -49,6 +49,7 @@ from dfastbe.structures import (
     MeshData,
     BankData,
     FairwayData,
+    ErosionResults,
 )
 from dfastbe.utils import timed_logger
 
@@ -792,6 +793,14 @@ class Erosion:
                 km_mid, dvol_bank, str(self.output_dir) + os.sep + erovol_file
             )
 
+        erosion_results = ErosionResults(
+            dn_eq=dn_eq,
+            dn_tot=dn_tot,
+            dv=dv,
+            dv_eq=dv_eq,
+            dv_tot=dv_tot,
+        )
+
         water_level_data = WaterLevelData(
             hfw_max=hfw_max,
             water_level=water_level,
@@ -804,13 +813,9 @@ class Erosion:
         bank_data.bank_line_size = line_size
 
         return (
-            dn_tot,
             dn_flow_tot,
             dn_ship_tot,
-            dn_eq,
-            dv,
-            dv_eq,
-            dv_tot,
+            erosion_results,
             water_level_data,
         )
 

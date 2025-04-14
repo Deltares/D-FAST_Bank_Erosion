@@ -155,9 +155,31 @@ class FairwayData:
 
 @dataclass
 class ErosionResults:
-    dn_tot: List[np.ndarray]
-    d_nav: np.ndarray
+    """Class to hold erosion results.
+
+    args:
+        dn_eq (List[np.ndarray]):
+            Erosion rate data for equilibrium.
+        dn_tot (List[np.ndarray]):
+            Total erosion distance data.
+        dv (List[List[np.ndarray]]):
+            Eroded volume per discharge level.
+        dv_eq (List[np.ndarray]):
+            Eroded volume at equilibrium for each bank line.
+        dv_tot (List[np.ndarray]):
+            Total eroded volume for each bank line.
+        d_nav (np.ndarray):
+            Average erosion rate data.
+        vol_eq (np.ndarray):
+            Volume data for equilibrium.
+        t_erosion (int):
+            Erosion time step.
+    """
     dn_eq: List[np.ndarray]
+    dn_tot: List[np.ndarray]
     dv: List[List[np.ndarray]]
-    vol_eq: np.ndarray
+    dv_eq: List[np.ndarray]
+    dv_tot: List[np.ndarray]
+    d_nav: np.ndarray = np.array([])
+    vol_eq: np.ndarray = np.array([])
     t_erosion: int
