@@ -380,7 +380,7 @@ class Erosion:
                 )
 
         fairway_data.bank_protection_fairway_face_indices = bp_fw_face_idx
-        fairway_data.fairway_distances = distance_fw
+        bank_data.fairway_distances = distance_fw
 
         # water level at fairway
         zfw_ini = []
@@ -659,7 +659,7 @@ class Erosion:
                         ship_type[ib],
                         Tship[ib],
                         mu_slope[ib],
-                        fairway_data.fairway_distances[ib],
+                        bank_data.fairway_distances[ib],
                         hfw,
                         erosion_inputs,
                         ib,
@@ -687,7 +687,7 @@ class Erosion:
                             "shiptype": ship_type[ib],
                             "draught": Tship[ib],
                             "mu_slp": mu_slope[ib],
-                            "dist_fw": fairway_data.fairway_distances[ib],
+                            "dist_fw": bank_data.fairway_distances[ib],
                             "dfw0": erosion_inputs.wave_fairway_distance_0[ib],
                             "dfw1": erosion_inputs.wave_fairway_distance_1[ib],
                             "hfw": hfw,
@@ -714,7 +714,7 @@ class Erosion:
                         t_erosion * self.p_discharge[iq],
                         mu_slope[ib],
                         mu_reed[ib],
-                        fairway_data.fairway_distances[ib],
+                        bank_data.fairway_distances[ib],
                         hfw,
                         chezy[iq][ib],
                         erosion_inputs,
@@ -752,7 +752,7 @@ class Erosion:
                         "draught": Tship[ib],
                         "mu_slp": mu_slope[ib],
                         "mu_reed": mu_reed[ib],
-                        "dist_fw": fairway_data.fairway_distances[ib],
+                        "dist_fw": bank_data.fairway_distances[ib],
                         "dfw0": erosion_inputs.wave_fairway_distance_0[ib],
                         "dfw1": erosion_inputs.wave_fairway_distance_1[ib],
                         "hfw": hfw,
