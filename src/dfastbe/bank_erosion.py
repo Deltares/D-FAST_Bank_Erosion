@@ -679,7 +679,7 @@ class Erosion:
                             "iface_fw": fairway_data.bank_protection_fairway_face_indices[
                                 ib
                             ],  # ii
-                            "iface_bank": bank_data.bank_idx[ib],  # bank_index
+                            "iface_bank": bank_data.bank_face_indices[ib],  # bank_index
                             "zb": bank_height[ib],
                             "len": line_size[ib],
                             "zw0": fairway_data.fairway_initial_water_levels[ib],
