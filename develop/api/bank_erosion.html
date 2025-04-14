@@ -1595,10 +1595,10 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1422</span>
-<span class="normal">1423</span>
-<span class="normal">1424</span>
-<span class="normal">1425</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesResultsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1428</span>
+<span class="normal">1429</span>
+<span class="normal">1430</span>
+<span class="normal">1431</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesResultsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom exception for BankLine results errors.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span>
@@ -2845,7 +2845,13 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">1275</span>
 <span class="normal">1276</span>
 <span class="normal">1277</span>
-<span class="normal">1278</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Erosion</span><span class="p">:</span>
+<span class="normal">1278</span>
+<span class="normal">1279</span>
+<span class="normal">1280</span>
+<span class="normal">1281</span>
+<span class="normal">1282</span>
+<span class="normal">1283</span>
+<span class="normal">1284</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Erosion</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root_dir</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">root_dir</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_config_file</span> <span class="o">=</span> <span class="n">config_file</span>
@@ -3463,8 +3469,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                             <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">bcrds_mid</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span>
                             <span class="s2">&quot;iface_fw&quot;</span><span class="p">:</span> <span class="n">fairway_data</span><span class="o">.</span><span class="n">bank_protection_fairway_face_indices</span><span class="p">[</span>
                                 <span class="n">ib</span>
-                            <span class="p">],</span>  <span class="c1"># ii</span>
-                            <span class="s2">&quot;iface_bank&quot;</span><span class="p">:</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">bank_idx</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>  <span class="c1"># bank_index</span>
+                            <span class="p">],</span>
+                            <span class="s2">&quot;iface_bank&quot;</span><span class="p">:</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">bank_face_indices</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>  <span class="c1"># bank_index</span>
                             <span class="s2">&quot;zb&quot;</span><span class="p">:</span> <span class="n">bank_height</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
                             <span class="s2">&quot;len&quot;</span><span class="p">:</span> <span class="n">line_size</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
                             <span class="s2">&quot;zw0&quot;</span><span class="p">:</span> <span class="n">fairway_data</span><span class="o">.</span><span class="n">fairway_initial_water_levels</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
@@ -3845,7 +3851,13 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                         <span class="p">)</span>
                         <span class="o">/</span> <span class="mi">2</span>
                     <span class="p">)</span>
-                <span class="n">km_zoom</span><span class="p">,</span> <span class="n">xy_zoom</span> <span class="o">=</span> <span class="n">get_zoom_extends</span><span class="p">(</span><span class="n">river_axis_km</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">river_axis_km</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_flags</span><span class="p">[</span><span class="s2">&quot;zoom_km_step&quot;</span><span class="p">],</span> <span class="n">bank_coords_mid</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">)</span>
+                <span class="n">km_zoom</span><span class="p">,</span> <span class="n">xy_zoom</span> <span class="o">=</span> <span class="n">get_zoom_extends</span><span class="p">(</span>
+                    <span class="n">river_axis_km</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span>
+                    <span class="n">river_axis_km</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">plot_flags</span><span class="p">[</span><span class="s2">&quot;zoom_km_step&quot;</span><span class="p">],</span>
+                    <span class="n">bank_coords_mid</span><span class="p">,</span>
+                    <span class="n">bank_data</span><span class="o">.</span><span class="n">bank_chainage_midpoints</span><span class="p">,</span>
+                <span class="p">)</span>
 
             <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">df_plt</span><span class="o">.</span><span class="n">plot1_waterdepth_and_banklines</span><span class="p">(</span>
                 <span class="n">bbox</span><span class="p">,</span>
