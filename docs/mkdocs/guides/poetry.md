@@ -70,6 +70,32 @@ by first starting a poetry shell with the virtual hydrolib-core environment:
 (base) PS C:\checkouts\HYDROLIB-core_git> code
 ```
 
+## Switching Between Python Versions
+If you need to switch between Python versions (e.g., from Python 3.9 to Python 3.10), you can configure Poetry to use a specific Python version. Follow these steps:
+
+1. **Verify python version in `pyproject.toml`**:
+The `pyproject.toml` specifies which python version is supported. Please verify that the python version you wish to use is supported. For example the following configuration:
+```toml
+[tool.poetry.dependencies]
+python = "~3.10"
+```
+Indicates that the project supports Python 3.10 with any minor version (e.g., 3.10.1, 3.10.2, etc.).
+
+2. **Check Installed Python Versions**:
+Ensure that the desired Python version (e.g., Python 3.10) is installed on your system. You can check the available versions by running: `python --version python3.10 --version`.
+
+3. **Set the Python Version for Poetry**:
+Use the `poetry env use` command to specify the Python version for your project. For example: `poetry env use python3.10`. This will create a new virtual environment using Python 3.10.
+
+4. **Verify the Python Version**:
+After setting the Python version, verify that Poetry is using the correct version: `poetry run python --version`. The output should show Python 3.10.
+
+5. **Reinstall Dependencies**:
+If you switch Python versions, you may need to reinstall your dependencies. Run: `poetry install`.
+
+6. **Test the Installation**: Run the test suite to ensure everything works correctly with the new Python version: 
+`poetry run pytest`.
+
 ## Frequently asked questions
 - How to fix "File ... does not exist" errors during `poetry install` as in the example below?
 ```
