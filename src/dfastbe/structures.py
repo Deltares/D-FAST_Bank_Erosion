@@ -151,3 +151,13 @@ class FairwayData:
     fairway_face_indices: np.ndarray
     intersection_coords: np.ndarray
     fairway_initial_water_levels: List[np.ndarray] = field(default_factory=list)
+
+
+@dataclass
+class ErosionResults:
+    dn_tot: List[np.ndarray]
+    d_nav: np.ndarray
+    dn_eq: List[np.ndarray]
+    dv: List[List[np.ndarray]]
+    vol_eq: np.ndarray
+    t_erosion: int
