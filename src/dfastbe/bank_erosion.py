@@ -818,10 +818,7 @@ class Erosion:
         )
         bank_data.bank_line_size = line_size
 
-        return (
-            erosion_results,
-            water_level_data,
-        )
+        return water_level_data, erosion_results
 
     def _postprocess_erosion_results(
         self,
