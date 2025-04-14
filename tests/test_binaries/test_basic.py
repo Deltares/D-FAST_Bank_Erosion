@@ -6,7 +6,7 @@ from pathlib import Path
 
 @pytest.mark.binaries
 class TestBasic:
-    def test_basic_00(self, exe_path: Path):
+    def test_help_runs_correctly(self, exe_path: Path):
         """
         test getting the help message.
         """
