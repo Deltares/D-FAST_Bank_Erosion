@@ -263,15 +263,18 @@ class Erosion:
 
         # intersect fairway and mesh
         log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
-        ifw_numpy, fairway_face_indices = intersect_line_mesh(fairway_numpy, mesh_data)
+        fairway_intersection_coords, fairway_face_indices = intersect_line_mesh(
+            fairway_numpy, mesh_data
+        )
         if self.debug:
             write_shp_pnt(
-                (ifw_numpy[:-1] + ifw_numpy[1:]) / 2,
+                (fairway_intersection_coords[:-1] + fairway_intersection_coords[1:])
+                / 2,
                 {"iface": fairway_face_indices},
                 f"{str(self.output_dir)}{os.sep}fairway_face_indices.shp",
             )
 
-        return FairwayData(fairway_face_indices, ifw_numpy)
+        return FairwayData(fairway_face_indices, fairway_intersection_coords)
 
     def _map_bank_to_fairway(
         self, bank_data: BankData, fairway_data: FairwayData, sim: SimulationObject
@@ -287,8 +290,10 @@ class Erosion:
             bp_fw_face_idx.append(np.zeros(len(bcrds_mid), dtype=np.int64))
             for ip, bp in enumerate(bcrds_mid):
                 # find closest fairway support node
-                ifw = np.argmin(((bp - fairway_data.fairway_data) ** 2).sum(axis=1))
-                fwp = fairway_data.fairway_data[ifw]
+                ifw = np.argmin(
+                    ((bp - fairway_data.intersection_coords) ** 2).sum(axis=1)
+                )
+                fwp = fairway_data.intersection_coords[ifw]
                 dbfw = ((bp - fwp) ** 2).sum() ** 0.5
                 # If fairway support node is also the closest projected fairway point, then it likely
                 # that that point is one of the original support points (a corner) of the fairway path
@@ -301,31 +306,31 @@ class Erosion:
                 if ifw > 0:
                     alpha = (
                         (
-                            fairway_data.fairway_data[ifw, 0]
-                            - fairway_data.fairway_data[ifw - 1, 0]
+                            fairway_data.intersection_coords[ifw, 0]
+                            - fairway_data.intersection_coords[ifw - 1, 0]
                         )
-                        * (bp[0] - fairway_data.fairway_data[ifw - 1, 0])
+                        * (bp[0] - fairway_data.intersection_coords[ifw - 1, 0])
                         + (
-                            fairway_data.fairway_data[ifw, 1]
-                            - fairway_data.fairway_data[ifw - 1, 1]
+                            fairway_data.intersection_coords[ifw, 1]
+                            - fairway_data.intersection_coords[ifw - 1, 1]
                         )
-                        * (bp[1] - fairway_data.fairway_data[ifw - 1, 1])
+                        * (bp[1] - fairway_data.intersection_coords[ifw - 1, 1])
                     ) / (
                         (
-                            fairway_data.fairway_data[ifw, 0]
-                            - fairway_data.fairway_data[ifw - 1, 0]
+                            fairway_data.intersection_coords[ifw, 0]
+                            - fairway_data.intersection_coords[ifw - 1, 0]
                         )
                         ** 2
                         + (
-                            fairway_data.fairway_data[ifw, 1]
-                            - fairway_data.fairway_data[ifw - 1, 1]
+                            fairway_data.intersection_coords[ifw, 1]
+                            - fairway_data.intersection_coords[ifw - 1, 1]
                         )
                         ** 2
                     )
                     if alpha > 0 and alpha < 1:
-                        fwp1 = fairway_data.fairway_data[ifw - 1] + alpha * (
-                            fairway_data.fairway_data[ifw]
-                            - fairway_data.fairway_data[ifw - 1]
+                        fwp1 = fairway_data.intersection_coords[ifw - 1] + alpha * (
+                            fairway_data.intersection_coords[ifw]
+                            - fairway_data.intersection_coords[ifw - 1]
                         )
                         d1 = ((bp - fwp1) ** 2).sum() ** 0.5
                         if d1 < dbfw:
@@ -334,31 +339,31 @@ class Erosion:
                 if ifw < nfw:
                     alpha = (
                         (
-                            fairway_data.fairway_data[ifw + 1, 0]
-                            - fairway_data.fairway_data[ifw, 0]
+                            fairway_data.intersection_coords[ifw + 1, 0]
+                            - fairway_data.intersection_coords[ifw, 0]
                         )
-                        * (bp[0] - fairway_data.fairway_data[ifw, 0])
+                        * (bp[0] - fairway_data.intersection_coords[ifw, 0])
                         + (
-                            fairway_data.fairway_data[ifw + 1, 1]
-                            - fairway_data.fairway_data[ifw, 1]
+                            fairway_data.intersection_coords[ifw + 1, 1]
+                            - fairway_data.intersection_coords[ifw, 1]
                         )
-                        * (bp[1] - fairway_data.fairway_data[ifw, 1])
+                        * (bp[1] - fairway_data.intersection_coords[ifw, 1])
                     ) / (
                         (
-                            fairway_data.fairway_data[ifw + 1, 0]
-                            - fairway_data.fairway_data[ifw, 0]
+                            fairway_data.intersection_coords[ifw + 1, 0]
+                            - fairway_data.intersection_coords[ifw, 0]
                         )
                         ** 2
                         + (
-                            fairway_data.fairway_data[ifw + 1, 1]
-                            - fairway_data.fairway_data[ifw, 1]
+                            fairway_data.intersection_coords[ifw + 1, 1]
+                            - fairway_data.intersection_coords[ifw, 1]
                         )
                         ** 2
                     )
                     if alpha > 0 and alpha < 1:
-                        fwp1 = fairway_data.fairway_data[ifw] + alpha * (
-                            fairway_data.fairway_data[ifw + 1]
-                            - fairway_data.fairway_data[ifw]
+                        fwp1 = fairway_data.intersection_coords[ifw] + alpha * (
+                            fairway_data.intersection_coords[ifw + 1]
+                            - fairway_data.intersection_coords[ifw]
                         )
                         d1 = ((bp - fwp1) ** 2).sum() ** 0.5
                         if d1 < dbfw:

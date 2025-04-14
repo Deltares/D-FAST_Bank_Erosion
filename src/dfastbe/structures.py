@@ -143,11 +143,11 @@ class FairwayData:
     args:
         fairway_face_indices (np.ndarray):
             Mesh face indices matching to the fairway points.
-        fairway_data (np.ndarray):
-            Numpy array containing fairway-related data.
+        intersection_coords (np.ndarray):
+            The x, y coordinates of the intersection points of the fairway with the simulation mesh.
         fairway_initial_water_levels (List[np.ndarray]):
             Reference water level at the fairway
     """
     fairway_face_indices: np.ndarray
-    fairway_data: np.ndarray
+    intersection_coords: np.ndarray
     fairway_initial_water_levels: List[np.ndarray] = field(default_factory=list)
