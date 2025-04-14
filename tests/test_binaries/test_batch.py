@@ -8,7 +8,7 @@ from pathlib import Path
 class TestBatchMode:
     config_file = "meuse_manual.cfg"
 
-    def test_batch_mode_00(self, exe_path: Path):
+    def test_bank_lines_error(self, exe_path: Path):
         """
         Testing batch_mode: missing configuration file.
         """
