@@ -9,14 +9,22 @@ class ErosionInputs:
     """Class to hold erosion inputs.
 
     args:
-        ship_data (Dict[str, np.ndarray]): Ship data.
-        wave_fairway_distance_0 (List[np.ndarray]): Wave fairway distance 0.
-        wave_fairway_distance_1 (List[np.ndarray]): Wave fairway distance 1.
-        bank_protection_level (List[np.ndarray]): Bank protection level.
-        tauc (List[np.ndarray]): Tau critical values.
-        bank_type (List[np.ndarray]): Bank type.
-        taucls (np.ndarray): Tau critical values for different bank types.
-        taucls_str (Tuple[str]): String representation of tau critical values.
+        ship_data (Dict[str, np.ndarray]):
+            Data on all the vessels that travel through the river.
+        wave_fairway_distance_0 (List[np.ndarray]):
+            Threshold fairway distance 0 for wave attenuation.
+        wave_fairway_distance_1 (List[np.ndarray]):
+            Threshold fairway distance 1 for wave attenuation.
+        bank_protection_level (List[np.ndarray]):
+            Bank protection level.
+        tauc (List[np.ndarray]):
+            Critical bank shear stress values.
+        bank_type (List[np.ndarray]):
+            Integer representation of the bank type. Represents an index into the taucls_str array.
+        taucls (np.ndarray):
+            Critical bank shear stress values for different bank types.
+        taucls_str (Tuple[str]):
+            String representation for different bank types.
     """
     ship_data: Dict[str, np.ndarray]
     wave_fairway_distance_0: List[np.ndarray]
@@ -38,11 +46,11 @@ class ErosionInputs:
 class WaterLevelData:
     """Class to hold water level data.
     args:
-        hfw_max (float): Maximum water level.
+        hfw_max (float): Maximum water depth along the fairway.
         water_level (List[List[np.ndarray]]): Water level data.
-        ship_wave_max (List[List[np.ndarray]]): Maximum ship wave data.
-        ship_wave_min (List[List[np.ndarray]]): Minimum ship wave data.
-        velocity (List[List[np.ndarray]]): Velocity data.
+        ship_wave_max (List[List[np.ndarray]]): Maximum bank height subject to ship waves [m]
+        ship_wave_min (List[List[np.ndarray]]): Minimum bank height subject to ship waves [m]
+        velocity (List[List[np.ndarray]]): Flow velocity magnitude along the bank [m/s]
         bank_height (List[np.ndarray]): Bank height data.
         chezy (List[List[np.ndarray]]): Chezy coefficient data.
     """
@@ -60,16 +68,26 @@ class MeshData:
     """Class to hold mesh-related data.
 
     args:
-        x_face_coords (np.ndarray): X-coordinates of the mesh faces.
-        y_face_coords (np.ndarray): Y-coordinates of the mesh faces.
-        x_edge_coords (np.ndarray): X-coordinates of the mesh edges.
-        y_edge_coords (np.ndarray): Y-coordinates of the mesh edges.
-        face_node (np.ndarray): Node connectivity for each face.
-        n_nodes (np.ndarray): Number of nodes in the mesh.
-        edge_node (np.ndarray): Node connectivity for each edge.
-        edge_face_connectivity (np.ndarray): Edge-face connectivity matrix.
-        face_edge_connectivity (np.ndarray): Face-edge connectivity matrix.
-        boundary_edge_nrs (np.ndarray): Boundary edge numbers.
+        x_face_coords (np.ndarray):
+            X-coordinates of the mesh faces.
+        y_face_coords (np.ndarray):
+            Y-coordinates of the mesh faces.
+        x_edge_coords (np.ndarray):
+            X-coordinates of the mesh edges.
+        y_edge_coords (np.ndarray):
+            Y-coordinates of the mesh edges.
+        face_node (np.ndarray):
+            Node connectivity for each face.
+        n_nodes (np.ndarray):
+            Number of nodes in the mesh.
+        edge_node (np.ndarray):
+            Node connectivity for each edge.
+        edge_face_connectivity (np.ndarray):
+            Per edge a list of the indices of the faces on the left and right side of that edge.
+        face_edge_connectivity (np.ndarray):
+            Per face a list of indices of the edges that together form the boundary of that face.
+        boundary_edge_nrs (np.ndarray):
+            List of edge indices that together form the boundary of the whole mesh.
     """
     x_face_coords: np.ndarray
     y_face_coords: np.ndarray
@@ -88,13 +106,20 @@ class BankData:
     """Class to hold bank-related data.
 
     args:
-        is_right_bank (List[bool]): List indicating if the bank is right or not.
-        bank_km_mid (List[np.ndarray]): Midpoint coordinates of the banks.
-        bank_line_coords (List[np.ndarray]): Coordinates of the bank lines.
-        bank_face_indices (List[np.ndarray]): Indices of the faces associated with the banks.
-        bank_lines (GeoDataFrame): GeoDataFrame containing the bank lines.
-        n_bank_lines (int): Number of bank lines.
-        bank_line_size (List[np.ndarray]): Size of each individual bank line.
+        is_right_bank (List[bool]):
+            List indicating if the bank is right or not.
+        bank_chainage_midpoints (List[np.ndarray]):
+            River chainage for the midpoints of each segment of the bank line
+        bank_line_coords (List[np.ndarray]):
+            Coordinates of the bank lines.
+        bank_face_indices (List[np.ndarray]):
+            Indices of the faces associated with the banks.
+        bank_lines (GeoDataFrame):
+            GeoDataFrame containing the bank lines.
+        n_bank_lines (int):
+            Number of bank lines.
+        bank_line_size (List[np.ndarray]):
+            Size of each individual bank line.
     """
     is_right_bank: List[bool]
     bank_chainage_midpoints: List[np.ndarray]
@@ -110,11 +135,16 @@ class FairwayData:
     """Class to hold fairway-related data.
 
     args:
-        fairway_face_indices (np.ndarray): Indices of the fairway faces.
-        fairway_data (np.ndarray): Numpy array containing fairway-related data.
-        bank_protection_fairway_face_indices (np.ndarray): Indices of the bank protection fairway faces.
-        fairway_distances (np.ndarray): Distances from the banks to the fairway.
-        fairway_initial_water_levels (List[np.ndarray]): Initial water levels in the fairway.
+        fairway_face_indices (np.ndarray):
+            Mesh face indices matching to the fairway points.
+        fairway_data (np.ndarray):
+            Numpy array containing fairway-related data.
+        bank_protection_fairway_face_indices (np.ndarray):
+            Indices of the bank protection fairway faces.
+        fairway_distances (np.ndarray):
+            The distance of each bank line point to the closest fairway point.
+        fairway_initial_water_levels (List[np.ndarray]):
+            Reference water level at the fairway
     """
     fairway_face_indices: np.ndarray
     fairway_data: np.ndarray
