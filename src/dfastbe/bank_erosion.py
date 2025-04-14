@@ -678,7 +678,7 @@ class Erosion:
                             "y": bcrds_mid[:, 1],
                             "iface_fw": fairway_data.bank_protection_fairway_face_indices[
                                 ib
-                            ],  # ii
+                            ],
                             "iface_bank": bank_data.bank_face_indices[ib],  # bank_index
                             "zb": bank_height[ib],
                             "len": line_size[ib],
@@ -1060,7 +1060,13 @@ class Erosion:
                         )
                         / 2
                     )
-                km_zoom, xy_zoom = get_zoom_extends(river_axis_km.min(), river_axis_km.max(), self.plot_flags["zoom_km_step"], bank_coords_mid, bank_km_mid)
+                km_zoom, xy_zoom = get_zoom_extends(
+                    river_axis_km.min(),
+                    river_axis_km.max(),
+                    self.plot_flags["zoom_km_step"],
+                    bank_coords_mid,
+                    bank_data.bank_chainage_midpoints,
+                )
 
             fig, ax = df_plt.plot1_waterdepth_and_banklines(
                 bbox,
