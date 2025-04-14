@@ -11,9 +11,10 @@ class TestBasic:
         test getting the help message.
         """
         result = subprocess.run([exe_path, "--help"])
-        success = result.returncode == 0
 
-        assert success == True
+        assert result.returncode == 0, (
+            f"Process returned exit code: {result.returncode}, please run the dfastbe.exe to find the specific error."
+        )
 
     def test_compare_help_message(self, exe_path: Path):
         """
