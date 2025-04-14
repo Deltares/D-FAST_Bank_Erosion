@@ -481,15 +481,8 @@ class Erosion:
         bank_data: BankData,
         fairway_data: FairwayData,
     ) -> Tuple[
-        List[np.ndarray],
-        List[np.ndarray],
-        List[np.ndarray],
-        List[np.ndarray],
-        List[np.ndarray],
-        List[List[np.ndarray]],
-        List[np.ndarray],
-        List[np.ndarray],
         WaterLevelData,
+        ErosionResults,
     ]:
         # initialize arrays for erosion loop over all discharges
         velocity: List[List[np.ndarray]] = []
@@ -826,7 +819,8 @@ class Erosion:
         km_mid,
         bank_data: BankData,
         erosion_results: ErosionResults,
-    ):
+    ) -> Tuple[List[LineString], List[LineString], List[LineString]]:
+        """Postprocess the erosion results to get the new bank lines and volumes."""
         log_text("=")
         d_nav = np.zeros(bank_data.n_bank_lines)
         dn_max = np.zeros(bank_data.n_bank_lines)
