@@ -976,19 +976,14 @@ class Erosion:
         self._generate_plots(
             river_axis_km,
             sim,
-            dn_tot,
             xy_line_eq_list,
-            d_nav,
-            t_erosion,
             km_mid,
             km_step,
-            dv,
-            vol_eq,
-            dn_eq,
             erosion_inputs,
             water_level_data,
             mesh_data,
             bank_data,
+            erosion_results,
         )
         log_text("end_bankerosion")
         timed_logger("-- end analysis --")
@@ -1012,30 +1007,29 @@ class Erosion:
     def _write_volume_outputs(self, erosion_results: ErosionResults, km_mid):
         erosion_vol_file = self.config_file.get_str("Erosion", "EroVol", default="erovol.evo")
         log_text("save_tot_erovol", data={"file": erosion_vol_file})
-        write_km_eroded_volumes(km_mid, vol_tot, str(self.output_dir) + os.sep + erosion_vol_file)
+        write_km_eroded_volumes(
+            km_mid, erosion_results.vol_tot, str(self.output_dir / erosion_vol_file)
+        )
 
         # write eroded volumes per km (equilibrium)
         erosion_vol_file = self.config_file.get_str("Erosion", "EroVolEqui", default="erovol_eq.evo")
         log_text("save_eq_erovol", data={"file": erosion_vol_file})
-        write_km_eroded_volumes(km_mid, vol_eq, str(self.output_dir) + os.sep + erosion_vol_file)
+        write_km_eroded_volumes(
+            km_mid, erosion_results.vol_eq, str(self.output_dir / erosion_vol_file)
+        )
 
     def _generate_plots(
         self,
         river_axis_km,
         sim,
-        dn_tot,
         xy_line_eq_list,
-        d_nav,
-        t_erosion,
         km_mid,
         km_step,
-        dv,
-        vol_eq,
-        dn_eq,
         erosion_inputs: ErosionInputs,
         water_level_data: WaterLevelData,
         mesh_data: MeshData,
         bank_data: BankData,
+        erosion_results: ErosionResults,
     ):
         # create various plots
         if self.plot_flags["plot_data"]:
@@ -1091,16 +1085,16 @@ class Erosion:
                 bbox,
                 self.river_data.masked_profile_arr,
                 bank_data.bank_line_coords,
-                dn_tot,
+                erosion_results.dn_tot,
                 bank_data.is_right_bank,
-                d_nav,
+                erosion_results.d_nav,
                 xy_line_eq_list,
                 mesh_data.x_edge_coords,
                 mesh_data.y_edge_coords,
                 X_AXIS_TITLE,
                 Y_AXIS_TITLE,
                 "eroded distance and equilibrium bank location",
-                f"eroded during {t_erosion} year",
+                f"eroded during {erosion_results.t_erosion} year",
                 "eroded distance [m]",
                 "equilibrium location",
             )
@@ -1118,9 +1112,9 @@ class Erosion:
                 km_mid,
                 km_step,
                 "river chainage [km]",
-                dv,
+                erosion_results.dv,
                 "eroded volume [m^3]",
-                f"eroded volume per {km_step} chainage km ({t_erosion} years)",
+                f"eroded volume per {km_step} chainage km ({erosion_results.t_erosion} years)",
                 "Q{iq}",
                 "Bank {ib}",
             )
@@ -1138,9 +1132,9 @@ class Erosion:
                 km_mid,
                 km_step,
                 "river chainage [km]",
-                dv,
+                erosion_results.dv,
                 "eroded volume [m^3]",
-                f"eroded volume per {km_step} chainage km ({t_erosion} years)",
+                f"eroded volume per {km_step} chainage km ({erosion_results.t_erosion} years)",
                 "Q{iq}",
             )
             if self.plot_flags["save_plot"]:
@@ -1155,9 +1149,9 @@ class Erosion:
                 km_mid,
                 km_step,
                 "river chainage [km]",
-                dv,
+                erosion_results.dv,
                 "eroded volume [m^3]",
-                f"eroded volume per {km_step} chainage km ({t_erosion} years)",
+                f"eroded volume per {km_step} chainage km ({erosion_results.t_erosion} years)",
                 "Bank {ib}",
             )
             if self.plot_flags["save_plot"]:
@@ -1172,7 +1166,7 @@ class Erosion:
                 km_mid,
                 km_step,
                 "river chainage [km]",
-                vol_eq,
+                erosion_results.vol_eq,
                 "eroded volume [m^3]",
                 f"eroded volume per {km_step} chainage km (equilibrium)",
             )
@@ -1257,9 +1251,9 @@ class Erosion:
             fig, ax = df_plt.plot8_eroded_distance(
                 bank_data.bank_chainage_midpoints,
                 "river chainage [km]",
-                dn_tot,
+                erosion_results.dn_tot,
                 "Bank {ib}",
-                dn_eq,
+                erosion_results.dn_eq,
                 "Bank {ib} (eq)",
                 "eroded distance",
                 "[m]",
