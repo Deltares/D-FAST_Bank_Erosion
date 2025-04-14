@@ -35,6 +35,8 @@ import matplotlib.pyplot
 import geopandas
 import numpy
 
+from dfastbe.io import ConfigFile
+
 
 def savefig(fig: matplotlib.figure.Figure, filename: str) -> None:
     """
@@ -243,6 +245,7 @@ def plot_detect1(
     waterdepth_txt: str,
     bankarea_txt: str,
     bankline_txt: str,
+    config_file: ConfigFile,
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank line detection plot.
@@ -300,10 +303,10 @@ def plot_detect1(
     chainage_markers(xykm, ax, ndec=0, scale=scale)
     p = plot_mesh_patches(ax, fn, nnodes, xn, yn, h, 0, hmax, scale=scale)
     for b, bankarea in enumerate(bankareas):
-        geopandas.GeoSeries(bankarea, crs="EPSG:28992").plot(
+        geopandas.GeoSeries(bankarea, crs=config_file.crs).plot(
             ax=ax, alpha=0.2, color="k"
         )
-        geopandas.GeoSeries(bank[b], crs="EPSG:28992").plot(ax=ax, color="r")
+        geopandas.GeoSeries(bank[b], crs=config_file.crs).plot(ax=ax, color="r")
     cbar = fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=waterdepth_txt)
     #
     shaded = matplotlib.patches.Patch(color="k", alpha=0.2)

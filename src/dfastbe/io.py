@@ -94,6 +94,7 @@ class ConfigFile:
 
     def __init__(self, config: ConfigParser, path: Union[Path, str] = None):
         self._config = config
+        self.crs = "EPSG:28992"
         if path:
             self.path = Path(path)
             self.root_dir = self.path.parent
@@ -634,7 +635,7 @@ class ConfigFile:
             xy_bank = XYCModel.read(xyc_file)
             bankline_list.append(LineString(xy_bank))
             b += 1
-        bankline_series = GeoSeries(bankline_list, crs="EPSG:28992")
+        bankline_series = GeoSeries(bankline_list, crs=self.crs)
         banklines = GeoDataFrame(geometry=bankline_series)
         return banklines
 
@@ -1913,7 +1914,9 @@ def relative_path(rootdir: str, file: str) -> str:
         return str(file_path)
 
 
-def write_shp_pnt(xy: np.ndarray, data: Dict[str, np.ndarray], filename: str) -> None:
+def write_shp_pnt(
+    xy: np.ndarray, data: Dict[str, np.ndarray], filename: str, config_file: ConfigFile
+) -> None:
     """
     Write a shape point file with x, y, and values.
 
@@ -1931,7 +1934,7 @@ def write_shp_pnt(xy: np.ndarray, data: Dict[str, np.ndarray], filename: str) ->
     None
     """
     xy_points = [Point(xy1) for xy1 in xy]
-    geom = GeoSeries(xy_points, crs="EPSG:28992")
+    geom = GeoSeries(xy_points, crs=config_file.crs)
     write_shp(geom, data, filename)
 
 
