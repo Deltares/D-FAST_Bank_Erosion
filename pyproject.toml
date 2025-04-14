@@ -53,9 +53,15 @@ notebook = "<7.0"
 dfastbe = 'dfastbe.__main__:main'
 
 
+[tool.coverage.run]
+omit = [
+    "tests/test_binaries/*",
+]
+
 [tool.coverage.report]
 show_missing = true
 fail_under = 61
+
 
 [tool.flake8]
 ignore = ["E501", "E203", "F821", "E722", "B001", "D401", "B006", "D202", "W503"]
@@ -72,17 +78,16 @@ line_length = 88
 multi_line_output = 3
 
 [tool.pytest.ini_options]
-addopts = [ "--ignore=tests-dist",
-            "--cov",
+addopts = [ "--cov",
             "--cov-report=term",
             "--cov-report=html",
             "--cov-report=xml:coverage-reports/coverage.xml",
 ]
 testpaths="tests"
-python_functions=["given_*",
-                    "Given_*",
-                    "test_*",
-                    "Test_*"]
+
+markers = [
+    "binaries: marks tests as binaries (deselect with '-m \"not binaries\"')",
+]
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

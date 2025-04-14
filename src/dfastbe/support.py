@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Copyright (C) 2020 Stichting Deltares.
 
@@ -27,8 +26,12 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Dict, List, Tuple, Union
+from typing import List, Tuple
+
+import numpy as np
+
 from dfastbe.io import SimulationObject
+from dfastbe.structures import MeshData
 
 # import matplotlib
 # import matplotlib.pyplot
@@ -43,7 +46,6 @@ from shapely.geometry import (
 )
 from shapely import union_all, line_merge
 import geopandas
-import sys
 
 
 def project_km_on_line(
@@ -228,108 +230,56 @@ def on_right_side(line_xy: numpy.ndarray, ref_xy: numpy.ndarray) -> bool:
     return right_side
 
 
-def xykm_bin(xykm: numpy.ndarray, km_bin: Tuple[float, float, float]) -> numpy.ndarray:
-    """
-    Resample a georeferenced chainage line to bin boundaries. 
-    
-    Arguments
-    ---------
-    xykm : numpy.ndarray
-        N x 3 array representing the basic georeferenced chainage information.
-    km_bin : Tuple[float, float, float]
-        Tuple containing start, end, and step for chainage bins.
-        
-    Returns
-    -------
-    xykm1 : numpy.ndarray
-        M x 3 array representing the resampled georeferenced chainage information.
-    """
-    length = xykm.shape[0]
-    length1 = int((km_bin[1] - km_bin[0]) / km_bin[2]) + 1
-    xykm1 = numpy.zeros((length1, 3))
-    j = 0
-    for i in range(length1):
-        km = km_bin[0] + i * km_bin[2]
-        while xykm[j, 2] < km:
-            j = j + 1
-            if j == length:
-                break
-        if j == 0:
-            xykm1[i, :] = xykm[0, :]
-        elif j == length:
-            xykm1[i, :] = xykm[-1, :]
-        else:
-            alpha = (km - xykm[j - 1, 2]) / (xykm[j, 2] - xykm[j - 1, 2])
-            xykm1[i, :] = (1 - alpha) * xykm[j - 1, :] + alpha * xykm[j, :]
-    return xykm1
-
-
 def intersect_line_mesh(
     bp: numpy.ndarray,
-    xf: numpy.ma.masked_array,
-    yf: numpy.ma.masked_array,
-    xe: numpy.ndarray,
-    ye: numpy.ndarray,
-    fe: numpy.ma.masked_array,
-    ef: numpy.ndarray,
-    fn: numpy.ma.masked_array,
-    en: numpy.ndarray,
-    nnodes: numpy.ndarray,
-    boundary_edge_nrs: numpy.ndarray,
+    mesh_data: MeshData,
     d_thresh: float = 0.001,
 ) -> Tuple[numpy.ndarray, numpy.ndarray]:
-    """
-    Intersect a (bank) line with an unstructured mesh and return the intersection coordinates and mesh face indices.
+    """Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.
 
-    Arguments
-    ---------
-    bp : numpy.ndarray
-        Array containing the x,y-coordinates of the (bank) line.
-    xf : numpy.ma.masked_array
-        Array containing the x-coordinates of the corner points of each mesh face.
-    yf : numpy.ma.masked_array
-        Array containing the y-coordinates of the corner points of each mesh face.
-    xe : numpy.ndarray
-        Array containing the x-coordinates of the end points of each mesh edge.
-    ye : numpy.ndarray
-        Array containing the y-coordinates of the end points of each mesh edge.
-    fe : numpy.ma.masked_array
-        Array containg the mesh face-edge connectivity.
-    ef : numpy.ndarray
-        Array containg the mesh edge-face connectivity.
-    fn : numpy.ma.masked_array
-        Array containg the mesh face-node connectivity.
-    en : numpy.ndarray
-        Array containg the mesh edge-node connectivity.
-    nnodes : numpy.ndarray
-        Array containg the number of nodes/edges per face.
-    boundary_edge_nrs : numpy.ndarray
-        Array containing the indices of the domain boundary edges.
-    d_thresh : float
-        Distance threshold.
-        
-    Returns
-    -------
-    crds : numpy.ndarray
-        Array containing the x,y-coordinates of the (bank) line intersected by the mesh.
-    idx : numpy.ndarray
-        Array containing the indices of the mesh faces in which each line segment of crds is located.
+    This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.
+    It calculates the intersection points and identifies the mesh faces corresponding to each segment of the line.
+
+    Args:
+        bp (numpy.ndarray):
+            A 2D array of shape (N, 2) containing the x, y coordinates of the line to be intersected with the mesh.
+        mesh_data (MeshData):
+            An instance of the `MeshData` class containing mesh-related data, such as face coordinates, edge coordinates,
+            and connectivity information.
+        d_thresh (float, optional):
+            A distance threshold for filtering out very small segments. Segments shorter than this threshold will be removed.
+            Defaults to 0.001.
+
+    Returns:
+        Tuple[numpy.ndarray, numpy.ndarray]:
+            A tuple containing:
+            - `crds` (numpy.ndarray): A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.
+            - `idx` (numpy.ndarray): A 1D array of shape (M-1,) containing the indices of the mesh faces corresponding to
+              each segment of the intersected line.
+
+    Raises:
+        Exception:
+            If the line starts outside the mesh and cannot be associated with any mesh face, or if the line crosses
+            ambiguous regions (e.g., edges shared by multiple faces).
+
+    Notes:
+        - The function uses Shapely geometry operations to determine whether points are inside polygons or on edges.
+        - The function handles cases where the line starts outside the mesh, crosses multiple edges, or ends on a node.
+        - Tiny segments shorter than `d_thresh` are removed from the output.
     """
     crds = numpy.zeros((len(bp), 2))
     idx = numpy.zeros(len(bp), dtype=numpy.int64)
     verbose = False
     l = 0
-    #
     index: int
     vindex: numpy.ndarray
-    nprint = 0
     for j, bpj in enumerate(bp):
         if verbose:
             print("Current location: {}, {}".format(bpj[0], bpj[1]))
         if j == 0:
             # first bp inside or outside?
-            dx = xf - bpj[0]
-            dy = yf - bpj[1]
+            dx = mesh_data.x_face_coords - bpj[0]
+            dy = mesh_data.y_face_coords - bpj[1]
             possible_cells = numpy.nonzero(
                 ~(
                     (dx < 0).all(axis=1)
@@ -352,7 +302,14 @@ def intersect_line_mesh(
                 for k in possible_cells:
                     polygon_k = Polygon(
                         numpy.concatenate(
-                            (xf[k : k + 1, : nnodes[k]], yf[k : k + 1, : nnodes[k]]),
+                            (
+                                mesh_data.x_face_coords[
+                                    k : k + 1, : mesh_data.n_nodes[k]
+                                ],
+                                mesh_data.y_face_coords[
+                                    k : k + 1, : mesh_data.n_nodes[k]
+                                ],
+                            ),
                             axis=0,
                         ).T
                     )
@@ -365,7 +322,14 @@ def intersect_line_mesh(
                     on_edge: List[int] = []
                     for k in possible_cells:
                         nd = numpy.concatenate(
-                            (xf[k : k + 1, : nnodes[k]], yf[k : k + 1, : nnodes[k]]),
+                            (
+                                mesh_data.x_face_coords[
+                                    k : k + 1, : mesh_data.n_nodes[k]
+                                ],
+                                mesh_data.y_face_coords[
+                                    k : k + 1, : mesh_data.n_nodes[k]
+                                ],
+                            ),
                             axis=0,
                         ).T
                         line_k = LineString(numpy.concatenate(nd, nd[0:1], axis=0))
@@ -394,7 +358,6 @@ def intersect_line_mesh(
             # second or later point
             bpj1 = bp[j - 1]
             prev_b = 0
-            prev_pnt = bpj1
             while True:
                 if index == -2:
                     b = numpy.zeros(0)
@@ -407,12 +370,7 @@ def intersect_line_mesh(
                             prev_b,
                             bpj,
                             bpj1,
-                            xe,
-                            ye,
-                            fe,
-                            nnodes,
-                            en,
-                            boundary_edge_nrs,
+                            mesh_data,
                         )
                         b = numpy.concatenate((b, b1), axis=0)
                         edges = numpy.concatenate((edges, edges1), axis=0)
@@ -436,12 +394,7 @@ def intersect_line_mesh(
                         prev_b,
                         bpj,
                         bpj1,
-                        xe,
-                        ye,
-                        fe,
-                        nnodes,
-                        en,
-                        boundary_edge_nrs,
+                        mesh_data,
                     )
 
                 if len(edges) == 0:
@@ -460,8 +413,14 @@ def intersect_line_mesh(
                             polygon_k = Polygon(
                                 numpy.concatenate(
                                     (
-                                        xf[index : index + 1, : nnodes[index]],
-                                        yf[index : index + 1, : nnodes[index]],
+                                        mesh_data.x_face_coords[
+                                            index : index + 1,
+                                            : mesh_data.n_nodes[index],
+                                        ],
+                                        mesh_data.y_face_coords[
+                                            index : index + 1,
+                                            : mesh_data.n_nodes[index],
+                                        ],
                                     ),
                                     axis=0,
                                 ).T
@@ -494,7 +453,7 @@ def intersect_line_mesh(
                     # slice location identified ...
                     node = nodes[0]
                     edge = edges[0]
-                    faces = ef[edge]
+                    faces = mesh_data.edge_face_connectivity[edge]
                     prev_b = b[0]
 
                     if node >= 0:
@@ -506,8 +465,9 @@ def intersect_line_mesh(
                                 )
                             )
                         # figure out where we will be heading afterwards ...
-                        all_node_edges = numpy.nonzero((en == node).any(axis=1))[0]
-                        all_node_faces = numpy.unique(ef[all_node_edges])
+                        all_node_edges = numpy.nonzero(
+                            (mesh_data.edge_node == node).any(axis=1)
+                        )[0]
                         if b[0] < 1.0:
                             # segment passes through node and enter non-neighbouring cell ...
                             # direction of current segment from bpj1 to bpj
@@ -547,17 +507,25 @@ def intersect_line_mesh(
                                 )
                             )
                         for ie in all_node_edges:
-                            if en[ie, 0] == node:
+                            if mesh_data.edge_node[ie, 0] == node:
                                 theta_edge = math.atan2(
-                                    ye[ie, 1] - ye[ie, 0], xe[ie, 1] - xe[ie, 0]
+                                    mesh_data.y_edge_coords[ie, 1]
+                                    - mesh_data.y_edge_coords[ie, 0],
+                                    mesh_data.x_edge_coords[ie, 1]
+                                    - mesh_data.x_edge_coords[ie, 0],
                                 )
                             else:
                                 theta_edge = math.atan2(
-                                    ye[ie, 0] - ye[ie, 1], xe[ie, 0] - xe[ie, 1]
+                                    mesh_data.y_edge_coords[ie, 0]
+                                    - mesh_data.y_edge_coords[ie, 1],
+                                    mesh_data.x_edge_coords[ie, 0]
+                                    - mesh_data.x_edge_coords[ie, 1],
                                 )
                             if verbose:
                                 print(
-                                    "{}: edge {} connects {}".format(j, ie, en[ie, :])
+                                    "{}: edge {} connects {}".format(
+                                        j, ie, mesh_data.edge_node[ie, :]
+                                    )
                                 )
                                 print(
                                     "{}: edge {} theta is {}".format(j, ie, theta_edge)
@@ -601,7 +569,7 @@ def intersect_line_mesh(
                         if left_edge == right_edge:
                             if verbose:
                                 print("{}: continue along edge {}".format(j, left_edge))
-                            index0 = ef[left_edge, :]
+                            index0 = mesh_data.edge_face_connectivity[left_edge, :]
                         else:
                             if verbose:
                                 print(
@@ -609,15 +577,17 @@ def intersect_line_mesh(
                                         j, left_edge, right_edge
                                     )
                                 )
-                            left_faces = ef[left_edge, :]
-                            right_faces = ef[right_edge, :]
+                            left_faces = mesh_data.edge_face_connectivity[left_edge, :]
+                            right_faces = mesh_data.edge_face_connectivity[
+                                right_edge, :
+                            ]
                             if (
                                 left_faces[0] in right_faces
                                 and left_faces[1] in right_faces
                             ):
                                 # the two edges are shared by two faces ... check first face
-                                fn1 = fn[left_faces[0]]
-                                fe1 = fe[left_faces[0]]
+                                fn1 = mesh_data.face_node[left_faces[0]]
+                                fe1 = mesh_data.face_edge_connectivity[left_faces[0]]
                                 if verbose:
                                     print(
                                         "{}: those edges are shared by two faces: {}".format(
@@ -680,7 +650,10 @@ def intersect_line_mesh(
                         if verbose:
                             print("{}: moving in direction theta = {}".format(j, theta))
                         theta_edge = math.atan2(
-                            ye[edge, 1] - ye[edge, 0], xe[edge, 1] - xe[edge, 0]
+                            mesh_data.y_edge_coords[edge, 1]
+                            - mesh_data.y_edge_coords[edge, 0],
+                            mesh_data.x_edge_coords[edge, 1]
+                            - mesh_data.x_edge_coords[edge, 0],
                         )
                         if theta == theta_edge or theta == -theta_edge:
                             # aligned with edge
@@ -689,9 +662,9 @@ def intersect_line_mesh(
                             index0 = faces
                         else:
                             # check whether the (extended) segment slices any edge of faces[0]
-                            fe1 = fe[faces[0]]
+                            fe1 = mesh_data.face_edge_connectivity[faces[0]]
                             a, b, edges = get_slices_core(
-                                fe1, xe, ye, bpj, bp[j + 1], 0.0, False
+                                fe1, mesh_data, bpj, bp[j + 1], 0.0, False
                             )
                             if len(edges) > 0:
                                 # yes, a slice (typically 1, but could be 2 if it slices at a node
@@ -721,13 +694,15 @@ def intersect_line_mesh(
                                         j, index, node, index0, prev_b
                                     )
                                 )
-                        if type(index0) == int or type(index0) == numpy.int64:
+
+                        if isinstance(index0, int) or isinstance(index0, np.int32) or isinstance(index0, np.int64):
                             index = index0
                         elif len(index0) == 1:
                             index = index0[0]
                         else:
                             index = -2
                             vindex = index0
+
                     elif faces[0] == index:
                         if verbose:
                             print(
@@ -781,102 +756,118 @@ def get_slices(
     prev_b: float,
     bpj: numpy.ndarray,
     bpj1: numpy.ndarray,
-    xe: numpy.ndarray,
-    ye: numpy.ndarray,
-    fe: numpy.ndarray,
-    nnodes: numpy.ndarray,
-    en: numpy.ndarray,
-    boundary_edge_nrs: numpy.ndarray,
+    mesh_data: MeshData,
 ) -> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]:
-    """
-    Intersect a (bank) line with an unstructured mesh and return the intersection coordinates and mesh face indices.
+    """Calculate the intersection of a line segment with the edges of a mesh face.
 
-    Arguments
-    ---------
-    index : int
-        index of the current face.
-    prev_b : float
-        offset of previous slice.
-    bpj : numpy.ndarray
-        1x2 array containing the x,y-coordinates of a bank point.
-    bpj : numpy.ndarray
-        1x2 array containing the x,y-coordinates of the previous bank point.
-    xe : numpy.ndarray
-        Array containing the x-coordinates of the end points of each mesh edge.
-    ye : numpy.ndarray
-        Array containing the y-coordinates of the end points of each mesh edge.
-    fe : numpy.ndarray
-        Array containg the mesh face-edge connectivity.
-    nnodes: numpy.ndarray
-        Array containing the number of nodes per face.
-    en : numpy.ndarray
-        Array containg the mesh edge-node connectivity.
-    boundary_edge_nrs : numpy.ndarray
-        Array containing the indices of the domain boundary edges.
-        
-    Returns
-    -------
-    b : numpy.ndarray
-        Array containing relative distance along the segment bpj1-bpj at which the slice occurs.
-    edges : numpy.ndarray
-        Array containing all considered edges.
-    nodes : numpu.ndarray
-        Array containing flags indicating whether the slices was at a node.
+    This function determines where a line segment (defined by two points) intersects the edges of a mesh face.
+    It returns the relative distances along the segment and the edges where the intersections occur, as well as
+    flags indicating whether the intersections occur at nodes.
+
+    Args:
+        index (int):
+            Index of the current mesh face. If `index` is negative, the function assumes the segment intersects
+            the boundary edges of the mesh.
+        prev_b (float):
+            The relative distance along the previous segment where the last intersection occurred. Used to filter
+            intersections along the current segment.
+        bpj (numpy.ndarray):
+            A 1D array of shape (2,) containing the x, y coordinates of the current point of the line segment.
+        bpj1 (numpy.ndarray):
+            A 1D array of shape (2,) containing the x, y coordinates of the previous point of the line segment.
+        mesh_data (MeshData):
+            An instance of the `MeshData` class containing mesh-related data, such as edge coordinates, face-edge
+            connectivity, and edge-node connectivity.
+
+    Returns:
+        Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]:
+            A tuple containing:
+            - `b` (numpy.ndarray): Relative distances along the segment `bpj1-bpj` where the intersections occur.
+            - `edges` (numpy.ndarray): Indices of the edges that are intersected by the segment.
+            - `nodes` (numpy.ndarray): Flags indicating whether the intersections occur at nodes. A value of `-1`
+              indicates no intersection at a node, while other values correspond to node indices.
+
+    Raises:
+        ValueError:
+            If the input data is invalid or inconsistent.
+
+    Notes:
+        - If `index` is negative, the function assumes the segment intersects the boundary edges of the mesh.
+        - The function uses the `get_slices_core` helper function to calculate the intersections.
+        - Intersections at nodes are flagged in the `nodes` array, with the corresponding node indices.
+
     """
     if index < 0:
-        edges = boundary_edge_nrs
+        edges = mesh_data.boundary_edge_nrs
     else:
-        edges = fe[index, : nnodes[index]]
-    a, b, edges = get_slices_core(edges, xe, ye, bpj1, bpj, prev_b, True)
+        edges = mesh_data.face_edge_connectivity[index, : mesh_data.n_nodes[index]]
+    a, b, edges = get_slices_core(edges, mesh_data, bpj1, bpj, prev_b, True)
     nodes = -numpy.ones(a.shape, dtype=numpy.int64)
-    nodes[a == 0] = en[edges[a == 0], 0]
-    nodes[a == 1] = en[edges[a == 1], 1]
+    nodes[a == 0] = mesh_data.edge_node[edges[a == 0], 0]
+    nodes[a == 1] = mesh_data.edge_node[edges[a == 1], 1]
     return b, edges, nodes
 
 
 def get_slices_core(
     edges: numpy.ndarray,
-    xe: numpy.ndarray,
-    ye: numpy.ndarray,
+    mesh_data: MeshData,
     bpj1: numpy.ndarray,
     bpj: numpy.ndarray,
     bmin: float,
     bmax1: bool = True,
 ) -> Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]:
-    """
-    Intersect a (bank) line with an unstructured mesh and return the intersection coordinates and mesh face indices.
+    """Calculate the intersection of a line segment with multiple mesh edges.
 
-    Arguments
-    ---------
-    edges : numpy.ndarray
-        Array containing indices of the edges to check for slicing.
-    xe : numpy.ndarray
-        Array containing the x-coordinates of the end points of each mesh edge.
-    ye : numpy.ndarray
-        Array containing the y-coordinates of the end points of each mesh edge.
-    bpj1 : numpy.ndarray
-        1x2 array containing the x,y-coordinates of the previous bank point.
-    bpj : numpy.ndarray
-        1x2 array containing the x,y-coordinates of a bank point.
-    bmin : float
-        Minimum relative distance from bpj1 at which slice should occur.
-    bmax1 : bool
-        Flag indicating whether the the relative distance along the segment bpj1-bpj should be limited to 1.
-        
-    Returns
-    -------
-    a : numpy.ndarray
-        Array containing relative distance along the edges at which the slice occurs.
-    b : numpy.ndarray
-        Array containing relative distance along the segment bpj1-bpj at which the slice occurs.
-    edges : numpy.ndarray
-        Reduced array containing only the indices of the sliced edges.
+    This function determines where a line segment intersects a set of mesh edges.
+    It calculates the relative distances along the segment and the edges where
+    the intersections occur, and returns the indices of the intersected edges.
+
+    Args:
+        edges (numpy.ndarray):
+            Array containing the indices of the edges to check for intersections.
+        mesh_data (MeshData):
+            An instance of the `MeshData` class containing mesh-related data,
+            such as edge coordinates and connectivity information.
+        bpj1 (numpy.ndarray):
+            A 1D array of shape (2,) containing the x, y coordinates of the
+            starting point of the line segment.
+        bpj (numpy.ndarray):
+            A 1D array of shape (2,) containing the x, y coordinates of the
+            ending point of the line segment.
+        bmin (float):
+            Minimum relative distance along the segment `bpj1-bpj` at which
+            intersections should be considered valid.
+        bmax1 (bool, optional):
+            If True, limits the relative distance along the segment `bpj1-bpj`
+            to a maximum of 1. Defaults to True.
+
+    Returns:
+        Tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]:
+            A tuple containing:
+            - `a` (numpy.ndarray): Relative distances along the edges where the
+              intersections occur.
+            - `b` (numpy.ndarray): Relative distances along the segment `bpj1-bpj`
+              where the intersections occur.
+            - `edges` (numpy.ndarray): Indices of the edges that are intersected
+              by the segment.
+
+    Raises:
+        ValueError:
+            If the input data is invalid or inconsistent.
+
+    Notes:
+        - The function uses the `get_slices_ab` helper function to calculate the
+          relative distances `a` and `b` for each edge.
+        - The `bmin` parameter is used to filter out intersections that occur
+          too close to the starting point of the segment.
+        - If `bmax1` is True, intersections beyond the endpoint of the segment
+          are ignored.
     """
     a, b, slices = get_slices_ab(
-        xe[edges, 0],
-        ye[edges, 0],
-        xe[edges, 1],
-        ye[edges, 1],
+        mesh_data.x_edge_coords[edges, 0],
+        mesh_data.y_edge_coords[edges, 0],
+        mesh_data.x_edge_coords[edges, 1],
+        mesh_data.y_edge_coords[edges, 1],
         bpj1[0],
         bpj1[1],
         bpj[0],
@@ -943,7 +934,6 @@ def get_slices_ab(
     det[det == 0] = 1e-10
     a = (dyi * (xi0 - X0) - dxi * (yi0 - Y0)) / det  # along mesh edge
     b = (dY * (xi0 - X0) - dX * (yi0 - Y0)) / det  # along bank line
-    # eps = numpy.finfo(float).eps
     if bmax1:
         slices = numpy.nonzero((b > bmin) & (b <= 1) & (a >= 0) & (a <= 1))[0]
     else:
@@ -951,148 +941,6 @@ def get_slices_ab(
     a = a[slices]
     b = b[slices]
     return a, b, slices
-
-
-def map_line_mesh(
-    bp: numpy.ndarray,
-    xf: numpy.ma.masked_array,
-    yf: numpy.ma.masked_array,
-    nnodes: numpy.ndarray,
-    xe: numpy.ndarray,
-    ye: numpy.ndarray,
-    fe: numpy.ma.masked_array,
-    ef: numpy.ndarray,
-    boundary_edge_nrs: numpy.ndarray,
-) -> numpy.ndarray:
-    """
-    Determine for each point of a line in which mesh face it is located.
-
-    Arguments
-    ---------
-    bp : numpy.ndarray
-        Array containing the x,y-coordinates of the (bank) line.
-    xf : numpy.ma.masked_array
-        Array containing the x-coordinates of the corner points of each mesh face.
-    yf : numpy.ma.masked_array
-        Array containing the y-coordinates of the corner points of each mesh face.
-    nnodes : numpy.ndarray
-        Array containing the number of nodes/edges per mesh face.
-    xe : numpy.ndarray
-        Array containing the x-coordinates of the end points of each mesh edge.
-    ye : numpy.ndarray
-        Array containing the y-coordinates of the end points of each mesh edge.
-    fe : numpy.ma.masked_array
-        Array containg the mesh face-edge connectivity.
-    ef : numpy.ndarray
-        Array containg the mesh edge-face connectivity.
-    boundary_edge_nrs : numpy.ndarray
-        Array containing the indices of the domain boundary edges.
-    
-    Returns
-    -------
-    masked_idx : numpy.ndarray
-        Array containing the indices of the mesh faces in which each point of bp is located.
-    """
-    idx = numpy.zeros(len(bp), dtype=numpy.int64)
-    #
-    for j, bpj in enumerate(bp):
-        if j == 0:
-            # first bp inside or outside?
-            dx = xf - bpj[0]
-            dy = yf - bpj[1]
-            possible_cells = numpy.nonzero(
-                ~(
-                    (dx < 0).all(axis=1)
-                    | (dx > 0).all(axis=1)
-                    | (dy < 0).all(axis=1)
-                    | (dy > 0).all(axis=1)
-                )
-            )[0]
-            if len(possible_cells) == 0:
-                # no cells found ... it must be outside
-                index = -1
-                # print("Starting outside mesh")
-            else:
-                # one or more possible cells, check whether it's really inside one of them
-                # using numpy math might be faster, but since it's should only be for a few points let's using shapely
-                pnt = Point(bp[0])
-                for k in possible_cells:
-                    polygon_k = Polygon(
-                        numpy.concatenate(
-                            (xf[k : k + 1, : nnodes[k]], yf[k : k + 1, : nnodes[k]]),
-                            axis=0,
-                        ).T
-                    )
-                    if polygon_k.contains(pnt):
-                        index = k
-                        # print("Starting in {}".format(index))
-                        break
-                else:
-                    index = -1
-                    # print("Starting outside mesh")
-            idx[j] = index
-        else:
-            # second or later point
-            bpj1 = bp[j - 1]
-            prev_b = 0
-            prev_pnt = bpj1
-            while True:
-                if index < 0:
-                    edges = boundary_edge_nrs
-                else:
-                    edges = fe[index, : nnodes[k]]
-                X0 = xe[edges, 0]
-                dX = xe[edges, 1] - X0
-                Y0 = ye[edges, 0]
-                dY = ye[edges, 1] - Y0
-                xi0 = bpj1[0]
-                dxi = bpj[0] - xi0
-                yi0 = bpj1[1]
-                dyi = bpj[1] - yi0
-                det = dX * dyi - dY * dxi
-                a = (dyi * (xi0 - X0) - dxi * (yi0 - Y0)) / det  # along mesh edge
-                b = (dY * (xi0 - X0) - dX * (yi0 - Y0)) / det  # along bank line
-                slices = numpy.nonzero((b > prev_b) & (b <= 1) & (a >= 0) & (a <= 1))[0]
-                # print("number of slices: ", len(slices))
-                if len(slices) == 0:
-                    # rest of segment associated with same face
-                    # print("{}: -- no slice --".format(j))
-                    idx[j] = index
-                    break
-                else:
-                    if len(slices) > 1:
-                        # crossing multiple edges, when and how?
-                        # - crossing at a corner point?
-                        # - going out and in again for cell seems unlogical
-                        # - going in and out again for boundary seems possible [check: encountered]
-                        # print("multiple intersections at ", b[slices])
-                        bmin = numpy.amin(b[slices])
-                        slices = slices[b[slices] == bmin]
-                    # len(slices) == 1
-                    edge = edges[slices[0]]
-                    faces = ef[edge]
-                    prev_b = b[slices[0]]
-                    if index < 0:
-                        index = faces[0]
-                        # print("{}: Moving into {} via edge {} at b = {}".format(j, index, edge, prev_b))
-                    else:
-                        if faces[0] == index:
-                            index = faces[1]
-                            # if index < 0:
-                            #     print("{}: Moving outside mesh via edge {} at b = {}".format(j, edge, prev_b))
-                            # else:
-                            #     print("{}: Moving to {} via edge {} at b = {}".format(j, index, edge, prev_b))
-                        elif faces[1] == index:
-                            index = faces[0]
-                            # print("{}: Moving to {} via edge {} at b = {}".format(j, index, edge, prev_b))
-                        else:
-                            raise Exception(
-                                "Shouldn't come here .... index {} differs from both faces {} and {} associated with slicing edge {}".format(
-                                    index, faces[0], faces[1], edge
-                                )
-                            )
-    masked_idx = numpy.ma.masked_array(idx, mask=(idx == -1))
-    return masked_idx
 
 
 def move_line(
@@ -1641,225 +1489,6 @@ def sort_connect_bank_lines(
     bank = LineString(new_bank_coords)
 
     return bank
-
-
-def clip_search_lines(
-    line: List[LineString],
-    xykm: LineString,
-    max_river_width: float = 1000,
-) -> Tuple[List[LineString], float]:
-    """
-    Clip the list of lines to the envelope of certain size surrounding a reference line.
-
-    Arguments
-    ---------
-    line : List[LineString]
-        List of search lines to be clipped.
-    xykm : LineString
-        Reference line.
-    max_river_width: float
-        Maximum distance away from xykm.
-
-    Returns
-    -------
-    line : List[LineString]
-        List of clipped search lines.
-    maxmaxd: float
-        Maximum distance from any point within line to reference line.
-    """
-    nbank = len(line)
-    kmbuffer = xykm.buffer(max_river_width, cap_style=2)
-
-    # The algorithm uses simplified geometries for determining the distance between lines for speed.
-    # Stay accurate to within about 1 m
-    xy_simplified = xykm.simplify(1)
-
-    maxmaxd = 0
-    for b in range(nbank):
-        # Clip the bank search lines to the reach of interest (indicated by the reference line).
-        line[b] = line[b].intersection(kmbuffer)
-
-        # If the bank search line breaks into multiple parts, select the part closest to the reference line.
-        if line[b].geom_type == "MultiLineString":
-            dmin = max_river_width
-            imin = 0
-            for i in range(len(line[b])):
-                line_simplified = line[b][i].simplify(1)
-                dmin_i = line_simplified.distance(xy_simplified)
-                if dmin_i < dmin:
-                    dmin = dmin_i
-                    imin = i
-            line[b] = line[b][imin]
-
-        # Determine the maximum distance from a point on this line to the reference line.
-        line_simplified = line[b].simplify(1)
-        maxd = max([Point(c).distance(xy_simplified) for c in line_simplified.coords])
-
-        # Increase the value of maxd by 2 to account for error introduced by using simplified lines.
-        maxmaxd = max(maxmaxd, maxd + 2)
-
-    return line, maxmaxd
-
-
-def convert_search_lines_to_bank_polygons(
-    search_lines: List[numpy.ndarray], dlines: List[float]
-):
-    """
-    Construct a series of polygons surrounding the bank search lines.
-
-    Arguments
-    ---------
-    search_lines : List[numpy.ndarray]
-        List of arrays containing the x,y-coordinates of a bank search lines.
-    dlines : List[float]
-        Array containing the search distance value per bank line.
-        
-    Results
-    -------
-    bankareas
-        Array containing the areas of interest surrounding the bank search lines.
-    """
-    nbank = len(search_lines)
-    bankareas = [None] * nbank
-    for b, distance in enumerate(dlines):
-        bankareas[b] = search_lines[b].buffer(distance, cap_style=2)
-
-    return bankareas
-
-
-def clip_simdata(
-    sim: SimulationObject, xykm: LineString, maxmaxd: float
-) -> SimulationObject:
-    """
-    Clip the simulation mesh and data to the area of interest sufficiently close to the reference line.
-
-    Arguments
-    ---------
-    sim : SimulationObject
-        Simulation data: mesh, bed levels, water levels, velocities, etc.
-    xykm : LineString
-        Reference line.
-    maxmaxd : float
-        Maximum distance between the reference line and a point in the area of
-        interest defined based on the search lines for the banks and the search
-        distance.
-
-    Returns
-    -------
-    sim1 : SimulationObject
-        Clipped simulation data: mesh, bed levels, water levels, velocities, etc.
-    """
-    maxdx = maxmaxd
-    xybuffer = xykm.buffer(maxmaxd + maxdx)
-    bbox = xybuffer.envelope.exterior
-    xmin = bbox.coords[0][0]
-    xmax = bbox.coords[1][0]
-    ymin = bbox.coords[0][1]
-    ymax = bbox.coords[2][1]
-
-    xybprep = xybuffer.prepare()
-    x = sim["x_node"]
-    y = sim["y_node"]
-    nnodes = x.shape
-    keep = (x > xmin) & (x < xmax) & (y > ymin) & (y < ymax)
-    for i in range(x.size):
-        if keep[i] and not xybprep.contains(Point((x[i], y[i]))):
-            keep[i] = False
-
-    fnc = sim["facenode"]
-    keepface = keep[fnc].all(axis=1)
-    renum = numpy.zeros(nnodes, dtype=numpy.int)
-    renum[keep] = range(sum(keep))
-    sim["facenode"] = renum[fnc[keepface]]
-
-    sim["x_node"] = x[keep]
-    sim["y_node"] = y[keep]
-    if sim["zb_location"] == "node":
-        sim["zb_val"] = sim["zb_val"][keep]
-    else:
-        sim["zb_val"] = sim["zb_val"][keepface]
-
-    sim["nnodes"] = sim["nnodes"][keepface]
-    sim["zw_face"] = sim["zw_face"][keepface]
-    sim["h_face"] = sim["h_face"][keepface]
-    sim["ucx_face"] = sim["ucx_face"][keepface]
-    sim["ucy_face"] = sim["ucy_face"][keepface]
-    sim["chz_face"] = sim["chz_face"][keepface]
-
-    return sim
-
-
-def get_banklines(sim: SimulationObject, h0: float) -> geopandas.GeoSeries:
-    """
-    Detect all possible bank line segments based on simulation data.
-    
-    Use a critical water depth h0 as water depth threshold for dry/wet boundary.
-
-    Arguments
-    ---------
-    sim : SimulationObject
-        Simulation data: mesh, bed levels, water levels, velocities, etc.
-    h0 : float
-        Critical water depth for determining the banks.
-    
-    Returns
-    -------
-    banklines : geopandas.GeoSeries
-        The collection of all detected bank segments in the remaining model area.
-    """
-    FNC = sim["facenode"]
-    NNODES = sim["nnodes"]
-    max_nnodes = FNC.shape[1]
-    X = sim["x_node"][FNC]
-    Y = sim["y_node"][FNC]
-    ZB = sim["zb_val"][FNC]
-    ZW = sim["zw_face"]
-    H_face = sim["h_face"]
-    WET_face = H_face > h0
-    #
-    nnodes_total = len(sim["x_node"])
-    try:
-        mask = ~FNC.mask
-        nonmasked = sum(mask.reshape(FNC.size))
-        FNCm = FNC[mask]
-        ZWm = numpy.repeat(ZW, max_nnodes)[mask]
-    except:
-        mask = numpy.repeat(True, FNC.size)
-        nonmasked = FNC.size
-        FNCm = FNC.reshape(nonmasked)
-        ZWm = numpy.repeat(ZW, max_nnodes).reshape(nonmasked)
-    ZW_node = numpy.bincount(FNCm, weights=ZWm, minlength=nnodes_total)
-    NVal = numpy.bincount(FNCm, weights=numpy.ones(nonmasked), minlength=nnodes_total)
-    ZW_node = ZW_node / numpy.maximum(NVal, 1)
-    ZW_node[NVal == 0] = sim["zb_val"][NVal == 0]
-    #
-    H_node = ZW_node[FNC] - ZB
-    WET_node = H_node > h0
-    NWET = WET_node.sum(axis=1)
-    MASK = NWET.mask.size > 1
-    #
-    nfaces = len(FNC)
-    Lines = [None] * nfaces
-    frac = 0
-    for i in range(nfaces):
-        if i >= frac * (nfaces - 1) / 10:
-            print("{}%".format(int(frac * 10)))
-            frac = frac + 1
-        nnodes = NNODES[i]
-        nwet = NWET[i]
-        if (MASK and nwet.mask) or nwet == 0 or nwet == nnodes:
-            # all dry or all wet
-            pass
-        else:
-            # some nodes dry and some nodes wet: determine the line
-            if nnodes == 3:
-                Lines[i] = tri_to_line(X[i], Y[i], WET_node[i], H_node[i], h0)
-            else:
-                Lines[i] = poly_to_line(nnodes, X[i], Y[i], WET_node[i], H_node[i], h0)
-    Lines = [line for line in Lines if not line is None and not line.is_empty]
-    multi_line = union_all(Lines)
-    merged_line = line_merge(multi_line)
-    return geopandas.GeoSeries(merged_line, crs="EPSG:28992")
 
 
 def poly_to_line(
