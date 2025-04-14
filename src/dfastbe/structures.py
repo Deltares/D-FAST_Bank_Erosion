@@ -120,9 +120,9 @@ class BankData:
             Number of bank lines.
         bank_line_size (List[np.ndarray]):
             Size of each individual bank line.
-        fairway_distances (np.ndarray):
+        fairway_distances (List[np.ndarray]):
             The distance of each bank line point to the closest fairway point.
-        fairway_face_indices (np.ndarray):
+        fairway_face_indices (List[np.ndarray]):
             The face index of the closest fairway point for each bank line point.
     """
     is_right_bank: List[bool]
@@ -132,8 +132,8 @@ class BankData:
     bank_lines: GeoDataFrame
     n_bank_lines: int
     bank_line_size: List[np.ndarray] = field(default_factory=list)
-    fairway_distances: np.ndarray = np.array([])
-    fairway_face_indices: np.ndarray = np.array([])
+    fairway_distances: List[np.ndarray] = field(default_factory=list)
+    fairway_face_indices: List[np.ndarray] = field(default_factory=list)
 
 
 @dataclass
