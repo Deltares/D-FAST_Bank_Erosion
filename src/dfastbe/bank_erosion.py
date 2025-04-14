@@ -398,7 +398,7 @@ class Erosion:
         self, config_file: ConfigFile, bank_data: BankData, fairway_data: FairwayData
     ) -> ErosionInputs:
         # wave reduction s0, s1
-        dfw0 = config_file.get_parameter(
+        wave_fairway_distance_0 = config_file.get_parameter(
             "Erosion",
             "Wave0",
             bank_data.bank_chainage_midpoints,
@@ -406,7 +406,7 @@ class Erosion:
             positive=True,
             onefile=True,
         )
-        dfw1 = config_file.get_parameter(
+        wave_fairway_distance_1 = config_file.get_parameter(
             "Erosion",
             "Wave1",
             bank_data.bank_chainage_midpoints,
@@ -417,12 +417,12 @@ class Erosion:
 
         # save 1_banklines
         # read vship, nship, nwave, draught (tship), shiptype ... independent of level number
-        ship_data = self.get_ship_parameters(bank_data.bank_chainage_midpoints)
+        shipping_data = self.get_ship_parameters(bank_data.bank_chainage_midpoints)
 
         # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
         classes = config_file.get_bool("Erosion", "Classes")
         if classes:
-            banktype = config_file.get_parameter(
+            bank_type = config_file.get_parameter(
                 "Erosion",
                 "BankType",
                 bank_data.bank_chainage_midpoints,
@@ -430,7 +430,7 @@ class Erosion:
                 ext=".btp",
             )
             tauc = []
-            for bank in banktype:
+            for bank in bank_type:
                 tauc.append(ErosionInputs.taucls[bank])
         else:
             tauc = config_file.get_parameter(
@@ -441,12 +441,12 @@ class Erosion:
                 ext=".btp",
             )
             thr = (ErosionInputs.taucls[:-1] + ErosionInputs.taucls[1:]) / 2
-            banktype = [None] * len(thr)
-            for ib in range(len(tauc)):
-                bt = np.zeros(tauc[ib].size)
+            bank_type = [None] * len(thr)
+            for ib, shear_stress in enumerate(tauc):
+                bt = np.zeros(shear_stress.size)
                 for thr_i in thr:
-                    bt[tauc[ib] < thr_i] += 1
-                banktype[ib] = bt
+                    bt[shear_stress < thr_i] += 1
+                bank_type[ib] = bt
 
         # read bank protection level zss
         zss_miss = -1000
@@ -458,17 +458,17 @@ class Erosion:
             ext=".bpl",
         )
         # if zss undefined, set zss equal to zfw_ini - 1
-        for ib in range(len(zss)):
-            mask = zss[ib] == zss_miss
-            zss[ib][mask] = fairway_data.fairway_initial_water_levels[ib][mask] - 1
+        for ib, one_zss in enumerate(zss):
+            mask = one_zss == zss_miss
+            one_zss[mask] = fairway_data.fairway_initial_water_levels[ib][mask] - 1
 
         return ErosionInputs(
-            ship_data=ship_data,
-            wave_fairway_distance_0=dfw0,
-            wave_fairway_distance_1=dfw1,
+            shipping_data=shipping_data,
+            wave_fairway_distance_0=wave_fairway_distance_0,
+            wave_fairway_distance_1=wave_fairway_distance_1,
             bank_protection_level=zss,
             tauc=tauc,
-            bank_type=banktype,
+            bank_type=bank_type,
         )
 
     def _process_discharge_levels(
@@ -521,7 +521,7 @@ class Erosion:
                 "Erosion",
                 f"VShip{iq_str}",
                 bank_data.bank_chainage_midpoints,
-                default=erosion_inputs.ship_data["vship0"],
+                default=erosion_inputs.shipping_data["vship0"],
                 positive=True,
                 onefile=True,
             )
@@ -529,7 +529,7 @@ class Erosion:
                 "Erosion",
                 f"NShip{iq_str}",
                 bank_data.bank_chainage_midpoints,
-                default=erosion_inputs.ship_data["Nship0"],
+                default=erosion_inputs.shipping_data["Nship0"],
                 positive=True,
                 onefile=True,
             )
@@ -537,7 +537,7 @@ class Erosion:
                 "Erosion",
                 f"NWave{iq_str}",
                 bank_data.bank_chainage_midpoints,
-                default=erosion_inputs.ship_data["nwave0"],
+                default=erosion_inputs.shipping_data["nwave0"],
                 positive=True,
                 onefile=True,
             )
@@ -545,7 +545,7 @@ class Erosion:
                 "Erosion",
                 f"Draught{iq_str}",
                 bank_data.bank_chainage_midpoints,
-                default=erosion_inputs.ship_data["Tship0"],
+                default=erosion_inputs.shipping_data["Tship0"],
                 positive=True,
                 onefile=True,
             )
@@ -553,7 +553,7 @@ class Erosion:
                 "Erosion",
                 f"ShipType{iq_str}",
                 bank_data.bank_chainage_midpoints,
-                default=erosion_inputs.ship_data["ship0"],
+                default=erosion_inputs.shipping_data["ship0"],
                 valid=[1, 2, 3],
                 onefile=True,
             )
@@ -562,7 +562,7 @@ class Erosion:
                 "Erosion",
                 f"Slope{iq_str}",
                 bank_data.bank_chainage_midpoints,
-                default=erosion_inputs.ship_data["parslope0"],
+                default=erosion_inputs.shipping_data["parslope0"],
                 positive=True,
                 ext="slp",
             )
@@ -570,7 +570,7 @@ class Erosion:
                 "Erosion",
                 f"Reed{iq_str}",
                 bank_data.bank_chainage_midpoints,
-                default=erosion_inputs.ship_data["parreed0"],
+                default=erosion_inputs.shipping_data["parreed0"],
                 positive=True,
                 ext="rdd",
             )

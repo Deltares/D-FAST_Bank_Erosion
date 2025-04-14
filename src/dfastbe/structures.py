@@ -9,7 +9,7 @@ class ErosionInputs:
     """Class to hold erosion inputs.
 
     args:
-        ship_data (Dict[str, np.ndarray]):
+        shipping_data (Dict[str, np.ndarray]):
             Data on all the vessels that travel through the river.
         wave_fairway_distance_0 (List[np.ndarray]):
             Threshold fairway distance 0 for wave attenuation.
@@ -26,7 +26,7 @@ class ErosionInputs:
         taucls_str (Tuple[str]):
             String representation for different bank types.
     """
-    ship_data: Dict[str, np.ndarray]
+    shipping_data: Dict[str, np.ndarray]
     wave_fairway_distance_0: List[np.ndarray]
     wave_fairway_distance_1: List[np.ndarray]
     bank_protection_level: List[np.ndarray]
