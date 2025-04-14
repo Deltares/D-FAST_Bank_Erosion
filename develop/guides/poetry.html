@@ -637,18 +637,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#use-poetry-to-install-hydrolib-core" class="md-nav__link">
+  <a href="#use-poetry-to-install-d-fast_bank_erosion" class="md-nav__link">
     <span class="md-ellipsis">
-      Use Poetry to install hydrolib-core
+      Use Poetry to install D-FAST_Bank_Erosion
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#frequently-asked-questions" class="md-nav__link">
+  <a href="#switching-between-python-versions" class="md-nav__link">
     <span class="md-ellipsis">
-      Frequently asked questions
+      Switching Between Python Versions
     </span>
   </a>
   
@@ -1432,18 +1432,18 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#use-poetry-to-install-hydrolib-core" class="md-nav__link">
+  <a href="#use-poetry-to-install-d-fast_bank_erosion" class="md-nav__link">
     <span class="md-ellipsis">
-      Use Poetry to install hydrolib-core
+      Use Poetry to install D-FAST_Bank_Erosion
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#frequently-asked-questions" class="md-nav__link">
+  <a href="#switching-between-python-versions" class="md-nav__link">
     <span class="md-ellipsis">
-      Frequently asked questions
+      Switching Between Python Versions
     </span>
   </a>
   
@@ -1483,12 +1483,12 @@
 
 <h1 id="installation-using-poetry"><a class="toclink" href="#installation-using-poetry">Installation using Poetry</a><a class="headerlink" href="#installation-using-poetry" title="Permanent link">#</a></h1>
 <p>You can use a Poetry-based installation if you are using
-hydrolib-core from a local clone of the Github repository,
+D-FAST_Bank_Erosion from a local clone of the Github repository,
 for example if you intend to contribute to the code.</p>
 <h2 id="clone-the-github-repo"><a class="toclink" href="#clone-the-github-repo">Clone the GitHub repo</a><a class="headerlink" href="#clone-the-github-repo" title="Permanent link">#</a></h2>
-<p>Use your own preferred way of cloning the GitHub repository of hydrolib-core.
-In the examples below it is placed in <code>C:\checkouts\HYDROLIB-core_git</code>.</p>
-<h2 id="use-poetry-to-install-hydrolib-core"><a class="toclink" href="#use-poetry-to-install-hydrolib-core">Use Poetry to install hydrolib-core</a><a class="headerlink" href="#use-poetry-to-install-hydrolib-core" title="Permanent link">#</a></h2>
+<p>Use your own preferred way of cloning the GitHub repository of D-FAST_Bank_Erosion.
+In the examples below it is placed in <code>C:\checkouts\D-FAST_Bank_Erosion_git</code>.</p>
+<h2 id="use-poetry-to-install-d-fast_bank_erosion"><a class="toclink" href="#use-poetry-to-install-d-fast_bank_erosion">Use Poetry to install D-FAST_Bank_Erosion</a><a class="headerlink" href="#use-poetry-to-install-d-fast_bank_erosion" title="Permanent link">#</a></h2>
 <p>We use <code>poetry</code> to manage our package and its dependencies.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -1498,29 +1498,29 @@ In other words, run the <code>poetry install</code> command from the <code>base<
 <ol>
 <li>Download + installation instructions for Poetry are <a href="https://python-poetry.org/">here</a>.</li>
 <li>
-<p>After installation of Poetry itself, now use it to install your local clone of the hydrolib-core package, as follows.
-   Make sure Poetry is available on your <code>PATH</code> and run <code>poetry install</code> in the hydrolib-core directory in your shell of choice.
-   This will create a virtual environment in which hydrolib-core is installed and made available for use in your own scripts.
+<p>After installation of Poetry itself, now use it to install your local clone of the D-FAST_Bank_Erosion package, as follows.
+   Make sure Poetry is available on your <code>PATH</code> and run <code>poetry install</code> in the D-FAST_Bank_Erosion directory in your shell of choice.
+   This will create a virtual environment in which D-FAST_Bank_Erosion is installed and made available for use in your own scripts.
    For example in an Anaconda PowerShell:
-<div class="highlight"><pre><span></span><code>(base) PS C:\checkouts\HYDROLIB-core_git&gt; poetry install
-Creating virtualenv hydrolib-core-kHkQBdtS-py3.8 in C:\Users\dam_ar\AppData\Local\pypoetry\Cache\virtualenvs
+<div class="highlight"><pre><span></span><code>(base) PS C:\checkouts\D-FAST_Bank_Erosion_git&gt; poetry install
+Creating virtualenv D-FAST_Bank_Erosion-kHkQBdtS-py3.8 in C:\Users\dam_ar\AppData\Local\pypoetry\Cache\virtualenvs
 Installing dependencies from lock file
 
 Package operations: 67 installs, 0 updates, 0 removals
 
   * Installing six (1.16.0)
 [..]
-Installing the current project: hydrolib-core (0.1.5)
-(base) PS C:\checkouts\HYDROLIB-core_git&gt;
+Installing the current project: D-FAST_Bank_Erosion (0.1.5)
+(base) PS C:\checkouts\D-FAST_Bank_Erosion_git&gt;
 </code></pre></div>
    If you need to use an already existing Python installation, you can activate it and run <code>poetry env use system</code> before <code>poetry install</code>.</p>
 </li>
 <li>
-<p>Test your installation, by running the hydrolib-core pytest suite via poetry:
-<div class="highlight"><pre><span></span><code>(base) PS C:\checkouts\HYDROLIB-core_git&gt; poetry run pytest
+<p>Test your installation, by running the D-FAST_Bank_Erosion pytest suite via poetry:
+<div class="highlight"><pre><span></span><code>(base) PS C:\checkouts\D-FAST_Bank_Erosion_git&gt; poetry run pytest
 ===================================== test session starts ======================================
 platform win32 -- Python 3.8.8, pytest-6.2.5, py-1.10.0, pluggy-1.0.0
-rootdir: C:\checkouts\HYDROLIB-core_git, configfile: pyproject.toml
+rootdir: C:\checkouts\D-FAST_Bank_Erosion_git, configfile: pyproject.toml
 plugins: cov-2.12.1
 collected 473 items / 2 deselected / 471 selected
 
@@ -1542,29 +1542,54 @@ tests\test_utils.py .......                                                     
 .........................................                                                 [100%]
 
 ============================== 471 passed, 2 deselected in 3.50s ===============================
-(base) PS C:\checkouts\HYDROLIB-core_git&gt;
+(base) PS C:\checkouts\D-FAST_Bank_Erosion_git&gt;
 </code></pre></div></p>
 </li>
-<li>Start using hydrolib-core. You can launch your favourite editor (for example VS Code)
-by first starting a poetry shell with the virtual hydrolib-core environment:
-<div class="highlight"><pre><span></span><code>(base) PS C:\checkouts\HYDROLIB-core_git&gt; poetry shell
-(base) PS C:\checkouts\HYDROLIB-core_git&gt; code
+<li>Start using D-FAST_Bank_Erosion. You can launch your favourite editor (for example VS Code)
+by first starting a poetry shell with the virtual D-FAST_Bank_Erosion environment:
+<div class="highlight"><pre><span></span><code>(base) PS C:\checkouts\D-FAST_Bank_Erosion_git&gt; poetry shell
+(base) PS C:\checkouts\D-FAST_Bank_Erosion_git&gt; code
 </code></pre></div></li>
 </ol>
-<h2 id="frequently-asked-questions"><a class="toclink" href="#frequently-asked-questions">Frequently asked questions</a><a class="headerlink" href="#frequently-asked-questions" title="Permanent link">#</a></h2>
-<ul>
-<li>How to fix "File ... does not exist" errors during <code>poetry install</code> as in the example below?
-<div class="highlight"><pre><span></span><code>  * Installing six (1.16.0)
-
-  ValueError
-
-  File \C:\Users\dam_ar\AppData\Local\pypoetry\Cache\artifacts\48\e6\04\8118155ae3ec3a16dd2a213bbf7a7d8a62c596b2e90f73a22c896269f1\six-1.16.0-py2.py3-none-any.whl does not exist
+<h2 id="switching-between-python-versions"><a class="toclink" href="#switching-between-python-versions">Switching Between Python Versions</a><a class="headerlink" href="#switching-between-python-versions" title="Permanent link">#</a></h2>
+<p>If you need to switch between Python versions (e.g., from Python 3.9 to Python 3.10), you can configure Poetry to use a specific Python version. Follow these steps:</p>
+<ol>
+<li>
+<p><strong>Verify python version in <code>pyproject.toml</code></strong>:
+The <code>pyproject.toml</code> specifies which python version is supported. Please verify that the python version you wish to use is supported. For example, the following configuration:
+<div class="highlight"><pre><span></span><code><span class="k">[tool.poetry.dependencies]</span>
+<span class="n">python</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;~3.10&quot;</span>
 </code></pre></div>
-  This may occur when a conda environment was activated.
-  Delete the <code>AppData\Local\pypoetry\Cache</code> directory.
-  Then run <code>conda deactivate</code> to return to the base environment.
-  Finally, rerun <code>poetry install</code>.</li>
-</ul>
+It Indicates that the project supports Python 3.10 with any minor version (e.g., 3.10.1, 3.10.2, etc.).</p>
+</li>
+<li>
+<p><strong>Check Installed Python Versions</strong>:
+Ensure that the desired Python version (e.g., Python 3.10) is installed on your system. 
+You can check the available versions by running:
+on windows:
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>--version
+</code></pre></div>
+or on Linux:
+<div class="highlight"><pre><span></span><code>python3<span class="w"> </span>--version<span class="w"> </span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Set the Python Version for Poetry</strong>:
+Use the <code>poetry env use</code> command to specify the Python version for your project. For example: <code>poetry env use python3.10</code>. This will create a new virtual environment using Python 3.10.</p>
+</li>
+<li>
+<p><strong>Verify the Python Version</strong>:
+After setting the Python version, verify that Poetry is using the correct version: <code>poetry run python --version</code>. The output should show Python 3.10.</p>
+</li>
+<li>
+<p><strong>Reinstall Dependencies</strong>:
+If you switch Python versions, you may need to reinstall your dependencies. Run: <code>poetry install</code>.</p>
+</li>
+<li>
+<p><strong>Test the Installation</strong>: Run the test suite to ensure everything works correctly with the new Python version: 
+<code>poetry run pytest</code>.</p>
+</li>
+</ol>
 
 
 
