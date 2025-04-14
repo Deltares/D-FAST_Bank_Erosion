@@ -37,9 +37,9 @@ class TestErosion:
         self, erosion_instance: Erosion, config_file: ConfigFile
     ):
         """Test the _prepare_initial_conditions method."""
-        mock_bank_data = MagicMock(type=BankData)
+        mock_bank_data = MagicMock(spec=BankData)
         mock_bank_data.bank_chainage_midpoints = [np.array([3.0, 3.0, 3.0])]
-        mock_fairway_data = MagicMock(type=FairwayData)
+        mock_fairway_data = MagicMock(spec=FairwayData)
         mock_fairway_data.fairway_initial_water_levels = [np.array([10, 20, 30])]
         taucls = np.array([1, 1, 1])
         taucls_str = (
