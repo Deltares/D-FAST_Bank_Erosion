@@ -1620,10 +1620,10 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1435</span>
-<span class="normal">1436</span>
-<span class="normal">1437</span>
-<span class="normal">1438</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesResultsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1439</span>
+<span class="normal">1440</span>
+<span class="normal">1441</span>
+<span class="normal">1442</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesResultsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom exception for BankLine results errors.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span>
@@ -2882,7 +2882,11 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">1288</span>
 <span class="normal">1289</span>
 <span class="normal">1290</span>
-<span class="normal">1291</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Erosion</span><span class="p">:</span>
+<span class="normal">1291</span>
+<span class="normal">1292</span>
+<span class="normal">1293</span>
+<span class="normal">1294</span>
+<span class="normal">1295</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Erosion</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root_dir</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">root_dir</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_config_file</span> <span class="o">=</span> <span class="n">config_file</span>
@@ -3322,25 +3326,29 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">bank_height</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">water_level</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">chezy</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">dv</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">vol_per_discharge</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ship_wave_max</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">ship_wave_min</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="n">line_size</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">dn_flow_tot</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">dn_ship_tot</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">dn_tot</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">dv_tot</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">dn_eq</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">dv_eq</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">flow_erosion_dist</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ship_erosion_dist</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">total_erosion_dist</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">total_eroded_vol</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">eq_erosion_dist</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">eq_eroded_vol</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="n">t_erosion</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_int</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;TErosion&quot;</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;total_time&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="n">t_erosion</span><span class="p">})</span>
+        <span class="n">erosion_time</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_int</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;TErosion&quot;</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;total_time&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="n">erosion_time</span><span class="p">})</span>
 
         <span class="k">for</span> <span class="n">iq</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_levels</span><span class="p">):</span>
             <span class="n">log_text</span><span class="p">(</span>
                 <span class="s2">&quot;discharge_header&quot;</span><span class="p">,</span>
-                <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;i&quot;</span><span class="p">:</span> <span class="n">iq</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_discharge</span><span class="p">[</span><span class="n">iq</span><span class="p">],</span> <span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_discharge</span><span class="p">[</span><span class="n">iq</span><span class="p">]</span> <span class="o">*</span> <span class="n">t_erosion</span><span class="p">},</span>
+                <span class="n">data</span><span class="o">=</span><span class="p">{</span>
+                    <span class="s2">&quot;i&quot;</span><span class="p">:</span> <span class="n">iq</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_discharge</span><span class="p">[</span><span class="n">iq</span><span class="p">],</span>
+                    <span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_discharge</span><span class="p">[</span><span class="n">iq</span><span class="p">]</span> <span class="o">*</span> <span class="n">erosion_time</span><span class="p">,</span>
+                <span class="p">},</span>
             <span class="p">)</span>
 
             <span class="n">iq_str</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">iq</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
@@ -3423,7 +3431,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="n">velocity</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
             <span class="n">water_level</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
             <span class="n">chezy</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-            <span class="n">dv</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="n">vol_per_discharge</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
             <span class="n">ship_wave_max</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
             <span class="n">ship_wave_min</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
 
@@ -3500,8 +3508,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                         <span class="n">ib</span><span class="p">,</span>
                         <span class="n">g</span><span class="p">,</span>
                     <span class="p">)</span>
-                    <span class="n">dn_eq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dn_eq1</span><span class="p">)</span>
-                    <span class="n">dv_eq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dv_eq1</span><span class="p">)</span>
+                    <span class="n">eq_erosion_dist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dn_eq1</span><span class="p">)</span>
+                    <span class="n">eq_eroded_vol</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dv_eq1</span><span class="p">)</span>
 
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
                         <span class="n">bcrds_mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">bcrds</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bcrds</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span>
@@ -3546,7 +3554,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                         <span class="n">nwave</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
                         <span class="n">ship_type</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
                         <span class="n">Tship</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
-                        <span class="n">t_erosion</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_discharge</span><span class="p">[</span><span class="n">iq</span><span class="p">],</span>
+                        <span class="n">erosion_time</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_discharge</span><span class="p">[</span><span class="n">iq</span><span class="p">],</span>
                         <span class="n">mu_slope</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
                         <span class="n">mu_reed</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
                         <span class="n">bank_data</span><span class="o">.</span><span class="n">fairway_distances</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
@@ -3600,22 +3608,22 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                     <span class="n">write_csv</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">debug.Q</span><span class="si">{</span><span class="n">iq</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.B</span><span class="si">{</span><span class="n">ib</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.csv&quot;</span><span class="p">)</span>
 
                 <span class="c1"># shift bank lines</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dn_tot</span><span class="p">)</span> <span class="o">==</span> <span class="n">ib</span><span class="p">:</span>
-                    <span class="n">dn_flow_tot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dn_flow</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
-                    <span class="n">dn_ship_tot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dn_ship</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
-                    <span class="n">dn_tot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dniqib</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
-                    <span class="n">dv_tot</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dviqib</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">total_erosion_dist</span><span class="p">)</span> <span class="o">==</span> <span class="n">ib</span><span class="p">:</span>
+                    <span class="n">flow_erosion_dist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dn_flow</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+                    <span class="n">ship_erosion_dist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dn_ship</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+                    <span class="n">total_erosion_dist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dniqib</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+                    <span class="n">total_eroded_vol</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dviqib</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">dn_flow_tot</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dn_flow</span>
-                    <span class="n">dn_ship_tot</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dn_ship</span>
-                    <span class="n">dn_tot</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dniqib</span>
-                    <span class="n">dv_tot</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dviqib</span>
+                    <span class="n">flow_erosion_dist</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dn_flow</span>
+                    <span class="n">ship_erosion_dist</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dn_ship</span>
+                    <span class="n">total_erosion_dist</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dniqib</span>
+                    <span class="n">total_eroded_vol</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dviqib</span>
 
                 <span class="c1"># accumulate eroded volumes per km</span>
                 <span class="n">dvol</span> <span class="o">=</span> <span class="n">get_km_eroded_volume</span><span class="p">(</span>
                     <span class="n">bank_data</span><span class="o">.</span><span class="n">bank_chainage_midpoints</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span> <span class="n">dviqib</span><span class="p">,</span> <span class="n">km_bin</span>
                 <span class="p">)</span>
-                <span class="n">dv</span><span class="p">[</span><span class="n">iq</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dvol</span><span class="p">)</span>
+                <span class="n">vol_per_discharge</span><span class="p">[</span><span class="n">iq</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dvol</span><span class="p">)</span>
                 <span class="n">dvol_bank</span><span class="p">[:,</span> <span class="n">ib</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dvol</span>
 
             <span class="n">erovol_file</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;EroVol</span><span class="si">{</span><span class="n">iq_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;erovolQ</span><span class="si">{</span><span class="n">iq_str</span><span class="si">}</span><span class="s2">.evo&quot;</span><span class="p">)</span>
@@ -3625,14 +3633,14 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="p">)</span>
 
         <span class="n">erosion_results</span> <span class="o">=</span> <span class="n">ErosionResults</span><span class="p">(</span>
-            <span class="n">eq_erosion_dist</span><span class="o">=</span><span class="n">dn_eq</span><span class="p">,</span>
-            <span class="n">total_erosion_dist</span><span class="o">=</span><span class="n">dn_tot</span><span class="p">,</span>
-            <span class="n">flow_erosion_dist</span><span class="o">=</span><span class="n">dn_flow_tot</span><span class="p">,</span>
-            <span class="n">ship_erosion_dist</span><span class="o">=</span><span class="n">dn_ship_tot</span><span class="p">,</span>
-            <span class="n">vol_per_discharge</span><span class="o">=</span><span class="n">dv</span><span class="p">,</span>
-            <span class="n">eq_eroded_vol</span><span class="o">=</span><span class="n">dv_eq</span><span class="p">,</span>
-            <span class="n">total_eroded_vol</span><span class="o">=</span><span class="n">dv_tot</span><span class="p">,</span>
-            <span class="n">erosion_time</span><span class="o">=</span><span class="n">t_erosion</span><span class="p">,</span>
+            <span class="n">eq_erosion_dist</span><span class="o">=</span><span class="n">eq_erosion_dist</span><span class="p">,</span>
+            <span class="n">total_erosion_dist</span><span class="o">=</span><span class="n">total_erosion_dist</span><span class="p">,</span>
+            <span class="n">flow_erosion_dist</span><span class="o">=</span><span class="n">flow_erosion_dist</span><span class="p">,</span>
+            <span class="n">ship_erosion_dist</span><span class="o">=</span><span class="n">ship_erosion_dist</span><span class="p">,</span>
+            <span class="n">vol_per_discharge</span><span class="o">=</span><span class="n">vol_per_discharge</span><span class="p">,</span>
+            <span class="n">eq_eroded_vol</span><span class="o">=</span><span class="n">eq_eroded_vol</span><span class="p">,</span>
+            <span class="n">total_eroded_vol</span><span class="o">=</span><span class="n">total_eroded_vol</span><span class="p">,</span>
+            <span class="n">erosion_time</span><span class="o">=</span><span class="n">erosion_time</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="n">water_level_data</span> <span class="o">=</span> <span class="n">WaterLevelData</span><span class="p">(</span>
@@ -3657,20 +3665,20 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Postprocess the erosion results to get the new bank lines and volumes.&quot;&quot;&quot;</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
-        <span class="n">d_nav</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span><span class="p">)</span>
+        <span class="n">avg_erosion_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span><span class="p">)</span>
         <span class="n">dn_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span><span class="p">)</span>
         <span class="n">d_nav_flow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span><span class="p">)</span>
         <span class="n">d_nav_ship</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span><span class="p">)</span>
         <span class="n">d_nav_eq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span><span class="p">)</span>
         <span class="n">dn_max_eq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span><span class="p">)</span>
-        <span class="n">vol_eq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">km_mid</span><span class="p">),</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span><span class="p">))</span>
-        <span class="n">vol_tot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">km_mid</span><span class="p">),</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span><span class="p">))</span>
+        <span class="n">eq_eroded_vol_per_km</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">km_mid</span><span class="p">),</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span><span class="p">))</span>
+        <span class="n">total_eroded_vol_per_km</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">km_mid</span><span class="p">),</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span><span class="p">))</span>
         <span class="n">xy_line_new_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">bankline_new_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">xy_line_eq_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">bankline_eq_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">ib</span><span class="p">,</span> <span class="n">bank_coords</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bank_data</span><span class="o">.</span><span class="n">bank_line_coords</span><span class="p">):</span>
-            <span class="n">d_nav</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">avg_erosion_rate</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">erosion_results</span><span class="o">.</span><span class="n">total_erosion_dist</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">*</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">bank_line_size</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span>
             <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">bank_line_size</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
             <span class="n">dn_max</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">erosion_results</span><span class="o">.</span><span class="n">total_erosion_dist</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
@@ -3684,7 +3692,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                 <span class="n">erosion_results</span><span class="o">.</span><span class="n">eq_erosion_dist</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">*</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">bank_line_size</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span>
             <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">bank_line_size</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
             <span class="n">dn_max_eq</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">erosion_results</span><span class="o">.</span><span class="n">eq_erosion_dist</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnav&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">ib</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">d_nav</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
+            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnav&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">ib</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">avg_erosion_rate</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
             <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnavflow&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">d_nav_flow</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
             <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnavship&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">d_nav_ship</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
             <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnmax&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">dn_max</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
@@ -3712,19 +3720,19 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                 <span class="n">erosion_results</span><span class="o">.</span><span class="n">eq_eroded_vol</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
                 <span class="n">km_bin</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">vol_eq</span><span class="p">[:,</span> <span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">dvol_eq</span>
+            <span class="n">eq_eroded_vol_per_km</span><span class="p">[:,</span> <span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">dvol_eq</span>
             <span class="n">dvol_tot</span> <span class="o">=</span> <span class="n">get_km_eroded_volume</span><span class="p">(</span>
                 <span class="n">bank_data</span><span class="o">.</span><span class="n">bank_chainage_midpoints</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
                 <span class="n">erosion_results</span><span class="o">.</span><span class="n">total_eroded_vol</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
                 <span class="n">km_bin</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">vol_tot</span><span class="p">[:,</span> <span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">dvol_tot</span>
+            <span class="n">total_eroded_vol_per_km</span><span class="p">[:,</span> <span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">dvol_tot</span>
             <span class="k">if</span> <span class="n">ib</span> <span class="o">&lt;</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
 
-        <span class="n">erosion_results</span><span class="o">.</span><span class="n">avg_erosion_rate</span> <span class="o">=</span> <span class="n">d_nav</span>
-        <span class="n">erosion_results</span><span class="o">.</span><span class="n">eq_eroded_vol_per_km</span> <span class="o">=</span> <span class="n">vol_eq</span>
-        <span class="n">erosion_results</span><span class="o">.</span><span class="n">total_eroded_vol_per_km</span> <span class="o">=</span> <span class="n">vol_tot</span>
+        <span class="n">erosion_results</span><span class="o">.</span><span class="n">avg_erosion_rate</span> <span class="o">=</span> <span class="n">avg_erosion_rate</span>
+        <span class="n">erosion_results</span><span class="o">.</span><span class="n">eq_eroded_vol_per_km</span> <span class="o">=</span> <span class="n">eq_eroded_vol_per_km</span>
+        <span class="n">erosion_results</span><span class="o">.</span><span class="n">total_eroded_vol_per_km</span> <span class="o">=</span> <span class="n">total_eroded_vol_per_km</span>
 
         <span class="k">return</span> <span class="n">bankline_new_list</span><span class="p">,</span> <span class="n">bankline_eq_list</span><span class="p">,</span> <span class="n">xy_line_eq_list</span>
 
@@ -4161,11 +4169,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 910</span>
-<span class="normal"> 911</span>
-<span class="normal"> 912</span>
-<span class="normal"> 913</span>
-<span class="normal"> 914</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 914</span>
 <span class="normal"> 915</span>
 <span class="normal"> 916</span>
 <span class="normal"> 917</span>
@@ -4253,7 +4257,11 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal"> 999</span>
 <span class="normal">1000</span>
 <span class="normal">1001</span>
-<span class="normal">1002</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">bankerosion_core</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1002</span>
+<span class="normal">1003</span>
+<span class="normal">1004</span>
+<span class="normal">1005</span>
+<span class="normal">1006</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">bankerosion_core</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the bank erosion analysis for a specified configuration.&quot;&quot;&quot;</span>
     <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- start analysis --&quot;</span><span class="p">)</span>
     <span class="n">log_text</span><span class="p">(</span>
