@@ -1760,11 +1760,11 @@ The merge commit message should adhere to the <a href="https://www.conventionalc
 </ul>
 <h2 id="releasing"><a class="toclink" href="#releasing">Releasing</a><a class="headerlink" href="#releasing" title="Permanent link">#</a></h2>
 <h3 id="making-a-release-on-github-and-pypi"><a class="toclink" href="#making-a-release-on-github-and-pypi">Making a release on GitHub and PyPi</a><a class="headerlink" href="#making-a-release-on-github-and-pypi" title="Permanent link">#</a></h3>
-<p>When we are releasing D-FAST_Bank_Erosion, we want to create a release on GitHub and PyPi.
-This should only be done by one of the D-FAST_Bank_Erosion maintainers.
+<p>When we are releasing hydrolib-core, we want to create a release on GitHub and PyPi.
+This should only be done by one of the hydrolib-core maintainers.
 To prepare for releasing, please make sure you have a clean checkout of the latest <code>main</code> branch and follow these steps:</p>
 <ul>
-<li>Go to the root level of your D-FAST_Bank_Erosion checkout location</li>
+<li>Go to the root level your hydrolib-core checkout location</li>
 <li>Open your command line in this location</li>
 <li>Perform the following commands:<ul>
 <li>If commitizen is not installed yet:
@@ -1797,7 +1797,7 @@ poetry publish
  You will need a PyPI account and permissions for this publish step. Ask a maintainer for help if you need this.</li>
 </ul>
 </li>
-<li>Go to the D-FAST_Bank_Erosion GitHub page.</li>
+<li>Go to the hydrolib-core GitHub page.</li>
 <li>Go to <code>Releases</code> and click on <code>Draft a new release</code>.</li>
 <li>Fill in the <code>Release title</code> field with <code>Release v&lt;VERSION&gt;</code>, with <code>&lt;VERSION&gt;</code> in the full format <code>&lt;MAJOR&gt;.&lt;MINOR&gt;.&lt;PATCH&gt;</code>, for example <code>Release v0.3.0</code>.</li>
 <li>Choose the appropriate version tag in the <code>Choose a tag</code> dropdown box (typically <code>&lt;VERSION&gt;</code> without "v" prefix).</li>
