@@ -501,25 +501,29 @@ class Erosion:
         bank_height: List[np.ndarray] = []
         water_level: List[List[np.ndarray]] = []
         chezy: List[List[np.ndarray]] = []
-        dv: List[List[np.ndarray]] = []
+        vol_per_discharge: List[List[np.ndarray]] = []
         ship_wave_max: List[List[np.ndarray]] = []
         ship_wave_min: List[List[np.ndarray]] = []
 
         line_size: List[np.ndarray] = []
-        dn_flow_tot: List[np.ndarray] = []
-        dn_ship_tot: List[np.ndarray] = []
-        dn_tot: List[np.ndarray] = []
-        dv_tot: List[np.ndarray] = []
-        dn_eq: List[np.ndarray] = []
-        dv_eq: List[np.ndarray] = []
+        flow_erosion_dist: List[np.ndarray] = []
+        ship_erosion_dist: List[np.ndarray] = []
+        total_erosion_dist: List[np.ndarray] = []
+        total_eroded_vol: List[np.ndarray] = []
+        eq_erosion_dist: List[np.ndarray] = []
+        eq_eroded_vol: List[np.ndarray] = []
 
-        t_erosion = config_file.get_int("Erosion", "TErosion", positive=True)
-        log_text("total_time", data={"t": t_erosion})
+        erosion_time = config_file.get_int("Erosion", "TErosion", positive=True)
+        log_text("total_time", data={"t": erosion_time})
 
         for iq in range(self.num_levels):
             log_text(
                 "discharge_header",
-                data={"i": iq + 1, "p": self.p_discharge[iq], "t": self.p_discharge[iq] * t_erosion},
+                data={
+                    "i": iq + 1,
+                    "p": self.p_discharge[iq],
+                    "t": self.p_discharge[iq] * erosion_time,
+                },
             )
 
             iq_str = "{}".format(iq + 1)
@@ -602,7 +606,7 @@ class Erosion:
             velocity.append([])
             water_level.append([])
             chezy.append([])
-            dv.append([])
+            vol_per_discharge.append([])
             ship_wave_max.append([])
             ship_wave_min.append([])
 
@@ -679,8 +683,8 @@ class Erosion:
                         ib,
                         g,
                     )
-                    dn_eq.append(dn_eq1)
-                    dv_eq.append(dv_eq1)
+                    eq_erosion_dist.append(dn_eq1)
+                    eq_eroded_vol.append(dv_eq1)
 
                     if self.debug:
                         bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
@@ -725,7 +729,7 @@ class Erosion:
                         nwave[ib],
                         ship_type[ib],
                         Tship[ib],
-                        t_erosion * self.p_discharge[iq],
+                        erosion_time * self.p_discharge[iq],
                         mu_slope[ib],
                         mu_reed[ib],
                         bank_data.fairway_distances[ib],
@@ -779,22 +783,22 @@ class Erosion:
                     write_csv(params, f"{str(self.output_dir)}{os.sep}debug.Q{iq + 1}.B{ib + 1}.csv")
 
                 # shift bank lines
-                if len(dn_tot) == ib:
-                    dn_flow_tot.append(dn_flow.copy())
-                    dn_ship_tot.append(dn_ship.copy())
-                    dn_tot.append(dniqib.copy())
-                    dv_tot.append(dviqib.copy())
+                if len(total_erosion_dist) == ib:
+                    flow_erosion_dist.append(dn_flow.copy())
+                    ship_erosion_dist.append(dn_ship.copy())
+                    total_erosion_dist.append(dniqib.copy())
+                    total_eroded_vol.append(dviqib.copy())
                 else:
-                    dn_flow_tot[ib] += dn_flow
-                    dn_ship_tot[ib] += dn_ship
-                    dn_tot[ib] += dniqib
-                    dv_tot[ib] += dviqib
+                    flow_erosion_dist[ib] += dn_flow
+                    ship_erosion_dist[ib] += dn_ship
+                    total_erosion_dist[ib] += dniqib
+                    total_eroded_vol[ib] += dviqib
 
                 # accumulate eroded volumes per km
                 dvol = get_km_eroded_volume(
                     bank_data.bank_chainage_midpoints[ib], dviqib, km_bin
                 )
-                dv[iq].append(dvol)
+                vol_per_discharge[iq].append(dvol)
                 dvol_bank[:, ib] += dvol
 
             erovol_file = config_file.get_str("Erosion", f"EroVol{iq_str}", default=f"erovolQ{iq_str}.evo")
@@ -804,14 +808,14 @@ class Erosion:
             )
 
         erosion_results = ErosionResults(
-            eq_erosion_dist=dn_eq,
-            total_erosion_dist=dn_tot,
-            flow_erosion_dist=dn_flow_tot,
-            ship_erosion_dist=dn_ship_tot,
-            vol_per_discharge=dv,
-            eq_eroded_vol=dv_eq,
-            total_eroded_vol=dv_tot,
-            erosion_time=t_erosion,
+            eq_erosion_dist=eq_erosion_dist,
+            total_erosion_dist=total_erosion_dist,
+            flow_erosion_dist=flow_erosion_dist,
+            ship_erosion_dist=ship_erosion_dist,
+            vol_per_discharge=vol_per_discharge,
+            eq_eroded_vol=eq_eroded_vol,
+            total_eroded_vol=total_eroded_vol,
+            erosion_time=erosion_time,
         )
 
         water_level_data = WaterLevelData(
@@ -836,20 +840,20 @@ class Erosion:
     ) -> Tuple[List[LineString], List[LineString], List[LineString]]:
         """Postprocess the erosion results to get the new bank lines and volumes."""
         log_text("=")
-        d_nav = np.zeros(bank_data.n_bank_lines)
+        avg_erosion_rate = np.zeros(bank_data.n_bank_lines)
         dn_max = np.zeros(bank_data.n_bank_lines)
         d_nav_flow = np.zeros(bank_data.n_bank_lines)
         d_nav_ship = np.zeros(bank_data.n_bank_lines)
         d_nav_eq = np.zeros(bank_data.n_bank_lines)
         dn_max_eq = np.zeros(bank_data.n_bank_lines)
-        vol_eq = np.zeros((len(km_mid), bank_data.n_bank_lines))
-        vol_tot = np.zeros((len(km_mid), bank_data.n_bank_lines))
+        eq_eroded_vol_per_km = np.zeros((len(km_mid), bank_data.n_bank_lines))
+        total_eroded_vol_per_km = np.zeros((len(km_mid), bank_data.n_bank_lines))
         xy_line_new_list = []
         bankline_new_list = []
         xy_line_eq_list = []
         bankline_eq_list = []
         for ib, bank_coords in enumerate(bank_data.bank_line_coords):
-            d_nav[ib] = (
+            avg_erosion_rate[ib] = (
                 erosion_results.total_erosion_dist[ib] * bank_data.bank_line_size[ib]
             ).sum() / bank_data.bank_line_size[ib].sum()
             dn_max[ib] = erosion_results.total_erosion_dist[ib].max()
@@ -863,7 +867,7 @@ class Erosion:
                 erosion_results.eq_erosion_dist[ib] * bank_data.bank_line_size[ib]
             ).sum() / bank_data.bank_line_size[ib].sum()
             dn_max_eq[ib] = erosion_results.eq_erosion_dist[ib].max()
-            log_text("bank_dnav", data={"ib": ib + 1, "v": d_nav[ib]})
+            log_text("bank_dnav", data={"ib": ib + 1, "v": avg_erosion_rate[ib]})
             log_text("bank_dnavflow", data={"v": d_nav_flow[ib]})
             log_text("bank_dnavship", data={"v": d_nav_ship[ib]})
             log_text("bank_dnmax", data={"v": dn_max[ib]})
@@ -891,19 +895,19 @@ class Erosion:
                 erosion_results.eq_eroded_vol[ib],
                 km_bin,
             )
-            vol_eq[:, ib] = dvol_eq
+            eq_eroded_vol_per_km[:, ib] = dvol_eq
             dvol_tot = get_km_eroded_volume(
                 bank_data.bank_chainage_midpoints[ib],
                 erosion_results.total_eroded_vol[ib],
                 km_bin,
             )
-            vol_tot[:, ib] = dvol_tot
+            total_eroded_vol_per_km[:, ib] = dvol_tot
             if ib < bank_data.n_bank_lines - 1:
                 log_text("-")
 
-        erosion_results.avg_erosion_rate = d_nav
-        erosion_results.eq_eroded_vol_per_km = vol_eq
-        erosion_results.total_eroded_vol_per_km = vol_tot
+        erosion_results.avg_erosion_rate = avg_erosion_rate
+        erosion_results.eq_eroded_vol_per_km = eq_eroded_vol_per_km
+        erosion_results.total_eroded_vol_per_km = total_eroded_vol_per_km
 
         return bankline_new_list, bankline_eq_list, xy_line_eq_list
 
