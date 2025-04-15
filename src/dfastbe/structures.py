@@ -158,38 +158,38 @@ class ErosionResults:
     """Class to hold erosion results.
 
     args:
-        equilibrium_erosion_distance (List[np.ndarray]):
+        eq_erosion_dist (List[np.ndarray]):
             Erosion distance at equilibrium for each bank line.
-        total_erosion_distance (List[np.ndarray]):
+        total_erosion_dist (List[np.ndarray]):
             Total erosion distance for each bank line.
-        flow_erosion_distance (List[np.ndarray]):
+        flow_erosion_dist (List[np.ndarray]):
             Total erosion distance caused by flow for each bank line.
-        ship_wave_erosion_distance (List[np.ndarray]):
+        ship_erosion_dist (List[np.ndarray]):
             Total erosion distance caused by ship waves for each bank line.
-        eroded_volume_per_discharge (List[List[np.ndarray]]):
+        vol_per_discharge (List[List[np.ndarray]]):
             Eroded volume per discharge level for each bank line.
-        equilibrium_eroded_volume (List[np.ndarray]):
+        eq_eroded_vol (List[np.ndarray]):
             Eroded volume at equilibrium for each bank line.
-        total_eroded_volume (List[np.ndarray]):
+        total_eroded_vol (List[np.ndarray]):
             Total eroded volume for each bank line.
-        erosion_time_step (int):
+        erosion_time (int):
             Time over which erosion is calculated.
-        average_erosion_rate (np.ndarray):
+        avg_erosion_rate (np.ndarray):
             Average erosion rate data.
-        equilibrium_eroded_volume_per_km (np.ndarray):
-            Total erosion time step,
-            representing the cumulative time over which erosion is calculated.
-        total_eroded_volume_per_km (np.ndarray):
-            Total eroded volume per kilometer for each bank line.
+        eq_eroded_vol_per_km (np.ndarray):
+            Equilibrium eroded volume calculated per kilometer bin.
+        total_eroded_vol_per_km (np.ndarray):
+            Total eroded volume calculated per kilometer bin.
     """
-    dn_eq: List[np.ndarray]
-    dn_tot: List[np.ndarray]
-    dn_flow_tot: List[np.ndarray]
-    dn_ship_tot: List[np.ndarray]
-    dv: List[List[np.ndarray]]
-    dv_eq: List[np.ndarray]
-    dv_tot: List[np.ndarray]
-    t_erosion: int
-    d_nav: np.ndarray = np.array([])
-    vol_eq: np.ndarray = np.array([])
-    vol_tot: np.ndarray = np.array([])
+
+    eq_erosion_dist: List[np.ndarray]
+    total_erosion_dist: List[np.ndarray]
+    flow_erosion_dist: List[np.ndarray]
+    ship_erosion_dist: List[np.ndarray]
+    vol_per_discharge: List[List[np.ndarray]]
+    eq_eroded_vol: List[np.ndarray]
+    total_eroded_vol: List[np.ndarray]
+    erosion_time: int
+    avg_erosion_rate: np.ndarray = np.array([])
+    eq_eroded_vol_per_km: np.ndarray = np.array([])
+    total_eroded_vol_per_km: np.ndarray = np.array([])
