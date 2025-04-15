@@ -1,3 +1,4 @@
+import pytest
 import numpy as np
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
@@ -20,7 +21,7 @@ def test_erosion_inputs():
         tauc=[np.array([0.5, 0.6])],
         bank_type=[np.array([1, 2])],
     )
-    assert erosion_inputs.shipping_data["ship1"][0] == 1.0
+    assert erosion_inputs.shipping_data["ship1"][0] == pytest.approx(1.0)
     assert erosion_inputs.taucls[1] == 95
     assert erosion_inputs.taucls_str[0] == "protected"
 
@@ -36,9 +37,9 @@ def test_water_level_data():
         bank_height=[np.array([3.0, 4.0])],
         chezy=[[np.array([30.0, 40.0])]],
     )
-    assert water_level_data.hfw_max == 5.0
-    assert water_level_data.water_level[0][0][1] == 2.0
-    assert water_level_data.bank_height[0][1] == 4.0
+    assert water_level_data.hfw_max == pytest.approx(5.0)
+    assert water_level_data.water_level[0][0][1] == pytest.approx(2.0)
+    assert water_level_data.bank_height[0][1] == pytest.approx(4.0)
 
 
 def test_mesh_data():
@@ -55,7 +56,7 @@ def test_mesh_data():
         face_edge_connectivity=np.array([[0, 1], [1, 2]]),
         boundary_edge_nrs=np.array([0, 1]),
     )
-    assert mesh_data.x_face_coords[0] == 1.0
+    assert mesh_data.x_face_coords[0] == pytest.approx(1.0)
     assert mesh_data.face_node[1][1] == 2
     assert mesh_data.boundary_edge_nrs[1] == 1
 
@@ -74,7 +75,7 @@ def test_bank_data():
         fairway_face_indices=[np.array([0, 1])],
     )
     assert bank_data.is_right_bank[0] is True
-    assert bank_data.bank_chainage_midpoints[0][1] == 1.0
+    assert bank_data.bank_chainage_midpoints[0][1] == pytest.approx(1.0)
     assert len(bank_data.bank_lines) == 1
 
 
@@ -86,5 +87,5 @@ def test_fairway_data():
         fairway_initial_water_levels=[np.array([1.0, 2.0])],
     )
     assert fairway_data.fairway_face_indices[1] == 1
-    assert fairway_data.intersection_coords[1][1] == 1.0
-    assert fairway_data.fairway_initial_water_levels[0][1] == 2.0
+    assert fairway_data.intersection_coords[1][1] == pytest.approx(1.0)
+    assert fairway_data.fairway_initial_water_levels[0][1] == pytest.approx(2.0)
