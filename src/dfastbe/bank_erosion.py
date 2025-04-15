@@ -790,14 +790,14 @@ class Erosion:
             )
 
         erosion_results = ErosionResults(
-            dn_eq=dn_eq,
-            dn_tot=dn_tot,
-            dn_flow_tot=dn_flow_tot,
-            dn_ship_tot=dn_ship_tot,
-            dv=dv,
-            dv_eq=dv_eq,
-            dv_tot=dv_tot,
-            t_erosion=t_erosion,
+            eq_erosion_dist=dn_eq,
+            total_erosion_dist=dn_tot,
+            flow_erosion_dist=dn_flow_tot,
+            ship_erosion_dist=dn_ship_tot,
+            vol_per_discharge=dv,
+            eq_eroded_vol=dv_eq,
+            total_eroded_vol=dv_tot,
+            erosion_time=t_erosion,
         )
 
         water_level_data = WaterLevelData(
@@ -836,19 +836,19 @@ class Erosion:
         bankline_eq_list = []
         for ib, bank_coords in enumerate(bank_data.bank_line_coords):
             d_nav[ib] = (
-                erosion_results.dn_tot[ib] * bank_data.bank_line_size[ib]
+                erosion_results.total_erosion_dist[ib] * bank_data.bank_line_size[ib]
             ).sum() / bank_data.bank_line_size[ib].sum()
-            dn_max[ib] = erosion_results.dn_tot[ib].max()
+            dn_max[ib] = erosion_results.total_erosion_dist[ib].max()
             d_nav_flow[ib] = (
-                erosion_results.dn_flow_tot[ib] * bank_data.bank_line_size[ib]
+                erosion_results.flow_erosion_dist[ib] * bank_data.bank_line_size[ib]
             ).sum() / bank_data.bank_line_size[ib].sum()
             d_nav_ship[ib] = (
-                erosion_results.dn_ship_tot[ib] * bank_data.bank_line_size[ib]
+                erosion_results.ship_erosion_dist[ib] * bank_data.bank_line_size[ib]
             ).sum() / bank_data.bank_line_size[ib].sum()
             d_nav_eq[ib] = (
-                erosion_results.dn_eq[ib] * bank_data.bank_line_size[ib]
+                erosion_results.eq_erosion_dist[ib] * bank_data.bank_line_size[ib]
             ).sum() / bank_data.bank_line_size[ib].sum()
-            dn_max_eq[ib] = erosion_results.dn_eq[ib].max()
+            dn_max_eq[ib] = erosion_results.eq_erosion_dist[ib].max()
             log_text("bank_dnav", data={"ib": ib + 1, "v": d_nav[ib]})
             log_text("bank_dnavflow", data={"v": d_nav_flow[ib]})
             log_text("bank_dnavship", data={"v": d_nav_ship[ib]})
@@ -857,33 +857,39 @@ class Erosion:
             log_text("bank_dnmaxeq", data={"v": dn_max_eq[ib]})
 
             xy_line_new = move_line(
-                bank_coords, erosion_results.dn_tot[ib], bank_data.is_right_bank[ib]
+                bank_coords,
+                erosion_results.total_erosion_dist[ib],
+                bank_data.is_right_bank[ib],
             )
             xy_line_new_list.append(xy_line_new)
             bankline_new_list.append(LineString(xy_line_new))
 
             xy_line_eq = move_line(
-                bank_coords, erosion_results.dn_eq[ib], bank_data.is_right_bank[ib]
+                bank_coords,
+                erosion_results.eq_erosion_dist[ib],
+                bank_data.is_right_bank[ib],
             )
             xy_line_eq_list.append(xy_line_eq)
             bankline_eq_list.append(LineString(xy_line_eq))
 
             dvol_eq = get_km_eroded_volume(
-                bank_data.bank_chainage_midpoints[ib], erosion_results.dv_eq[ib], km_bin
+                bank_data.bank_chainage_midpoints[ib],
+                erosion_results.eq_eroded_vol[ib],
+                km_bin,
             )
             vol_eq[:, ib] = dvol_eq
             dvol_tot = get_km_eroded_volume(
                 bank_data.bank_chainage_midpoints[ib],
-                erosion_results.dv_tot[ib],
+                erosion_results.total_eroded_vol[ib],
                 km_bin,
             )
             vol_tot[:, ib] = dvol_tot
             if ib < bank_data.n_bank_lines - 1:
                 log_text("-")
 
-        erosion_results.d_nav = d_nav
-        erosion_results.vol_eq = vol_eq
-        erosion_results.vol_tot = vol_tot
+        erosion_results.avg_erosion_rate = d_nav
+        erosion_results.eq_eroded_vol_per_km = vol_eq
+        erosion_results.total_eroded_vol_per_km = vol_tot
 
         return bankline_new_list, bankline_eq_list, xy_line_eq_list
 
@@ -999,14 +1005,18 @@ class Erosion:
         erosion_vol_file = self.config_file.get_str("Erosion", "EroVol", default="erovol.evo")
         log_text("save_tot_erovol", data={"file": erosion_vol_file})
         write_km_eroded_volumes(
-            km_mid, erosion_results.vol_tot, str(self.output_dir / erosion_vol_file)
+            km_mid,
+            erosion_results.total_eroded_vol_per_km,
+            str(self.output_dir / erosion_vol_file),
         )
 
         # write eroded volumes per km (equilibrium)
         erosion_vol_file = self.config_file.get_str("Erosion", "EroVolEqui", default="erovol_eq.evo")
         log_text("save_eq_erovol", data={"file": erosion_vol_file})
         write_km_eroded_volumes(
-            km_mid, erosion_results.vol_eq, str(self.output_dir / erosion_vol_file)
+            km_mid,
+            erosion_results.eq_eroded_vol_per_km,
+            str(self.output_dir / erosion_vol_file),
         )
 
     def _generate_plots(
@@ -1076,16 +1086,16 @@ class Erosion:
                 bbox,
                 self.river_data.masked_profile_arr,
                 bank_data.bank_line_coords,
-                erosion_results.dn_tot,
+                erosion_results.total_erosion_dist,
                 bank_data.is_right_bank,
-                erosion_results.d_nav,
+                erosion_results.avg_erosion_rate,
                 xy_line_eq_list,
                 mesh_data.x_edge_coords,
                 mesh_data.y_edge_coords,
                 X_AXIS_TITLE,
                 Y_AXIS_TITLE,
                 "eroded distance and equilibrium bank location",
-                f"eroded during {erosion_results.t_erosion} year",
+                f"eroded during {erosion_results.erosion_time} year",
                 "eroded distance [m]",
                 "equilibrium location",
             )
@@ -1103,9 +1113,9 @@ class Erosion:
                 km_mid,
                 km_step,
                 "river chainage [km]",
-                erosion_results.dv,
+                erosion_results.vol_per_discharge,
                 "eroded volume [m^3]",
-                f"eroded volume per {km_step} chainage km ({erosion_results.t_erosion} years)",
+                f"eroded volume per {km_step} chainage km ({erosion_results.erosion_time} years)",
                 "Q{iq}",
                 "Bank {ib}",
             )
@@ -1123,9 +1133,9 @@ class Erosion:
                 km_mid,
                 km_step,
                 "river chainage [km]",
-                erosion_results.dv,
+                erosion_results.vol_per_discharge,
                 "eroded volume [m^3]",
-                f"eroded volume per {km_step} chainage km ({erosion_results.t_erosion} years)",
+                f"eroded volume per {km_step} chainage km ({erosion_results.erosion_time} years)",
                 "Q{iq}",
             )
             if self.plot_flags["save_plot"]:
@@ -1140,9 +1150,9 @@ class Erosion:
                 km_mid,
                 km_step,
                 "river chainage [km]",
-                erosion_results.dv,
+                erosion_results.vol_per_discharge,
                 "eroded volume [m^3]",
-                f"eroded volume per {km_step} chainage km ({erosion_results.t_erosion} years)",
+                f"eroded volume per {km_step} chainage km ({erosion_results.erosion_time} years)",
                 "Bank {ib}",
             )
             if self.plot_flags["save_plot"]:
@@ -1157,7 +1167,7 @@ class Erosion:
                 km_mid,
                 km_step,
                 "river chainage [km]",
-                erosion_results.vol_eq,
+                erosion_results.eq_eroded_vol_per_km,
                 "eroded volume [m^3]",
                 f"eroded volume per {km_step} chainage km (equilibrium)",
             )
@@ -1242,9 +1252,9 @@ class Erosion:
             fig, ax = df_plt.plot8_eroded_distance(
                 bank_data.bank_chainage_midpoints,
                 "river chainage [km]",
-                erosion_results.dn_tot,
+                erosion_results.total_erosion_dist,
                 "Bank {ib}",
-                erosion_results.dn_eq,
+                erosion_results.eq_erosion_dist,
                 "Bank {ib} (eq)",
                 "eroded distance",
                 "[m]",
