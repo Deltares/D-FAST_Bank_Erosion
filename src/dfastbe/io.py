@@ -196,9 +196,7 @@ class SimulationData:
             dh0=dh0,
         )
 
-    def apply_clipping_to_simulation_data(
-        self, river_profile: LineString, max_distance: float
-    ):
+    def clip(self, river_profile: LineString, max_distance: float):
         """Clip the simulation mesh.
 
         Clipping data to the area of interest,
@@ -236,7 +234,7 @@ class SimulationData:
             ... [194982.8125, 361431.03125]
             ... ])
             >>> max_distance = 10.0
-            >>> sim_data.apply_clipping_to_simulation_data(river_profile, max_distance)
+            >>> sim_data.clipriver_profile, max_distance)
             >>> print(sim_data.x_node)
             [194949.796875 194966.515625 194982.8125  ]
 

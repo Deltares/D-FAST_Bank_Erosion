@@ -57,7 +57,7 @@ def test_load_program_texts_01():
 
 class TestSimulationData:
 
-    def test_read_simulation_data(self):
+    def test_read(self):
         file_name = "test_map.nc"
         mock_x_node = np.array([0.0, 1.0, 2.0])
         mock_y_node = np.array([0.0, 1.0, 2.0])
@@ -116,14 +116,14 @@ class TestSimulationData:
             mock_read_fm_map.assert_any_call(file_name, "sea_water_y_velocity")
             mock_read_fm_map.assert_any_call(file_name, "Chezy roughness")
 
-    def test_read_simulation_data_invalid_file(self):
+    def test_read_invalid_file(self):
         invalid_file_name = "invalid_file.nc"
 
         with pytest.raises(SimulationFilesError):
             SimulationData.read(invalid_file_name)
 
     @pytest.fixture
-    def sim_data(self) -> SimulationData:
+    def simulation_data(self) -> SimulationData:
         x_node = np.array([194949.796875, 194966.515625, 194982.8125, 195000.0])
         y_node = np.array([361366.90625, 361399.46875, 361431.03125, 361450.0])
         nnodes = np.array([4, 4])
@@ -156,7 +156,7 @@ class TestSimulationData:
         )
         return sim_data
 
-    def test_apply_clipping_to_simulation_data(self, sim_data: SimulationData):
+    def test_clip(self, simulation_data: SimulationData):
         river_profile = LineString(
             [
                 [194949.796875, 361366.90625],
@@ -165,25 +165,24 @@ class TestSimulationData:
             ]
         )
         max_distance = 10.0
-        sim_data.apply_clipping_to_simulation_data(river_profile, max_distance)
+        simulation_data.clip(river_profile, max_distance)
 
         assert np.array_equal(
-            sim_data.x_node, np.array([194949.796875, 194966.515625, 194982.8125])
+            simulation_data.x_node,
+            np.array([194949.796875, 194966.515625, 194982.8125]),
         )
         assert np.array_equal(
-            sim_data.y_node, np.array([361366.90625, 361399.46875, 361431.03125])
+            simulation_data.y_node, np.array([361366.90625, 361399.46875, 361431.03125])
         )
-        assert np.array_equal(sim_data.zb_val, np.array([10.0, 20.0, 30.0]))
-        assert sim_data.nnodes.size == 0
-        assert sim_data.zw_face.size == 0
-        assert sim_data.h_face.size == 0
-        assert sim_data.ucx_face.size == 0
-        assert sim_data.ucy_face.size == 0
-        assert sim_data.chz_face.size == 0
+        assert np.array_equal(simulation_data.zb_val, np.array([10.0, 20.0, 30.0]))
+        assert simulation_data.nnodes.size == 0
+        assert simulation_data.zw_face.size == 0
+        assert simulation_data.h_face.size == 0
+        assert simulation_data.ucx_face.size == 0
+        assert simulation_data.ucy_face.size == 0
+        assert simulation_data.chz_face.size == 0
 
-    def test_apply_clipping_to_simulation_data_no_nodes_in_buffer(
-        self, sim_data: SimulationData
-    ):
+    def test_clip_no_nodes_in_buffer(self, simulation_data: SimulationData):
         river_profile = LineString(
             [
                 [194900.0, 361300.0],
@@ -193,17 +192,17 @@ class TestSimulationData:
         )
         max_distance = 10.0
 
-        sim_data.apply_clipping_to_simulation_data(river_profile, max_distance)
+        simulation_data.clip(river_profile, max_distance)
 
-        assert sim_data.x_node.size == 0
-        assert sim_data.y_node.size == 0
-        assert sim_data.zb_val.size == 0
-        assert sim_data.nnodes.size == 0
-        assert sim_data.zw_face.size == 0
-        assert sim_data.h_face.size == 0
-        assert sim_data.ucx_face.size == 0
-        assert sim_data.ucy_face.size == 0
-        assert sim_data.chz_face.size == 0
+        assert simulation_data.x_node.size == 0
+        assert simulation_data.y_node.size == 0
+        assert simulation_data.zb_val.size == 0
+        assert simulation_data.nnodes.size == 0
+        assert simulation_data.zw_face.size == 0
+        assert simulation_data.h_face.size == 0
+        assert simulation_data.ucx_face.size == 0
+        assert simulation_data.ucy_face.size == 0
+        assert simulation_data.chz_face.size == 0
 
 
 class TestLogText:
