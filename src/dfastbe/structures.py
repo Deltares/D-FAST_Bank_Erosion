@@ -159,15 +159,15 @@ class ErosionResults:
 
     args:
         dn_eq (List[np.ndarray]):
-            Erosion rate data for equilibrium.
+            Erosion distance at equilibrium for each bank line.
         dn_tot (List[np.ndarray]):
-            Total erosion distance data.
+            Total erosion distance for each bank line.
         dn_flow_tot (List[np.ndarray]):
             Total erosion distance caused by flow for each bank line.
         dn_ship_tot (List[np.ndarray]):
             Total erosion distance caused by ship waves for each bank line.
         dv (List[List[np.ndarray]]):
-            Eroded volume per discharge level.
+            Eroded volume per discharge level for each bank line.
         dv_eq (List[np.ndarray]):
             Eroded volume at equilibrium for each bank line.
         dv_tot (List[np.ndarray]):
@@ -177,7 +177,7 @@ class ErosionResults:
         d_nav (np.ndarray):
             Average erosion rate data.
         vol_eq (np.ndarray):
-            Volume data for equilibrium.
+            Total erosion time step, representing the cumulative time over which erosion is calculated.
     """
     dn_eq: List[np.ndarray]
     dn_tot: List[np.ndarray]
