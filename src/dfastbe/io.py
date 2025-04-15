@@ -38,8 +38,8 @@ import pandas as pd
 from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
-from shapely.geometry import LineString, Point, asLineString, linestring
-from shapely.prepared import prep
+from shapely.geometry import LineString, Point
+from shapely import prepare
 
 MAX_RIVER_WIDTH = 1000
 
@@ -197,7 +197,7 @@ class SimulationData:
         )
 
     def apply_clipping_to_simulation_data(
-        self, river_profile: np.ndarray, max_distance: float
+        self, river_profile: LineString, max_distance: float
     ):
         """Clip the simulation mesh.
 
@@ -249,7 +249,7 @@ class SimulationData:
         y_min = bbox.coords[0][1]
         y_max = bbox.coords[2][1]
 
-        xy_b_prep = prep(xy_buffer)
+        prepare(xy_buffer)
         x = self.x_node
         y = self.y_node
         nnodes = x.shape
@@ -315,6 +315,7 @@ class ConfigFile:
 
     def __init__(self, config: ConfigParser, path: Union[Path, str] = None):
         self._config = config
+        self.crs = "EPSG:28992"
         if path:
             self.path = Path(path)
             self.root_dir = self.path.parent
@@ -813,7 +814,7 @@ class ConfigFile:
 
         return km_bounds
 
-    def get_search_lines(self) -> List[linestring.LineStringAdapter]:
+    def get_search_lines(self) -> List[LineString]:
         """Get the search lines for the bank lines from the analysis settings.
 
         Returns:
@@ -855,8 +856,8 @@ class ConfigFile:
             xy_bank = XYCModel.read(xyc_file)
             bankline_list.append(LineString(xy_bank))
             b += 1
-        bankline_series = GeoSeries(bankline_list)
-        banklines = GeoDataFrame.from_features(bankline_series)
+        bankline_series = GeoSeries(bankline_list, crs=self.crs)
+        banklines = GeoDataFrame(geometry=bankline_series)
         return banklines
 
     def get_parameter(
@@ -1025,11 +1026,11 @@ class ConfigFile:
             ) from e
         return val
 
-    def get_xy_km(self) -> linestring.LineStringAdapter:
+    def get_xy_km(self) -> LineString:
         """Get the chainage line from the analysis settings.
 
         Returns:
-            linestring.LineStringAdapter: Chainage line.
+            LineString: Chainage line.
         """
         # get the chainage file
         km_file = self.get_str("General", "RiverKM")
@@ -1038,7 +1039,7 @@ class ConfigFile:
 
         # make sure that chainage is increasing with node index
         if xy_km.coords[0][2] > xy_km.coords[1][2]:
-            xy_km = asLineString(xy_km.coords[::-1])
+            xy_km = LineString(xy_km.coords[::-1])
 
         return xy_km
 
@@ -1297,26 +1298,22 @@ class RiverData:
             ```
         """
         self.config_file = config_file
-        self.profile: linestring.LineString = config_file.get_xy_km()
+        self.profile: LineString = config_file.get_xy_km()
         self.station_bounds: Tuple = config_file.get_km_bounds()
         self.start_station: float = self.station_bounds[0]
         self.end_station: float = self.station_bounds[1]
         log_text(
             "clip_chainage", data={"low": self.start_station, "high": self.end_station}
         )
-        self.masked_profile: linestring.LineString = self.mask_profile(
-            self.station_bounds
-        )
-        self.masked_profile_arr = np.array(self.masked_profile)
+        self.masked_profile: LineString = self.mask_profile(self.station_bounds)
+        self.masked_profile_arr = np.array(self.masked_profile.coords)
 
     @property
-    def bank_search_lines(self) -> List[linestring.LineStringAdapter]:
+    def bank_search_lines(self) -> List[LineString]:
         """Get the bank search lines.
 
-        Returns
-        -------
-        search_lines : List[linestring.LineStringAdapter]
-            List of bank search lines.
+        Returns:
+            List[LineString]: List of bank search lines.
         """
         return self.config_file.get_search_lines()
 
@@ -1325,19 +1322,15 @@ class RiverData:
         """Number of river bank search lines."""
         return len(self.bank_search_lines)
 
-    def mask_profile(self, bounds: Tuple[float, float]) -> linestring.LineStringAdapter:
+    def mask_profile(self, bounds: Tuple[float, float]) -> LineString:
         """
         Clip a chainage line to the relevant reach.
 
-        Arguments
-        ---------
-        bounds : Tuple[float, float]
-            Lower and upper limit for the chainage.
+        Args:
+            bounds (Tuple[float, float]): Lower and upper limit for the chainage.
 
-        Returns
-        -------
-        xykm1 : linestring.LineStringAdapter
-            Clipped river chainage line.
+        Returns:
+            LineString: Clipped river chainage line.
         """
         xy_km = self.profile
         start_i = None
@@ -1415,23 +1408,17 @@ class RiverData:
     def clip_search_lines(
         self,
         max_river_width: float = MAX_RIVER_WIDTH,
-    ) -> Tuple[List[linestring.LineStringAdapter], float]:
+    ) -> Tuple[List[LineString], float]:
         """
         Clip the list of lines to the envelope of certain size surrounding a reference line.
 
         Arg:
-            search_lines : List[linestring.LineStringAdapter]
-                List of search lines to be clipped.
-            river_profile : linestring.LineStringAdapter
-                Reference line.
             max_river_width: float
                 Maximum distance away from river_profile.
 
         Returns:
-            search_lines : List[linestring.LineStringAdapter]
-                List of clipped search lines.
-            max_distance: float
-                Maximum distance from any point within line to reference line.
+            List[LineString]: List of clipped search lines.
+            float: Maximum distance from any point within line to reference line.
         """
         search_lines = self.bank_search_lines
         profile_buffer = self.masked_profile.buffer(max_river_width, cap_style=2)
@@ -1990,7 +1977,9 @@ def relative_path(rootdir: str, file: str) -> str:
         return str(file_path)
 
 
-def write_shp_pnt(xy: np.ndarray, data: Dict[str, np.ndarray], filename: str) -> None:
+def write_shp_pnt(
+    xy: np.ndarray, data: Dict[str, np.ndarray], filename: str, config_file: ConfigFile
+) -> None:
     """
     Write a shape point file with x, y, and values.
 
@@ -2008,7 +1997,7 @@ def write_shp_pnt(xy: np.ndarray, data: Dict[str, np.ndarray], filename: str) ->
     None
     """
     xy_points = [Point(xy1) for xy1 in xy]
-    geom = GeoSeries(xy_points)
+    geom = GeoSeries(xy_points, crs=config_file.crs)
     write_shp(geom, data, filename)
 
 

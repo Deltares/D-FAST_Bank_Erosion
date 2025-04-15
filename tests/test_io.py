@@ -13,7 +13,7 @@ import numpy as np
 import pytest
 from geopandas import GeoDataFrame
 from pyfakefs.fake_filesystem import FakeFilesystem
-from shapely.geometry.linestring import LineString
+from shapely.geometry import LineString
 
 from dfastbe.io import (
     SimulationData,
