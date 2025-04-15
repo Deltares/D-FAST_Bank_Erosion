@@ -255,7 +255,7 @@ class SimulationData:
         nnodes = x.shape
         keep = (x > x_min) & (x < x_max) & (y > y_min) & (y < y_max)
         for i in range(x.size):
-            if keep[i] and not xy_b_prep.contains(Point((x[i], y[i]))):
+            if keep[i] and not xy_buffer.contains(Point((x[i], y[i]))):
                 keep[i] = False
 
         fnc = self.facenode
