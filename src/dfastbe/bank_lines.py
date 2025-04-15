@@ -251,7 +251,7 @@ class BankLines:
 
     @staticmethod
     def _get_bank_lines(
-        sim: SimulationData, h0: float, config_file: ConfigFile
+        simulation_data: SimulationData, h0: float, config_file: ConfigFile
     ) -> gpd.GeoSeries:
         """
         Detect all possible bank line segments based on simulation data.
@@ -259,7 +259,7 @@ class BankLines:
         Use a critical water depth h0 as a water depth threshold for dry/wet boundary.
 
         Args:
-            sim (SimulationData):
+            simulation_data (SimulationData):
                 Simulation data: mesh, bed levels, water levels, velocities, etc.
             h0 (float):
                 Critical water depth for determining the banks.
@@ -268,15 +268,15 @@ class BankLines:
         banklines (geopandas.GeoSeries):
             The collection of all detected bank segments in the remaining model area.
         """
-        fnc = sim.facenode
-        n_nodes = sim.nnodes
+        fnc = simulation_data.face_node
+        n_nodes = simulation_data.n_nodes
         max_nnodes = fnc.shape[1]
-        x_node = sim.x_node[fnc]
-        y_node = sim.y_node[fnc]
-        zb = sim.zb_val[fnc]
-        zw = sim.zw_face
+        x_node = simulation_data.x_node[fnc]
+        y_node = simulation_data.y_node[fnc]
+        zb = simulation_data.zb_val[fnc]
+        zw = simulation_data.zw_face
 
-        nnodes_total = len(sim.x_node)
+        nnodes_total = len(simulation_data.x_node)
         try:
             mask = ~fnc.mask
             non_masked = sum(mask.reshape(fnc.size))
@@ -291,7 +291,7 @@ class BankLines:
         zw_node = np.bincount(f_nc_m, weights=zwm, minlength=nnodes_total)
         n_val = np.bincount(f_nc_m, weights=np.ones(non_masked), minlength=nnodes_total)
         zw_node = zw_node / np.maximum(n_val, 1)
-        zw_node[n_val == 0] = sim.zb_val[n_val == 0]
+        zw_node[n_val == 0] = simulation_data.zb_val[n_val == 0]
 
         h_node = zw_node[fnc] - zb
         wet_node = h_node > h0

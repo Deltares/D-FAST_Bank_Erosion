@@ -69,8 +69,8 @@ class SimulationData:
         self,
         x_node: np.ndarray,
         y_node: np.ndarray,
-        nnodes: np.ndarray,
-        facenode: np.ma.masked_array,
+        n_nodes: np.ndarray,
+        face_node: np.ma.masked_array,
         zb_location: np.ndarray,
         zb_val: np.ndarray,
         zw_face: np.ndarray,
@@ -82,8 +82,8 @@ class SimulationData:
     ):
         self.x_node = x_node
         self.y_node = y_node
-        self.nnodes = nnodes
-        self.facenode = facenode
+        self.n_nodes = n_nodes
+        self.face_node = face_node
         self.zb_location = zb_location
         self.zb_val = zb_val
         self.zw_face = zw_face
@@ -137,13 +137,13 @@ class SimulationData:
             f_nc = read_fm_map(file_name, "face_node_connectivity")
             if f_nc.mask.shape == ():
                 # all faces have the same number of nodes
-                nnodes = np.ones(f_nc.data.shape[0], dtype=np.int) * f_nc.data.shape[1]
+                n_nodes = np.ones(f_nc.data.shape[0], dtype=np.int) * f_nc.data.shape[1]
             else:
                 # varying number of nodes
-                nnodes = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
+                n_nodes = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
             f_nc.data[f_nc.mask] = 0
 
-            facenode = f_nc
+            face_node = f_nc
             log_text("read_bathymetry", indent=indent)
             zb_location = "node"
             zb_val = read_fm_map(file_name, "altitude", location="node")
@@ -184,8 +184,8 @@ class SimulationData:
         return cls(
             x_node=x_node,
             y_node=y_node,
-            nnodes=nnodes,
-            facenode=facenode,
+            n_nodes=n_nodes,
+            face_node=face_node,
             zb_location=zb_location,
             zb_val=zb_val,
             zw_face=zw_face,
@@ -256,11 +256,11 @@ class SimulationData:
             if keep[i] and not xy_buffer.contains(Point((x[i], y[i]))):
                 keep[i] = False
 
-        fnc = self.facenode
+        fnc = self.face_node
         keep_face = keep[fnc].all(axis=1)
         renum = np.zeros(nnodes, dtype=np.int)
         renum[keep] = range(sum(keep))
-        self.facenode = renum[fnc[keep_face]]
+        self.face_node = renum[fnc[keep_face]]
 
         self.x_node = x[keep]
         self.y_node = y[keep]
@@ -269,7 +269,7 @@ class SimulationData:
         else:
             self.zb_val = self.zb_val[keep_face]
 
-        self.nnodes = self.nnodes[keep_face]
+        self.n_nodes = self.n_nodes[keep_face]
         self.zw_face = self.zw_face[keep_face]
         self.h_face = self.h_face[keep_face]
         self.ucx_face = self.ucx_face[keep_face]

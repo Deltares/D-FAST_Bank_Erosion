@@ -61,9 +61,9 @@ class TestSimulationData:
         file_name = "test_map.nc"
         mock_x_node = np.array([0.0, 1.0, 2.0])
         mock_y_node = np.array([0.0, 1.0, 2.0])
-        mock_facenode = MagicMock()
-        mock_facenode.data = np.array([[0, 1, 2], [2, 3, 4]])
-        mock_facenode.mask = np.array([[False, False, False], [False, False, False]])
+        mock_face_node = MagicMock()
+        mock_face_node.data = np.array([[0, 1, 2], [2, 3, 4]])
+        mock_face_node.mask = np.array([[False, False, False], [False, False, False]])
         mock_zb_val = np.array([10.0, 20.0, 30.0])
         mock_zw_face = np.array([1.0, 2.0, 3.0])
         mock_h_face = np.array([0.5, 1.0, 1.5])
@@ -77,7 +77,7 @@ class TestSimulationData:
             mock_read_fm_map.side_effect = [
                 mock_x_node,
                 mock_y_node,
-                mock_facenode,
+                mock_face_node,
                 mock_zb_val,
                 mock_zw_face,
                 mock_h_face,
@@ -95,7 +95,7 @@ class TestSimulationData:
             assert isinstance(sim_object, SimulationData)
             assert np.array_equal(sim_object.x_node, mock_x_node)
             assert np.array_equal(sim_object.y_node, mock_y_node)
-            assert np.array_equal(sim_object.facenode.data, mock_facenode.data)
+            assert np.array_equal(sim_object.face_node.data, mock_face_node.data)
             assert np.array_equal(sim_object.zb_val, mock_zb_val)
             assert np.array_equal(sim_object.zw_face, mock_zw_face)
             assert np.array_equal(sim_object.h_face, mock_h_face)
@@ -126,8 +126,8 @@ class TestSimulationData:
     def simulation_data(self) -> SimulationData:
         x_node = np.array([194949.796875, 194966.515625, 194982.8125, 195000.0])
         y_node = np.array([361366.90625, 361399.46875, 361431.03125, 361450.0])
-        nnodes = np.array([4, 4])
-        facenode = np.ma.masked_array(
+        n_nodes = np.array([4, 4])
+        face_node = np.ma.masked_array(
             data=[[0, 1, 2, 3], [1, 2, 3, 0]],
             mask=[[False, False, False, False], [False, False, False, False]],
         )
@@ -143,8 +143,8 @@ class TestSimulationData:
         sim_data = SimulationData(
             x_node=x_node,
             y_node=y_node,
-            nnodes=nnodes,
-            facenode=facenode,
+            n_nodes=n_nodes,
+            face_node=face_node,
             zb_location=zb_location,
             zb_val=zb_val,
             zw_face=zw_face,
@@ -175,7 +175,7 @@ class TestSimulationData:
             simulation_data.y_node, np.array([361366.90625, 361399.46875, 361431.03125])
         )
         assert np.array_equal(simulation_data.zb_val, np.array([10.0, 20.0, 30.0]))
-        assert simulation_data.nnodes.size == 0
+        assert simulation_data.n_nodes.size == 0
         assert simulation_data.zw_face.size == 0
         assert simulation_data.h_face.size == 0
         assert simulation_data.ucx_face.size == 0
@@ -197,7 +197,7 @@ class TestSimulationData:
         assert simulation_data.x_node.size == 0
         assert simulation_data.y_node.size == 0
         assert simulation_data.zb_val.size == 0
-        assert simulation_data.nnodes.size == 0
+        assert simulation_data.n_nodes.size == 0
         assert simulation_data.zw_face.size == 0
         assert simulation_data.h_face.size == 0
         assert simulation_data.ucx_face.size == 0
