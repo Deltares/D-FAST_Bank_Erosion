@@ -234,7 +234,7 @@ class SimulationData:
             ... [194982.8125, 361431.03125]
             ... ])
             >>> max_distance = 10.0
-            >>> sim_data.clipriver_profile, max_distance)
+            >>> sim_data.clip(river_profile, max_distance)
             >>> print(sim_data.x_node)
             [194949.796875 194966.515625 194982.8125  ]
 

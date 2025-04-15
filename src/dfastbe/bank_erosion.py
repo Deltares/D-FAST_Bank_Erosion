@@ -1280,7 +1280,7 @@ def _compute_mesh_topology(
     Args:
         simulation_data (SimulationData):
             A simulation object containing mesh-related data, including face-node connectivity
-            (`facenode`), the number of nodes per face (`nnodes`), and node coordinates (`x_node`, `y_node`).
+            (`face_node`), the number of nodes per face (`n_nodes`), and node coordinates (`x_node`, `y_node`).
 
     Returns:
         MeshData: a dataclass containing the following attributes:
@@ -1297,7 +1297,7 @@ def _compute_mesh_topology(
 
     Raises:
         KeyError:
-            If required keys (e.g., `facenode`, `nnodes`, `x_node`, `y_node`) are missing from the `sim` object.
+            If required keys (e.g., `face_node`, `nnodes`, `x_node`, `y_node`) are missing from the `sim` object.
 
     Notes:
         - The function identifies unique edges by sorting and comparing node indices.
@@ -1307,8 +1307,8 @@ def _compute_mesh_topology(
 
     # get a sorted list of edge node connections (shared edges occur twice)
     # face_nr contains the face index to which the edge belongs
-    face_node = simulation_data.facenode
-    n_nodes = simulation_data.nnodes
+    face_node = simulation_data.face_node
+    n_nodes = simulation_data.n_nodes
     n_faces = face_node.shape[0]
     n_edges = sum(n_nodes)
     edge_node = np.zeros((n_edges, 2), dtype=np.int64)
