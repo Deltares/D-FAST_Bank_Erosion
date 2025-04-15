@@ -158,26 +158,29 @@ class ErosionResults:
     """Class to hold erosion results.
 
     args:
-        dn_eq (List[np.ndarray]):
+        equilibrium_erosion_distance (List[np.ndarray]):
             Erosion distance at equilibrium for each bank line.
-        dn_tot (List[np.ndarray]):
+        total_erosion_distance (List[np.ndarray]):
             Total erosion distance for each bank line.
-        dn_flow_tot (List[np.ndarray]):
+        flow_erosion_distance (List[np.ndarray]):
             Total erosion distance caused by flow for each bank line.
-        dn_ship_tot (List[np.ndarray]):
+        ship_wave_erosion_distance (List[np.ndarray]):
             Total erosion distance caused by ship waves for each bank line.
-        dv (List[List[np.ndarray]]):
+        eroded_volume_per_discharge (List[List[np.ndarray]]):
             Eroded volume per discharge level for each bank line.
-        dv_eq (List[np.ndarray]):
+        equilibrium_eroded_volume (List[np.ndarray]):
             Eroded volume at equilibrium for each bank line.
-        dv_tot (List[np.ndarray]):
+        total_eroded_volume (List[np.ndarray]):
             Total eroded volume for each bank line.
-        t_erosion (int):
+        erosion_time_step (int):
             Time over which erosion is calculated.
-        d_nav (np.ndarray):
+        average_erosion_rate (np.ndarray):
             Average erosion rate data.
-        vol_eq (np.ndarray):
-            Total erosion time step, representing the cumulative time over which erosion is calculated.
+        equilibrium_eroded_volume_per_km (np.ndarray):
+            Total erosion time step,
+            representing the cumulative time over which erosion is calculated.
+        total_eroded_volume_per_km (np.ndarray):
+            Total eroded volume per kilometer for each bank line.
     """
     dn_eq: List[np.ndarray]
     dn_tot: List[np.ndarray]
@@ -188,5 +191,5 @@ class ErosionResults:
     dv_tot: List[np.ndarray]
     t_erosion: int
     d_nav: np.ndarray = np.array([])
-    vol_tot: np.ndarray = np.array([])
     vol_eq: np.ndarray = np.array([])
+    vol_tot: np.ndarray = np.array([])
