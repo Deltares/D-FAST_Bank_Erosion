@@ -1966,9 +1966,7 @@
 <span class="normal">348</span>
 <span class="normal">349</span>
 <span class="normal">350</span>
-<span class="normal">351</span>
-<span class="normal">352</span>
-<span class="normal">353</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLines</span><span class="p">:</span>
+<span class="normal">351</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLines</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Bank line detection class.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
@@ -2062,9 +2060,7 @@
 
         <span class="c1"># clip simulation data to boundaries ...</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;clip_data&quot;</span><span class="p">)</span>
-        <span class="n">SimulationData</span><span class="o">.</span><span class="n">apply_clipping_to_simulation_data</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="n">river_profile</span><span class="p">,</span> <span class="n">max_distance</span>
-        <span class="p">)</span>
+        <span class="n">SimulationData</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="n">river_profile</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">)</span>
 
         <span class="c1"># derive bank lines (get_banklines)</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;identify_banklines&quot;</span><span class="p">)</span>
@@ -2133,8 +2129,8 @@
             <span class="n">xy_km_numpy</span><span class="p">,</span>
             <span class="n">bank_areas</span><span class="p">,</span>
             <span class="n">bank</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">facenode</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">nnodes</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">y_node</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">h_face</span><span class="p">,</span>
@@ -2185,7 +2181,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_bank_lines</span><span class="p">(</span>
-        <span class="n">sim</span><span class="p">:</span> <span class="n">SimulationData</span><span class="p">,</span> <span class="n">h0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
+        <span class="n">simulation_data</span><span class="p">:</span> <span class="n">SimulationData</span><span class="p">,</span> <span class="n">h0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Detect all possible bank line segments based on simulation data.</span>
@@ -2193,7 +2189,7 @@
 <span class="sd">        Use a critical water depth h0 as a water depth threshold for dry/wet boundary.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            sim (SimulationData):</span>
+<span class="sd">            simulation_data (SimulationData):</span>
 <span class="sd">                Simulation data: mesh, bed levels, water levels, velocities, etc.</span>
 <span class="sd">            h0 (float):</span>
 <span class="sd">                Critical water depth for determining the banks.</span>
@@ -2202,15 +2198,15 @@
 <span class="sd">        banklines (geopandas.GeoSeries):</span>
 <span class="sd">            The collection of all detected bank segments in the remaining model area.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">fnc</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">facenode</span>
-        <span class="n">n_nodes</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">nnodes</span>
+        <span class="n">fnc</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span>
+        <span class="n">n_nodes</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">n_nodes</span>
         <span class="n">max_nnodes</span> <span class="o">=</span> <span class="n">fnc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">x_node</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">x_node</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span>
-        <span class="n">y_node</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">y_node</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span>
-        <span class="n">zb</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">zb_val</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span>
-        <span class="n">zw</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">zw_face</span>
+        <span class="n">x_node</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span>
+        <span class="n">y_node</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">y_node</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span>
+        <span class="n">zb</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">zb_val</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span>
+        <span class="n">zw</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">zw_face</span>
 
-        <span class="n">nnodes_total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sim</span><span class="o">.</span><span class="n">x_node</span><span class="p">)</span>
+        <span class="n">nnodes_total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">fnc</span><span class="o">.</span><span class="n">mask</span>
             <span class="n">non_masked</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">fnc</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
@@ -2225,7 +2221,7 @@
         <span class="n">zw_node</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">f_nc_m</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">zwm</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">nnodes_total</span><span class="p">)</span>
         <span class="n">n_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">f_nc_m</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">non_masked</span><span class="p">),</span> <span class="n">minlength</span><span class="o">=</span><span class="n">nnodes_total</span><span class="p">)</span>
         <span class="n">zw_node</span> <span class="o">=</span> <span class="n">zw_node</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">n_val</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">zw_node</span><span class="p">[</span><span class="n">n_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">sim</span><span class="o">.</span><span class="n">zb_val</span><span class="p">[</span><span class="n">n_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">zw_node</span><span class="p">[</span><span class="n">n_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">zb_val</span><span class="p">[</span><span class="n">n_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
 
         <span class="n">h_node</span> <span class="o">=</span> <span class="n">zw_node</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span> <span class="o">-</span> <span class="n">zb</span>
         <span class="n">wet_node</span> <span class="o">=</span> <span class="n">h_node</span> <span class="o">&gt;</span> <span class="n">h0</span>
@@ -2531,9 +2527,7 @@ Flag indicating whether this routine is called from the GUI.</p>
 <span class="normal">161</span>
 <span class="normal">162</span>
 <span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">detect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">164</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">detect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the bank line detection analysis for a specified configuration.&quot;&quot;&quot;</span>
     <span class="n">config_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span>
     <span class="n">river_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span>
@@ -2569,9 +2563,7 @@ Flag indicating whether this routine is called from the GUI.</p>
 
     <span class="c1"># clip simulation data to boundaries ...</span>
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;clip_data&quot;</span><span class="p">)</span>
-    <span class="n">SimulationData</span><span class="o">.</span><span class="n">apply_clipping_to_simulation_data</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="n">river_profile</span><span class="p">,</span> <span class="n">max_distance</span>
-    <span class="p">)</span>
+    <span class="n">SimulationData</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="n">river_profile</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">)</span>
 
     <span class="c1"># derive bank lines (get_banklines)</span>
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;identify_banklines&quot;</span><span class="p">)</span>
@@ -2624,7 +2616,9 @@ Flag indicating whether this routine is called from the GUI.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">168</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
 <span class="normal">169</span>
 <span class="normal">170</span>
 <span class="normal">171</span>
@@ -2687,9 +2681,7 @@ Flag indicating whether this routine is called from the GUI.</p>
 <span class="normal">228</span>
 <span class="normal">229</span>
 <span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
+<span class="normal">231</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">xy_km_numpy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">n_search_lines</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -2725,8 +2717,8 @@ Flag indicating whether this routine is called from the GUI.</p>
         <span class="n">xy_km_numpy</span><span class="p">,</span>
         <span class="n">bank_areas</span><span class="p">,</span>
         <span class="n">bank</span><span class="p">,</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">facenode</span><span class="p">,</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">nnodes</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">,</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">,</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">y_node</span><span class="p">,</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">h_face</span><span class="p">,</span>
@@ -2776,7 +2768,9 @@ Flag indicating whether this routine is called from the GUI.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">235</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
 <span class="normal">236</span>
 <span class="normal">237</span>
 <span class="normal">238</span>
@@ -2791,9 +2785,7 @@ Flag indicating whether this routine is called from the GUI.</p>
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span>
+<span class="normal">250</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">bank</span><span class="p">,</span> <span class="n">banklines</span><span class="p">,</span> <span class="n">clipped_banklines</span><span class="p">,</span> <span class="n">bank_areas</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Save result files.&quot;&quot;&quot;</span>

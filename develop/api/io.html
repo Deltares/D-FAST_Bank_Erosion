@@ -1477,9 +1477,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#dfastbe.io.SimulationData.apply_clipping_to_simulation_data" class="md-nav__link">
+  <a href="#dfastbe.io.SimulationData.clip" class="md-nav__link">
     <span class="md-ellipsis">
-      apply_clipping_to_simulation_data
+      clip
     </span>
   </a>
   
@@ -2255,9 +2255,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#dfastbe.io.SimulationData.apply_clipping_to_simulation_data" class="md-nav__link">
+  <a href="#dfastbe.io.SimulationData.clip" class="md-nav__link">
     <span class="md-ellipsis">
-      apply_clipping_to_simulation_data
+      clip
     </span>
   </a>
   
@@ -2644,7 +2644,9 @@ Writing a configuration file:
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 285</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 283</span>
+<span class="normal"> 284</span>
+<span class="normal"> 285</span>
 <span class="normal"> 286</span>
 <span class="normal"> 287</span>
 <span class="normal"> 288</span>
@@ -3637,9 +3639,7 @@ Writing a configuration file:
 <span class="normal">1275</span>
 <span class="normal">1276</span>
 <span class="normal">1277</span>
-<span class="normal">1278</span>
-<span class="normal">1279</span>
-<span class="normal">1280</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConfigFile</span><span class="p">:</span>
+<span class="normal">1278</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConfigFile</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to read configuration files for D-FAST Bank Erosion.</span>
 
 <span class="sd">    This class provides methods to read, write, and manage configuration files</span>
@@ -4788,7 +4788,9 @@ Writing a configuration file:
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">387</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
 <span class="normal">388</span>
 <span class="normal">389</span>
 <span class="normal">390</span>
@@ -4806,9 +4808,7 @@ Writing a configuration file:
 <span class="normal">402</span>
 <span class="normal">403</span>
 <span class="normal">404</span>
-<span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="normal">405</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">config_file_callback_parser</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConfigParser</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Parse a configuration file as fallback to the read method.</span>
 
@@ -4904,7 +4904,9 @@ Writing a configuration file:
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">832</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">830</span>
+<span class="normal">831</span>
+<span class="normal">832</span>
 <span class="normal">833</span>
 <span class="normal">834</span>
 <span class="normal">835</span>
@@ -4931,9 +4933,7 @@ Writing a configuration file:
 <span class="normal">856</span>
 <span class="normal">857</span>
 <span class="normal">858</span>
-<span class="normal">859</span>
-<span class="normal">860</span>
-<span class="normal">861</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bank_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bank_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="normal">859</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bank_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bank_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the bank lines from the detection step.</span>
 
 <span class="sd">    Args:</span>
@@ -5046,7 +5046,9 @@ Writing a configuration file:
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">959</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">957</span>
+<span class="normal">958</span>
+<span class="normal">959</span>
 <span class="normal">960</span>
 <span class="normal">961</span>
 <span class="normal">962</span>
@@ -5076,9 +5078,7 @@ Writing a configuration file:
 <span class="normal">986</span>
 <span class="normal">987</span>
 <span class="normal">988</span>
-<span class="normal">989</span>
-<span class="normal">990</span>
-<span class="normal">991</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bank_search_distances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nbank</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+<span class="normal">989</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bank_search_distances</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nbank</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the search distance per bank line from the analysis settings.</span>
 
 <span class="sd">    Args:</span>
@@ -5249,7 +5249,9 @@ Writing a configuration file:
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">630</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">628</span>
+<span class="normal">629</span>
+<span class="normal">630</span>
 <span class="normal">631</span>
 <span class="normal">632</span>
 <span class="normal">633</span>
@@ -5292,9 +5294,7 @@ Writing a configuration file:
 <span class="normal">670</span>
 <span class="normal">671</span>
 <span class="normal">672</span>
-<span class="normal">673</span>
-<span class="normal">674</span>
-<span class="normal">675</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bool</span><span class="p">(</span>
+<span class="normal">673</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bool</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -5505,7 +5505,9 @@ All floats are accepted (if False), or only positive floats (if True).</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">677</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">675</span>
+<span class="normal">676</span>
+<span class="normal">677</span>
 <span class="normal">678</span>
 <span class="normal">679</span>
 <span class="normal">680</span>
@@ -5549,9 +5551,7 @@ All floats are accepted (if False), or only positive floats (if True).</p>
 <span class="normal">718</span>
 <span class="normal">719</span>
 <span class="normal">720</span>
-<span class="normal">721</span>
-<span class="normal">722</span>
-<span class="normal">723</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_float</span><span class="p">(</span>
+<span class="normal">721</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_float</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -5763,7 +5763,9 @@ All floats are accepted (if False), or only positive floats (if True).</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">725</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">723</span>
+<span class="normal">724</span>
+<span class="normal">725</span>
 <span class="normal">726</span>
 <span class="normal">727</span>
 <span class="normal">728</span>
@@ -5807,9 +5809,7 @@ All floats are accepted (if False), or only positive floats (if True).</p>
 <span class="normal">766</span>
 <span class="normal">767</span>
 <span class="normal">768</span>
-<span class="normal">769</span>
-<span class="normal">770</span>
-<span class="normal">771</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_int</span><span class="p">(</span>
+<span class="normal">769</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_int</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -5908,7 +5908,9 @@ All floats are accepted (if False), or only positive floats (if True).</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">798</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span>
 <span class="normal">799</span>
 <span class="normal">800</span>
 <span class="normal">801</span>
@@ -5923,9 +5925,7 @@ All floats are accepted (if False), or only positive floats (if True).</p>
 <span class="normal">810</span>
 <span class="normal">811</span>
 <span class="normal">812</span>
-<span class="normal">813</span>
-<span class="normal">814</span>
-<span class="normal">815</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_km_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="normal">813</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_km_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the lower and upper limit for the chainage.</span>
 
 <span class="sd">    Returns:</span>
@@ -6167,7 +6167,9 @@ For each bank a parameter value per bank point (bank chainage location).</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">863</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">861</span>
+<span class="normal">862</span>
+<span class="normal">863</span>
 <span class="normal">864</span>
 <span class="normal">865</span>
 <span class="normal">866</span>
@@ -6259,9 +6261,7 @@ For each bank a parameter value per bank point (bank chainage location).</p>
 <span class="normal">952</span>
 <span class="normal">953</span>
 <span class="normal">954</span>
-<span class="normal">955</span>
-<span class="normal">956</span>
-<span class="normal">957</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_parameter</span><span class="p">(</span>
+<span class="normal">955</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_parameter</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -6404,7 +6404,9 @@ close_plot (bool): Flag indicating whether to close the plot.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1218</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1216</span>
+<span class="normal">1217</span>
+<span class="normal">1218</span>
 <span class="normal">1219</span>
 <span class="normal">1220</span>
 <span class="normal">1221</span>
@@ -6449,9 +6451,7 @@ close_plot (bool): Flag indicating whether to close the plot.</p>
 <span class="normal">1260</span>
 <span class="normal">1261</span>
 <span class="normal">1262</span>
-<span class="normal">1263</span>
-<span class="normal">1264</span>
-<span class="normal">1265</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_plotting_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="normal">1263</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_plotting_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the plotting flags from the configuration file.</span>
 
 <span class="sd">    Returns:</span>
@@ -6598,7 +6598,9 @@ close_plot (bool): Flag indicating whether to close the plot.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 993</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 991</span>
+<span class="normal"> 992</span>
+<span class="normal"> 993</span>
 <span class="normal"> 994</span>
 <span class="normal"> 995</span>
 <span class="normal"> 996</span>
@@ -6630,9 +6632,7 @@ close_plot (bool): Flag indicating whether to close the plot.</p>
 <span class="normal">1022</span>
 <span class="normal">1023</span>
 <span class="normal">1024</span>
-<span class="normal">1025</span>
-<span class="normal">1026</span>
-<span class="normal">1027</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="normal">1025</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get a start and end value from a selected group and keyword in the analysis settings.</span>
 
 <span class="sd">    Args:</span>
@@ -6711,7 +6711,9 @@ close_plot (bool): Flag indicating whether to close the plot.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">817</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">815</span>
+<span class="normal">816</span>
+<span class="normal">817</span>
 <span class="normal">818</span>
 <span class="normal">819</span>
 <span class="normal">820</span>
@@ -6722,9 +6724,7 @@ close_plot (bool): Flag indicating whether to close the plot.</p>
 <span class="normal">825</span>
 <span class="normal">826</span>
 <span class="normal">827</span>
-<span class="normal">828</span>
-<span class="normal">829</span>
-<span class="normal">830</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_search_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">]:</span>
+<span class="normal">828</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_search_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the search lines for the bank lines from the analysis settings.</span>
 
 <span class="sd">    Returns:</span>
@@ -6840,7 +6840,9 @@ typically a string representation of the index.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">773</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">771</span>
+<span class="normal">772</span>
+<span class="normal">773</span>
 <span class="normal">774</span>
 <span class="normal">775</span>
 <span class="normal">776</span>
@@ -6861,9 +6863,7 @@ typically a string representation of the index.</p>
 <span class="normal">791</span>
 <span class="normal">792</span>
 <span class="normal">793</span>
-<span class="normal">794</span>
-<span class="normal">795</span>
-<span class="normal">796</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_sim_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">istr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">794</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_sim_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">istr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the name of the simulation file from the analysis settings.</span>
 
 <span class="sd">    Args:</span>
@@ -7027,7 +7027,9 @@ typically a string representation of the index.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">589</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">587</span>
+<span class="normal">588</span>
+<span class="normal">589</span>
 <span class="normal">590</span>
 <span class="normal">591</span>
 <span class="normal">592</span>
@@ -7064,9 +7066,7 @@ typically a string representation of the index.</p>
 <span class="normal">623</span>
 <span class="normal">624</span>
 <span class="normal">625</span>
-<span class="normal">626</span>
-<span class="normal">627</span>
-<span class="normal">628</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_str</span><span class="p">(</span>
+<span class="normal">626</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_str</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -7150,7 +7150,9 @@ typically a string representation of the index.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1029</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1027</span>
+<span class="normal">1028</span>
+<span class="normal">1029</span>
 <span class="normal">1030</span>
 <span class="normal">1031</span>
 <span class="normal">1032</span>
@@ -7163,9 +7165,7 @@ typically a string representation of the index.</p>
 <span class="normal">1039</span>
 <span class="normal">1040</span>
 <span class="normal">1041</span>
-<span class="normal">1042</span>
-<span class="normal">1043</span>
-<span class="normal">1044</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_xy_km</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LineString</span><span class="p">:</span>
+<span class="normal">1042</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_xy_km</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LineString</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the chainage line from the analysis settings.</span>
 
 <span class="sd">    Returns:</span>
@@ -7225,15 +7225,15 @@ typically a string representation of the index.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">579</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
 <span class="normal">580</span>
 <span class="normal">581</span>
 <span class="normal">582</span>
 <span class="normal">583</span>
 <span class="normal">584</span>
-<span class="normal">585</span>
-<span class="normal">586</span>
-<span class="normal">587</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_paths_absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">585</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">make_paths_absolute</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert all relative paths in the configuration to absolute paths.</span>
 
 <span class="sd">    Returns:</span>
@@ -7335,7 +7335,9 @@ If not, try to convert to a relative path.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1191</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1189</span>
+<span class="normal">1190</span>
+<span class="normal">1191</span>
 <span class="normal">1192</span>
 <span class="normal">1193</span>
 <span class="normal">1194</span>
@@ -7358,9 +7360,7 @@ If not, try to convert to a relative path.</p>
 <span class="normal">1211</span>
 <span class="normal">1212</span>
 <span class="normal">1213</span>
-<span class="normal">1214</span>
-<span class="normal">1215</span>
-<span class="normal">1216</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parameter_relative_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="normal">1214</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">parameter_relative_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a parameter value to contain a relative path.</span>
 
 <span class="sd">    Determine whether the string represents a number.</span>
@@ -7507,7 +7507,9 @@ dedicated reader compatible with old waqbank files.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">347</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
 <span class="normal">348</span>
 <span class="normal">349</span>
 <span class="normal">350</span>
@@ -7543,9 +7545,7 @@ dedicated reader compatible with old waqbank files.</p>
 <span class="normal">380</span>
 <span class="normal">381</span>
 <span class="normal">382</span>
-<span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;ConfigFile&quot;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read a configParser object (configuration file).</span>
 
@@ -7643,7 +7643,9 @@ dedicated reader compatible with old waqbank files.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1105</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1103</span>
+<span class="normal">1104</span>
+<span class="normal">1105</span>
 <span class="normal">1106</span>
 <span class="normal">1107</span>
 <span class="normal">1108</span>
@@ -7699,9 +7701,7 @@ dedicated reader compatible with old waqbank files.</p>
 <span class="normal">1158</span>
 <span class="normal">1159</span>
 <span class="normal">1160</span>
-<span class="normal">1161</span>
-<span class="normal">1162</span>
-<span class="normal">1163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">relative_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1161</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">relative_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a configuration object to contain relative paths (for saving).</span>
 
 <span class="sd">    Args:</span>
@@ -7819,7 +7819,9 @@ dedicated reader compatible with old waqbank files.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1046</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1044</span>
+<span class="normal">1045</span>
+<span class="normal">1046</span>
 <span class="normal">1047</span>
 <span class="normal">1048</span>
 <span class="normal">1049</span>
@@ -7874,9 +7876,7 @@ dedicated reader compatible with old waqbank files.</p>
 <span class="normal">1098</span>
 <span class="normal">1099</span>
 <span class="normal">1100</span>
-<span class="normal">1101</span>
-<span class="normal">1102</span>
-<span class="normal">1103</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="normal">1101</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a configuration object to contain absolute paths (for editing).</span>
 
 <span class="sd">    Args:</span>
@@ -8027,7 +8027,9 @@ If not, try to convert to an absolute path.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1165</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1163</span>
+<span class="normal">1164</span>
+<span class="normal">1165</span>
 <span class="normal">1166</span>
 <span class="normal">1167</span>
 <span class="normal">1168</span>
@@ -8049,9 +8051,7 @@ If not, try to convert to an absolute path.</p>
 <span class="normal">1184</span>
 <span class="normal">1185</span>
 <span class="normal">1186</span>
-<span class="normal">1187</span>
-<span class="normal">1188</span>
-<span class="normal">1189</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">resolve_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="normal">1187</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">resolve_parameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert a parameter value to contain an absolute path.</span>
 
 <span class="sd">    Determine whether the string represents a number.</span>
@@ -8140,7 +8140,9 @@ and adds an empty line before the start of a new block.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">542</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
 <span class="normal">543</span>
 <span class="normal">544</span>
 <span class="normal">545</span>
@@ -8173,9 +8175,7 @@ and adds an empty line before the start of a new block.</p>
 <span class="normal">572</span>
 <span class="normal">573</span>
 <span class="normal">574</span>
-<span class="normal">575</span>
-<span class="normal">576</span>
-<span class="normal">577</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">575</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Pretty print a configParser object (configuration file) to file.</span>
 
 <span class="sd">    Pretty prints a `configparser` object to a file. Aligns the equal signs for</span>
@@ -8250,10 +8250,10 @@ and adds an empty line before the start of a new block.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2201</span>
-<span class="normal">2202</span>
-<span class="normal">2203</span>
-<span class="normal">2204</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConfigFileError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2199</span>
+<span class="normal">2200</span>
+<span class="normal">2201</span>
+<span class="normal">2202</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConfigFileError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom exception for configuration file errors.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span>
@@ -8287,7 +8287,9 @@ and adds an empty line before the start of a new block.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1283</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1281</span>
+<span class="normal">1282</span>
+<span class="normal">1283</span>
 <span class="normal">1284</span>
 <span class="normal">1285</span>
 <span class="normal">1286</span>
@@ -8464,9 +8466,7 @@ and adds an empty line before the start of a new block.</p>
 <span class="normal">1457</span>
 <span class="normal">1458</span>
 <span class="normal">1459</span>
-<span class="normal">1460</span>
-<span class="normal">1461</span>
-<span class="normal">1462</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">RiverData</span><span class="p">:</span>
+<span class="normal">1460</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">RiverData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;River data class.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">):</span>
@@ -8779,7 +8779,9 @@ Configuration file with settings for the analysis.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1286</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1284</span>
+<span class="normal">1285</span>
+<span class="normal">1286</span>
 <span class="normal">1287</span>
 <span class="normal">1288</span>
 <span class="normal">1289</span>
@@ -8800,9 +8802,7 @@ Configuration file with settings for the analysis.</p>
 <span class="normal">1304</span>
 <span class="normal">1305</span>
 <span class="normal">1306</span>
-<span class="normal">1307</span>
-<span class="normal">1308</span>
-<span class="normal">1309</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">):</span>
+<span class="normal">1307</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;River Data initialization.</span>
 
 <span class="sd">    Args:</span>
@@ -8886,7 +8886,9 @@ Configuration file with settings for the analysis.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1408</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1406</span>
+<span class="normal">1407</span>
+<span class="normal">1408</span>
 <span class="normal">1409</span>
 <span class="normal">1410</span>
 <span class="normal">1411</span>
@@ -8932,9 +8934,7 @@ Configuration file with settings for the analysis.</p>
 <span class="normal">1451</span>
 <span class="normal">1452</span>
 <span class="normal">1453</span>
-<span class="normal">1454</span>
-<span class="normal">1455</span>
-<span class="normal">1456</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clip_search_lines</span><span class="p">(</span>
+<span class="normal">1454</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clip_search_lines</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">max_river_width</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">MAX_RIVER_WIDTH</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">],</span> <span class="nb">float</span><span class="p">]:</span>
@@ -9058,7 +9058,9 @@ Configuration file with settings for the analysis.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1325</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1323</span>
+<span class="normal">1324</span>
+<span class="normal">1325</span>
 <span class="normal">1326</span>
 <span class="normal">1327</span>
 <span class="normal">1328</span>
@@ -9137,9 +9139,7 @@ Configuration file with settings for the analysis.</p>
 <span class="normal">1401</span>
 <span class="normal">1402</span>
 <span class="normal">1403</span>
-<span class="normal">1404</span>
-<span class="normal">1405</span>
-<span class="normal">1406</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mask_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">LineString</span><span class="p">:</span>
+<span class="normal">1404</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">mask_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bounds</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">LineString</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Clip a chainage line to the relevant reach.</span>
 
@@ -9698,9 +9698,7 @@ mesh to a specified area of interest.</p>
 <span class="normal">274</span>
 <span class="normal">275</span>
 <span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SimulationData</span><span class="p">:</span>
+<span class="normal">277</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SimulationData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to hold simulation data.</span>
 
 <span class="sd">    This class contains the simulation data read from a UGRID netCDF file.</span>
@@ -9725,8 +9723,8 @@ mesh to a specified area of interest.</p>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">x_node</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">y_node</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="n">nnodes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="n">facenode</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">,</span>
+        <span class="n">n_nodes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">face_node</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">,</span>
         <span class="n">zb_location</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">zb_val</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">zw_face</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -9738,8 +9736,8 @@ mesh to a specified area of interest.</p>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x_node</span> <span class="o">=</span> <span class="n">x_node</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y_node</span> <span class="o">=</span> <span class="n">y_node</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span> <span class="o">=</span> <span class="n">nnodes</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">facenode</span> <span class="o">=</span> <span class="n">facenode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_nodes</span> <span class="o">=</span> <span class="n">n_nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">face_node</span> <span class="o">=</span> <span class="n">face_node</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">zb_location</span> <span class="o">=</span> <span class="n">zb_location</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">zb_val</span> <span class="o">=</span> <span class="n">zb_val</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">zw_face</span> <span class="o">=</span> <span class="n">zw_face</span>
@@ -9793,13 +9791,13 @@ mesh to a specified area of interest.</p>
             <span class="n">f_nc</span> <span class="o">=</span> <span class="n">read_fm_map</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;face_node_connectivity&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">():</span>
                 <span class="c1"># all faces have the same number of nodes</span>
-                <span class="n">nnodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">f_nc</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span> <span class="o">*</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">n_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">f_nc</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span> <span class="o">*</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># varying number of nodes</span>
-                <span class="n">nnodes</span> <span class="o">=</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">n_nodes</span> <span class="o">=</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="n">f_nc</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">f_nc</span><span class="o">.</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
-            <span class="n">facenode</span> <span class="o">=</span> <span class="n">f_nc</span>
+            <span class="n">face_node</span> <span class="o">=</span> <span class="n">f_nc</span>
             <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_bathymetry&quot;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="n">indent</span><span class="p">)</span>
             <span class="n">zb_location</span> <span class="o">=</span> <span class="s2">&quot;node&quot;</span>
             <span class="n">zb_val</span> <span class="o">=</span> <span class="n">read_fm_map</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;altitude&quot;</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">&quot;node&quot;</span><span class="p">)</span>
@@ -9840,8 +9838,8 @@ mesh to a specified area of interest.</p>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">x_node</span><span class="o">=</span><span class="n">x_node</span><span class="p">,</span>
             <span class="n">y_node</span><span class="o">=</span><span class="n">y_node</span><span class="p">,</span>
-            <span class="n">nnodes</span><span class="o">=</span><span class="n">nnodes</span><span class="p">,</span>
-            <span class="n">facenode</span><span class="o">=</span><span class="n">facenode</span><span class="p">,</span>
+            <span class="n">n_nodes</span><span class="o">=</span><span class="n">n_nodes</span><span class="p">,</span>
+            <span class="n">face_node</span><span class="o">=</span><span class="n">face_node</span><span class="p">,</span>
             <span class="n">zb_location</span><span class="o">=</span><span class="n">zb_location</span><span class="p">,</span>
             <span class="n">zb_val</span><span class="o">=</span><span class="n">zb_val</span><span class="p">,</span>
             <span class="n">zw_face</span><span class="o">=</span><span class="n">zw_face</span><span class="p">,</span>
@@ -9852,9 +9850,7 @@ mesh to a specified area of interest.</p>
             <span class="n">dh0</span><span class="o">=</span><span class="n">dh0</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">apply_clipping_to_simulation_data</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">river_profile</span><span class="p">:</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">:</span> <span class="nb">float</span>
-    <span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">river_profile</span><span class="p">:</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Clip the simulation mesh.</span>
 
 <span class="sd">        Clipping data to the area of interest,</span>
@@ -9892,7 +9888,7 @@ mesh to a specified area of interest.</p>
 <span class="sd">            ... [194982.8125, 361431.03125]</span>
 <span class="sd">            ... ])</span>
 <span class="sd">            &gt;&gt;&gt; max_distance = 10.0</span>
-<span class="sd">            &gt;&gt;&gt; sim_data.apply_clipping_to_simulation_data(river_profile, max_distance)</span>
+<span class="sd">            &gt;&gt;&gt; sim_data.clip(river_profile, max_distance)</span>
 <span class="sd">            &gt;&gt;&gt; print(sim_data.x_node)</span>
 <span class="sd">            [194949.796875 194966.515625 194982.8125  ]</span>
 
@@ -9914,11 +9910,11 @@ mesh to a specified area of interest.</p>
             <span class="k">if</span> <span class="n">keep</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">xy_buffer</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">Point</span><span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]))):</span>
                 <span class="n">keep</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 
-        <span class="n">fnc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">facenode</span>
+        <span class="n">fnc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_node</span>
         <span class="n">keep_face</span> <span class="o">=</span> <span class="n">keep</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">renum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
         <span class="n">renum</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">keep</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">facenode</span> <span class="o">=</span> <span class="n">renum</span><span class="p">[</span><span class="n">fnc</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">face_node</span> <span class="o">=</span> <span class="n">renum</span><span class="p">[</span><span class="n">fnc</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">x_node</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y_node</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
@@ -9927,7 +9923,7 @@ mesh to a specified area of interest.</p>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">zb_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zb_val</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">zw_face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zw_face</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">h_face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_face</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ucx_face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ucx_face</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]</span>
@@ -9951,10 +9947,10 @@ mesh to a specified area of interest.</p>
 <div class="doc doc-object doc-function">
 
 
-<h4 id="dfastbe.io.SimulationData.apply_clipping_to_simulation_data" class="doc doc-heading"><a href="#dfastbe.io.SimulationData.apply_clipping_to_simulation_data" class="toclink">
-            <code class="highlight language-python"><span class="n">apply_clipping_to_simulation_data</span><span class="p">(</span><span class="n">river_profile</span><span class="p">:</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span></code>
+<h4 id="dfastbe.io.SimulationData.clip" class="doc doc-heading"><a href="#dfastbe.io.SimulationData.clip" class="toclink">
+            <code class="highlight language-python"><span class="n">clip</span><span class="p">(</span><span class="n">river_profile</span><span class="p">:</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span></code>
 
-</a><a href="#dfastbe.io.SimulationData.apply_clipping_to_simulation_data" class="headerlink" title="Permanent link">#</a></h4>
+</a><a href="#dfastbe.io.SimulationData.clip" class="headerlink" title="Permanent link">#</a></h4>
 
 
     <div class="doc doc-contents ">
@@ -10052,7 +10048,7 @@ they are removed from the simulation data.</p>
 <span class="o">...</span> <span class="p">[</span><span class="mf">194982.8125</span><span class="p">,</span> <span class="mf">361431.03125</span><span class="p">]</span>
 <span class="o">...</span> <span class="p">])</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">max_distance</span> <span class="o">=</span> <span class="mf">10.0</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">sim_data</span><span class="o">.</span><span class="n">apply_clipping_to_simulation_data</span><span class="p">(</span><span class="n">river_profile</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">sim_data</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">river_profile</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="nb">print</span><span class="p">(</span><span class="n">sim_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">)</span>
 <span class="p">[</span><span class="mf">194949.796875</span> <span class="mf">194966.515625</span> <span class="mf">194982.8125</span>  <span class="p">]</span>
 </code></pre></div>
@@ -10137,11 +10133,7 @@ they are removed from the simulation data.</p>
 <span class="normal">274</span>
 <span class="normal">275</span>
 <span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">apply_clipping_to_simulation_data</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">river_profile</span><span class="p">:</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">:</span> <span class="nb">float</span>
-<span class="p">):</span>
+<span class="normal">277</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">clip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">river_profile</span><span class="p">:</span> <span class="n">LineString</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Clip the simulation mesh.</span>
 
 <span class="sd">    Clipping data to the area of interest,</span>
@@ -10179,7 +10171,7 @@ they are removed from the simulation data.</p>
 <span class="sd">        ... [194982.8125, 361431.03125]</span>
 <span class="sd">        ... ])</span>
 <span class="sd">        &gt;&gt;&gt; max_distance = 10.0</span>
-<span class="sd">        &gt;&gt;&gt; sim_data.apply_clipping_to_simulation_data(river_profile, max_distance)</span>
+<span class="sd">        &gt;&gt;&gt; sim_data.clip(river_profile, max_distance)</span>
 <span class="sd">        &gt;&gt;&gt; print(sim_data.x_node)</span>
 <span class="sd">        [194949.796875 194966.515625 194982.8125  ]</span>
 
@@ -10201,11 +10193,11 @@ they are removed from the simulation data.</p>
         <span class="k">if</span> <span class="n">keep</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">xy_buffer</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">Point</span><span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="n">i</span><span class="p">]))):</span>
             <span class="n">keep</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="n">fnc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">facenode</span>
+    <span class="n">fnc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_node</span>
     <span class="n">keep_face</span> <span class="o">=</span> <span class="n">keep</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">renum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
     <span class="n">renum</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">keep</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">facenode</span> <span class="o">=</span> <span class="n">renum</span><span class="p">[</span><span class="n">fnc</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">face_node</span> <span class="o">=</span> <span class="n">renum</span><span class="p">[</span><span class="n">fnc</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]]</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">x_node</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">y_node</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
@@ -10214,7 +10206,7 @@ they are removed from the simulation data.</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">zb_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zb_val</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nnodes</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">n_nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">zw_face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zw_face</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">h_face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h_face</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ucx_face</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ucx_face</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]</span>
@@ -10486,13 +10478,13 @@ they are removed from the simulation data.</p>
         <span class="n">f_nc</span> <span class="o">=</span> <span class="n">read_fm_map</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;face_node_connectivity&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">():</span>
             <span class="c1"># all faces have the same number of nodes</span>
-            <span class="n">nnodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">f_nc</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span> <span class="o">*</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">n_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">f_nc</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span> <span class="o">*</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># varying number of nodes</span>
-            <span class="n">nnodes</span> <span class="o">=</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">n_nodes</span> <span class="o">=</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">f_nc</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">f_nc</span><span class="o">.</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
-        <span class="n">facenode</span> <span class="o">=</span> <span class="n">f_nc</span>
+        <span class="n">face_node</span> <span class="o">=</span> <span class="n">f_nc</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_bathymetry&quot;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="n">indent</span><span class="p">)</span>
         <span class="n">zb_location</span> <span class="o">=</span> <span class="s2">&quot;node&quot;</span>
         <span class="n">zb_val</span> <span class="o">=</span> <span class="n">read_fm_map</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s2">&quot;altitude&quot;</span><span class="p">,</span> <span class="n">location</span><span class="o">=</span><span class="s2">&quot;node&quot;</span><span class="p">)</span>
@@ -10533,8 +10525,8 @@ they are removed from the simulation data.</p>
     <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
         <span class="n">x_node</span><span class="o">=</span><span class="n">x_node</span><span class="p">,</span>
         <span class="n">y_node</span><span class="o">=</span><span class="n">y_node</span><span class="p">,</span>
-        <span class="n">nnodes</span><span class="o">=</span><span class="n">nnodes</span><span class="p">,</span>
-        <span class="n">facenode</span><span class="o">=</span><span class="n">facenode</span><span class="p">,</span>
+        <span class="n">n_nodes</span><span class="o">=</span><span class="n">n_nodes</span><span class="p">,</span>
+        <span class="n">face_node</span><span class="o">=</span><span class="n">face_node</span><span class="p">,</span>
         <span class="n">zb_location</span><span class="o">=</span><span class="n">zb_location</span><span class="p">,</span>
         <span class="n">zb_val</span><span class="o">=</span><span class="n">zb_val</span><span class="p">,</span>
         <span class="n">zw_face</span><span class="o">=</span><span class="n">zw_face</span><span class="p">,</span>
@@ -10583,10 +10575,10 @@ they are removed from the simulation data.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2207</span>
-<span class="normal">2208</span>
-<span class="normal">2209</span>
-<span class="normal">2210</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SimulationFilesError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2205</span>
+<span class="normal">2206</span>
+<span class="normal">2207</span>
+<span class="normal">2208</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SimulationFilesError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom exception for configuration file errors.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span>
@@ -10683,7 +10675,9 @@ they are removed from the simulation data.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1934</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1932</span>
+<span class="normal">1933</span>
+<span class="normal">1934</span>
 <span class="normal">1935</span>
 <span class="normal">1936</span>
 <span class="normal">1937</span>
@@ -10701,9 +10695,7 @@ they are removed from the simulation data.</p>
 <span class="normal">1949</span>
 <span class="normal">1950</span>
 <span class="normal">1951</span>
-<span class="normal">1952</span>
-<span class="normal">1953</span>
-<span class="normal">1954</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">absolute_path</span><span class="p">(</span><span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">1952</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">absolute_path</span><span class="p">(</span><span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a relative path to an absolute path.</span>
 
@@ -10755,7 +10747,9 @@ dstname : str
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1733</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1731</span>
+<span class="normal">1732</span>
+<span class="normal">1733</span>
 <span class="normal">1734</span>
 <span class="normal">1735</span>
 <span class="normal">1736</span>
@@ -10808,9 +10802,7 @@ dstname : str
 <span class="normal">1783</span>
 <span class="normal">1784</span>
 <span class="normal">1785</span>
-<span class="normal">1786</span>
-<span class="normal">1787</span>
-<span class="normal">1788</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy_ugrid</span><span class="p">(</span><span class="n">srcname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">meshname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dstname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1786</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy_ugrid</span><span class="p">(</span><span class="n">srcname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">meshname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dstname</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Copy UGRID mesh data from one netCDF file to another.</span>
 
@@ -10896,7 +10888,9 @@ dst : netCDF4.Dataset
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1791</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1789</span>
+<span class="normal">1790</span>
+<span class="normal">1791</span>
 <span class="normal">1792</span>
 <span class="normal">1793</span>
 <span class="normal">1794</span>
@@ -10926,9 +10920,7 @@ dst : netCDF4.Dataset
 <span class="normal">1818</span>
 <span class="normal">1819</span>
 <span class="normal">1820</span>
-<span class="normal">1821</span>
-<span class="normal">1822</span>
-<span class="normal">1823</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy_var</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">varname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1821</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">copy_var</span><span class="p">(</span><span class="n">src</span><span class="p">:</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">varname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="n">netCDF4</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Copy a single variable from one netCDF file to another.</span>
 
@@ -10990,7 +10982,9 @@ which will be added to the key by this routine.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1539</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1537</span>
+<span class="normal">1538</span>
+<span class="normal">1539</span>
 <span class="normal">1540</span>
 <span class="normal">1541</span>
 <span class="normal">1542</span>
@@ -11006,9 +11000,7 @@ which will be added to the key by this routine.</p>
 <span class="normal">1552</span>
 <span class="normal">1553</span>
 <span class="normal">1554</span>
-<span class="normal">1555</span>
-<span class="normal">1556</span>
-<span class="normal">1557</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_filename</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">1555</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_filename</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Query the global dictionary of texts for a file name.</span>
 
@@ -11067,7 +11059,9 @@ val : np.ndarray
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2142</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2140</span>
+<span class="normal">2141</span>
+<span class="normal">2142</span>
 <span class="normal">2143</span>
 <span class="normal">2144</span>
 <span class="normal">2145</span>
@@ -11121,9 +11115,7 @@ val : np.ndarray
 <span class="normal">2193</span>
 <span class="normal">2194</span>
 <span class="normal">2195</span>
-<span class="normal">2196</span>
-<span class="normal">2197</span>
-<span class="normal">2198</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_kmval</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">positive</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">valid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]):</span>
+<span class="normal">2196</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_kmval</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">positive</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">valid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read a parameter file, check its contents and return arrays of chainages and values.</span>
 
@@ -11211,7 +11203,9 @@ val : np.ndarray
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1690</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1688</span>
+<span class="normal">1689</span>
+<span class="normal">1690</span>
 <span class="normal">1691</span>
 <span class="normal">1692</span>
 <span class="normal">1693</span>
@@ -11249,9 +11243,7 @@ val : np.ndarray
 <span class="normal">1725</span>
 <span class="normal">1726</span>
 <span class="normal">1727</span>
-<span class="normal">1728</span>
-<span class="normal">1729</span>
-<span class="normal">1730</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_mesh_and_facedim_names</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="normal">1728</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_mesh_and_facedim_names</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Obtain the names of 2D mesh and face dimension from netCDF UGRID file.</span>
 
@@ -11324,7 +11316,9 @@ include the key, a default string is returned.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1560</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1558</span>
+<span class="normal">1559</span>
+<span class="normal">1560</span>
 <span class="normal">1561</span>
 <span class="normal">1562</span>
 <span class="normal">1563</span>
@@ -11349,9 +11343,7 @@ include the key, a default string is returned.</p>
 <span class="normal">1582</span>
 <span class="normal">1583</span>
 <span class="normal">1584</span>
-<span class="normal">1585</span>
-<span class="normal">1586</span>
-<span class="normal">1587</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_text</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal">1585</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_text</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Query the global dictionary of texts via a string key.</span>
 
@@ -11407,7 +11399,9 @@ routine "get_text". These routines are used to implement multi-language support.
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1465</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1463</span>
+<span class="normal">1464</span>
+<span class="normal">1465</span>
 <span class="normal">1466</span>
 <span class="normal">1467</span>
 <span class="normal">1468</span>
@@ -11439,9 +11433,7 @@ routine "get_text". These routines are used to implement multi-language support.
 <span class="normal">1494</span>
 <span class="normal">1495</span>
 <span class="normal">1496</span>
-<span class="normal">1497</span>
-<span class="normal">1498</span>
-<span class="normal">1499</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_program_texts</span><span class="p">(</span><span class="n">file_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1497</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_program_texts</span><span class="p">(</span><span class="n">file_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load texts from a configuration file, and store globally for access.</span>
 
 <span class="sd">    This routine reads the text file &quot;file_name&quot;, and detects the keywords</span>
@@ -11510,7 +11502,9 @@ indent : str
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1502</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1500</span>
+<span class="normal">1501</span>
+<span class="normal">1502</span>
 <span class="normal">1503</span>
 <span class="normal">1504</span>
 <span class="normal">1505</span>
@@ -11542,9 +11536,7 @@ indent : str
 <span class="normal">1531</span>
 <span class="normal">1532</span>
 <span class="normal">1533</span>
-<span class="normal">1534</span>
-<span class="normal">1535</span>
-<span class="normal">1536</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">log_text</span><span class="p">(</span>
+<span class="normal">1534</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">log_text</span><span class="p">(</span>
     <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TextIO</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
@@ -11736,7 +11728,9 @@ Updated settings for the D-FAST Bank Erosion analysis.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2077</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2075</span>
+<span class="normal">2076</span>
+<span class="normal">2077</span>
 <span class="normal">2078</span>
 <span class="normal">2079</span>
 <span class="normal">2080</span>
@@ -11774,9 +11768,7 @@ Updated settings for the D-FAST Bank Erosion analysis.</p>
 <span class="normal">2112</span>
 <span class="normal">2113</span>
 <span class="normal">2114</span>
-<span class="normal">2115</span>
-<span class="normal">2116</span>
-<span class="normal">2117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">move_parameter_location</span><span class="p">(</span>
+<span class="normal">2115</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">move_parameter_location</span><span class="p">(</span>
     <span class="n">config</span><span class="p">:</span> <span class="n">ConfigParser</span><span class="p">,</span>
     <span class="n">group1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">key1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -11854,7 +11846,9 @@ location : str
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1590</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1588</span>
+<span class="normal">1589</span>
+<span class="normal">1590</span>
 <span class="normal">1591</span>
 <span class="normal">1592</span>
 <span class="normal">1593</span>
@@ -11949,9 +11943,7 @@ location : str
 <span class="normal">1682</span>
 <span class="normal">1683</span>
 <span class="normal">1684</span>
-<span class="normal">1685</span>
-<span class="normal">1686</span>
-<span class="normal">1687</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">read_fm_map</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">varname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;face&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">1685</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">read_fm_map</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">varname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">location</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;face&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read the last time step of any quantity defined at faces from a D-Flow FM map-file.</span>
 
@@ -12078,7 +12070,9 @@ cols : Tuple[int]
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1873</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1871</span>
+<span class="normal">1872</span>
+<span class="normal">1873</span>
 <span class="normal">1874</span>
 <span class="normal">1875</span>
 <span class="normal">1876</span>
@@ -12093,9 +12087,7 @@ cols : Tuple[int]
 <span class="normal">1885</span>
 <span class="normal">1886</span>
 <span class="normal">1887</span>
-<span class="normal">1888</span>
-<span class="normal">1889</span>
-<span class="normal">1890</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">read_waqua_xyz</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cols</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,))</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">1888</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">read_waqua_xyz</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">cols</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,))</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Read data columns from a SIMONA XYZ file.</span>
 
@@ -12204,7 +12196,9 @@ cols : Tuple[int]
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1957</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1955</span>
+<span class="normal">1956</span>
+<span class="normal">1957</span>
 <span class="normal">1958</span>
 <span class="normal">1959</span>
 <span class="normal">1960</span>
@@ -12222,9 +12216,7 @@ cols : Tuple[int]
 <span class="normal">1972</span>
 <span class="normal">1973</span>
 <span class="normal">1974</span>
-<span class="normal">1975</span>
-<span class="normal">1976</span>
-<span class="normal">1977</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">relative_path</span><span class="p">(</span><span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">1975</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">relative_path</span><span class="p">(</span><span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert an absolute path to a relative path.</span>
 
@@ -12320,7 +12312,9 @@ cols : Tuple[int]
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2120</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2118</span>
+<span class="normal">2119</span>
+<span class="normal">2120</span>
 <span class="normal">2121</span>
 <span class="normal">2122</span>
 <span class="normal">2123</span>
@@ -12337,9 +12331,7 @@ cols : Tuple[int]
 <span class="normal">2134</span>
 <span class="normal">2135</span>
 <span class="normal">2136</span>
-<span class="normal">2137</span>
-<span class="normal">2138</span>
-<span class="normal">2139</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sim2nc</span><span class="p">(</span><span class="n">oldfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">2137</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">sim2nc</span><span class="p">(</span><span class="n">oldfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert an SDS file name to an NC file (mirrors sim2ugrid.m).</span>
 
@@ -12396,7 +12388,9 @@ units : str
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1826</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1824</span>
+<span class="normal">1825</span>
+<span class="normal">1826</span>
 <span class="normal">1827</span>
 <span class="normal">1828</span>
 <span class="normal">1829</span>
@@ -12438,9 +12432,7 @@ units : str
 <span class="normal">1865</span>
 <span class="normal">1866</span>
 <span class="normal">1867</span>
-<span class="normal">1868</span>
-<span class="normal">1869</span>
-<span class="normal">1870</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">ugrid_add</span><span class="p">(</span>
+<span class="normal">1868</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">ugrid_add</span><span class="p">(</span>
     <span class="n">dstfile</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">varname</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">ldata</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span>
@@ -12513,7 +12505,9 @@ filename : str
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2027</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2025</span>
+<span class="normal">2026</span>
+<span class="normal">2027</span>
 <span class="normal">2028</span>
 <span class="normal">2029</span>
 <span class="normal">2030</span>
@@ -12535,9 +12529,7 @@ filename : str
 <span class="normal">2046</span>
 <span class="normal">2047</span>
 <span class="normal">2048</span>
-<span class="normal">2049</span>
-<span class="normal">2050</span>
-<span class="normal">2051</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_csv</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2049</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_csv</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Write a data to csv file.</span>
 
@@ -12592,7 +12584,9 @@ filename : str
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2054</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2052</span>
+<span class="normal">2053</span>
+<span class="normal">2054</span>
 <span class="normal">2055</span>
 <span class="normal">2056</span>
 <span class="normal">2057</span>
@@ -12610,9 +12604,7 @@ filename : str
 <span class="normal">2069</span>
 <span class="normal">2070</span>
 <span class="normal">2071</span>
-<span class="normal">2072</span>
-<span class="normal">2073</span>
-<span class="normal">2074</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_km_eroded_volumes</span><span class="p">(</span><span class="n">km</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">vol</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2072</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_km_eroded_volumes</span><span class="p">(</span><span class="n">km</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">vol</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Write a text file with eroded volume data binned per kilometre.</span>
 
@@ -12665,7 +12657,9 @@ filename : str
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2004</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2002</span>
+<span class="normal">2003</span>
+<span class="normal">2004</span>
 <span class="normal">2005</span>
 <span class="normal">2006</span>
 <span class="normal">2007</span>
@@ -12683,9 +12677,7 @@ filename : str
 <span class="normal">2019</span>
 <span class="normal">2020</span>
 <span class="normal">2021</span>
-<span class="normal">2022</span>
-<span class="normal">2023</span>
-<span class="normal">2024</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_shp</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeoSeries</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2022</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_shp</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeoSeries</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Write a shape file.</span>
 
 <span class="sd">    Write a shape file for a given GeoSeries and dictionary of np arrays.</span>
@@ -12736,7 +12728,9 @@ filename : str
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1980</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1978</span>
+<span class="normal">1979</span>
+<span class="normal">1980</span>
 <span class="normal">1981</span>
 <span class="normal">1982</span>
 <span class="normal">1983</span>
@@ -12755,9 +12749,7 @@ filename : str
 <span class="normal">1996</span>
 <span class="normal">1997</span>
 <span class="normal">1998</span>
-<span class="normal">1999</span>
-<span class="normal">2000</span>
-<span class="normal">2001</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_shp_pnt</span><span class="p">(</span>
+<span class="normal">1999</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_shp_pnt</span><span class="p">(</span>
     <span class="n">xy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -12809,7 +12801,9 @@ firstn : int
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1893</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1891</span>
+<span class="normal">1892</span>
+<span class="normal">1893</span>
 <span class="normal">1894</span>
 <span class="normal">1895</span>
 <span class="normal">1896</span>
@@ -12845,9 +12839,7 @@ firstn : int
 <span class="normal">1926</span>
 <span class="normal">1927</span>
 <span class="normal">1928</span>
-<span class="normal">1929</span>
-<span class="normal">1930</span>
-<span class="normal">1931</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_simona_box</span><span class="p">(</span>
+<span class="normal">1929</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_simona_box</span><span class="p">(</span>
     <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">rdata</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">firstm</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">firstn</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
