@@ -2,8 +2,9 @@
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.projectFeatures.*
 import UnitTestsSonarCloud
+import DFastCleanConfiguration
 
-version = "2024.12"
+version = "2025.03"
 
 project {
     description = "D-FAST Bank Erosion"
@@ -15,6 +16,8 @@ project {
         param("SonarProjectKey", "Deltares_D-FAST_Bank_Erosion")
         password("sonar_server", "credentialsJSON:b6bc3a37-8077-45db-9f3c-da2b5db2e8ca")
     }
+
+    template(DFastCleanConfiguration)
 
     buildType(UnitTestsSonarCloud)
 }
