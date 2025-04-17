@@ -20,7 +20,6 @@ project {
         param("python.version", "3.11.12")
         param("SonarSource", "dfastbe")
         param("SonarProjectKey", "Deltares_D-FAST_Bank_Erosion")
-        password("sonar_server", "credentialsJSON:b6bc3a37-8077-45db-9f3c-da2b5db2e8ca")
     }
 
     template(DFastCleanConfiguration)
