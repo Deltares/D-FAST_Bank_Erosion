@@ -1,8 +1,11 @@
+"""Erosion-related data structures."""
+
 from dataclasses import dataclass, field
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
 from geopandas import GeoDataFrame
+
 
 @dataclass
 class ErosionInputs:
@@ -26,6 +29,7 @@ class ErosionInputs:
         taucls_str (Tuple[str]):
             String representation for different bank types.
     """
+
     shipping_data: Dict[str, np.ndarray]
     wave_fairway_distance_0: List[np.ndarray]
     wave_fairway_distance_1: List[np.ndarray]
@@ -45,6 +49,7 @@ class ErosionInputs:
 @dataclass
 class WaterLevelData:
     """Class to hold water level data.
+
     args:
         hfw_max (float): Maximum water depth along the fairway.
         water_level (List[List[np.ndarray]]): Water level data.
@@ -54,6 +59,7 @@ class WaterLevelData:
         bank_height (List[np.ndarray]): Bank height data.
         chezy (List[List[np.ndarray]]): Chezy coefficient data.
     """
+
     hfw_max: float
     water_level: List[List[np.ndarray]]
     ship_wave_max: List[List[np.ndarray]]
@@ -89,6 +95,7 @@ class MeshData:
         boundary_edge_nrs (np.ndarray):
             List of edge indices that together form the boundary of the whole mesh.
     """
+
     x_face_coords: np.ndarray
     y_face_coords: np.ndarray
     x_edge_coords: np.ndarray
@@ -125,6 +132,7 @@ class BankData:
         fairway_face_indices (List[np.ndarray]):
             The face index of the closest fairway point for each bank line point.
     """
+
     is_right_bank: List[bool]
     bank_chainage_midpoints: List[np.ndarray]
     bank_line_coords: List[np.ndarray]
@@ -148,6 +156,7 @@ class FairwayData:
         fairway_initial_water_levels (List[np.ndarray]):
             Reference water level at the fairway
     """
+
     fairway_face_indices: np.ndarray
     intersection_coords: np.ndarray
     fairway_initial_water_levels: List[np.ndarray] = field(default_factory=list)
@@ -180,6 +189,50 @@ class ErosionResults:
             Equilibrium eroded volume calculated per kilometer bin.
         total_eroded_vol_per_km (np.ndarray):
             Total eroded volume calculated per kilometer bin.
+
+    Examples:
+        - You can create an instance of the ErosionResults class as follows:
+        ```python
+        >>> from dfastbe.structures import ErosionResults
+        >>> import numpy as np
+        >>> erosion_results = ErosionResults(
+        ...     eq_erosion_dist=[np.array([0.1, 0.2])],
+        ...     total_erosion_dist=[np.array([0.3, 0.4])],
+        ...     flow_erosion_dist=[np.array([0.5, 0.6])],
+        ...     ship_erosion_dist=[np.array([0.7, 0.8])],
+        ...     vol_per_discharge=[[np.array([0.9, 1.0])]],
+        ...     eq_eroded_vol=[np.array([1.1, 1.2])],
+        ...     total_eroded_vol=[np.array([1.3, 1.4])],
+        ...     erosion_time=10,
+        ...     avg_erosion_rate=np.array([0.1, 0.2]),
+        ...     eq_eroded_vol_per_km=np.array([0.3, 0.4]),
+        ...     total_eroded_vol_per_km=np.array([0.5, 0.6]),
+        ... )
+        >>> print(erosion_results)
+        ErosionResults(eq_erosion_dist=[array([0.1, 0.2])], total_erosion_dist=[array([0.3, 0.4])], flow_erosion_dist=[array([0.5, 0.6])], ship_erosion_dist=[array([0.7, 0.8])], vol_per_discharge=[[array([0.9, 1. ])]], eq_eroded_vol=[array([1.1, 1.2])], total_eroded_vol=[array([1.3, 1.4])], erosion_time=10, avg_erosion_rate=array([0.1, 0.2]), eq_eroded_vol_per_km=array([0.3, 0.4]), total_eroded_vol_per_km=array([0.5, 0.6]))
+
+        ```
+
+        - The `avg_erosion_rate`, `eq_eroded_vol_per_km`, and `total_eroded_vol_per_km` attributes are optional and
+        can be set to empty arrays if not needed, .
+
+        ```python
+        >>> from dfastbe.structures import ErosionResults
+        >>> import numpy as np
+        >>> erosion_results = ErosionResults(
+        ...     eq_erosion_dist=[np.array([0.1, 0.2])],
+        ...     total_erosion_dist=[np.array([0.3, 0.4])],
+        ...     flow_erosion_dist=[np.array([0.5, 0.6])],
+        ...     ship_erosion_dist=[np.array([0.7, 0.8])],
+        ...     vol_per_discharge=[[np.array([0.9, 1.0])]],
+        ...     eq_eroded_vol=[np.array([1.1, 1.2])],
+        ...     total_eroded_vol=[np.array([1.3, 1.4])],
+        ...     erosion_time=10,
+        ... )
+        >>> print(erosion_results)
+        ErosionResults(eq_erosion_dist=[array([0.1, 0.2])], total_erosion_dist=[array([0.3, 0.4])], flow_erosion_dist=[array([0.5, 0.6])], ship_erosion_dist=[array([0.7, 0.8])], vol_per_discharge=[[array([0.9, 1. ])]], eq_eroded_vol=[array([1.1, 1.2])], total_eroded_vol=[array([1.3, 1.4])], erosion_time=10, avg_erosion_rate=array([], dtype=float64), eq_eroded_vol_per_km=array([], dtype=float64), total_eroded_vol_per_km=array([], dtype=float64))
+
+        ```
     """
 
     eq_erosion_dist: List[np.ndarray]
