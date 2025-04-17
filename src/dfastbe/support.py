@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Copyright (C) 2020 Stichting Deltares.
 
@@ -28,6 +27,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 from typing import List, Tuple
+
+import numpy as np
+
 from dfastbe.io import SimulationObject
 from dfastbe.structures import MeshData
 
@@ -692,13 +694,15 @@ def intersect_line_mesh(
                                         j, index, node, index0, prev_b
                                     )
                                 )
-                        if type(index0) == int or type(index0) == numpy.int64:
+
+                        if isinstance(index0, int) or isinstance(index0, np.int32) or isinstance(index0, np.int64):
                             index = index0
                         elif len(index0) == 1:
                             index = index0[0]
                         else:
                             index = -2
                             vindex = index0
+
                     elif faces[0] == index:
                         if verbose:
                             print(
