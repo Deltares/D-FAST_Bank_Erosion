@@ -3,6 +3,7 @@ import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.projectFeatures.*
 import UnitTestsSonarCloud
 import DFastCleanConfiguration
+import LatexManualGeneration
 
 version = "2025.03"
 
@@ -20,4 +21,5 @@ project {
     template(DFastCleanConfiguration)
 
     buildType(UnitTestsSonarCloud)
+    buildType(LatexManualGeneration)
 }
