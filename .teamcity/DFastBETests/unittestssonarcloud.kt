@@ -25,11 +25,6 @@ object UnitTestsSonarCloud : BuildType({
 
     steps {
         script {
-            name = "Conda create environment"
-            id = "Conda_create_environment"
-            scriptContent = "CALL conda create -v -y -n %CONDA_ENV_NAME% python=%python.version%"
-        }
-        script {
             name = "Install dependencies via poetry"
             id = "Install_dependencies_via_poetry"
             scriptContent = """

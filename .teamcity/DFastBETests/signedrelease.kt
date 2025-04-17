@@ -1,5 +1,7 @@
 import jetbrains.buildServer.configs.kotlin.*
 
+import BuildWithCommandWindow
+
 object SignedRelease : BuildType({
     id("SignedRelease")
     name = "Signed release with command window"

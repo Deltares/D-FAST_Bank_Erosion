@@ -31,7 +31,10 @@ object DFastCleanConfiguration : Template({
         script {
             name = "Conda create environment"
             id = "Conda_create_environment"
-            scriptContent = "CALL conda create -v -y -n %CONDA_ENV_NAME% python=3.9.13"
+            scriptContent = """
+                rmdir /S /Q D:\ProgramData\Miniforge3\envs\%CONDA_ENV_NAME%
+                CALL conda create -v -y -n %CONDA_ENV_NAME% python=%python.version%
+            """.trimIndent()
         }
         script {
             name = "Python pip install poetry"
