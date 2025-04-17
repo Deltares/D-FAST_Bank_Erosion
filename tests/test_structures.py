@@ -8,6 +8,7 @@ from dfastbe.structures import (
     MeshData,
     BankData,
     FairwayData,
+    ErosionResults,
 )
 
 
@@ -89,3 +90,24 @@ def test_fairway_data():
     assert fairway_data.fairway_face_indices[1] == 1
     assert fairway_data.intersection_coords[1][1] == pytest.approx(1.0)
     assert fairway_data.fairway_initial_water_levels[0][1] == pytest.approx(2.0)
+
+
+def test_erosion_results():
+    """Test instantiation of the ErosionResults dataclass."""
+    erosion_results = ErosionResults(
+        eq_erosion_dist=[np.array([0.1, 0.2])],
+        total_erosion_dist=[np.array([0.3, 0.4])],
+        flow_erosion_dist=[np.array([0.5, 0.6])],
+        ship_erosion_dist=[np.array([0.7, 0.8])],
+        vol_per_discharge=[[np.array([0.9, 1.0])]],
+        eq_eroded_vol=[np.array([1.1, 1.2])],
+        total_eroded_vol=[np.array([1.3, 1.4])],
+        erosion_time=10,
+        avg_erosion_rate=np.array([0.1, 0.2]),
+        eq_eroded_vol_per_km=np.array([0.3, 0.4]),
+        total_eroded_vol_per_km=np.array([0.5, 0.6]),
+    )
+    assert erosion_results.eq_erosion_dist[0][1] == pytest.approx(0.2)
+    assert erosion_results.total_erosion_dist[0][0] == pytest.approx(0.3)
+    assert erosion_results.erosion_time == 10
+
