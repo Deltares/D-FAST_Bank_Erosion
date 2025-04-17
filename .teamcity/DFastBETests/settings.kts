@@ -4,6 +4,7 @@ import jetbrains.buildServer.configs.kotlin.projectFeatures.*
 import UnitTestsSonarCloud
 import DFastCleanConfiguration
 import LatexManualGeneration
+import SignedRelease
 
 version = "2025.03"
 
@@ -22,4 +23,5 @@ project {
 
     buildType(UnitTestsSonarCloud)
     buildType(LatexManualGeneration)
+    buildType(SignedRelease)
 }
