@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, ClassVar
 import numpy as np
+
 
 @dataclass
 class ErosionInputs:
@@ -12,8 +13,8 @@ class ErosionInputs:
     bank_protection_level: List[np.ndarray]
     tauc: List[np.ndarray]
     bank_type: List[np.ndarray]
-    taucls: np.array = np.array([1e20, 95, 3.0, 0.95, 0.15])
-    taucls_str: Tuple[str] = (
+    taucls: ClassVar[np.ndarray] = np.array([1e20, 95, 3.0, 0.95, 0.15])
+    taucls_str: ClassVar[Tuple[str]] = (
         "protected",
         "vegetation",
         "good clay",
