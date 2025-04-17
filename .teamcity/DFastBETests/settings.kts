@@ -5,6 +5,7 @@ import UnitTestsSonarCloud
 import DFastCleanConfiguration
 import LatexManualGeneration
 import SignedRelease
+import BuildWithCommandWindow
 
 version = "2025.03"
 
@@ -24,4 +25,5 @@ project {
     buildType(UnitTestsSonarCloud)
     buildType(LatexManualGeneration)
     buildType(SignedRelease)
+    buildType(BuildWithCommandWindow)
 }
