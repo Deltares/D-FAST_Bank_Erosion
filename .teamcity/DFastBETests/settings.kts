@@ -39,7 +39,7 @@ project {
         BuildWithCommandWindow,
         SignedReleaseCommand,
         DistributionTests,
-        BuildWithoutCommandWindow
-        SignedRelease,
+        BuildWithoutCommandWindow,
+        SignedRelease
     )
 }
