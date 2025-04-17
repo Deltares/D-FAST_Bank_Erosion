@@ -130,7 +130,7 @@ class BankLines:
 
         # clip simulation data to boundaries ...
         log_text("clip_data")
-        SimulationData.clip(self.simulation_data, river_profile, max_distance)
+        self.simulation_data.clip(river_profile, max_distance)
 
         # derive bank lines (get_banklines)
         log_text("identify_banklines")

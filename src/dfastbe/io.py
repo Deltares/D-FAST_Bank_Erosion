@@ -203,8 +203,6 @@ class SimulationData:
         that is sufficiently close to the reference line.
 
         Args:
-            sim (SimulationData):
-                Simulation data: mesh, bed levels, water levels, velocities, etc.
             river_profile (np.ndarray):
                 Reference line.
             max_distance (float):
