@@ -40,6 +40,6 @@ project {
         SignedReleaseCommand,
         DistributionTests,
         BuildWithoutCommandWindow
-        SignedRelease,
+        SignedRelease
     )
 }
