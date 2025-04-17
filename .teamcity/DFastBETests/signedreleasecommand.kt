@@ -26,7 +26,7 @@ object SignedReleaseCommand : BuildType({
                 artifactRules = "dfastbe.zip!** => ."
             }
         }
-        dependency(AbsoluteId("SigningAndCertificates_DFast_SigningDFastBankErosion")) {
+        dependency(AbsoluteId("SigningAndCertificates_DFast_SigningDFastBankErosionTestCode")) {
             snapshot {
                 onDependencyFailure = FailureAction.FAIL_TO_START
             }

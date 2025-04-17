@@ -40,7 +40,7 @@ object SignedRelease : BuildType({
         snapshot(BuildWithCommandWindow) {
             onDependencyFailure = FailureAction.FAIL_TO_START
         }
-        dependency(AbsoluteId("SigningDFastBankErosion")) {
+        dependency(AbsoluteId("SigningAndCertificates_DFast_SigningDFastBankErosionTestCode")) {
             snapshot {
                 onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -49,7 +49,7 @@ object SignedRelease : BuildType({
                 artifactRules = "dfastbe.exe => dfastbe_cli"
             }
         }
-        dependency(AbsoluteId("SigningDFastBankErosionSuppressCommandWindow")) {
+        dependency(AbsoluteId("SigningAndCertificates_DFast_SigningDFastBankErosionSuppressCommandWindowTestCode")) {
             snapshot {
                 onDependencyFailure = FailureAction.FAIL_TO_START
             }
