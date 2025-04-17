@@ -37,7 +37,7 @@ object UnitTestsSonarCloud : BuildType({
                 "-Dsonar.organization=deltares"
                 "-Dsonar.token=%sonar_token%"
             """.trimIndent())
-            param("sonarProjectKey", "%SonarProjectKey%")
+            param("sonarProjectKey", "41dee3f5-7fe2-478a-865e-d0b26dba20f1")
             param("sonarServer", "%sonar_server%")
         }
         stepsOrder = arrayListOf("Conda_create_environment", "Python_pip_install_poetry", "Install_dependencies_via_poetry", "Unit_test_and_code_coverage", "SonarCloud_analysis", "Conda_deactivate_and_remove_environment")
