@@ -3937,7 +3937,7 @@ Writing a configuration file:
 <span class="sd">            &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
 <span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/erosion/meuse_manual.cfg&quot;)</span>
 <span class="sd">            &gt;&gt;&gt; result = config_file.get_str(&quot;General&quot;, &quot;BankDir&quot;)</span>
-<span class="sd">            &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/output/banklines&quot;).resolve()</span>
+<span class="sd">            &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/output/banklines&quot;)</span>
 <span class="sd">            &gt;&gt;&gt; str(expected) == result</span>
 <span class="sd">            True</span>
 
@@ -4113,7 +4113,7 @@ Writing a configuration file:
 <span class="sd">            &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
 <span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/erosion/meuse_manual.cfg&quot;)</span>
 <span class="sd">            &gt;&gt;&gt; result = config_file.get_sim_file(&quot;Erosion&quot;, &quot;1&quot;)</span>
-<span class="sd">            &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/inputs/sim0075/SDS-j19_map.nc&quot;).resolve()</span>
+<span class="sd">            &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/inputs/sim0075/SDS-j19_map.nc&quot;)</span>
 <span class="sd">            &gt;&gt;&gt; str(expected) == result</span>
 <span class="sd">            True</span>
 
@@ -4276,7 +4276,7 @@ Writing a configuration file:
                 <span class="k">if</span> <span class="n">km_thr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">parfield</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bkm</span><span class="p">))</span> <span class="o">+</span> <span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bkm</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+                    <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bkm</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
                     <span class="k">for</span> <span class="n">thr</span> <span class="ow">in</span> <span class="n">km_thr</span><span class="p">:</span>
                         <span class="n">idx</span><span class="p">[</span><span class="n">bkm</span> <span class="o">&gt;=</span> <span class="n">thr</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">parfield</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
@@ -6320,7 +6320,7 @@ For each bank a parameter value per bank point (bank chainage location).</p>
             <span class="k">if</span> <span class="n">km_thr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">parfield</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bkm</span><span class="p">))</span> <span class="o">+</span> <span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bkm</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bkm</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">thr</span> <span class="ow">in</span> <span class="n">km_thr</span><span class="p">:</span>
                     <span class="n">idx</span><span class="p">[</span><span class="n">bkm</span> <span class="o">&gt;=</span> <span class="n">thr</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="n">parfield</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
@@ -6803,7 +6803,7 @@ typically a string representation of the index.</p>
     <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigFile</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/data/erosion/meuse_manual.cfg&quot;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_sim_file</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">expected</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tests/data/erosion/inputs/sim0075/SDS-j19_map.nc&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">expected</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tests/data/erosion/inputs/sim0075/SDS-j19_map.nc&quot;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="nb">str</span><span class="p">(</span><span class="n">expected</span><span class="p">)</span> <span class="o">==</span> <span class="n">result</span>
 <span class="kc">True</span>
 </code></pre></div>
@@ -6849,7 +6849,7 @@ typically a string representation of the index.</p>
 <span class="sd">        &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
 <span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/erosion/meuse_manual.cfg&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; result = config_file.get_sim_file(&quot;Erosion&quot;, &quot;1&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/inputs/sim0075/SDS-j19_map.nc&quot;).resolve()</span>
+<span class="sd">        &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/inputs/sim0075/SDS-j19_map.nc&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; str(expected) == result</span>
 <span class="sd">        True</span>
 
@@ -6990,7 +6990,7 @@ typically a string representation of the index.</p>
     <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigFile</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/data/erosion/meuse_manual.cfg&quot;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;BankDir&quot;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">expected</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tests/data/erosion/output/banklines&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">expected</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tests/data/erosion/output/banklines&quot;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="nb">str</span><span class="p">(</span><span class="n">expected</span><span class="p">)</span> <span class="o">==</span> <span class="n">result</span>
 <span class="kc">True</span>
 </code></pre></div>
@@ -7060,7 +7060,7 @@ typically a string representation of the index.</p>
 <span class="sd">        &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
 <span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/erosion/meuse_manual.cfg&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; result = config_file.get_str(&quot;General&quot;, &quot;BankDir&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/output/banklines&quot;).resolve()</span>
+<span class="sd">        &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/output/banklines&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; str(expected) == result</span>
 <span class="sd">        True</span>
 
@@ -9502,7 +9502,7 @@ max_distance : float
 
     <span class="n">fnc</span> <span class="o">=</span> <span class="n">sim</span><span class="p">[</span><span class="s2">&quot;facenode&quot;</span><span class="p">]</span>
     <span class="n">keep_face</span> <span class="o">=</span> <span class="n">keep</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-    <span class="n">renum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span>
+    <span class="n">renum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
     <span class="n">renum</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">keep</span><span class="p">))</span>
     <span class="n">sim</span><span class="p">[</span><span class="s2">&quot;facenode&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">renum</span><span class="p">[</span><span class="n">fnc</span><span class="p">[</span><span class="n">keep_face</span><span class="p">]]</span>
 
@@ -11023,7 +11023,7 @@ dh0 : float
         <span class="k">if</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">():</span>
             <span class="c1"># all faces have the same number of nodes</span>
             <span class="n">sim</span><span class="p">[</span><span class="s2">&quot;nnodes&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">f_nc</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int</span><span class="p">)</span> <span class="o">*</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">f_nc</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span> <span class="o">*</span> <span class="n">f_nc</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># varying number of nodes</span>
