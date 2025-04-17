@@ -83,6 +83,7 @@ object DFastCleanConfiguration : Template({
     triggers {
         vcs {
             id = "TRIGGER_648"
+            enabled = false
         }
     }
 
