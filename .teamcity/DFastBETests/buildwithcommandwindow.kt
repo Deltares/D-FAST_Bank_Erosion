@@ -4,9 +4,10 @@ import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnMetr
 import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnText
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnMetricChange
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnText
+import DFastCleanConfiguration
 
 object BuildWithCommandWindow : BuildType({
-    templates(AbsoluteId("DFastCleanConfiguration"))
+    templates(DFastCleanConfiguration)
     id("BuildWithCommandWindow")
     name = "Build with command window"
 
@@ -16,7 +17,7 @@ object BuildWithCommandWindow : BuildType({
     """.trimIndent()
 
     vcs {
-        root(DFast_DFastBankErosion)
+        root(DslContext.settingsRoot)
     }
 
     steps {
