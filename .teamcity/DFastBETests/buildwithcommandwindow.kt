@@ -41,11 +41,6 @@ object BuildWithCommandWindow : BuildType({
             """.trimIndent()
         }
         script {
-            name = "Unit test and code coverage"
-            id = "Unit_test_and_code_coverage"
-            enabled = false
-        }
-        script {
             name = "build D-FAST BE"
             id = "build_D_FAST_BE"
             scriptContent = """
@@ -78,7 +73,7 @@ object BuildWithCommandWindow : BuildType({
     }
 
     dependencies {
-        dependency(DFast_DFastBankErosion_LatexManualGeneration) {
+        dependency(LatexManualGeneration) {
             snapshot {
                 onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -88,7 +83,7 @@ object BuildWithCommandWindow : BuildType({
                 artifactRules = "+:*.pdf => docs/"
             }
         }
-        snapshot(DFast_DFastBankErosion_UnitTestsSonarCloud) {
+        snapshot(UnitTestsSonarCloud) {
             onDependencyFailure = FailureAction.FAIL_TO_START
         }
     }
