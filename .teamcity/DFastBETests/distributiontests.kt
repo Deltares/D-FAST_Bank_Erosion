@@ -75,7 +75,7 @@ object DistributionTests : BuildType({
     }
 
     dependencies {
-        dependency(DFast_DFastBankErosion_SignedRelease) {
+        dependency(SignedRelease) {
             snapshot {
                 onDependencyFailure = FailureAction.FAIL_TO_START
             }
