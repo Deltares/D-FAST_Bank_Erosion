@@ -3937,7 +3937,7 @@ Writing a configuration file:
 <span class="sd">            &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
 <span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/erosion/meuse_manual.cfg&quot;)</span>
 <span class="sd">            &gt;&gt;&gt; result = config_file.get_str(&quot;General&quot;, &quot;BankDir&quot;)</span>
-<span class="sd">            &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/output/banklines&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/output/banklines&quot;).resolve()</span>
 <span class="sd">            &gt;&gt;&gt; str(expected) == result</span>
 <span class="sd">            True</span>
 
@@ -4113,7 +4113,7 @@ Writing a configuration file:
 <span class="sd">            &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
 <span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/erosion/meuse_manual.cfg&quot;)</span>
 <span class="sd">            &gt;&gt;&gt; result = config_file.get_sim_file(&quot;Erosion&quot;, &quot;1&quot;)</span>
-<span class="sd">            &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/inputs/sim0075/SDS-j19_map.nc&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/inputs/sim0075/SDS-j19_map.nc&quot;).resolve()</span>
 <span class="sd">            &gt;&gt;&gt; str(expected) == result</span>
 <span class="sd">            True</span>
 
@@ -6803,7 +6803,7 @@ typically a string representation of the index.</p>
     <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigFile</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/data/erosion/meuse_manual.cfg&quot;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_sim_file</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">expected</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tests/data/erosion/inputs/sim0075/SDS-j19_map.nc&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">expected</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tests/data/erosion/inputs/sim0075/SDS-j19_map.nc&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="nb">str</span><span class="p">(</span><span class="n">expected</span><span class="p">)</span> <span class="o">==</span> <span class="n">result</span>
 <span class="kc">True</span>
 </code></pre></div>
@@ -6849,7 +6849,7 @@ typically a string representation of the index.</p>
 <span class="sd">        &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
 <span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/erosion/meuse_manual.cfg&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; result = config_file.get_sim_file(&quot;Erosion&quot;, &quot;1&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/inputs/sim0075/SDS-j19_map.nc&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/inputs/sim0075/SDS-j19_map.nc&quot;).resolve()</span>
 <span class="sd">        &gt;&gt;&gt; str(expected) == result</span>
 <span class="sd">        True</span>
 
@@ -6990,7 +6990,7 @@ typically a string representation of the index.</p>
     <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigFile</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/data/erosion/meuse_manual.cfg&quot;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;BankDir&quot;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">expected</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tests/data/erosion/output/banklines&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">expected</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">&quot;tests/data/erosion/output/banklines&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="nb">str</span><span class="p">(</span><span class="n">expected</span><span class="p">)</span> <span class="o">==</span> <span class="n">result</span>
 <span class="kc">True</span>
 </code></pre></div>
@@ -7060,7 +7060,7 @@ typically a string representation of the index.</p>
 <span class="sd">        &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
 <span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/erosion/meuse_manual.cfg&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; result = config_file.get_str(&quot;General&quot;, &quot;BankDir&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/output/banklines&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; expected = Path(&quot;tests/data/erosion/output/banklines&quot;).resolve()</span>
 <span class="sd">        &gt;&gt;&gt; str(expected) == result</span>
 <span class="sd">        True</span>
 
