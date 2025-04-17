@@ -4,7 +4,7 @@ import jetbrains.buildServer.configs.kotlin.projectFeatures.*
 import UnitTestsSonarCloud
 import DFastCleanConfiguration
 import LatexManualGeneration
-import SignedRelease
+import SignedReleaseCommand
 import BuildWithCommandWindow
 import DistributionTests
 
@@ -25,7 +25,7 @@ project {
 
     buildType(UnitTestsSonarCloud)
     buildType(LatexManualGeneration)
-    buildType(SignedRelease)
+    buildType(SignedReleaseCommand)
     buildType(BuildWithCommandWindow)
     buildType(DistributionTests)
 }

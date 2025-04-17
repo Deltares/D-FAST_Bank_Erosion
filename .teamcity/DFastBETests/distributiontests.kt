@@ -75,7 +75,7 @@ object DistributionTests : BuildType({
     }
 
     dependencies {
-        dependency(SignedRelease) {
+        dependency(SignedReleaseCommand) {
             snapshot {
                 onDependencyFailure = FailureAction.FAIL_TO_START
             }
