@@ -2,7 +2,9 @@
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.projectFeatures.*
 import UnitTestsSonarCloud
+
 version = "2024.12"
+
 project {
     description = "D-FAST Bank Erosion"
 
