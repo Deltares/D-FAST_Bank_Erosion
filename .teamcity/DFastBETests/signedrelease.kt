@@ -2,6 +2,9 @@ import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 
+import BuildWithCommandWindow
+import BuildWithoutCommandWindow
+
 object SignedRelease : BuildType({
     id("SignedRelease")
     name = "Signed release"
@@ -13,7 +16,7 @@ object SignedRelease : BuildType({
     buildNumberPattern = "%build.revisions.short%"
 
     vcs {
-        root(DFast_DFastBankErosion)
+        root(DslContext.settingsRoot)
     }
 
     steps {

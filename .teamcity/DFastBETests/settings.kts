@@ -6,7 +6,9 @@ import DFastCleanConfiguration
 import LatexManualGeneration
 import SignedReleaseCommand
 import BuildWithCommandWindow
+import BuildWithoutCommandWindow
 import DistributionTests
+import SignedRelease
 
 version = "2025.03"
 
@@ -28,4 +30,6 @@ project {
     buildType(SignedReleaseCommand)
     buildType(BuildWithCommandWindow)
     buildType(DistributionTests)
+    buildType(SignedRelease)
+    buildType(BuildWithoutCommandWindow)
 }
