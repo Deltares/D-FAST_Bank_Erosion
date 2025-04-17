@@ -5,17 +5,17 @@ object SignedRelease : BuildType({
     name = "Signed release with command window"
 
     artifactRules = """
-        . => dfastbe-signed-${DFast_DFastBankErosion_BuildWithCommandWindow.depParamRefs["build.revisions.short"]}.zip
+        . => dfastbe-signed-${BuildWithCommandWindow.depParamRefs["build.revisions.short"]}.zip
         -:dfastbe.zip
     """.trimIndent()
-    buildNumberPattern = "${DFast_DFastBankErosion_BuildWithCommandWindow.depParamRefs["build.revisions.short"]}"
+    buildNumberPattern = "${BuildWithCommandWindow.depParamRefs["build.revisions.short"]}"
 
     vcs {
         root(DslContext.settingsRoot)
     }
 
     dependencies {
-        dependency(DFast_DFastBankErosion_BuildWithCommandWindow) {
+        dependency(BuildWithCommandWindow) {
             snapshot {
                 onDependencyFailure = FailureAction.FAIL_TO_START
             }
