@@ -32,4 +32,14 @@ project {
     buildType(DistributionTests)
     buildType(SignedRelease)
     buildType(BuildWithoutCommandWindow)
+
+    buildTypesOrder = arrayListOf(
+        LatexManualGeneration,
+        UnitTestsSonarCloud,
+        BuildWithCommandWindow,
+        SignedReleaseCommand,
+        DistributionTests,
+        BuildWithoutCommandWindow
+        SignedRelease,
+    )
 }
