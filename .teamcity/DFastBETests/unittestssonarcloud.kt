@@ -24,27 +24,6 @@ object UnitTestsSonarCloud : BuildType({
     }
 
     steps {
-        script {
-            name = "Install dependencies via poetry"
-            id = "Install_dependencies_via_poetry"
-            scriptContent = """
-                CALL conda activate %CONDA_ENV_NAME%
-                CALL pip install --upgrade virtualenv
-                CALL python -m poetry install
-                CALL python -m poetry show > packages.txt
-                CALL type packages.txt
-                CALL conda deactivate
-            """.trimIndent()
-        }
-        script {
-            name = "Unit test and code coverage"
-            id = "Unit_test_and_code_coverage"
-            scriptContent = """
-                CALL conda activate %CONDA_ENV_NAME%
-                CALL poetry run pytest --junitxml="report.xml" --cov=%COVERAGE_LOC% --cov-report=xml tests/ -m "not binaries"
-                CALL conda deactivate
-            """.trimIndent()
-        }
         step {
             name = "SonarCloud analysis"
             id = "SonarCloud_analysis"

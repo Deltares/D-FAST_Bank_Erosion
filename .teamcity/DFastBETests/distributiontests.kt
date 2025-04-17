@@ -18,17 +18,6 @@ object DistributionTests : BuildType({
 
     steps {
         script {
-            name = "Install dependencies via poetry"
-            id = "Install_dependencies_via_poetry"
-            scriptContent = """
-                CALL conda activate %CONDA_ENV_NAME%
-                CALL pip install --upgrade virtualenv
-                CALL python -m poetry install
-                CALL python -m poetry show
-                CALL conda deactivate
-            """.trimIndent()
-        }
-        script {
             name = "Get folder listing"
             id = "Get_folder_listing"
             scriptContent = """
