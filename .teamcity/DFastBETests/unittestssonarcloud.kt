@@ -26,12 +26,12 @@ object UnitTestsSonarCloud : BuildType({
     steps {
         script {
             name = "Conda create environment"
-            id = "RUNNER_11"
+            id = "Conda_create_environment"
             scriptContent = "CALL conda create -v -y -n %CONDA_ENV_NAME% python=%python.version%"
         }
         script {
             name = "Install dependencies via poetry"
-            id = "RUNNER_18"
+            id = "Install_dependencies_via_poetry"
             scriptContent = """
                 CALL conda activate %CONDA_ENV_NAME%
                 CALL pip install --upgrade virtualenv
@@ -43,7 +43,7 @@ object UnitTestsSonarCloud : BuildType({
         }
         script {
             name = "Unit test and code coverage"
-            id = "RUNNER_19"
+            id = "Unit_test_and_code_coverage"
             scriptContent = """
                 CALL conda activate %CONDA_ENV_NAME%
                 CALL poetry run pytest --junitxml="report.xml" --cov=%COVERAGE_LOC% --cov-report=xml tests/ -m "not binaries"
@@ -66,7 +66,7 @@ object UnitTestsSonarCloud : BuildType({
             param("sonarProjectKey", "%SonarProjectKey%")
             param("sonarServer", "%sonar_server%")
         }
-        stepsOrder = arrayListOf("Conda_create_environment", "RUNNER_11", "Python_pip_install_poetry", "Install_dependencies_via_poetry", "Unit_test_and_code_coverage", "RUNNER_18", "RUNNER_19", "SonarCloud_analysis", "Conda_deactivate_and_remove_environment")
+        stepsOrder = arrayListOf("Conda_create_environment", "Python_pip_install_poetry", "Install_dependencies_via_poetry", "Unit_test_and_code_coverage", "SonarCloud_analysis", "Conda_deactivate_and_remove_environment")
     }
 
     features {
