@@ -13,12 +13,6 @@ object BuildWithoutCommandWindow : BuildType({
         compilation-report.xml =>.
     """.trimIndent()
 
-    params {
-        param("CONDA_ENV_NAME", "python_3_9_13-dfastbe")
-        param("SonarProjectKey", "")
-        param("SonarSource", "")
-    }
-
     vcs {
         root(DslContext.settingsRoot)
     }
