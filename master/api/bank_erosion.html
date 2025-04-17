@@ -1620,10 +1620,10 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1357</span>
-<span class="normal">1358</span>
-<span class="normal">1359</span>
-<span class="normal">1360</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesResultsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1382</span>
+<span class="normal">1383</span>
+<span class="normal">1384</span>
+<span class="normal">1385</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesResultsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom exception for BankLine results errors.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span>
@@ -2811,7 +2811,32 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">1210</span>
 <span class="normal">1211</span>
 <span class="normal">1212</span>
-<span class="normal">1213</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Erosion</span><span class="p">:</span>
+<span class="normal">1213</span>
+<span class="normal">1214</span>
+<span class="normal">1215</span>
+<span class="normal">1216</span>
+<span class="normal">1217</span>
+<span class="normal">1218</span>
+<span class="normal">1219</span>
+<span class="normal">1220</span>
+<span class="normal">1221</span>
+<span class="normal">1222</span>
+<span class="normal">1223</span>
+<span class="normal">1224</span>
+<span class="normal">1225</span>
+<span class="normal">1226</span>
+<span class="normal">1227</span>
+<span class="normal">1228</span>
+<span class="normal">1229</span>
+<span class="normal">1230</span>
+<span class="normal">1231</span>
+<span class="normal">1232</span>
+<span class="normal">1233</span>
+<span class="normal">1234</span>
+<span class="normal">1235</span>
+<span class="normal">1236</span>
+<span class="normal">1237</span>
+<span class="normal">1238</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Erosion</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">root_dir</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">root_dir</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_config_file</span> <span class="o">=</span> <span class="n">config_file</span>
@@ -2908,7 +2933,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">bank_line_coords</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">bank_face_indices</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">bank_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_banklines</span><span class="p">):</span>
-            <span class="n">line_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">banklines</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">bank_index</span><span class="p">])</span>
+            <span class="n">line_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">banklines</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
             <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_nodes&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">bank_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">line_coords</span><span class="p">)})</span>
 
             <span class="n">coords_along_bank</span><span class="p">,</span> <span class="n">face_indices</span> <span class="o">=</span> <span class="n">intersect_line_mesh</span><span class="p">(</span>
@@ -2944,10 +2969,12 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
         <span class="k">return</span> <span class="n">bank_line_coords</span><span class="p">,</span> <span class="n">bank_face_indices</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">is_right_bank</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_river_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stations_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">LineString</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_prepare_river_axis</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">stations_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">LineString</span><span class="p">]:</span>
         <span class="c1"># read river axis file</span>
         <span class="n">river_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">read_river_axis</span><span class="p">()</span>
-        <span class="n">river_axis_numpy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">river_axis</span><span class="p">)</span>
+        <span class="n">river_axis_numpy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">river_axis</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
         <span class="c1"># optional sorting --&gt; see 04_Waal_D3D example</span>
         <span class="c1"># check: sum all distances and determine maximum distance ...</span>
         <span class="c1"># if maximum &gt; alpha * sum then perform sort</span>
@@ -2962,7 +2989,10 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_axis&quot;</span><span class="p">)</span>
         <span class="n">river_axis_km</span> <span class="o">=</span> <span class="n">project_km_on_line</span><span class="p">(</span><span class="n">river_axis_numpy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">masked_profile_arr</span><span class="p">)</span>
         <span class="n">write_shp_pnt</span><span class="p">(</span>
-            <span class="n">river_axis_numpy</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;chainage&quot;</span><span class="p">:</span> <span class="n">river_axis_km</span><span class="p">},</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">river_axis_chainage.shp&quot;</span>
+            <span class="n">river_axis_numpy</span><span class="p">,</span>
+            <span class="p">{</span><span class="s2">&quot;chainage&quot;</span><span class="p">:</span> <span class="n">river_axis_km</span><span class="p">},</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">river_axis_chainage.shp&quot;</span><span class="p">,</span>
+            <span class="n">config_file</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># clip river axis to reach of interest</span>
@@ -2984,6 +3014,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">river_axis</span><span class="p">:</span> <span class="n">LineString</span><span class="p">,</span>
         <span class="n">stations_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">mesh_data</span><span class="p">:</span> <span class="n">MeshData</span><span class="p">,</span>
+        <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="c1"># read fairway file</span>
         <span class="n">fairway_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;Fairway&quot;</span><span class="p">)</span>
@@ -2993,7 +3024,12 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_fairway&quot;</span><span class="p">)</span>
         <span class="n">fairway_numpy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">river_axis</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
         <span class="n">fairway_km</span> <span class="o">=</span> <span class="n">project_km_on_line</span><span class="p">(</span><span class="n">fairway_numpy</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">masked_profile_arr</span><span class="p">)</span>
-        <span class="n">write_shp_pnt</span><span class="p">(</span><span class="n">fairway_numpy</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;chainage&quot;</span><span class="p">:</span> <span class="n">fairway_km</span><span class="p">},</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s2">&quot;fairway_chainage.shp&quot;</span><span class="p">)</span>
+        <span class="n">write_shp_pnt</span><span class="p">(</span>
+            <span class="n">fairway_numpy</span><span class="p">,</span>
+            <span class="p">{</span><span class="s2">&quot;chainage&quot;</span><span class="p">:</span> <span class="n">fairway_km</span><span class="p">},</span>
+            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span> <span class="o">+</span> <span class="s2">&quot;fairway_chainage.shp&quot;</span><span class="p">,</span>
+            <span class="n">config_file</span><span class="p">,</span>
+        <span class="p">)</span>
 
         <span class="c1"># clip fairway to reach of interest</span>
         <span class="n">i1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(((</span><span class="n">stations_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">fairway_numpy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
@@ -3008,8 +3044,11 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;intersect_fairway_mesh&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">fairway_numpy</span><span class="p">)})</span>
         <span class="n">ifw_numpy</span><span class="p">,</span> <span class="n">ifw_face_idx</span> <span class="o">=</span> <span class="n">intersect_line_mesh</span><span class="p">(</span><span class="n">fairway_numpy</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
-            <span class="n">write_shp_pnt</span><span class="p">((</span><span class="n">ifw_numpy</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;iface&quot;</span><span class="p">:</span> <span class="n">ifw_face_idx</span><span class="p">},</span>
+            <span class="n">write_shp_pnt</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">ifw_numpy</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">ifw_numpy</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="p">{</span><span class="s2">&quot;iface&quot;</span><span class="p">:</span> <span class="n">ifw_face_idx</span><span class="p">},</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span><span class="si">}{</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s2">fairway_face_indices.shp&quot;</span><span class="p">,</span>
+                <span class="n">config_file</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ifw_face_idx</span><span class="p">,</span> <span class="n">ifw_numpy</span>
@@ -3020,6 +3059,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">bank_km_mid</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
         <span class="n">ifw_numpy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">ifw_face_idx</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
         <span class="c1"># distance fairway-bankline (bankfairway)</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_distance_fairway&quot;</span><span class="p">)</span>
@@ -3029,7 +3069,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="k">for</span> <span class="n">ib</span><span class="p">,</span> <span class="n">bcrds</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bank_line_coords</span><span class="p">):</span>
             <span class="n">bcrds_mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">bcrds</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bcrds</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span>
             <span class="n">distance_fw</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bcrds_mid</span><span class="p">)))</span>
-            <span class="n">bp_fw_face_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bcrds_mid</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">))</span>
+            <span class="n">bp_fw_face_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bcrds_mid</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">ip</span><span class="p">,</span> <span class="n">bp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bcrds_mid</span><span class="p">):</span>
                 <span class="c1"># find closest fairway support node</span>
                 <span class="n">ifw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(((</span><span class="n">bp</span> <span class="o">-</span> <span class="n">ifw_numpy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
@@ -3087,9 +3127,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                 <span class="n">write_shp_pnt</span><span class="p">(</span>
                     <span class="n">bcrds_mid</span><span class="p">,</span>
                     <span class="p">{</span><span class="s2">&quot;chainage&quot;</span><span class="p">:</span> <span class="n">bank_km_mid</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span> <span class="s2">&quot;iface_fw&quot;</span><span class="p">:</span> <span class="n">bp_fw_face_idx</span><span class="p">[</span><span class="n">ib</span><span class="p">]},</span>
-                    <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
-                    <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;/bank_</span><span class="si">{</span><span class="n">ib</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">_chainage_and_fairway_face_idx.shp&quot;</span><span class="p">,</span>
-                    <span class="p">)</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/bank_</span><span class="si">{</span><span class="n">ib</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">_chainage_and_fairway_face_idx.shp&quot;</span><span class="p">,</span>
+                    <span class="n">config_file</span><span class="p">,</span>
+                <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">bp_fw_face_idx</span><span class="p">,</span> <span class="n">distance_fw</span>
 
@@ -3364,7 +3404,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
                         <span class="n">bcrds_mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">bcrds</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bcrds</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span>
                         <span class="n">bank_coords_points</span> <span class="o">=</span> <span class="p">[</span><span class="n">Point</span><span class="p">(</span><span class="n">xy1</span><span class="p">)</span> <span class="k">for</span> <span class="n">xy1</span> <span class="ow">in</span> <span class="n">bcrds_mid</span><span class="p">]</span>
-                        <span class="n">bank_coords_geo</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bank_coords_points</span><span class="p">)</span>
+                        <span class="n">bank_coords_geo</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span>
+                            <span class="n">bank_coords_points</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">config_file</span><span class="o">.</span><span class="n">crs</span>
+                        <span class="p">)</span>
                         <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
                             <span class="s2">&quot;chainage&quot;</span><span class="p">:</span> <span class="n">bank_km_mid</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
                             <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">bcrds_mid</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
@@ -3421,7 +3463,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                     <span class="n">bcrds_mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">bcrds</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">bcrds</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span>
 
                     <span class="n">bank_coords_points</span> <span class="o">=</span> <span class="p">[</span><span class="n">Point</span><span class="p">(</span><span class="n">xy1</span><span class="p">)</span> <span class="k">for</span> <span class="n">xy1</span> <span class="ow">in</span> <span class="n">bcrds_mid</span><span class="p">]</span>
-                    <span class="n">bank_coords_geo</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bank_coords_points</span><span class="p">)</span>
+                    <span class="n">bank_coords_geo</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bank_coords_points</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">config_file</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
                     <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
                         <span class="s2">&quot;chainage&quot;</span><span class="p">:</span> <span class="n">bank_km_mid</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
                         <span class="s2">&quot;x&quot;</span><span class="p">:</span> <span class="n">bcrds_mid</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
@@ -3610,7 +3652,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="bp">self</span><span class="o">.</span><span class="n">intersect_bank_lines_with_mesh</span><span class="p">(</span><span class="n">banklines</span><span class="p">,</span> <span class="n">stations_coords</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="n">river_axis_km</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">river_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_river_axis</span><span class="p">(</span><span class="n">stations_coords</span><span class="p">)</span>
+        <span class="n">river_axis_km</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">river_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_river_axis</span><span class="p">(</span>
+            <span class="n">stations_coords</span><span class="p">,</span> <span class="n">config_file</span>
+        <span class="p">)</span>
 
         <span class="c1"># get output interval</span>
         <span class="n">km_step</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;OutputInterval&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
@@ -3619,10 +3663,12 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">km_mid</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># get mid-points</span>
 
         <span class="n">ifw_face_idx</span><span class="p">,</span> <span class="n">ifw_numpy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fairway</span><span class="p">(</span>
-            <span class="n">river_axis</span><span class="p">,</span> <span class="n">stations_coords</span><span class="p">,</span> <span class="n">mesh_data</span>
+            <span class="n">river_axis</span><span class="p">,</span> <span class="n">stations_coords</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">,</span> <span class="n">config_file</span>
         <span class="p">)</span>
 
-        <span class="n">bp_fw_face_idx</span><span class="p">,</span> <span class="n">distance_fw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_bank_to_fairway</span><span class="p">(</span><span class="n">bank_line_coords</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">ifw_numpy</span><span class="p">,</span> <span class="n">ifw_face_idx</span><span class="p">)</span>
+        <span class="n">bp_fw_face_idx</span><span class="p">,</span> <span class="n">distance_fw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_bank_to_fairway</span><span class="p">(</span>
+            <span class="n">bank_line_coords</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">ifw_numpy</span><span class="p">,</span> <span class="n">ifw_face_idx</span><span class="p">,</span> <span class="n">config_file</span>
+        <span class="p">)</span>
 
         <span class="c1"># water level at fairway</span>
         <span class="n">zfw_ini</span> <span class="o">=</span> <span class="p">[]</span>
@@ -3665,7 +3711,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="n">n_banklines</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">,</span> <span class="n">dn_flow_tot</span><span class="p">,</span> <span class="n">dn_ship_tot</span><span class="p">,</span>
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_write_bankline_shapefiles</span><span class="p">(</span><span class="n">bankline_new_list</span><span class="p">,</span> <span class="n">bankline_eq_list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_write_bankline_shapefiles</span><span class="p">(</span>
+            <span class="n">bankline_new_list</span><span class="p">,</span> <span class="n">bankline_eq_list</span><span class="p">,</span> <span class="n">config_file</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_write_volume_outputs</span><span class="p">(</span><span class="n">vol_tot</span><span class="p">,</span> <span class="n">vol_eq</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">)</span>
 
         <span class="c1"># create various plots</span>
@@ -3693,17 +3741,19 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;end_bankerosion&quot;</span><span class="p">)</span>
         <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- end analysis --&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_write_bankline_shapefiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bankline_new_list</span><span class="p">,</span> <span class="n">bankline_eq_list</span><span class="p">):</span>
-        <span class="n">bankline_new_series</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bankline_new_list</span><span class="p">)</span>
-        <span class="n">bank_lines_new</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_features</span><span class="p">(</span><span class="n">bankline_new_series</span><span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_write_bankline_shapefiles</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">bankline_new_list</span><span class="p">,</span> <span class="n">bankline_eq_list</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
+    <span class="p">):</span>
+        <span class="n">bankline_new_series</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bankline_new_list</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">config_file</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="n">bank_lines_new</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">bankline_new_series</span><span class="p">)</span>
         <span class="n">bank_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;BankFile&quot;</span><span class="p">,</span> <span class="s2">&quot;bankfile&quot;</span><span class="p">)</span>
 
         <span class="n">bank_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">_new.shp&quot;</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)})</span>
         <span class="n">bank_lines_new</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)</span>
 
-        <span class="n">bankline_eq_series</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bankline_eq_list</span><span class="p">)</span>
-        <span class="n">banklines_eq</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="o">.</span><span class="n">from_features</span><span class="p">(</span><span class="n">bankline_eq_series</span><span class="p">)</span>
+        <span class="n">bankline_eq_series</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bankline_eq_list</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">config_file</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+        <span class="n">banklines_eq</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">bankline_eq_series</span><span class="p">)</span>
 
         <span class="n">bank_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">_eq.shp&quot;</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)})</span>
@@ -4019,24 +4069,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">810</span>
-<span class="normal">811</span>
-<span class="normal">812</span>
-<span class="normal">813</span>
-<span class="normal">814</span>
-<span class="normal">815</span>
-<span class="normal">816</span>
-<span class="normal">817</span>
-<span class="normal">818</span>
-<span class="normal">819</span>
-<span class="normal">820</span>
-<span class="normal">821</span>
-<span class="normal">822</span>
-<span class="normal">823</span>
-<span class="normal">824</span>
-<span class="normal">825</span>
-<span class="normal">826</span>
-<span class="normal">827</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">827</span>
 <span class="normal">828</span>
 <span class="normal">829</span>
 <span class="normal">830</span>
@@ -4146,7 +4179,30 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">934</span>
 <span class="normal">935</span>
 <span class="normal">936</span>
-<span class="normal">937</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">bankerosion_core</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">937</span>
+<span class="normal">938</span>
+<span class="normal">939</span>
+<span class="normal">940</span>
+<span class="normal">941</span>
+<span class="normal">942</span>
+<span class="normal">943</span>
+<span class="normal">944</span>
+<span class="normal">945</span>
+<span class="normal">946</span>
+<span class="normal">947</span>
+<span class="normal">948</span>
+<span class="normal">949</span>
+<span class="normal">950</span>
+<span class="normal">951</span>
+<span class="normal">952</span>
+<span class="normal">953</span>
+<span class="normal">954</span>
+<span class="normal">955</span>
+<span class="normal">956</span>
+<span class="normal">957</span>
+<span class="normal">958</span>
+<span class="normal">959</span>
+<span class="normal">960</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">bankerosion_core</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the bank erosion analysis for a specified configuration.&quot;&quot;&quot;</span>
     <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- start analysis --&quot;</span><span class="p">)</span>
     <span class="n">log_text</span><span class="p">(</span>
@@ -4192,7 +4248,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="bp">self</span><span class="o">.</span><span class="n">intersect_bank_lines_with_mesh</span><span class="p">(</span><span class="n">banklines</span><span class="p">,</span> <span class="n">stations_coords</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">)</span>
     <span class="p">)</span>
 
-    <span class="n">river_axis_km</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">river_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_river_axis</span><span class="p">(</span><span class="n">stations_coords</span><span class="p">)</span>
+    <span class="n">river_axis_km</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">river_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_river_axis</span><span class="p">(</span>
+        <span class="n">stations_coords</span><span class="p">,</span> <span class="n">config_file</span>
+    <span class="p">)</span>
 
     <span class="c1"># get output interval</span>
     <span class="n">km_step</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;OutputInterval&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
@@ -4201,10 +4259,12 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
     <span class="n">km_mid</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># get mid-points</span>
 
     <span class="n">ifw_face_idx</span><span class="p">,</span> <span class="n">ifw_numpy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_fairway</span><span class="p">(</span>
-        <span class="n">river_axis</span><span class="p">,</span> <span class="n">stations_coords</span><span class="p">,</span> <span class="n">mesh_data</span>
+        <span class="n">river_axis</span><span class="p">,</span> <span class="n">stations_coords</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">,</span> <span class="n">config_file</span>
     <span class="p">)</span>
 
-    <span class="n">bp_fw_face_idx</span><span class="p">,</span> <span class="n">distance_fw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_bank_to_fairway</span><span class="p">(</span><span class="n">bank_line_coords</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">ifw_numpy</span><span class="p">,</span> <span class="n">ifw_face_idx</span><span class="p">)</span>
+    <span class="n">bp_fw_face_idx</span><span class="p">,</span> <span class="n">distance_fw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_map_bank_to_fairway</span><span class="p">(</span>
+        <span class="n">bank_line_coords</span><span class="p">,</span> <span class="n">bank_km_mid</span><span class="p">,</span> <span class="n">ifw_numpy</span><span class="p">,</span> <span class="n">ifw_face_idx</span><span class="p">,</span> <span class="n">config_file</span>
+    <span class="p">)</span>
 
     <span class="c1"># water level at fairway</span>
     <span class="n">zfw_ini</span> <span class="o">=</span> <span class="p">[]</span>
@@ -4247,7 +4307,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">n_banklines</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">,</span> <span class="n">dn_flow_tot</span><span class="p">,</span> <span class="n">dn_ship_tot</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_write_bankline_shapefiles</span><span class="p">(</span><span class="n">bankline_new_list</span><span class="p">,</span> <span class="n">bankline_eq_list</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_write_bankline_shapefiles</span><span class="p">(</span>
+        <span class="n">bankline_new_list</span><span class="p">,</span> <span class="n">bankline_eq_list</span><span class="p">,</span> <span class="n">config_file</span>
+    <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_write_volume_outputs</span><span class="p">(</span><span class="n">vol_tot</span><span class="p">,</span> <span class="n">vol_eq</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">)</span>
 
     <span class="c1"># create various plots</span>
