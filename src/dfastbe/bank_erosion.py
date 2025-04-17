@@ -968,7 +968,7 @@ class Erosion:
         )
 
         # initialize arrays for erosion loop over all discharges
-        (water_level_data, erosion_results) = self._process_discharge_levels(
+        water_level_data, erosion_results = self._process_discharge_levels(
             km_mid,
             km_bin,
             config_file,
