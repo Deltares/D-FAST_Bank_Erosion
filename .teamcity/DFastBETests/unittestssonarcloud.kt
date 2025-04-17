@@ -5,7 +5,7 @@ import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import DFastCleanConfiguration
 
 object UnitTestsSonarCloud : BuildType({
-    templates(DFastCleanConfiguration)
+    //templates(DFastCleanConfiguration)
     id("UnitTestsSonarCloud")
     name = "Unit Tests + SonarCloud"
 
@@ -66,7 +66,7 @@ object UnitTestsSonarCloud : BuildType({
             param("sonarProjectKey", "%SonarProjectKey%")
             param("sonarServer", "%sonar_server%")
         }
-        stepsOrder = arrayListOf("Conda_create_environment", "RUNNER_11", "Python_pip_install_poetry", "Install_dependencies_via_poetry", "Unit_test_and_code_coverage", "RUNNER_18", "RUNNER_19", "SonarCloud_analysis", "Conda_deactivate_and_remove_environment")
+        //stepsOrder = arrayListOf("Conda_create_environment", "RUNNER_11", "Python_pip_install_poetry", "Install_dependencies_via_poetry", "Unit_test_and_code_coverage", "RUNNER_18", "RUNNER_19", "SonarCloud_analysis", "Conda_deactivate_and_remove_environment")
     }
 
     features {
