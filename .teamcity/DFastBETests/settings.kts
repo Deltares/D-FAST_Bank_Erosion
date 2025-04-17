@@ -1,7 +1,7 @@
 
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.projectFeatures.*
-import DFast_DFastBankErosion_UnitTestsSonarCloud
+import UnitTestsSonarCloud
 version = "2024.12"
 project {
     description = "D-FAST Bank Erosion"
@@ -14,5 +14,5 @@ project {
         password("sonar_server", "credentialsJSON:b6bc3a37-8077-45db-9f3c-da2b5db2e8ca")
     }
 
-    buildType(DFast_DFastBankErosion_UnitTestsSonarCloud)
+    buildType(UnitTestsSonarCloud)
 }

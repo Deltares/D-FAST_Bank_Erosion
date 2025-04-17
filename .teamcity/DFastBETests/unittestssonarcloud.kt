@@ -5,7 +5,7 @@ import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildFeatures.perfmon
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 
-object DFast_DFastBankErosion_UnitTestsSonarCloud : BuildType({
+object UnitTestsSonarCloud : BuildType({
     templates(AbsoluteId("DFast_DFastMorphologicalImpact_DFastCleanConfiguration"))
     id("UnitTestsSonarCloud")
     name = "Unit Tests + SonarCloud"
