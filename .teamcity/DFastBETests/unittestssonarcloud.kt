@@ -2,9 +2,10 @@ import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildFeatures.perfmon
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
+import template
 
 object UnitTestsSonarCloud : BuildType({
-    templates(AbsoluteId("DFast_DFastMorphologicalImpact_DFastCleanConfiguration"))
+    templates(DFastCleanConfiguration)
     id("UnitTestsSonarCloud")
     name = "Unit Tests + SonarCloud"
 
