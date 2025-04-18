@@ -385,8 +385,12 @@ class SimulationData:
         edge_face[edge_nr[unique_edge], 0] = face_nr[unique_edge]
         edge_face[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
 
-        x_face_coords = apply_masked_indexing(self.x_node, self.face_node)
-        y_face_coords = apply_masked_indexing(self.y_node, self.face_node)
+        x_face_coords = SimulationData.apply_masked_indexing(
+            self.x_node, self.face_node
+        )
+        y_face_coords = SimulationData.apply_masked_indexing(
+            self.y_node, self.face_node
+        )
         x_edge_coords = self.x_node[edge_node]
         y_edge_coords = self.y_node[edge_node]
 
@@ -402,6 +406,28 @@ class SimulationData:
             face_edge_connectivity=face_edge_connectivity,
             boundary_edge_nrs=boundary_edge_nrs,
         )
+
+    @staticmethod
+    def apply_masked_indexing(
+        x0: np.array, idx: np.ma.masked_array
+    ) -> np.ma.masked_array:
+        """
+        Index one array by another transferring the mask.
+
+        Args:
+            x0 : np.ndarray
+                A linear array.
+            idx : np.ma.masked_array
+                An index array with possibly masked indices.
+
+        returns:
+            x1: np.ma.masked_array
+                An array with same shape as idx, with mask.
+        """
+        idx_safe = idx.copy()
+        idx_safe.data[np.ma.getmask(idx)] = 0
+        x1 = np.ma.masked_where(np.ma.getmask(idx), x0[idx_safe])
+        return x1
 
 
 class ConfigFile:

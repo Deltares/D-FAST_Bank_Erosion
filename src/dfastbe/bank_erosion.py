@@ -584,7 +584,7 @@ class Erosion:
                     # bankheight = maximum bed elevation per cell
                     if simulation_data.bed_elevation_location == "node":
                         zb = simulation_data.bed_elevation_values
-                        zb_all_nodes = apply_masked_indexing(
+                        zb_all_nodes = SimulationData.apply_masked_indexing(
                             zb, simulation_data.face_node[bank_index, :]
                         )
                         zb_bank = zb_all_nodes.max(axis=1)
@@ -1246,26 +1246,6 @@ class Erosion:
                 plt.close("all")
             else:
                 plt.show(block=not self.gui)
-
-
-def apply_masked_indexing(x0: np.array, idx: np.ma.masked_array) -> np.ma.masked_array:
-    """
-    Index one array by another transferring the mask.
-
-    Args:
-        x0 : np.ndarray
-            A linear array.
-        idx : np.ma.masked_array
-            An index array with possibly masked indices.
-
-    returns:
-        x1: np.ma.masked_array
-            An array with same shape as idx, with mask.
-    """
-    idx_safe = idx.copy()
-    idx_safe.data[np.ma.getmask(idx)] = 0
-    x1 = np.ma.masked_where(np.ma.getmask(idx), x0[idx_safe])
-    return x1
 
 
 class BankLinesResultsError(Exception):
