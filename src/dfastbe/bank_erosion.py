@@ -584,7 +584,7 @@ class Erosion:
                     # bankheight = maximum bed elevation per cell
                     if simulation_data.bed_elevation_location == "node":
                         zb = simulation_data.bed_elevation_values
-                        zb_all_nodes = _apply_masked_indexing(
+                        zb_all_nodes = apply_masked_indexing(
                             zb, simulation_data.face_node[bank_index, :]
                         )
                         zb_bank = zb_all_nodes.max(axis=1)
@@ -1248,7 +1248,7 @@ class Erosion:
                 plt.show(block=not self.gui)
 
 
-def _apply_masked_indexing(x0: np.array, idx: np.ma.masked_array) -> np.ma.masked_array:
+def apply_masked_indexing(x0: np.array, idx: np.ma.masked_array) -> np.ma.masked_array:
     """
     Index one array by another transferring the mask.
 
@@ -1266,127 +1266,6 @@ def _apply_masked_indexing(x0: np.array, idx: np.ma.masked_array) -> np.ma.maske
     idx_safe.data[np.ma.getmask(idx)] = 0
     x1 = np.ma.masked_where(np.ma.getmask(idx), x0[idx_safe])
     return x1
-
-
-def _compute_mesh_topology(
-    simulation_data: SimulationData,
-) -> MeshData:
-    """Derive secondary topology arrays from the face-node connectivity of the mesh.
-
-    This function computes the edge-node, edge-face, and face-edge connectivity arrays,
-    as well as the boundary edges of the mesh, based on the face-node connectivity provided
-    in the simulation data.
-
-    Args:
-        simulation_data (SimulationData):
-            A simulation object containing mesh-related data, including face-node connectivity
-            (`face_node`), the number of nodes per face (`n_nodes`), and node coordinates (`x_node`, `y_node`).
-
-    Returns:
-        MeshData: a dataclass containing the following attributes:
-            - `x_face_coords`: x-coordinates of face nodes
-            - `y_face_coords`: y-coordinates of face nodes
-            - `x_edge_coords`: x-coordinates of edge nodes
-            - `y_edge_coords`: y-coordinates of edge nodes
-            - `face_node`: the node indices for each of the mesh faces.
-            - `n_nodes`: number of nodes per face
-            - `edge_node`: the node indices for each of the mesh edges.
-            - `edge_face_connectivity`: the face indices for each of the mesh edge
-            - `face_edge_connectivity`: the edge indices for each of the mesh face
-            - `boundary_edge_nrs`: indices of boundary edges
-
-    Raises:
-        KeyError:
-            If required keys (e.g., `face_node`, `nnodes`, `x_node`, `y_node`) are missing from the `sim` object.
-
-    Notes:
-        - The function identifies unique edges by sorting and comparing node indices.
-        - Boundary edges are identified as edges that belong to only one face.
-        - The function assumes that the mesh is well-formed, with consistent face-node connectivity.
-    """
-
-    # get a sorted list of edge node connections (shared edges occur twice)
-    # face_nr contains the face index to which the edge belongs
-    face_node = simulation_data.face_node
-    n_nodes = simulation_data.n_nodes
-    n_faces = face_node.shape[0]
-    n_edges = sum(n_nodes)
-    edge_node = np.zeros((n_edges, 2), dtype=int)
-    face_nr = np.zeros((n_edges,), dtype=int)
-    i = 0
-    for face_i in range(n_faces):
-        num_edges = n_nodes[face_i]  # note: nEdges = nNodes
-        for edge_i in range(num_edges):
-            if edge_i == 0:
-                edge_node[i, 1] = face_node[face_i, num_edges - 1]
-            else:
-                edge_node[i, 1] = face_node[face_i, edge_i - 1]
-            edge_node[i, 0] = face_node[face_i, edge_i]
-            face_nr[i] = face_i
-            i = i + 1
-    edge_node.sort(axis=1)
-    i2 = np.argsort(edge_node[:, 1], kind="stable")
-    i1 = np.argsort(edge_node[i2, 0], kind="stable")
-    i12 = i2[i1]
-    edge_node = edge_node[i12, :]
-    face_nr = face_nr[i12]
-
-    # detect which edges are equal to the previous edge, and get a list of all unique edges
-    numpy_true = np.array([True])
-    equal_to_previous = np.concatenate(
-        (~numpy_true, (np.diff(edge_node, axis=0) == 0).all(axis=1))
-    )
-    unique_edge = ~equal_to_previous
-    n_unique_edges = np.sum(unique_edge)
-    # reduce the edge node connections to only the unique edges
-    edge_node = edge_node[unique_edge, :]
-
-    # number the edges
-    edge_nr = np.zeros(n_edges, dtype=int)
-    edge_nr[unique_edge] = np.arange(n_unique_edges, dtype=int)
-    edge_nr[equal_to_previous] = edge_nr[
-        np.concatenate((equal_to_previous[1:], equal_to_previous[:1]))
-    ]
-
-    # if two consecutive edges are unique, the first one occurs only once and represents a boundary edge
-    is_boundary_edge = unique_edge & np.concatenate((unique_edge[1:], numpy_true))
-    boundary_edge_nrs = edge_nr[is_boundary_edge]
-
-    # go back to the original face order
-    edge_nr_in_face_order = np.zeros(n_edges, dtype=int)
-    edge_nr_in_face_order[i12] = edge_nr
-    # create the face edge connectivity array
-    face_edge_connectivity = np.zeros(face_node.shape, dtype=int)
-
-    i = 0
-    for face_i in range(n_faces):
-        num_edges = n_nodes[face_i]  # note: num_edges = n_nodes
-        for edge_i in range(num_edges):
-            face_edge_connectivity[face_i, edge_i] = edge_nr_in_face_order[i]
-            i = i + 1
-
-    # determine the edge face connectivity
-    edge_face = -np.ones((n_unique_edges, 2), dtype=int)
-    edge_face[edge_nr[unique_edge], 0] = face_nr[unique_edge]
-    edge_face[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
-
-    x_face_coords = _apply_masked_indexing(simulation_data.x_node, face_node)
-    y_face_coords = _apply_masked_indexing(simulation_data.y_node, face_node)
-    x_edge_coords = simulation_data.x_node[edge_node]
-    y_edge_coords = simulation_data.y_node[edge_node]
-
-    return MeshData(
-        x_face_coords=x_face_coords,
-        y_face_coords=y_face_coords,
-        x_edge_coords=x_edge_coords,
-        y_edge_coords=y_edge_coords,
-        face_node=face_node,
-        n_nodes=n_nodes,
-        edge_node=edge_node,
-        edge_face_connectivity=edge_face,
-        face_edge_connectivity=face_edge_connectivity,
-        boundary_edge_nrs=boundary_edge_nrs,
-    )
 
 
 class BankLinesResultsError(Exception):
