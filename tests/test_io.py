@@ -687,7 +687,7 @@ class TestConfigFile:
         assert len(search_lines) == 2
         assert list(search_lines[0].coords) == [(0, 0), (1, 1), (2, 2)]
 
-    def test_get_bank_lines(self, config: ConfigParser, fs: FakeFilesystem):
+    def test_read_bank_lines(self, config: ConfigParser, fs: FakeFilesystem):
         """Test retrieving bank lines."""
         config["General"]["BankLine"] = "bankfile"
         config = ConfigFile(config, "tests/data/erosion/test.cfg")
@@ -697,7 +697,7 @@ class TestConfigFile:
             contents="0.0 0.0\n1.0 1.0\n2.0 2.0\n3.0 3.0\n4.0 4.0\n",
         )
 
-        bank_lines = config.get_bank_lines("inputs")
+        bank_lines = config.read_bank_lines("inputs")
 
         assert isinstance(bank_lines, GeoDataFrame)
         assert len(bank_lines) == 1

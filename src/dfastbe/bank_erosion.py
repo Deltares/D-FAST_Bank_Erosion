@@ -870,7 +870,7 @@ class Erosion:
         stations_coords = self.river_data.masked_profile_arr[:, :2]
 
         # read bank lines
-        banklines = config_file.get_bank_lines(str(self.bank_dir))
+        banklines = config_file.read_bank_lines(str(self.bank_dir))
         n_banklines = len(banklines)
 
         # map bank lines to mesh cells

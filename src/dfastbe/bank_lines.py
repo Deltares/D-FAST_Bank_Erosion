@@ -134,7 +134,7 @@ class BankLines:
 
         # derive bank lines (get_banklines)
         log_text("identify_banklines")
-        banklines = self._get_bank_lines(self.simulation_data, self.h0, config_file)
+        banklines = self.detect_bank_lines(self.simulation_data, self.h0, config_file)
 
         # clip the set of detected bank lines to the bank areas
         log_text("simplify_banklines")
@@ -250,7 +250,7 @@ class BankLines:
         )
 
     @staticmethod
-    def _get_bank_lines(
+    def detect_bank_lines(
         simulation_data: SimulationData, h0: float, config_file: ConfigFile
     ) -> gpd.GeoSeries:
         """
@@ -265,8 +265,8 @@ class BankLines:
                 Critical water depth for determining the banks.
 
         Returns:
-        banklines (geopandas.GeoSeries):
-            The collection of all detected bank segments in the remaining model area.
+            geopandas.GeoSeries:
+                The collection of all detected bank segments in the remaining model area.
         """
         fnc = simulation_data.face_node
         n_nodes = simulation_data.n_nodes

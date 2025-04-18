@@ -839,7 +839,7 @@ class ConfigFile:
             line[b] = XYCModel.read(bankfile)
         return line
 
-    def get_bank_lines(self, bank_dir: str) -> List[np.ndarray]:
+    def read_bank_lines(self, bank_dir: str) -> List[np.ndarray]:
         """Get the bank lines from the detection step.
 
         Args:
