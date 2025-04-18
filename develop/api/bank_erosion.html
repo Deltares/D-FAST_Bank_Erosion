@@ -3637,7 +3637,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;derive_topology&quot;</span><span class="p">)</span>
 
-        <span class="n">mesh_data</span> <span class="o">=</span> <span class="n">_compute_mesh_topology</span><span class="p">(</span><span class="n">simulation_data</span><span class="p">)</span>
+        <span class="n">mesh_data</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">compute_mesh_topology</span><span class="p">()</span>
 
         <span class="c1"># clip the chainage path to the range of chainages of interest</span>
         <span class="n">km_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">station_bounds</span>
@@ -4233,7 +4233,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;derive_topology&quot;</span><span class="p">)</span>
 
-    <span class="n">mesh_data</span> <span class="o">=</span> <span class="n">_compute_mesh_topology</span><span class="p">(</span><span class="n">simulation_data</span><span class="p">)</span>
+    <span class="n">mesh_data</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">compute_mesh_topology</span><span class="p">()</span>
 
     <span class="c1"># clip the chainage path to the range of chainages of interest</span>
     <span class="n">km_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">station_bounds</span>
