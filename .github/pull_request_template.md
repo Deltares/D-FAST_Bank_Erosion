@@ -29,6 +29,8 @@ Check relevant points.
 
 # Checklist:
 - [ ] Assigned copilot as a reviewer and addressed the copilot's comments.
+- [ ] are all pipelines passing?
+- [ ] My branch is updated with the latest changes from the base branch.
 - [ ] updated version number in pyproject.toml.
 - [ ] updated environment.yml and the lock file.
 - [ ] I have added tests that prove my fix is effective or that my feature works.
