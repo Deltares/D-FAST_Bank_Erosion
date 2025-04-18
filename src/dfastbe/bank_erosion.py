@@ -608,7 +608,7 @@ class Erosion:
                 hfw = simulation_data.water_depth_face[ii]
                 hfw_max = max(hfw_max, hfw.max())
                 water_level[iq].append(simulation_data.water_level_face[ii])
-                chez = simulation_data.chz_face[ii]
+                chez = simulation_data.chezy_face[ii]
                 chezy[iq].append(0 * chez + chez.mean())
 
                 if iq == self.num_levels - 1:  # ref_level:

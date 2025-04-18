@@ -91,7 +91,7 @@ class SimulationData:
         water_depth_face: np.ndarray,
         velocity_x_face: np.ndarray,
         velocity_y_face: np.ndarray,
-        chz_face: np.ndarray,
+        chezy_face: np.ndarray,
         dh0: float,
     ):
         self.x_node = x_node
@@ -104,7 +104,7 @@ class SimulationData:
         self.water_depth_face = water_depth_face
         self.velocity_x_face = velocity_x_face
         self.velocity_y_face = velocity_y_face
-        self.chz_face = chz_face
+        self.chezy_face = chezy_face
         self.dh0 = dh0
 
     @classmethod
@@ -171,7 +171,7 @@ class SimulationData:
             velocity_x_face = read_fm_map(file_name, "sea_water_x_velocity")
             velocity_y_face = read_fm_map(file_name, "sea_water_y_velocity")
             log_text("read_chezy", indent=indent)
-            chz_face = read_fm_map(file_name, "Chezy roughness")
+            chezy_face = read_fm_map(file_name, "Chezy roughness")
 
             log_text("read_drywet", indent=indent)
             root_group = netCDF4.Dataset(file_name)
@@ -206,7 +206,7 @@ class SimulationData:
             water_depth_face=water_depth_face,
             velocity_x_face=velocity_x_face,
             velocity_y_face=velocity_y_face,
-            chz_face=chz_face,
+            chezy_face=chezy_face,
             dh0=dh0,
         )
 
@@ -286,7 +286,7 @@ class SimulationData:
         self.water_depth_face = self.water_depth_face[keep_face]
         self.velocity_x_face = self.velocity_x_face[keep_face]
         self.velocity_y_face = self.velocity_y_face[keep_face]
-        self.chz_face = self.chz_face[keep_face]
+        self.chezy_face = self.chezy_face[keep_face]
 
 
 PROGTEXTS: Dict[str, List[str]]
