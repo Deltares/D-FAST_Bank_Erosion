@@ -44,6 +44,9 @@ from shapely import prepare
 MAX_RIVER_WIDTH = 1000
 
 
+PROGTEXTS: Dict[str, List[str]]
+
+
 class SimulationData:
     """Class to hold simulation data.
 
@@ -287,9 +290,6 @@ class SimulationData:
         self.velocity_x_face = self.velocity_x_face[keep_face]
         self.velocity_y_face = self.velocity_y_face[keep_face]
         self.chezy_face = self.chezy_face[keep_face]
-
-
-PROGTEXTS: Dict[str, List[str]]
 
 
 class ConfigFile:
