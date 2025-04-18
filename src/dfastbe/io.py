@@ -52,26 +52,40 @@ class SimulationData:
     mesh to a specified area of interest.
 
     Args:
-        x_node (np.ndarray): X-coordinates of the nodes.
-        y_node (np.ndarray): Y-coordinates of the nodes.
-        nnodes (np.ndarray): Number of nodes in each face.
-        facenode (np.ma.masked_array): Face-node connectivity array.
-        zb_location (np.ndarray): Location of the bed levels.
-        zb_val (np.ndarray): Bed levels.
-        zw_face (np.ndarray): Water levels at the faces.
-        h_face (np.ndarray): Water depths at the faces.
-        ucx_face (np.ndarray): X-component of the velocity at the faces.
-        ucy_face (np.ndarray): Y-component of the velocity at the faces.
-        chz_face (np.ndarray): Chezy roughness values at the faces.
-        dh0 (float): Threshold depth for detecting drying and flooding.
+        x_node (np.ndarray):
+            X-coordinates of the nodes.
+        y_node (np.ndarray):
+            Y-coordinates of the nodes.
+        n_nodes (np.ndarray):
+            Number of nodes in each face.
+        face_node (np.ma.masked_array):
+            Face-node connectivity array.
+        bed_elevation_location (np.ndarray):
+            Determines whether the bed elevation is associated with nodes
+            or faces in the computational mesh.
+        bed_elevation_values (np.ndarray):
+            Bed elevation values for each node in the simulation data.
+        water_level_face (np.ndarray):
+            Water levels at the faces.
+        water_depth_face (np.ndarray):
+            Water depths at the faces.
+        velocity_x_face (np.ndarray):
+            X-component of the velocity at the faces.
+        velocity_y_face (np.ndarray):
+            Y-component of the velocity at the faces.
+        chezy_face (np.ndarray):
+            Chezy roughness values at the faces.
+        dry_wet_threshold (float):
+            Threshold depth for detecting drying and flooding.
     """
+
     def __init__(
         self,
         x_node: np.ndarray,
         y_node: np.ndarray,
         n_nodes: np.ndarray,
         face_node: np.ma.masked_array,
-        zb_location: np.ndarray,
+        bed_elevation_location: np.ndarray,
         zb_val: np.ndarray,
         zw_face: np.ndarray,
         h_face: np.ndarray,
@@ -84,7 +98,7 @@ class SimulationData:
         self.y_node = y_node
         self.n_nodes = n_nodes
         self.face_node = face_node
-        self.zb_location = zb_location
+        self.bed_elevation_location = bed_elevation_location
         self.zb_val = zb_val
         self.zw_face = zw_face
         self.h_face = h_face
@@ -145,7 +159,7 @@ class SimulationData:
 
             face_node = f_nc
             log_text("read_bathymetry", indent=indent)
-            zb_location = "node"
+            bed_elevation_location = "node"
             zb_val = read_fm_map(file_name, "altitude", location="node")
             log_text("read_water_level", indent=indent)
             zw_face = read_fm_map(file_name, "Water level")
@@ -186,7 +200,7 @@ class SimulationData:
             y_node=y_node,
             n_nodes=n_nodes,
             face_node=face_node,
-            zb_location=zb_location,
+            bed_elevation_location=bed_elevation_location,
             zb_val=zb_val,
             zw_face=zw_face,
             h_face=h_face,
@@ -262,7 +276,7 @@ class SimulationData:
 
         self.x_node = x[keep]
         self.y_node = y[keep]
-        if self.zb_location == "node":
+        if self.bed_elevation_location == "node":
             self.zb_val = self.zb_val[keep]
         else:
             self.zb_val = self.zb_val[keep_face]
