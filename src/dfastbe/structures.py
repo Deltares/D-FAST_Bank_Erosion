@@ -1,8 +1,7 @@
 """Erosion-related data structures."""
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Tuple
-
+from typing import List, Dict, Tuple, ClassVar
 import numpy as np
 from geopandas import GeoDataFrame
 
@@ -36,8 +35,8 @@ class ErosionInputs:
     bank_protection_level: List[np.ndarray]
     tauc: List[np.ndarray]
     bank_type: List[np.ndarray]
-    taucls: np.array = np.array([1e20, 95, 3.0, 0.95, 0.15])
-    taucls_str: Tuple[str] = (
+    taucls: ClassVar[np.ndarray] = np.array([1e20, 95, 3.0, 0.95, 0.15])
+    taucls_str: ClassVar[Tuple[str]] = (
         "protected",
         "vegetation",
         "good clay",
@@ -243,6 +242,6 @@ class ErosionResults:
     eq_eroded_vol: List[np.ndarray]
     total_eroded_vol: List[np.ndarray]
     erosion_time: int
-    avg_erosion_rate: np.ndarray = np.array([])
-    eq_eroded_vol_per_km: np.ndarray = np.array([])
-    total_eroded_vol_per_km: np.ndarray = np.array([])
+    avg_erosion_rate: np.ndarray = field(default_factory=lambda : np.empty(0))
+    eq_eroded_vol_per_km: np.ndarray = field(default_factory=lambda : np.empty(0))
+    total_eroded_vol_per_km: np.ndarray = field(default_factory=lambda : np.empty(0))
