@@ -607,7 +607,7 @@ class Erosion:
                 ii = bp_fw_face_idx[ib]
                 hfw = simulation_data.h_face[ii]
                 hfw_max = max(hfw_max, hfw.max())
-                water_level[iq].append(simulation_data.zw_face[ii])
+                water_level[iq].append(simulation_data.water_level_face[ii])
                 chez = simulation_data.chz_face[ii]
                 chezy[iq].append(0 * chez + chez.mean())
 
@@ -902,7 +902,7 @@ class Erosion:
         zfw_ini = []
         for ib in range(n_banklines):
             ii = bp_fw_face_idx[ib]
-            zfw_ini.append(simulation_data.zw_face[ii])
+            zfw_ini.append(simulation_data.water_level_face[ii])
 
         erosion_inputs = self._prepare_initial_conditions(
             config_file, bank_km_mid, zfw_ini
