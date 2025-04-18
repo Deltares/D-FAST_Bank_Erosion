@@ -566,7 +566,7 @@ class Erosion:
                 bank_index = bank_idx[ib]
                 vel_bank = (
                     np.absolute(
-                        simulation_data.ucx_face[bank_index] * dx
+                        simulation_data.velocity_x_face[bank_index] * dx
                         + simulation_data.ucy_face[bank_index] * dy
                     )
                     / line_size[ib]

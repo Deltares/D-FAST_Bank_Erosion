@@ -89,7 +89,7 @@ class SimulationData:
         bed_elevation_values: np.ndarray,
         water_level_face: np.ndarray,
         water_depth_face: np.ndarray,
-        ucx_face: np.ndarray,
+        velocity_x_face: np.ndarray,
         ucy_face: np.ndarray,
         chz_face: np.ndarray,
         dh0: float,
@@ -102,7 +102,7 @@ class SimulationData:
         self.bed_elevation_values = bed_elevation_values
         self.water_level_face = water_level_face
         self.water_depth_face = water_depth_face
-        self.ucx_face = ucx_face
+        self.velocity_x_face = velocity_x_face
         self.ucy_face = ucy_face
         self.chz_face = chz_face
         self.dh0 = dh0
@@ -168,7 +168,7 @@ class SimulationData:
                 read_fm_map(file_name, "sea_floor_depth_below_sea_surface"), 0.0
             )
             log_text("read_velocity", indent=indent)
-            ucx_face = read_fm_map(file_name, "sea_water_x_velocity")
+            velocity_x_face = read_fm_map(file_name, "sea_water_x_velocity")
             ucy_face = read_fm_map(file_name, "sea_water_y_velocity")
             log_text("read_chezy", indent=indent)
             chz_face = read_fm_map(file_name, "Chezy roughness")
@@ -204,7 +204,7 @@ class SimulationData:
             bed_elevation_values=bed_elevation_values,
             water_level_face=water_level_face,
             water_depth_face=water_depth_face,
-            ucx_face=ucx_face,
+            velocity_x_face=velocity_x_face,
             ucy_face=ucy_face,
             chz_face=chz_face,
             dh0=dh0,
@@ -284,7 +284,7 @@ class SimulationData:
         self.n_nodes = self.n_nodes[keep_face]
         self.water_level_face = self.water_level_face[keep_face]
         self.water_depth_face = self.water_depth_face[keep_face]
-        self.ucx_face = self.ucx_face[keep_face]
+        self.velocity_x_face = self.velocity_x_face[keep_face]
         self.ucy_face = self.ucy_face[keep_face]
         self.chz_face = self.chz_face[keep_face]
 
