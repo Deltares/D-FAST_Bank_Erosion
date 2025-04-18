@@ -27,6 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 from typing import List, Tuple
+
 import numpy as np
 
 from dfastbe.structures import MeshData

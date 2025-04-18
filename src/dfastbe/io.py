@@ -137,7 +137,7 @@ class SimulationData:
             f_nc = read_fm_map(file_name, "face_node_connectivity")
             if f_nc.mask.shape == ():
                 # all faces have the same number of nodes
-                n_nodes = np.ones(f_nc.data.shape[0], dtype=np.int) * f_nc.data.shape[1]
+                n_nodes = np.ones(f_nc.data.shape[0], dtype=int) * f_nc.data.shape[1]
             else:
                 # varying number of nodes
                 n_nodes = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
@@ -256,7 +256,7 @@ class SimulationData:
 
         fnc = self.face_node
         keep_face = keep[fnc].all(axis=1)
-        renum = np.zeros(nnodes, dtype=np.int)
+        renum = np.zeros(nnodes, dtype=int)
         renum[keep] = range(sum(keep))
         self.face_node = renum[fnc[keep_face]]
 
