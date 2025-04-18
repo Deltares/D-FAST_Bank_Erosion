@@ -324,21 +324,19 @@ class SimulationData:
 
         # get a sorted list of edge node connections (shared edges occur twice)
         # face_nr contains the face index to which the edge belongs
-        face_node = self.face_node
-        n_nodes = self.n_nodes
-        n_faces = face_node.shape[0]
-        n_edges = sum(n_nodes)
+        n_faces = self.face_node.shape[0]
+        n_edges = sum(self.n_nodes)
         edge_node = np.zeros((n_edges, 2), dtype=int)
         face_nr = np.zeros((n_edges,), dtype=int)
         i = 0
         for face_i in range(n_faces):
-            num_edges = n_nodes[face_i]  # note: nEdges = nNodes
+            num_edges = self.n_nodes[face_i]  # note: nEdges = nNodes
             for edge_i in range(num_edges):
                 if edge_i == 0:
-                    edge_node[i, 1] = face_node[face_i, num_edges - 1]
+                    edge_node[i, 1] = self.face_node[face_i, num_edges - 1]
                 else:
-                    edge_node[i, 1] = face_node[face_i, edge_i - 1]
-                edge_node[i, 0] = face_node[face_i, edge_i]
+                    edge_node[i, 1] = self.face_node[face_i, edge_i - 1]
+                edge_node[i, 0] = self.face_node[face_i, edge_i]
                 face_nr[i] = face_i
                 i = i + 1
         edge_node.sort(axis=1)
@@ -373,11 +371,11 @@ class SimulationData:
         edge_nr_in_face_order = np.zeros(n_edges, dtype=int)
         edge_nr_in_face_order[i12] = edge_nr
         # create the face edge connectivity array
-        face_edge_connectivity = np.zeros(face_node.shape, dtype=int)
+        face_edge_connectivity = np.zeros(self.face_node.shape, dtype=int)
 
         i = 0
         for face_i in range(n_faces):
-            num_edges = n_nodes[face_i]  # note: num_edges = n_nodes
+            num_edges = self.n_nodes[face_i]  # note: num_edges = n_nodes
             for edge_i in range(num_edges):
                 face_edge_connectivity[face_i, edge_i] = edge_nr_in_face_order[i]
                 i = i + 1
@@ -387,8 +385,8 @@ class SimulationData:
         edge_face[edge_nr[unique_edge], 0] = face_nr[unique_edge]
         edge_face[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
 
-        x_face_coords = apply_masked_indexing(self.x_node, face_node)
-        y_face_coords = apply_masked_indexing(self.y_node, face_node)
+        x_face_coords = apply_masked_indexing(self.x_node, self.face_node)
+        y_face_coords = apply_masked_indexing(self.y_node, self.face_node)
         x_edge_coords = self.x_node[edge_node]
         y_edge_coords = self.y_node[edge_node]
 
@@ -397,8 +395,8 @@ class SimulationData:
             y_face_coords=y_face_coords,
             x_edge_coords=x_edge_coords,
             y_edge_coords=y_edge_coords,
-            face_node=face_node,
-            n_nodes=n_nodes,
+            face_node=self.face_node,
+            n_nodes=self.n_nodes,
             edge_node=edge_node,
             edge_face_connectivity=edge_face,
             face_edge_connectivity=face_edge_connectivity,

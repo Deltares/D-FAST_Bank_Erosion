@@ -1036,7 +1036,7 @@ class Erosion:
                 bbox,
                 self.river_data.masked_profile_arr,
                 banklines,
-                mesh_data.face_node,
+                simulation_data.face_node,
                 simulation_data.n_nodes,
                 simulation_data.x_node,
                 simulation_data.y_node,
