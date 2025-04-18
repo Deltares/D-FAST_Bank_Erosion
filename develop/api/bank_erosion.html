@@ -3646,7 +3646,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">stations_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">masked_profile_arr</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
 
         <span class="c1"># read bank lines</span>
-        <span class="n">banklines</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_bank_lines</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_dir</span><span class="p">))</span>
+        <span class="n">banklines</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">read_bank_lines</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_dir</span><span class="p">))</span>
         <span class="n">n_banklines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">banklines</span><span class="p">)</span>
 
         <span class="c1"># map bank lines to mesh cells</span>
@@ -4242,7 +4242,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
     <span class="n">stations_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">masked_profile_arr</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
 
     <span class="c1"># read bank lines</span>
-    <span class="n">banklines</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_bank_lines</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_dir</span><span class="p">))</span>
+    <span class="n">banklines</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">read_bank_lines</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_dir</span><span class="p">))</span>
     <span class="n">n_banklines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">banklines</span><span class="p">)</span>
 
     <span class="c1"># map bank lines to mesh cells</span>

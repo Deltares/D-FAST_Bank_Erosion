@@ -1167,6 +1167,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#dfastbe.bank_lines.BankLines.detect_bank_lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      detect_bank_lines
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#dfastbe.bank_lines.BankLines.plot" class="md-nav__link">
     <span class="md-ellipsis">
       plot
@@ -1532,6 +1541,15 @@
   <a href="#dfastbe.bank_lines.BankLines.detect" class="md-nav__link">
     <span class="md-ellipsis">
       detect
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dfastbe.bank_lines.BankLines.detect_bank_lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      detect_bank_lines
     </span>
   </a>
   
@@ -2064,7 +2082,7 @@
 
         <span class="c1"># derive bank lines (get_banklines)</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;identify_banklines&quot;</span><span class="p">)</span>
-        <span class="n">banklines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_bank_lines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h0</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
+        <span class="n">banklines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_bank_lines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h0</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
 
         <span class="c1"># clip the set of detected bank lines to the bank areas</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;simplify_banklines&quot;</span><span class="p">)</span>
@@ -2180,7 +2198,7 @@
         <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_bank_lines</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">detect_bank_lines</span><span class="p">(</span>
         <span class="n">simulation_data</span><span class="p">:</span> <span class="n">SimulationData</span><span class="p">,</span> <span class="n">h0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2195,8 +2213,8 @@
 <span class="sd">                Critical water depth for determining the banks.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">        banklines (geopandas.GeoSeries):</span>
-<span class="sd">            The collection of all detected bank segments in the remaining model area.</span>
+<span class="sd">            geopandas.GeoSeries:</span>
+<span class="sd">                The collection of all detected bank segments in the remaining model area.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">fnc</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span>
         <span class="n">n_nodes</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">n_nodes</span>
@@ -2567,7 +2585,7 @@ Flag indicating whether this routine is called from the GUI.</p>
 
     <span class="c1"># derive bank lines (get_banklines)</span>
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;identify_banklines&quot;</span><span class="p">)</span>
-    <span class="n">banklines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_bank_lines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h0</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
+    <span class="n">banklines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_bank_lines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h0</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
 
     <span class="c1"># clip the set of detected bank lines to the bank areas</span>
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;simplify_banklines&quot;</span><span class="p">)</span>
@@ -2595,6 +2613,254 @@ Flag indicating whether this routine is called from the GUI.</p>
 
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;end_banklines&quot;</span><span class="p">)</span>
     <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- stop analysis --&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="dfastbe.bank_lines.BankLines.detect_bank_lines" class="doc doc-heading"><a href="#dfastbe.bank_lines.BankLines.detect_bank_lines" class="toclink">
+            <code class="highlight language-python"><span class="n">detect_bank_lines</span><span class="p">(</span><span class="n">simulation_data</span><span class="p">:</span> <span class="n">SimulationData</span><span class="p">,</span> <span class="n">h0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span></code>
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
+  </span>
+
+</a><a href="#dfastbe.bank_lines.BankLines.detect_bank_lines" class="headerlink" title="Permanent link">#</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Detect all possible bank line segments based on simulation data.</p>
+<p>Use a critical water depth h0 as a water depth threshold for dry/wet boundary.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>simulation_data</code>
+            </td>
+            <td>
+                  <code><a class="autorefs autorefs-internal" title="SimulationData (&lt;code&gt;dfastbe.io.SimulationData&lt;/code&gt;)" href="io.html#dfastbe.io.SimulationData">SimulationData</a></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Simulation data: mesh, bed levels, water levels, velocities, etc.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>h0</code>
+            </td>
+            <td>
+                  <code><span title="float">float</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Critical water depth for determining the banks.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="geopandas.GeoSeries">GeoSeries</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>geopandas.GeoSeries:
+The collection of all detected bank segments in the remaining model area.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+            <details class="quote">
+              <summary>Source code in <code>src/dfastbe/bank_lines.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span>
+<span class="normal">296</span>
+<span class="normal">297</span>
+<span class="normal">298</span>
+<span class="normal">299</span>
+<span class="normal">300</span>
+<span class="normal">301</span>
+<span class="normal">302</span>
+<span class="normal">303</span>
+<span class="normal">304</span>
+<span class="normal">305</span>
+<span class="normal">306</span>
+<span class="normal">307</span>
+<span class="normal">308</span>
+<span class="normal">309</span>
+<span class="normal">310</span>
+<span class="normal">311</span>
+<span class="normal">312</span>
+<span class="normal">313</span>
+<span class="normal">314</span>
+<span class="normal">315</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span>
+<span class="normal">322</span>
+<span class="normal">323</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">detect_bank_lines</span><span class="p">(</span>
+    <span class="n">simulation_data</span><span class="p">:</span> <span class="n">SimulationData</span><span class="p">,</span> <span class="n">h0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Detect all possible bank line segments based on simulation data.</span>
+
+<span class="sd">    Use a critical water depth h0 as a water depth threshold for dry/wet boundary.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        simulation_data (SimulationData):</span>
+<span class="sd">            Simulation data: mesh, bed levels, water levels, velocities, etc.</span>
+<span class="sd">        h0 (float):</span>
+<span class="sd">            Critical water depth for determining the banks.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        geopandas.GeoSeries:</span>
+<span class="sd">            The collection of all detected bank segments in the remaining model area.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fnc</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span>
+    <span class="n">n_nodes</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">n_nodes</span>
+    <span class="n">max_nnodes</span> <span class="o">=</span> <span class="n">fnc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">x_node</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span>
+    <span class="n">y_node</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">y_node</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span>
+    <span class="n">zb</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">bed_elevation_values</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span>
+    <span class="n">zw</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">water_level_face</span>
+
+    <span class="n">nnodes_total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">fnc</span><span class="o">.</span><span class="n">mask</span>
+        <span class="n">non_masked</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">fnc</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">f_nc_m</span> <span class="o">=</span> <span class="n">fnc</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">zwm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">zw</span><span class="p">,</span> <span class="n">max_nnodes</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">fnc</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">non_masked</span> <span class="o">=</span> <span class="n">fnc</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">f_nc_m</span> <span class="o">=</span> <span class="n">fnc</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">non_masked</span><span class="p">)</span>
+        <span class="n">zwm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">zw</span><span class="p">,</span> <span class="n">max_nnodes</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">non_masked</span><span class="p">)</span>
+
+    <span class="n">zw_node</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">f_nc_m</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">zwm</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">nnodes_total</span><span class="p">)</span>
+    <span class="n">n_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">f_nc_m</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">non_masked</span><span class="p">),</span> <span class="n">minlength</span><span class="o">=</span><span class="n">nnodes_total</span><span class="p">)</span>
+    <span class="n">zw_node</span> <span class="o">=</span> <span class="n">zw_node</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">n_val</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">zw_node</span><span class="p">[</span><span class="n">n_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">bed_elevation_values</span><span class="p">[</span><span class="n">n_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">h_node</span> <span class="o">=</span> <span class="n">zw_node</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span> <span class="o">-</span> <span class="n">zb</span>
+    <span class="n">wet_node</span> <span class="o">=</span> <span class="n">h_node</span> <span class="o">&gt;</span> <span class="n">h0</span>
+    <span class="n">n_wet_arr</span> <span class="o">=</span> <span class="n">wet_node</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">n_wet_arr</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span>
+
+    <span class="n">n_faces</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fnc</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_faces</span>
+    <span class="n">frac</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_faces</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">frac</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_faces</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">frac</span> <span class="o">*</span> <span class="mi">10</span><span class="p">))</span>
+            <span class="n">frac</span> <span class="o">=</span> <span class="n">frac</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">n_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">n_wet</span> <span class="o">=</span> <span class="n">n_wet_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">mask</span> <span class="ow">and</span> <span class="n">n_wet</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="ow">or</span> <span class="n">n_wet</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n_wet</span> <span class="o">==</span> <span class="n">nnodes</span><span class="p">:</span>
+            <span class="c1"># all dry or all wet</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># some nodes dry and some nodes wet: determine the line</span>
+            <span class="k">if</span> <span class="n">nnodes</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">tri_to_line</span><span class="p">(</span>
+                    <span class="n">x_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">wet_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">h_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">h0</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">poly_to_line</span><span class="p">(</span>
+                    <span class="n">nnodes</span><span class="p">,</span> <span class="n">x_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">wet_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">h_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">h0</span>
+                <span class="p">)</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="n">line</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">is_empty</span><span class="p">]</span>
+    <span class="n">multi_line</span> <span class="o">=</span> <span class="n">union_all</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+    <span class="n">merged_line</span> <span class="o">=</span> <span class="n">line_merge</span><span class="p">(</span><span class="n">multi_line</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="n">merged_line</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">config_file</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>

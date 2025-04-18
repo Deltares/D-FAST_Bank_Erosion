@@ -1213,15 +1213,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dfastbe.io.ConfigFile.get_bank_lines" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_bank_lines
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#dfastbe.io.ConfigFile.get_bank_search_distances" class="md-nav__link">
     <span class="md-ellipsis">
       get_bank_search_distances
@@ -1351,6 +1342,15 @@
   <a href="#dfastbe.io.ConfigFile.read" class="md-nav__link">
     <span class="md-ellipsis">
       read
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dfastbe.io.ConfigFile.read_bank_lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      read_bank_lines
     </span>
   </a>
   
@@ -1991,15 +1991,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dfastbe.io.ConfigFile.get_bank_lines" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_bank_lines
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#dfastbe.io.ConfigFile.get_bank_search_distances" class="md-nav__link">
     <span class="md-ellipsis">
       get_bank_search_distances
@@ -2129,6 +2120,15 @@
   <a href="#dfastbe.io.ConfigFile.read" class="md-nav__link">
     <span class="md-ellipsis">
       read
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dfastbe.io.ConfigFile.read_bank_lines" class="md-nav__link">
+    <span class="md-ellipsis">
+      read_bank_lines
     </span>
   </a>
   
@@ -4186,7 +4186,7 @@ Writing a configuration file:
             <span class="n">line</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">XYCModel</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">bankfile</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">line</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_bank_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bank_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read_bank_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bank_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the bank lines from the detection step.</span>
 
 <span class="sd">        Args:</span>
@@ -4829,140 +4829,6 @@ Writing a configuration file:
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
             <span class="n">config</span><span class="p">[</span><span class="s2">&quot;General&quot;</span><span class="p">][</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">config</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h4 id="dfastbe.io.ConfigFile.get_bank_lines" class="doc doc-heading"><a href="#dfastbe.io.ConfigFile.get_bank_lines" class="toclink">
-            <code class="highlight language-python"><span class="n">get_bank_lines</span><span class="p">(</span><span class="n">bank_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span></code>
-
-</a><a href="#dfastbe.io.ConfigFile.get_bank_lines" class="headerlink" title="Permanent link">#</a></h4>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Get the bank lines from the detection step.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>bank_dir</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Name of directory in which the bank lines files are located.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
-    <p><span class="doc-section-title">Returns:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="typing.List">List</span>[<span title="numpy.ndarray">ndarray</span>]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>List[np.ndarray]: List of arrays containing the x,y-coordinates of a bank lines.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-            <details class="quote">
-              <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">842</span>
-<span class="normal">843</span>
-<span class="normal">844</span>
-<span class="normal">845</span>
-<span class="normal">846</span>
-<span class="normal">847</span>
-<span class="normal">848</span>
-<span class="normal">849</span>
-<span class="normal">850</span>
-<span class="normal">851</span>
-<span class="normal">852</span>
-<span class="normal">853</span>
-<span class="normal">854</span>
-<span class="normal">855</span>
-<span class="normal">856</span>
-<span class="normal">857</span>
-<span class="normal">858</span>
-<span class="normal">859</span>
-<span class="normal">860</span>
-<span class="normal">861</span>
-<span class="normal">862</span>
-<span class="normal">863</span>
-<span class="normal">864</span>
-<span class="normal">865</span>
-<span class="normal">866</span>
-<span class="normal">867</span>
-<span class="normal">868</span>
-<span class="normal">869</span>
-<span class="normal">870</span>
-<span class="normal">871</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bank_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bank_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the bank lines from the detection step.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        bank_dir (str): Name of directory in which the bank lines files are located.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        List[np.ndarray]: List of arrays containing the x,y-coordinates of a bank lines.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">bank_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;BankFile&quot;</span><span class="p">,</span> <span class="s2">&quot;bankfile&quot;</span><span class="p">)</span>
-    <span class="n">bankfile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">bank_dir</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">.shp&quot;</span>
-    <span class="k">if</span> <span class="n">bankfile</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bankfile</span><span class="p">)})</span>
-        <span class="k">return</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">bankfile</span><span class="p">)</span>
-
-    <span class="n">bankfile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">bank_dir</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">_#.xyc&quot;</span>
-    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bankfile</span><span class="p">)})</span>
-    <span class="n">bankline_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">b</span> <span class="o">=</span> <span class="mi">1</span>
-    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-        <span class="n">xyc_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">bank_dir</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2">.xyc&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">xyc_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="k">break</span>
-
-        <span class="n">xy_bank</span> <span class="o">=</span> <span class="n">XYCModel</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">xyc_file</span><span class="p">)</span>
-        <span class="n">bankline_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LineString</span><span class="p">(</span><span class="n">xy_bank</span><span class="p">))</span>
-        <span class="n">b</span> <span class="o">+=</span> <span class="mi">1</span>
-    <span class="n">bankline_series</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bankline_list</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
-    <span class="n">banklines</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">bankline_series</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">banklines</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7584,6 +7450,140 @@ dedicated reader compatible with old waqbank files.</p>
     <span class="c1"># if version != &quot;1.0&quot;:</span>
     <span class="n">config</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_upgrade</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
     <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="dfastbe.io.ConfigFile.read_bank_lines" class="doc doc-heading"><a href="#dfastbe.io.ConfigFile.read_bank_lines" class="toclink">
+            <code class="highlight language-python"><span class="n">read_bank_lines</span><span class="p">(</span><span class="n">bank_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span></code>
+
+</a><a href="#dfastbe.io.ConfigFile.read_bank_lines" class="headerlink" title="Permanent link">#</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the bank lines from the detection step.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>bank_dir</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Name of directory in which the bank lines files are located.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="typing.List">List</span>[<span title="numpy.ndarray">ndarray</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List[np.ndarray]: List of arrays containing the x,y-coordinates of a bank lines.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+            <details class="quote">
+              <summary>Source code in <code>src/dfastbe/io.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">842</span>
+<span class="normal">843</span>
+<span class="normal">844</span>
+<span class="normal">845</span>
+<span class="normal">846</span>
+<span class="normal">847</span>
+<span class="normal">848</span>
+<span class="normal">849</span>
+<span class="normal">850</span>
+<span class="normal">851</span>
+<span class="normal">852</span>
+<span class="normal">853</span>
+<span class="normal">854</span>
+<span class="normal">855</span>
+<span class="normal">856</span>
+<span class="normal">857</span>
+<span class="normal">858</span>
+<span class="normal">859</span>
+<span class="normal">860</span>
+<span class="normal">861</span>
+<span class="normal">862</span>
+<span class="normal">863</span>
+<span class="normal">864</span>
+<span class="normal">865</span>
+<span class="normal">866</span>
+<span class="normal">867</span>
+<span class="normal">868</span>
+<span class="normal">869</span>
+<span class="normal">870</span>
+<span class="normal">871</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">read_bank_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bank_dir</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the bank lines from the detection step.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        bank_dir (str): Name of directory in which the bank lines files are located.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[np.ndarray]: List of arrays containing the x,y-coordinates of a bank lines.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bank_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;BankFile&quot;</span><span class="p">,</span> <span class="s2">&quot;bankfile&quot;</span><span class="p">)</span>
+    <span class="n">bankfile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">bank_dir</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">.shp&quot;</span>
+    <span class="k">if</span> <span class="n">bankfile</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bankfile</span><span class="p">)})</span>
+        <span class="k">return</span> <span class="n">gpd</span><span class="o">.</span><span class="n">read_file</span><span class="p">(</span><span class="n">bankfile</span><span class="p">)</span>
+
+    <span class="n">bankfile</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">bank_dir</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">_#.xyc&quot;</span>
+    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bankfile</span><span class="p">)})</span>
+    <span class="n">bankline_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">xyc_file</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">bank_dir</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2">.xyc&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">xyc_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">break</span>
+
+        <span class="n">xy_bank</span> <span class="o">=</span> <span class="n">XYCModel</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">xyc_file</span><span class="p">)</span>
+        <span class="n">bankline_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">LineString</span><span class="p">(</span><span class="n">xy_bank</span><span class="p">))</span>
+        <span class="n">b</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">bankline_series</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bankline_list</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+    <span class="n">banklines</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">bankline_series</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">banklines</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
