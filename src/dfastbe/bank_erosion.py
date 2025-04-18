@@ -861,7 +861,7 @@ class Erosion:
 
         log_text("derive_topology")
 
-        mesh_data = _compute_mesh_topology(simulation_data)
+        mesh_data = simulation_data.compute_mesh_topology()
 
         # clip the chainage path to the range of chainages of interest
         km_bounds = self.river_data.station_bounds

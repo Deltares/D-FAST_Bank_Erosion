@@ -34,6 +34,7 @@ from dfastbe.io import (
     ugrid_add,
     write_simona_box,
 )
+from dfastbe.structures import MeshData
 
 
 @contextmanager
@@ -207,6 +208,62 @@ class TestSimulationData:
         assert simulation_data.velocity_x_face.size == 0
         assert simulation_data.velocity_y_face.size == 0
         assert simulation_data.chezy_face.size == 0
+
+    def test_compute_mesh_topology(self, simulation_data: SimulationData):
+        """
+        Test the compute_mesh_topology method of SimulationData.
+        """
+        # Call the method to compute the mesh topology
+        mesh_data = simulation_data.compute_mesh_topology()
+
+        assert isinstance(mesh_data, MeshData)
+
+        assert np.array_equal(
+            mesh_data.edge_face_connectivity, np.array([[0, 1], [0, 1], [0, 1], [0, 1]])
+        )
+        assert np.array_equal(
+            mesh_data.face_edge_connectivity, np.array([[1, 0, 2, 3], [0, 2, 3, 1]])
+        )
+        assert np.allclose(
+            mesh_data.x_edge_coords,
+            np.array(
+                [
+                    [194949.796875, 194966.515625],
+                    [194949.796875, 195000.0],
+                    [194966.515625, 194982.8125],
+                    [194982.8125, 195000.0],
+                ]
+            ),
+        )
+        assert np.allclose(
+            mesh_data.x_face_coords.data,
+            np.array(
+                [
+                    [194949.796875, 194966.515625, 194982.8125, 195000.0],
+                    [194966.515625, 194982.8125, 195000.0, 194949.796875],
+                ]
+            ),
+        )
+        assert np.allclose(
+            mesh_data.y_edge_coords,
+            np.array(
+                [
+                    [361366.90625, 361399.46875],
+                    [361366.90625, 361450.0],
+                    [361399.46875, 361431.03125],
+                    [361431.03125, 361450.0],
+                ]
+            ),
+        )
+        assert np.allclose(
+            mesh_data.y_face_coords.data,
+            np.array(
+                [
+                    [361366.90625, 361399.46875, 361431.03125, 361450.0],
+                    [361399.46875, 361431.03125, 361450.0, 361366.90625],
+                ]
+            ),
+        )
 
 
 class TestLogText:
@@ -690,14 +747,14 @@ class TestConfigFile:
     def test_read_bank_lines(self, config: ConfigParser, fs: FakeFilesystem):
         """Test retrieving bank lines."""
         config["General"]["BankLine"] = "bankfile"
-        config = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
 
         fs.create_file(
             "inputs/bankfile_1.xyc",
             contents="0.0 0.0\n1.0 1.0\n2.0 2.0\n3.0 3.0\n4.0 4.0\n",
         )
 
-        bank_lines = config.read_bank_lines("inputs")
+        bank_lines = config_file.read_bank_lines("inputs")
 
         assert isinstance(bank_lines, GeoDataFrame)
         assert len(bank_lines) == 1
