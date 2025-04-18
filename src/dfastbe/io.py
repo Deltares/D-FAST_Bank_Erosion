@@ -945,7 +945,7 @@ class ConfigFile:
                 if km_thr is None:
                     parfield[ib] = np.zeros(len(bkm)) + val[0]
                 else:
-                    idx = np.zeros(len(bkm), dtype=np.int64)
+                    idx = np.zeros(len(bkm), dtype=int)
                     for thr in km_thr:
                         idx[bkm >= thr] += 1
                     parfield[ib] = val[idx]

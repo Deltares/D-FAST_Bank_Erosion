@@ -295,7 +295,7 @@ class Erosion:
         for ib, bcrds in enumerate(bank_line_coords):
             bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
             distance_fw.append(np.zeros(len(bcrds_mid)))
-            bp_fw_face_idx.append(np.zeros(len(bcrds_mid), dtype=np.int64))
+            bp_fw_face_idx.append(np.zeros(len(bcrds_mid), dtype=int))
             for ip, bp in enumerate(bcrds_mid):
                 # find closest fairway support node
                 ifw = np.argmin(((bp - ifw_numpy) ** 2).sum(axis=1))
@@ -1311,8 +1311,8 @@ def _compute_mesh_topology(
     n_nodes = simulation_data.n_nodes
     n_faces = face_node.shape[0]
     n_edges = sum(n_nodes)
-    edge_node = np.zeros((n_edges, 2), dtype=np.int64)
-    face_nr = np.zeros((n_edges,), dtype=np.int64)
+    edge_node = np.zeros((n_edges, 2), dtype=int)
+    face_nr = np.zeros((n_edges,), dtype=int)
     i = 0
     for face_i in range(n_faces):
         num_edges = n_nodes[face_i]  # note: nEdges = nNodes
@@ -1342,8 +1342,8 @@ def _compute_mesh_topology(
     edge_node = edge_node[unique_edge, :]
 
     # number the edges
-    edge_nr = np.zeros(n_edges, dtype=np.int64)
-    edge_nr[unique_edge] = np.arange(n_unique_edges, dtype=np.int64)
+    edge_nr = np.zeros(n_edges, dtype=int)
+    edge_nr[unique_edge] = np.arange(n_unique_edges, dtype=int)
     edge_nr[equal_to_previous] = edge_nr[
         np.concatenate((equal_to_previous[1:], equal_to_previous[:1]))
     ]
@@ -1353,10 +1353,10 @@ def _compute_mesh_topology(
     boundary_edge_nrs = edge_nr[is_boundary_edge]
 
     # go back to the original face order
-    edge_nr_in_face_order = np.zeros(n_edges, dtype=np.int64)
+    edge_nr_in_face_order = np.zeros(n_edges, dtype=int)
     edge_nr_in_face_order[i12] = edge_nr
     # create the face edge connectivity array
-    face_edge_connectivity = np.zeros(face_node.shape, dtype=np.int64)
+    face_edge_connectivity = np.zeros(face_node.shape, dtype=int)
 
     i = 0
     for face_i in range(n_faces):
@@ -1366,7 +1366,7 @@ def _compute_mesh_topology(
             i = i + 1
 
     # determine the edge face connectivity
-    edge_face = -np.ones((n_unique_edges, 2), dtype=np.int64)
+    edge_face = -np.ones((n_unique_edges, 2), dtype=int)
     edge_face[edge_nr[unique_edge], 0] = face_nr[unique_edge]
     edge_face[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
 
