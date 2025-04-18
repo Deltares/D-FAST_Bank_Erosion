@@ -104,7 +104,7 @@ class TestSimulationData:
             assert np.array_equal(sim_object.velocity_x_face, mock_velocity_x_face)
             assert np.array_equal(sim_object.velocity_y_face, mock_velocity_y_face)
             assert np.array_equal(sim_object.chezy_face, mock_chezy_face)
-            assert sim_object.dh0 == 0.1
+            assert sim_object.dry_wet_threshold == 0.1
 
             mock_read_fm_map.assert_any_call(file_name, "x", location="node")
             mock_read_fm_map.assert_any_call(file_name, "y", location="node")
@@ -140,7 +140,7 @@ class TestSimulationData:
         velocity_x_face = np.array([0.1, 0.2])
         velocity_y_face = np.array([0.4, 0.5])
         chezy_face = np.array([30.0, 40.0])
-        dh0 = 0.1
+        dry_wet_threshold = 0.1
 
         sim_data = SimulationData(
             x_node=x_node,
@@ -154,7 +154,7 @@ class TestSimulationData:
             velocity_x_face=velocity_x_face,
             velocity_y_face=velocity_y_face,
             chezy_face=chezy_face,
-            dh0=dh0,
+            dry_wet_threshold=dry_wet_threshold,
         )
         return sim_data
 

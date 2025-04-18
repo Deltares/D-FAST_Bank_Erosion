@@ -92,7 +92,7 @@ class SimulationData:
         velocity_x_face: np.ndarray,
         velocity_y_face: np.ndarray,
         chezy_face: np.ndarray,
-        dh0: float,
+        dry_wet_threshold: float,
     ):
         self.x_node = x_node
         self.y_node = y_node
@@ -105,7 +105,7 @@ class SimulationData:
         self.velocity_x_face = velocity_x_face
         self.velocity_y_face = velocity_y_face
         self.chezy_face = chezy_face
-        self.dh0 = dh0
+        self.dry_wet_threshold = dry_wet_threshold
 
     @classmethod
     def read(cls, file_name: str, indent: str = "") -> "SimulationData":
@@ -178,11 +178,11 @@ class SimulationData:
             try:
                 file_source = root_group.converted_from
                 if file_source == "SIMONA":
-                    dh0 = 0.1
+                    dry_wet_threshold = 0.1
                 else:
-                    dh0 = 0.01
+                    dry_wet_threshold = 0.01
             except:
-                dh0 = 0.01
+                dry_wet_threshold = 0.01
 
         elif name.startswith("SDS"):
             raise SimulationFilesError(
@@ -207,7 +207,7 @@ class SimulationData:
             velocity_x_face=velocity_x_face,
             velocity_y_face=velocity_y_face,
             chezy_face=chezy_face,
-            dh0=dh0,
+            dry_wet_threshold=dry_wet_threshold,
         )
 
     def clip(self, river_profile: LineString, max_distance: float):

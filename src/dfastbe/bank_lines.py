@@ -71,7 +71,7 @@ class BankLines:
         critical_water_depth = self.config_file.get_float(
             "Detect", "WaterDepth", default=0
         )
-        h0 = critical_water_depth + simulation_data.dh0
+        h0 = critical_water_depth + simulation_data.dry_wet_threshold
         return simulation_data, h0
 
     @property
