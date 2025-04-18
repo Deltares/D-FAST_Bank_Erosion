@@ -68,7 +68,7 @@ class TestSimulationData:
         mock_water_level_face = np.array([1.0, 2.0, 3.0])
         mock_water_depth_face = np.array([0.5, 1.0, 1.5])
         mock_velocity_x_face = np.array([0.1, 0.2, 0.3])
-        mock_ucy_face = np.array([0.4, 0.5, 0.6])
+        mock_velocity_y_face = np.array([0.4, 0.5, 0.6])
         mock_chz_face = np.array([30.0, 40.0, 50.0])
 
         with patch("dfastbe.io.read_fm_map") as mock_read_fm_map, patch(
@@ -82,7 +82,7 @@ class TestSimulationData:
                 mock_water_level_face,
                 mock_water_depth_face,
                 mock_velocity_x_face,
-                mock_ucy_face,
+                mock_velocity_y_face,
                 mock_chz_face,
             ]
 
@@ -102,7 +102,7 @@ class TestSimulationData:
             assert np.array_equal(sim_object.water_level_face, mock_water_level_face)
             assert np.array_equal(sim_object.water_depth_face, mock_water_depth_face)
             assert np.array_equal(sim_object.velocity_x_face, mock_velocity_x_face)
-            assert np.array_equal(sim_object.ucy_face, mock_ucy_face)
+            assert np.array_equal(sim_object.velocity_y_face, mock_velocity_y_face)
             assert np.array_equal(sim_object.chz_face, mock_chz_face)
             assert sim_object.dh0 == 0.1
 
@@ -138,7 +138,7 @@ class TestSimulationData:
         water_level_face = np.array([1.0, 2.0])
         water_depth_face = np.array([0.5, 1.0])
         velocity_x_face = np.array([0.1, 0.2])
-        ucy_face = np.array([0.4, 0.5])
+        velocity_y_face = np.array([0.4, 0.5])
         chz_face = np.array([30.0, 40.0])
         dh0 = 0.1
 
@@ -152,7 +152,7 @@ class TestSimulationData:
             water_level_face=water_level_face,
             water_depth_face=water_depth_face,
             velocity_x_face=velocity_x_face,
-            ucy_face=ucy_face,
+            velocity_y_face=velocity_y_face,
             chz_face=chz_face,
             dh0=dh0,
         )
@@ -183,7 +183,7 @@ class TestSimulationData:
         assert simulation_data.water_level_face.size == 0
         assert simulation_data.water_depth_face.size == 0
         assert simulation_data.velocity_x_face.size == 0
-        assert simulation_data.ucy_face.size == 0
+        assert simulation_data.velocity_y_face.size == 0
         assert simulation_data.chz_face.size == 0
 
     def test_clip_no_nodes_in_buffer(self, simulation_data: SimulationData):
@@ -205,7 +205,7 @@ class TestSimulationData:
         assert simulation_data.water_level_face.size == 0
         assert simulation_data.water_depth_face.size == 0
         assert simulation_data.velocity_x_face.size == 0
-        assert simulation_data.ucy_face.size == 0
+        assert simulation_data.velocity_y_face.size == 0
         assert simulation_data.chz_face.size == 0
 
 
