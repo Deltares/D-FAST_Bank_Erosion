@@ -86,7 +86,7 @@ class SimulationData:
         n_nodes: np.ndarray,
         face_node: np.ma.masked_array,
         bed_elevation_location: np.ndarray,
-        zb_val: np.ndarray,
+        bed_elevation_values: np.ndarray,
         zw_face: np.ndarray,
         h_face: np.ndarray,
         ucx_face: np.ndarray,
@@ -99,7 +99,7 @@ class SimulationData:
         self.n_nodes = n_nodes
         self.face_node = face_node
         self.bed_elevation_location = bed_elevation_location
-        self.zb_val = zb_val
+        self.bed_elevation_values = bed_elevation_values
         self.zw_face = zw_face
         self.h_face = h_face
         self.ucx_face = ucx_face
@@ -160,7 +160,7 @@ class SimulationData:
             face_node = f_nc
             log_text("read_bathymetry", indent=indent)
             bed_elevation_location = "node"
-            zb_val = read_fm_map(file_name, "altitude", location="node")
+            bed_elevation_values = read_fm_map(file_name, "altitude", location="node")
             log_text("read_water_level", indent=indent)
             zw_face = read_fm_map(file_name, "Water level")
             log_text("read_water_depth", indent=indent)
@@ -201,7 +201,7 @@ class SimulationData:
             n_nodes=n_nodes,
             face_node=face_node,
             bed_elevation_location=bed_elevation_location,
-            zb_val=zb_val,
+            bed_elevation_values=bed_elevation_values,
             zw_face=zw_face,
             h_face=h_face,
             ucx_face=ucx_face,
@@ -277,9 +277,9 @@ class SimulationData:
         self.x_node = x[keep]
         self.y_node = y[keep]
         if self.bed_elevation_location == "node":
-            self.zb_val = self.zb_val[keep]
+            self.bed_elevation_values = self.bed_elevation_values[keep]
         else:
-            self.zb_val = self.zb_val[keep_face]
+            self.bed_elevation_values = self.bed_elevation_values[keep_face]
 
         self.n_nodes = self.n_nodes[keep_face]
         self.zw_face = self.zw_face[keep_face]

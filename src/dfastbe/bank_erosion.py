@@ -582,8 +582,8 @@ class Erosion:
                 if iq == 0:
                     # determine velocity and bankheight along banks ...
                     # bankheight = maximum bed elevation per cell
-                    if simulation_data.zb_location == "node":
-                        zb = simulation_data.zb_val
+                    if simulation_data.bed_elevation_location == "node":
+                        zb = simulation_data.bed_elevation_values
                         zb_all_nodes = _apply_masked_indexing(
                             zb, simulation_data.face_node[bank_index, :]
                         )
