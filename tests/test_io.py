@@ -96,9 +96,9 @@ class TestSimulationData:
             assert np.array_equal(sim_object.x_node, mock_x_node)
             assert np.array_equal(sim_object.y_node, mock_y_node)
             assert np.array_equal(sim_object.face_node.data, mock_face_node.data)
-            assert np.array_equal(sim_object.zb_val, mock_zb_val)
-            assert np.array_equal(sim_object.zw_face, mock_zw_face)
-            assert np.array_equal(sim_object.h_face, mock_h_face)
+            assert np.array_equal(sim_object.bed_elevation_values, mock_zb_val)
+            assert np.array_equal(sim_object.water_level_face, mock_zw_face)
+            assert np.array_equal(sim_object.water_depth_face, mock_h_face)
             assert np.array_equal(sim_object.ucx_face, mock_ucx_face)
             assert np.array_equal(sim_object.ucy_face, mock_ucy_face)
             assert np.array_equal(sim_object.chz_face, mock_chz_face)
@@ -131,10 +131,10 @@ class TestSimulationData:
             data=[[0, 1, 2, 3], [1, 2, 3, 0]],
             mask=[[False, False, False, False], [False, False, False, False]],
         )
-        zb_location = "node"
-        zb_val = np.array([10.0, 20.0, 30.0, 40.0])
-        zw_face = np.array([1.0, 2.0])
-        h_face = np.array([0.5, 1.0])
+        bed_elevation_location = "node"
+        bed_elevation_values = np.array([10.0, 20.0, 30.0, 40.0])
+        water_level_face = np.array([1.0, 2.0])
+        water_depth_face = np.array([0.5, 1.0])
         ucx_face = np.array([0.1, 0.2])
         ucy_face = np.array([0.4, 0.5])
         chz_face = np.array([30.0, 40.0])
@@ -145,10 +145,10 @@ class TestSimulationData:
             y_node=y_node,
             n_nodes=n_nodes,
             face_node=face_node,
-            zb_location=zb_location,
-            zb_val=zb_val,
-            zw_face=zw_face,
-            h_face=h_face,
+            bed_elevation_location=bed_elevation_location,
+            bed_elevation_values=bed_elevation_values,
+            water_level_face=water_level_face,
+            water_depth_face=water_depth_face,
             ucx_face=ucx_face,
             ucy_face=ucy_face,
             chz_face=chz_face,
@@ -174,10 +174,12 @@ class TestSimulationData:
         assert np.array_equal(
             simulation_data.y_node, np.array([361366.90625, 361399.46875, 361431.03125])
         )
-        assert np.array_equal(simulation_data.zb_val, np.array([10.0, 20.0, 30.0]))
+        assert np.array_equal(
+            simulation_data.bed_elevation_values, np.array([10.0, 20.0, 30.0])
+        )
         assert simulation_data.n_nodes.size == 0
-        assert simulation_data.zw_face.size == 0
-        assert simulation_data.h_face.size == 0
+        assert simulation_data.water_level_face.size == 0
+        assert simulation_data.water_depth_face.size == 0
         assert simulation_data.ucx_face.size == 0
         assert simulation_data.ucy_face.size == 0
         assert simulation_data.chz_face.size == 0
@@ -196,10 +198,10 @@ class TestSimulationData:
 
         assert simulation_data.x_node.size == 0
         assert simulation_data.y_node.size == 0
-        assert simulation_data.zb_val.size == 0
+        assert simulation_data.bed_elevation_values.size == 0
         assert simulation_data.n_nodes.size == 0
-        assert simulation_data.zw_face.size == 0
-        assert simulation_data.h_face.size == 0
+        assert simulation_data.water_level_face.size == 0
+        assert simulation_data.water_depth_face.size == 0
         assert simulation_data.ucx_face.size == 0
         assert simulation_data.ucy_face.size == 0
         assert simulation_data.chz_face.size == 0

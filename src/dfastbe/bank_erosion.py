@@ -605,7 +605,7 @@ class Erosion:
 
                 # get water depth along fairway
                 ii = bp_fw_face_idx[ib]
-                hfw = simulation_data.h_face[ii]
+                hfw = simulation_data.water_depth_face[ii]
                 hfw_max = max(hfw_max, hfw.max())
                 water_level[iq].append(simulation_data.water_level_face[ii])
                 chez = simulation_data.chz_face[ii]
@@ -1040,7 +1040,7 @@ class Erosion:
                 simulation_data.n_nodes,
                 simulation_data.x_node,
                 simulation_data.y_node,
-                simulation_data.h_face,
+                simulation_data.water_depth_face,
                 1.1 * water_level_data.hfw_max,
                 X_AXIS_TITLE,
                 Y_AXIS_TITLE,
