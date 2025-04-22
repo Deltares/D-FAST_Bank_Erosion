@@ -1136,13 +1136,13 @@ class RiverData:
         Returns:
             LineString: Clipped river chainage line.
         """
-        start_index, end_index = self._find_clipping_indices()
+        start_index, end_index = self._find_mask_indices()
         x0, start_index = self._handle_lower_bound(start_index)
         x1, end_index = self._handle_upper_bound(end_index)
 
-        return self._construct_clipped_profile(x0, start_index, x1, end_index)
+        return self._construct_masked_profile(x0, start_index, x1, end_index)
 
-    def _find_clipping_indices(self) -> Tuple[Optional[int], Optional[int]]:
+    def _find_mask_indices(self) -> Tuple[Optional[int], Optional[int]]:
         """Find the start and end indices for clipping the chainage line.
 
         Returns:
@@ -1254,7 +1254,7 @@ class RiverData:
         )
         return alpha, interpolated_point
 
-    def _construct_clipped_profile(
+    def _construct_masked_profile(
         self,
         x0: Optional[Tuple[float, float, float]],
         start_index: Optional[int],
