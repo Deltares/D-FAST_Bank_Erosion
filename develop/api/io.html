@@ -8721,13 +8721,13 @@ and adds an empty line before the start of a new block.</p>
 <span class="sd">        Returns:</span>
 <span class="sd">            LineString: Clipped river chainage line.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">start_index</span><span class="p">,</span> <span class="n">end_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_clipping_indices</span><span class="p">()</span>
+        <span class="n">start_index</span><span class="p">,</span> <span class="n">end_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_mask_indices</span><span class="p">()</span>
         <span class="n">x0</span><span class="p">,</span> <span class="n">start_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_lower_bound</span><span class="p">(</span><span class="n">start_index</span><span class="p">)</span>
         <span class="n">x1</span><span class="p">,</span> <span class="n">end_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_upper_bound</span><span class="p">(</span><span class="n">end_index</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_clipped_profile</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">start_index</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">end_index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_construct_masked_profile</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">start_index</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span> <span class="n">end_index</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_find_clipping_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_find_mask_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Find the start and end indices for clipping the chainage line.</span>
 
 <span class="sd">        Returns:</span>
@@ -8839,7 +8839,7 @@ and adds an empty line before the start of a new block.</p>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">interpolated_point</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_construct_clipped_profile</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_construct_masked_profile</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">x0</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
         <span class="n">start_index</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
