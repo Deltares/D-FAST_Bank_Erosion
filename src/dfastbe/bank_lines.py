@@ -112,7 +112,6 @@ class BankLines:
         log_text("-")
 
         # clip the chainage path to the range of chainages of interest
-        km_bounds = river_data.station_bounds
         river_profile = river_data.masked_profile
         stations_coords = river_data.masked_profile_coords[:, :2]
         masked_search_lines, max_distance = river_data.clip_search_lines()
@@ -154,11 +153,9 @@ class BankLines:
 
         if self.plot_flags["plot_data"]:
             self.plot(
-                river_data.masked_profile_coords,
+                river_data,
                 self.plot_flags,
-                river_data.num_search_lines,
                 bank,
-                km_bounds,
                 bank_areas,
                 sim,
                 config_file,
@@ -169,11 +166,9 @@ class BankLines:
 
     def plot(
         self,
-        xy_km_numpy: np.ndarray,
+        river_data: RiverData,
         plot_flags: Dict[str, bool],
-        n_search_lines: int,
         bank: List,
-        km_bounds,
         bank_areas,
         sim,
         config_file: ConfigFile,
@@ -182,19 +177,21 @@ class BankLines:
         log_text("=")
         log_text("create_figures")
         i_fig = 0
-        bbox = get_bbox(xy_km_numpy)
+        bbox = get_bbox(river_data.masked_profile_coords)
 
         if plot_flags["save_plot_zoomed"]:
             bank_crds: List[np.ndarray] = []
             bank_km: List[np.ndarray] = []
-            for ib in range(n_search_lines):
+            for ib in range(river_data.num_search_lines):
                 bcrds_numpy = np.array(bank[ib])
-                km_numpy = project_km_on_line(bcrds_numpy, xy_km_numpy)
+                km_numpy = project_km_on_line(
+                    bcrds_numpy, river_data.masked_profile_coords
+                )
                 bank_crds.append(bcrds_numpy)
                 bank_km.append(km_numpy)
             km_zoom, xy_zoom = get_zoom_extends(
-                km_bounds[0],
-                km_bounds[1],
+                river_data.start_station,
+                river_data.end_station,
                 plot_flags["zoom_km_step"],
                 bank_crds,
                 bank_km,
@@ -202,7 +199,7 @@ class BankLines:
 
         fig, ax = df_plt.plot_detect1(
             bbox,
-            xy_km_numpy,
+            river_data.masked_profile_coords,
             bank_areas,
             bank,
             sim["facenode"],

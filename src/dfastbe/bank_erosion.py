@@ -942,9 +942,13 @@ class Erosion:
 
         mesh_data = _compute_mesh_topology(sim)
 
-        # clip the chainage path to the range of chainages of interest
-        km_bounds = self.river_data.station_bounds
-        log_text("clip_chainage", data={"low": km_bounds[0], "high": km_bounds[1]})
+        log_text(
+            "clip_chainage",
+            data={
+                "low": self.river_data.start_station,
+                "high": self.river_data.end_station,
+            },
+        )
 
         stations_coords = self.river_data.masked_profile_coords[:, :2]
 

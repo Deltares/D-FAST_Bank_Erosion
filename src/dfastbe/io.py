@@ -1081,9 +1081,9 @@ class RiverData:
         """
         self.config_file = config_file
         self._profile: LineString = config_file.get_xy_km()
-        self._station_bounds: Tuple = config_file.get_km_bounds()
-        self._start_station: float = self.station_bounds[0]
-        self._end_station: float = self.station_bounds[1]
+        start, end = config_file.get_km_bounds()
+        self._start_station: float = start
+        self._end_station: float = end
         log_text(
             "clip_chainage", data={"low": self.start_station, "high": self.end_station}
         )
@@ -1094,11 +1094,6 @@ class RiverData:
     def profile(self) -> LineString:
         """LineString: Chainage line."""
         return self._profile
-
-    @property
-    def station_bounds(self) -> Tuple[float, float]:
-        """Tuple[float, float]: Lower and upper limit for the chainage."""
-        return self._station_bounds
 
     @property
     def start_station(self) -> float:
@@ -1136,8 +1131,8 @@ class RiverData:
         Returns:
             LineString: Clipped river chainage line.
         """
-        start_index = self._find_mask_index(self.station_bounds[0])
-        end_index = self._find_mask_index(self.station_bounds[1])
+        start_index = self._find_mask_index(self.start_station)
+        end_index = self._find_mask_index(self.end_station)
         x0, start_index = self._handle_lower_bound(start_index)
         x1, end_index = self._handle_upper_bound(end_index)
 
@@ -1175,19 +1170,19 @@ class RiverData:
         """
         if start_index is None:
             raise ValueError(
-                f"Lower chainage bound {self.station_bounds[0]} "
+                f"Lower chainage bound {self.start_station} "
                 f"is larger than the maximum chainage {self.profile.coords[-1][2]} available"
             )
         elif start_index == 0:
-            if self.profile.coords[0][2] - self.station_bounds[0] > 0.1:
+            if self.profile.coords[0][2] - self.start_station > 0.1:
                 raise ValueError(
-                    f"Lower chainage bound {self.station_bounds[0]} "
+                    f"Lower chainage bound {self.start_station} "
                     f"is smaller than the minimum chainage {self.profile.coords[0][2]} available"
                 )
             return None, start_index
         else:
             alpha, interpolated_point = self._interpolate_point(
-                start_index, self.station_bounds[0]
+                start_index, self.start_station
             )
             if alpha > 0.9:
                 start_index += 1
@@ -1206,20 +1201,20 @@ class RiverData:
                 Adjusted upper bound point and end index.
         """
         if end_index is None:
-            if self.station_bounds[1] - self.profile.coords[-1][2] > 0.1:
+            if self.end_station - self.profile.coords[-1][2] > 0.1:
                 raise ValueError(
-                    f"Upper chainage bound {self.station_bounds[1]} "
+                    f"Upper chainage bound {self.end_station} "
                     f"is larger than the maximum chainage {self.profile.coords[-1][2]} available"
                 )
             return None, end_index
         elif end_index == 0:
             raise ValueError(
-                f"Upper chainage bound {self.station_bounds[1]} "
+                f"Upper chainage bound {self.end_station} "
                 f"is smaller than the minimum chainage {self.profile.coords[0][2]} available"
             )
         else:
             alpha, interpolated_point = self._interpolate_point(
-                end_index, self.station_bounds[1]
+                end_index, self.end_station
             )
             if alpha < 0.1:
                 end_index -= 1

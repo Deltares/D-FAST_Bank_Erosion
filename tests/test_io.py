@@ -887,7 +887,7 @@ class TestRiverData:
         expected_profile: LineString,
     ):
         """Test the mask_profile method with various station bounds."""
-        river_data._station_bounds = station_bounds
+        river_data._start_station, river_data._end_station = station_bounds
         masked_profile = river_data._mask_profile()
 
         assert isinstance(masked_profile, LineString)
@@ -926,6 +926,6 @@ class TestRiverData:
         self, river_data: RiverData, station_bounds: Tuple[int], expected_error: str
     ):
         """Test the mask_profile method for out-of-bounds station bounds."""
-        river_data._station_bounds = station_bounds
+        river_data._start_station, river_data._end_station = station_bounds
         with pytest.raises(ValueError, match=expected_error):
             river_data._mask_profile()
