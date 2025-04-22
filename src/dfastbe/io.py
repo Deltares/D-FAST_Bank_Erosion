@@ -1087,7 +1087,7 @@ class RiverData:
         log_text(
             "clip_chainage", data={"low": self.start_station, "high": self.end_station}
         )
-        self._masked_profile: LineString = self.mask_profile()
+        self._masked_profile: LineString = self._mask_profile()
         self._masked_profile_coords = np.array(self.masked_profile.coords)
 
     @property
@@ -1137,14 +1137,22 @@ class RiverData:
             LineString: Clipped river chainage line.
         """
         xy_km = self.profile
-        start_i = None
-        end_i = None
-        for i, c in enumerate(xy_km.coords):
-            if start_i is None and c[2] >= self.station_bounds[0]:
-                start_i = i
-            if c[2] >= self.station_bounds[1]:
-                end_i = i
-                break
+        start_i = next(
+            (
+                i
+                for i, c in enumerate(self.profile.coords)
+                if c[2] >= self.station_bounds[0]
+            ),
+            None,
+        )
+        end_i = next(
+            (
+                i
+                for i, c in enumerate(self.profile.coords)
+                if c[2] >= self.station_bounds[1]
+            ),
+            None,
+        )
 
         if start_i is None:
             raise ValueError(
