@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Dict
 from unittest.mock import patch, MagicMock
 
-import netCDF4
 import numpy as np
 import pytest
 from geopandas import GeoDataFrame
@@ -21,17 +20,12 @@ from dfastbe.io import (
     ConfigFile,
     RiverData,
     absolute_path,
-    copy_ugrid,
-    copy_var,
     get_filename,
-    get_mesh_and_facedim_names,
     get_text,
     load_program_texts,
     log_text,
     _read_fm_map,
     relative_path,
-    ugrid_add,
-    write_simona_box,
 )
 from dfastbe.structures import MeshData
 
@@ -405,160 +399,6 @@ class TestReadFMMap:
         assert (
             str(cm.value) == 'Expected one variable for "water level", but obtained 0.'
         )
-
-
-def test_get_mesh_and_facedim_names_01():
-    """
-    Testing get_mesh_and_facedim_names.
-    """
-    filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
-    name_and_dim = get_mesh_and_facedim_names(filename)
-    assert name_and_dim == ("mesh2d", "mesh2d_nFaces")
-
-
-class TestCopyUgrid:
-    def test_copy_ugrid_01(self):
-        """
-        Testing copy_ugrid (depends on copy_var).
-        """
-        src_filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
-        dst_filename = "test.nc"
-        meshname, _ = get_mesh_and_facedim_names(src_filename)
-        copy_ugrid(src_filename, meshname, dst_filename)
-        #
-        varname = "face_node_connectivity"
-        datac = read_fm_map(dst_filename, varname)
-        dataref = 2352
-        assert datac[-1][1] == dataref
-
-
-class TestCopyVar:
-
-    def test_copy_var_01(self):
-        """
-        Testing copy_var.
-        """
-        src_filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
-        dst_filename = "test.nc"
-        #
-        with netCDF4.Dataset(src_filename) as src:
-            with netCDF4.Dataset(dst_filename, "a") as dst:
-                copy_var(src, "mesh2d_s1", dst)
-        #
-        varname = "sea_surface_height"
-        datac = read_fm_map(dst_filename, varname)
-        dataref = 3.8871328177527262
-        assert datac[1] == pytest.approx(dataref)
-
-
-def test_ugrid_add_01():
-    """
-    Testing ugrid_add.
-    """
-    dst_filename = "test.nc"
-    meshname = "mesh2d"
-    facedim = "mesh2d_nFaces"
-    #
-    varname = "xxx"
-    ldata = np.zeros((4132))
-    ldata[1] = 3.14159
-    long_name = "added_variable"
-    #
-    ugrid_add(dst_filename, varname, ldata, meshname, facedim, long_name)
-    #
-    datac = read_fm_map(dst_filename, long_name)
-    assert datac[1] == ldata[1]
-
-
-class TestReadWaquaXYZ:
-    def test_read_waqua_xyz_01(self):
-        """
-        Read WAQUA xyz file default column 2.
-        """
-        filename = "tests/files/read_waqua_xyz_test.xyc"
-        data = read_waqua_xyz(filename)
-        datar = np.array([3.0, 6.0, 9.0, 12.0])
-        print("data reference: ", datar)
-        print("data read     : ", data)
-        assert np.shape(data) == (4,)
-        assert (data == datar).all() == True
-
-    def test_read_waqua_xyz_02(self):
-        """
-        Read WAQUA xyz file columns 1 and 2.
-        """
-        filename = "tests/files/read_waqua_xyz_test.xyc"
-        col = (1, 2)
-        data = read_waqua_xyz(filename, col)
-        datar = np.array([[2.0, 3.0], [5.0, 6.0], [8.0, 9.0], [11.0, 12.0]])
-        print("data reference: ", datar)
-        print("data read     : ", data)
-        assert np.shape(data) == (4, 2)
-        assert (data == datar).all() == True
-
-
-class TestWriteSimonaBox:
-    def test_write_simona_box_01(self):
-        """
-        Write small SIMONA BOX file.
-        """
-        filename = "test.box"
-        data = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-        firstm = 0
-        firstn = 0
-        write_simona_box(filename, data, firstm, firstn)
-        all_lines = open(filename, "r").read().splitlines()
-        all_lines_ref = [
-            '      BOX MNMN=(   1,    1,    3,    3), VARIABLE_VAL=',
-            '          1.000       2.000       3.000',
-            '          4.000       5.000       6.000',
-            '          7.000       8.000       9.000',
-        ]
-        assert all_lines == all_lines_ref
-
-    def test_write_simona_box_02(self):
-        """
-        Write small SIMONA BOX file with offset.
-        """
-        filename = "test.box"
-        data = np.array(
-            [[0, 0, 0, 0, 0], [0, 0, 1, 2, 3], [0, 0, 4, 5, 6], [0, 0, 7, 8, 9]]
-        )
-        firstm = 1
-        firstn = 2
-        write_simona_box(filename, data, firstm, firstn)
-        all_lines = open(filename, "r").read().splitlines()
-        all_lines_ref = [
-            '      BOX MNMN=(   2,    3,    4,    5), VARIABLE_VAL=',
-            '          1.000       2.000       3.000',
-            '          4.000       5.000       6.000',
-            '          7.000       8.000       9.000',
-        ]
-        assert all_lines == all_lines_ref
-
-    def test_write_simona_box_03(self):
-        """
-        Write large SIMONA BOX file.
-        """
-        filename = "test.box"
-        data = np.zeros((15, 15))
-        firstm = 0
-        firstn = 0
-        write_simona_box(filename, data, firstm, firstn)
-        all_lines = open(filename, "r").read().splitlines()
-        all_lines_ref = ['      BOX MNMN=(   1,    1,   15,   10), VARIABLE_VAL=']
-        all_lines_ref.extend(
-            [
-                '          0.000       0.000       0.000       0.000       0.000       0.000       0.000       0.000       0.000       0.000'
-            ]
-            * 15
-        )
-        all_lines_ref.extend(['      BOX MNMN=(   1,   11,   15,   15), VARIABLE_VAL='])
-        all_lines_ref.extend(
-            ['          0.000       0.000       0.000       0.000       0.000'] * 15
-        )
-        self.maxDiff = None
-        assert all_lines == all_lines_ref
 
 
 @pytest.mark.skipif(
