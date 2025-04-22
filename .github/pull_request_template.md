@@ -28,9 +28,12 @@ Check relevant points.
 - [ ] Test B
 
 # Checklist:
+- [ ] My branch is updated with the latest changes from the base branch.
+- [ ] All pipelines are green?
+- [ ] Mkdocs docs is updated with my changes (the examples look as they should in the github pages). 
 - [ ] Assigned copilot as a reviewer and addressed the copilot's comments.
-- [ ] updated version number in pyproject.toml.
-- [ ] updated environment.yml and the lock file.
+- [ ] Updated version number in pyproject.toml.
+- [ ] Updated the lock file.
 - [ ] I have added tests that prove my fix is effective or that my feature works.
 - [ ] New and existing unit tests pass locally with my changes.
-- [ ] documentation are updated.
+- [ ] Documentation (docstring/existing mkdocs files) are updated.
