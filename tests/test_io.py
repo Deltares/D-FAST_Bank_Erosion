@@ -28,8 +28,6 @@ from dfastbe.io import (
     get_text,
     load_program_texts,
     log_text,
-    read_fm_map,
-    read_waqua_xyz,
     _read_fm_map,
     relative_path,
     ugrid_add,
