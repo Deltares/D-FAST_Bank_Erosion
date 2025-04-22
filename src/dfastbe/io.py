@@ -1080,53 +1080,49 @@ class RiverData:
             ```
         """
         self.config_file = config_file
-        self.__profile: LineString = config_file.get_xy_km()
-        self.__station_bounds: Tuple = config_file.get_km_bounds()
-        self.__start_station: float = self.station_bounds[0]
-        self.__end_station: float = self.station_bounds[1]
+        self._profile: LineString = config_file.get_xy_km()
+        self._station_bounds: Tuple = config_file.get_km_bounds()
+        self._start_station: float = self.station_bounds[0]
+        self._end_station: float = self.station_bounds[1]
         log_text(
             "clip_chainage", data={"low": self.start_station, "high": self.end_station}
         )
-        self.__masked_profile: LineString = self.mask_profile(self.station_bounds)
-        self.__masked_profile_coords = np.array(self.masked_profile.coords)
+        self._masked_profile: LineString = self._mask_profile()
+        self._masked_profile_coords = np.array(self.masked_profile.coords)
 
     @property
     def profile(self) -> LineString:
         """LineString: Chainage line."""
-        return self.__profile
+        return self._profile
 
     @property
     def station_bounds(self) -> Tuple[float, float]:
         """Tuple[float, float]: Lower and upper limit for the chainage."""
-        return self.__station_bounds
+        return self._station_bounds
 
     @property
     def start_station(self) -> float:
         """float: Lower limit for the chainage."""
-        return self.__start_station
+        return self._start_station
 
     @property
     def end_station(self) -> float:
         """float: Upper limit for the chainage."""
-        return self.__end_station
+        return self._end_station
 
     @property
     def masked_profile(self) -> LineString:
         """LineString: Clipped river chainage line."""
-        return self.__masked_profile
+        return self._masked_profile
 
     @property
     def masked_profile_coords(self) -> np.ndarray:
         """np.ndarray: Coordinates of the clipped river chainage line."""
-        return self.__masked_profile_coords
+        return self._masked_profile_coords
 
     @property
     def bank_search_lines(self) -> List[LineString]:
-        """Get the bank search lines.
-
-        Returns:
-            List[LineString]: List of bank search lines.
-        """
+        """List[LineString]: List of bank search lines."""
         return self.config_file.get_search_lines()
 
     @property
@@ -1134,12 +1130,8 @@ class RiverData:
         """Number of river bank search lines."""
         return len(self.bank_search_lines)
 
-    def mask_profile(self, bounds: Tuple[float, float]) -> LineString:
-        """
-        Clip a chainage line to the relevant reach.
-
-        Args:
-            bounds (Tuple[float, float]): Lower and upper limit for the chainage.
+    def mask_profile(self) -> LineString:
+        """Clip a chainage line to the relevant reach.
 
         Returns:
             LineString: Clipped river chainage line.
@@ -1148,29 +1140,27 @@ class RiverData:
         start_i = None
         end_i = None
         for i, c in enumerate(xy_km.coords):
-            if start_i is None and c[2] >= bounds[0]:
+            if start_i is None and c[2] >= self.station_bounds[0]:
                 start_i = i
-            if c[2] >= bounds[1]:
+            if c[2] >= self.station_bounds[1]:
                 end_i = i
                 break
 
         if start_i is None:
-            raise Exception(
-                "Lower chainage bound {} is larger than the maximum chainage {} available".format(
-                    bounds[0], xy_km.coords[-1][2]
-                )
+            raise ValueError(
+                f"Lower chainage bound {self.station_bounds[0]} "
+                f"is larger than the maximum chainage {xy_km.coords[-1][2]} available"
             )
         elif start_i == 0:
             # lower bound (potentially) clipped to available reach
-            if xy_km.coords[0][2] - bounds[0] > 0.1:
-                raise Exception(
-                    "Lower chainage bound {} is smaller than the minimum chainage {} available".format(
-                        bounds[0], xy_km.coords[0][2]
-                    )
+            if xy_km.coords[0][2] - self.station_bounds[0] > 0.1:
+                raise ValueError(
+                    f"Lower chainage bound {self.station_bounds[0]} "
+                    f"is smaller than the minimum chainage {xy_km.coords[0][2]} available"
                 )
             x0 = None
         else:
-            alpha = (bounds[0] - xy_km.coords[start_i - 1][2]) / (
+            alpha = (self.station_bounds[0] - xy_km.coords[start_i - 1][2]) / (
                 xy_km.coords[start_i][2] - xy_km.coords[start_i - 1][2]
             )
             x0 = tuple(
@@ -1182,11 +1172,10 @@ class RiverData:
                 start_i = start_i + 1
 
         if end_i is None:
-            if bounds[1] - xy_km.coords[-1][2] > 0.1:
-                raise Exception(
-                    "Upper chainage bound {} is larger than the maximum chainage {} available".format(
-                        bounds[1], xy_km.coords[-1][2]
-                    )
+            if self.station_bounds[1] - xy_km.coords[-1][2] > 0.1:
+                raise ValueError(
+                    f"Upper chainage bound {self.station_bounds[1]} "
+                    f"is larger than the maximum chainage {xy_km.coords[-1][2]} available"
                 )
             # else kmbounds[1] matches chainage of last point
             if x0 is None:
@@ -1195,13 +1184,12 @@ class RiverData:
             else:
                 xy_km = LineString([x0] + xy_km.coords[start_i:])
         elif end_i == 0:
-            raise Exception(
-                "Upper chainage bound {} is smaller than the minimum chainage {} available".format(
-                    bounds[1], xy_km.coords[0][2]
-                )
+            raise ValueError(
+                f"Upper chainage bound {self.station_bounds[1]} "
+                f"is smaller than the minimum chainage {xy_km.coords[0][2]} available"
             )
         else:
-            alpha = (bounds[1] - xy_km.coords[end_i - 1][2]) / (
+            alpha = (self.station_bounds[1] - xy_km.coords[end_i - 1][2]) / (
                 xy_km.coords[end_i][2] - xy_km.coords[end_i - 1][2]
             )
             x1 = tuple(
@@ -1220,8 +1208,7 @@ class RiverData:
     def clip_search_lines(
         self, max_river_width: float = MAX_RIVER_WIDTH
     ) -> Tuple[List[LineString], float]:
-        """
-        Clip the list of lines to the envelope of certain size surrounding a reference line.
+        """Clip the list of lines to the envelope of certain size surrounding a reference line.
 
         Arg:
             max_river_width: float
