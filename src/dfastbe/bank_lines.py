@@ -114,7 +114,7 @@ class BankLines:
         # clip the chainage path to the range of chainages of interest
         km_bounds = river_data.station_bounds
         river_profile = river_data.masked_profile
-        stations_coords = river_data.masked_profile_arr[:, :2]
+        stations_coords = river_data.masked_profile_coords[:, :2]
         masked_search_lines, max_distance = river_data.clip_search_lines()
 
         # convert search lines to bank polygons
@@ -154,7 +154,7 @@ class BankLines:
 
         if self.plot_flags["plot_data"]:
             self.plot(
-                river_data.masked_profile_arr,
+                river_data.masked_profile_coords,
                 self.plot_flags,
                 river_data.num_search_lines,
                 bank,

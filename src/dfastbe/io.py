@@ -597,7 +597,7 @@ class ConfigFile:
         """Get the search lines for the bank lines from the analysis settings.
 
         Returns:
-            List[np.ndarray]: List of arrays containing the x,y-coordinates of a bank search lines.
+            List[LineString]: List of arrays containing the x,y-coordinates of a bank search lines.
         """
         # read guiding bank line
         n_bank = self.get_int("Detect", "NBank")
