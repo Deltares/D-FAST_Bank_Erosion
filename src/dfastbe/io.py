@@ -1229,10 +1229,10 @@ class RiverData:
         """Interpolate a point between two coordinates.
 
         Args:
-            location (int):
-                The location of the coordinate to interpolate.
             index (int):
                 Index of the coordinate to interpolate.
+            station_bound (float):
+                Station bound for interpolation.
 
         Returns:
             float: Interpolation factor.
