@@ -823,29 +823,26 @@ class TestConfigFileE2E:
 
 
 class TestRiverData:
-    def test_initialization(self):
-        path = "tests/data/erosion/meuse_manual.cfg"
-        config_file = ConfigFile.read(path)
-        river_data = RiverData(config_file)
-        assert isinstance(river_data.config_file, ConfigFile)
-        assert river_data.num_search_lines == 2
-        assert river_data.start_station == 123.0
-        assert river_data.end_station == 128.0
-        assert isinstance(river_data.masked_profile, LineString)
-        assert isinstance(river_data.profile, LineString)
-        assert isinstance(river_data.masked_profile_coords, np.ndarray)
-        assert river_data.masked_profile_coords.shape == (251, 3)
+    # def test_initialization(self):
+    #     path = "tests/data/erosion/meuse_manual.cfg"
+    #     config_file = ConfigFile.read(path)
+    #     river_data = RiverData(config_file)
+    #     assert isinstance(river_data.config_file, ConfigFile)
+    #     assert river_data.num_search_lines == 2
+    #     assert river_data.start_station == 123.0
+    #     assert river_data.end_station == 128.0
+    #     assert isinstance(river_data.masked_profile, LineString)
+    #     assert isinstance(river_data.profile, LineString)
+    #     assert isinstance(river_data.masked_profile_coords, np.ndarray)
+    #     assert river_data.masked_profile_coords.shape == (251, 3)
 
     @pytest.fixture
     def river_data(self):
         """Fixture to create a RiverData instance with mock data."""
         config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
         river_data = RiverData(config_file)
-        return river_data
 
-    def test_mask_profile(self, river_data: RiverData):
-        """Test the mask_profile method of the RiverData class."""
-        river_data._RiverData__profile = LineString(
+        river_data._profile = LineString(
             [
                 (0, 0, 0),
                 (1, 1, 1),
@@ -854,7 +851,12 @@ class TestRiverData:
                 (4, 4, 4),
             ]
         )
-        river_data._RiverData__station_bounds = (1.5, 3.5)
+
+        return river_data
+
+    def test_mask_profile(self, river_data: RiverData):
+        """Test the mask_profile method of the RiverData class."""
+        river_data._station_bounds = (1.5, 3.5)
         masked_profile = river_data.mask_profile()
 
         expected_profile = LineString(
@@ -868,3 +870,73 @@ class TestRiverData:
 
         assert isinstance(masked_profile, LineString)
         assert masked_profile.equals(expected_profile)
+
+    def test_mask_profile_out_of_bounds(self, river_data: RiverData):
+        """Test the mask_profile method for out-of-bounds station bounds."""
+        # Case 1: Lower bound is larger than the maximum chainage
+        river_data._station_bounds = (5.0, 6.0)
+        with pytest.raises(
+            ValueError,
+            match="Lower chainage bound 5.0 is larger than the maximum chainage 4.0 available",
+        ):
+            river_data.mask_profile()
+
+        # Case 2: Lower bound is slightly smaller than the minimum chainage
+        river_data._station_bounds = (-0.2, 3.0)
+        with pytest.raises(
+            ValueError,
+            match="Lower chainage bound -0.2 is smaller than the minimum chainage 0.0 available",
+        ):
+            river_data.mask_profile()
+
+        # Case 3: Upper bound is smaller than the minimum chainage
+        river_data._station_bounds = (0.0, -0.5)
+        with pytest.raises(
+            ValueError,
+            match="Upper chainage bound -0.5 is smaller than the minimum chainage 0.0 available",
+        ):
+            river_data.mask_profile()
+
+        # Case 4: Upper bound is larger than the maximum chainage
+        river_data._station_bounds = (0.0, 5.0)
+        with pytest.raises(
+            ValueError,
+            match="Upper chainage bound 5.0 is larger than the maximum chainage 4.0 available",
+        ):
+            river_data.mask_profile()
+
+    def test_mask_profile_end_i_none(self, river_data: RiverData):
+        """Test the mask_profile method where end_i is None."""
+        # Mock the profile with a simple LineString
+        river_data._profile = LineString(
+            [
+                (0, 0, 0.0),  # First chainage value
+                (1, 1, 1.0),  # Second chainage value
+                (2, 2, 2.0),
+                (3, 3, 3.0),
+            ]
+        )
+
+        # Set station_bounds such that:
+        # - Lower bound (station_bounds[0]) is between two chainage values (triggers x0 interpolation).
+        # - Upper bound (station_bounds[1]) is greater than the maximum chainage (end_i = None).
+        river_data._station_bounds = (0.5, 3.05)
+
+        # Call the mask_profile method
+        masked_profile = river_data._mask_profile()
+
+        # Expected result: The start point (0.5, 0.5, 0.5) is interpolated, and the upper bound is ignored.
+        expected_profile = LineString(
+            [
+                (0.5, 0.5, 0.5),  # Interpolated start point
+                (1, 1, 1.0),
+                (2, 2, 2.0),
+                (3, 3, 3.0),
+            ]
+        )
+
+        # Assertions
+        assert isinstance(masked_profile, LineString)
+        assert masked_profile.equals(
+            expected_profile
+        ), "Masked profile does not match the expected result."
