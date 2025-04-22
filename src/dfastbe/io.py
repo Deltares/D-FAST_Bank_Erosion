@@ -1087,7 +1087,7 @@ class RiverData:
         log_text(
             "clip_chainage", data={"low": self.start_station, "high": self.end_station}
         )
-        self._masked_profile: LineString = self._mask_profile()
+        self._masked_profile: LineString = self.mask_profile()
         self._masked_profile_coords = np.array(self.masked_profile.coords)
 
     @property

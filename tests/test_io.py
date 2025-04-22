@@ -923,7 +923,7 @@ class TestRiverData:
         river_data._station_bounds = (0.5, 3.05)
 
         # Call the mask_profile method
-        masked_profile = river_data._mask_profile()
+        masked_profile = river_data.mask_profile()
 
         # Expected result: The start point (0.5, 0.5, 0.5) is interpolated, and the upper bound is ignored.
         expected_profile = LineString(
