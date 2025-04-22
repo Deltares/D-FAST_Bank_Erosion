@@ -1190,22 +1190,12 @@ class RiverData:
                 )
             return None, start_index
         else:
-            alpha = (
-                self.station_bounds[0] - self.profile.coords[start_index - 1][2]
-            ) / (
-                self.profile.coords[start_index][2]
-                - self.profile.coords[start_index - 1][2]
-            )
-            x0 = tuple(
-                c1 + alpha * (c2 - c1)
-                for c1, c2 in zip(
-                    self.profile.coords[start_index - 1],
-                    self.profile.coords[start_index],
-                )
+            alpha, interpolated_point = self._interpolate_point(
+                start_index, self.station_bounds[0]
             )
             if alpha > 0.9:
                 start_index += 1
-            return x0, start_index
+            return interpolated_point, start_index
 
     def _handle_upper_bound(
         self, end_index: Optional[int]
@@ -1231,19 +1221,38 @@ class RiverData:
                 f"is smaller than the minimum chainage {self.profile.coords[0][2]} available"
             )
         else:
-            alpha = (self.station_bounds[1] - self.profile.coords[end_index - 1][2]) / (
-                self.profile.coords[end_index][2]
-                - self.profile.coords[end_index - 1][2]
-            )
-            x1 = tuple(
-                c1 + alpha * (c2 - c1)
-                for c1, c2 in zip(
-                    self.profile.coords[end_index - 1], self.profile.coords[end_index]
-                )
+            alpha, interpolated_point = self._interpolate_point(
+                end_index, self.station_bounds[1]
             )
             if alpha < 0.1:
                 end_index -= 1
-            return x1, end_index
+            return interpolated_point, end_index
+
+    def _interpolate_point(
+        self, index: int, station_bound: float
+    ) -> Tuple[float, Tuple[float, float, float]]:
+        """Interpolate a point between two coordinates.
+
+        Args:
+            location (int):
+                The location of the coordinate to interpolate.
+            index (int):
+                Index of the coordinate to interpolate.
+
+        Returns:
+            float: Interpolation factor.
+            Tuple[float, float, float]: Interpolated point.
+        """
+        alpha = (station_bound - self.profile.coords[index - 1][2]) / (
+            self.profile.coords[index][2] - self.profile.coords[index - 1][2]
+        )
+        interpolated_point = tuple(
+            prev_coord + alpha * (next_coord - prev_coord)
+            for prev_coord, next_coord in zip(
+                self.profile.coords[index - 1], self.profile.coords[index]
+            )
+        )
+        return alpha, interpolated_point
 
     def _construct_clipped_profile(
         self,
