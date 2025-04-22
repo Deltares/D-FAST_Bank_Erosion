@@ -1,10 +1,12 @@
 import matplotlib
 import numpy as np
 import pytest
+from unittest.mock import MagicMock
 
 from dfastbe.bank_erosion import Erosion
 from dfastbe.cmd import run
 from dfastbe.io import ConfigFile
+from dfastbe.structures import BankData, FairwayData
 
 matplotlib.use('Agg')
 
@@ -35,8 +37,10 @@ class TestErosion:
         self, erosion_instance: Erosion, config_file: ConfigFile
     ):
         """Test the _prepare_initial_conditions method."""
-        bank_km_mid = [np.array([3.0, 3.0, 3.0])]
-        zfw_ini = [np.array([10, 20, 30])]
+        mock_bank_data = MagicMock(spec=BankData)
+        mock_bank_data.bank_chainage_midpoints = [np.array([3.0, 3.0, 3.0])]
+        mock_fairway_data = MagicMock(spec=FairwayData)
+        mock_fairway_data.fairway_initial_water_levels = [np.array([10, 20, 30])]
         taucls = np.array([1, 1, 1])
         taucls_str = (
             "protected",
@@ -47,11 +51,11 @@ class TestErosion:
         )
 
         erosion_inputs = erosion_instance._prepare_initial_conditions(
-            config_file, bank_km_mid, zfw_ini
+            config_file, mock_bank_data, mock_fairway_data
         )
 
         assert np.array_equal(
-            erosion_inputs.ship_data["vship0"][0], np.array([5.0, 5.0, 5.0])
+            erosion_inputs.shipping_data["vship0"][0], np.array([5.0, 5.0, 5.0])
         )
         assert np.array_equal(
             erosion_inputs.wave_fairway_distance_0[0], np.array([150, 150, 150])
