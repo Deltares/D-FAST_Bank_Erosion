@@ -1136,35 +1136,30 @@ class RiverData:
         Returns:
             LineString: Clipped river chainage line.
         """
-        start_index, end_index = self._find_mask_indices()
+        start_index = self._find_mask_index(self.station_bounds[0])
+        end_index = self._find_mask_index(self.station_bounds[1])
         x0, start_index = self._handle_lower_bound(start_index)
         x1, end_index = self._handle_upper_bound(end_index)
 
         return self._construct_masked_profile(x0, start_index, x1, end_index)
 
-    def _find_mask_indices(self) -> Tuple[Optional[int], Optional[int]]:
+    def _find_mask_index(self, station_bound: float) -> Optional[int]:
         """Find the start and end indices for clipping the chainage line.
 
+        Args:
+            station_bound (float): Station bound for clipping.
         Returns:
-            Tuple[Optional[int], Optional[int]]: Start and end indices for clipping.
+            Optional[int]: index for clipping.
         """
-        start_index = next(
+        mask_index = next(
             (
-                i
-                for i, c in enumerate(self.profile.coords)
-                if c[2] >= self.station_bounds[0]
+                index
+                for index, coord in enumerate(self.profile.coords)
+                if coord[2] >= station_bound
             ),
             None,
         )
-        end_index = next(
-            (
-                i
-                for i, c in enumerate(self.profile.coords)
-                if c[2] >= self.station_bounds[1]
-            ),
-            None,
-        )
-        return start_index, end_index
+        return mask_index
 
     def _handle_lower_bound(
         self, start_index: Optional[int]
