@@ -1130,14 +1130,25 @@ class RiverData:
         """Number of river bank search lines."""
         return len(self.bank_search_lines)
 
-    def mask_profile(self) -> LineString:
+    def _mask_profile(self) -> LineString:
         """Clip a chainage line to the relevant reach.
 
         Returns:
             LineString: Clipped river chainage line.
         """
-        xy_km = self.profile
-        start_i = next(
+        start_index, end_index = self._find_clipping_indices()
+        x0, start_index = self._handle_lower_bound(start_index)
+        x1, end_index = self._handle_upper_bound(end_index)
+
+        return self._construct_clipped_profile(x0, start_index, x1, end_index)
+
+    def _find_clipping_indices(self) -> Tuple[Optional[int], Optional[int]]:
+        """Find the start and end indices for clipping the chainage line.
+
+        Returns:
+            Tuple[Optional[int], Optional[int]]: Start and end indices for clipping.
+        """
+        start_index = next(
             (
                 i
                 for i, c in enumerate(self.profile.coords)
@@ -1145,7 +1156,7 @@ class RiverData:
             ),
             None,
         )
-        end_i = next(
+        end_index = next(
             (
                 i
                 for i, c in enumerate(self.profile.coords)
@@ -1153,65 +1164,113 @@ class RiverData:
             ),
             None,
         )
+        return start_index, end_index
 
-        if start_i is None:
+    def _handle_lower_bound(
+        self, start_index: Optional[int]
+    ) -> Tuple[Optional[Tuple[float, float, float]], Optional[int]]:
+        """Handle the lower bound clipping of the chainage line.
+
+        Args:
+            start_index (Optional[int]): Start index for clipping.
+
+        Returns:
+            Tuple[Optional[Tuple[float, float, float]], Optional[int]]: Adjusted lower bound point and start index.
+        """
+        if start_index is None:
             raise ValueError(
                 f"Lower chainage bound {self.station_bounds[0]} "
-                f"is larger than the maximum chainage {xy_km.coords[-1][2]} available"
+                f"is larger than the maximum chainage {self.profile.coords[-1][2]} available"
             )
-        elif start_i == 0:
-            # lower bound (potentially) clipped to available reach
-            if xy_km.coords[0][2] - self.station_bounds[0] > 0.1:
+        elif start_index == 0:
+            if self.profile.coords[0][2] - self.station_bounds[0] > 0.1:
                 raise ValueError(
                     f"Lower chainage bound {self.station_bounds[0]} "
-                    f"is smaller than the minimum chainage {xy_km.coords[0][2]} available"
+                    f"is smaller than the minimum chainage {self.profile.coords[0][2]} available"
                 )
-            x0 = None
+            return None, start_index
         else:
-            alpha = (self.station_bounds[0] - xy_km.coords[start_i - 1][2]) / (
-                xy_km.coords[start_i][2] - xy_km.coords[start_i - 1][2]
+            alpha = (
+                self.station_bounds[0] - self.profile.coords[start_index - 1][2]
+            ) / (
+                self.profile.coords[start_index][2]
+                - self.profile.coords[start_index - 1][2]
             )
             x0 = tuple(
-                (c1 + alpha * (c2 - c1))
-                for c1, c2 in zip(xy_km.coords[start_i - 1], xy_km.coords[start_i])
+                c1 + alpha * (c2 - c1)
+                for c1, c2 in zip(
+                    self.profile.coords[start_index - 1],
+                    self.profile.coords[start_index],
+                )
             )
             if alpha > 0.9:
-                # value close to the first node (start_i), so let's skip that one
-                start_i = start_i + 1
+                start_index += 1
+            return x0, start_index
 
-        if end_i is None:
-            if self.station_bounds[1] - xy_km.coords[-1][2] > 0.1:
+    def _handle_upper_bound(
+        self, end_index: Optional[int]
+    ) -> Tuple[Optional[Tuple[float, float, float]], Optional[int]]:
+        """Handle the upper bound clipping of the chainage line.
+
+        Args:
+            end_index (Optional[int]): End index for clipping.
+
+        Returns:
+            Tuple[Optional[Tuple[float, float, float]], Optional[int]]: Adjusted upper bound point and end index.
+        """
+        if end_index is None:
+            if self.station_bounds[1] - self.profile.coords[-1][2] > 0.1:
                 raise ValueError(
                     f"Upper chainage bound {self.station_bounds[1]} "
-                    f"is larger than the maximum chainage {xy_km.coords[-1][2]} available"
+                    f"is larger than the maximum chainage {self.profile.coords[-1][2]} available"
                 )
-            # else kmbounds[1] matches chainage of last point
-            if x0 is None:
-                # whole range available selected
-                pass
-            else:
-                xy_km = LineString([x0] + xy_km.coords[start_i:])
-        elif end_i == 0:
+            return None, end_index
+        elif end_index == 0:
             raise ValueError(
                 f"Upper chainage bound {self.station_bounds[1]} "
-                f"is smaller than the minimum chainage {xy_km.coords[0][2]} available"
+                f"is smaller than the minimum chainage {self.profile.coords[0][2]} available"
             )
         else:
-            alpha = (self.station_bounds[1] - xy_km.coords[end_i - 1][2]) / (
-                xy_km.coords[end_i][2] - xy_km.coords[end_i - 1][2]
+            alpha = (self.station_bounds[1] - self.profile.coords[end_index - 1][2]) / (
+                self.profile.coords[end_index][2]
+                - self.profile.coords[end_index - 1][2]
             )
             x1 = tuple(
-                (c1 + alpha * (c2 - c1))
-                for c1, c2 in zip(xy_km.coords[end_i - 1], xy_km.coords[end_i])
+                c1 + alpha * (c2 - c1)
+                for c1, c2 in zip(
+                    self.profile.coords[end_index - 1], self.profile.coords[end_index]
+                )
             )
             if alpha < 0.1:
-                # value close to the previous point (end_i - 1), so let's skip that one
-                end_i = end_i - 1
-            if x0 is None:
-                xy_km = LineString(xy_km.coords[:end_i] + [x1])
-            else:
-                xy_km = LineString([x0] + xy_km.coords[start_i:end_i] + [x1])
-        return xy_km
+                end_index -= 1
+            return x1, end_index
+
+    def _construct_clipped_profile(
+        self,
+        x0: Optional[Tuple[float, float, float]],
+        start_index: Optional[int],
+        x1: Optional[Tuple[float, float, float]],
+        end_index: Optional[int],
+    ) -> LineString:
+        """Construct the clipped chainage line.
+
+        Args:
+            x0 (Optional[Tuple[float, float, float]]): Adjusted lower bound point.
+            start_index (Optional[int]): Start index for clipping.
+            x1 (Optional[Tuple[float, float, float]]): Adjusted upper bound point.
+            end_index (Optional[int]): End index for clipping.
+
+        Returns:
+            LineString: Clipped chainage line.
+        """
+        if x0 is None and x1 is None:
+            return self.profile
+        elif x0 is None:
+            return LineString(self.profile.coords[: end_index + 1] + [x1])
+        elif x1 is None:
+            return LineString([x0] + self.profile.coords[start_index:])
+        else:
+            return LineString([x0] + self.profile.coords[start_index:end_index] + [x1])
 
     def clip_search_lines(
         self, max_river_width: float = MAX_RIVER_WIDTH

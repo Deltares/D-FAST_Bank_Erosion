@@ -841,7 +841,6 @@ class TestRiverData:
         """Fixture to create a RiverData instance with mock data."""
         config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
         river_data = RiverData(config_file)
-
         river_data._profile = LineString(
             [
                 (0, 0, 0),
@@ -889,7 +888,7 @@ class TestRiverData:
     ):
         """Test the mask_profile method with various station bounds."""
         river_data._station_bounds = station_bounds
-        masked_profile = river_data.mask_profile()
+        masked_profile = river_data._mask_profile()
 
         assert isinstance(masked_profile, LineString)
         assert masked_profile.equals(
@@ -929,4 +928,4 @@ class TestRiverData:
         """Test the mask_profile method for out-of-bounds station bounds."""
         river_data._station_bounds = station_bounds
         with pytest.raises(ValueError, match=expected_error):
-            river_data.mask_profile()
+            river_data._mask_profile()
