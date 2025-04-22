@@ -835,3 +835,36 @@ class TestRiverData:
         assert isinstance(river_data.profile, LineString)
         assert isinstance(river_data.masked_profile_coords, np.ndarray)
         assert river_data.masked_profile_coords.shape == (251, 3)
+
+    @pytest.fixture
+    def river_data(self):
+        """Fixture to create a RiverData instance with mock data."""
+        config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+        river_data = RiverData(config_file)
+        return river_data
+
+    def test_mask_profile(self, river_data: RiverData):
+        """Test the mask_profile method of the RiverData class."""
+        river_data._RiverData__profile = LineString(
+            [
+                (0, 0, 0),
+                (1, 1, 1),
+                (2, 2, 2),
+                (3, 3, 3),
+                (4, 4, 4),
+            ]
+        )
+        river_data._RiverData__station_bounds = (1.5, 3.5)
+        masked_profile = river_data.mask_profile()
+
+        expected_profile = LineString(
+            [
+                (1.5, 1.5, 1.5),
+                (2, 2, 2),
+                (3, 3, 3),
+                (3.5, 3.5, 3.5),
+            ]
+        )
+
+        assert isinstance(masked_profile, LineString)
+        assert masked_profile.equals(expected_profile)
