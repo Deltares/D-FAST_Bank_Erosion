@@ -30,6 +30,7 @@ from dfastbe.io import (
     log_text,
     read_fm_map,
     read_waqua_xyz,
+    _read_fm_map,
     relative_path,
     ugrid_add,
     write_simona_box,
@@ -72,7 +73,7 @@ class TestSimulationData:
         mock_velocity_y_face = np.array([0.4, 0.5, 0.6])
         mock_chezy_face = np.array([30.0, 40.0, 50.0])
 
-        with patch("dfastbe.io.read_fm_map") as mock_read_fm_map, patch(
+        with patch("dfastbe.io._read_fm_map") as mock_read_fm_map, patch(
             "netCDF4.Dataset"
         ) as mock_dataset:
             mock_read_fm_map.side_effect = [
@@ -350,7 +351,7 @@ class TestReadFMMap:
         """
         filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
         varname = "x"
-        datac = read_fm_map(filename, varname)
+        datac = _read_fm_map(filename, varname)
         dataref = 41.24417604888325
         assert datac[1] == pytest.approx(dataref)
 
@@ -361,7 +362,7 @@ class TestReadFMMap:
         filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
         varname = "y"
         location = "edge"
-        datac = read_fm_map(filename, varname, location)
+        datac = _read_fm_map(filename, varname, location)
         dataref = 7059.853000358055
         assert datac[1] == dataref
 
@@ -371,7 +372,7 @@ class TestReadFMMap:
         """
         filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
         varname = "face_node_connectivity"
-        datac = read_fm_map(filename, varname)
+        datac = _read_fm_map(filename, varname)
         dataref = 2352
         assert datac[-1][1] == dataref
 
@@ -381,7 +382,7 @@ class TestReadFMMap:
         """
         filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
         varname = "sea_floor_depth_below_sea_surface"
-        datac = read_fm_map(filename, varname)
+        datac = _read_fm_map(filename, varname)
         dataref = 3.894498393076889
         assert datac[1] == pytest.approx(dataref)
 
@@ -391,7 +392,7 @@ class TestReadFMMap:
         """
         filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
         varname = "Water level"
-        datac = read_fm_map(filename, varname)
+        datac = _read_fm_map(filename, varname)
         dataref = 3.8871328177527262
         assert datac[1] == pytest.approx(dataref)
 
@@ -402,7 +403,7 @@ class TestReadFMMap:
         filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
         varname = "water level"
         with pytest.raises(Exception) as cm:
-            read_fm_map(filename, varname)
+            _read_fm_map(filename, varname)
         assert (
             str(cm.value) == 'Expected one variable for "water level", but obtained 0.'
         )

@@ -150,9 +150,9 @@ class SimulationData:
         name = Path(file_name).name
         if name.endswith("map.nc"):
             log_text("read_grid", indent=indent)
-            x_node = read_fm_map(file_name, "x", location="node")
-            y_node = read_fm_map(file_name, "y", location="node")
-            f_nc = read_fm_map(file_name, "face_node_connectivity")
+            x_node = _read_fm_map(file_name, "x", location="node")
+            y_node = _read_fm_map(file_name, "y", location="node")
+            f_nc = _read_fm_map(file_name, "face_node_connectivity")
             if f_nc.mask.shape == ():
                 # all faces have the same number of nodes
                 n_nodes = np.ones(f_nc.data.shape[0], dtype=int) * f_nc.data.shape[1]
@@ -164,18 +164,18 @@ class SimulationData:
             face_node = f_nc
             log_text("read_bathymetry", indent=indent)
             bed_elevation_location = "node"
-            bed_elevation_values = read_fm_map(file_name, "altitude", location="node")
+            bed_elevation_values = _read_fm_map(file_name, "altitude", location="node")
             log_text("read_water_level", indent=indent)
-            water_level_face = read_fm_map(file_name, "Water level")
+            water_level_face = _read_fm_map(file_name, "Water level")
             log_text("read_water_depth", indent=indent)
             water_depth_face = np.maximum(
-                read_fm_map(file_name, "sea_floor_depth_below_sea_surface"), 0.0
+                _read_fm_map(file_name, "sea_floor_depth_below_sea_surface"), 0.0
             )
             log_text("read_velocity", indent=indent)
-            velocity_x_face = read_fm_map(file_name, "sea_water_x_velocity")
-            velocity_y_face = read_fm_map(file_name, "sea_water_y_velocity")
+            velocity_x_face = _read_fm_map(file_name, "sea_water_x_velocity")
+            velocity_y_face = _read_fm_map(file_name, "sea_water_y_velocity")
             log_text("read_chezy", indent=indent)
-            chezy_face = read_fm_map(file_name, "Chezy roughness")
+            chezy_face = _read_fm_map(file_name, "Chezy roughness")
 
             log_text("read_drywet", indent=indent)
             root_group = netCDF4.Dataset(file_name)
@@ -583,105 +583,105 @@ class ConfigFile:
             config["General"]["Version"] = "1.0"
 
             config["Detect"] = {}
-            config = move_parameter_location(
-                config, "General", "Delft3Dfile", "Detect", "SimFile", convert=sim2nc
+            config = _move_parameter_location(
+                config, "General", "Delft3Dfile", "Detect", "SimFile", convert=_sim2nc
             )
-            config = move_parameter_location(
-                config, "General", "SDSfile", "Detect", "SimFile", convert=sim2nc
+            config = _move_parameter_location(
+                config, "General", "SDSfile", "Detect", "SimFile", convert=_sim2nc
             )
-            config = move_parameter_location(config, "General", "SimFile", "Detect")
-            config = move_parameter_location(config, "General", "NBank", "Detect")
+            config = _move_parameter_location(config, "General", "SimFile", "Detect")
+            config = _move_parameter_location(config, "General", "NBank", "Detect")
             config_file = ConfigFile(config)
             n_bank = config_file.get_int("Detect", "NBank", default=0, positive=True)
             for i in range(1, n_bank + 1):
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"Line{i}", "Detect"
                 )
 
-            config = move_parameter_location(config, "General", "WaterDepth", "Detect")
-            config = move_parameter_location(config, "General", "DLines", "Detect")
+            config = _move_parameter_location(config, "General", "WaterDepth", "Detect")
+            config = _move_parameter_location(config, "General", "DLines", "Detect")
 
             config["Erosion"] = {}
-            config = move_parameter_location(config, "General", "TErosion", "Erosion")
-            config = move_parameter_location(config, "General", "RiverAxis", "Erosion")
-            config = move_parameter_location(config, "General", "Fairway", "Erosion")
-            config = move_parameter_location(config, "General", "RefLevel", "Erosion")
-            config = move_parameter_location(
+            config = _move_parameter_location(config, "General", "TErosion", "Erosion")
+            config = _move_parameter_location(config, "General", "RiverAxis", "Erosion")
+            config = _move_parameter_location(config, "General", "Fairway", "Erosion")
+            config = _move_parameter_location(config, "General", "RefLevel", "Erosion")
+            config = _move_parameter_location(
                 config, "General", "OutputInterval", "Erosion"
             )
-            config = move_parameter_location(config, "General", "OutputDir", "Erosion")
-            config = move_parameter_location(config, "General", "BankNew", "Erosion")
-            config = move_parameter_location(config, "General", "BankEq", "Erosion")
-            config = move_parameter_location(config, "General", "EroVol", "Erosion")
-            config = move_parameter_location(config, "General", "EroVolEqui", "Erosion")
-            config = move_parameter_location(config, "General", "NLevel", "Erosion")
+            config = _move_parameter_location(config, "General", "OutputDir", "Erosion")
+            config = _move_parameter_location(config, "General", "BankNew", "Erosion")
+            config = _move_parameter_location(config, "General", "BankEq", "Erosion")
+            config = _move_parameter_location(config, "General", "EroVol", "Erosion")
+            config = _move_parameter_location(config, "General", "EroVolEqui", "Erosion")
+            config = _move_parameter_location(config, "General", "NLevel", "Erosion")
             config_file = ConfigFile(config)
             n_level = config_file.get_int("Erosion", "NLevel", default=0, positive=True)
 
             for i in range(1, n_level + 1):
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config,
                     "General",
                     f"Delft3Dfile{i}",
                     "Erosion",
                     f"SimFile{i}",
-                    convert=sim2nc,
+                    convert=_sim2nc,
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config,
                     "General",
                     f"SDSfile{i}",
                     "Erosion",
                     f"SimFile{i}",
-                    convert=sim2nc,
+                    convert=_sim2nc,
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"SimFile{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"PDischarge{i}", "Erosion"
                 )
 
-            config = move_parameter_location(config, "General", "ShipType", "Erosion")
-            config = move_parameter_location(config, "General", "VShip", "Erosion")
-            config = move_parameter_location(config, "General", "NShip", "Erosion")
-            config = move_parameter_location(config, "General", "NWave", "Erosion")
-            config = move_parameter_location(config, "General", "Draught", "Erosion")
-            config = move_parameter_location(config, "General", "Wave0", "Erosion")
-            config = move_parameter_location(config, "General", "Wave1", "Erosion")
+            config = _move_parameter_location(config, "General", "ShipType", "Erosion")
+            config = _move_parameter_location(config, "General", "VShip", "Erosion")
+            config = _move_parameter_location(config, "General", "NShip", "Erosion")
+            config = _move_parameter_location(config, "General", "NWave", "Erosion")
+            config = _move_parameter_location(config, "General", "Draught", "Erosion")
+            config = _move_parameter_location(config, "General", "Wave0", "Erosion")
+            config = _move_parameter_location(config, "General", "Wave1", "Erosion")
 
-            config = move_parameter_location(config, "General", "Classes", "Erosion")
-            config = move_parameter_location(config, "General", "BankType", "Erosion")
-            config = move_parameter_location(
+            config = _move_parameter_location(config, "General", "Classes", "Erosion")
+            config = _move_parameter_location(config, "General", "BankType", "Erosion")
+            config = _move_parameter_location(
                 config, "General", "ProtectLevel", "Erosion", "ProtectionLevel"
             )
-            config = move_parameter_location(config, "General", "Slope", "Erosion")
-            config = move_parameter_location(config, "General", "Reed", "Erosion")
-            config = move_parameter_location(config, "General", "VelFilter", "Erosion")
+            config = _move_parameter_location(config, "General", "Slope", "Erosion")
+            config = _move_parameter_location(config, "General", "Reed", "Erosion")
+            config = _move_parameter_location(config, "General", "VelFilter", "Erosion")
 
             for i in range(1, n_level + 1):
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"ShipType{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"VShip{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"NShip{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"NWave{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"Draught{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"Slope{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"Reed{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"EroVol{i}", "Erosion"
                 )
 
@@ -1085,7 +1085,7 @@ class ConfigFile:
         except (ValueError, TypeError):
             if onefile:
                 log_text("read_param", data={"param": key, "file": filename})
-                km_thr, val = get_kmval(filename, key, positive, valid)
+                km_thr, val = _get_kmval(filename, key, positive, valid)
             for ib, bkm in enumerate(bank_km):
                 if not onefile:
                     filename_i = filename + f"_{ib + 1}" + ext
@@ -1093,7 +1093,7 @@ class ConfigFile:
                         "read_param_one_bank",
                         data={"param": key, "i": ib + 1, "file": filename_i},
                     )
-                    km_thr, val = get_kmval(filename_i, key, positive, valid)
+                    km_thr, val = _get_kmval(filename_i, key, positive, valid)
                 if km_thr is None:
                     parfield[ib] = np.zeros(len(bkm)) + val[0]
                 else:
@@ -1735,7 +1735,7 @@ def get_text(key: str) -> List[str]:
     return str_value
 
 
-def read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndarray:
+def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndarray:
     """
     Read the last time step of any quantity defined at faces from a D-Flow FM map-file.
 
@@ -2222,7 +2222,7 @@ def write_km_eroded_volumes(km: np.ndarray, vol: np.ndarray, filename: str) -> N
             erofile.write("{:.2f}\t".format(km[i]) + valstr + "\n")
 
 
-def move_parameter_location(
+def _move_parameter_location(
     config: ConfigParser,
     group1: str,
     key1: str,
@@ -2265,7 +2265,7 @@ def move_parameter_location(
     return config
 
 
-def sim2nc(oldfile: str) -> str:
+def _sim2nc(oldfile: str) -> str:
     """
     Convert an SDS file name to an NC file (mirrors sim2ugrid.m).
 
@@ -2287,7 +2287,7 @@ def sim2nc(oldfile: str) -> str:
     return nc_file
 
 
-def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[float]]):
+def _get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[float]]):
     """
     Read a parameter file, check its contents and return arrays of chainages and values.
 
