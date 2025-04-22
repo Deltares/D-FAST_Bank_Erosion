@@ -1080,15 +1080,45 @@ class RiverData:
             ```
         """
         self.config_file = config_file
-        self.profile: LineString = config_file.get_xy_km()
-        self.station_bounds: Tuple = config_file.get_km_bounds()
-        self.start_station: float = self.station_bounds[0]
-        self.end_station: float = self.station_bounds[1]
+        self.__profile: LineString = config_file.get_xy_km()
+        self.__station_bounds: Tuple = config_file.get_km_bounds()
+        self.__start_station: float = self.station_bounds[0]
+        self.__end_station: float = self.station_bounds[1]
         log_text(
             "clip_chainage", data={"low": self.start_station, "high": self.end_station}
         )
-        self.masked_profile: LineString = self.mask_profile(self.station_bounds)
-        self.masked_profile_arr = np.array(self.masked_profile.coords)
+        self.__masked_profile: LineString = self.mask_profile(self.station_bounds)
+        self.__masked_profile_coords = np.array(self.masked_profile.coords)
+
+    @property
+    def profile(self) -> LineString:
+        """LineString: Chainage line."""
+        return self.__profile
+
+    @property
+    def station_bounds(self) -> Tuple[float, float]:
+        """Tuple[float, float]: Lower and upper limit for the chainage."""
+        return self.__station_bounds
+
+    @property
+    def start_station(self) -> float:
+        """float: Lower limit for the chainage."""
+        return self.__start_station
+
+    @property
+    def end_station(self) -> float:
+        """float: Upper limit for the chainage."""
+        return self.__end_station
+
+    @property
+    def masked_profile(self) -> LineString:
+        """LineString: Clipped river chainage line."""
+        return self.__masked_profile
+
+    @property
+    def masked_profile_coords(self) -> np.ndarray:
+        """np.ndarray: Coordinates of the clipped river chainage line."""
+        return self.__masked_profile_coords
 
     @property
     def bank_search_lines(self) -> List[LineString]:
@@ -1188,8 +1218,7 @@ class RiverData:
         return xy_km
 
     def clip_search_lines(
-        self,
-        max_river_width: float = MAX_RIVER_WIDTH,
+        self, max_river_width: float = MAX_RIVER_WIDTH
     ) -> Tuple[List[LineString], float]:
         """
         Clip the list of lines to the envelope of certain size surrounding a reference line.
@@ -1237,7 +1266,12 @@ class RiverData:
 
         return search_lines, max_distance
 
-    def read_river_axis(self):
+    def read_river_axis(self) -> LineString:
+        """Get the river axis from the configuration file.
+
+        Returns:
+            LineString: River axis.
+        """
         river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
         log_text("read_river_axis", data={"file": river_axis_file})
         river_axis = XYCModel.read(river_axis_file)
