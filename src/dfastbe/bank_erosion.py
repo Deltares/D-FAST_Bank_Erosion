@@ -161,7 +161,7 @@ class Erosion:
         stations_coords: np.ndarray,
         mesh_data: MeshData,
     ) -> BankData:
-        bank_lines = config_file.get_bank_lines(str(self.bank_dir))
+        bank_lines = config_file.read_bank_lines(str(self.bank_dir))
         n_bank_lines = len(bank_lines)
 
         bank_line_coords = []
@@ -298,7 +298,11 @@ class Erosion:
         return FairwayData(fairway_face_indices, fairway_intersection_coords)
 
     def _map_bank_to_fairway(
-        self, bank_data: BankData, fairway_data: FairwayData, sim: SimulationObject, config_file: ConfigFile
+        self,
+        bank_data: BankData,
+        fairway_data: FairwayData,
+        simulation_data: SimulationData,
+        config_file: ConfigFile,
     ):
         # distance fairway-bankline (bankfairway)
         log_text("bank_distance_fairway")
@@ -412,7 +416,7 @@ class Erosion:
         zfw_ini = []
         for ib in range(bank_data.n_bank_lines):
             ii = bank_data.fairway_face_indices[ib]
-            zfw_ini.append(sim["zw_face"][ii])
+            zfw_ini.append(simulation_data.water_level_face[ii])
         fairway_data.fairway_initial_water_levels = zfw_ini
 
     def _prepare_initial_conditions(
@@ -952,10 +956,6 @@ class Erosion:
 
         stations_coords = self.river_data.masked_profile_arr[:, :2]
 
-        # read bank lines
-        banklines = config_file.read_bank_lines(str(self.bank_dir))
-        n_banklines = len(banklines)
-
         # map bank lines to mesh cells
         log_text("intersect_bank_mesh")
 
@@ -975,7 +975,7 @@ class Erosion:
 
         fairway_data = self._prepare_fairway(river_axis, stations_coords, mesh_data, config_file)
 
-        self._map_bank_to_fairway(bank_data, fairway_data, sim, config_file)
+        self._map_bank_to_fairway(bank_data, fairway_data, simulation_data, config_file)
 
         erosion_inputs = self._prepare_initial_conditions(
             config_file, bank_data, fairway_data
