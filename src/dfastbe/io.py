@@ -1170,7 +1170,8 @@ class RiverData:
             start_index (Optional[int]): Start index for clipping.
 
         Returns:
-            Tuple[Optional[Tuple[float, float, float]], Optional[int]]: Adjusted lower bound point and start index.
+            Tuple[Optional[Tuple[float, float, float]], Optional[int]]:
+                Adjusted lower bound point and start index.
         """
         if start_index is None:
             raise ValueError(
@@ -1201,7 +1202,8 @@ class RiverData:
             end_index (Optional[int]): End index for clipping.
 
         Returns:
-            Tuple[Optional[Tuple[float, float, float]], Optional[int]]: Adjusted upper bound point and end index.
+            Tuple[Optional[Tuple[float, float, float]], Optional[int]]:
+                Adjusted upper bound point and end index.
         """
         if end_index is None:
             if self.station_bounds[1] - self.profile.coords[-1][2] > 0.1:
