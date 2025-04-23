@@ -880,7 +880,8 @@ class TestRiverData:
         config_file = ConfigFile.read(path)
         river_data = RiverData(config_file)
         assert isinstance(river_data.config_file, ConfigFile)
-        assert river_data.num_search_lines == 2
+        search_lines = river_data.search_lines
+        assert search_lines.size == 2
         center_line = river_data.river_center_line
         assert center_line.station_bounds[0] == 123.0
         assert center_line.station_bounds[1] == 128.0

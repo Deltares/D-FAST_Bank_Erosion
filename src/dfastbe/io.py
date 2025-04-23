@@ -1565,51 +1565,31 @@ class CenterLine:
                 line_string = LineString([x0] + line_string.coords[start_i:end_i] + [x1])
         return line_string
 
+class SearchLines:
 
-class RiverData:
-    """River data class."""
-
-    def __init__(self, config_file: ConfigFile):
-        """River Data initialization.
+    def __init__(self, lines: List[LineString], mask: CenterLine = None):
+        """Search lines initialization.
 
         Args:
-            config_file : ConfigFile
-                Configuration file with settings for the analysis.
-
-        Examples:
-            ```python
-            >>> from dfastbe.io import ConfigFile, RiverData
-            >>> config_file = ConfigFile("tests/data/erosion/meuse_manual.cfg")
-            >>> river_data = RiverData(config_file)
-            ```
+            lines (List[LineString]):
+                List of search lines.
         """
-        self.config_file = config_file
-        center_line = config_file.get_river_center_line()
-        bounds = config_file.get_start_end_stations()
-        self.river_center_line: CenterLine = CenterLine(center_line, bounds)
-        self.station_bounds: Tuple = config_file.get_start_end_stations()
+        if mask is None:
+            self.values = lines
+            self.max_distance = None
+        else:
+            self.values, self.max_distance = self.mask(lines, mask.values)
 
+        self.size = len(lines)
 
-    @property
-    def bank_search_lines(self) -> List[LineString]:
-        """Get the bank search lines.
-
-        Returns:
-            List[LineString]: List of bank search lines.
-        """
-        return self.config_file.get_search_lines()
-
-    @property
-    def num_search_lines(self) -> int:
-        """Number of river bank search lines."""
-        return len(self.bank_search_lines)
-
-    def clip_search_lines(
-        self,
+    @staticmethod
+    def mask(
+        search_lines: List[LineString],
+        river_center_line: LineString,
         max_river_width: float = MAX_RIVER_WIDTH,
     ) -> Tuple[List[LineString], float]:
         """
-        Clip the list of lines to the envelope of certain size surrounding a reference line.
+        Clip the list of lines to the envelope of a certain size surrounding a reference line.
 
         Arg:
             max_river_width: float
@@ -1619,8 +1599,7 @@ class RiverData:
             List[LineString]: List of clipped search lines.
             float: Maximum distance from any point within line to reference line.
         """
-        search_lines = self.bank_search_lines
-        river_center_line = self.river_center_line.values
+        num = len(search_lines)
         profile_buffer = river_center_line.buffer(max_river_width, cap_style=2)
 
         # The algorithm uses simplified geometries for determining the distance between lines for speed.
@@ -1628,7 +1607,7 @@ class RiverData:
         profile_simplified = river_center_line.simplify(1)
 
         max_distance = 0
-        for ind in range(self.num_search_lines):
+        for ind in range(num):
             # Clip the bank search lines to the reach of interest (indicated by the reference line).
             search_lines[ind] = search_lines[ind].intersection(profile_buffer)
 
@@ -1654,6 +1633,49 @@ class RiverData:
             max_distance = max(max_distance, max_distance + 2)
 
         return search_lines, max_distance
+
+class RiverData:
+    """River data class."""
+
+    def __init__(self, config_file: ConfigFile):
+        """River Data initialization.
+
+        Args:
+            config_file : ConfigFile
+                Configuration file with settings for the analysis.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile, RiverData
+            >>> config_file = ConfigFile("tests/data/erosion/meuse_manual.cfg")
+            >>> river_data = RiverData(config_file)
+            ```
+        """
+        self.config_file = config_file
+        center_line = config_file.get_river_center_line()
+        bounds = config_file.get_start_end_stations()
+        self.river_center_line: CenterLine = CenterLine(center_line, bounds)
+        self.station_bounds: Tuple = config_file.get_start_end_stations()
+
+    @property
+    def search_lines(self) -> SearchLines:
+        return SearchLines(self.config_file.get_search_lines(), self.river_center_line)
+
+
+    # @property
+    # def bank_search_lines(self) -> List[LineString]:
+    #     """Get the bank search lines.
+    #
+    #     Returns:
+    #         List[LineString]: List of bank search lines.
+    #     """
+    #     return self.config_file.get_search_lines()
+
+    # @property
+    # def num_search_lines(self) -> int:
+    #     """Number of river bank search lines."""
+    #     return len(self.bank_search_lines)
+
 
     def read_river_axis(self):
         """Get the river axis from the analysis settings."""

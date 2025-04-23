@@ -59,6 +59,7 @@ class BankLines:
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)
         self.river_data = RiverData(config_file)
+        self.search_lines = self.river_data.search_lines
 
         self.simulation_data, self.h0 = self._get_simulation_data()
 
@@ -117,19 +118,20 @@ class BankLines:
         center_line_arr = river_center_line.as_array()
         stations_coords = center_line_arr[:, :2]
 
-        masked_search_lines, max_distance = river_data.clip_search_lines()
-
+        search_lines = self.search_lines.values
+        max_distance = self.search_lines.max_distance
+        num_search_lines = self.search_lines.size
         # convert search lines to bank polygons
-        d_lines = config_file.get_bank_search_distances(river_data.num_search_lines)
+        d_lines = config_file.get_bank_search_distances(self.search_lines.size)
         bank_areas: List[Polygon] = self._convert_search_lines_to_bank_polygons(
-            masked_search_lines, d_lines
+            search_lines, d_lines
         )
 
         # determine whether search lines are located on the left or right
-        to_right = [True] * river_data.num_search_lines
-        for ib in range(river_data.num_search_lines):
+        to_right = [True] * num_search_lines
+        for ib in range(num_search_lines):
             to_right[ib] = on_right_side(
-                np.array(masked_search_lines[ib].coords), stations_coords
+                np.array(search_lines[ib].coords), stations_coords
             )
 
         # clip simulation data to boundaries ...
@@ -142,8 +144,8 @@ class BankLines:
 
         # clip the set of detected bank lines to the bank areas
         log_text("simplify_banklines")
-        bank = [None] * river_data.num_search_lines
-        clipped_banklines = [None] * river_data.num_search_lines
+        bank = [None] * num_search_lines
+        clipped_banklines = [None] * num_search_lines
         for ib, bank_area in enumerate(bank_areas):
             log_text("bank_lines", data={"ib": ib + 1})
             clipped_banklines[ib] = clip_bank_lines(banklines, bank_area)
@@ -158,7 +160,7 @@ class BankLines:
         if self.plot_flags["plot_data"]:
             self.plot(
                 center_line_arr,
-                river_data.num_search_lines,
+                num_search_lines,
                 bank,
                 station_bounds,
                 bank_areas,
