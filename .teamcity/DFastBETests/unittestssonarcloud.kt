@@ -58,7 +58,6 @@ object UnitTestsSonarCloud : BuildType({
             forceCleanCheckout = true
         }
         commitStatusPublisher {
-            id = "BUILD_EXT_316"
             vcsRootExtId = "${DslContext.settingsRoot.id}"
             publisher = github {
                 githubUrl = "https://api.github.com"

@@ -32,7 +32,6 @@ object BuildWithoutCommandWindow : BuildType({
 
     failureConditions {
         failOnText {
-            id = "BUILD_EXT_478"
             conditionType = BuildFailureOnText.ConditionType.CONTAINS
             pattern = "AssertionError"
             failureMessage = "AssertionError"
@@ -51,7 +50,6 @@ object BuildWithoutCommandWindow : BuildType({
             }
 
             artifacts {
-                id = "ARTIFACT_DEPENDENCY_12900"
                 artifactRules = "+:*.pdf => docs/"
             }
         }

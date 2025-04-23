@@ -47,7 +47,6 @@ object TestBinaries : BuildType({
 
     failureConditions {
         failOnMetricChange {
-            id = "BUILD_EXT_469"
             metric = BuildFailureOnMetric.MetricType.TEST_COUNT
             units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
             comparison = BuildFailureOnMetric.MetricComparison.LESS
@@ -56,9 +55,9 @@ object TestBinaries : BuildType({
     }
 
 
-    triggers {
-        // Trigger disabled until ready for merge to main branch
-        if (false) {
+    // Trigger disabled until ready for merge to main branch
+    if (false) {
+        triggers {
             vcs {
                 branchFilter = "+:refs/heads/*"
             }
@@ -71,7 +70,6 @@ object TestBinaries : BuildType({
             forceCleanCheckout = true
         }
         commitStatusPublisher {
-            id = "BUILD_EXT_315"
             vcsRootExtId = "${DslContext.settingsRoot.id}"
             publisher = github {
                 githubUrl = "https://api.github.com"
@@ -89,7 +87,6 @@ object TestBinaries : BuildType({
             }
 
             artifacts {
-                id = "ARTIFACT_DEPENDENCY_5392"
                 artifactRules = "*.zip!** => dfastbe.dist"
             }
         }

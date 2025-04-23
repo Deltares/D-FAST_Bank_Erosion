@@ -36,7 +36,6 @@ object BuildWithCommandWindow : BuildType({
     failureConditions {
         executionTimeoutMin = 90
         failOnText {
-            id = "BUILD_EXT_462"
             conditionType = BuildFailureOnText.ConditionType.CONTAINS
             pattern = "AssertionError"
             failureMessage = "AssertionError"
@@ -44,7 +43,6 @@ object BuildWithCommandWindow : BuildType({
             stopBuildOnFailure = true
         }
         failOnMetricChange {
-            id = "BUILD_EXT_479"
             metric = BuildFailureOnMetric.MetricType.ARTIFACTS_TOTAL_SIZE
             units = BuildFailureOnMetric.MetricUnit.DEFAULT_UNIT
             comparison = BuildFailureOnMetric.MetricComparison.LESS
@@ -60,7 +58,6 @@ object BuildWithCommandWindow : BuildType({
             }
 
             artifacts {
-                id = "ARTIFACT_DEPENDENCY_5007"
                 artifactRules = "+:*.pdf => docs/"
             }
         }
