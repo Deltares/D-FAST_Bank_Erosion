@@ -57,8 +57,11 @@ object TestBinaries : BuildType({
 
 
     triggers {
-        vcs {
-            enabled = false
+        // Trigger disabled until ready for merge to main branch
+        if (false) {
+            vcs {
+                branchFilter = "+:refs/heads/*"
+            }
         }
     }
 
