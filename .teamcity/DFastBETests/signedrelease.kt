@@ -30,12 +30,6 @@ object SignedRelease : BuildType({
         }
     }
 
-    triggers {
-        vcs {
-            branchFilter = "+:<default>"
-        }
-    }
-
     dependencies {
         snapshot(BuildWithCommandWindow) {
             onDependencyFailure = FailureAction.FAIL_TO_START

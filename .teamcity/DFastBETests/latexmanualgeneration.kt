@@ -61,12 +61,6 @@ object LatexManualGeneration : BuildType({
         }
     }
 
-    triggers {
-        vcs {
-            enabled = false
-        }
-    }
-
     failureConditions {
         failOnText {
             conditionType = BuildFailureOnText.ConditionType.CONTAINS
