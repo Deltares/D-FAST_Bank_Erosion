@@ -11,12 +11,13 @@ object LatexManualGeneration : BuildType({
     name = "Latex Manual Generation"
 
     artifactRules = """
-        +:docs/end-user-docs/*.pdf
-        +:docs/end-user-docs/*.log
+        +:%artifact_path%*.pdf
+        +:%artifact_path%*.log
     """.trimIndent()
     buildNumberPattern = "%build.revisions.short%"
 
     params {
+        param("artifact_path", "docs/end-user-docs/")
         param("file_name_of_techref", "dfastbe_techref")
         param("file_name_of_usermanual", "dfastbe_usermanual")
     }
