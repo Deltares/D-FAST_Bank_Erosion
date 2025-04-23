@@ -1476,7 +1476,6 @@ class CenterLine:
         )
 
     def as_array(self):
-        # self.masked_profile_arr =
         return np.array(self.values.coords)
 
     @staticmethod
