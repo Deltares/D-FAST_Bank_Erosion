@@ -51,7 +51,7 @@ from dfastbe.io import (
     RiverData,
     SimulationData,
 )
-from dfastbe.structures import (
+from dfastbe.erosion.structures import (
     ErosionInputs,
     WaterLevelData,
     MeshData,
