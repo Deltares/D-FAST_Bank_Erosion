@@ -884,7 +884,7 @@ class TestRiverData:
         center_line = river_data.river_center_line
         assert center_line.station_bounds[0] == 123.0
         assert center_line.station_bounds[1] == 128.0
-        assert isinstance(center_line.masked_river_center_line, LineString)
-        assert isinstance(center_line.river_center_line, LineString)
-        assert isinstance(center_line.masked_profile_arr, np.ndarray)
-        assert center_line.masked_profile_arr.shape == (251, 3)
+        assert isinstance(center_line.values, LineString)
+        center_line_arr = center_line.as_array()
+        assert isinstance(center_line_arr, np.ndarray)
+        assert center_line_arr.shape == (251, 3)

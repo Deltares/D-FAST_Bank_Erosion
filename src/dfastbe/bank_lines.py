@@ -113,8 +113,10 @@ class BankLines:
         # clip the chainage path to the range of chainages of interest
         km_bounds = river_data.station_bounds
         river_center_line = river_data.river_center_line
-        river_profile = river_center_line.masked_river_center_line
-        stations_coords = river_center_line.masked_profile_arr[:, :2]
+        river_center_line_values = river_center_line.values
+        center_line_arr = river_center_line.as_array()
+        stations_coords = center_line_arr[:, :2]
+
         masked_search_lines, max_distance = river_data.clip_search_lines()
 
         # convert search lines to bank polygons
@@ -132,7 +134,7 @@ class BankLines:
 
         # clip simulation data to boundaries ...
         log_text("clip_data")
-        self.simulation_data.clip(river_profile, max_distance)
+        self.simulation_data.clip(river_center_line_values, max_distance)
 
         # derive bank lines (get_banklines)
         log_text("identify_banklines")
@@ -146,7 +148,7 @@ class BankLines:
             log_text("bank_lines", data={"ib": ib + 1})
             clipped_banklines[ib] = clip_bank_lines(banklines, bank_area)
             bank[ib] = sort_connect_bank_lines(
-                clipped_banklines[ib], river_profile, to_right[ib]
+                clipped_banklines[ib], river_center_line_values, to_right[ib]
             )
 
         # save bank_file
@@ -155,7 +157,7 @@ class BankLines:
 
         if self.plot_flags["plot_data"]:
             self.plot(
-                river_data.river_center_line.masked_profile_arr,
+                center_line_arr,
                 river_data.num_search_lines,
                 bank,
                 km_bounds,

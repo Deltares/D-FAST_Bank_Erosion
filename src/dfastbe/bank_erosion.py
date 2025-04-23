@@ -81,6 +81,7 @@ class Erosion:
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)
         self.river_data = RiverData(config_file)
+        self.river_center_line_arr = self.river_data.river_center_line.as_array()
 
         # get filter settings for bank levels and flow velocities along banks
         self.zb_dx = config_file.get_float("Erosion", "BedFilterDist", 0.0, positive=True)
@@ -184,7 +185,7 @@ class Erosion:
         for bank_index, coords in enumerate(bank_line_coords):
             segment_mid_points = (coords[:-1, :] + coords[1:, :]) / 2
             chainage_mid_points = project_km_on_line(segment_mid_points,
-                                                     self.river_data.river_center_line.masked_profile_arr)
+                                                     self.river_center_line_arr)
 
             # check if bank line is defined from low chainage to high chainage
             if chainage_mid_points[0] > chainage_mid_points[-1]:
@@ -230,7 +231,7 @@ class Erosion:
 
         # map km to axis points, further using axis
         log_text("chainage_to_axis")
-        river_axis_km = project_km_on_line(river_axis_numpy, self.river_data.river_center_line.masked_profile_arr)
+        river_axis_km = project_km_on_line(river_axis_numpy, self.river_center_line_arr)
         write_shp_pnt(
             river_axis_numpy,
             {"chainage": river_axis_km},
@@ -266,7 +267,7 @@ class Erosion:
         # map km to fairway points, further using axis
         log_text("chainage_to_fairway")
         fairway_numpy = np.array(river_axis.coords)
-        fairway_km = project_km_on_line(fairway_numpy, self.river_data.river_center_line.masked_profile_arr)
+        fairway_km = project_km_on_line(fairway_numpy, self.river_center_line_arr)
         write_shp_pnt(
             fairway_numpy,
             {"chainage": fairway_km},
@@ -956,7 +957,7 @@ class Erosion:
         km_bounds = self.river_data.station_bounds
         log_text("clip_chainage", data={"low": km_bounds[0], "high": km_bounds[1]})
 
-        stations_coords = self.river_data.river_center_line.masked_profile_arr[:, :2]
+        stations_coords = self.river_center_line_arr[:, :2]
 
         # map bank lines to mesh cells
         log_text("intersect_bank_mesh")
@@ -1072,7 +1073,7 @@ class Erosion:
             log_text("=")
             log_text("create_figures")
             fig_i = 0
-            bbox = self.river_data.get_bbox(self.river_data.river_center_line.masked_profile_arr)
+            bbox = self.river_data.get_bbox(self.river_center_line_arr)
 
             if self.plot_flags["save_plot_zoomed"]:
                 bank_coords_mid = []
@@ -1094,7 +1095,7 @@ class Erosion:
 
             fig, ax = df_plt.plot1_waterdepth_and_banklines(
                 bbox,
-                self.river_data.river_center_line.masked_profile_arr,
+                self.river_center_line_arr,
                 bank_data.bank_lines,
                 simulation_data.face_node,
                 simulation_data.n_nodes,
@@ -1119,7 +1120,7 @@ class Erosion:
 
             fig, ax = df_plt.plot2_eroded_distance_and_equilibrium(
                 bbox,
-                self.river_data.river_center_line.masked_profile_arr,
+                self.river_center_line_arr,
                 bank_data.bank_line_coords,
                 erosion_results.total_erosion_dist,
                 bank_data.is_right_bank,
@@ -1268,7 +1269,7 @@ class Erosion:
 
             fig, ax = df_plt.plot7_banktype(
                 bbox,
-                self.river_data.river_center_line.masked_profile_arr,
+                self.river_center_line_arr,
                 bank_data.bank_line_coords,
                 erosion_inputs.bank_type,
                 erosion_inputs.taucls_str,

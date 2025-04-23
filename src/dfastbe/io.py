@@ -218,14 +218,14 @@ class SimulationData:
             dry_wet_threshold=dry_wet_threshold,
         )
 
-    def clip(self, river_profile: LineString, max_distance: float):
+    def clip(self, river_center_line: LineString, max_distance: float):
         """Clip the simulation mesh.
 
         Clipping data to the area of interest,
         that is sufficiently close to the reference line.
 
         Args:
-            river_profile (np.ndarray):
+            river_center_line (np.ndarray):
                 Reference line.
             max_distance (float):
                 Maximum distance between the reference line and a point in the area of
@@ -254,13 +254,13 @@ class SimulationData:
             ... [194982.8125, 361431.03125]
             ... ])
             >>> max_distance = 10.0
-            >>> sim_data.clip(river_profile, max_distance)
+            >>> sim_data.clip(river_center_line, max_distance)
             >>> print(sim_data.x_node)
             [194949.796875 194966.515625 194982.8125  ]
 
             ```
         """
-        xy_buffer = river_profile.buffer(max_distance + max_distance)
+        xy_buffer = river_center_line.buffer(max_distance + max_distance)
         bbox = xy_buffer.envelope.exterior
         x_min = bbox.coords[0][0]
         x_max = bbox.coords[1][0]
@@ -1451,7 +1451,7 @@ class ConfigFile:
 class CenterLine:
     """Center line class."""
 
-    def __init__(self, config_file: ConfigFile):
+    def __init__(self, line_string: LineString, mask: List[float] = None):
         """Center Line initialization.
 
         Args:
@@ -1465,16 +1465,22 @@ class CenterLine:
             >>> center_line = CenterLine(config_file)
             ```
         """
-        self.config_file = config_file
-        self.river_center_line: LineString = config_file.get_river_center_line()
-        self.station_bounds = config_file.get_start_end_stations()
-        self.masked_river_center_line: LineString = self.mask(self.station_bounds)
-        self.masked_profile_arr = np.array(self.masked_river_center_line.coords)
+        self.station_bounds = mask
+        if mask is None:
+            self.values = line_string
+        else:
+            self.values: LineString = self.mask(line_string, mask)
+
         log_text(
             "clip_chainage", data={"low": self.station_bounds[0], "high": self.station_bounds[1]}
         )
 
-    def mask(self, bounds: Tuple[float, float]) -> LineString:
+    def as_array(self):
+        # self.masked_profile_arr =
+        return np.array(self.values.coords)
+
+
+    def mask(self, line_string, bounds: Tuple[float, float]) -> LineString:
         """
         Clip a chainage line to the relevant reach.
 
@@ -1484,10 +1490,9 @@ class CenterLine:
         Returns:
             LineString: Clipped river chainage line.
         """
-        xy_km = self.river_center_line
         start_i = None
         end_i = None
-        for i, c in enumerate(xy_km.coords):
+        for i, c in enumerate(line_string.coords):
             if start_i is None and c[2] >= bounds[0]:
                 start_i = i
             if c[2] >= bounds[1]:
@@ -1497,35 +1502,35 @@ class CenterLine:
         if start_i is None:
             raise Exception(
                 "Lower chainage bound {} is larger than the maximum chainage {} available".format(
-                    bounds[0], xy_km.coords[-1][2]
+                    bounds[0], line_string.coords[-1][2]
                 )
             )
         elif start_i == 0:
             # lower bound (potentially) clipped to available reach
-            if xy_km.coords[0][2] - bounds[0] > 0.1:
+            if line_string.coords[0][2] - bounds[0] > 0.1:
                 raise Exception(
                     "Lower chainage bound {} is smaller than the minimum chainage {} available".format(
-                        bounds[0], xy_km.coords[0][2]
+                        bounds[0], line_string.coords[0][2]
                     )
                 )
             x0 = None
         else:
-            alpha = (bounds[0] - xy_km.coords[start_i - 1][2]) / (
-                    xy_km.coords[start_i][2] - xy_km.coords[start_i - 1][2]
+            alpha = (bounds[0] - line_string.coords[start_i - 1][2]) / (
+                    line_string.coords[start_i][2] - line_string.coords[start_i - 1][2]
             )
             x0 = tuple(
                 (c1 + alpha * (c2 - c1))
-                for c1, c2 in zip(xy_km.coords[start_i - 1], xy_km.coords[start_i])
+                for c1, c2 in zip(line_string.coords[start_i - 1], line_string.coords[start_i])
             )
             if alpha > 0.9:
                 # value close to the first node (start_i), so let's skip that one
                 start_i = start_i + 1
 
         if end_i is None:
-            if bounds[1] - xy_km.coords[-1][2] > 0.1:
+            if bounds[1] - line_string.coords[-1][2] > 0.1:
                 raise Exception(
                     "Upper chainage bound {} is larger than the maximum chainage {} available".format(
-                        bounds[1], xy_km.coords[-1][2]
+                        bounds[1], line_string.coords[-1][2]
                     )
                 )
             # else kmbounds[1] matches chainage of last point
@@ -1533,29 +1538,29 @@ class CenterLine:
                 # whole range available selected
                 pass
             else:
-                xy_km = LineString([x0] + xy_km.coords[start_i:])
+                line_string = LineString([x0] + line_string.coords[start_i:])
         elif end_i == 0:
             raise Exception(
                 "Upper chainage bound {} is smaller than the minimum chainage {} available".format(
-                    bounds[1], xy_km.coords[0][2]
+                    bounds[1], line_string.coords[0][2]
                 )
             )
         else:
-            alpha = (bounds[1] - xy_km.coords[end_i - 1][2]) / (
-                    xy_km.coords[end_i][2] - xy_km.coords[end_i - 1][2]
+            alpha = (bounds[1] - line_string.coords[end_i - 1][2]) / (
+                    line_string.coords[end_i][2] - line_string.coords[end_i - 1][2]
             )
             x1 = tuple(
                 (c1 + alpha * (c2 - c1))
-                for c1, c2 in zip(xy_km.coords[end_i - 1], xy_km.coords[end_i])
+                for c1, c2 in zip(line_string.coords[end_i - 1], line_string.coords[end_i])
             )
             if alpha < 0.1:
                 # value close to the previous point (end_i - 1), so let's skip that one
                 end_i = end_i - 1
             if x0 is None:
-                xy_km = LineString(xy_km.coords[:end_i] + [x1])
+                line_string = LineString(line_string.coords[:end_i] + [x1])
             else:
-                xy_km = LineString([x0] + xy_km.coords[start_i:end_i] + [x1])
-        return xy_km
+                line_string = LineString([x0] + line_string.coords[start_i:end_i] + [x1])
+        return line_string
 
 
 class RiverData:
@@ -1576,7 +1581,9 @@ class RiverData:
             ```
         """
         self.config_file = config_file
-        self.river_center_line: CenterLine = CenterLine(config_file)
+        center_line = config_file.get_river_center_line()
+        bounds = config_file.get_start_end_stations()
+        self.river_center_line: CenterLine = CenterLine(center_line, bounds)
         self.station_bounds: Tuple = config_file.get_start_end_stations()
 
 
@@ -1610,7 +1617,7 @@ class RiverData:
             float: Maximum distance from any point within line to reference line.
         """
         search_lines = self.bank_search_lines
-        masked_river_center_line = self.river_center_line.masked_river_center_line
+        masked_river_center_line = self.river_center_line.values
         profile_buffer = masked_river_center_line.buffer(max_river_width, cap_style=2)
 
         # The algorithm uses simplified geometries for determining the distance between lines for speed.
