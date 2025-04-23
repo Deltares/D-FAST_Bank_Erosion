@@ -42,7 +42,7 @@ object BuildWithoutCommandWindow : BuildType({
     }
 
     dependencies {
-        snapshot(DistributionTests) {
+        snapshot(TestBinaries) {
             onDependencyFailure = FailureAction.FAIL_TO_START
         }
         dependency(LatexManualGeneration) {

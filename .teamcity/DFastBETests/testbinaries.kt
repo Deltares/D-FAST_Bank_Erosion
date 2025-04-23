@@ -5,7 +5,7 @@ import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnMetr
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnMetricChange
 import CondaTemplate
 
-object DistributionTests : BuildType({
+object TestBinaries : BuildType({
     templates(CondaTemplate)
     id("DistributionTests")
     name = "Distribution Tests"

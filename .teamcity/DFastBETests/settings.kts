@@ -7,7 +7,7 @@ import LatexManualGeneration
 import SignedReleaseCommand
 import BuildWithCommandWindow
 import BuildWithoutCommandWindow
-import DistributionTests
+import TestBinaries
 import SignedRelease
 
 version = "2025.03"
@@ -28,7 +28,7 @@ project {
     buildType(LatexManualGeneration)
     buildType(SignedReleaseCommand)
     buildType(BuildWithCommandWindow)
-    buildType(DistributionTests)
+    buildType(TestBinaries)
     buildType(SignedRelease)
     buildType(BuildWithoutCommandWindow)
 
@@ -37,7 +37,7 @@ project {
         UnitTestsSonarCloud,
         BuildWithCommandWindow,
         SignedReleaseCommand,
-        DistributionTests,
+        TestBinaries,
         BuildWithoutCommandWindow,
         SignedRelease
     )

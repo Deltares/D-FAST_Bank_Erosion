@@ -97,7 +97,7 @@ Defines a build configuration for executing the signing process of release artif
 
 ---
 
-### 9. `distributiontests.kt`
+### 9. `TestBinaries.kt`
 **Purpose:**  
 Defines a build configuration for running distribution tests on the built binaries.
 
