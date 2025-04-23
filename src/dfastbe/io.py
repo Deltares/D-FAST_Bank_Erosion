@@ -1451,7 +1451,7 @@ class ConfigFile:
 class CenterLine:
     """Center line class."""
 
-    def __init__(self, line_string: LineString, mask: List[float] = None):
+    def __init__(self, line_string: LineString, mask: Tuple[float, float] = None):
         """Center Line initialization.
 
         Args:
@@ -1479,13 +1479,16 @@ class CenterLine:
         # self.masked_profile_arr =
         return np.array(self.values.coords)
 
-
-    def mask(self, line_string, bounds: Tuple[float, float]) -> LineString:
+    @staticmethod
+    def mask(line_string, bounds: Tuple[float, float]) -> LineString:
         """
         Clip a chainage line to the relevant reach.
 
         Args:
-            bounds (Tuple[float, float]): Lower and upper limit for the chainage.
+            line_string (LineString):
+                river center line as a linestring.
+            bounds (Tuple[float, float]):
+                Lower and upper limit for the chainage.
 
         Returns:
             LineString: Clipped river chainage line.
