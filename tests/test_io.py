@@ -929,3 +929,25 @@ class TestRiverData:
         river_data._start_station, river_data._end_station = station_bounds
         with pytest.raises(ValueError, match=expected_error):
             river_data._mask_profile()
+
+    @patch("dfastbe.io.XYCModel.read")
+    def test_read_river_axis(self, mock_read, river_data):
+        """
+        Test the read_river_axis method by mocking XYCModel.read.
+        """
+        # Mock the return value of XYCModel.read
+        mock_river_axis = LineString([(0, 0), (1, 1), (2, 2)])
+        mock_read.return_value = mock_river_axis
+
+        # Call the method
+        river_axis = river_data.read_river_axis()
+
+        # Assertions
+        expected_path = Path(
+            "tests/data/erosion/inputs/maas_rivieras_mod.xyc"
+        ).resolve()
+        mock_read.assert_called_once_with(str(expected_path))
+        assert isinstance(river_axis, LineString)
+        assert river_axis.equals(
+            mock_river_axis
+        ), "The returned river axis does not match the mocked value."
