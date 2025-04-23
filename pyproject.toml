@@ -85,6 +85,7 @@ addopts = [ "--cov",
 testpaths="tests"
 
 markers = [
+    "e2e: marks tests as e2e (deselect with '-m \"not e2e\"')",
     "binaries: marks tests as binaries (deselect with '-m \"not binaries\"')",
 ]
 
