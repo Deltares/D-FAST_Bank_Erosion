@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from io import StringIO
 from pathlib import Path
 from typing import Dict
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import netCDF4
 import numpy as np
@@ -16,6 +16,8 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry import LineString
 
 from dfastbe.io import (
+    SimulationData,
+    SimulationFilesError,
     ConfigFile,
     RiverData,
     absolute_path,
@@ -32,6 +34,7 @@ from dfastbe.io import (
     ugrid_add,
     write_simona_box,
 )
+from dfastbe.structures import MeshData
 
 
 @contextmanager
@@ -51,6 +54,216 @@ def test_load_program_texts_01():
     """
     print("current work directory: ", os.getcwd())
     assert load_program_texts("tests/files/messages.UK.ini") is None
+
+
+class TestSimulationData:
+
+    def test_read(self):
+        file_name = "test_map.nc"
+        mock_x_node = np.array([0.0, 1.0, 2.0])
+        mock_y_node = np.array([0.0, 1.0, 2.0])
+        mock_face_node = MagicMock()
+        mock_face_node.data = np.array([[0, 1, 2], [2, 3, 4]])
+        mock_face_node.mask = np.array([[False, False, False], [False, False, False]])
+        mock_bed_level_values = np.array([10.0, 20.0, 30.0])
+        mock_water_level_face = np.array([1.0, 2.0, 3.0])
+        mock_water_depth_face = np.array([0.5, 1.0, 1.5])
+        mock_velocity_x_face = np.array([0.1, 0.2, 0.3])
+        mock_velocity_y_face = np.array([0.4, 0.5, 0.6])
+        mock_chezy_face = np.array([30.0, 40.0, 50.0])
+
+        with patch("dfastbe.io.read_fm_map") as mock_read_fm_map, patch(
+            "netCDF4.Dataset"
+        ) as mock_dataset:
+            mock_read_fm_map.side_effect = [
+                mock_x_node,
+                mock_y_node,
+                mock_face_node,
+                mock_bed_level_values,
+                mock_water_level_face,
+                mock_water_depth_face,
+                mock_velocity_x_face,
+                mock_velocity_y_face,
+                mock_chezy_face,
+            ]
+
+            mock_root_group = MagicMock()
+            mock_root_group.converted_from = "SIMONA"
+            mock_dataset.return_value = mock_root_group
+
+            sim_object = SimulationData.read(file_name)
+
+            assert isinstance(sim_object, SimulationData)
+            assert np.array_equal(sim_object.x_node, mock_x_node)
+            assert np.array_equal(sim_object.y_node, mock_y_node)
+            assert np.array_equal(sim_object.face_node.data, mock_face_node.data)
+            assert np.array_equal(
+                sim_object.bed_elevation_values, mock_bed_level_values
+            )
+            assert np.array_equal(sim_object.water_level_face, mock_water_level_face)
+            assert np.array_equal(sim_object.water_depth_face, mock_water_depth_face)
+            assert np.array_equal(sim_object.velocity_x_face, mock_velocity_x_face)
+            assert np.array_equal(sim_object.velocity_y_face, mock_velocity_y_face)
+            assert np.array_equal(sim_object.chezy_face, mock_chezy_face)
+            assert sim_object.dry_wet_threshold == 0.1
+
+            mock_read_fm_map.assert_any_call(file_name, "x", location="node")
+            mock_read_fm_map.assert_any_call(file_name, "y", location="node")
+            mock_read_fm_map.assert_any_call(file_name, "face_node_connectivity")
+            mock_read_fm_map.assert_any_call(file_name, "altitude", location="node")
+            mock_read_fm_map.assert_any_call(file_name, "Water level")
+            mock_read_fm_map.assert_any_call(
+                file_name, "sea_floor_depth_below_sea_surface"
+            )
+            mock_read_fm_map.assert_any_call(file_name, "sea_water_x_velocity")
+            mock_read_fm_map.assert_any_call(file_name, "sea_water_y_velocity")
+            mock_read_fm_map.assert_any_call(file_name, "Chezy roughness")
+
+    def test_read_invalid_file(self):
+        invalid_file_name = "invalid_file.nc"
+
+        with pytest.raises(SimulationFilesError):
+            SimulationData.read(invalid_file_name)
+
+    @pytest.fixture
+    def simulation_data(self) -> SimulationData:
+        x_node = np.array([194949.796875, 194966.515625, 194982.8125, 195000.0])
+        y_node = np.array([361366.90625, 361399.46875, 361431.03125, 361450.0])
+        n_nodes = np.array([4, 4])
+        face_node = np.ma.masked_array(
+            data=[[0, 1, 2, 3], [1, 2, 3, 0]],
+            mask=[[False, False, False, False], [False, False, False, False]],
+        )
+        bed_elevation_location = "node"
+        bed_elevation_values = np.array([10.0, 20.0, 30.0, 40.0])
+        water_level_face = np.array([1.0, 2.0])
+        water_depth_face = np.array([0.5, 1.0])
+        velocity_x_face = np.array([0.1, 0.2])
+        velocity_y_face = np.array([0.4, 0.5])
+        chezy_face = np.array([30.0, 40.0])
+        dry_wet_threshold = 0.1
+
+        sim_data = SimulationData(
+            x_node=x_node,
+            y_node=y_node,
+            n_nodes=n_nodes,
+            face_node=face_node,
+            bed_elevation_location=bed_elevation_location,
+            bed_elevation_values=bed_elevation_values,
+            water_level_face=water_level_face,
+            water_depth_face=water_depth_face,
+            velocity_x_face=velocity_x_face,
+            velocity_y_face=velocity_y_face,
+            chezy_face=chezy_face,
+            dry_wet_threshold=dry_wet_threshold,
+        )
+        return sim_data
+
+    def test_clip(self, simulation_data: SimulationData):
+        river_profile = LineString(
+            [
+                [194949.796875, 361366.90625],
+                [194966.515625, 361399.46875],
+                [194982.8125, 361431.03125],
+            ]
+        )
+        max_distance = 10.0
+        simulation_data.clip(river_profile, max_distance)
+
+        assert np.array_equal(
+            simulation_data.x_node,
+            np.array([194949.796875, 194966.515625, 194982.8125]),
+        )
+        assert np.array_equal(
+            simulation_data.y_node, np.array([361366.90625, 361399.46875, 361431.03125])
+        )
+        assert np.array_equal(
+            simulation_data.bed_elevation_values, np.array([10.0, 20.0, 30.0])
+        )
+        assert simulation_data.n_nodes.size == 0
+        assert simulation_data.water_level_face.size == 0
+        assert simulation_data.water_depth_face.size == 0
+        assert simulation_data.velocity_x_face.size == 0
+        assert simulation_data.velocity_y_face.size == 0
+        assert simulation_data.chezy_face.size == 0
+
+    def test_clip_no_nodes_in_buffer(self, simulation_data: SimulationData):
+        river_profile = LineString(
+            [
+                [194900.0, 361300.0],
+                [194910.0, 361310.0],
+                [194920.0, 361320.0],
+            ]
+        )
+        max_distance = 10.0
+
+        simulation_data.clip(river_profile, max_distance)
+
+        assert simulation_data.x_node.size == 0
+        assert simulation_data.y_node.size == 0
+        assert simulation_data.bed_elevation_values.size == 0
+        assert simulation_data.n_nodes.size == 0
+        assert simulation_data.water_level_face.size == 0
+        assert simulation_data.water_depth_face.size == 0
+        assert simulation_data.velocity_x_face.size == 0
+        assert simulation_data.velocity_y_face.size == 0
+        assert simulation_data.chezy_face.size == 0
+
+    def test_compute_mesh_topology(self, simulation_data: SimulationData):
+        """
+        Test the compute_mesh_topology method of SimulationData.
+        """
+        # Call the method to compute the mesh topology
+        mesh_data = simulation_data.compute_mesh_topology()
+
+        assert isinstance(mesh_data, MeshData)
+
+        assert np.array_equal(
+            mesh_data.edge_face_connectivity, np.array([[0, 1], [0, 1], [0, 1], [0, 1]])
+        )
+        assert np.array_equal(
+            mesh_data.face_edge_connectivity, np.array([[1, 0, 2, 3], [0, 2, 3, 1]])
+        )
+        assert np.allclose(
+            mesh_data.x_edge_coords,
+            np.array(
+                [
+                    [194949.796875, 194966.515625],
+                    [194949.796875, 195000.0],
+                    [194966.515625, 194982.8125],
+                    [194982.8125, 195000.0],
+                ]
+            ),
+        )
+        assert np.allclose(
+            mesh_data.x_face_coords.data,
+            np.array(
+                [
+                    [194949.796875, 194966.515625, 194982.8125, 195000.0],
+                    [194966.515625, 194982.8125, 195000.0, 194949.796875],
+                ]
+            ),
+        )
+        assert np.allclose(
+            mesh_data.y_edge_coords,
+            np.array(
+                [
+                    [361366.90625, 361399.46875],
+                    [361366.90625, 361450.0],
+                    [361399.46875, 361431.03125],
+                    [361431.03125, 361450.0],
+                ]
+            ),
+        )
+        assert np.allclose(
+            mesh_data.y_face_coords.data,
+            np.array(
+                [
+                    [361366.90625, 361399.46875, 361431.03125, 361450.0],
+                    [361399.46875, 361431.03125, 361450.0, 361366.90625],
+                ]
+            ),
+        )
 
 
 class TestLogText:
@@ -531,17 +744,17 @@ class TestConfigFile:
         assert len(search_lines) == 2
         assert list(search_lines[0].coords) == [(0, 0), (1, 1), (2, 2)]
 
-    def test_get_bank_lines(self, config: ConfigParser, fs: FakeFilesystem):
+    def test_read_bank_lines(self, config: ConfigParser, fs: FakeFilesystem):
         """Test retrieving bank lines."""
         config["General"]["BankLine"] = "bankfile"
-        config = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
 
         fs.create_file(
             "inputs/bankfile_1.xyc",
             contents="0.0 0.0\n1.0 1.0\n2.0 2.0\n3.0 3.0\n4.0 4.0\n",
         )
 
-        bank_lines = config.get_bank_lines("inputs")
+        bank_lines = config_file.read_bank_lines("inputs")
 
         assert isinstance(bank_lines, GeoDataFrame)
         assert len(bank_lines) == 1

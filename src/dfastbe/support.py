@@ -30,7 +30,6 @@ from typing import List, Tuple
 
 import numpy as np
 
-from dfastbe.io import SimulationObject
 from dfastbe.structures import MeshData
 
 # import matplotlib
