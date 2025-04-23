@@ -111,8 +111,8 @@ class BankLines:
         log_text("-")
 
         # clip the chainage path to the range of chainages of interest
-        km_bounds = river_data.station_bounds
         river_center_line = river_data.river_center_line
+        station_bounds = river_center_line.station_bounds
         river_center_line_values = river_center_line.values
         center_line_arr = river_center_line.as_array()
         stations_coords = center_line_arr[:, :2]
@@ -160,7 +160,7 @@ class BankLines:
                 center_line_arr,
                 river_data.num_search_lines,
                 bank,
-                km_bounds,
+                station_bounds,
                 bank_areas,
                 config_file,
             )

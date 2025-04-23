@@ -1617,12 +1617,12 @@ class RiverData:
             float: Maximum distance from any point within line to reference line.
         """
         search_lines = self.bank_search_lines
-        masked_river_center_line = self.river_center_line.values
-        profile_buffer = masked_river_center_line.buffer(max_river_width, cap_style=2)
+        river_center_line = self.river_center_line.values
+        profile_buffer = river_center_line.buffer(max_river_width, cap_style=2)
 
         # The algorithm uses simplified geometries for determining the distance between lines for speed.
         # Stay accurate to within about 1 m
-        profile_simplified = masked_river_center_line.simplify(1)
+        profile_simplified = river_center_line.simplify(1)
 
         max_distance = 0
         for ind in range(self.num_search_lines):
