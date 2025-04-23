@@ -6,9 +6,9 @@ import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnText
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnText
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 
-object LatexManualGeneration : BuildType({
-    id("LatexManualGeneration")
+object LatexManual : BuildType({
     name = "Latex Manual Generation"
+    description = "Generate the D-FAST Bank Erosion user manual and technical reference using LaTeX."
 
     artifactRules = """
         +:%artifact_path%*.pdf

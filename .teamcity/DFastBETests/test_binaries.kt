@@ -9,10 +9,10 @@ import CondaTemplate
 
 object TestBinaries : BuildType({
     templates(CondaTemplate)
-    id("DistributionTests")
     name = "Distribution Tests"
+    description = "Test D-FAST Bank Erosion binaries."
 
-    buildNumberPattern = "${BuildWithCommandWindow.depParamRefs["build.revisions.short"]}"
+    buildNumberPattern = "%build.revisions.short%"
 
     vcs {
         root(DslContext.settingsRoot)

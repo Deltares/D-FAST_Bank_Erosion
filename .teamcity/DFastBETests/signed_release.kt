@@ -6,8 +6,8 @@ import BuildWithCommandWindow
 import BuildWithoutCommandWindow
 
 object SignedRelease : BuildType({
-    id("SignedRelease")
     name = "Signed release"
+    description = "Collect D-FAST Bank Erosion signed release"
 
     artifactRules = """
         . => dfastbe-signed-%build.revisions.short%.zip

@@ -1,12 +1,12 @@
 
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.projectFeatures.*
-import UnitTestsSonarCloud
+import UnitTests
 import CondaTemplate
-import LatexManualGeneration
-import SignedReleaseCommand
-import BuildWithCommandWindow
-import BuildWithoutCommandWindow
+import LatexManual
+import SignedReleaseTerminal
+import BuildTerminal
+import BuildMain
 import TestBinaries
 import SignedRelease
 
@@ -25,21 +25,21 @@ project {
 
     template(CondaTemplate)
 
-    buildType(UnitTestsSonarCloud)
-    buildType(LatexManualGeneration)
-    buildType(SignedReleaseCommand)
-    buildType(BuildWithCommandWindow)
+    buildType(UnitTests)
+    buildType(LatexManual)
+    buildType(SignedReleaseTerminal)
+    buildType(BuildTerminal)
     buildType(TestBinaries)
     buildType(SignedRelease)
-    buildType(BuildWithoutCommandWindow)
+    buildType(BuildMain)
 
     buildTypesOrder = arrayListOf(
-        LatexManualGeneration,
-        UnitTestsSonarCloud,
-        BuildWithCommandWindow,
-        SignedReleaseCommand,
+        LatexManual,
+        UnitTests,
+        BuildTerminal,
+        SignedReleaseTerminal,
         TestBinaries,
-        BuildWithoutCommandWindow,
+        BuildMain,
         SignedRelease
     )
 }

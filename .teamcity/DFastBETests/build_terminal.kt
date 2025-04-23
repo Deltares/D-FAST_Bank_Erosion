@@ -6,10 +6,10 @@ import jetbrains.buildServer.configs.kotlin.failureConditions.failOnMetricChange
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnText
 import CondaTemplate
 
-object BuildWithCommandWindow : BuildType({
+object BuildTerminal : BuildType({
     templates(CondaTemplate)
-    id("BuildWithCommandWindow")
     name = "Build with command window"
+    description = "Build D-FAST Bank Erosion with terminal window for debugging"
 
     artifactRules = """
         dfastbe.dist => dfastbe.zip

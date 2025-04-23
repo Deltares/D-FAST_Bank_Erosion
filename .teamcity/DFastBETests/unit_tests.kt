@@ -5,10 +5,10 @@ import jetbrains.buildServer.configs.kotlin.buildFeatures.perfmon
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import CondaTemplate
 
-object UnitTestsSonarCloud : BuildType({
+object UnitTests : BuildType({
     templates(CondaTemplate)
-    id("UnitTestsSonarCloud")
     name = "Unit Tests + SonarCloud"
+    description = "Run unit tests and SonarCloud analysis."
 
     artifactRules = """
         coverage.xml

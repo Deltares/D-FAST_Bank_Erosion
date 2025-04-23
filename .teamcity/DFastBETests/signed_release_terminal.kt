@@ -2,15 +2,15 @@ import jetbrains.buildServer.configs.kotlin.*
 
 import BuildWithCommandWindow
 
-object SignedReleaseCommand : BuildType({
-    id("SignedReleaseCommand")
+object SignedReleaseTerminal : BuildType({
     name = "Signed release with command window"
+    description = "Collect D-FAST Bank Erosion signed release with terminal window for debugging"
 
     artifactRules = """
-        . => dfastbe-signed-${BuildWithCommandWindow.depParamRefs["build.revisions.short"]}.zip
+        . => dfastbe-signed-%build.revisions.short%.zip
         -:dfastbe.zip
     """.trimIndent()
-    buildNumberPattern = "${BuildWithCommandWindow.depParamRefs["build.revisions.short"]}"
+    buildNumberPattern = "%build.revisions.short%"
 
     vcs {
         root(DslContext.settingsRoot)

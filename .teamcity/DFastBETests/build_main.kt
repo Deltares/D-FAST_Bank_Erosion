@@ -3,9 +3,8 @@ import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnText
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnText
 
-object BuildWithoutCommandWindow : BuildType({
+object BuildMain : BuildType({
     templates(CondaTemplate)
-    id("BuildWithoutCommandWindow")
     name = "Build without command window"
 
     artifactRules = """
