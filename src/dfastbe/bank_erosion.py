@@ -80,6 +80,7 @@ class Erosion:
         self.debug = config_file.get_bool("General", "DebugOutput", False)
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)
+
         self.river_data = RiverData(config_file)
         self.river_center_line_arr = self.river_data.river_center_line.as_array()
 
@@ -87,6 +88,7 @@ class Erosion:
         self.zb_dx = config_file.get_float("Erosion", "BedFilterDist", 0.0, positive=True)
         self.vel_dx = config_file.get_float("Erosion", "VelFilterDist", 0.0, positive=True)
         log_text("get_levels")
+
         self.num_levels = config_file.get_int("Erosion", "NLevel")
         self.ref_level = config_file.get_int("Erosion", "RefLevel") - 1
         self.sim_files, self.p_discharge = self.get_sim_data()
@@ -947,7 +949,6 @@ class Erosion:
         log_text("read_simdata", data={"file": sim_file})
         log_text("-")
         simulation_data = SimulationData.read(sim_file)
-        log_text("-")
 
         log_text("derive_topology")
 
