@@ -91,6 +91,6 @@ def run(
             bank_lines.detect()
         elif run_mode == "BANKEROSION":
             erosion = Erosion(config_file)
-            erosion.bankerosion_core()
+            erosion.run()
         else:
             raise ValueError(f"Invalid run mode {run_mode} specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'.")

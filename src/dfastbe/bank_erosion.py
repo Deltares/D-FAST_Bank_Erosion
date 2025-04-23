@@ -925,7 +925,7 @@ class Erosion:
 
         return bankline_new_list, bankline_eq_list, xy_line_eq_list
 
-    def bankerosion_core(self) -> None:
+    def run(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
         timed_logger("-- start analysis --")
         log_text(
