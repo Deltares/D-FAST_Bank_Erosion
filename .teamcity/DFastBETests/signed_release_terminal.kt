@@ -17,7 +17,7 @@ object SignedReleaseTerminal : BuildType({
     }
 
     dependencies {
-        dependency(BuildWithCommandWindow) {
+        dependency(BuildTerminal) {
             snapshot {
                 onDependencyFailure = FailureAction.FAIL_TO_START
             }

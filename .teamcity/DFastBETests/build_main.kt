@@ -43,7 +43,7 @@ object BuildMain : BuildType({
         snapshot(TestBinaries) {
             onDependencyFailure = FailureAction.FAIL_TO_START
         }
-        dependency(LatexManualGeneration) {
+        dependency(LatexManual) {
             snapshot {
                 onDependencyFailure = FailureAction.FAIL_TO_START
             }

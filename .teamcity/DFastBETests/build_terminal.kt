@@ -52,7 +52,7 @@ object BuildTerminal : BuildType({
     }
 
     dependencies {
-        dependency(LatexManualGeneration) {
+        dependency(LatexManual) {
             snapshot {
                 onDependencyFailure = FailureAction.FAIL_TO_START
             }
@@ -61,7 +61,7 @@ object BuildTerminal : BuildType({
                 artifactRules = "+:*.pdf => docs/"
             }
         }
-        snapshot(UnitTestsSonarCloud) {
+        snapshot(UnitTests) {
             onDependencyFailure = FailureAction.FAIL_TO_START
         }
     }

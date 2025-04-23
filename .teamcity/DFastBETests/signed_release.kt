@@ -2,8 +2,8 @@ import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 
-import BuildWithCommandWindow
-import BuildWithoutCommandWindow
+import BuildTerminal
+import BuildMain
 
 object SignedRelease : BuildType({
     name = "Signed release"
@@ -31,7 +31,7 @@ object SignedRelease : BuildType({
     }
 
     dependencies {
-        snapshot(BuildWithCommandWindow) {
+        snapshot(BuildTerminal) {
             onDependencyFailure = FailureAction.FAIL_TO_START
         }
         dependency(AbsoluteId("SigningAndCertificates_DFast_SigningDFastBankErosionTestCode")) {
@@ -52,7 +52,7 @@ object SignedRelease : BuildType({
                 artifactRules = "dfastbe.exe"
             }
         }
-        artifacts(BuildWithoutCommandWindow) {
+        artifacts(BuildMain) {
             artifactRules = "dfastbe.zip!** => ."
         }
     }
