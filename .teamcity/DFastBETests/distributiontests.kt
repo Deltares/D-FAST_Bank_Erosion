@@ -50,6 +50,15 @@ object DistributionTests : BuildType({
         }
     }
 
+
+    triggers {
+        vcs {
+            id = "TRIGGER_648"
+            enabled = false
+        }
+    }
+
+
     features {
         commitStatusPublisher {
             id = "BUILD_EXT_315"

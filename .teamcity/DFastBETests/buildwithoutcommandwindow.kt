@@ -27,7 +27,7 @@ object BuildWithoutCommandWindow : BuildType({
                 CALL conda deactivate
             """.trimIndent()
         }
-        stepsOrder = arrayListOf("Conda_create_environment", "Python_pip_install_poetry", "Install_dependencies_via_poetry", "Unit_test_and_code_coverage", "build_D_FAST_BE", "Conda_deactivate_and_remove_environment")
+        stepsOrder = arrayListOf("Conda_create_environment", "Python_pip_install_poetry", "Install_dependencies_via_poetry", "build_D_FAST_BE", "Conda_deactivate_and_remove_environment")
     }
 
     failureConditions {
@@ -57,5 +57,5 @@ object BuildWithoutCommandWindow : BuildType({
         }
     }
     
-    disableSettings("TRIGGER_648", "Unit_test_and_code_coverage", "swabra")
+    disableSettings("swabra")
 })

@@ -24,6 +24,15 @@ object UnitTestsSonarCloud : BuildType({
     }
 
     steps {
+        script {
+            name = "Unit test and code coverage"
+            id = "Unit_test_and_code_coverage"
+            scriptContent = """
+                CALL conda activate %CONDA_ENV_NAME%
+                CALL poetry run pytest --junitxml="report.xml" --cov=%COVERAGE_LOC% --cov-report=xml tests/ -m "not binaries"
+                CALL conda deactivate
+            """.trimIndent()
+        }
         step {
             name = "SonarCloud analysis"
             id = "SonarCloud_analysis"

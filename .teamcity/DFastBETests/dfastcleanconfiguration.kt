@@ -55,15 +55,6 @@ object DFastCleanConfiguration : Template({
             """.trimIndent()
         }
         script {
-            name = "Unit test and code coverage"
-            id = "Unit_test_and_code_coverage"
-            scriptContent = """
-                CALL conda activate %CONDA_ENV_NAME%
-                CALL poetry run pytest --junitxml="report.xml" --cov=%COVERAGE_LOC% --cov-report=xml tests/ -m "not binaries"
-                CALL conda deactivate
-            """.trimIndent()
-        }
-        script {
             name = "Conda deactivate and remove environment"
             id = "Conda_deactivate_and_remove_environment"
             executionMode = BuildStep.ExecutionMode.ALWAYS
@@ -72,13 +63,6 @@ object DFastCleanConfiguration : Template({
                 rem CALL conda env remove -y --name %CONDA_ENV_NAME%
                 CALL conda remove --name %CONDA_ENV_NAME% --all --force-remove
             """.trimIndent()
-        }
-    }
-
-    triggers {
-        vcs {
-            id = "TRIGGER_648"
-            enabled = false
         }
     }
 
