@@ -4,7 +4,7 @@ import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnText
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnText
 
 object BuildWithoutCommandWindow : BuildType({
-    templates(DFastCleanConfiguration)
+    templates(CondaTemplate)
     id("BuildWithoutCommandWindow")
     name = "Build without command window"
 

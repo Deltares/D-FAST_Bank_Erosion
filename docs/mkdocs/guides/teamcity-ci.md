@@ -24,7 +24,7 @@ Defines the build configuration for running unit tests and performing SonarCloud
 
 ---
 
-### 3. `dfastcleanconfiguration.kt`
+### 3. `condatemplate.kt`
 **Purpose:**  
 Provides a reusable template for cleaning up the build environment.
 
@@ -40,7 +40,7 @@ Defines the build configuration for compiling the D-FAST Bank Erosion project pr
 
 **Key Features:**  
 - Executes a batch script (`BuildDfastbe.bat`) to build the project.  
-- Relies on the template (`dfastcleanconfiguration.kt`) for conda environment setup.  
+- Relies on the template (`CondaTemplate.kt`) for conda environment setup.  
 - Includes failure conditions:  
     - Fails the build if an `AssertionError` is detected in the logs.  
     - Fails the build if the total artifact size is below a specified threshold (e.g., 100MB).  
@@ -56,7 +56,7 @@ Defines the build configuration for compiling the D-FAST Bank Erosion project wh
 
 **Key Features:**  
 - Executes a batch script (`BuildDfastbe_no_command_window.bat`) to build the project.  
-- Relies on the template (`dfastcleanconfiguration.kt`) for conda environment setup.   
+- Relies on the template (`CondaTemplate.kt`) for conda environment setup.   
 - Includes failure conditions:  
     - Fails the build if an `AssertionError` is detected in the logs.  
     - Fails the build if the total artifact size is below a specified threshold (e.g., 100MB).  

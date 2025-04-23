@@ -2,10 +2,10 @@ import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildFeatures.perfmon
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
-import DFastCleanConfiguration
+import CondaTemplate
 
 object UnitTestsSonarCloud : BuildType({
-    templates(DFastCleanConfiguration)
+    templates(CondaTemplate)
     id("UnitTestsSonarCloud")
     name = "Unit Tests + SonarCloud"
 

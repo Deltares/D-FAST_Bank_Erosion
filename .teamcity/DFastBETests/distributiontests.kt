@@ -3,10 +3,10 @@ import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnMetric
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnMetricChange
-import DFastCleanConfiguration
+import CondaTemplate
 
 object DistributionTests : BuildType({
-    templates(DFastCleanConfiguration)
+    templates(CondaTemplate)
     id("DistributionTests")
     name = "Distribution Tests"
 

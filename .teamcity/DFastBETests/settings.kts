@@ -2,7 +2,7 @@
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.projectFeatures.*
 import UnitTestsSonarCloud
-import DFastCleanConfiguration
+import CondaTemplate
 import LatexManualGeneration
 import SignedReleaseCommand
 import BuildWithCommandWindow
@@ -22,7 +22,7 @@ project {
         param("SonarProjectKey", "Deltares_D-FAST_Bank_Erosion")
     }
 
-    template(DFastCleanConfiguration)
+    template(CondaTemplate)
 
     buildType(UnitTestsSonarCloud)
     buildType(LatexManualGeneration)

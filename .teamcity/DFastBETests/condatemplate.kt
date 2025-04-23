@@ -3,7 +3,7 @@ import jetbrains.buildServer.configs.kotlin.buildFeatures.swabra
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 
-object DFastCleanConfiguration : Template({
+object CondaTemplate : Template({
     name = "D-FAST Clean configuration"
 
     artifactRules = """

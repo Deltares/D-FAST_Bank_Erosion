@@ -4,10 +4,10 @@ import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnMetr
 import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnText
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnMetricChange
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnText
-import DFastCleanConfiguration
+import CondaTemplate
 
 object BuildWithCommandWindow : BuildType({
-    templates(DFastCleanConfiguration)
+    templates(CondaTemplate)
     id("BuildWithCommandWindow")
     name = "Build with command window"
 
