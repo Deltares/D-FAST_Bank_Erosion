@@ -17,8 +17,9 @@ from dfastbe.io import (
     RiverData,
     SimulationData,
     log_text,
+    get_bbox
 )
-from dfastbe.kernel import get_bbox, get_zoom_extends
+from dfastbe.kernel import get_zoom_extends
 from dfastbe.support import (
     clip_bank_lines,
     on_right_side,
@@ -111,7 +112,7 @@ class BankLines:
 
         # clip the chainage path to the range of chainages of interest
         km_bounds = river_data.station_bounds
-        river_profile = river_data.masked_profile
+        river_profile = river_data.masked_river_center_line
         stations_coords = river_data.masked_profile_arr[:, :2]
         masked_search_lines, max_distance = river_data.clip_search_lines()
 

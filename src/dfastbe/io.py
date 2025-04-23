@@ -1474,8 +1474,8 @@ class RiverData:
         log_text(
             "clip_chainage", data={"low": self.start_station, "high": self.end_station}
         )
-        self.masked_profile: LineString = self.mask_profile(self.station_bounds)
-        self.masked_profile_arr = np.array(self.masked_profile.coords)
+        self.masked_river_center_line: LineString = self.mask_profile(self.station_bounds)
+        self.masked_profile_arr = np.array(self.masked_river_center_line.coords)
 
     @property
     def bank_search_lines(self) -> List[LineString]:
@@ -1590,11 +1590,11 @@ class RiverData:
             float: Maximum distance from any point within line to reference line.
         """
         search_lines = self.bank_search_lines
-        profile_buffer = self.masked_profile.buffer(max_river_width, cap_style=2)
+        profile_buffer = self.masked_river_center_line.buffer(max_river_width, cap_style=2)
 
         # The algorithm uses simplified geometries for determining the distance between lines for speed.
         # Stay accurate to within about 1 m
-        profile_simplified = self.masked_profile.simplify(1)
+        profile_simplified = self.masked_river_center_line.simplify(1)
 
         max_distance = 0
         for ind in range(self.num_search_lines):
@@ -1631,6 +1631,52 @@ class RiverData:
         river_axis = XYCModel.read(river_axis_file)
         return river_axis
 
+    @staticmethod
+    def get_bbox(
+        coords: np.ndarray, buffer: float = 0.1
+    ) -> Tuple[float, float, float, float]:
+        """
+        Derive the bounding box from an array of coordinates.
+
+        Args:
+            coords (np.ndarray):
+                An N x M array containing x- and y-coordinates as first two M entries
+            buffer : float
+                Buffer fraction surrounding the tight bounding box
+
+        Returns:
+            bbox (Tuple[float, float, float, float]):
+                Tuple bounding box consisting of [min x, min y, max x, max y)
+        """
+        return get_bbox(coords, buffer)
+
+
+def get_bbox(
+        coords: np.ndarray, buffer: float = 0.1
+) -> Tuple[float, float, float, float]:
+    """
+    Derive the bounding box from a line.
+
+    Args:
+        coords (np.ndarray):
+            An N x M array containing x- and y-coordinates as first two M entries
+        buffer : float
+            Buffer fraction surrounding the tight bounding box
+
+    Returns:
+        bbox (Tuple[float, float, float, float]):
+            Tuple bounding box consisting of [min x, min y, max x, max y)
+    """
+    x = coords[:, 0]
+    y = coords[:, 1]
+    x_min = x.min()
+    y_min = y.min()
+    x_max = x.max()
+    y_max = y.max()
+    d = buffer * max(x_max - x_min, y_max - y_min)
+    bbox = (x_min - d, y_min - d, x_max + d, y_max + d)
+
+    return bbox
 
 def load_program_texts(file_name: Union[str, Path]) -> None:
     """Load texts from a configuration file, and store globally for access.

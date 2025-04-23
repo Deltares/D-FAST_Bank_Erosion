@@ -883,7 +883,7 @@ class TestRiverData:
         assert river_data.num_search_lines == 2
         assert river_data.start_station == 123.0
         assert river_data.end_station == 128.0
-        assert isinstance(river_data.masked_profile, LineString)
+        assert isinstance(river_data.masked_river_center_line, LineString)
         assert isinstance(river_data.river_center_line, LineString)
         assert isinstance(river_data.masked_profile_arr, np.ndarray)
         assert river_data.masked_profile_arr.shape == (251, 3)

@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 
 from dfastbe import __version__
 from dfastbe.kernel import get_km_bins, moving_avg, comp_erosion_eq, comp_erosion, get_km_eroded_volume, \
-                            get_zoom_extends, get_bbox
+                            get_zoom_extends
 from dfastbe.support import on_right_side, project_km_on_line, intersect_line_mesh, move_line
 from dfastbe import plotting as df_plt
 from dfastbe.io import (
@@ -1071,7 +1071,7 @@ class Erosion:
             log_text("=")
             log_text("create_figures")
             fig_i = 0
-            bbox = get_bbox(self.river_data.masked_profile_arr)
+            bbox = self.river_data.get_bbox(self.river_data.masked_profile_arr)
 
             if self.plot_flags["save_plot_zoomed"]:
                 bank_coords_mid = []

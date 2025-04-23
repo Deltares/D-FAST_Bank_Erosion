@@ -552,31 +552,3 @@ def get_zoom_extends(km_min: float, km_max: float, zoom_km_step: float, bank_crd
 
     return kmzoom, xyzoom
 
-
-def get_bbox(
-    xykm: numpy.ndarray, buffer: float = 0.1
-) -> Tuple[float, float, float, float]:
-    """
-    Derive the bounding box from a line.
-
-    Arguments
-    ---------
-    xybm : numpy.ndarray
-        An N x M array containing x- and y-coordinates as first two M entries
-    buffer : float
-        Buffer fraction surrounding the tight bounding box
-
-    Results
-    -------
-    bbox : Tuple[float, float, float, float]
-        Tuple bounding box consisting of [min x, min y, max x, max y)
-    """
-    x = xykm[:, 0]
-    y = xykm[:, 1]
-    xmin = x.min()
-    ymin = y.min()
-    xmax = x.max()
-    ymax = y.max()
-    d = buffer * max(xmax - xmin, ymax - ymin)
-    bbox = (xmin - d, ymin - d, xmax + d, ymax + d)
-    return bbox
