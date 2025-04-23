@@ -1133,21 +1133,21 @@ class ConfigFile:
 
             ```
         """
-        dlines_key = self.config["Detect"].get("DLines", None)
-        if dlines_key is None:
-            dlines = [50] * nbank
-        elif dlines_key[0] == "[" and dlines_key[-1] == "]":
-            dlines_split = dlines_key[1:-1].split(",")
-            dlines = [float(d) for d in dlines_split]
-            if not all([d > 0 for d in dlines]):
+        d_lines_key = self.config["Detect"].get("DLines", None)
+        if d_lines_key is None:
+            d_lines = [50] * nbank
+        elif d_lines_key[0] == "[" and d_lines_key[-1] == "]":
+            d_lines_split = d_lines_key[1:-1].split(",")
+            d_lines = [float(d) for d in d_lines_split]
+            if not all([d > 0 for d in d_lines]):
                 raise ValueError(
                     "keyword DLINES should contain positive values in configuration file."
                 )
-            if len(dlines) != nbank:
+            if len(d_lines) != nbank:
                 raise ConfigFileError(
                     "keyword DLINES should contain NBANK values in configuration file."
                 )
-        return dlines
+        return d_lines
 
     def get_range(self, group: str, key: str) -> Tuple[float, float]:
         """Get a start and end value from a selected group and keyword in the analysis settings.
