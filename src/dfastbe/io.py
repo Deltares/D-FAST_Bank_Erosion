@@ -1133,16 +1133,19 @@ class RiverData:
         """
         start_index = self._find_mask_index(self.start_station)
         end_index = self._find_mask_index(self.end_station)
-        x0, start_index = self._handle_lower_bound(start_index)
-        x1, end_index = self._handle_upper_bound(end_index)
+        lower_bound_point, start_index = self._handle_lower_bound(start_index)
+        upper_bound_point, end_index = self._handle_upper_bound(end_index)
 
-        return self._construct_masked_profile(x0, start_index, x1, end_index)
+        return self._construct_masked_profile(
+            lower_bound_point, start_index, upper_bound_point, end_index
+        )
 
     def _find_mask_index(self, station_bound: float) -> Optional[int]:
         """Find the start and end indices for clipping the chainage line.
 
         Args:
             station_bound (float): Station bound for clipping.
+
         Returns:
             Optional[int]: index for clipping.
         """
@@ -1248,30 +1251,40 @@ class RiverData:
 
     def _construct_masked_profile(
         self,
-        x0: Optional[Tuple[float, float, float]],
+        lower_bound_point: Optional[Tuple[float, float, float]],
         start_index: Optional[int],
-        x1: Optional[Tuple[float, float, float]],
+        upper_bound_point: Optional[Tuple[float, float, float]],
         end_index: Optional[int],
     ) -> LineString:
         """Construct the clipped chainage line.
 
         Args:
-            x0 (Optional[Tuple[float, float, float]]): Adjusted lower bound point.
-            start_index (Optional[int]): Start index for clipping.
-            x1 (Optional[Tuple[float, float, float]]): Adjusted upper bound point.
-            end_index (Optional[int]): End index for clipping.
+            lower_bound_point (Optional[Tuple[float, float, float]]):
+                Adjusted lower bound point.
+            start_index (Optional[int]):
+                Start index for clipping.
+            upper_bound_point (Optional[Tuple[float, float, float]]):
+                Adjusted upper bound point.
+            end_index (Optional[int]):
+                End index for clipping.
 
         Returns:
             LineString: Clipped chainage line.
         """
-        if x0 is None and x1 is None:
+        if lower_bound_point is None and upper_bound_point is None:
             return self.profile
-        elif x0 is None:
-            return LineString(self.profile.coords[: end_index + 1] + [x1])
-        elif x1 is None:
-            return LineString([x0] + self.profile.coords[start_index:])
+        elif lower_bound_point is None:
+            return LineString(
+                self.profile.coords[: end_index + 1] + [upper_bound_point]
+            )
+        elif upper_bound_point is None:
+            return LineString([lower_bound_point] + self.profile.coords[start_index:])
         else:
-            return LineString([x0] + self.profile.coords[start_index:end_index] + [x1])
+            return LineString(
+                [upper_bound_point]
+                + self.profile.coords[start_index:end_index]
+                + [upper_bound_point]
+            )
 
     def clip_search_lines(
         self, max_river_width: float = MAX_RIVER_WIDTH
