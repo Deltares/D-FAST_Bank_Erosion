@@ -16,6 +16,10 @@ object TestBinaries : BuildType({
         root(DslContext.settingsRoot)
     }
 
+    params {
+        param("test_dir", "tests/test_binaries/")
+    }
+
     steps {
         script {
             name = "Get folder listing"
@@ -33,7 +37,7 @@ object TestBinaries : BuildType({
                 rem echo on
                 rem CALL poetry env use %%python3913%%\python.exe
                 CALL conda activate %CONDA_ENV_NAME%
-                CALL poetry run pytest -v tests/test_binaries/ --no-cov
+                CALL poetry run pytest -v %test_dir% --no-cov
                 CALL conda deactivate
             """.trimIndent()
         }
