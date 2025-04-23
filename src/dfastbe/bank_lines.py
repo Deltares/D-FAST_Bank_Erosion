@@ -118,25 +118,21 @@ class BankLines:
         center_line_arr = river_center_line.as_array()
         stations_coords = center_line_arr[:, :2]
 
-        search_lines = self.search_lines.values
-        max_distance = self.search_lines.max_distance
-        num_search_lines = self.search_lines.size
         # convert search lines to bank polygons
-        d_lines = config_file.get_bank_search_distances(self.search_lines.size)
         bank_areas: List[Polygon] = self._convert_search_lines_to_bank_polygons(
-            search_lines, d_lines
+            self.search_lines.values, self.search_lines.d_lines
         )
 
         # determine whether search lines are located on the left or right
-        to_right = [True] * num_search_lines
-        for ib in range(num_search_lines):
+        to_right = [True] * self.search_lines.size
+        for ib in range(self.search_lines.size):
             to_right[ib] = on_right_side(
-                np.array(search_lines[ib].coords), stations_coords
+                np.array(self.search_lines.values[ib].coords), stations_coords
             )
 
         # clip simulation data to boundaries ...
         log_text("clip_data")
-        self.simulation_data.clip(river_center_line_values, max_distance)
+        self.simulation_data.clip(river_center_line_values, self.search_lines.max_distance)
 
         # derive bank lines (get_banklines)
         log_text("identify_banklines")
@@ -144,8 +140,8 @@ class BankLines:
 
         # clip the set of detected bank lines to the bank areas
         log_text("simplify_banklines")
-        bank = [None] * num_search_lines
-        clipped_banklines = [None] * num_search_lines
+        bank = [None] * self.search_lines.size
+        clipped_banklines = [None] * self.search_lines.size
         for ib, bank_area in enumerate(bank_areas):
             log_text("bank_lines", data={"ib": ib + 1})
             clipped_banklines[ib] = clip_bank_lines(banklines, bank_area)
@@ -160,7 +156,7 @@ class BankLines:
         if self.plot_flags["plot_data"]:
             self.plot(
                 center_line_arr,
-                num_search_lines,
+                self.search_lines.size,
                 bank,
                 station_bounds,
                 bank_areas,

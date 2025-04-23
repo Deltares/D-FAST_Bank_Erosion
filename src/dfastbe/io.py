@@ -1115,11 +1115,11 @@ class ConfigFile:
                 # print("Min/max of data: ", parfield[ib].min(), parfield[ib].max())
         return parfield
 
-    def get_bank_search_distances(self, nbank: int) -> List[float]:
+    def get_bank_search_distances(self, num_search_lines: int) -> List[float]:
         """Get the search distance per bank line from the analysis settings.
 
         Args:
-            nbank (int): Number of bank search lines.
+            num_search_lines (int): Number of bank search lines.
 
         Returns:
             List[float]: Array of length nbank containing the search distance value per bank line (default value: 50).
@@ -1135,17 +1135,17 @@ class ConfigFile:
         """
         d_lines_key = self.config["Detect"].get("DLines", None)
         if d_lines_key is None:
-            d_lines = [50] * nbank
+            d_lines = [50] * num_search_lines
         elif d_lines_key[0] == "[" and d_lines_key[-1] == "]":
             d_lines_split = d_lines_key[1:-1].split(",")
             d_lines = [float(d) for d in d_lines_split]
             if not all([d > 0 for d in d_lines]):
                 raise ValueError(
-                    "keyword DLINES should contain positive values in configuration file."
+                    "keyword DLINES should contain positive values in the configuration file."
                 )
-            if len(d_lines) != nbank:
+            if len(d_lines) != num_search_lines:
                 raise ConfigFileError(
-                    "keyword DLINES should contain NBANK values in configuration file."
+                    "keyword DLINES should contain NBANK values in the configuration file."
                 )
         return d_lines
 
@@ -1564,6 +1564,7 @@ class CenterLine:
                 line_string = LineString([x0] + line_string.coords[start_i:end_i] + [x1])
         return line_string
 
+
 class SearchLines:
 
     def __init__(self, lines: List[LineString], mask: CenterLine = None):
@@ -1580,6 +1581,17 @@ class SearchLines:
             self.values, self.max_distance = self.mask(lines, mask.values)
 
         self.size = len(lines)
+
+    @property
+    def d_lines(self) -> List[float]:
+        if hasattr(self, "_d_lines"):
+            return self._d_lines
+        else:
+            raise ValueError("The d_lines property has not been set yet.")
+
+    @d_lines.setter
+    def d_lines(self, value: List[float]):
+        self._d_lines = value
 
     @staticmethod
     def mask(
@@ -1658,7 +1670,9 @@ class RiverData:
 
     @property
     def search_lines(self) -> SearchLines:
-        return SearchLines(self.config_file.get_search_lines(), self.river_center_line)
+        search_lines = SearchLines(self.config_file.get_search_lines(), self.river_center_line)
+        search_lines.d_lines = self.config_file.get_bank_search_distances(search_lines.size)
+        return search_lines
 
     def read_river_axis(self):
         """Get the river axis from the analysis settings."""
