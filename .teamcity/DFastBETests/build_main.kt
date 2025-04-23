@@ -6,6 +6,7 @@ import jetbrains.buildServer.configs.kotlin.failureConditions.failOnText
 object BuildMain : BuildType({
     templates(CondaTemplate)
     name = "Build without command window"
+    description = "Build D-FAST Bank Erosion without terminal window as main distribution"
 
     artifactRules = """
         dfastbe.dist => dfastbe.zip
