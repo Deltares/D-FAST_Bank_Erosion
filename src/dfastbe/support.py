@@ -39,8 +39,7 @@ from shapely.geometry import (
     Polygon,
     MultiLineString,
 )
-from shapely import union_all, line_merge
-import geopandas
+from shapely import line_merge
 
 
 def project_km_on_line(
