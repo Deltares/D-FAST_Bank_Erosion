@@ -26,7 +26,7 @@ object CondaTemplate : Template({
             name = "Conda create environment"
             id = "Conda_create_environment"
             scriptContent = """
-                rmdir /S /Q D:\ProgramData\Miniforge3\envs\%CONDA_ENV_NAME%
+                rmdir /S /Q %CONDA_PATH%\\%CONDA_ENV_NAME%
                 CALL conda create -v -y -n %CONDA_ENV_NAME% python=%python.version%
             """.trimIndent()
         }

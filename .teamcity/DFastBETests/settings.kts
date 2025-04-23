@@ -17,6 +17,7 @@ project {
 
     params {
         param("CONDA_ENV_NAME", "python-dfastbe")
+        param("CONDA_PATH", "D:\\ProgramData\\Miniforge3\\envs")
         param("python.version", "3.11.12")
         param("SonarSource", "dfastbe")
         param("SonarProjectKey", "Deltares_D-FAST_Bank_Erosion")
