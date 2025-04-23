@@ -1281,7 +1281,7 @@ class RiverData:
             return LineString([lower_bound_point] + self.profile.coords[start_index:])
         else:
             return LineString(
-                [upper_bound_point]
+                [lower_bound_point]
                 + self.profile.coords[start_index:end_index]
                 + [upper_bound_point]
             )
