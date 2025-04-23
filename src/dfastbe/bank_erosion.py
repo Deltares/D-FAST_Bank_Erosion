@@ -89,6 +89,7 @@ class Erosion:
         self.num_levels = config_file.get_int("Erosion", "NLevel")
         self.ref_level = config_file.get_int("Erosion", "RefLevel") - 1
         self.sim_files, self.p_discharge = self.get_sim_data()
+        self.output_intervals = config_file.get_float("Erosion", "OutputInterval", 1.0)
 
     @property
     def config_file(self) -> ConfigFile:
@@ -966,11 +967,8 @@ class Erosion:
         river_axis_km, _, river_axis = self._prepare_river_axis(
             stations_coords, config_file
         )
-
-        # get output interval
-        km_step = config_file.get_float("Erosion", "OutputInterval", 1.0)
         # map to output interval
-        km_bin = (river_axis_km.min(), river_axis_km.max(), km_step)
+        km_bin = (river_axis_km.min(), river_axis_km.max(), self.output_intervals)
         km_mid = get_km_bins(km_bin, type=3)  # get mid-points
 
         fairway_data = self._prepare_fairway(river_axis, stations_coords, mesh_data, config_file)
@@ -1009,7 +1007,7 @@ class Erosion:
             simulation_data,
             xy_line_eq_list,
             km_mid,
-            km_step,
+            self.output_intervals,
             erosion_inputs,
             water_level_data,
             mesh_data,
