@@ -53,6 +53,9 @@ object UnitTestsSonarCloud : BuildType({
     }
 
     features {
+        swabra {
+            forceCleanCheckout = true
+        }
         commitStatusPublisher {
             id = "BUILD_EXT_316"
             vcsRootExtId = "${DslContext.settingsRoot.id}"
@@ -72,6 +75,4 @@ object UnitTestsSonarCloud : BuildType({
             param("provider", "GitHub")
         }
     }
-    
-    disableSettings("TRIGGER_648")
 })

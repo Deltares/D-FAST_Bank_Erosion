@@ -56,6 +56,4 @@ object BuildWithoutCommandWindow : BuildType({
             }
         }
     }
-    
-    disableSettings("swabra")
 })

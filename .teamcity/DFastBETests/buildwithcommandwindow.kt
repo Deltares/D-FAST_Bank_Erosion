@@ -68,6 +68,4 @@ object BuildWithCommandWindow : BuildType({
             onDependencyFailure = FailureAction.FAIL_TO_START
         }
     }
-    
-    disableSettings("swabra")
 })

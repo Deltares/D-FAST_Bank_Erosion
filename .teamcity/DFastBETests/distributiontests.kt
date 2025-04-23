@@ -37,7 +37,7 @@ object DistributionTests : BuildType({
                 CALL conda deactivate
             """.trimIndent()
         }
-        stepsOrder = arrayListOf("Conda_create_environment", "Python_pip_install_poetry", "Install_dependencies_via_poetry", "Unit_test_and_code_coverage", "Get_folder_listing", "Validate_distribution", "Conda_deactivate_and_remove_environment")
+        stepsOrder = arrayListOf("Conda_create_environment", "Python_pip_install_poetry", "Install_dependencies_via_poetry", "Get_folder_listing", "Validate_distribution", "Conda_deactivate_and_remove_environment")
     }
 
     failureConditions {
@@ -60,6 +60,9 @@ object DistributionTests : BuildType({
 
 
     features {
+        swabra {
+            forceCleanCheckout = true
+        }
         commitStatusPublisher {
             id = "BUILD_EXT_315"
             vcsRootExtId = "${DslContext.settingsRoot.id}"
@@ -84,6 +87,4 @@ object DistributionTests : BuildType({
             }
         }
     }
-    
-    disableSettings("Unit_test_and_code_coverage")
 })
