@@ -38,8 +38,9 @@ import pandas as pd
 from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
-from shapely.geometry import LineString, Point
 from shapely import prepare
+from shapely.geometry import LineString, Point
+
 from dfastbe.structures import MeshData
 
 MAX_RIVER_WIDTH = 1000
@@ -54,8 +55,27 @@ class SimulationData:
     This class contains the simulation data read from a UGRID netCDF file.
     It includes methods to read the data from the file and clip the simulation
     mesh to a specified area of interest.
+    """
 
-    Args:
+    def __init__(
+        self,
+        x_node: np.ndarray,
+        y_node: np.ndarray,
+        n_nodes: np.ndarray,
+        face_node: np.ma.masked_array,
+        bed_elevation_location: np.ndarray,
+        bed_elevation_values: np.ndarray,
+        water_level_face: np.ndarray,
+        water_depth_face: np.ndarray,
+        velocity_x_face: np.ndarray,
+        velocity_y_face: np.ndarray,
+        chezy_face: np.ndarray,
+        dry_wet_threshold: float,
+    ):
+        """
+        Initialize the SimulationData object.
+
+        Args:
         x_node (np.ndarray):
             X-coordinates of the nodes.
         y_node (np.ndarray):
@@ -81,23 +101,7 @@ class SimulationData:
             Chezy roughness values at the faces.
         dry_wet_threshold (float):
             Threshold depth for detecting drying and flooding.
-    """
-
-    def __init__(
-        self,
-        x_node: np.ndarray,
-        y_node: np.ndarray,
-        n_nodes: np.ndarray,
-        face_node: np.ma.masked_array,
-        bed_elevation_location: np.ndarray,
-        bed_elevation_values: np.ndarray,
-        water_level_face: np.ndarray,
-        water_depth_face: np.ndarray,
-        velocity_x_face: np.ndarray,
-        velocity_y_face: np.ndarray,
-        chezy_face: np.ndarray,
-        dry_wet_threshold: float,
-    ):
+        """
         self.x_node = x_node
         self.y_node = y_node
         self.n_nodes = n_nodes
@@ -436,32 +440,37 @@ class ConfigFile:
     This class provides methods to read, write, and manage configuration files
     for the D-FAST Bank Erosion analysis. It also allows access to configuration
     settings and supports upgrading older configuration formats.
-
-    Args:
-        config (ConfigParser): Settings for the D-FAST Bank Erosion analysis.
-        path (Union[Path, str]): Path to the configuration file.
-
-    Examples:
-        Reading a configuration file:
-            ```python
-            >>> import tempfile
-            >>> from dfastbe.io import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> print(config_file.config["General"]["Version"])
-            1.0
-
-            ```
-        Writing a configuration file:
-            ```python
-            >>> from dfastbe.io import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> with tempfile.TemporaryDirectory() as tmpdirname:
-            ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
-
-            ```
     """
 
     def __init__(self, config: ConfigParser, path: Union[Path, str] = None):
+        """
+        Initialize the ConfigFile object.
+
+        Args:
+            config (ConfigParser):
+                Settings for the D-FAST Bank Erosion analysis.
+            path (Union[Path, str]):
+                Path to the configuration file.
+
+        Examples:
+            Reading a configuration file:
+                ```python
+                >>> import tempfile
+                >>> from dfastbe.io import ConfigFile
+                >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+                >>> print(config_file.config["General"]["Version"])
+                1.0
+
+                ```
+            Writing a configuration file:
+                ```python
+                >>> from dfastbe.io import ConfigFile
+                >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+                >>> with tempfile.TemporaryDirectory() as tmpdirname:
+                ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
+
+                ```
+        """
         self._config = config
         self.crs = "EPSG:28992"
         if path:
@@ -613,7 +622,9 @@ class ConfigFile:
             config = _move_parameter_location(config, "General", "BankNew", "Erosion")
             config = _move_parameter_location(config, "General", "BankEq", "Erosion")
             config = _move_parameter_location(config, "General", "EroVol", "Erosion")
-            config = _move_parameter_location(config, "General", "EroVolEqui", "Erosion")
+            config = _move_parameter_location(
+                config, "General", "EroVolEqui", "Erosion"
+            )
             config = _move_parameter_location(config, "General", "NLevel", "Erosion")
             config_file = ConfigFile(config)
             n_level = config_file.get_int("Erosion", "NLevel", default=0, positive=True)
@@ -1413,6 +1424,16 @@ class ConfigFile:
         return data
 
     def get_output_dir(self, option: str) -> Path:
+        """Get the output directory for the analysis.
+
+        Args:
+            option (str):
+                Option for which to get the output directory. "banklines" for bank lines, else the erosion output
+                directory will be returned.
+        Returns:
+            output_dir (Path):
+                Path to the output directory.
+        """
         if option == "banklines":
             output_dir = self.get_str("General", "BankDir")
         else:
@@ -1604,6 +1625,7 @@ class RiverData:
         return search_lines, max_distance
 
     def read_river_axis(self):
+        """Get the river axis from the analysis settings."""
         river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
         log_text("read_river_axis", data={"file": river_axis_file})
         river_axis = XYCModel.read(river_axis_file)
@@ -2088,7 +2110,9 @@ def _get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[flo
         val = val[None]
 
     if positive and (val < 0).any():
-        raise ValueError(f'Values of "{key}" in {filename} should be positive. Negative value read for chainage(s): {km[val < 0]}')
+        raise ValueError(
+            f'Values of "{key}" in {filename} should be positive. Negative value read for chainage(s): {km[val < 0]}'
+        )
 
     if len(km) == 1:
         km_thr = None
