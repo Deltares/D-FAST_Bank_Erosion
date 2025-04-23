@@ -1313,15 +1313,15 @@ class RiverData:
 
             # If the bank search line breaks into multiple parts, select the part closest to the reference line.
             if search_lines[ind].geom_type == "MultiLineString":
-                distance_min = max_river_width
-                i_min = 0
-                for i in range(len(search_lines[ind])):
-                    line_simplified = search_lines[ind][i].simplify(1)
-                    distance_min_i = line_simplified.distance(profile_simplified)
-                    if distance_min_i < distance_min:
-                        distance_min = distance_min_i
-                        i_min = i
-                search_lines[ind] = search_lines[ind][i_min]
+                min_distance = max_river_width
+                closest_part = None
+                for part in search_lines[ind]:
+                    simplified_part = part.simplify(1)
+                    distance = simplified_part.distance(profile_simplified)
+                    if distance < min_distance:
+                        min_distance = distance
+                        closest_part = part
+                search_lines[ind] = closest_part
 
             # Determine the maximum distance from a point on this line to the reference line.
             line_simplified = search_lines[ind].simplify(1)
@@ -1333,6 +1333,32 @@ class RiverData:
             max_distance = max(max_distance, max_distance + 2)
 
         return search_lines, max_distance
+
+    def _select_closest_part(
+        self, multiline: LineString, reference_line: LineString, max_river_width: float
+    ) -> LineString:
+        """
+        Select the closest part of a MultiLineString to the reference line.
+
+        Args:
+            multiline (LineString): The MultiLineString to process.
+            reference_line (LineString): The reference line to calculate distances.
+            max_river_width (float): Maximum allowable distance.
+
+        Returns:
+            LineString: The closest part of the MultiLineString.
+        """
+        closest_part = None
+        min_distance = max_river_width
+
+        for part in multiline:
+            simplified_part = part.simplify(1)
+            distance = simplified_part.distance(reference_line)
+            if distance < min_distance:
+                min_distance = distance
+                closest_part = part
+
+        return closest_part
 
     def read_river_axis(self) -> LineString:
         """Get the river axis from the configuration file.
