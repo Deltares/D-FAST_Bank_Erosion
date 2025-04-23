@@ -954,24 +954,24 @@ class ConfigFile:
         sim_file = self.config[group].get(f"SimFile{istr}", "")
         return sim_file
 
-    def get_km_bounds(self) -> Tuple[float, float]:
-        """Get the lower and upper limit for the chainage.
+    def get_start_end_stations(self) -> Tuple[float, float]:
+        """Get the start and end station for the river.
 
         Returns:
-            Tuple[float, float]: Lower and upper limit for the chainage.
+            Tuple[float, float]: start and end station.
 
         Examples:
             ```python
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> config_file.get_km_bounds()
+            >>> config_file.get_start_end_stations()
             (123.0, 128.0)
 
             ```
         """
-        km_bounds = self.get_range("General", "Boundaries")
+        stations = self.get_range("General", "Boundaries")
 
-        return km_bounds
+        return stations
 
     def get_search_lines(self) -> List[LineString]:
         """Get the search lines for the bank lines from the analysis settings.
@@ -1185,22 +1185,22 @@ class ConfigFile:
             ) from e
         return val
 
-    def get_xy_km(self) -> LineString:
-        """Get the chainage line from the analysis settings.
+    def get_river_center_line(self) -> LineString:
+        """Get the river center line from the xyc file as a linestring g.
 
         Returns:
             LineString: Chainage line.
         """
         # get the chainage file
-        km_file = self.get_str("General", "RiverKM")
-        log_text("read_chainage", data={"file": km_file})
-        xy_km = XYCModel.read(km_file, num_columns=3)
+        river_center_line_file = self.get_str("General", "RiverKM")
+        log_text("read_chainage", data={"file": river_center_line_file})
+        river_center_line = XYCModel.read(river_center_line_file, num_columns=3)
 
         # make sure that chainage is increasing with node index
-        if xy_km.coords[0][2] > xy_km.coords[1][2]:
-            xy_km = LineString(xy_km.coords[::-1])
+        if river_center_line.coords[0][2] > river_center_line.coords[1][2]:
+            river_center_line = LineString(river_center_line.coords[::-1])
 
-        return xy_km
+        return river_center_line
 
     def resolve(self, rootdir: str):
         """Convert a configuration object to contain absolute paths (for editing).
@@ -1467,8 +1467,8 @@ class RiverData:
             ```
         """
         self.config_file = config_file
-        self.profile: LineString = config_file.get_xy_km()
-        self.station_bounds: Tuple = config_file.get_km_bounds()
+        self.river_center_line: LineString = config_file.get_river_center_line()
+        self.station_bounds: Tuple = config_file.get_start_end_stations()
         self.start_station: float = self.station_bounds[0]
         self.end_station: float = self.station_bounds[1]
         log_text(
@@ -1501,7 +1501,7 @@ class RiverData:
         Returns:
             LineString: Clipped river chainage line.
         """
-        xy_km = self.profile
+        xy_km = self.river_center_line
         start_i = None
         end_i = None
         for i, c in enumerate(xy_km.coords):
