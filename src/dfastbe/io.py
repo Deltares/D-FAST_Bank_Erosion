@@ -39,7 +39,7 @@ from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString, Point
-from shapely import prepare
+from shapely import MultiLineString, prepare
 
 MAX_RIVER_WIDTH = 1000
 
@@ -1335,7 +1335,10 @@ class RiverData:
         return search_lines, max_distance
 
     def _select_closest_part(
-        self, multiline: LineString, reference_line: LineString, max_river_width: float
+        self,
+        multiline: MultiLineString,
+        reference_line: LineString,
+        max_river_width: float,
     ) -> LineString:
         """
         Select the closest part of a MultiLineString to the reference line.
