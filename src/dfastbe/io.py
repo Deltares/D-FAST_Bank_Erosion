@@ -35,6 +35,7 @@ import geopandas as gpd
 import netCDF4
 import numpy as np
 import pandas as pd
+from shapely.geometry.polygon import Polygon
 from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
@@ -1564,7 +1565,6 @@ class CenterLine:
                 line_string = LineString([x0] + line_string.coords[start_i:end_i] + [x1])
         return line_string
 
-
 class SearchLines:
 
     def __init__(self, lines: List[LineString], mask: CenterLine = None):
@@ -1644,6 +1644,20 @@ class SearchLines:
             max_distance = max(max_distance, max_distance + 2)
 
         return search_lines, max_distance
+
+    def to_polygons(self) -> List[Polygon]:
+        """
+        Construct a series of polygons surrounding the bank search lines.
+
+        Returns:
+            bank_areas:
+                Array containing the areas of interest surrounding the bank search lines.
+        """
+        bank_areas = [None] * self.size
+        for b, distance in enumerate(self.d_lines):
+            bank_areas[b] = self.values[b].buffer(distance, cap_style=2)
+
+        return bank_areas
 
 class RiverData:
     """River data class."""

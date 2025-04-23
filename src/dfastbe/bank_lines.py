@@ -119,9 +119,7 @@ class BankLines:
         stations_coords = center_line_arr[:, :2]
 
         # convert search lines to bank polygons
-        bank_areas: List[Polygon] = self._convert_search_lines_to_bank_polygons(
-            self.search_lines.values, self.search_lines.d_lines
-        )
+        bank_areas: List[Polygon] = self.search_lines.to_polygons()
 
         # determine whether search lines are located on the left or right
         to_right = [True] * self.search_lines.size
@@ -328,27 +326,3 @@ class BankLines:
         merged_line = line_merge(multi_line)
 
         return gpd.GeoSeries(merged_line, crs=config_file.crs)
-
-    @staticmethod
-    def _convert_search_lines_to_bank_polygons(
-        search_lines: List[np.ndarray], d_lines: List[float]
-    ) -> List[Polygon]:
-        """
-        Construct a series of polygons surrounding the bank search lines.
-
-        Args:
-            search_lines : List[numpy.ndarray]
-                List of arrays containing the x,y-coordinates of a bank search lines.
-            d_lines : List[float]
-                Array containing the search distance value per bank line.
-
-        Returns:
-            bank_areas:
-                Array containing the areas of interest surrounding the bank search lines.
-        """
-        n_bank = len(search_lines)
-        bank_areas = [None] * n_bank
-        for b, distance in enumerate(d_lines):
-            bank_areas[b] = search_lines[b].buffer(distance, cap_style=2)
-
-        return bank_areas
