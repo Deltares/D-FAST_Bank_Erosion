@@ -1661,22 +1661,6 @@ class RiverData:
     def search_lines(self) -> SearchLines:
         return SearchLines(self.config_file.get_search_lines(), self.river_center_line)
 
-
-    # @property
-    # def bank_search_lines(self) -> List[LineString]:
-    #     """Get the bank search lines.
-    #
-    #     Returns:
-    #         List[LineString]: List of bank search lines.
-    #     """
-    #     return self.config_file.get_search_lines()
-
-    # @property
-    # def num_search_lines(self) -> int:
-    #     """Number of river bank search lines."""
-    #     return len(self.bank_search_lines)
-
-
     def read_river_axis(self):
         """Get the river axis from the analysis settings."""
         river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
