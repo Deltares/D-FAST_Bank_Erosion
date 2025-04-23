@@ -26,7 +26,7 @@ object BuildWithCommandWindow : BuildType({
             id = "build_D_FAST_BE"
             scriptContent = """
                 CALL conda activate %CONDA_ENV_NAME%
-                CALL .\BuildScripts\BuildDfastbe.bat
+                CALL .\BuildScripts\BuildDfastbe.bat || exit /b
                 CALL conda deactivate
             """.trimIndent()
         }

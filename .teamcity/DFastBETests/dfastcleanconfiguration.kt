@@ -66,13 +66,6 @@ object DFastCleanConfiguration : Template({
         }
     }
 
-    features {
-        swabra {
-            id = "swabra"
-            forceCleanCheckout = true
-        }
-    }
-
     requirements {
         exists("env.python3913")
         contains("teamcity.agent.jvm.os.name", "Windows")
