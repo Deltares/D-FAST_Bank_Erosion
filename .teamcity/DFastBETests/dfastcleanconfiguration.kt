@@ -12,11 +12,6 @@ object DFastCleanConfiguration : Template({
     """.trimIndent()
     buildNumberPattern = "%build.revisions.short%"
 
-    params {
-        param("SonarProjectKey", "Deltares_D-FAST_Morphological_Impact")
-        param("SonarSource", "dfastmi")
-    }
-
     vcs {
         cleanCheckout = true
     }
