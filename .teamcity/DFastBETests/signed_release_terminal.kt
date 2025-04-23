@@ -1,7 +1,5 @@
 import jetbrains.buildServer.configs.kotlin.*
 
-import BuildWithCommandWindow
-
 object SignedReleaseTerminal : BuildType({
     name = "Signed release with command window"
     description = "Collect D-FAST Bank Erosion signed release with terminal window for debugging"

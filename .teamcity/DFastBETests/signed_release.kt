@@ -2,9 +2,6 @@ import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 
-import BuildTerminal
-import BuildMain
-
 object SignedRelease : BuildType({
     name = "Signed release"
     description = "Collect D-FAST Bank Erosion signed release"

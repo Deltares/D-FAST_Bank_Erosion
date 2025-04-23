@@ -81,7 +81,7 @@ object TestBinaries : BuildType({
     }
 
     dependencies {
-        dependency(SignedReleaseCommand) {
+        dependency(SignedReleaseTerminal) {
             snapshot {
                 onDependencyFailure = FailureAction.FAIL_TO_START
             }
