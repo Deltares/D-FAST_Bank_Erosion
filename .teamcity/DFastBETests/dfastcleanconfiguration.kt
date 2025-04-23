@@ -90,7 +90,7 @@ object DFastCleanConfiguration : Template({
     }
 
     requirements {
-        exists("env.python3913", "RQ_368")
-        contains("teamcity.agent.jvm.os.name", "Windows", "RQ_372")
+        exists("env.python3913")
+        contains("teamcity.agent.jvm.os.name", "Windows")
     }
 })
