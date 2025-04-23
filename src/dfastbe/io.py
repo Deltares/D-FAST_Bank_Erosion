@@ -1688,6 +1688,28 @@ class RiverData:
         search_lines.d_lines = self.config_file.get_bank_search_distances(search_lines.size)
         return search_lines
 
+    def _get_bank_lines_simulation_data(self) -> Tuple[SimulationData, float]:
+        """
+        read simulation data and drying flooding threshold dh0
+        """
+        sim_file = self.config_file.get_sim_file("Detect", "")
+        log_text("read_simdata", data={"file": sim_file})
+        simulation_data = SimulationData.read(sim_file)
+        # increase critical water depth h0 by flooding threshold dh0
+        # get critical water depth used for defining bank line (default = 0.0 m)
+        critical_water_depth = self.config_file.get_float(
+            "Detect", "WaterDepth", default=0
+        )
+        h0 = critical_water_depth + simulation_data.dry_wet_threshold
+        return simulation_data, h0
+
+    def simulation_data(self):
+        simulation_data, h0 = self._get_bank_lines_simulation_data()
+        # clip simulation data to boundaries ...
+        log_text("clip_data")
+        simulation_data.clip(self.river_center_line.values, self.search_lines.max_distance)
+        return simulation_data, h0
+
     def read_river_axis(self):
         """Get the river axis from the analysis settings."""
         river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")

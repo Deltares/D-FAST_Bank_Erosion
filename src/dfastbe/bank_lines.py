@@ -22,11 +22,11 @@ from dfastbe.io import (
 from dfastbe.kernel import get_zoom_extends
 from dfastbe.support import (
     clip_bank_lines,
-    on_right_side,
     poly_to_line,
     project_km_on_line,
     sort_connect_bank_lines,
     tri_to_line,
+    on_right_side,
 )
 from dfastbe.utils import timed_logger
 
@@ -61,20 +61,8 @@ class BankLines:
         self.river_data = RiverData(config_file)
         self.search_lines = self.river_data.search_lines
 
-        self.simulation_data, self.h0 = self._get_simulation_data()
+        self.simulation_data, self.h0 = self.river_data.simulation_data()
 
-    def _get_simulation_data(self) -> Tuple[SimulationData, float]:
-        # read simulation data and drying flooding threshold dh0
-        sim_file = self.config_file.get_sim_file("Detect", "")
-        log_text("read_simdata", data={"file": sim_file})
-        simulation_data = SimulationData.read(sim_file)
-        # increase critical water depth h0 by flooding threshold dh0
-        # get critical water depth used for defining bank line (default = 0.0 m)
-        critical_water_depth = self.config_file.get_float(
-            "Detect", "WaterDepth", default=0
-        )
-        h0 = critical_water_depth + simulation_data.dry_wet_threshold
-        return simulation_data, h0
 
     @property
     def config_file(self) -> ConfigFile:
@@ -127,10 +115,6 @@ class BankLines:
             to_right[ib] = on_right_side(
                 np.array(self.search_lines.values[ib].coords), stations_coords
             )
-
-        # clip simulation data to boundaries ...
-        log_text("clip_data")
-        self.simulation_data.clip(river_center_line_values, self.search_lines.max_distance)
 
         # derive bank lines (get_banklines)
         log_text("identify_banklines")
