@@ -8,6 +8,8 @@ import geopandas as gpd
 import numpy as np
 from matplotlib import pyplot as plt
 from shapely.geometry.polygon import Polygon
+from shapely.geometry import MultiLineString
+from geopandas.geoseries import GeoSeries
 from shapely import union_all, line_merge
 
 from dfastbe import __version__
@@ -21,7 +23,6 @@ from dfastbe.io import (
 )
 from dfastbe.kernel import get_zoom_extends
 from dfastbe.support import (
-    clip_bank_lines,
     poly_to_line,
     project_km_on_line,
     sort_connect_bank_lines,
@@ -126,7 +127,7 @@ class BankLines:
         clipped_banklines = [None] * self.search_lines.size
         for ib, bank_area in enumerate(bank_areas):
             log_text("bank_lines", data={"ib": ib + 1})
-            clipped_banklines[ib] = clip_bank_lines(banklines, bank_area)
+            clipped_banklines[ib] = self.mask(banklines, bank_area)
             bank[ib] = sort_connect_bank_lines(
                 clipped_banklines[ib], river_center_line_values, to_right[ib]
             )
@@ -147,6 +148,27 @@ class BankLines:
 
         log_text("end_banklines")
         timed_logger("-- stop analysis --")
+
+    @staticmethod
+    def mask(banklines: GeoSeries, bank_area: Polygon) -> MultiLineString:
+        """
+        Clip the bank line segments to the area of interest.
+
+        Args:
+            banklines (GeoSeries):
+                Unordered set of bank line segments.
+            bank_area (Polygon):
+                A search area corresponding to one of the bank search lines.
+
+        Returns
+        -------
+        clipped_banklines : MultiLineString
+            Un-ordered set of bank line segments, clipped to bank area.
+        """
+        # intersection returns one MultiLineString object
+        clipped_banklines = banklines.intersection(bank_area)[0]
+
+        return clipped_banklines
 
     def plot(
         self,

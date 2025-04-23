@@ -31,10 +31,6 @@ from typing import List, Tuple
 import numpy as np
 
 from dfastbe.structures import MeshData
-
-# import matplotlib
-# import matplotlib.pyplot
-
 import numpy
 import math
 from shapely.geometry import (
@@ -1326,30 +1322,6 @@ def add_point(
     else:
         xy_out = xy_in
     return ixy1, xy_out
-
-
-def clip_bank_lines(
-    banklines: geopandas.geoseries.GeoSeries, bankarea: Polygon
-) -> MultiLineString:
-    """
-    Clip the bank line segments to the area of interest.
-
-    Arguments
-    ---------
-    banklines : geopandas.geoseries.GeoSeries
-        Unordered set of bank line segments.
-    bankarea : Polygon
-        A search area corresponding to one of the bank search lines.
-
-    Returns
-    -------
-    clipped_banklines : MultiLineString
-        Unordered set of bank line segments, clipped to bank area.
-    """
-    # intersection returns one MultiLineString object
-    clipped_banklines = banklines.intersection(bankarea)[0]
-
-    return clipped_banklines
 
 
 def sort_connect_bank_lines(
