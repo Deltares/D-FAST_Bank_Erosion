@@ -1353,9 +1353,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-dfastcleanconfigurationkt" class="md-nav__link">
+  <a href="#3-condatemplatekt" class="md-nav__link">
     <span class="md-ellipsis">
-      3. dfastcleanconfiguration.kt
+      3. condatemplate.kt
     </span>
   </a>
   
@@ -1490,7 +1490,7 @@ Defines the build configuration for running unit tests and performing SonarCloud
 - Integrates with SonarCloud for code quality analysis.<br />
 - Publishes commit statuses to GitHub using a personal access token.  </p>
 <hr />
-<h3 id="3-dfastcleanconfigurationkt"><a class="toclink" href="#3-dfastcleanconfigurationkt">3. <code>dfastcleanconfiguration.kt</code></a><a class="headerlink" href="#3-dfastcleanconfigurationkt" title="Permanent link">#</a></h3>
+<h3 id="3-condatemplatekt"><a class="toclink" href="#3-condatemplatekt">3. <code>condatemplate.kt</code></a><a class="headerlink" href="#3-condatemplatekt" title="Permanent link">#</a></h3>
 <p><strong>Purpose:</strong><br />
 Provides a reusable template for cleaning up the build environment.</p>
 <p><strong>Key Features:</strong><br />
@@ -1502,7 +1502,7 @@ Provides a reusable template for cleaning up the build environment.</p>
 Defines the build configuration for compiling the D-FAST Bank Erosion project providing a command window version as final result.</p>
 <p><strong>Key Features:</strong><br />
 - Executes a batch script (<code>BuildDfastbe.bat</code>) to build the project.<br />
-- Relies on the template (<code>dfastcleanconfiguration.kt</code>) for conda environment setup.<br />
+- Relies on the template (<code>CondaTemplate.kt</code>) for conda environment setup.<br />
 - Includes failure conditions:<br />
     - Fails the build if an <code>AssertionError</code> is detected in the logs.<br />
     - Fails the build if the total artifact size is below a specified threshold (e.g., 100MB).<br />
@@ -1515,7 +1515,7 @@ Defines the build configuration for compiling the D-FAST Bank Erosion project pr
 Defines the build configuration for compiling the D-FAST Bank Erosion project where the final result suppresses the command window.</p>
 <p><strong>Key Features:</strong><br />
 - Executes a batch script (<code>BuildDfastbe_no_command_window.bat</code>) to build the project.<br />
-- Relies on the template (<code>dfastcleanconfiguration.kt</code>) for conda environment setup. <br />
+- Relies on the template (<code>CondaTemplate.kt</code>) for conda environment setup. <br />
 - Includes failure conditions:<br />
     - Fails the build if an <code>AssertionError</code> is detected in the logs.<br />
     - Fails the build if the total artifact size is below a specified threshold (e.g., 100MB).<br />
