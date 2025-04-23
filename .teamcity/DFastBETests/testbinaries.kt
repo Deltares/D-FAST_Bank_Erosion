@@ -55,8 +55,7 @@ object TestBinaries : BuildType({
     }
 
 
-    // Trigger disabled until ready for merge to main branch
-    if (false) {
+    if (DslContext.getParameter("environment") == "production") {
         triggers {
             vcs {
                 branchFilter = "+:refs/heads/*"
