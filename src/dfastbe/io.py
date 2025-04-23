@@ -42,7 +42,7 @@ from geopandas.geoseries import GeoSeries
 from shapely import prepare
 from shapely.geometry import LineString, Point
 
-from dfastbe.structures import MeshData
+from dfastbe.erosion.structures import MeshData
 
 MAX_RIVER_WIDTH = 1000
 
@@ -1703,11 +1703,12 @@ class RiverData:
         h0 = critical_water_depth + simulation_data.dry_wet_threshold
         return simulation_data, h0
 
-    def simulation_data(self):
-        simulation_data, h0 = self._get_bank_lines_simulation_data()
-        # clip simulation data to boundaries ...
-        log_text("clip_data")
-        simulation_data.clip(self.river_center_line.values, self.search_lines.max_distance)
+    def simulation_data(self, bank_lines: bool = True) -> Tuple[SimulationData, float]:
+        if bank_lines:
+            simulation_data, h0 = self._get_bank_lines_simulation_data()
+            # clip simulation data to boundaries ...
+            log_text("clip_data")
+            simulation_data.clip(self.river_center_line.values, self.search_lines.max_distance)
         return simulation_data, h0
 
     def read_river_axis(self):

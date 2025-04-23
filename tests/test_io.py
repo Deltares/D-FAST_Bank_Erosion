@@ -27,7 +27,7 @@ from dfastbe.io import (
     _read_fm_map,
     relative_path,
 )
-from dfastbe.structures import MeshData
+from dfastbe.erosion.structures import MeshData
 
 
 @contextmanager

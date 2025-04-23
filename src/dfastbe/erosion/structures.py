@@ -213,7 +213,7 @@ class ErosionResults:
         ```
 
         - The `avg_erosion_rate`, `eq_eroded_vol_per_km`, and `total_eroded_vol_per_km` attributes are optional and
-        can be set to empty arrays if not needed, .
+        can be set to empty arrays if not needed.
 
         ```python
         >>> from dfastbe.erosion.structures import ErosionResults

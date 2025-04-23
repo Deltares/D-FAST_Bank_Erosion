@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
-from dfastbe.structures import (
+from dfastbe.erosion.structures import (
     ErosionInputs,
     WaterLevelData,
     MeshData,
