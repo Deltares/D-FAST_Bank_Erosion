@@ -38,7 +38,7 @@ import matplotlib.pyplot as plt
 
 from dfastbe import __version__
 from dfastbe.kernel import get_km_bins, moving_avg, comp_erosion_eq, comp_erosion, get_km_eroded_volume, \
-                            get_zoom_extends, get_bbox
+                            get_zoom_extends
 from dfastbe.support import on_right_side, project_km_on_line, intersect_line_mesh, move_line
 from dfastbe import plotting as df_plt
 from dfastbe.io import (
@@ -80,15 +80,19 @@ class Erosion:
         self.debug = config_file.get_bool("General", "DebugOutput", False)
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)
+
         self.river_data = RiverData(config_file)
+        self.river_center_line_arr = self.river_data.river_center_line.as_array()
 
         # get filter settings for bank levels and flow velocities along banks
         self.zb_dx = config_file.get_float("Erosion", "BedFilterDist", 0.0, positive=True)
         self.vel_dx = config_file.get_float("Erosion", "VelFilterDist", 0.0, positive=True)
         log_text("get_levels")
+
         self.num_levels = config_file.get_int("Erosion", "NLevel")
         self.ref_level = config_file.get_int("Erosion", "RefLevel") - 1
         self.sim_files, self.p_discharge = self.get_sim_data()
+        self.output_intervals = config_file.get_float("Erosion", "OutputInterval", 1.0)
 
     @property
     def config_file(self) -> ConfigFile:
@@ -182,7 +186,8 @@ class Erosion:
         is_right_bank = [True] * n_bank_lines
         for bank_index, coords in enumerate(bank_line_coords):
             segment_mid_points = (coords[:-1, :] + coords[1:, :]) / 2
-            chainage_mid_points = project_km_on_line(segment_mid_points, self.river_data.masked_profile_arr)
+            chainage_mid_points = project_km_on_line(segment_mid_points,
+                                                     self.river_center_line_arr)
 
             # check if bank line is defined from low chainage to high chainage
             if chainage_mid_points[0] > chainage_mid_points[-1]:
@@ -228,7 +233,7 @@ class Erosion:
 
         # map km to axis points, further using axis
         log_text("chainage_to_axis")
-        river_axis_km = project_km_on_line(river_axis_numpy, self.river_data.masked_profile_arr)
+        river_axis_km = project_km_on_line(river_axis_numpy, self.river_center_line_arr)
         write_shp_pnt(
             river_axis_numpy,
             {"chainage": river_axis_km},
@@ -264,7 +269,7 @@ class Erosion:
         # map km to fairway points, further using axis
         log_text("chainage_to_fairway")
         fairway_numpy = np.array(river_axis.coords)
-        fairway_km = project_km_on_line(fairway_numpy, self.river_data.masked_profile_arr)
+        fairway_km = project_km_on_line(fairway_numpy, self.river_center_line_arr)
         write_shp_pnt(
             fairway_numpy,
             {"chainage": fairway_km},
@@ -925,7 +930,7 @@ class Erosion:
 
         return bankline_new_list, bankline_eq_list, xy_line_eq_list
 
-    def bankerosion_core(self) -> None:
+    def run(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
         timed_logger("-- start analysis --")
         log_text(
@@ -944,7 +949,6 @@ class Erosion:
         log_text("read_simdata", data={"file": sim_file})
         log_text("-")
         simulation_data = SimulationData.read(sim_file)
-        log_text("-")
 
         log_text("derive_topology")
 
@@ -954,7 +958,7 @@ class Erosion:
         km_bounds = self.river_data.station_bounds
         log_text("clip_chainage", data={"low": km_bounds[0], "high": km_bounds[1]})
 
-        stations_coords = self.river_data.masked_profile_arr[:, :2]
+        stations_coords = self.river_center_line_arr[:, :2]
 
         # map bank lines to mesh cells
         log_text("intersect_bank_mesh")
@@ -966,11 +970,8 @@ class Erosion:
         river_axis_km, _, river_axis = self._prepare_river_axis(
             stations_coords, config_file
         )
-
-        # get output interval
-        km_step = config_file.get_float("Erosion", "OutputInterval", 1.0)
         # map to output interval
-        km_bin = (river_axis_km.min(), river_axis_km.max(), km_step)
+        km_bin = (river_axis_km.min(), river_axis_km.max(), self.output_intervals)
         km_mid = get_km_bins(km_bin, type=3)  # get mid-points
 
         fairway_data = self._prepare_fairway(river_axis, stations_coords, mesh_data, config_file)
@@ -1009,7 +1010,7 @@ class Erosion:
             simulation_data,
             xy_line_eq_list,
             km_mid,
-            km_step,
+            self.output_intervals,
             erosion_inputs,
             water_level_data,
             mesh_data,
@@ -1073,7 +1074,7 @@ class Erosion:
             log_text("=")
             log_text("create_figures")
             fig_i = 0
-            bbox = get_bbox(self.river_data.masked_profile_arr)
+            bbox = self.river_data.get_bbox(self.river_center_line_arr)
 
             if self.plot_flags["save_plot_zoomed"]:
                 bank_coords_mid = []
@@ -1095,7 +1096,7 @@ class Erosion:
 
             fig, ax = df_plt.plot1_waterdepth_and_banklines(
                 bbox,
-                self.river_data.masked_profile_arr,
+                self.river_center_line_arr,
                 bank_data.bank_lines,
                 simulation_data.face_node,
                 simulation_data.n_nodes,
@@ -1120,7 +1121,7 @@ class Erosion:
 
             fig, ax = df_plt.plot2_eroded_distance_and_equilibrium(
                 bbox,
-                self.river_data.masked_profile_arr,
+                self.river_center_line_arr,
                 bank_data.bank_line_coords,
                 erosion_results.total_erosion_dist,
                 bank_data.is_right_bank,
@@ -1269,7 +1270,7 @@ class Erosion:
 
             fig, ax = df_plt.plot7_banktype(
                 bbox,
-                self.river_data.masked_profile_arr,
+                self.river_center_line_arr,
                 bank_data.bank_line_coords,
                 erosion_inputs.bank_type,
                 erosion_inputs.taucls_str,

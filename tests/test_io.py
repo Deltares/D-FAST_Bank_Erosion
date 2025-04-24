@@ -565,10 +565,10 @@ class TestConfigFile:
             path.resolve() / "test_sim.nc"
         )
 
-    def test_get_km_bounds(self, config: ConfigParser):
+    def test_get_start_end_stations(self, config: ConfigParser):
         """Test retrieving km bounds."""
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
-        start, end = config_file.get_km_bounds()
+        start, end = config_file.get_start_end_stations()
         assert start == pytest.approx(123.0, rel=1e-6)
         assert end == pytest.approx(128.0, rel=1e-6)
 
@@ -687,15 +687,15 @@ class TestConfigFile:
         result = config_file.get_bank_search_distances(2)
         assert all(pytest.approx(item, rel=1e-6) == 50.0 for item in result)
 
-    def test_get_xy_km(self):
+    def test_get_river_center_line(self):
         """Test retrieving x and y coordinates."""
         config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
         mock_linestring = LineString([(0, 0, 1), (1, 1, 2), (2, 2, 3)])
 
         with patch("dfastio.xyc.models.XYCModel.read", return_value=mock_linestring):
-            xykm = config.get_xy_km()
+            river_center_line = config.get_river_center_line()
 
-        assert xykm.wkt == 'LINESTRING Z (0 0 1, 1 1 2, 2 2 3)'
+        assert river_center_line.wkt == 'LINESTRING Z (0 0 1, 1 1 2, 2 2 3)'
 
     @pytest.fixture
     def path_dict(self) -> Dict:
@@ -880,10 +880,12 @@ class TestRiverData:
         config_file = ConfigFile.read(path)
         river_data = RiverData(config_file)
         assert isinstance(river_data.config_file, ConfigFile)
-        assert river_data.num_search_lines == 2
-        assert river_data.start_station == 123.0
-        assert river_data.end_station == 128.0
-        assert isinstance(river_data.masked_profile, LineString)
-        assert isinstance(river_data.profile, LineString)
-        assert isinstance(river_data.masked_profile_arr, np.ndarray)
-        assert river_data.masked_profile_arr.shape == (251, 3)
+        search_lines = river_data.search_lines
+        assert search_lines.size == 2
+        center_line = river_data.river_center_line
+        assert center_line.station_bounds[0] == 123.0
+        assert center_line.station_bounds[1] == 128.0
+        assert isinstance(center_line.values, LineString)
+        center_line_arr = center_line.as_array()
+        assert isinstance(center_line_arr, np.ndarray)
+        assert center_line_arr.shape == (251, 3)

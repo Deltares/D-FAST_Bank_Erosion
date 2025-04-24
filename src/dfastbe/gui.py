@@ -1238,7 +1238,7 @@ def run_erosion() -> None:
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
     matplotlib.pyplot.close("all")
     erosion = Erosion(config_file, gui=True)
-    erosion.bankerosion_core()
+    erosion.run()
     dialog["application"].restoreOverrideCursor()
 
 

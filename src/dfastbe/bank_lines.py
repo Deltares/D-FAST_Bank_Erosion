@@ -8,6 +8,8 @@ import geopandas as gpd
 import numpy as np
 from matplotlib import pyplot as plt
 from shapely.geometry.polygon import Polygon
+from shapely.geometry import MultiLineString
+from geopandas.geoseries import GeoSeries
 from shapely import union_all, line_merge
 
 from dfastbe import __version__
@@ -17,15 +19,15 @@ from dfastbe.io import (
     RiverData,
     SimulationData,
     log_text,
+    get_bbox
 )
-from dfastbe.kernel import get_bbox, get_zoom_extends
+from dfastbe.kernel import get_zoom_extends
 from dfastbe.support import (
-    clip_bank_lines,
-    on_right_side,
     poly_to_line,
     project_km_on_line,
     sort_connect_bank_lines,
     tri_to_line,
+    on_right_side,
 )
 from dfastbe.utils import timed_logger
 
@@ -58,21 +60,10 @@ class BankLines:
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)
         self.river_data = RiverData(config_file)
+        self.search_lines = self.river_data.search_lines
 
-        self.simulation_data, self.h0 = self._get_simulation_data()
+        self.simulation_data, self.h0 = self.river_data.simulation_data()
 
-    def _get_simulation_data(self) -> Tuple[SimulationData, float]:
-        # read simulation data and drying flooding threshold dh0
-        sim_file = self.config_file.get_sim_file("Detect", "")
-        log_text("read_simdata", data={"file": sim_file})
-        simulation_data = SimulationData.read(sim_file)
-        # increase critical water depth h0 by flooding threshold dh0
-        # get critical water depth used for defining bank line (default = 0.0 m)
-        critical_water_depth = self.config_file.get_float(
-            "Detect", "WaterDepth", default=0
-        )
-        h0 = critical_water_depth + simulation_data.dry_wet_threshold
-        return simulation_data, h0
 
     @property
     def config_file(self) -> ConfigFile:
@@ -110,27 +101,21 @@ class BankLines:
         log_text("-")
 
         # clip the chainage path to the range of chainages of interest
-        km_bounds = river_data.station_bounds
-        river_profile = river_data.masked_profile
-        stations_coords = river_data.masked_profile_arr[:, :2]
-        masked_search_lines, max_distance = river_data.clip_search_lines()
+        river_center_line = river_data.river_center_line
+        station_bounds = river_center_line.station_bounds
+        river_center_line_values = river_center_line.values
+        center_line_arr = river_center_line.as_array()
+        stations_coords = center_line_arr[:, :2]
 
         # convert search lines to bank polygons
-        d_lines = config_file.get_bank_search_distances(river_data.num_search_lines)
-        bank_areas: List[Polygon] = self._convert_search_lines_to_bank_polygons(
-            masked_search_lines, d_lines
-        )
+        bank_areas: List[Polygon] = self.search_lines.to_polygons()
 
         # determine whether search lines are located on the left or right
-        to_right = [True] * river_data.num_search_lines
-        for ib in range(river_data.num_search_lines):
+        to_right = [True] * self.search_lines.size
+        for ib in range(self.search_lines.size):
             to_right[ib] = on_right_side(
-                np.array(masked_search_lines[ib].coords), stations_coords
+                np.array(self.search_lines.values[ib].coords), stations_coords
             )
-
-        # clip simulation data to boundaries ...
-        log_text("clip_data")
-        self.simulation_data.clip(river_profile, max_distance)
 
         # derive bank lines (get_banklines)
         log_text("identify_banklines")
@@ -138,30 +123,52 @@ class BankLines:
 
         # clip the set of detected bank lines to the bank areas
         log_text("simplify_banklines")
-        bank = [None] * river_data.num_search_lines
-        clipped_banklines = [None] * river_data.num_search_lines
+        bank = [None] * self.search_lines.size
+        clipped_banklines = [None] * self.search_lines.size
         for ib, bank_area in enumerate(bank_areas):
             log_text("bank_lines", data={"ib": ib + 1})
-            clipped_banklines[ib] = clip_bank_lines(banklines, bank_area)
+            clipped_banklines[ib] = self.mask(banklines, bank_area)
             bank[ib] = sort_connect_bank_lines(
-                clipped_banklines[ib], river_profile, to_right[ib]
+                clipped_banklines[ib], river_center_line_values, to_right[ib]
             )
 
         # save bank_file
         self.save(bank, banklines, clipped_banklines, bank_areas, config_file)
 
+
         if self.plot_flags["plot_data"]:
             self.plot(
-                river_data.masked_profile_arr,
-                river_data.num_search_lines,
+                center_line_arr,
+                self.search_lines.size,
                 bank,
-                km_bounds,
+                station_bounds,
                 bank_areas,
                 config_file,
             )
 
         log_text("end_banklines")
         timed_logger("-- stop analysis --")
+
+    @staticmethod
+    def mask(banklines: GeoSeries, bank_area: Polygon) -> MultiLineString:
+        """
+        Clip the bank line segments to the area of interest.
+
+        Args:
+            banklines (GeoSeries):
+                Unordered set of bank line segments.
+            bank_area (Polygon):
+                A search area corresponding to one of the bank search lines.
+
+        Returns
+        -------
+        clipped_banklines : MultiLineString
+            Un-ordered set of bank line segments, clipped to bank area.
+        """
+        # intersection returns one MultiLineString object
+        clipped_banklines = banklines.intersection(bank_area)[0]
+
+        return clipped_banklines
 
     def plot(
         self,
@@ -325,27 +332,3 @@ class BankLines:
         merged_line = line_merge(multi_line)
 
         return gpd.GeoSeries(merged_line, crs=config_file.crs)
-
-    @staticmethod
-    def _convert_search_lines_to_bank_polygons(
-        search_lines: List[np.ndarray], d_lines: List[float]
-    ) -> List[Polygon]:
-        """
-        Construct a series of polygons surrounding the bank search lines.
-
-        Args:
-            search_lines : List[numpy.ndarray]
-                List of arrays containing the x,y-coordinates of a bank search lines.
-            d_lines : List[float]
-                Array containing the search distance value per bank line.
-
-        Returns:
-            bank_areas:
-                Array containing the areas of interest surrounding the bank search lines.
-        """
-        n_bank = len(search_lines)
-        bank_areas = [None] * n_bank
-        for b, distance in enumerate(d_lines):
-            bank_areas[b] = search_lines[b].buffer(distance, cap_style=2)
-
-        return bank_areas

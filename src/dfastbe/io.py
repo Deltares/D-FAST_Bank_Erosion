@@ -35,6 +35,7 @@ import geopandas as gpd
 import netCDF4
 import numpy as np
 import pandas as pd
+from shapely.geometry.polygon import Polygon
 from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
@@ -218,14 +219,14 @@ class SimulationData:
             dry_wet_threshold=dry_wet_threshold,
         )
 
-    def clip(self, river_profile: LineString, max_distance: float):
+    def clip(self, river_center_line: LineString, max_distance: float):
         """Clip the simulation mesh.
 
         Clipping data to the area of interest,
         that is sufficiently close to the reference line.
 
         Args:
-            river_profile (np.ndarray):
+            river_center_line (np.ndarray):
                 Reference line.
             max_distance (float):
                 Maximum distance between the reference line and a point in the area of
@@ -254,13 +255,13 @@ class SimulationData:
             ... [194982.8125, 361431.03125]
             ... ])
             >>> max_distance = 10.0
-            >>> sim_data.clip(river_profile, max_distance)
+            >>> sim_data.clip(river_center_line, max_distance)
             >>> print(sim_data.x_node)
             [194949.796875 194966.515625 194982.8125  ]
 
             ```
         """
-        xy_buffer = river_profile.buffer(max_distance + max_distance)
+        xy_buffer = river_center_line.buffer(max_distance + max_distance)
         bbox = xy_buffer.envelope.exterior
         x_min = bbox.coords[0][0]
         x_max = bbox.coords[1][0]
@@ -954,24 +955,24 @@ class ConfigFile:
         sim_file = self.config[group].get(f"SimFile{istr}", "")
         return sim_file
 
-    def get_km_bounds(self) -> Tuple[float, float]:
-        """Get the lower and upper limit for the chainage.
+    def get_start_end_stations(self) -> Tuple[float, float]:
+        """Get the start and end station for the river.
 
         Returns:
-            Tuple[float, float]: Lower and upper limit for the chainage.
+            Tuple[float, float]: start and end station.
 
         Examples:
             ```python
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> config_file.get_km_bounds()
+            >>> config_file.get_start_end_stations()
             (123.0, 128.0)
 
             ```
         """
-        km_bounds = self.get_range("General", "Boundaries")
+        stations = self.get_range("General", "Boundaries")
 
-        return km_bounds
+        return stations
 
     def get_search_lines(self) -> List[LineString]:
         """Get the search lines for the bank lines from the analysis settings.
@@ -1115,11 +1116,11 @@ class ConfigFile:
                 # print("Min/max of data: ", parfield[ib].min(), parfield[ib].max())
         return parfield
 
-    def get_bank_search_distances(self, nbank: int) -> List[float]:
+    def get_bank_search_distances(self, num_search_lines: int) -> List[float]:
         """Get the search distance per bank line from the analysis settings.
 
         Args:
-            nbank (int): Number of bank search lines.
+            num_search_lines (int): Number of bank search lines.
 
         Returns:
             List[float]: Array of length nbank containing the search distance value per bank line (default value: 50).
@@ -1133,21 +1134,21 @@ class ConfigFile:
 
             ```
         """
-        dlines_key = self.config["Detect"].get("DLines", None)
-        if dlines_key is None:
-            dlines = [50] * nbank
-        elif dlines_key[0] == "[" and dlines_key[-1] == "]":
-            dlines_split = dlines_key[1:-1].split(",")
-            dlines = [float(d) for d in dlines_split]
-            if not all([d > 0 for d in dlines]):
+        d_lines_key = self.config["Detect"].get("DLines", None)
+        if d_lines_key is None:
+            d_lines = [50] * num_search_lines
+        elif d_lines_key[0] == "[" and d_lines_key[-1] == "]":
+            d_lines_split = d_lines_key[1:-1].split(",")
+            d_lines = [float(d) for d in d_lines_split]
+            if not all([d > 0 for d in d_lines]):
                 raise ValueError(
-                    "keyword DLINES should contain positive values in configuration file."
+                    "keyword DLINES should contain positive values in the configuration file."
                 )
-            if len(dlines) != nbank:
+            if len(d_lines) != num_search_lines:
                 raise ConfigFileError(
-                    "keyword DLINES should contain NBANK values in configuration file."
+                    "keyword DLINES should contain NBANK values in the configuration file."
                 )
-        return dlines
+        return d_lines
 
     def get_range(self, group: str, key: str) -> Tuple[float, float]:
         """Get a start and end value from a selected group and keyword in the analysis settings.
@@ -1185,22 +1186,22 @@ class ConfigFile:
             ) from e
         return val
 
-    def get_xy_km(self) -> LineString:
-        """Get the chainage line from the analysis settings.
+    def get_river_center_line(self) -> LineString:
+        """Get the river center line from the xyc file as a linestring.
 
         Returns:
             LineString: Chainage line.
         """
         # get the chainage file
-        km_file = self.get_str("General", "RiverKM")
-        log_text("read_chainage", data={"file": km_file})
-        xy_km = XYCModel.read(km_file, num_columns=3)
+        river_center_line_file = self.get_str("General", "RiverKM")
+        log_text("read_chainage", data={"file": river_center_line_file})
+        river_center_line = XYCModel.read(river_center_line_file, num_columns=3)
 
         # make sure that chainage is increasing with node index
-        if xy_km.coords[0][2] > xy_km.coords[1][2]:
-            xy_km = LineString(xy_km.coords[::-1])
+        if river_center_line.coords[0][2] > river_center_line.coords[1][2]:
+            river_center_line = LineString(river_center_line.coords[::-1])
 
-        return xy_km
+        return river_center_line
 
     def resolve(self, rootdir: str):
         """Convert a configuration object to contain absolute paths (for editing).
@@ -1448,12 +1449,11 @@ class ConfigFile:
 
         return output_dir
 
+class CenterLine:
+    """Center line class."""
 
-class RiverData:
-    """River data class."""
-
-    def __init__(self, config_file: ConfigFile):
-        """River Data initialization.
+    def __init__(self, line_string: LineString, mask: Tuple[float, float] = None):
+        """Center Line initialization.
 
         Args:
             config_file : ConfigFile
@@ -1461,50 +1461,41 @@ class RiverData:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile, RiverData
+            >>> from dfastbe.io import ConfigFile, CenterLine
             >>> config_file = ConfigFile("tests/data/erosion/meuse_manual.cfg")
-            >>> river_data = RiverData(config_file)
+            >>> center_line = CenterLine(config_file)
             ```
         """
-        self.config_file = config_file
-        self.profile: LineString = config_file.get_xy_km()
-        self.station_bounds: Tuple = config_file.get_km_bounds()
-        self.start_station: float = self.station_bounds[0]
-        self.end_station: float = self.station_bounds[1]
+        self.station_bounds = mask
+        if mask is None:
+            self.values = line_string
+        else:
+            self.values: LineString = self.mask(line_string, mask)
+
         log_text(
-            "clip_chainage", data={"low": self.start_station, "high": self.end_station}
+            "clip_chainage", data={"low": self.station_bounds[0], "high": self.station_bounds[1]}
         )
-        self.masked_profile: LineString = self.mask_profile(self.station_bounds)
-        self.masked_profile_arr = np.array(self.masked_profile.coords)
 
-    @property
-    def bank_search_lines(self) -> List[LineString]:
-        """Get the bank search lines.
+    def as_array(self):
+        return np.array(self.values.coords)
 
-        Returns:
-            List[LineString]: List of bank search lines.
-        """
-        return self.config_file.get_search_lines()
-
-    @property
-    def num_search_lines(self) -> int:
-        """Number of river bank search lines."""
-        return len(self.bank_search_lines)
-
-    def mask_profile(self, bounds: Tuple[float, float]) -> LineString:
+    @staticmethod
+    def mask(line_string, bounds: Tuple[float, float]) -> LineString:
         """
         Clip a chainage line to the relevant reach.
 
         Args:
-            bounds (Tuple[float, float]): Lower and upper limit for the chainage.
+            line_string (LineString):
+                river center line as a linestring.
+            bounds (Tuple[float, float]):
+                Lower and upper limit for the chainage.
 
         Returns:
             LineString: Clipped river chainage line.
         """
-        xy_km = self.profile
         start_i = None
         end_i = None
-        for i, c in enumerate(xy_km.coords):
+        for i, c in enumerate(line_string.coords):
             if start_i is None and c[2] >= bounds[0]:
                 start_i = i
             if c[2] >= bounds[1]:
@@ -1514,35 +1505,35 @@ class RiverData:
         if start_i is None:
             raise Exception(
                 "Lower chainage bound {} is larger than the maximum chainage {} available".format(
-                    bounds[0], xy_km.coords[-1][2]
+                    bounds[0], line_string.coords[-1][2]
                 )
             )
         elif start_i == 0:
             # lower bound (potentially) clipped to available reach
-            if xy_km.coords[0][2] - bounds[0] > 0.1:
+            if line_string.coords[0][2] - bounds[0] > 0.1:
                 raise Exception(
                     "Lower chainage bound {} is smaller than the minimum chainage {} available".format(
-                        bounds[0], xy_km.coords[0][2]
+                        bounds[0], line_string.coords[0][2]
                     )
                 )
             x0 = None
         else:
-            alpha = (bounds[0] - xy_km.coords[start_i - 1][2]) / (
-                xy_km.coords[start_i][2] - xy_km.coords[start_i - 1][2]
+            alpha = (bounds[0] - line_string.coords[start_i - 1][2]) / (
+                    line_string.coords[start_i][2] - line_string.coords[start_i - 1][2]
             )
             x0 = tuple(
                 (c1 + alpha * (c2 - c1))
-                for c1, c2 in zip(xy_km.coords[start_i - 1], xy_km.coords[start_i])
+                for c1, c2 in zip(line_string.coords[start_i - 1], line_string.coords[start_i])
             )
             if alpha > 0.9:
                 # value close to the first node (start_i), so let's skip that one
                 start_i = start_i + 1
 
         if end_i is None:
-            if bounds[1] - xy_km.coords[-1][2] > 0.1:
+            if bounds[1] - line_string.coords[-1][2] > 0.1:
                 raise Exception(
                     "Upper chainage bound {} is larger than the maximum chainage {} available".format(
-                        bounds[1], xy_km.coords[-1][2]
+                        bounds[1], line_string.coords[-1][2]
                     )
                 )
             # else kmbounds[1] matches chainage of last point
@@ -1550,36 +1541,66 @@ class RiverData:
                 # whole range available selected
                 pass
             else:
-                xy_km = LineString([x0] + xy_km.coords[start_i:])
+                line_string = LineString([x0] + line_string.coords[start_i:])
         elif end_i == 0:
             raise Exception(
                 "Upper chainage bound {} is smaller than the minimum chainage {} available".format(
-                    bounds[1], xy_km.coords[0][2]
+                    bounds[1], line_string.coords[0][2]
                 )
             )
         else:
-            alpha = (bounds[1] - xy_km.coords[end_i - 1][2]) / (
-                xy_km.coords[end_i][2] - xy_km.coords[end_i - 1][2]
+            alpha = (bounds[1] - line_string.coords[end_i - 1][2]) / (
+                    line_string.coords[end_i][2] - line_string.coords[end_i - 1][2]
             )
             x1 = tuple(
                 (c1 + alpha * (c2 - c1))
-                for c1, c2 in zip(xy_km.coords[end_i - 1], xy_km.coords[end_i])
+                for c1, c2 in zip(line_string.coords[end_i - 1], line_string.coords[end_i])
             )
             if alpha < 0.1:
                 # value close to the previous point (end_i - 1), so let's skip that one
                 end_i = end_i - 1
             if x0 is None:
-                xy_km = LineString(xy_km.coords[:end_i] + [x1])
+                line_string = LineString(line_string.coords[:end_i] + [x1])
             else:
-                xy_km = LineString([x0] + xy_km.coords[start_i:end_i] + [x1])
-        return xy_km
+                line_string = LineString([x0] + line_string.coords[start_i:end_i] + [x1])
+        return line_string
 
-    def clip_search_lines(
-        self,
+class SearchLines:
+
+    def __init__(self, lines: List[LineString], mask: CenterLine = None):
+        """Search lines initialization.
+
+        Args:
+            lines (List[LineString]):
+                List of search lines.
+        """
+        if mask is None:
+            self.values = lines
+            self.max_distance = None
+        else:
+            self.values, self.max_distance = self.mask(lines, mask.values)
+
+        self.size = len(lines)
+
+    @property
+    def d_lines(self) -> List[float]:
+        if hasattr(self, "_d_lines"):
+            return self._d_lines
+        else:
+            raise ValueError("The d_lines property has not been set yet.")
+
+    @d_lines.setter
+    def d_lines(self, value: List[float]):
+        self._d_lines = value
+
+    @staticmethod
+    def mask(
+        search_lines: List[LineString],
+        river_center_line: LineString,
         max_river_width: float = MAX_RIVER_WIDTH,
     ) -> Tuple[List[LineString], float]:
         """
-        Clip the list of lines to the envelope of certain size surrounding a reference line.
+        Clip the list of lines to the envelope of a certain size surrounding a reference line.
 
         Arg:
             max_river_width: float
@@ -1589,15 +1610,15 @@ class RiverData:
             List[LineString]: List of clipped search lines.
             float: Maximum distance from any point within line to reference line.
         """
-        search_lines = self.bank_search_lines
-        profile_buffer = self.masked_profile.buffer(max_river_width, cap_style=2)
+        num = len(search_lines)
+        profile_buffer = river_center_line.buffer(max_river_width, cap_style=2)
 
         # The algorithm uses simplified geometries for determining the distance between lines for speed.
         # Stay accurate to within about 1 m
-        profile_simplified = self.masked_profile.simplify(1)
+        profile_simplified = river_center_line.simplify(1)
 
         max_distance = 0
-        for ind in range(self.num_search_lines):
+        for ind in range(num):
             # Clip the bank search lines to the reach of interest (indicated by the reference line).
             search_lines[ind] = search_lines[ind].intersection(profile_buffer)
 
@@ -1624,6 +1645,71 @@ class RiverData:
 
         return search_lines, max_distance
 
+    def to_polygons(self) -> List[Polygon]:
+        """
+        Construct a series of polygons surrounding the bank search lines.
+
+        Returns:
+            bank_areas:
+                Array containing the areas of interest surrounding the bank search lines.
+        """
+        bank_areas = [None] * self.size
+        for b, distance in enumerate(self.d_lines):
+            bank_areas[b] = self.values[b].buffer(distance, cap_style=2)
+
+        return bank_areas
+
+class RiverData:
+    """River data class."""
+
+    def __init__(self, config_file: ConfigFile):
+        """River Data initialization.
+
+        Args:
+            config_file : ConfigFile
+                Configuration file with settings for the analysis.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile, RiverData
+            >>> config_file = ConfigFile("tests/data/erosion/meuse_manual.cfg")
+            >>> river_data = RiverData(config_file)
+            ```
+        """
+        self.config_file = config_file
+        center_line = config_file.get_river_center_line()
+        bounds = config_file.get_start_end_stations()
+        self.river_center_line: CenterLine = CenterLine(center_line, bounds)
+        self.station_bounds: Tuple = config_file.get_start_end_stations()
+
+    @property
+    def search_lines(self) -> SearchLines:
+        search_lines = SearchLines(self.config_file.get_search_lines(), self.river_center_line)
+        search_lines.d_lines = self.config_file.get_bank_search_distances(search_lines.size)
+        return search_lines
+
+    def _get_bank_lines_simulation_data(self) -> Tuple[SimulationData, float]:
+        """
+        read simulation data and drying flooding threshold dh0
+        """
+        sim_file = self.config_file.get_sim_file("Detect", "")
+        log_text("read_simdata", data={"file": sim_file})
+        simulation_data = SimulationData.read(sim_file)
+        # increase critical water depth h0 by flooding threshold dh0
+        # get critical water depth used for defining bank line (default = 0.0 m)
+        critical_water_depth = self.config_file.get_float(
+            "Detect", "WaterDepth", default=0
+        )
+        h0 = critical_water_depth + simulation_data.dry_wet_threshold
+        return simulation_data, h0
+
+    def simulation_data(self):
+        simulation_data, h0 = self._get_bank_lines_simulation_data()
+        # clip simulation data to boundaries ...
+        log_text("clip_data")
+        simulation_data.clip(self.river_center_line.values, self.search_lines.max_distance)
+        return simulation_data, h0
+
     def read_river_axis(self):
         """Get the river axis from the analysis settings."""
         river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
@@ -1631,6 +1717,52 @@ class RiverData:
         river_axis = XYCModel.read(river_axis_file)
         return river_axis
 
+    @staticmethod
+    def get_bbox(
+        coords: np.ndarray, buffer: float = 0.1
+    ) -> Tuple[float, float, float, float]:
+        """
+        Derive the bounding box from an array of coordinates.
+
+        Args:
+            coords (np.ndarray):
+                An N x M array containing x- and y-coordinates as first two M entries
+            buffer : float
+                Buffer fraction surrounding the tight bounding box
+
+        Returns:
+            bbox (Tuple[float, float, float, float]):
+                Tuple bounding box consisting of [min x, min y, max x, max y)
+        """
+        return get_bbox(coords, buffer)
+
+
+def get_bbox(
+        coords: np.ndarray, buffer: float = 0.1
+) -> Tuple[float, float, float, float]:
+    """
+    Derive the bounding box from a line.
+
+    Args:
+        coords (np.ndarray):
+            An N x M array containing x- and y-coordinates as first two M entries
+        buffer : float
+            Buffer fraction surrounding the tight bounding box
+
+    Returns:
+        bbox (Tuple[float, float, float, float]):
+            Tuple bounding box consisting of [min x, min y, max x, max y)
+    """
+    x = coords[:, 0]
+    y = coords[:, 1]
+    x_min = x.min()
+    y_min = y.min()
+    x_max = x.max()
+    y_max = y.max()
+    d = buffer * max(x_max - x_min, y_max - y_min)
+    bbox = (x_min - d, y_min - d, x_max + d, y_max + d)
+
+    return bbox
 
 def load_program_texts(file_name: Union[str, Path]) -> None:
     """Load texts from a configuration file, and store globally for access.
