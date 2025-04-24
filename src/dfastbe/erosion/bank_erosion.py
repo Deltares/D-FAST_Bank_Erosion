@@ -903,13 +903,6 @@ class Erosion:
         log_text("-")
         config_file = self.config_file
 
-        # # read simulation data (get_sim_data)
-        # sim_file = config_file.get_sim_file("Erosion", str(self.ref_level + 1))
-        # log_text("-")
-        # log_text("read_simdata", data={"file": sim_file})
-        # log_text("-")
-        # simulation_data = ErosionSimulationData.read(sim_file)
-
         log_text("derive_topology")
 
         mesh_data = self.simulation_data.compute_mesh_topology()
