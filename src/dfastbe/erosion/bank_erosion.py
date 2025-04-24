@@ -78,7 +78,6 @@ class Erosion:
         self.simulation_data = self.river_data.simulation_data()
         self.sim_files, self.p_discharge = self.river_data.get_erosion_sim_data(self.river_data.num_discharge_levels)
 
-
     @property
     def config_file(self) -> ConfigFile:
         """Configuration file object."""
