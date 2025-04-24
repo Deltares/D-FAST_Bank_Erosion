@@ -1574,8 +1574,9 @@ Defines the Maven project configuration for the D-FAST Bank Erosion project. Thi
 <h3 id="commit-status-publisher"><a class="toclink" href="#commit-status-publisher">Commit status publisher:</a><a class="headerlink" href="#commit-status-publisher" title="Permanent link">#</a></h3>
 <p>The Commit Status Publisher is a feature used in some TeamCity configurations to report the build status of commits back to GitHub. This integration helps developers track the success or failure of builds directly within their GitHub pull requests or commit history.</p>
 <ul>
-<li>The Commit Status Publisher uses a personal access token to authenticate with GitHub.</li>
-<li>The token is securely stored in TeamCity as a parameter and accessed using the <code>%parameter_name%</code> syntax, ensuring sensitive information is protected and not exposed in the build configuration.</li>
+<li>The Commit Status Publisher uses a personal access token to authenticate with GitHub. This token is required to update the commit status in GitHub.</li>
+<li>The token is securely stored in TeamCity as a parameter. To view or manage the list of tokens in TeamCity, navigate to Project Settings → Parameters.</li>
+<li>The token is accessed in the build configuration using the %parameter_name% syntax. This ensures that sensitive information, such as the token, is protected and not exposed in the build logs or configuration files.</li>
 </ul>
 <h3 id="folder-overview"><a class="toclink" href="#folder-overview">Folder Overview</a><a class="headerlink" href="#folder-overview" title="Permanent link">#</a></h3>
 <p>The <code>DFastBETests</code> folder is structured to modularize the TeamCity build configurations and templates for the D-FAST Bank Erosion project. Each file serves a specific purpose, such as running tests, building the project, or managing dependencies, while the <code>settings.kts</code> file ties everything together into a cohesive project.</p>
