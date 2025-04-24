@@ -6,6 +6,13 @@ import numpy as np
 from geopandas import GeoDataFrame
 
 
+from dfastbe.io import ConfigFile, BaseRiverData
+
+class ErosionRiverData(BaseRiverData):
+
+    def __init__(self, config_file: ConfigFile):
+        super().__init__(config_file)
+        
 @dataclass
 class ErosionInputs:
     """Class to hold erosion inputs.
