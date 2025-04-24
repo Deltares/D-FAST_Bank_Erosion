@@ -1045,7 +1045,7 @@ class ConfigFile:
         return val
 
     def get_river_center_line(self) -> LineString:
-        """Get the river center line from the xyc file as a linestring g.
+        """Get the river center line from the xyc file as a linestring.
 
         Returns:
             LineString: Chainage line.
