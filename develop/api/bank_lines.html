@@ -1176,15 +1176,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dfastbe.bank_lines.BankLines.mask" class="md-nav__link">
-    <span class="md-ellipsis">
-      mask
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#dfastbe.bank_lines.BankLines.plot" class="md-nav__link">
     <span class="md-ellipsis">
       plot
@@ -1565,15 +1556,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dfastbe.bank_lines.BankLines.mask" class="md-nav__link">
-    <span class="md-ellipsis">
-      mask
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#dfastbe.bank_lines.BankLines.plot" class="md-nav__link">
     <span class="md-ellipsis">
       plot
@@ -1690,7 +1672,9 @@
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_lines.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 41</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
 <span class="normal"> 42</span>
 <span class="normal"> 43</span>
 <span class="normal"> 44</span>
@@ -1983,7 +1967,24 @@
 <span class="normal">331</span>
 <span class="normal">332</span>
 <span class="normal">333</span>
-<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLines</span><span class="p">:</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLines</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Bank line detection class.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
@@ -2005,10 +2006,21 @@
         <span class="c1"># set plotting flags</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_flags</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_plotting_flags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_dir</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span> <span class="o">=</span> <span class="n">RiverData</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">search_lines</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_simulation_data</span><span class="p">()</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_simulation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">SimulationData</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+        <span class="c1"># read simulation data and drying flooding threshold dh0</span>
+        <span class="n">sim_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_sim_file</span><span class="p">(</span><span class="s2">&quot;Detect&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_simdata&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">sim_file</span><span class="p">})</span>
+        <span class="n">simulation_data</span> <span class="o">=</span> <span class="n">SimulationData</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">sim_file</span><span class="p">)</span>
+        <span class="c1"># increase critical water depth h0 by flooding threshold dh0</span>
+        <span class="c1"># get critical water depth used for defining bank line (default = 0.0 m)</span>
+        <span class="n">critical_water_depth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span>
+            <span class="s2">&quot;Detect&quot;</span><span class="p">,</span> <span class="s2">&quot;WaterDepth&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span>
+        <span class="p">)</span>
+        <span class="n">h0</span> <span class="o">=</span> <span class="n">critical_water_depth</span> <span class="o">+</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">dry_wet_threshold</span>
+        <span class="k">return</span> <span class="n">simulation_data</span><span class="p">,</span> <span class="n">h0</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConfigFile</span><span class="p">:</span>
@@ -2046,21 +2058,27 @@
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
 
         <span class="c1"># clip the chainage path to the range of chainages of interest</span>
-        <span class="n">river_center_line</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">river_center_line</span>
-        <span class="n">station_bounds</span> <span class="o">=</span> <span class="n">river_center_line</span><span class="o">.</span><span class="n">station_bounds</span>
-        <span class="n">river_center_line_values</span> <span class="o">=</span> <span class="n">river_center_line</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">center_line_arr</span> <span class="o">=</span> <span class="n">river_center_line</span><span class="o">.</span><span class="n">as_array</span><span class="p">()</span>
-        <span class="n">stations_coords</span> <span class="o">=</span> <span class="n">center_line_arr</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">km_bounds</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">station_bounds</span>
+        <span class="n">river_profile</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">masked_profile</span>
+        <span class="n">stations_coords</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">masked_profile_arr</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">masked_search_lines</span><span class="p">,</span> <span class="n">max_distance</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">clip_search_lines</span><span class="p">()</span>
 
         <span class="c1"># convert search lines to bank polygons</span>
-        <span class="n">bank_areas</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Polygon</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span><span class="o">.</span><span class="n">to_polygons</span><span class="p">()</span>
+        <span class="n">d_lines</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_bank_search_distances</span><span class="p">(</span><span class="n">river_data</span><span class="o">.</span><span class="n">num_search_lines</span><span class="p">)</span>
+        <span class="n">bank_areas</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Polygon</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_search_lines_to_bank_polygons</span><span class="p">(</span>
+            <span class="n">masked_search_lines</span><span class="p">,</span> <span class="n">d_lines</span>
+        <span class="p">)</span>
 
         <span class="c1"># determine whether search lines are located on the left or right</span>
-        <span class="n">to_right</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span><span class="o">.</span><span class="n">size</span>
-        <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+        <span class="n">to_right</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="n">river_data</span><span class="o">.</span><span class="n">num_search_lines</span>
+        <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">river_data</span><span class="o">.</span><span class="n">num_search_lines</span><span class="p">):</span>
             <span class="n">to_right</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">on_right_side</span><span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">),</span> <span class="n">stations_coords</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">masked_search_lines</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">),</span> <span class="n">stations_coords</span>
             <span class="p">)</span>
+
+        <span class="c1"># clip simulation data to boundaries ...</span>
+        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;clip_data&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">river_profile</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">)</span>
 
         <span class="c1"># derive bank lines (get_banklines)</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;identify_banklines&quot;</span><span class="p">)</span>
@@ -2068,52 +2086,30 @@
 
         <span class="c1"># clip the set of detected bank lines to the bank areas</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;simplify_banklines&quot;</span><span class="p">)</span>
-        <span class="n">bank</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span><span class="o">.</span><span class="n">size</span>
-        <span class="n">clipped_banklines</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">bank</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">river_data</span><span class="o">.</span><span class="n">num_search_lines</span>
+        <span class="n">clipped_banklines</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">river_data</span><span class="o">.</span><span class="n">num_search_lines</span>
         <span class="k">for</span> <span class="n">ib</span><span class="p">,</span> <span class="n">bank_area</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bank_areas</span><span class="p">):</span>
             <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_lines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">ib</span> <span class="o">+</span> <span class="mi">1</span><span class="p">})</span>
-            <span class="n">clipped_banklines</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">banklines</span><span class="p">,</span> <span class="n">bank_area</span><span class="p">)</span>
+            <span class="n">clipped_banklines</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">clip_bank_lines</span><span class="p">(</span><span class="n">banklines</span><span class="p">,</span> <span class="n">bank_area</span><span class="p">)</span>
             <span class="n">bank</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">sort_connect_bank_lines</span><span class="p">(</span>
-                <span class="n">clipped_banklines</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span> <span class="n">river_center_line_values</span><span class="p">,</span> <span class="n">to_right</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span>
+                <span class="n">clipped_banklines</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span> <span class="n">river_profile</span><span class="p">,</span> <span class="n">to_right</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span>
             <span class="p">)</span>
 
         <span class="c1"># save bank_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">bank</span><span class="p">,</span> <span class="n">banklines</span><span class="p">,</span> <span class="n">clipped_banklines</span><span class="p">,</span> <span class="n">bank_areas</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
 
-
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_flags</span><span class="p">[</span><span class="s2">&quot;plot_data&quot;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-                <span class="n">center_line_arr</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
+                <span class="n">river_data</span><span class="o">.</span><span class="n">masked_profile_arr</span><span class="p">,</span>
+                <span class="n">river_data</span><span class="o">.</span><span class="n">num_search_lines</span><span class="p">,</span>
                 <span class="n">bank</span><span class="p">,</span>
-                <span class="n">station_bounds</span><span class="p">,</span>
+                <span class="n">km_bounds</span><span class="p">,</span>
                 <span class="n">bank_areas</span><span class="p">,</span>
                 <span class="n">config_file</span><span class="p">,</span>
             <span class="p">)</span>
 
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;end_banklines&quot;</span><span class="p">)</span>
         <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- stop analysis --&quot;</span><span class="p">)</span>
-
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">mask</span><span class="p">(</span><span class="n">banklines</span><span class="p">:</span> <span class="n">GeoSeries</span><span class="p">,</span> <span class="n">bank_area</span><span class="p">:</span> <span class="n">Polygon</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiLineString</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Clip the bank line segments to the area of interest.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            banklines (GeoSeries):</span>
-<span class="sd">                Unordered set of bank line segments.</span>
-<span class="sd">            bank_area (Polygon):</span>
-<span class="sd">                A search area corresponding to one of the bank search lines.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        clipped_banklines : MultiLineString</span>
-<span class="sd">            Un-ordered set of bank line segments, clipped to bank area.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># intersection returns one MultiLineString object</span>
-        <span class="n">clipped_banklines</span> <span class="o">=</span> <span class="n">banklines</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">bank_area</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="k">return</span> <span class="n">clipped_banklines</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -2277,6 +2273,30 @@
         <span class="n">merged_line</span> <span class="o">=</span> <span class="n">line_merge</span><span class="p">(</span><span class="n">multi_line</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">(</span><span class="n">merged_line</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">config_file</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_convert_search_lines_to_bank_polygons</span><span class="p">(</span>
+        <span class="n">search_lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">d_lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Polygon</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct a series of polygons surrounding the bank search lines.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            search_lines : List[numpy.ndarray]</span>
+<span class="sd">                List of arrays containing the x,y-coordinates of a bank search lines.</span>
+<span class="sd">            d_lines : List[float]</span>
+<span class="sd">                Array containing the search distance value per bank line.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bank_areas:</span>
+<span class="sd">                Array containing the areas of interest surrounding the bank search lines.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n_bank</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">search_lines</span><span class="p">)</span>
+        <span class="n">bank_areas</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_bank</span>
+        <span class="k">for</span> <span class="n">b</span><span class="p">,</span> <span class="n">distance</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">d_lines</span><span class="p">):</span>
+            <span class="n">bank_areas</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">search_lines</span><span class="p">[</span><span class="n">b</span><span class="p">]</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="n">distance</span><span class="p">,</span> <span class="n">cap_style</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">bank_areas</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -2396,7 +2416,9 @@ Flag indicating whether this routine is called from the GUI.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">44</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
 <span class="normal">45</span>
 <span class="normal">46</span>
 <span class="normal">47</span>
@@ -2414,10 +2436,7 @@ Flag indicating whether this routine is called from the GUI.</p>
 <span class="normal">59</span>
 <span class="normal">60</span>
 <span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="normal">62</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Bank line initializer.</span>
 
 <span class="sd">    Args:</span>
@@ -2436,9 +2455,8 @@ Flag indicating whether this routine is called from the GUI.</p>
     <span class="c1"># set plotting flags</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">plot_flags</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_plotting_flags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_dir</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span> <span class="o">=</span> <span class="n">RiverData</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">search_lines</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_simulation_data</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2460,16 +2478,7 @@ Flag indicating whether this routine is called from the GUI.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 88</span>
-<span class="normal"> 89</span>
-<span class="normal"> 90</span>
-<span class="normal"> 91</span>
-<span class="normal"> 92</span>
-<span class="normal"> 93</span>
-<span class="normal"> 94</span>
-<span class="normal"> 95</span>
-<span class="normal"> 96</span>
-<span class="normal"> 97</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 97</span>
 <span class="normal"> 98</span>
 <span class="normal"> 99</span>
 <span class="normal">100</span>
@@ -2522,7 +2531,21 @@ Flag indicating whether this routine is called from the GUI.</p>
 <span class="normal">147</span>
 <span class="normal">148</span>
 <span class="normal">149</span>
-<span class="normal">150</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">detect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">detect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the bank line detection analysis for a specified configuration.&quot;&quot;&quot;</span>
     <span class="n">config_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span>
     <span class="n">river_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span>
@@ -2538,21 +2561,27 @@ Flag indicating whether this routine is called from the GUI.</p>
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
 
     <span class="c1"># clip the chainage path to the range of chainages of interest</span>
-    <span class="n">river_center_line</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">river_center_line</span>
-    <span class="n">station_bounds</span> <span class="o">=</span> <span class="n">river_center_line</span><span class="o">.</span><span class="n">station_bounds</span>
-    <span class="n">river_center_line_values</span> <span class="o">=</span> <span class="n">river_center_line</span><span class="o">.</span><span class="n">values</span>
-    <span class="n">center_line_arr</span> <span class="o">=</span> <span class="n">river_center_line</span><span class="o">.</span><span class="n">as_array</span><span class="p">()</span>
-    <span class="n">stations_coords</span> <span class="o">=</span> <span class="n">center_line_arr</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">km_bounds</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">station_bounds</span>
+    <span class="n">river_profile</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">masked_profile</span>
+    <span class="n">stations_coords</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">masked_profile_arr</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">masked_search_lines</span><span class="p">,</span> <span class="n">max_distance</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">clip_search_lines</span><span class="p">()</span>
 
     <span class="c1"># convert search lines to bank polygons</span>
-    <span class="n">bank_areas</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Polygon</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span><span class="o">.</span><span class="n">to_polygons</span><span class="p">()</span>
+    <span class="n">d_lines</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_bank_search_distances</span><span class="p">(</span><span class="n">river_data</span><span class="o">.</span><span class="n">num_search_lines</span><span class="p">)</span>
+    <span class="n">bank_areas</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Polygon</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_convert_search_lines_to_bank_polygons</span><span class="p">(</span>
+        <span class="n">masked_search_lines</span><span class="p">,</span> <span class="n">d_lines</span>
+    <span class="p">)</span>
 
     <span class="c1"># determine whether search lines are located on the left or right</span>
-    <span class="n">to_right</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span><span class="o">.</span><span class="n">size</span>
-    <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+    <span class="n">to_right</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="n">river_data</span><span class="o">.</span><span class="n">num_search_lines</span>
+    <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">river_data</span><span class="o">.</span><span class="n">num_search_lines</span><span class="p">):</span>
         <span class="n">to_right</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">on_right_side</span><span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">),</span> <span class="n">stations_coords</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">masked_search_lines</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">),</span> <span class="n">stations_coords</span>
         <span class="p">)</span>
+
+    <span class="c1"># clip simulation data to boundaries ...</span>
+    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;clip_data&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">river_profile</span><span class="p">,</span> <span class="n">max_distance</span><span class="p">)</span>
 
     <span class="c1"># derive bank lines (get_banklines)</span>
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;identify_banklines&quot;</span><span class="p">)</span>
@@ -2560,25 +2589,24 @@ Flag indicating whether this routine is called from the GUI.</p>
 
     <span class="c1"># clip the set of detected bank lines to the bank areas</span>
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;simplify_banklines&quot;</span><span class="p">)</span>
-    <span class="n">bank</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span><span class="o">.</span><span class="n">size</span>
-    <span class="n">clipped_banklines</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">bank</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">river_data</span><span class="o">.</span><span class="n">num_search_lines</span>
+    <span class="n">clipped_banklines</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">river_data</span><span class="o">.</span><span class="n">num_search_lines</span>
     <span class="k">for</span> <span class="n">ib</span><span class="p">,</span> <span class="n">bank_area</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bank_areas</span><span class="p">):</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_lines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">ib</span> <span class="o">+</span> <span class="mi">1</span><span class="p">})</span>
-        <span class="n">clipped_banklines</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">banklines</span><span class="p">,</span> <span class="n">bank_area</span><span class="p">)</span>
+        <span class="n">clipped_banklines</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">clip_bank_lines</span><span class="p">(</span><span class="n">banklines</span><span class="p">,</span> <span class="n">bank_area</span><span class="p">)</span>
         <span class="n">bank</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">sort_connect_bank_lines</span><span class="p">(</span>
-            <span class="n">clipped_banklines</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span> <span class="n">river_center_line_values</span><span class="p">,</span> <span class="n">to_right</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span>
+            <span class="n">clipped_banklines</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span> <span class="n">river_profile</span><span class="p">,</span> <span class="n">to_right</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span>
         <span class="p">)</span>
 
     <span class="c1"># save bank_file</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">bank</span><span class="p">,</span> <span class="n">banklines</span><span class="p">,</span> <span class="n">clipped_banklines</span><span class="p">,</span> <span class="n">bank_areas</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
 
-
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_flags</span><span class="p">[</span><span class="s2">&quot;plot_data&quot;</span><span class="p">]:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-            <span class="n">center_line_arr</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span><span class="o">.</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">river_data</span><span class="o">.</span><span class="n">masked_profile_arr</span><span class="p">,</span>
+            <span class="n">river_data</span><span class="o">.</span><span class="n">num_search_lines</span><span class="p">,</span>
             <span class="n">bank</span><span class="p">,</span>
-            <span class="n">station_bounds</span><span class="p">,</span>
+            <span class="n">km_bounds</span><span class="p">,</span>
             <span class="n">bank_areas</span><span class="p">,</span>
             <span class="n">config_file</span><span class="p">,</span>
         <span class="p">)</span>
@@ -2682,7 +2710,14 @@ The collection of all detected bank segments in the remaining model area.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">259</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
 <span class="normal">260</span>
 <span class="normal">261</span>
 <span class="normal">262</span>
@@ -2750,14 +2785,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="normal">324</span>
 <span class="normal">325</span>
 <span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="normal">327</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">detect_bank_lines</span><span class="p">(</span>
     <span class="n">simulation_data</span><span class="p">:</span> <span class="n">SimulationData</span><span class="p">,</span> <span class="n">h0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">:</span>
@@ -2842,120 +2870,6 @@ The collection of all detected bank segments in the remaining model area.</p>
 <div class="doc doc-object doc-function">
 
 
-<h4 id="dfastbe.bank_lines.BankLines.mask" class="doc doc-heading"><a href="#dfastbe.bank_lines.BankLines.mask" class="toclink">
-            <code class="highlight language-python"><span class="n">mask</span><span class="p">(</span><span class="n">banklines</span><span class="p">:</span> <span class="n">GeoSeries</span><span class="p">,</span> <span class="n">bank_area</span><span class="p">:</span> <span class="n">Polygon</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiLineString</span></code>
-
-  <span class="doc doc-labels">
-      <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
-  </span>
-
-</a><a href="#dfastbe.bank_lines.BankLines.mask" class="headerlink" title="Permanent link">#</a></h4>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Clip the bank line segments to the area of interest.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>banklines</code>
-            </td>
-            <td>
-                  <code><span title="geopandas.geoseries.GeoSeries">GeoSeries</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Unordered set of bank line segments.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>bank_area</code>
-            </td>
-            <td>
-                  <code><span title="shapely.geometry.polygon.Polygon">Polygon</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A search area corresponding to one of the bank search lines.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-        <h6 id="dfastbe.bank_lines.BankLines.mask--returns"><a class="toclink" href="#dfastbe.bank_lines.BankLines.mask--returns">Returns</a><a class="headerlink" href="#dfastbe.bank_lines.BankLines.mask--returns" title="Permanent link">#</a></h6>
-<p>clipped_banklines : MultiLineString
-    Un-ordered set of bank line segments, clipped to bank area.</p>
-
-            <details class="quote">
-              <summary>Source code in <code>src/dfastbe/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
-<span class="normal">159</span>
-<span class="normal">160</span>
-<span class="normal">161</span>
-<span class="normal">162</span>
-<span class="normal">163</span>
-<span class="normal">164</span>
-<span class="normal">165</span>
-<span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">mask</span><span class="p">(</span><span class="n">banklines</span><span class="p">:</span> <span class="n">GeoSeries</span><span class="p">,</span> <span class="n">bank_area</span><span class="p">:</span> <span class="n">Polygon</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiLineString</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Clip the bank line segments to the area of interest.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        banklines (GeoSeries):</span>
-<span class="sd">            Unordered set of bank line segments.</span>
-<span class="sd">        bank_area (Polygon):</span>
-<span class="sd">            A search area corresponding to one of the bank search lines.</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    clipped_banklines : MultiLineString</span>
-<span class="sd">        Un-ordered set of bank line segments, clipped to bank area.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># intersection returns one MultiLineString object</span>
-    <span class="n">clipped_banklines</span> <span class="o">=</span> <span class="n">banklines</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">bank_area</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-
-    <span class="k">return</span> <span class="n">clipped_banklines</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
 <h4 id="dfastbe.bank_lines.BankLines.plot" class="doc doc-heading"><a href="#dfastbe.bank_lines.BankLines.plot" class="toclink">
             <code class="highlight language-python"><span class="n">plot</span><span class="p">(</span><span class="n">xy_km_numpy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">n_search_lines</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bank</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">km_bounds</span><span class="p">,</span> <span class="n">bank_areas</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">)</span></code>
 
@@ -2968,7 +2882,14 @@ The collection of all detected bank segments in the remaining model area.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">173</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
 <span class="normal">174</span>
 <span class="normal">175</span>
 <span class="normal">176</span>
@@ -3026,14 +2947,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="normal">228</span>
 <span class="normal">229</span>
 <span class="normal">230</span>
-<span class="normal">231</span>
-<span class="normal">232</span>
-<span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
+<span class="normal">231</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">xy_km_numpy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">n_search_lines</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -3120,7 +3034,14 @@ The collection of all detected bank segments in the remaining model area.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">240</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
 <span class="normal">241</span>
 <span class="normal">242</span>
 <span class="normal">243</span>
@@ -3130,14 +3051,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
-<span class="normal">250</span>
-<span class="normal">251</span>
-<span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span>
+<span class="normal">250</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">bank</span><span class="p">,</span> <span class="n">banklines</span><span class="p">,</span> <span class="n">clipped_banklines</span><span class="p">,</span> <span class="n">bank_areas</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Save result files.&quot;&quot;&quot;</span>
