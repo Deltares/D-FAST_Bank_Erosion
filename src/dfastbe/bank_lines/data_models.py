@@ -106,10 +106,6 @@ class BankLinesRiverData(BaseRiverData):
 
     def __init__(self, config_file: ConfigFile):
         super().__init__(config_file)
-        # self.bank_lines = None
-        # self.bank_lines_data = None
-        # self.fairway_data = None
-        # self.fairway_data_list = []
 
     @property
     def search_lines(self) -> SearchLines:
