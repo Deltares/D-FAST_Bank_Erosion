@@ -125,13 +125,12 @@ class Erosion:
         stations_coords: np.ndarray,
         mesh_data: MeshData,
     ) -> BankData:
-        bank_lines = config_file.read_bank_lines(str(self.river_data.bank_dir))
-        n_bank_lines = len(bank_lines)
+        n_bank_lines = len(self.bank_lines)
 
         bank_line_coords = []
         bank_face_indices = []
         for bank_index in range(n_bank_lines):
-            line_coords = np.array(bank_lines.geometry[bank_index].coords)
+            line_coords = np.array(self.bank_lines.geometry[bank_index].coords)
             log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
 
             coords_along_bank, face_indices = intersect_line_mesh(
@@ -149,7 +148,7 @@ class Erosion:
             chainage_mid_points = project_km_on_line(segment_mid_points,
                                                      self.river_center_line_arr)
 
-            # check if bank line is defined from low chainage to high chainage
+            # check if the bank line is defined from low chainage to high chainage
             if chainage_mid_points[0] > chainage_mid_points[-1]:
                 # if not, flip the bank line and all associated data
                 chainage_mid_points = chainage_mid_points[::-1]
@@ -158,7 +157,7 @@ class Erosion:
 
             bank_chainage_midpoints[bank_index] = chainage_mid_points
 
-            # check if bank line is left or right bank
+            # check if the bank line is left or right bank
             # when looking from low to high chainage
             is_right_bank[bank_index] = on_right_side(coords, stations_coords)
             if is_right_bank[bank_index]:
@@ -171,7 +170,7 @@ class Erosion:
             bank_face_indices=bank_face_indices,
             bank_chainage_midpoints=bank_chainage_midpoints,
             is_right_bank=is_right_bank,
-            bank_lines=bank_lines,
+            bank_lines=self.bank_lines,
             n_bank_lines=n_bank_lines,
         )
 
@@ -469,10 +468,7 @@ class Erosion:
         erosion_inputs: ErosionInputs,
         bank_data: BankData,
         fairway_data: FairwayData,
-    ) -> Tuple[
-        WaterLevelData,
-        ErosionResults,
-    ]:
+    ) -> Tuple[WaterLevelData, ErosionResults]:
         # initialize arrays for erosion loop over all discharges
         velocity: List[List[np.ndarray]] = []
         bank_height: List[np.ndarray] = []
@@ -906,28 +902,23 @@ class Erosion:
         log_text("derive_topology")
 
         mesh_data = self.simulation_data.compute_mesh_topology()
-
-        # clip the chainage path to the range of chainages of interest
-        km_bounds = self.river_data.station_bounds
-        log_text("clip_chainage", data={"low": km_bounds[0], "high": km_bounds[1]})
-
-        stations_coords = self.river_center_line_arr[:, :2]
+        river_center_line_coords = self.river_center_line_arr[:, :2]
 
         # map bank lines to mesh cells
         log_text("intersect_bank_mesh")
 
         bank_data = self.intersect_bank_lines_with_mesh(
-            config_file, stations_coords, mesh_data
+            config_file, river_center_line_coords, mesh_data
         )
 
         river_axis_km, _, river_axis = self._prepare_river_axis(
-            stations_coords, config_file
+            river_center_line_coords, config_file
         )
         # map to output interval
         km_bin = (river_axis_km.min(), river_axis_km.max(), self.river_data.output_intervals)
         km_mid = get_km_bins(km_bin, type=3)  # get mid-points
 
-        fairway_data = self._prepare_fairway(river_axis, stations_coords, mesh_data, config_file)
+        fairway_data = self._prepare_fairway(river_axis, river_center_line_coords, mesh_data, config_file)
 
         self._map_bank_to_fairway(bank_data, fairway_data, self.simulation_data, config_file)
 

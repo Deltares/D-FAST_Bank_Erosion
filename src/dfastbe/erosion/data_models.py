@@ -409,6 +409,7 @@ class ErosionRiverData(BaseRiverData):
         log_text("get_levels")
         self.num_discharge_levels = config_file.get_int("Erosion", "NLevel")
         self.output_intervals = config_file.get_float("Erosion", "OutputInterval", 1.0)
+        self.bank_lines = config_file.read_bank_lines(str(self.bank_dir))
 
     def simulation_data(self) -> ErosionSimulationData:
 
