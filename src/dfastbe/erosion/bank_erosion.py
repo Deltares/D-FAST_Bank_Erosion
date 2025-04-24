@@ -37,7 +37,7 @@ import matplotlib.pyplot as plt
 from dfastbe import __version__
 from dfastbe.kernel import get_km_bins, moving_avg, comp_erosion_eq, comp_erosion, get_km_eroded_volume, \
                             get_zoom_extends
-from dfastbe.support import on_right_side, project_km_on_line, intersect_line_mesh, move_line
+from dfastbe.support import project_km_on_line, move_line
 from dfastbe import plotting as df_plt
 from dfastbe.io import (
     ConfigFile,
@@ -57,6 +57,7 @@ from dfastbe.erosion.data_models import (
     FairwayData,
     ErosionResults,
 )
+from dfastbe.erosion.utils import intersect_line_mesh, BankLinesProcessor
 from dfastbe.utils import timed_logger
 
 
@@ -77,6 +78,7 @@ class Erosion:
         self.river_center_line_arr = self.river_data.river_center_line.as_array()
         self.simulation_data = self.river_data.simulation_data()
         self.sim_files, self.p_discharge = self.river_data.get_erosion_sim_data(self.river_data.num_discharge_levels)
+        self.bl_processor = BankLinesProcessor(self.river_data)
 
     @property
     def config_file(self) -> ConfigFile:
@@ -119,59 +121,6 @@ class Erosion:
         return ship_data
 
 
-    def intersect_bank_lines_with_mesh(
-        self,
-        stations_coords: np.ndarray,
-        mesh_data: MeshData,
-    ) -> BankData:
-        n_bank_lines = len(self.river_data.bank_lines)
-
-        bank_line_coords = []
-        bank_face_indices = []
-        for bank_index in range(n_bank_lines):
-            line_coords = np.array(self.river_data.bank_lines.geometry[bank_index].coords)
-            log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
-
-            coords_along_bank, face_indices = intersect_line_mesh(
-                line_coords, mesh_data
-            )
-            bank_line_coords.append(coords_along_bank)
-            bank_face_indices.append(face_indices)
-
-        # linking bank lines to chainage
-        log_text("chainage_to_banks")
-        bank_chainage_midpoints = [None] * n_bank_lines
-        is_right_bank = [True] * n_bank_lines
-        for bank_index, coords in enumerate(bank_line_coords):
-            segment_mid_points = (coords[:-1, :] + coords[1:, :]) / 2
-            chainage_mid_points = project_km_on_line(segment_mid_points,
-                                                     self.river_center_line_arr)
-
-            # check if the bank line is defined from low chainage to high chainage
-            if chainage_mid_points[0] > chainage_mid_points[-1]:
-                # if not, flip the bank line and all associated data
-                chainage_mid_points = chainage_mid_points[::-1]
-                bank_line_coords[bank_index] = bank_line_coords[bank_index][::-1, :]
-                bank_face_indices[bank_index] = bank_face_indices[bank_index][::-1]
-
-            bank_chainage_midpoints[bank_index] = chainage_mid_points
-
-            # check if the bank line is left or right bank
-            # when looking from low to high chainage
-            is_right_bank[bank_index] = on_right_side(coords, stations_coords)
-            if is_right_bank[bank_index]:
-                log_text("right_side_bank", data={"ib": bank_index + 1})
-            else:
-                log_text("left_side_bank", data={"ib": bank_index + 1})
-
-        return BankData(
-            bank_line_coords=bank_line_coords,
-            bank_face_indices=bank_face_indices,
-            bank_chainage_midpoints=bank_chainage_midpoints,
-            is_right_bank=is_right_bank,
-            bank_lines=self.river_data.bank_lines,
-            n_bank_lines=n_bank_lines,
-        )
 
     def _prepare_river_axis(
         self, stations_coords: np.ndarray, config_file: ConfigFile
@@ -905,10 +854,7 @@ class Erosion:
 
         # map bank lines to mesh cells
         log_text("intersect_bank_mesh")
-
-        bank_data = self.intersect_bank_lines_with_mesh(
-            config_file, river_center_line_coords, mesh_data
-        )
+        bank_data = self.bl_processor.intersect_with_mesh(mesh_data)
 
         river_axis_km, _, river_axis = self._prepare_river_axis(
             river_center_line_coords, config_file

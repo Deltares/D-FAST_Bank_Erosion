@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict
+from typing import List, Tuple
 from shapely.geometry import LineString, Point
 from shapely.geometry.polygon import Polygon
 from dfastbe.io import BaseRiverData, ConfigFile, CenterLine, log_text, BaseSimulationData
