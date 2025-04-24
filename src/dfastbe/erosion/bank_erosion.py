@@ -121,16 +121,15 @@ class Erosion:
 
     def intersect_bank_lines_with_mesh(
         self,
-        config_file: ConfigFile,
         stations_coords: np.ndarray,
         mesh_data: MeshData,
     ) -> BankData:
-        n_bank_lines = len(self.bank_lines)
+        n_bank_lines = len(self.river_data.bank_lines)
 
         bank_line_coords = []
         bank_face_indices = []
         for bank_index in range(n_bank_lines):
-            line_coords = np.array(self.bank_lines.geometry[bank_index].coords)
+            line_coords = np.array(self.river_data.bank_lines.geometry[bank_index].coords)
             log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
 
             coords_along_bank, face_indices = intersect_line_mesh(
@@ -170,7 +169,7 @@ class Erosion:
             bank_face_indices=bank_face_indices,
             bank_chainage_midpoints=bank_chainage_midpoints,
             is_right_bank=is_right_bank,
-            bank_lines=self.bank_lines,
+            bank_lines=self.river_data.bank_lines,
             n_bank_lines=n_bank_lines,
         )
 
