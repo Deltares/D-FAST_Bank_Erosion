@@ -120,5 +120,11 @@ Defines the Maven project configuration for the D-FAST Bank Erosion project. Thi
 
 ---
 
+### Commit status publisher:
+The Commit Status Publisher is a feature used in some TeamCity configurations to report the build status of commits back to GitHub. This integration helps developers track the success or failure of builds directly within their GitHub pull requests or commit history.
+
+- The Commit Status Publisher uses a personal access token to authenticate with GitHub.
+- The token is securely stored in TeamCity as a parameter and accessed using the `%parameter_name%` syntax, ensuring sensitive information is protected and not exposed in the build configuration.
+
 ### Folder Overview
 The `DFastBETests` folder is structured to modularize the TeamCity build configurations and templates for the D-FAST Bank Erosion project. Each file serves a specific purpose, such as running tests, building the project, or managing dependencies, while the `settings.kts` file ties everything together into a cohesive project.
