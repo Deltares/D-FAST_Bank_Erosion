@@ -5,8 +5,8 @@ from configparser import ConfigParser
 from contextlib import contextmanager
 from io import StringIO
 from pathlib import Path
-from typing import Dict
-from unittest.mock import patch, MagicMock
+from typing import Dict, Tuple
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
@@ -15,16 +15,17 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry import LineString
 
 from dfastbe.io import (
-    SimulationData,
-    SimulationFilesError,
+    CenterLine,
     ConfigFile,
     RiverData,
+    SimulationData,
+    SimulationFilesError,
+    _read_fm_map,
     absolute_path,
     get_filename,
     get_text,
     load_program_texts,
     log_text,
-    _read_fm_map,
     relative_path,
 )
 from dfastbe.structures import MeshData
@@ -875,10 +876,15 @@ class TestConfigFileE2E:
 
 
 class TestRiverData:
-    def test_initialization(self):
+
+    @pytest.fixture
+    def river_data(self) -> RiverData:
         path = "tests/data/erosion/meuse_manual.cfg"
         config_file = ConfigFile.read(path)
         river_data = RiverData(config_file)
+        return river_data
+
+    def test_initialization(self, river_data: RiverData):
         assert isinstance(river_data.config_file, ConfigFile)
         search_lines = river_data.search_lines
         assert search_lines.size == 2
@@ -889,3 +895,127 @@ class TestRiverData:
         center_line_arr = center_line.as_array()
         assert isinstance(center_line_arr, np.ndarray)
         assert center_line_arr.shape == (251, 3)
+
+    @patch("dfastbe.io.XYCModel.read")
+    def test_read_river_axis(self, mock_read, river_data):
+        """Test the read_river_axis method by mocking XYCModel.read."""
+        mock_river_axis = LineString([(0, 0), (1, 1), (2, 2)])
+        mock_read.return_value = mock_river_axis
+        expected_path = Path("tests/data/erosion/inputs/maas_rivieras_mod.xyc")
+
+        river_axis = river_data.read_river_axis()
+
+        mock_read.assert_called_once_with(str(expected_path.resolve()))
+        assert isinstance(river_axis, LineString)
+        assert river_axis.equals(mock_river_axis)
+
+
+class TestCenterLine:
+    @pytest.fixture
+    def river_line(self):
+        """Fixture to create a RiverData instance with mock data."""
+        line_string = LineString(
+            [
+                (0, 0, 0),
+                (1, 1, 1),
+                (2, 2, 2),
+                (3, 3, 3),
+                (4, 4, 4),
+            ]
+        )
+
+        return line_string
+
+    @pytest.mark.parametrize(
+        "mask, expected_profile",
+        [
+            (
+                (1.5, 3.5),
+                LineString([(1.5, 1.5, 1.5), (2, 2, 2), (3, 3, 3), (3.5, 3.5, 3.5)]),
+            ),
+            (
+                (2, 4.05),
+                LineString([(2, 2, 2), (3, 3, 3), (4, 4, 4)]),
+            ),
+            (
+                (-0.05, 3),
+                LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2), (3, 3, 3)]),
+            ),
+            (
+                (-0.05, 4.05),
+                LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 4)]),
+            ),
+        ],
+        ids=[
+            "Normal bounds",
+            "Upper bound exceeds max",
+            "Lower bound below min",
+            "Both bounds out of range",
+        ],
+    )
+    def test_mask_profile(
+        self,
+        river_line: LineString,
+        mask: Tuple[float],
+        expected_profile: LineString,
+    ):
+        """Test the mask_profile method with various station bounds."""
+        center_line = CenterLine(river_line, mask)
+
+        assert isinstance(center_line.values, LineString)
+        assert center_line.values.equals(expected_profile)
+
+    @pytest.mark.parametrize(
+        "mask, expected_error",
+        [
+            (
+                (5.0, 6.0),
+                "Lower chainage bound 5.0 is larger than the maximum chainage 4.0 available",
+            ),
+            (
+                (-0.2, 3.0),
+                "Lower chainage bound -0.2 is smaller than the minimum chainage 0.0 available",
+            ),
+            (
+                (0.0, -0.5),
+                "Upper chainage bound -0.5 is smaller than the minimum chainage 0.0 available",
+            ),
+            (
+                (0.0, 5.0),
+                "Upper chainage bound 5.0 is larger than the maximum chainage 4.0 available",
+            ),
+        ],
+        ids=[
+            "Lower bound exceeds max",
+            "Lower bound below min",
+            "Upper bound below min",
+            "Upper bound exceeds max",
+        ],
+    )
+    def test_mask_profile_out_of_bounds(
+        self, river_line: LineString, mask: Tuple[float], expected_error: str
+    ):
+        """Test the mask_profile method for out-of-bounds station bounds."""
+        with pytest.raises(ValueError, match=expected_error):
+            CenterLine(river_line, mask)
+
+    def test_as_array(self):
+        """Test the as_array method."""
+        line_string = LineString(
+            [
+                (0, 0, 0),
+                (1, 1, 1),
+                (2, 2, 2),
+                (3, 3, 3),
+                (4, 4, 4),
+            ]
+        )
+        center_line = CenterLine(line_string)
+
+        result = center_line.as_array()
+
+        assert isinstance(result, np.ndarray)
+        assert result.shape == (5, 3)
+        assert np.array_equal(result[:, 0], np.array([0, 1, 2, 3, 4]))
+        assert np.array_equal(result[:, 1], np.array([0, 1, 2, 3, 4]))
+        assert np.array_equal(result[:, 2], np.array([0, 1, 2, 3, 4]))
