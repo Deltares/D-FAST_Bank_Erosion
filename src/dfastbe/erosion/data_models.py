@@ -1,5 +1,6 @@
 """Erosion-related data structures."""
-
+import os
+from pathlib import Path
 from dataclasses import dataclass, field
 from typing import List, Dict, Tuple, ClassVar
 import numpy as np
@@ -397,6 +398,17 @@ class ErosionRiverData(BaseRiverData):
 
     def __init__(self, config_file: ConfigFile):
         super().__init__(config_file)
+        self.bank_dir = self._get_bank_line_dir()
+        self.output_dir = config_file.get_output_dir("erosion")
+        self.debug = config_file.get_bool("General", "DebugOutput", False)
+        # set plotting flags
+        self.plot_flags = config_file.get_plotting_flags(config_file.root_dir)
+        # get filter settings for bank levels and flow velocities along banks
+        self.zb_dx = config_file.get_float("Erosion", "BedFilterDist", 0.0, positive=True)
+        self.vel_dx = config_file.get_float("Erosion", "VelFilterDist", 0.0, positive=True)
+        log_text("get_levels")
+        self.num_discharge_levels = config_file.get_int("Erosion", "NLevel")
+        self.output_intervals = config_file.get_float("Erosion", "OutputInterval", 1.0)
 
     def simulation_data(self) -> ErosionSimulationData:
 
@@ -409,3 +421,32 @@ class ErosionRiverData(BaseRiverData):
         simulation_data = ErosionSimulationData.read(sim_file)
 
         return simulation_data
+
+    def _get_bank_output_dir(self) -> Path:
+        bank_output_dir = self.config_file.get_str("General", "BankDir")
+        log_text("bankdir_out", data={"dir": bank_output_dir})
+        if os.path.exists(bank_output_dir):
+            log_text("overwrite_dir", data={"dir": bank_output_dir})
+        else:
+            os.makedirs(bank_output_dir)
+
+        return Path(bank_output_dir)
+
+    def _get_bank_line_dir(self) -> Path:
+        bank_dir = self.config_file.get_str("General", "BankDir")
+        log_text("bankdir_in", data={"dir": bank_dir})
+        bank_dir = Path(bank_dir)
+        if not bank_dir.exists():
+            log_text("missing_dir", data={"dir": bank_dir})
+            raise BankLinesResultsError(
+                f"Required bank line directory:{bank_dir} does not exist. please use the banklines command to run the "
+                "bankline detection tool first it."
+            )
+        else:
+            return bank_dir
+
+
+class BankLinesResultsError(Exception):
+    """Custom exception for BankLine results errors."""
+
+    pass

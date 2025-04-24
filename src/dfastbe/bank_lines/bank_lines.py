@@ -73,16 +73,6 @@ class BankLines:
         """Maximum river width in meters."""
         return MAX_RIVER_WIDTH
 
-    def _get_bank_output_dir(self) -> Path:
-        bank_output_dir = self.config_file.get_str("General", "BankDir")
-        log_text("bankdir_out", data={"dir": bank_output_dir})
-        if os.path.exists(bank_output_dir):
-            log_text("overwrite_dir", data={"dir": bank_output_dir})
-        else:
-            os.makedirs(bank_output_dir)
-
-        return Path(bank_output_dir)
-
     def detect(self) -> None:
         """Run the bank line detection analysis for a specified configuration."""
         config_file = self.config_file
