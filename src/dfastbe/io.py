@@ -29,7 +29,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from configparser import ConfigParser
 from configparser import Error as ConfigparserError
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, TypedDict, Union
+from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, Union
 
 import geopandas as gpd
 import netCDF4
@@ -38,27 +38,400 @@ import pandas as pd
 from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
-from shapely.geometry import LineString, Point
 from shapely import MultiLineString, prepare
+from shapely.geometry import LineString, Point
+
+from dfastbe.structures import MeshData
 
 MAX_RIVER_WIDTH = 1000
 
 
-class SimulationObject(TypedDict):
-    x_node: np.ndarray
-    y_node: np.ndarray
-    nnodes: np.ndarray
-    facenode: np.ma.masked_array
-    zb_location: np.ndarray
-    zb_val: np.ndarray
-    zw_face: np.ndarray
-    h_face: np.ndarray
-    ucx_face: np.ndarray
-    ucy_face: np.ndarray
-    chz_face: np.ndarray
-
-
 PROGTEXTS: Dict[str, List[str]]
+
+
+class SimulationData:
+    """Class to hold simulation data.
+
+    This class contains the simulation data read from a UGRID netCDF file.
+    It includes methods to read the data from the file and clip the simulation
+    mesh to a specified area of interest.
+    """
+
+    def __init__(
+        self,
+        x_node: np.ndarray,
+        y_node: np.ndarray,
+        n_nodes: np.ndarray,
+        face_node: np.ma.masked_array,
+        bed_elevation_location: np.ndarray,
+        bed_elevation_values: np.ndarray,
+        water_level_face: np.ndarray,
+        water_depth_face: np.ndarray,
+        velocity_x_face: np.ndarray,
+        velocity_y_face: np.ndarray,
+        chezy_face: np.ndarray,
+        dry_wet_threshold: float,
+    ):
+        """
+        Initialize the SimulationData object.
+
+        Args:
+        x_node (np.ndarray):
+            X-coordinates of the nodes.
+        y_node (np.ndarray):
+            Y-coordinates of the nodes.
+        n_nodes (np.ndarray):
+            Number of nodes in each face.
+        face_node (np.ma.masked_array):
+            Face-node connectivity array.
+        bed_elevation_location (np.ndarray):
+            Determines whether the bed elevation is associated with nodes
+            or faces in the computational mesh.
+        bed_elevation_values (np.ndarray):
+            Bed elevation values for each node in the simulation data.
+        water_level_face (np.ndarray):
+            Water levels at the faces.
+        water_depth_face (np.ndarray):
+            Water depths at the faces.
+        velocity_x_face (np.ndarray):
+            X-component of the velocity at the faces.
+        velocity_y_face (np.ndarray):
+            Y-component of the velocity at the faces.
+        chezy_face (np.ndarray):
+            Chezy roughness values at the faces.
+        dry_wet_threshold (float):
+            Threshold depth for detecting drying and flooding.
+        """
+        self.x_node = x_node
+        self.y_node = y_node
+        self.n_nodes = n_nodes
+        self.face_node = face_node
+        self.bed_elevation_location = bed_elevation_location
+        self.bed_elevation_values = bed_elevation_values
+        self.water_level_face = water_level_face
+        self.water_depth_face = water_depth_face
+        self.velocity_x_face = velocity_x_face
+        self.velocity_y_face = velocity_y_face
+        self.chezy_face = chezy_face
+        self.dry_wet_threshold = dry_wet_threshold
+
+    @classmethod
+    def read(cls, file_name: str, indent: str = "") -> "SimulationData":
+        """Read a default set of quantities from a UGRID netCDF file.
+
+        Supported files are coming from D-Flow FM (or similar).
+
+        Args:
+            file_name (str):
+                Name of the simulation output file to be read.
+            indent (str):
+                String to use for each line as indentation (default empty).
+
+        Raises:
+            SimulationFilesError
+                If the file is not recognized as a D-Flow FM map-file.
+
+        Returns:
+            SimulationData: Dictionary containing the data read from the simulation output file.
+            float: Threshold depth for detecting drying and flooding.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import SimulationData
+            >>> sim_data = SimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
+            No message found for read_grid
+            No message found for read_bathymetry
+            No message found for read_water_level
+            No message found for read_water_depth
+            No message found for read_velocity
+            No message found for read_chezy
+            No message found for read_drywet
+            >>> print(sim_data.x_node[0:3])
+            [194949.796875 194966.515625 194982.8125  ]
+
+            ```
+        """
+        name = Path(file_name).name
+        if name.endswith("map.nc"):
+            log_text("read_grid", indent=indent)
+            x_node = _read_fm_map(file_name, "x", location="node")
+            y_node = _read_fm_map(file_name, "y", location="node")
+            f_nc = _read_fm_map(file_name, "face_node_connectivity")
+            if f_nc.mask.shape == ():
+                # all faces have the same number of nodes
+                n_nodes = np.ones(f_nc.data.shape[0], dtype=int) * f_nc.data.shape[1]
+            else:
+                # varying number of nodes
+                n_nodes = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
+            f_nc.data[f_nc.mask] = 0
+
+            face_node = f_nc
+            log_text("read_bathymetry", indent=indent)
+            bed_elevation_location = "node"
+            bed_elevation_values = _read_fm_map(file_name, "altitude", location="node")
+            log_text("read_water_level", indent=indent)
+            water_level_face = _read_fm_map(file_name, "Water level")
+            log_text("read_water_depth", indent=indent)
+            water_depth_face = np.maximum(
+                _read_fm_map(file_name, "sea_floor_depth_below_sea_surface"), 0.0
+            )
+            log_text("read_velocity", indent=indent)
+            velocity_x_face = _read_fm_map(file_name, "sea_water_x_velocity")
+            velocity_y_face = _read_fm_map(file_name, "sea_water_y_velocity")
+            log_text("read_chezy", indent=indent)
+            chezy_face = _read_fm_map(file_name, "Chezy roughness")
+
+            log_text("read_drywet", indent=indent)
+            root_group = netCDF4.Dataset(file_name)
+            try:
+                file_source = root_group.converted_from
+                if file_source == "SIMONA":
+                    dry_wet_threshold = 0.1
+                else:
+                    dry_wet_threshold = 0.01
+            except:
+                dry_wet_threshold = 0.01
+
+        elif name.startswith("SDS"):
+            raise SimulationFilesError(
+                f"WAQUA output files not yet supported. Unable to process {name}"
+            )
+        elif name.startswith("trim"):
+            raise SimulationFilesError(
+                f"Delft3D map files not yet supported. Unable to process {name}"
+            )
+        else:
+            raise SimulationFilesError(f"Unable to determine file type for {name}")
+
+        return cls(
+            x_node=x_node,
+            y_node=y_node,
+            n_nodes=n_nodes,
+            face_node=face_node,
+            bed_elevation_location=bed_elevation_location,
+            bed_elevation_values=bed_elevation_values,
+            water_level_face=water_level_face,
+            water_depth_face=water_depth_face,
+            velocity_x_face=velocity_x_face,
+            velocity_y_face=velocity_y_face,
+            chezy_face=chezy_face,
+            dry_wet_threshold=dry_wet_threshold,
+        )
+
+    def clip(self, river_profile: LineString, max_distance: float):
+        """Clip the simulation mesh.
+
+        Clipping data to the area of interest,
+        that is sufficiently close to the reference line.
+
+        Args:
+            river_profile (np.ndarray):
+                Reference line.
+            max_distance (float):
+                Maximum distance between the reference line and a point in the area of
+                interest defined based on the search lines for the banks and the search
+                distance.
+
+        Notes:
+            The function uses the Shapely library to create a buffer around the river
+            profile and checks if the nodes are within that buffer. If they are not,
+            they are removed from the simulation data.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import SimulationData
+            >>> sim_data = SimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
+            No message found for read_grid
+            No message found for read_bathymetry
+            No message found for read_water_level
+            No message found for read_water_depth
+            No message found for read_velocity
+            No message found for read_chezy
+            No message found for read_drywet
+            >>> river_profile = LineString([
+            ... [194949.796875, 361366.90625],
+            ... [194966.515625, 361399.46875],
+            ... [194982.8125, 361431.03125]
+            ... ])
+            >>> max_distance = 10.0
+            >>> sim_data.clip(river_profile, max_distance)
+            >>> print(sim_data.x_node)
+            [194949.796875 194966.515625 194982.8125  ]
+
+            ```
+        """
+        xy_buffer = river_profile.buffer(max_distance + max_distance)
+        bbox = xy_buffer.envelope.exterior
+        x_min = bbox.coords[0][0]
+        x_max = bbox.coords[1][0]
+        y_min = bbox.coords[0][1]
+        y_max = bbox.coords[2][1]
+
+        prepare(xy_buffer)
+        x = self.x_node
+        y = self.y_node
+        nnodes = x.shape
+        keep = (x > x_min) & (x < x_max) & (y > y_min) & (y < y_max)
+        for i in range(x.size):
+            if keep[i] and not xy_buffer.contains(Point((x[i], y[i]))):
+                keep[i] = False
+
+        fnc = self.face_node
+        keep_face = keep[fnc].all(axis=1)
+        renum = np.zeros(nnodes, dtype=int)
+        renum[keep] = range(sum(keep))
+        self.face_node = renum[fnc[keep_face]]
+
+        self.x_node = x[keep]
+        self.y_node = y[keep]
+        if self.bed_elevation_location == "node":
+            self.bed_elevation_values = self.bed_elevation_values[keep]
+        else:
+            self.bed_elevation_values = self.bed_elevation_values[keep_face]
+
+        self.n_nodes = self.n_nodes[keep_face]
+        self.water_level_face = self.water_level_face[keep_face]
+        self.water_depth_face = self.water_depth_face[keep_face]
+        self.velocity_x_face = self.velocity_x_face[keep_face]
+        self.velocity_y_face = self.velocity_y_face[keep_face]
+        self.chezy_face = self.chezy_face[keep_face]
+
+    def compute_mesh_topology(self) -> MeshData:
+        """Derive secondary topology arrays from the face-node connectivity of the mesh.
+
+        This function computes the edge-node, edge-face, and face-edge connectivity arrays,
+        as well as the boundary edges of the mesh, based on the face-node connectivity provided
+        in the simulation data.
+
+        Returns:
+            MeshData: a dataclass containing the following attributes:
+                - `x_face_coords`: x-coordinates of face nodes
+                - `y_face_coords`: y-coordinates of face nodes
+                - `x_edge_coords`: x-coordinates of edge nodes
+                - `y_edge_coords`: y-coordinates of edge nodes
+                - `face_node`: the node indices for each of the mesh faces.
+                - `n_nodes`: number of nodes per face
+                - `edge_node`: the node indices for each of the mesh edges.
+                - `edge_face_connectivity`: the face indices for each of the mesh edge
+                - `face_edge_connectivity`: the edge indices for each of the mesh face
+                - `boundary_edge_nrs`: indices of boundary edges
+
+        Raises:
+            KeyError:
+                If required keys (e.g., `face_node`, `nnodes`, `x_node`, `y_node`) are missing from the `sim` object.
+
+        Notes:
+            - The function identifies unique edges by sorting and comparing node indices.
+            - Boundary edges are identified as edges that belong to only one face.
+            - The function assumes that the mesh is well-formed, with consistent face-node connectivity.
+        """
+
+        # get a sorted list of edge node connections (shared edges occur twice)
+        # face_nr contains the face index to which the edge belongs
+        n_faces = self.face_node.shape[0]
+        n_edges = sum(self.n_nodes)
+        edge_node = np.zeros((n_edges, 2), dtype=int)
+        face_nr = np.zeros((n_edges,), dtype=int)
+        i = 0
+        for face_i in range(n_faces):
+            num_edges = self.n_nodes[face_i]  # note: nEdges = nNodes
+            for edge_i in range(num_edges):
+                if edge_i == 0:
+                    edge_node[i, 1] = self.face_node[face_i, num_edges - 1]
+                else:
+                    edge_node[i, 1] = self.face_node[face_i, edge_i - 1]
+                edge_node[i, 0] = self.face_node[face_i, edge_i]
+                face_nr[i] = face_i
+                i = i + 1
+        edge_node.sort(axis=1)
+        i2 = np.argsort(edge_node[:, 1], kind="stable")
+        i1 = np.argsort(edge_node[i2, 0], kind="stable")
+        i12 = i2[i1]
+        edge_node = edge_node[i12, :]
+        face_nr = face_nr[i12]
+
+        # detect which edges are equal to the previous edge, and get a list of all unique edges
+        numpy_true = np.array([True])
+        equal_to_previous = np.concatenate(
+            (~numpy_true, (np.diff(edge_node, axis=0) == 0).all(axis=1))
+        )
+        unique_edge = ~equal_to_previous
+        n_unique_edges = np.sum(unique_edge)
+        # reduce the edge node connections to only the unique edges
+        edge_node = edge_node[unique_edge, :]
+
+        # number the edges
+        edge_nr = np.zeros(n_edges, dtype=int)
+        edge_nr[unique_edge] = np.arange(n_unique_edges, dtype=int)
+        edge_nr[equal_to_previous] = edge_nr[
+            np.concatenate((equal_to_previous[1:], equal_to_previous[:1]))
+        ]
+
+        # if two consecutive edges are unique, the first one occurs only once and represents a boundary edge
+        is_boundary_edge = unique_edge & np.concatenate((unique_edge[1:], numpy_true))
+        boundary_edge_nrs = edge_nr[is_boundary_edge]
+
+        # go back to the original face order
+        edge_nr_in_face_order = np.zeros(n_edges, dtype=int)
+        edge_nr_in_face_order[i12] = edge_nr
+        # create the face edge connectivity array
+        face_edge_connectivity = np.zeros(self.face_node.shape, dtype=int)
+
+        i = 0
+        for face_i in range(n_faces):
+            num_edges = self.n_nodes[face_i]  # note: num_edges = n_nodes
+            for edge_i in range(num_edges):
+                face_edge_connectivity[face_i, edge_i] = edge_nr_in_face_order[i]
+                i = i + 1
+
+        # determine the edge face connectivity
+        edge_face = -np.ones((n_unique_edges, 2), dtype=int)
+        edge_face[edge_nr[unique_edge], 0] = face_nr[unique_edge]
+        edge_face[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
+
+        x_face_coords = SimulationData.apply_masked_indexing(
+            self.x_node, self.face_node
+        )
+        y_face_coords = SimulationData.apply_masked_indexing(
+            self.y_node, self.face_node
+        )
+        x_edge_coords = self.x_node[edge_node]
+        y_edge_coords = self.y_node[edge_node]
+
+        return MeshData(
+            x_face_coords=x_face_coords,
+            y_face_coords=y_face_coords,
+            x_edge_coords=x_edge_coords,
+            y_edge_coords=y_edge_coords,
+            face_node=self.face_node,
+            n_nodes=self.n_nodes,
+            edge_node=edge_node,
+            edge_face_connectivity=edge_face,
+            face_edge_connectivity=face_edge_connectivity,
+            boundary_edge_nrs=boundary_edge_nrs,
+        )
+
+    @staticmethod
+    def apply_masked_indexing(
+        x0: np.array, idx: np.ma.masked_array
+    ) -> np.ma.masked_array:
+        """
+        Index one array by another transferring the mask.
+
+        Args:
+            x0 : np.ndarray
+                A linear array.
+            idx : np.ma.masked_array
+                An index array with possibly masked indices.
+
+        returns:
+            x1: np.ma.masked_array
+                An array with same shape as idx, with mask.
+        """
+        idx_safe = idx.copy()
+        idx_safe.data[np.ma.getmask(idx)] = 0
+        x1 = np.ma.masked_where(np.ma.getmask(idx), x0[idx_safe])
+        return x1
 
 
 class ConfigFile:
@@ -67,32 +440,37 @@ class ConfigFile:
     This class provides methods to read, write, and manage configuration files
     for the D-FAST Bank Erosion analysis. It also allows access to configuration
     settings and supports upgrading older configuration formats.
-
-    Args:
-        config (ConfigParser): Settings for the D-FAST Bank Erosion analysis.
-        path (Union[Path, str]): Path to the configuration file.
-
-    Examples:
-        Reading a configuration file:
-            ```python
-            >>> import tempfile
-            >>> from dfastbe.io import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> print(config_file.config["General"]["Version"])
-            1.0
-
-            ```
-        Writing a configuration file:
-            ```python
-            >>> from dfastbe.io import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> with tempfile.TemporaryDirectory() as tmpdirname:
-            ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
-
-            ```
     """
 
     def __init__(self, config: ConfigParser, path: Union[Path, str] = None):
+        """
+        Initialize the ConfigFile object.
+
+        Args:
+            config (ConfigParser):
+                Settings for the D-FAST Bank Erosion analysis.
+            path (Union[Path, str]):
+                Path to the configuration file.
+
+        Examples:
+            Reading a configuration file:
+                ```python
+                >>> import tempfile
+                >>> from dfastbe.io import ConfigFile
+                >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+                >>> print(config_file.config["General"]["Version"])
+                1.0
+
+                ```
+            Writing a configuration file:
+                ```python
+                >>> from dfastbe.io import ConfigFile
+                >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+                >>> with tempfile.TemporaryDirectory() as tmpdirname:
+                ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
+
+                ```
+        """
         self._config = config
         self.crs = "EPSG:28992"
         if path:
@@ -214,105 +592,107 @@ class ConfigFile:
             config["General"]["Version"] = "1.0"
 
             config["Detect"] = {}
-            config = move_parameter_location(
-                config, "General", "Delft3Dfile", "Detect", "SimFile", convert=sim2nc
+            config = _move_parameter_location(
+                config, "General", "Delft3Dfile", "Detect", "SimFile", convert=_sim2nc
             )
-            config = move_parameter_location(
-                config, "General", "SDSfile", "Detect", "SimFile", convert=sim2nc
+            config = _move_parameter_location(
+                config, "General", "SDSfile", "Detect", "SimFile", convert=_sim2nc
             )
-            config = move_parameter_location(config, "General", "SimFile", "Detect")
-            config = move_parameter_location(config, "General", "NBank", "Detect")
+            config = _move_parameter_location(config, "General", "SimFile", "Detect")
+            config = _move_parameter_location(config, "General", "NBank", "Detect")
             config_file = ConfigFile(config)
             n_bank = config_file.get_int("Detect", "NBank", default=0, positive=True)
             for i in range(1, n_bank + 1):
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"Line{i}", "Detect"
                 )
 
-            config = move_parameter_location(config, "General", "WaterDepth", "Detect")
-            config = move_parameter_location(config, "General", "DLines", "Detect")
+            config = _move_parameter_location(config, "General", "WaterDepth", "Detect")
+            config = _move_parameter_location(config, "General", "DLines", "Detect")
 
             config["Erosion"] = {}
-            config = move_parameter_location(config, "General", "TErosion", "Erosion")
-            config = move_parameter_location(config, "General", "RiverAxis", "Erosion")
-            config = move_parameter_location(config, "General", "Fairway", "Erosion")
-            config = move_parameter_location(config, "General", "RefLevel", "Erosion")
-            config = move_parameter_location(
+            config = _move_parameter_location(config, "General", "TErosion", "Erosion")
+            config = _move_parameter_location(config, "General", "RiverAxis", "Erosion")
+            config = _move_parameter_location(config, "General", "Fairway", "Erosion")
+            config = _move_parameter_location(config, "General", "RefLevel", "Erosion")
+            config = _move_parameter_location(
                 config, "General", "OutputInterval", "Erosion"
             )
-            config = move_parameter_location(config, "General", "OutputDir", "Erosion")
-            config = move_parameter_location(config, "General", "BankNew", "Erosion")
-            config = move_parameter_location(config, "General", "BankEq", "Erosion")
-            config = move_parameter_location(config, "General", "EroVol", "Erosion")
-            config = move_parameter_location(config, "General", "EroVolEqui", "Erosion")
-            config = move_parameter_location(config, "General", "NLevel", "Erosion")
+            config = _move_parameter_location(config, "General", "OutputDir", "Erosion")
+            config = _move_parameter_location(config, "General", "BankNew", "Erosion")
+            config = _move_parameter_location(config, "General", "BankEq", "Erosion")
+            config = _move_parameter_location(config, "General", "EroVol", "Erosion")
+            config = _move_parameter_location(
+                config, "General", "EroVolEqui", "Erosion"
+            )
+            config = _move_parameter_location(config, "General", "NLevel", "Erosion")
             config_file = ConfigFile(config)
             n_level = config_file.get_int("Erosion", "NLevel", default=0, positive=True)
 
             for i in range(1, n_level + 1):
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config,
                     "General",
                     f"Delft3Dfile{i}",
                     "Erosion",
                     f"SimFile{i}",
-                    convert=sim2nc,
+                    convert=_sim2nc,
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config,
                     "General",
                     f"SDSfile{i}",
                     "Erosion",
                     f"SimFile{i}",
-                    convert=sim2nc,
+                    convert=_sim2nc,
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"SimFile{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"PDischarge{i}", "Erosion"
                 )
 
-            config = move_parameter_location(config, "General", "ShipType", "Erosion")
-            config = move_parameter_location(config, "General", "VShip", "Erosion")
-            config = move_parameter_location(config, "General", "NShip", "Erosion")
-            config = move_parameter_location(config, "General", "NWave", "Erosion")
-            config = move_parameter_location(config, "General", "Draught", "Erosion")
-            config = move_parameter_location(config, "General", "Wave0", "Erosion")
-            config = move_parameter_location(config, "General", "Wave1", "Erosion")
+            config = _move_parameter_location(config, "General", "ShipType", "Erosion")
+            config = _move_parameter_location(config, "General", "VShip", "Erosion")
+            config = _move_parameter_location(config, "General", "NShip", "Erosion")
+            config = _move_parameter_location(config, "General", "NWave", "Erosion")
+            config = _move_parameter_location(config, "General", "Draught", "Erosion")
+            config = _move_parameter_location(config, "General", "Wave0", "Erosion")
+            config = _move_parameter_location(config, "General", "Wave1", "Erosion")
 
-            config = move_parameter_location(config, "General", "Classes", "Erosion")
-            config = move_parameter_location(config, "General", "BankType", "Erosion")
-            config = move_parameter_location(
+            config = _move_parameter_location(config, "General", "Classes", "Erosion")
+            config = _move_parameter_location(config, "General", "BankType", "Erosion")
+            config = _move_parameter_location(
                 config, "General", "ProtectLevel", "Erosion", "ProtectionLevel"
             )
-            config = move_parameter_location(config, "General", "Slope", "Erosion")
-            config = move_parameter_location(config, "General", "Reed", "Erosion")
-            config = move_parameter_location(config, "General", "VelFilter", "Erosion")
+            config = _move_parameter_location(config, "General", "Slope", "Erosion")
+            config = _move_parameter_location(config, "General", "Reed", "Erosion")
+            config = _move_parameter_location(config, "General", "VelFilter", "Erosion")
 
             for i in range(1, n_level + 1):
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"ShipType{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"VShip{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"NShip{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"NWave{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"Draught{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"Slope{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"Reed{i}", "Erosion"
                 )
-                config = move_parameter_location(
+                config = _move_parameter_location(
                     config, "General", f"EroVol{i}", "Erosion"
                 )
 
@@ -608,7 +988,7 @@ class ConfigFile:
             line[b] = XYCModel.read(bankfile)
         return line
 
-    def get_bank_lines(self, bank_dir: str) -> List[np.ndarray]:
+    def read_bank_lines(self, bank_dir: str) -> List[np.ndarray]:
         """Get the bank lines from the detection step.
 
         Args:
@@ -716,7 +1096,7 @@ class ConfigFile:
         except (ValueError, TypeError):
             if onefile:
                 log_text("read_param", data={"param": key, "file": filename})
-                km_thr, val = get_kmval(filename, key, positive, valid)
+                km_thr, val = _get_kmval(filename, key, positive, valid)
             for ib, bkm in enumerate(bank_km):
                 if not onefile:
                     filename_i = filename + f"_{ib + 1}" + ext
@@ -724,7 +1104,7 @@ class ConfigFile:
                         "read_param_one_bank",
                         data={"param": key, "i": ib + 1, "file": filename_i},
                     )
-                    km_thr, val = get_kmval(filename_i, key, positive, valid)
+                    km_thr, val = _get_kmval(filename_i, key, positive, valid)
                 if km_thr is None:
                     parfield[ib] = np.zeros(len(bkm)) + val[0]
                 else:
@@ -1044,6 +1424,16 @@ class ConfigFile:
         return data
 
     def get_output_dir(self, option: str) -> Path:
+        """Get the output directory for the analysis.
+
+        Args:
+            option (str):
+                Option for which to get the output directory. "banklines" for bank lines, else the erosion output
+                directory will be returned.
+        Returns:
+            output_dir (Path):
+                Path to the output directory.
+        """
         if option == "banklines":
             output_dir = self.get_str("General", "BankDir")
         else:
@@ -1375,164 +1765,6 @@ class RiverData:
         return river_axis
 
 
-def read_simulation_data(
-    file_name: str, indent: str = ""
-) -> Tuple[SimulationObject, float]:
-    """
-    Read a default set of quantities from a UGRID netCDF file coming from D-Flow FM (or similar).
-
-    Arguments
-    ---------
-    file_name : str
-        Name of the simulation output file to be read.
-    indent : str
-        String to use for each line as indentation (default empty).
-
-    Raises
-    ------
-    Exception
-        If the file is not recognized as a D-Flow FM map-file.
-
-    Returns
-    -------
-    sim : SimulationObject
-        Dictionary containing the data read from the simulation output file.
-    dh0 : float
-        Threshold depth for detecting drying and flooding.
-    """
-    dum = np.array([])
-    sim: SimulationObject = {
-        "x_node": dum,
-        "y_node": dum,
-        "nnodes": dum,
-        "facenode": dum,
-        "zb_location": dum,
-        "zb_val": dum,
-        "zw_face": dum,
-        "h_face": dum,
-        "ucx_face": dum,
-        "ucy_face": dum,
-        "chz_face": dum,
-    }
-    # determine the file type
-    name = Path(file_name).name
-    if name.endswith("map.nc"):
-        log_text("read_grid", indent=indent)
-        sim["x_node"] = read_fm_map(file_name, "x", location="node")
-        sim["y_node"] = read_fm_map(file_name, "y", location="node")
-        f_nc = read_fm_map(file_name, "face_node_connectivity")
-        if f_nc.mask.shape == ():
-            # all faces have the same number of nodes
-            sim["nnodes"] = (
-                np.ones(f_nc.data.shape[0], dtype=int) * f_nc.data.shape[1]
-            )
-        else:
-            # varying number of nodes
-            sim["nnodes"] = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
-        f_nc.data[f_nc.mask] = 0
-
-        sim["facenode"] = f_nc
-        log_text("read_bathymetry", indent=indent)
-        sim["zb_location"] = "node"
-        sim["zb_val"] = read_fm_map(file_name, "altitude", location="node")
-        log_text("read_water_level", indent=indent)
-        sim["zw_face"] = read_fm_map(file_name, "Water level")
-        log_text("read_water_depth", indent=indent)
-        sim["h_face"] = np.maximum(
-            read_fm_map(file_name, "sea_floor_depth_below_sea_surface"), 0.0
-        )
-        log_text("read_velocity", indent=indent)
-        sim["ucx_face"] = read_fm_map(file_name, "sea_water_x_velocity")
-        sim["ucy_face"] = read_fm_map(file_name, "sea_water_y_velocity")
-        log_text("read_chezy", indent=indent)
-        sim["chz_face"] = read_fm_map(file_name, "Chezy roughness")
-
-        log_text("read_drywet", indent=indent)
-        root_group = netCDF4.Dataset(file_name)
-        try:
-            file_source = root_group.converted_from
-            if file_source == "SIMONA":
-                dh0 = 0.1
-            else:
-                dh0 = 0.01
-        except:
-            dh0 = 0.01
-
-    elif name.startswith("SDS"):
-        raise SimulationFilesError(
-            f"WAQUA output files not yet supported. Unable to process {name}"
-        )
-    elif name.startswith("trim"):
-        raise SimulationFilesError(
-            f"Delft3D map files not yet supported. Unable to process {name}"
-        )
-    else:
-        raise SimulationFilesError(f"Unable to determine file type for {name}")
-
-    return sim, dh0
-
-
-def clip_simulation_data(
-    sim: SimulationObject, river_profile: LineString, max_distance: float
-) -> SimulationObject:
-    """
-    Clip the simulation mesh and data to the area of interest sufficiently close to the reference line.
-
-    Arguments
-    ---------
-    sim : SimulationObject
-        Simulation data: mesh, bed levels, water levels, velocities, etc.
-    river_profile : LineString
-        Reference line.
-    max_distance : float
-        Maximum distance between the reference line and a point in the area of
-        interest defined based on the search lines for the banks and the search
-        distance.
-
-    Returns
-    -------
-    sim1 : SimulationObject
-        Clipped simulation data: mesh, bed levels, water levels, velocities, etc.
-    """
-    xy_buffer = river_profile.buffer(max_distance + max_distance)
-    bbox = xy_buffer.envelope.exterior
-    x_min = bbox.coords[0][0]
-    x_max = bbox.coords[1][0]
-    y_min = bbox.coords[0][1]
-    y_max = bbox.coords[2][1]
-
-    prepare(xy_buffer)
-    x = sim["x_node"]
-    y = sim["y_node"]
-    nnodes = x.shape
-    keep = (x > x_min) & (x < x_max) & (y > y_min) & (y < y_max)
-    for i in range(x.size):
-        if keep[i] and not xy_buffer.contains(Point((x[i], y[i]))):
-            keep[i] = False
-
-    fnc = sim["facenode"]
-    keep_face = keep[fnc].all(axis=1)
-    renum = np.zeros(nnodes, dtype=int)
-    renum[keep] = range(sum(keep))
-    sim["facenode"] = renum[fnc[keep_face]]
-
-    sim["x_node"] = x[keep]
-    sim["y_node"] = y[keep]
-    if sim["zb_location"] == "node":
-        sim["zb_val"] = sim["zb_val"][keep]
-    else:
-        sim["zb_val"] = sim["zb_val"][keep_face]
-
-    sim["nnodes"] = sim["nnodes"][keep_face]
-    sim["zw_face"] = sim["zw_face"][keep_face]
-    sim["h_face"] = sim["h_face"][keep_face]
-    sim["ucx_face"] = sim["ucx_face"][keep_face]
-    sim["ucy_face"] = sim["ucy_face"][keep_face]
-    sim["chz_face"] = sim["chz_face"][keep_face]
-
-    return sim
-
-
 def load_program_texts(file_name: Union[str, Path]) -> None:
     """Load texts from a configuration file, and store globally for access.
 
@@ -1658,7 +1890,7 @@ def get_text(key: str) -> List[str]:
     return str_value
 
 
-def read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndarray:
+def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndarray:
     """
     Read the last time step of any quantity defined at faces from a D-Flow FM map-file.
 
@@ -1756,250 +1988,6 @@ def read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndarr
     rootgrp.close()
 
     return data
-
-
-def get_mesh_and_facedim_names(filename: str) -> Tuple[str, str]:
-    """
-    Obtain the names of 2D mesh and face dimension from netCDF UGRID file.
-
-    Arguments
-    ---------
-    filename : str
-        Name of the netCDF file.
-
-    Raises
-    ------
-    Exception
-        If there is not one mesh in the netCDF file.
-
-    Returns
-    -------
-    tuple : Tuple[str, str]
-        Name of the 2D mesh variable
-        Name of the face dimension of that 2D mesh
-    """
-    # open file
-    rootgrp = netCDF4.Dataset(filename)
-
-    # locate 2d mesh variable
-    mesh2d = rootgrp.get_variables_by_attributes(
-        cf_role="mesh_topology", topology_dimension=2
-    )
-    if len(mesh2d) != 1:
-        raise Exception(
-            "Currently only one 2D mesh supported ... this file contains {} 2D meshes.".format(
-                len(mesh2d)
-            )
-        )
-
-    #
-    facenodeconnect_varname = mesh2d[0].face_node_connectivity
-    fnc = rootgrp.get_variables_by_attributes(name=facenodeconnect_varname)[0]
-
-    # default
-    facedim = fnc.dimensions[0]
-    return mesh2d[0].name, facedim
-
-
-def copy_ugrid(srcname: str, meshname: str, dstname: str) -> None:
-    """
-    Copy UGRID mesh data from one netCDF file to another.
-
-    Copy UGRID mesh data (mesh variable, all attributes, all variables that the
-    UGRID attributes depend on) from source file to destination file.
-
-    Arguments
-    ---------
-    srcname : str
-        Name of source file.
-    meshname : str
-        Name of the UGRID mesh to be copied from source to destination.
-    dstname : str
-        Name of destination file, or dataset object representing the destination
-        file.
-    """
-    # open source and destination files
-    src = netCDF4.Dataset(srcname)
-    dst = netCDF4.Dataset(dstname, "w", format="NETCDF4")
-
-    # locate source mesh
-    mesh = src.variables[meshname]
-
-    # copy mesh variable
-    copy_var(src, meshname, dst)
-    atts = [
-        "face_node_connectivity",
-        "edge_node_connectivity",
-        "edge_face_connectivity",
-        "face_coordinates",
-        "edge_coordinates",
-        "node_coordinates",
-    ]
-    for att in atts:
-        try:
-            varlist = mesh.getncattr(att).split()
-        except:
-            varlist = []
-        for varname in varlist:
-            copy_var(src, varname, dst)
-
-            # check if variable has bounds attribute, if so copy those as well
-            var = src.variables[varname]
-            atts2 = ["bounds"]
-            for att2 in atts2:
-                try:
-                    varlist2 = var.getncattr(att2).split()
-                except:
-                    varlist2 = []
-                for varname2 in varlist2:
-                    copy_var(src, varname2, dst)
-
-    # close files
-    src.close()
-    dst.close()
-
-
-def copy_var(src: netCDF4.Dataset, varname: str, dst: netCDF4.Dataset) -> None:
-    """
-    Copy a single variable from one netCDF file to another.
-
-    Copy a single netCDF variable including all attributes from source file to
-    destination file. Create dimensions as necessary.
-
-    Arguments
-    ---------
-    src : netCDF4.Dataset
-        Dataset object representing the source file.
-    varname : str
-        Name of the netCDF variable to be copied from source to destination.
-    dst : netCDF4.Dataset
-        Dataset object representing the destination file.
-    """
-    # locate the variable to be copied
-    srcvar = src.variables[varname]
-
-    # copy dimensions
-    for name in srcvar.dimensions:
-        dimension = src.dimensions[name]
-        if name not in dst.dimensions.keys():
-            dst.createDimension(
-                name, (len(dimension) if not dimension.isunlimited() else None)
-            )
-
-    # copy variable
-    dstvar = dst.createVariable(varname, srcvar.datatype, srcvar.dimensions)
-
-    # copy variable attributes all at once via dictionary
-    dstvar.setncatts(srcvar.__dict__)
-    dstvar[:] = srcvar[:]
-
-
-def ugrid_add(
-    dstfile: str,
-    varname: str,
-    ldata: np.array,
-    meshname: str,
-    facedim: str,
-    long_name: str = "None",
-    units: str = "None",
-) -> None:
-    """
-    Add a new variable defined at faces to an existing UGRID netCDF file
-
-    Arguments
-    ---------
-    dstfile : str
-        Name of netCDF file to write data to.
-    varname : str
-        Name of netCDF variable to be written.
-    ldata : np.array
-        Linear array containing the data to be written.
-    meshname : str
-        Name of mesh variable in the netCDF file.
-    facedim : str
-        Name of the face dimension of the selected mesh.
-    long_name : str
-        Long descriptive name for the variable ("None" if no long name attribute
-        should be written).
-    units : str
-        String indicating the unit ("None" if no unit attribute should be written).
-    """
-    # open destination file
-    dst = netCDF4.Dataset(dstfile, "a")
-
-    # add variable and write data
-    var = dst.createVariable(varname, "f8", (facedim,))
-    var.mesh = meshname
-    var.location = "face"
-    if long_name != "None":
-        var.long_name = long_name
-    if units != "None":
-        var.units = units
-    var[:] = ldata[:]
-
-    # close destination file
-    dst.close()
-
-
-def read_waqua_xyz(filename: str, cols: Tuple[int, ...] = (2,)) -> np.ndarray:
-    """
-    Read data columns from a SIMONA XYZ file.
-
-    Arguments
-    ---------
-    filename : str
-        Name of file to be read.
-    cols : Tuple[int]
-        List of column numbers for which to return the data.
-
-    Returns
-    -------
-    data : np.ndarray
-        Data read from the file.
-    """
-    data = np.genfromtxt(filename, delimiter=",", skip_header=1, usecols=cols)
-    return data
-
-
-def write_simona_box(
-    filename: str, rdata: np.ndarray, firstm: int, firstn: int
-) -> None:
-    """
-    Write a SIMONA BOX file.
-
-    Arguments
-    ---------
-    filename : str
-        Name of the file to be written.
-    rdata : np.ndarray
-        Two-dimensional np array containing the data to be written.
-    firstm : int
-        Firt M index to be written.
-    firstn : int
-        First N index to be written.
-    """
-    # open the data file
-    boxfile = open(filename, "w")
-
-    # get shape and prepare block header; data will be written in blocks of 10
-    # N-lines
-    shp = np.shape(rdata)
-    mmax = shp[0]
-    nmax = shp[1]
-    boxheader = "      BOX MNMN=({m1:4d},{n1:5d},{m2:5d},{n2:5d}), VARIABLE_VAL=\n"
-    nstep = 10
-
-    # Loop over all N-blocks and write data to file
-    for j in range(firstn, nmax, nstep):
-        k = min(nmax, j + nstep)
-        boxfile.write(boxheader.format(m1=firstm + 1, n1=j + 1, m2=mmax, n2=k))
-        nvalues = (mmax - firstm) * (k - j)
-        boxdata = ("   " + "{:12.3f}" * (k - j) + "\n") * (mmax - firstm)
-        values = tuple(rdata[firstm:mmax, j:k].reshape(nvalues))
-        boxfile.write(boxdata.format(*values))
-
-    # close the file
-    boxfile.close()
 
 
 def absolute_path(rootdir: str, path: str) -> str:
@@ -2145,7 +2133,7 @@ def write_km_eroded_volumes(km: np.ndarray, vol: np.ndarray, filename: str) -> N
             erofile.write("{:.2f}\t".format(km[i]) + valstr + "\n")
 
 
-def move_parameter_location(
+def _move_parameter_location(
     config: ConfigParser,
     group1: str,
     key1: str,
@@ -2188,7 +2176,7 @@ def move_parameter_location(
     return config
 
 
-def sim2nc(oldfile: str) -> str:
+def _sim2nc(oldfile: str) -> str:
     """
     Convert an SDS file name to an NC file (mirrors sim2ugrid.m).
 
@@ -2210,7 +2198,7 @@ def sim2nc(oldfile: str) -> str:
     return nc_file
 
 
-def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[float]]):
+def _get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[float]]):
     """
     Read a parameter file, check its contents and return arrays of chainages and values.
 
@@ -2255,7 +2243,9 @@ def get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[floa
         val = val[None]
 
     if positive and (val < 0).any():
-        raise ValueError(f'Values of "{key}" in {filename} should be positive. Negative value read for chainage(s): {km[val < 0]}')
+        raise ValueError(
+            f'Values of "{key}" in {filename} should be positive. Negative value read for chainage(s): {km[val < 0]}'
+        )
 
     if len(km) == 1:
         km_thr = None

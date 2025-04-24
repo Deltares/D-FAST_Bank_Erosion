@@ -11,6 +11,7 @@ from dfastbe.structures import BankData, FairwayData
 matplotlib.use('Agg')
 
 
+@pytest.mark.e2e
 def test_bank_erosion():
     file = "erosion"
     language = "UK"
