@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 from dfastbe.erosion.bank_erosion import Erosion
 from dfastbe.cmd import run
 from dfastbe.io import ConfigFile
-from dfastbe.erosion.structures import BankData, FairwayData
+from dfastbe.erosion.data_models import BankData, FairwayData
 
 matplotlib.use('Agg')
 

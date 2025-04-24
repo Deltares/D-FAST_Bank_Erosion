@@ -48,10 +48,10 @@ from dfastbe.io import (
     write_km_eroded_volumes,
     write_shp,
     write_csv,
-    BaseRiverData,
-    SimulationData,
 )
-from dfastbe.erosion.structures import (
+from dfastbe.erosion.data_models import (
+    ErosionRiverData,
+    ErosionSimulationData,
     ErosionInputs,
     WaterLevelData,
     MeshData,
@@ -81,7 +81,7 @@ class Erosion:
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)
 
-        self.river_data = BaseRiverData(config_file)
+        self.river_data = ErosionRiverData(config_file)
         self.river_center_line_arr = self.river_data.river_center_line.as_array()
 
         # get filter settings for bank levels and flow velocities along banks
@@ -298,7 +298,7 @@ class Erosion:
         self,
         bank_data: BankData,
         fairway_data: FairwayData,
-        simulation_data: SimulationData,
+        simulation_data: ErosionSimulationData,
         config_file: ConfigFile,
     ):
         # distance fairway-bankline (bankfairway)
@@ -607,7 +607,7 @@ class Erosion:
             log_text("-", indent="  ")
             log_text("read_simdata", data={"file": self.sim_files[iq]}, indent="  ")
             log_text("-", indent="  ")
-            simulation_data = SimulationData.read(self.sim_files[iq], indent="  ")
+            simulation_data = ErosionSimulationData.read(self.sim_files[iq], indent="  ")
             log_text("-", indent="  ")
 
             log_text("bank_erosion", indent="  ")
@@ -650,7 +650,7 @@ class Erosion:
                     # bankheight = maximum bed elevation per cell
                     if simulation_data.bed_elevation_location == "node":
                         zb = simulation_data.bed_elevation_values
-                        zb_all_nodes = SimulationData.apply_masked_indexing(
+                        zb_all_nodes = ErosionSimulationData.apply_masked_indexing(
                             zb, simulation_data.face_node[bank_index, :]
                         )
                         zb_bank = zb_all_nodes.max(axis=1)
@@ -940,7 +940,7 @@ class Erosion:
         # log_text("-")
         # log_text("read_simdata", data={"file": sim_file})
         # log_text("-")
-        # simulation_data = SimulationData.read(sim_file)
+        # simulation_data = ErosionSimulationData.read(sim_file)
 
         log_text("derive_topology")
 
@@ -1051,7 +1051,7 @@ class Erosion:
     def _generate_plots(
         self,
         river_axis_km,
-        simulation_data: SimulationData,
+        simulation_data: ErosionSimulationData,
         xy_line_eq_list,
         km_mid,
         km_step,

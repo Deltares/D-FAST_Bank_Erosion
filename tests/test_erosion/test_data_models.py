@@ -9,6 +9,7 @@ from dfastbe.erosion.data_models import (
     BankData,
     FairwayData,
     ErosionResults,
+    ErosionSimulationData
 )
 
 
@@ -111,3 +112,95 @@ def test_erosion_results():
     assert erosion_results.total_erosion_dist[0][0] == pytest.approx(0.3)
     assert erosion_results.erosion_time == 10
 
+
+class TestSimulationData:
+
+    @pytest.fixture
+    def simulation_data(self) -> ErosionSimulationData:
+        x_node = np.array([194949.796875, 194966.515625, 194982.8125, 195000.0])
+        y_node = np.array([361366.90625, 361399.46875, 361431.03125, 361450.0])
+        n_nodes = np.array([4, 4])
+        face_node = np.ma.masked_array(
+            data=[[0, 1, 2, 3], [1, 2, 3, 0]],
+            mask=[[False, False, False, False], [False, False, False, False]],
+        )
+        bed_elevation_location = "node"
+        bed_elevation_values = np.array([10.0, 20.0, 30.0, 40.0])
+        water_level_face = np.array([1.0, 2.0])
+        water_depth_face = np.array([0.5, 1.0])
+        velocity_x_face = np.array([0.1, 0.2])
+        velocity_y_face = np.array([0.4, 0.5])
+        chezy_face = np.array([30.0, 40.0])
+        dry_wet_threshold = 0.1
+
+        sim_data = ErosionSimulationData(
+            x_node=x_node,
+            y_node=y_node,
+            n_nodes=n_nodes,
+            face_node=face_node,
+            bed_elevation_location=bed_elevation_location,
+            bed_elevation_values=bed_elevation_values,
+            water_level_face=water_level_face,
+            water_depth_face=water_depth_face,
+            velocity_x_face=velocity_x_face,
+            velocity_y_face=velocity_y_face,
+            chezy_face=chezy_face,
+            dry_wet_threshold=dry_wet_threshold,
+        )
+        return sim_data
+
+    def test_compute_mesh_topology(self, simulation_data: ErosionSimulationData):
+        """
+        Test the compute_mesh_topology method of SimulationData.
+        """
+        # Call the method to compute the mesh topology
+        mesh_data = simulation_data.compute_mesh_topology()
+
+        assert isinstance(mesh_data, MeshData)
+
+        assert np.array_equal(
+            mesh_data.edge_face_connectivity, np.array([[0, 1], [0, 1], [0, 1], [0, 1]])
+        )
+        assert np.array_equal(
+            mesh_data.face_edge_connectivity, np.array([[1, 0, 2, 3], [0, 2, 3, 1]])
+        )
+        assert np.allclose(
+            mesh_data.x_edge_coords,
+            np.array(
+                [
+                    [194949.796875, 194966.515625],
+                    [194949.796875, 195000.0],
+                    [194966.515625, 194982.8125],
+                    [194982.8125, 195000.0],
+                ]
+            ),
+        )
+        assert np.allclose(
+            mesh_data.x_face_coords.data,
+            np.array(
+                [
+                    [194949.796875, 194966.515625, 194982.8125, 195000.0],
+                    [194966.515625, 194982.8125, 195000.0, 194949.796875],
+                ]
+            ),
+        )
+        assert np.allclose(
+            mesh_data.y_edge_coords,
+            np.array(
+                [
+                    [361366.90625, 361399.46875],
+                    [361366.90625, 361450.0],
+                    [361399.46875, 361431.03125],
+                    [361431.03125, 361450.0],
+                ]
+            ),
+        )
+        assert np.allclose(
+            mesh_data.y_face_coords.data,
+            np.array(
+                [
+                    [361366.90625, 361399.46875, 361431.03125, 361450.0],
+                    [361399.46875, 361431.03125, 361450.0, 361366.90625],
+                ]
+            ),
+        )
