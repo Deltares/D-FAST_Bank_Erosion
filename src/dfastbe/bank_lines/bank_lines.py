@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import List
 
 import geopandas as gpd
 import numpy as np
@@ -16,11 +16,11 @@ from dfastbe import __version__
 from dfastbe import plotting as df_plt
 from dfastbe.io import (
     ConfigFile,
-    RiverData,
     SimulationData,
     log_text,
     get_bbox
 )
+from dfastbe.bank_lines.data_models import BankLinesRiverData
 from dfastbe.kernel import get_zoom_extends
 from dfastbe.support import (
     poly_to_line,
@@ -59,7 +59,7 @@ class BankLines:
 
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)
-        self.river_data = RiverData(config_file)
+        self.river_data = BankLinesRiverData(config_file)
         self.search_lines = self.river_data.search_lines
         data = self.river_data.simulation_data()
         self.simulation_data, self.h0 = data["simulation_data"], data["h0"]

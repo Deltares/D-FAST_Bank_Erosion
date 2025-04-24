@@ -48,7 +48,7 @@ from dfastbe.io import (
     write_km_eroded_volumes,
     write_shp,
     write_csv,
-    RiverData,
+    BaseRiverData,
     SimulationData,
 )
 from dfastbe.erosion.structures import (
@@ -81,7 +81,7 @@ class Erosion:
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)
 
-        self.river_data = RiverData(config_file)
+        self.river_data = BaseRiverData(config_file)
         self.river_center_line_arr = self.river_data.river_center_line.as_array()
 
         # get filter settings for bank levels and flow velocities along banks
@@ -91,7 +91,7 @@ class Erosion:
 
         self.num_discharge_levels = config_file.get_int("Erosion", "NLevel")
 
-        data = self.river_data.simulation_data(bank_lines=False)
+        data = self.river_data.simulation_data()
         self.simulation_data = data["simulation_data"]
 
         self.sim_files, self.p_discharge = self.river_data.get_erosion_sim_data(self.num_discharge_levels)
