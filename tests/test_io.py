@@ -15,7 +15,7 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry import LineString
 
 from dfastbe.io import (
-    SimulationData,
+    BaseSimulationData,
     SimulationFilesError,
     ConfigFile,
     BaseRiverData,
@@ -84,9 +84,9 @@ class TestSimulationData:
             mock_root_group.converted_from = "SIMONA"
             mock_dataset.return_value = mock_root_group
 
-            sim_object = SimulationData.read(file_name)
+            sim_object = BaseSimulationData.read(file_name)
 
-            assert isinstance(sim_object, SimulationData)
+            assert isinstance(sim_object, BaseSimulationData)
             assert np.array_equal(sim_object.x_node, mock_x_node)
             assert np.array_equal(sim_object.y_node, mock_y_node)
             assert np.array_equal(sim_object.face_node.data, mock_face_node.data)
@@ -116,10 +116,10 @@ class TestSimulationData:
         invalid_file_name = "invalid_file.nc"
 
         with pytest.raises(SimulationFilesError):
-            SimulationData.read(invalid_file_name)
+            BaseSimulationData.read(invalid_file_name)
 
     @pytest.fixture
-    def simulation_data(self) -> SimulationData:
+    def simulation_data(self) -> BaseSimulationData:
         x_node = np.array([194949.796875, 194966.515625, 194982.8125, 195000.0])
         y_node = np.array([361366.90625, 361399.46875, 361431.03125, 361450.0])
         n_nodes = np.array([4, 4])
@@ -136,7 +136,7 @@ class TestSimulationData:
         chezy_face = np.array([30.0, 40.0])
         dry_wet_threshold = 0.1
 
-        sim_data = SimulationData(
+        sim_data = BaseSimulationData(
             x_node=x_node,
             y_node=y_node,
             n_nodes=n_nodes,
@@ -152,7 +152,7 @@ class TestSimulationData:
         )
         return sim_data
 
-    def test_clip(self, simulation_data: SimulationData):
+    def test_clip(self, simulation_data: BaseSimulationData):
         river_profile = LineString(
             [
                 [194949.796875, 361366.90625],
@@ -180,7 +180,7 @@ class TestSimulationData:
         assert simulation_data.velocity_y_face.size == 0
         assert simulation_data.chezy_face.size == 0
 
-    def test_clip_no_nodes_in_buffer(self, simulation_data: SimulationData):
+    def test_clip_no_nodes_in_buffer(self, simulation_data: BaseSimulationData):
         river_profile = LineString(
             [
                 [194900.0, 361300.0],

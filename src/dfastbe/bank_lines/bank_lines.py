@@ -16,7 +16,7 @@ from dfastbe import __version__
 from dfastbe import plotting as df_plt
 from dfastbe.io import (
     ConfigFile,
-    SimulationData,
+    BaseSimulationData,
     log_text,
     get_bbox
 )
@@ -61,8 +61,7 @@ class BankLines:
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)
         self.river_data = BankLinesRiverData(config_file)
         self.search_lines = self.river_data.search_lines
-        data = self.river_data.simulation_data()
-        self.simulation_data, self.h0 = data["simulation_data"], data["h0"]
+        self.simulation_data, self.h0 = self.river_data.simulation_data()
 
     @property
     def config_file(self) -> ConfigFile:
@@ -257,7 +256,7 @@ class BankLines:
 
     @staticmethod
     def detect_bank_lines(
-        simulation_data: SimulationData, h0: float, config_file: ConfigFile
+        simulation_data: BaseSimulationData, h0: float, config_file: ConfigFile
     ) -> gpd.GeoSeries:
         """
         Detect all possible bank line segments based on simulation data.
@@ -265,7 +264,7 @@ class BankLines:
         Use a critical water depth h0 as a water depth threshold for dry/wet boundary.
 
         Args:
-            simulation_data (SimulationData):
+            simulation_data (BaseSimulationData):
                 Simulation data: mesh, bed levels, water levels, velocities, etc.
             h0 (float):
                 Critical water depth for determining the banks.

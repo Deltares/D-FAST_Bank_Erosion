@@ -91,8 +91,7 @@ class Erosion:
 
         self.num_discharge_levels = config_file.get_int("Erosion", "NLevel")
 
-        data = self.river_data.simulation_data()
-        self.simulation_data = data["simulation_data"]
+        self.simulation_data = self.river_data.simulation_data()
 
         self.sim_files, self.p_discharge = self.river_data.get_erosion_sim_data(self.num_discharge_levels)
         self.output_intervals = config_file.get_float("Erosion", "OutputInterval", 1.0)

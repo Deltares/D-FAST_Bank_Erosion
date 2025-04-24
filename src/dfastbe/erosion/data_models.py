@@ -6,7 +6,7 @@ import numpy as np
 from geopandas import GeoDataFrame
 
 
-from dfastbe.io import ConfigFile, BaseRiverData, SimulationData, log_text
+from dfastbe.io import ConfigFile, BaseRiverData, BaseSimulationData, log_text
 
 
 @dataclass
@@ -250,7 +250,7 @@ class ErosionResults:
     total_eroded_vol_per_km: np.ndarray = field(default_factory=lambda : np.empty(0))
 
 
-class ErosionSimulationData(SimulationData):
+class ErosionSimulationData(BaseSimulationData):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -398,7 +398,7 @@ class ErosionRiverData(BaseRiverData):
     def __init__(self, config_file: ConfigFile):
         super().__init__(config_file)
 
-    def simulation_data(self) -> Dict[SimulationData, float]:
+    def simulation_data(self) -> ErosionSimulationData:
 
         ref_level = self.config_file.get_int("Erosion", "RefLevel") - 1
         # read simulation data (get_sim_data)
@@ -407,8 +407,5 @@ class ErosionRiverData(BaseRiverData):
         log_text("read_simdata", data={"file": sim_file})
         log_text("-")
         simulation_data = ErosionSimulationData.read(sim_file)
-        data = {
-            "simulation_data": simulation_data,
-        }
 
-        return data
+        return simulation_data

@@ -45,7 +45,7 @@ from shapely.geometry import LineString, Point
 PROGTEXTS: Dict[str, List[str]]
 
 
-class SimulationData:
+class BaseSimulationData:
     """Class to hold simulation data.
 
     This class contains the simulation data read from a UGRID netCDF file.
@@ -112,7 +112,7 @@ class SimulationData:
         self.dry_wet_threshold = dry_wet_threshold
 
     @classmethod
-    def read(cls, file_name: str, indent: str = "") -> "SimulationData":
+    def read(cls, file_name: str, indent: str = "") -> "BaseSimulationData":
         """Read a default set of quantities from a UGRID netCDF file.
 
         Supported files are coming from D-Flow FM (or similar).
@@ -128,13 +128,13 @@ class SimulationData:
                 If the file is not recognized as a D-Flow FM map-file.
 
         Returns:
-            SimulationData: Dictionary containing the data read from the simulation output file.
+            BaseSimulationData: Dictionary containing the data read from the simulation output file.
             float: Threshold depth for detecting drying and flooding.
 
         Examples:
             ```python
-            >>> from dfastbe.io import SimulationData
-            >>> sim_data = SimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
+            >>> from dfastbe.io import BaseSimulationData
+            >>> sim_data = BaseSimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
             No message found for read_grid
             No message found for read_bathymetry
             No message found for read_water_level
@@ -235,8 +235,8 @@ class SimulationData:
 
         Examples:
             ```python
-            >>> from dfastbe.io import SimulationData
-            >>> sim_data = SimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
+            >>> from dfastbe.io import BaseSimulationData
+            >>> sim_data = BaseSimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
             No message found for read_grid
             No message found for read_bathymetry
             No message found for read_water_level
