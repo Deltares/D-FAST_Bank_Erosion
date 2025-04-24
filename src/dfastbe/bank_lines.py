@@ -61,9 +61,8 @@ class BankLines:
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)
         self.river_data = RiverData(config_file)
         self.search_lines = self.river_data.search_lines
-
-        self.simulation_data, self.h0 = self.river_data.simulation_data()
-
+        data = self.river_data.simulation_data()
+        self.simulation_data, self.h0 = data["simulation_data"], data["h0"]
 
     @property
     def config_file(self) -> ConfigFile:

@@ -1703,13 +1703,29 @@ class RiverData:
         h0 = critical_water_depth + simulation_data.dry_wet_threshold
         return simulation_data, h0
 
-    def simulation_data(self, bank_lines: bool = True) -> Tuple[SimulationData, float]:
+    def simulation_data(self, bank_lines: bool = True) -> Dict[SimulationData, float]:
         if bank_lines:
             simulation_data, h0 = self._get_bank_lines_simulation_data()
             # clip simulation data to boundaries ...
             log_text("clip_data")
             simulation_data.clip(self.river_center_line.values, self.search_lines.max_distance)
-        return simulation_data, h0
+            data = {
+                "simulation_data": simulation_data,
+                "h0": h0,
+            }
+        else:
+            ref_level = self.config_file.get_int("Erosion", "RefLevel") - 1
+            # read simulation data (get_sim_data)
+            sim_file = self.config_file.get_sim_file("Erosion", str(ref_level + 1))
+            log_text("-")
+            log_text("read_simdata", data={"file": sim_file})
+            log_text("-")
+            simulation_data = SimulationData.read(sim_file)
+            data = {
+                "simulation_data": simulation_data,
+            }
+
+        return data
 
     def read_river_axis(self):
         """Get the river axis from the analysis settings."""
@@ -1737,6 +1753,17 @@ class RiverData:
         """
         return get_bbox(coords, buffer)
 
+    def get_erosion_sim_data(self, num_discharge_levels: int) -> Tuple[List[str], List[float]]:
+        # get pdischarges
+        sim_files = []
+        p_discharge = []
+        for iq in range(num_discharge_levels):
+            iq_str = str(iq + 1)
+            sim_files.append(self.config_file.get_sim_file("Erosion", iq_str))
+            p_discharge.append(
+                self.config_file.get_float("Erosion", f"PDischarge{iq_str}")
+            )
+        return sim_files, p_discharge
 
 def get_bbox(
         coords: np.ndarray, buffer: float = 0.1

@@ -89,9 +89,12 @@ class Erosion:
         self.vel_dx = config_file.get_float("Erosion", "VelFilterDist", 0.0, positive=True)
         log_text("get_levels")
 
-        self.num_levels = config_file.get_int("Erosion", "NLevel")
-        self.ref_level = config_file.get_int("Erosion", "RefLevel") - 1
-        self.sim_files, self.p_discharge = self.get_sim_data()
+        self.num_discharge_levels = config_file.get_int("Erosion", "NLevel")
+
+        data = self.river_data.simulation_data(bank_lines=False)
+        self.simulation_data = data["simulation_data"]
+
+        self.sim_files, self.p_discharge = self.river_data.get_erosion_sim_data(self.num_discharge_levels)
         self.output_intervals = config_file.get_float("Erosion", "OutputInterval", 1.0)
 
     @property
@@ -147,17 +150,6 @@ class Erosion:
         }
         return ship_data
 
-    def get_sim_data(self):
-        # get pdischarges
-        sim_files = []
-        p_discharge = []
-        for iq in range(self.num_levels):
-            iq_str = str(iq + 1)
-            sim_files.append(self.config_file.get_sim_file("Erosion", iq_str))
-            p_discharge.append(
-                self.config_file.get_float("Erosion", f"PDischarge{iq_str}")
-            )
-        return sim_files, p_discharge
 
     def intersect_bank_lines_with_mesh(
         self,
@@ -533,7 +525,7 @@ class Erosion:
         erosion_time = config_file.get_int("Erosion", "TErosion", positive=True)
         log_text("total_time", data={"t": erosion_time})
 
-        for iq in range(self.num_levels):
+        for iq in range(self.num_discharge_levels):
             log_text(
                 "discharge_header",
                 data={
@@ -687,7 +679,7 @@ class Erosion:
                 chez = simulation_data.chezy_face[ii]
                 chezy[iq].append(0 * chez + chez.mean())
 
-                if iq == self.num_levels - 1:  # ref_level:
+                if iq == self.num_discharge_levels - 1:  # ref_level:
                     dn_eq1, dv_eq1 = comp_erosion_eq(
                         bank_height[ib],
                         line_size[ib],
@@ -943,16 +935,16 @@ class Erosion:
         log_text("-")
         config_file = self.config_file
 
-        # read simulation data (get_sim_data)
-        sim_file = config_file.get_sim_file("Erosion", str(self.ref_level + 1))
-        log_text("-")
-        log_text("read_simdata", data={"file": sim_file})
-        log_text("-")
-        simulation_data = SimulationData.read(sim_file)
+        # # read simulation data (get_sim_data)
+        # sim_file = config_file.get_sim_file("Erosion", str(self.ref_level + 1))
+        # log_text("-")
+        # log_text("read_simdata", data={"file": sim_file})
+        # log_text("-")
+        # simulation_data = SimulationData.read(sim_file)
 
         log_text("derive_topology")
 
-        mesh_data = simulation_data.compute_mesh_topology()
+        mesh_data = self.simulation_data.compute_mesh_topology()
 
         # clip the chainage path to the range of chainages of interest
         km_bounds = self.river_data.station_bounds
@@ -976,7 +968,7 @@ class Erosion:
 
         fairway_data = self._prepare_fairway(river_axis, stations_coords, mesh_data, config_file)
 
-        self._map_bank_to_fairway(bank_data, fairway_data, simulation_data, config_file)
+        self._map_bank_to_fairway(bank_data, fairway_data, self.simulation_data, config_file)
 
         erosion_inputs = self._prepare_initial_conditions(
             config_file, bank_data, fairway_data
@@ -1007,7 +999,7 @@ class Erosion:
         # create various plots
         self._generate_plots(
             river_axis_km,
-            simulation_data,
+            self.simulation_data,
             xy_line_eq_list,
             km_mid,
             self.output_intervals,
