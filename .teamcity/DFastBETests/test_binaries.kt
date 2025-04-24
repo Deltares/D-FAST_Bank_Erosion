@@ -74,7 +74,7 @@ object TestBinaries : BuildType({
             publisher = github {
                 githubUrl = "https://api.github.com"
                 authType = personalToken {
-                    token = "%github_teamcity_commit_status_token%"
+                    token = "%github_deltares-service-account_access_token%"
                 }
             }
         }
