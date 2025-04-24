@@ -1613,6 +1613,52 @@ class RiverData:
                 end_index -= 1
             return interpolated_point, end_index
 
+    def _handle_bound(
+        self, index: Optional[int], station_bound: float, is_lower: bool
+    ) -> Tuple[Optional[Tuple[float, float, float]], Optional[int]]:
+        """
+        Handle the clipping of the chainage line for a given bound.
+
+        Args:
+            index (Optional[int]): Index for clipping (start or end).
+            station_bound (float): Station bound for clipping.
+            is_lower (bool): True if handling the lower bound, False for the upper bound.
+
+        Returns:
+            Tuple[Optional[Tuple[float, float, float]], Optional[int]]:
+                Adjusted bound point and updated index.
+        """
+        if index is None:
+            bound_type = "Lower" if is_lower else "Upper"
+            max_chainage = self.profile.coords[-1][2]
+            if is_lower or station_bound - max_chainage > 0.1:
+                raise ValueError(
+                    f"{bound_type} chainage bound {station_bound} "
+                    f"is larger than the maximum chainage {max_chainage} available"
+                )
+            return None, index
+
+        if index == 0:
+            bound_type = "Lower" if is_lower else "Upper"
+            min_chainage = self.profile.coords[0][2]
+            if not is_lower and min_chainage - station_bound > 0.1:
+                raise ValueError(
+                    f"{bound_type} chainage bound {station_bound} "
+                    f"is smaller than the minimum chainage {min_chainage} available"
+                )
+            return None, index
+
+        # Interpolate the point
+        alpha, interpolated_point = self._interpolate_point(index, station_bound)
+
+        # Adjust the index based on the interpolation factor
+        if is_lower and alpha > 0.9:
+            index += 1
+        elif not is_lower and alpha < 0.1:
+            index -= 1
+
+        return interpolated_point, index
+
     def _interpolate_point(
         self, index: int, station_bound: float
     ) -> Tuple[float, Tuple[float, float, float]]:
@@ -1703,15 +1749,9 @@ class RiverData:
 
             # If the bank search line breaks into multiple parts, select the part closest to the reference line.
             if search_lines[ind].geom_type == "MultiLineString":
-                min_distance = max_river_width
-                closest_part = None
-                for part in search_lines[ind]:
-                    simplified_part = part.simplify(1)
-                    distance = simplified_part.distance(profile_simplified)
-                    if distance < min_distance:
-                        min_distance = distance
-                        closest_part = part
-                search_lines[ind] = closest_part
+                search_lines[ind] = self._select_closest_part(
+                    search_lines[ind], profile_simplified, max_river_width
+                )
 
             # Determine the maximum distance from a point on this line to the reference line.
             line_simplified = search_lines[ind].simplify(1)
