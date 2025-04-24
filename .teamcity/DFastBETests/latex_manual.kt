@@ -87,7 +87,6 @@ object LatexManual : BuildType({
                 githubUrl = "https://api.github.com"
                 authType = personalToken {
                     token = "%github_deltares-service-account_access_token%"
-                }
             }
         }
     }

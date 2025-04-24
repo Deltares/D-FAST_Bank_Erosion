@@ -1,5 +1,5 @@
 from pathlib import Path
-
+import pytest
 import matplotlib
 from shapely.geometry import LineString, MultiLineString, Polygon
 
@@ -9,6 +9,7 @@ import geopandas as gpd
 from dfastbe.cmd import run
 
 
+@pytest.mark.e2e
 def test_bank_lines():
     test_r_dir = Path("tests/data/bank_lines")
     language = "UK"
