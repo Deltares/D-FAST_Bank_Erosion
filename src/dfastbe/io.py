@@ -1482,8 +1482,7 @@ class CenterLine:
 
     @staticmethod
     def mask(line_string: LineString, bounds: Tuple[float, float]) -> LineString:
-        """
-        Clip a chainage line to the relevant reach.
+        """Clip a chainage line to the relevant reach.
 
         Args:
             line_string (LineString):
@@ -1493,6 +1492,18 @@ class CenterLine:
 
         Returns:
             LineString: Clipped river chainage line.
+
+        Examples:
+            ```python
+            >>> line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])
+            >>> bounds = (0.5, 1.5)
+            >>> center_line = CenterLine.mask(line_string, bounds)
+            >>> np.array(center_line.coords)
+            array([[0.5, 0.5, 0.5],
+                   [1. , 1. , 1. ],
+                   [1.5, 1.5, 1.5]])
+
+            ```
         """
         line_string_coords = line_string.coords
         start_index = CenterLine._find_mask_index(bounds[0], line_string_coords)
