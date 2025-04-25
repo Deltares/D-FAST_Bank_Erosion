@@ -249,7 +249,7 @@ class SimulationData:
             No message found for read_velocity
             No message found for read_chezy
             No message found for read_drywet
-            >>> river_profile = LineString([
+            >>> river_center_line = LineString([
             ... [194949.796875, 361366.90625],
             ... [194966.515625, 361399.46875],
             ... [194982.8125, 361431.03125]
@@ -1449,11 +1449,12 @@ class ConfigFile:
 
         return output_dir
 
-class CenterLine:
-    """Center line class."""
+
+class GeometryLine:
+    """Geometry line class."""
 
     def __init__(self, line_string: LineString, mask: Tuple[float, float] = None):
-        """Center Line initialization.
+        """Geometry Line initialization.
 
         Args:
             line_string (LineString):
@@ -1465,7 +1466,8 @@ class CenterLine:
             ```python
             >>> line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])
             >>> mask = (0.5, 1.5)
-            >>> center_line = CenterLine(line_string, mask)
+            >>> center_line = GeometryLine(line_string, mask)
+            No message found for clip_chainage
             >>> np.array(center_line.values.coords)
             array([[0.5, 0.5, 0.5],
                    [1. , 1. , 1. ],
@@ -1504,7 +1506,7 @@ class CenterLine:
             ```python
             >>> line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])
             >>> bounds = (0.5, 1.5)
-            >>> center_line = CenterLine.mask(line_string, bounds)
+            >>> center_line = GeometryLine.mask(line_string, bounds)
             >>> np.array(center_line.coords)
             array([[0.5, 0.5, 0.5],
                    [1. , 1. , 1. ],
@@ -1513,12 +1515,12 @@ class CenterLine:
             ```
         """
         line_string_coords = line_string.coords
-        start_index = CenterLine._find_mask_index(bounds[0], line_string_coords)
-        end_index = CenterLine._find_mask_index(bounds[1], line_string_coords)
-        lower_bound_point, start_index = CenterLine._handle_bound(
+        start_index = GeometryLine._find_mask_index(bounds[0], line_string_coords)
+        end_index = GeometryLine._find_mask_index(bounds[1], line_string_coords)
+        lower_bound_point, start_index = GeometryLine._handle_bound(
             start_index, bounds[0], True, line_string_coords
         )
-        upper_bound_point, end_index = CenterLine._handle_bound(
+        upper_bound_point, end_index = GeometryLine._handle_bound(
             end_index, bounds[1], False, line_string_coords
         )
 
@@ -1605,7 +1607,7 @@ class CenterLine:
             return None, index
 
         # Interpolate the point
-        alpha, interpolated_point = CenterLine._interpolate_point(
+        alpha, interpolated_point = GeometryLine._interpolate_point(
             index, station_bound, line_string_coords
         )
 
@@ -1649,13 +1651,13 @@ class CenterLine:
 
 class SearchLines:
 
-    def __init__(self, lines: List[LineString], mask: CenterLine = None):
+    def __init__(self, lines: List[LineString], mask: GeometryLine = None):
         """Search lines initialization.
 
         Args:
             lines (List[LineString]):
                 List of search lines.
-            mask (CenterLine, optional):
+            mask (GeometryLine, optional):
                 Center line for masking the search lines. Defaults to None.
         """
         if mask is None:
@@ -1809,18 +1811,20 @@ class RiverData:
             >>> from dfastbe.io import ConfigFile, RiverData
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> river_data = RiverData(config_file)
+            No message found for read_chainage
+            No message found for clip_chainage
 
             ```
         """
         self.config_file = config_file
         center_line = config_file.get_river_center_line()
         bounds = config_file.get_start_end_stations()
-        self._river_center_line = CenterLine(center_line, bounds)
+        self._river_center_line = GeometryLine(center_line, bounds)
         self._station_bounds = config_file.get_start_end_stations()
 
     @property
-    def river_center_line(self) -> CenterLine:
-        """CenterLine: the clipped river center line."""
+    def river_center_line(self) -> GeometryLine:
+        """GeometryLine: the clipped river center line."""
         return self._river_center_line
 
     @property

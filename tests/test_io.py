@@ -16,7 +16,7 @@ from shapely import Polygon
 from shapely.geometry import LineString, MultiLineString
 
 from dfastbe.io import (
-    CenterLine,
+    GeometryLine,
     ConfigFile,
     RiverData,
     SearchLines,
@@ -899,7 +899,7 @@ class TestRiverData:
         assert center_line_arr.shape == (251, 3)
 
     @patch("dfastbe.io.SimulationData")
-    @patch("dfastbe.io.CenterLine")
+    @patch("dfastbe.io.GeometryLine")
     @patch("dfastbe.io.SearchLines")
     def test_simulation_data(
         self, mock_search_lines, mock_center_line, mock_simulation_data
@@ -990,7 +990,7 @@ class TestSearchLines:
         search_lines.d_lines = lines
         assert search_lines.d_lines == lines
 
-    @patch("dfastbe.io.CenterLine")
+    @patch("dfastbe.io.GeometryLine")
     def test_searchlines_with_center_line(self, mock_center_line, lines):
         mask = LineString([(0, 0), (2, 2)])
         mock_center_line.values = mask
@@ -1021,7 +1021,7 @@ class TestSearchLines:
         assert polygons[1].buffer(-2.0).is_empty
 
 
-class TestCenterLine:
+class TestGeometryLine:
     @pytest.fixture
     def river_line(self):
         """Fixture to create a RiverData instance with mock data."""
@@ -1071,7 +1071,7 @@ class TestCenterLine:
         expected_profile: LineString,
     ):
         """Test the mask_profile method with various station bounds."""
-        center_line = CenterLine(river_line, mask)
+        center_line = GeometryLine(river_line, mask)
 
         assert isinstance(center_line.values, LineString)
         assert center_line.values.equals(expected_profile)
@@ -1108,7 +1108,7 @@ class TestCenterLine:
     ):
         """Test the mask_profile method for out-of-bounds station bounds."""
         with pytest.raises(ValueError, match=expected_error):
-            CenterLine(river_line, mask)
+            GeometryLine(river_line, mask)
 
     def test_as_array(self):
         """Test the as_array method."""
@@ -1121,7 +1121,7 @@ class TestCenterLine:
                 (4, 4, 4),
             ]
         )
-        center_line = CenterLine(line_string)
+        center_line = GeometryLine(line_string)
 
         result = center_line.as_array()
 
