@@ -8926,21 +8926,21 @@ and adds an empty line before the start of a new block.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">bound_type</span> <span class="o">=</span> <span class="s2">&quot;Lower&quot;</span> <span class="k">if</span> <span class="n">is_lower</span> <span class="k">else</span> <span class="s2">&quot;Upper&quot;</span>
-            <span class="n">max_chainage</span> <span class="o">=</span> <span class="n">line_string_coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">is_lower</span> <span class="ow">or</span> <span class="p">(</span><span class="n">station_bound</span> <span class="o">-</span> <span class="n">max_chainage</span> <span class="o">&gt;</span> <span class="mf">0.1</span><span class="p">):</span>
+            <span class="n">end_station</span> <span class="o">=</span> <span class="n">line_string_coords</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">is_lower</span> <span class="ow">or</span> <span class="p">(</span><span class="n">station_bound</span> <span class="o">-</span> <span class="n">end_station</span> <span class="o">&gt;</span> <span class="mf">0.1</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bound_type</span><span class="si">}</span><span class="s2"> chainage bound </span><span class="si">{</span><span class="n">station_bound</span><span class="si">}</span><span class="s2"> &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;is larger than the maximum chainage </span><span class="si">{</span><span class="n">max_chainage</span><span class="si">}</span><span class="s2"> available&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;is larger than the maximum chainage </span><span class="si">{</span><span class="n">end_station</span><span class="si">}</span><span class="s2"> available&quot;</span>
                 <span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">index</span>
 
         <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">bound_type</span> <span class="o">=</span> <span class="s2">&quot;Lower&quot;</span> <span class="k">if</span> <span class="n">is_lower</span> <span class="k">else</span> <span class="s2">&quot;Upper&quot;</span>
-            <span class="n">min_chainage</span> <span class="o">=</span> <span class="n">line_string_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_lower</span> <span class="ow">or</span> <span class="p">(</span><span class="n">min_chainage</span> <span class="o">-</span> <span class="n">station_bound</span> <span class="o">&gt;</span> <span class="mf">0.1</span><span class="p">):</span>
+            <span class="n">start_station</span> <span class="o">=</span> <span class="n">line_string_coords</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">is_lower</span> <span class="ow">or</span> <span class="p">(</span><span class="n">start_station</span> <span class="o">-</span> <span class="n">station_bound</span> <span class="o">&gt;</span> <span class="mf">0.1</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bound_type</span><span class="si">}</span><span class="s2"> chainage bound </span><span class="si">{</span><span class="n">station_bound</span><span class="si">}</span><span class="s2"> &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;is smaller than the minimum chainage </span><span class="si">{</span><span class="n">min_chainage</span><span class="si">}</span><span class="s2"> available&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;is smaller than the minimum chainage </span><span class="si">{</span><span class="n">start_station</span><span class="si">}</span><span class="s2"> available&quot;</span>
                 <span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">index</span>
 
