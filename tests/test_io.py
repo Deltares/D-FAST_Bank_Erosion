@@ -898,6 +898,51 @@ class TestRiverData:
         assert isinstance(center_line_arr, np.ndarray)
         assert center_line_arr.shape == (251, 3)
 
+    @patch("dfastbe.io.SimulationData")
+    @patch("dfastbe.io.CenterLine")
+    @patch("dfastbe.io.SearchLines")
+    def test_simulation_data(
+        self, mock_search_lines, mock_center_line, mock_simulation_data
+    ):
+        """Test the simulation_data method of the RiverData class with a mocked SimulationData."""
+        # Mock the SimulationData instance
+        mock_simulation_data_class = MagicMock()
+        mock_simulation_data_class.dry_wet_threshold = 0.1
+        mock_simulation_data.read.return_value = mock_simulation_data_class
+
+        # Mock the ConfigFile
+        mock_config_file = MagicMock()
+        mock_config_file.get_sim_file.return_value = "mock_sim_file.nc"
+        mock_config_file.get_float.return_value = 0.5  # Critical water depth
+        mock_config_file.get_start_end_stations.return_value = (0.0, 10.0)
+        mock_config_file.get_search_lines.return_value = [
+            LineString([(0, 0), (1, 1)]),
+            LineString([(2, 2), (3, 3)]),
+        ]
+        mock_config_file.get_bank_search_distances.return_value = [1.0, 2.0]
+
+        mock_center_line_class = MagicMock()
+        mock_center_line_class.values = LineString([(0, 0), (1, 1), (2, 2)])
+        mock_center_line.return_value = mock_center_line_class
+
+        # Mock the SearchLines instance
+        mock_search_lines_class = MagicMock()
+        mock_search_lines_class.max_distance = 2.0
+        mock_search_lines.return_value = mock_search_lines_class
+
+        # Create a RiverData instance
+        river_data = RiverData(mock_config_file)
+
+        # Call the simulation_data method
+        simulation_data, h0 = river_data.simulation_data()
+
+        # Assertions
+        mock_simulation_data_class.clip.assert_called_once_with(
+            mock_center_line_class.values, mock_search_lines_class.max_distance
+        )
+        assert h0 == 0.6  # Critical water depth (0.5) + dry_wet_threshold (0.1)
+        assert simulation_data == mock_simulation_data_class
+
     @patch("dfastbe.io.XYCModel.read")
     def test_read_river_axis(self, mock_read, river_data):
         """Test the read_river_axis method by mocking XYCModel.read."""
