@@ -1569,8 +1569,7 @@ class GeometryLine:
         is_lower: bool,
         line_string_coords: np.ndarray,
     ) -> Tuple[Optional[Tuple[float, float, float]], Optional[int]]:
-        """
-        Handle the clipping of the chainage line for a given bound.
+        """Handle the clipping of the stations line for a given bound.
 
         Args:
             index (Optional[int]):
