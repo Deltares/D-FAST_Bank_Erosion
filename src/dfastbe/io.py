@@ -1307,7 +1307,7 @@ class ConfigFile:
 
         return output_dir
 
-class CenterLine:
+class LineGeometry:
     """Center line class."""
 
     def __init__(self, line_string: LineString, mask: Tuple[float, float] = None):
@@ -1319,9 +1319,9 @@ class CenterLine:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile, CenterLine
+            >>> from dfastbe.io import ConfigFile, LineGeometry
             >>> config_file = ConfigFile("tests/data/erosion/meuse_manual.cfg")
-            >>> center_line = CenterLine(config_file)
+            >>> center_line = LineGeometry(config_file)
             ```
         """
         self.station_bounds = mask
@@ -1330,9 +1330,9 @@ class CenterLine:
         else:
             self.values: LineString = self.mask(line_string, mask)
 
-        log_text(
-            "clip_chainage", data={"low": self.station_bounds[0], "high": self.station_bounds[1]}
-        )
+            log_text(
+                "clip_chainage", data={"low": self.station_bounds[0], "high": self.station_bounds[1]}
+            )
 
     def as_array(self):
         return np.array(self.values.coords)
@@ -1394,7 +1394,7 @@ class CenterLine:
                         bounds[1], line_string.coords[-1][2]
                     )
                 )
-            # else kmbounds[1] matches chainage of last point
+            # else station[1] matches chainage of the last point
             if x0 is None:
                 # whole range available selected
                 pass
@@ -1444,7 +1444,7 @@ class BaseRiverData:
         self.config_file = config_file
         center_line = config_file.get_river_center_line()
         bounds = config_file.get_start_end_stations()
-        self.river_center_line: CenterLine = CenterLine(center_line, bounds)
+        self.river_center_line = LineGeometry(center_line, bounds)
         self.station_bounds: Tuple = config_file.get_start_end_stations()
 
     def read_river_axis(self):

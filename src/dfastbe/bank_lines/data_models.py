@@ -1,7 +1,7 @@
 from typing import List, Tuple
 from shapely.geometry import LineString, Point
 from shapely.geometry.polygon import Polygon
-from dfastbe.io import BaseRiverData, ConfigFile, CenterLine, log_text, BaseSimulationData
+from dfastbe.io import BaseRiverData, ConfigFile, LineGeometry, log_text, BaseSimulationData
 
 
 MAX_RIVER_WIDTH = 1000
@@ -9,7 +9,7 @@ MAX_RIVER_WIDTH = 1000
 
 class SearchLines:
 
-    def __init__(self, lines: List[LineString], mask: CenterLine = None):
+    def __init__(self, lines: List[LineString], mask: LineGeometry = None):
         """Search lines initialization.
 
         Args:
@@ -37,9 +37,9 @@ class SearchLines:
 
     @staticmethod
     def mask(
-            search_lines: List[LineString],
-            river_center_line: LineString,
-            max_river_width: float = MAX_RIVER_WIDTH,
+        search_lines: List[LineString],
+        river_center_line: LineString,
+        max_river_width: float = MAX_RIVER_WIDTH,
     ) -> Tuple[List[LineString], float]:
         """
         Clip the list of lines to the envelope of a certain size surrounding a reference line.
