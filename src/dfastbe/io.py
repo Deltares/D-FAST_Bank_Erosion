@@ -1456,14 +1456,21 @@ class CenterLine:
         """Center Line initialization.
 
         Args:
-            config_file : ConfigFile
-                Configuration file with settings for the analysis.
+            line_string (LineString):
+                River center line as a linestring.
+            mask (Tuple[float, float], optional):
+                Lower and upper limit for the chainage. Defaults to None.
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile, CenterLine
-            >>> config_file = ConfigFile("tests/data/erosion/meuse_manual.cfg")
-            >>> center_line = CenterLine(config_file)
+            >>> line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])
+            >>> mask = (0.5, 1.5)
+            >>> center_line = CenterLine(line_string, mask)
+            >>> np.array(center_line.values.coords)
+            array([[0.5, 0.5, 0.5],
+                   [1. , 1. , 1. ],
+                   [1.5, 1.5, 1.5]])
+
             ```
         """
         self.station_bounds = mask
@@ -1535,7 +1542,10 @@ class CenterLine:
         """Find the start and end indices for clipping the chainage line.
 
         Args:
-            station_bound (float): Station bound for clipping.
+            station_bound (float):
+                Station bound for clipping.
+            line_string_coords (np.ndarray):
+                Coordinates of the line string.
 
         Returns:
             Optional[int]: index for clipping.
@@ -1561,9 +1571,14 @@ class CenterLine:
         Handle the clipping of the chainage line for a given bound.
 
         Args:
-            index (Optional[int]): Index for clipping (start or end).
-            station_bound (float): Station bound for clipping.
-            is_lower (bool): True if handling the lower bound, False for the upper bound.
+            index (Optional[int]):
+                Index for clipping (start or end).
+            station_bound (float):
+                Station bound for clipping.
+            is_lower (bool):
+                True if handling the lower bound, False for the upper bound.
+            line_string_coords (np.ndarray):
+                Coordinates of the line string.
 
         Returns:
             Tuple[Optional[Tuple[float, float, float]], Optional[int]]:
@@ -1613,6 +1628,8 @@ class CenterLine:
                 Index of the coordinate to interpolate.
             station_bound (float):
                 Station bound for interpolation.
+            line_string_coords (np.ndarray):
+                Coordinates of the line string.
 
         Returns:
             float: Interpolation factor.
@@ -1638,6 +1655,8 @@ class SearchLines:
         Args:
             lines (List[LineString]):
                 List of search lines.
+            mask (CenterLine, optional):
+                Center line for masking the search lines. Defaults to None.
         """
         if mask is None:
             self.values = lines
@@ -1668,6 +1687,10 @@ class SearchLines:
         Clip the list of lines to the envelope of a certain size surrounding a reference line.
 
         Arg:
+            search_lines (List[LineString]):
+                List of lines to be clipped.
+            river_center_line (LineString):
+                Reference line to which the search lines are clipped.
             max_river_width: float
                 Maximum distance away from river_profile.
 
@@ -1706,25 +1729,27 @@ class SearchLines:
 
     @staticmethod
     def _select_closest_part(
-        multiline: MultiLineString,
+        search_lines_segments: MultiLineString,
         reference_line: LineString,
         max_river_width: float,
     ) -> LineString:
-        """
-        Select the closest part of a MultiLineString to the reference line.
+        """Select the closest part of a MultiLineString to the reference line.
 
         Args:
-            multiline (LineString): The MultiLineString to process.
-            reference_line (LineString): The reference line to calculate distances.
-            max_river_width (float): Maximum allowable distance.
+            search_lines_segments (MultiLineString):
+                The MultiLineString containing multiple line segments to evaluate.
+            reference_line (LineString):
+                The reference line to calculate distances.
+            max_river_width (float):
+                Maximum allowable distance.
 
         Returns:
             LineString: The closest part of the MultiLineString.
         """
-        closest_part = multiline.geoms[0]
+        closest_part = search_lines_segments.geoms[0]
         min_distance = max_river_width
 
-        for part in multiline.geoms:
+        for part in search_lines_segments.geoms:
             simplified_part = part.simplify(1)
             distance = simplified_part.distance(reference_line)
             if distance < min_distance:
