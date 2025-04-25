@@ -43,9 +43,11 @@ from shapely import line_merge
 
 
 def project_km_on_line(
-    line_xy: numpy.ndarray, xykm_numpy: numpy.ndarray
+    target_line_coords: numpy.ndarray, reference_line_with_stations: numpy.ndarray
 ) -> numpy.ndarray:
     """
+    Project chainage(stations) values from a reference line onto a target line by spatial proximity and interpolation.
+
     Project chainage values from source line L1 onto another line L2.
 
     The chainage values are giving along a line L1 (xykm_numpy). For each node
@@ -56,82 +58,79 @@ def project_km_on_line(
     of interpolation.
 
     Args:
-        line_xy : numpy.ndarray
-            Array containing the x,y coordinates of a line.
-        xykm_numpy : numpy.ndarray
-            Array containing the x,y,chainage data.
+        target_line_coords (np.ndarray):
+            Nx2 array of x, y coordinates for the target line.
+        reference_line_with_stations (np.ndarray):
+            Mx3 array with x, y, and chainage values for the reference line.
 
     Returns:
         line_km : numpy.ndarray
             Array containing the chainage for every coordinate specified in line_xy.
     """
-    # pre-allocate the array for the mapped chainage values
-    line_km = numpy.zeros(line_xy.shape[0])
+    # pre-allocates the array for the mapped chainage values
+    projected_stations = numpy.zeros(target_line_coords.shape[0])
 
     # get an array with only the x,y coordinates of line L1
-    xy_numpy = xykm_numpy[:, :2]
-    last_xykm = xykm_numpy.shape[0] - 1
+    ref_coords = reference_line_with_stations[:, :2]
+    last_index = reference_line_with_stations.shape[0] - 1
 
     # for each node rp on line L2 get the chainage ...
-    for i, rp_numpy in enumerate(line_xy):
+    for i, station_i in enumerate(target_line_coords):
         # find the node on L1 closest to rp
-        imin = numpy.argmin(((rp_numpy - xy_numpy) ** 2).sum(axis=1))
-        p0 = xy_numpy[imin]
+        # get the distance to all the nodes on the reference line, and find the closest one
+        closest_ind = numpy.argmin(((station_i - ref_coords) ** 2).sum(axis=1))
+        closest_coords = ref_coords[closest_ind]
 
         # determine the distance between that node and rp
-        dist2 = ((rp_numpy - p0) ** 2).sum()
+        squared_distance = ((station_i - closest_coords) ** 2).sum()
 
         # chainage value of that node
-        station = xykm_numpy[imin, 2]
-        # print("chainage closest node: ", km)
+        station = reference_line_with_stations[closest_ind, 2]
 
         # if we didn't get the first node
-        if imin > 0:
+        if closest_ind > 0:
             # project rp onto the line segment before this node
-            p1 = xy_numpy[imin - 1]
+            closest_coord_minus_1 = ref_coords[closest_ind - 1]
             alpha = (
-                (p1[0] - p0[0]) * (rp_numpy[0] - p0[0])
-                + (p1[1] - p0[1]) * (rp_numpy[1] - p0[1])
-            ) / ((p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2)
+                            (closest_coord_minus_1[0] - closest_coords[0]) * (station_i[0] - closest_coords[0])
+                            + (closest_coord_minus_1[1] - closest_coords[1]) * (station_i[1] - closest_coords[1])
+            ) / ((closest_coord_minus_1[0] - closest_coords[0]) ** 2 + (closest_coord_minus_1[1] - closest_coords[1]) ** 2)
             # if there is a closest point not coinciding with the nodes ...
-            if alpha > 0 and alpha < 1:
-                dist2link = (rp_numpy[0] - p0[0] - alpha * (p1[0] - p0[0])) ** 2 + (
-                    rp_numpy[1] - p0[1] - alpha * (p1[1] - p0[1])
+            if 0 < alpha < 1:
+                dist2link = (station_i[0] - closest_coords[0] - alpha * (closest_coord_minus_1[0] - closest_coords[0])) ** 2 + (
+                        station_i[1] - closest_coords[1] - alpha * (closest_coord_minus_1[1] - closest_coords[1])
                 ) ** 2
                 # if it's actually closer than the node ...
-                if dist2link < dist2:
+                if dist2link < squared_distance:
                     # update the closest point information
-                    dist2 = dist2link
-                    station = xykm_numpy[imin, 2] + alpha * (
-                        xykm_numpy[imin - 1, 2] - xykm_numpy[imin, 2]
+                    squared_distance = dist2link
+                    station = reference_line_with_stations[closest_ind, 2] + alpha * (
+                            reference_line_with_stations[closest_ind - 1, 2] - reference_line_with_stations[closest_ind, 2]
                     )
-                    # print("chainage of projection 1: ", km)
 
         # if we didn't get the last node
-        if imin < last_xykm:
+        if closest_ind < last_index:
             # project rp onto the line segment after this node
-            p1 = xy_numpy[imin + 1]
+            closest_coord_minus_1 = ref_coords[closest_ind + 1]
             alpha = (
-                (p1[0] - p0[0]) * (rp_numpy[0] - p0[0])
-                + (p1[1] - p0[1]) * (rp_numpy[1] - p0[1])
-            ) / ((p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2)
+                            (closest_coord_minus_1[0] - closest_coords[0]) * (station_i[0] - closest_coords[0])
+                            + (closest_coord_minus_1[1] - closest_coords[1]) * (station_i[1] - closest_coords[1])
+            ) / ((closest_coord_minus_1[0] - closest_coords[0]) ** 2 + (closest_coord_minus_1[1] - closest_coords[1]) ** 2)
             # if there is a closest point not coinciding with the nodes ...
             if alpha > 0 and alpha < 1:
-                dist2link = (rp_numpy[0] - p0[0] - alpha * (p1[0] - p0[0])) ** 2 + (
-                    rp_numpy[1] - p0[1] - alpha * (p1[1] - p0[1])
+                dist2link = (station_i[0] - closest_coords[0] - alpha * (closest_coord_minus_1[0] - closest_coords[0])) ** 2 + (
+                        station_i[1] - closest_coords[1] - alpha * (closest_coord_minus_1[1] - closest_coords[1])
                 ) ** 2
                 # if it's actually closer than the previous value ...
-                if dist2link < dist2:
+                if dist2link < squared_distance:
                     # update the closest point information
-                    dist2 = dist2link
-                    station = xykm_numpy[imin, 2] + alpha * (
-                        xykm_numpy[imin + 1, 2] - xykm_numpy[imin, 2]
+                    # squared_distance = dist2link
+                    station = reference_line_with_stations[closest_ind, 2] + alpha * (
+                            reference_line_with_stations[closest_ind + 1, 2] - reference_line_with_stations[closest_ind, 2]
                     )
-                    # print("chainage of projection 2: ", km)
-
         # store the chainage value, loop ... and return
-        line_km[i] = station
-    return line_km
+        projected_stations[i] = station
+    return projected_stations
 
 
 def on_right_side(line_xy: numpy.ndarray, ref_xy: numpy.ndarray) -> bool:
