@@ -1697,6 +1697,17 @@ class SearchLines:
         Returns:
             List[LineString]: List of clipped search lines.
             float: Maximum distance from any point within line to reference line.
+
+        Examples:
+            ```python
+            >>> from shapely.geometry import LineString
+            >>> search_lines = [LineString([(0, 0), (1, 1)]), LineString([(2, 2), (3, 3)])]
+            >>> river_center_line = LineString([(0, 0), (2, 2)])
+            >>> search_lines_clipped, max_distance = SearchLines.mask(search_lines, river_center_line)
+            >>> max_distance
+            2.0
+
+            ```
         """
         num = len(search_lines)
         profile_buffer = river_center_line.buffer(max_river_width, cap_style=2)
@@ -1793,8 +1804,8 @@ class RiverData:
         self.config_file = config_file
         center_line = config_file.get_river_center_line()
         bounds = config_file.get_start_end_stations()
-        self._river_center_line: CenterLine = CenterLine(center_line, bounds)
-        self._station_bounds: Tuple = config_file.get_start_end_stations()
+        self._river_center_line = CenterLine(center_line, bounds)
+        self._station_bounds = config_file.get_start_end_stations()
 
     @property
     def river_center_line(self) -> CenterLine:
@@ -1813,9 +1824,7 @@ class RiverData:
         return search_lines
 
     def _get_bank_lines_simulation_data(self) -> Tuple[SimulationData, float]:
-        """
-        read simulation data and drying flooding threshold dh0
-        """
+        """read simulation data and drying flooding threshold dh0"""
         sim_file = self.config_file.get_sim_file("Detect", "")
         log_text("read_simdata", data={"file": sim_file})
         simulation_data = SimulationData.read(sim_file)
@@ -1829,7 +1838,6 @@ class RiverData:
 
     def simulation_data(self):
         simulation_data, h0 = self._get_bank_lines_simulation_data()
-        # clip simulation data to boundaries ...
         log_text("clip_data")
         simulation_data.clip(self.river_center_line.values, self.search_lines.max_distance)
         return simulation_data, h0
