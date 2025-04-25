@@ -1434,15 +1434,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#triggering-builds-based-on-environment" class="md-nav__link">
-    <span class="md-ellipsis">
-      Triggering Builds Based on Environment
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#folder-overview" class="md-nav__link">
     <span class="md-ellipsis">
       Folder Overview
@@ -1587,27 +1578,6 @@ Defines the Maven project configuration for the D-FAST Bank Erosion project. Thi
 <li>The token is securely stored in TeamCity as a parameter. To view or manage the list of tokens in TeamCity, navigate to Project Settings → Parameters.</li>
 <li>The token is accessed in the build configuration using the %parameter_name% syntax. This ensures that sensitive information, such as the token, is protected and not exposed in the build logs or configuration files.</li>
 </ul>
-<h3 id="triggering-builds-based-on-environment"><a class="toclink" href="#triggering-builds-based-on-environment">Triggering Builds Based on Environment</a><a class="headerlink" href="#triggering-builds-based-on-environment" title="Permanent link">#</a></h3>
-<p>To avoid unnecessary builds in a test environment, TeamCity allows you to control triggering using a context parameter. This ensures that builds are only triggered in the appropriate environment, such as production.</p>
-<ol>
-<li>How to Enable or Disable Triggering</li>
-<li>Enable Triggering:
-  Set the context parameter environment to "production". This allows builds to be triggered automatically.</li>
-<li>
-<p>Disable Triggering:
-  Set the context parameter environment to "test". This prevents builds from being triggered automatically.</p>
-</li>
-<li>
-<p>Where to Set the Context Parameter
-The context parameter can be configured in Versioned Settings under Context Parameters. This allows you to manage the environment-specific behavior of your build configurations directly in the versioned settings.</p>
-</li>
-<li>
-<p>Benefits</p>
-</li>
-<li>Efficiency: Prevents unnecessary builds in non-production environments, saving resources.</li>
-<li>Flexibility: Easily switch between environments by updating the context parameter.</li>
-<li>Control: Ensures that builds are only triggered when appropriate, reducing noise in the CI/CD pipeline.</li>
-</ol>
 <h3 id="folder-overview"><a class="toclink" href="#folder-overview">Folder Overview</a><a class="headerlink" href="#folder-overview" title="Permanent link">#</a></h3>
 <p>The <code>DFastBETests</code> folder is structured to modularize the TeamCity build configurations and templates for the D-FAST Bank Erosion project. Each file serves a specific purpose, such as running tests, building the project, or managing dependencies, while the <code>settings.kts</code> file ties everything together into a cohesive project.</p>
 
