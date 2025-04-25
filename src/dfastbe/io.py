@@ -1348,7 +1348,7 @@ class LineGeometry:
         return np.array(self.values.coords)
 
     def to_shapefile(
-        self, data: Dict[str, np.ndarray], filename: str, crs: Any
+        self, data: Dict[str, np.ndarray], file_name: str, crs: Any
     ) -> None:
         """
         Write a shape point file with x, y, and values.
@@ -1356,14 +1356,13 @@ class LineGeometry:
         Args:
             data : Dict[str, np.ndarray]
                 Dictionary of quantities to be written, each np array should have length k.
-            filename : str
+            file_name : str
                 Name of the file to be written.
             crs: Any
         """
         xy = self.as_array()
-        xy_points = [Point(xy1) for xy1 in xy]
-        geom = GeoSeries(xy_points, crs=crs)
-        write_shp(geom, data, filename)
+        geom = [Point(xy_i) for xy_i in xy]
+        GeoDataFrame(data, geometry=geom, crs=crs).to_file(file_name)
 
     @staticmethod
     def mask(line_string: LineString, bounds: Tuple[float, float]) -> LineString:
@@ -1999,8 +1998,7 @@ def write_shp(geom: GeoSeries, data: Dict[str, np.ndarray], filename: str) -> No
     -------
     None
     """
-    df = pd.DataFrame(data)
-    GeoDataFrame(df, geometry=geom).to_file(filename)
+    GeoDataFrame(data, geometry=geom).to_file(filename)
 
 
 def write_csv(data: Dict[str, np.ndarray], filename: str) -> None:
