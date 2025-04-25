@@ -1713,7 +1713,7 @@ class SearchLines:
         closest_part = None
         min_distance = max_river_width
 
-        for part in multiline:
+        for part in multiline.geoms:
             simplified_part = part.simplify(1)
             distance = simplified_part.distance(reference_line)
             if distance < min_distance:
@@ -1749,8 +1749,9 @@ class RiverData:
         Examples:
             ```python
             >>> from dfastbe.io import ConfigFile, RiverData
-            >>> config_file = ConfigFile("tests/data/erosion/meuse_manual.cfg")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> river_data = RiverData(config_file)
+
             ```
         """
         self.config_file = config_file
