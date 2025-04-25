@@ -30,6 +30,8 @@ from dfastbe.io import (
 )
 
 
+filename = "tests/data/files/e02_f001_c011_simplechannel_map.nc"
+
 @contextmanager
 def captured_output():
     new_out, new_err = StringIO(), StringIO()
@@ -46,7 +48,7 @@ def test_load_program_texts_01():
     Testing load_program_texts.
     """
     print("current work directory: ", os.getcwd())
-    assert load_program_texts("tests/files/messages.UK.ini") is None
+    assert load_program_texts("tests/data/files/messages.UK.ini") is None
 
 
 class TestSimulationData:
@@ -285,7 +287,7 @@ class TestReadFMMap:
         """
         Testing read_fm_map: x coordinates of the faces.
         """
-        filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
+
         varname = "x"
         datac = _read_fm_map(filename, varname)
         dataref = 41.24417604888325
@@ -295,7 +297,6 @@ class TestReadFMMap:
         """
         Testing read_fm_map: y coordinates of the edges.
         """
-        filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
         varname = "y"
         location = "edge"
         datac = _read_fm_map(filename, varname, location)
@@ -306,7 +307,6 @@ class TestReadFMMap:
         """
         Testing read_fm_map: face node connectivity.
         """
-        filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
         varname = "face_node_connectivity"
         datac = _read_fm_map(filename, varname)
         dataref = 2352
@@ -316,7 +316,6 @@ class TestReadFMMap:
         """
         Testing read_fm_map: variable by standard name.
         """
-        filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
         varname = "sea_floor_depth_below_sea_surface"
         datac = _read_fm_map(filename, varname)
         dataref = 3.894498393076889
@@ -326,7 +325,6 @@ class TestReadFMMap:
         """
         Testing read_fm_map: variable by long name.
         """
-        filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
         varname = "Water level"
         datac = _read_fm_map(filename, varname)
         dataref = 3.8871328177527262
@@ -336,7 +334,6 @@ class TestReadFMMap:
         """
         Testing read_fm_map: variable by long name.
         """
-        filename = "tests/files/e02_f001_c011_simplechannel_map.nc"
         varname = "water level"
         with pytest.raises(Exception) as cm:
             _read_fm_map(filename, varname)
