@@ -5,7 +5,7 @@ from configparser import ConfigParser
 from contextlib import contextmanager
 from io import StringIO
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Tuple
 from unittest.mock import patch, MagicMock
 
 import numpy as np
@@ -15,6 +15,7 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry import LineString
 
 from dfastbe.io import (
+    LineGeometry,
     BaseSimulationData,
     SimulationFilesError,
     ConfigFile,
@@ -27,7 +28,6 @@ from dfastbe.io import (
     _read_fm_map,
     relative_path,
 )
-
 
 
 @contextmanager
@@ -819,10 +819,15 @@ class TestConfigFileE2E:
 
 
 class TestRiverData:
-    def test_initialization(self):
+
+    @pytest.fixture
+    def river_data(self) -> BaseRiverData:
         path = "tests/data/erosion/meuse_manual.cfg"
         config_file = ConfigFile.read(path)
         river_data = BaseRiverData(config_file)
+        return river_data
+
+    def test_initialization(self, river_data: BaseRiverData):
         assert isinstance(river_data.config_file, ConfigFile)
         center_line = river_data.river_center_line
         assert center_line.station_bounds[0] == 123.0
@@ -831,3 +836,114 @@ class TestRiverData:
         center_line_arr = center_line.as_array()
         assert isinstance(center_line_arr, np.ndarray)
         assert center_line_arr.shape == (251, 3)
+
+
+class TestGeometryLine:
+    @pytest.fixture
+    def river_line(self):
+        """Fixture to create a BaseRiverData instance with mock data."""
+        line_string = LineString(
+            [
+                (0, 0, 0),
+                (1, 1, 1),
+                (2, 2, 2),
+                (3, 3, 3),
+                (4, 4, 4),
+            ]
+        )
+
+        return line_string
+
+    @pytest.mark.parametrize(
+        "mask, expected_profile",
+        [
+            (
+                (1.5, 3.5),
+                LineString([(1.5, 1.5, 1.5), (2, 2, 2), (3, 3, 3), (3.5, 3.5, 3.5)]),
+            ),
+            (
+                (2, 4.05),
+                LineString([(2, 2, 2), (3, 3, 3), (4, 4, 4)]),
+            ),
+            (
+                (-0.05, 3),
+                LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2), (3, 3, 3)]),
+            ),
+            (
+                (-0.05, 4.05),
+                LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 4)]),
+            ),
+        ],
+        ids=[
+            "Normal bounds",
+            "Upper bound exceeds max",
+            "Lower bound below min",
+            "Both bounds out of range",
+        ],
+    )
+    def test_mask_profile(
+        self,
+        river_line: LineString,
+        mask: Tuple[float],
+        expected_profile: LineString,
+    ):
+        """Test the mask_profile method with various station bounds."""
+        center_line = LineGeometry(river_line, mask)
+
+        assert isinstance(center_line.values, LineString)
+        assert center_line.values.equals(expected_profile)
+
+    @pytest.mark.parametrize(
+        "mask, expected_error",
+        [
+            (
+                (5.0, 6.0),
+                "Lower chainage bound 5.0 is larger than the maximum chainage 4.0 available",
+            ),
+            (
+                (-0.2, 3.0),
+                "Lower chainage bound -0.2 is smaller than the minimum chainage 0.0 available",
+            ),
+            (
+                (0.0, -0.5),
+                "Upper chainage bound -0.5 is smaller than the minimum chainage 0.0 available",
+            ),
+            (
+                (0.0, 5.0),
+                "Upper chainage bound 5.0 is larger than the maximum chainage 4.0 available",
+            ),
+        ],
+        ids=[
+            "Lower bound exceeds max",
+            "Lower bound below min",
+            "Upper bound below min",
+            "Upper bound exceeds max",
+        ],
+    )
+    def test_mask_profile_out_of_bounds(
+        self, river_line: LineString, mask: Tuple[float], expected_error: str
+    ):
+        """Test the mask_profile method for out-of-bounds station bounds."""
+        with pytest.raises(ValueError, match=expected_error):
+            LineGeometry(river_line, mask)
+
+    def test_as_array(self):
+        """Test the as_array method."""
+        line_string = LineString(
+            [
+                (0, 0, 0),
+                (1, 1, 1),
+                (2, 2, 2),
+                (3, 3, 3),
+                (4, 4, 4),
+            ]
+        )
+        center_line = LineGeometry(line_string)
+
+        result = center_line.as_array()
+
+        assert isinstance(result, np.ndarray)
+        assert result.shape == (5, 3)
+        assert np.array_equal(result[:, 0], np.array([0, 1, 2, 3, 4]))
+        assert np.array_equal(result[:, 1], np.array([0, 1, 2, 3, 4]))
+        assert np.array_equal(result[:, 2], np.array([0, 1, 2, 3, 4]))

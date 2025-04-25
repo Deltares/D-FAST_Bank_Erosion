@@ -27,6 +27,15 @@ object SignedRelease : BuildType({
         }
     }
 
+
+    if (DslContext.getParameter("environment") == "production") {
+        triggers {
+            vcs {
+                branchFilter = "+:<default>"
+            }
+        }
+    }
+
     dependencies {
         snapshot(BuildTerminal) {
             onDependencyFailure = FailureAction.FAIL_TO_START

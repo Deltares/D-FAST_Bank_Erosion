@@ -1311,17 +1311,25 @@ class LineGeometry:
     """Center line class."""
 
     def __init__(self, line: Union[LineString, np.ndarray], mask: Tuple[float, float] = None):
-        """Center Line initialization.
+        """Geometry Line initialization.
 
         Args:
-            config_file : ConfigFile
-                Configuration file with settings for the analysis.
+            line_string (LineString):
+                River center line as a linestring.
+            mask (Tuple[float, float], optional):
+                Lower and upper limit for the chainage. Defaults to None.
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile, LineGeometry
-            >>> config_file = ConfigFile("tests/data/erosion/meuse_manual.cfg")
-            >>> center_line = LineGeometry(config_file)
+            >>> line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])
+            >>> mask = (0.5, 1.5)
+            >>> center_line = LineGeometry(line_string, mask)
+            No message found for clip_chainage
+            >>> np.array(center_line.values.coords)
+            array([[0.5, 0.5, 0.5],
+                   [1. , 1. , 1. ],
+                   [1.5, 1.5, 1.5]])
+
             ```
         """
         self.station_bounds = mask
@@ -1340,9 +1348,8 @@ class LineGeometry:
         return np.array(self.values.coords)
 
     @staticmethod
-    def mask(line_string, bounds: Tuple[float, float]) -> LineString:
-        """
-        Clip a chainage line to the relevant reach.
+    def mask(line_string: LineString, bounds: Tuple[float, float]) -> LineString:
+        """Clip a chainage line to the relevant reach.
 
         Args:
             line_string (LineString):
@@ -1352,78 +1359,151 @@ class LineGeometry:
 
         Returns:
             LineString: Clipped river chainage line.
+
+        Examples:
+            ```python
+            >>> line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])
+            >>> bounds = (0.5, 1.5)
+            >>> center_line = GeometryLine.mask(line_string, bounds)
+            >>> np.array(center_line.coords)
+            array([[0.5, 0.5, 0.5],
+                   [1. , 1. , 1. ],
+                   [1.5, 1.5, 1.5]])
+
+            ```
         """
-        start_i = None
-        end_i = None
-        for i, c in enumerate(line_string.coords):
-            if start_i is None and c[2] >= bounds[0]:
-                start_i = i
-            if c[2] >= bounds[1]:
-                end_i = i
-                break
+        line_string_coords = line_string.coords
+        start_index = LineGeometry._find_mask_index(bounds[0], line_string_coords)
+        end_index = LineGeometry._find_mask_index(bounds[1], line_string_coords)
+        lower_bound_point, start_index = LineGeometry._handle_bound(
+            start_index, bounds[0], True, line_string_coords
+        )
+        upper_bound_point, end_index = LineGeometry._handle_bound(
+            end_index, bounds[1], False, line_string_coords
+        )
 
-        if start_i is None:
-            raise Exception(
-                "Lower chainage bound {} is larger than the maximum chainage {} available".format(
-                    bounds[0], line_string.coords[-1][2]
-                )
-            )
-        elif start_i == 0:
-            # lower bound (potentially) clipped to available reach
-            if line_string.coords[0][2] - bounds[0] > 0.1:
-                raise Exception(
-                    "Lower chainage bound {} is smaller than the minimum chainage {} available".format(
-                        bounds[0], line_string.coords[0][2]
-                    )
-                )
-            x0 = None
+        if lower_bound_point is None and upper_bound_point is None:
+            return line_string
+        elif lower_bound_point is None:
+            return LineString(line_string_coords[: end_index + 1] + [upper_bound_point])
+        elif upper_bound_point is None:
+            return LineString([lower_bound_point] + line_string_coords[start_index:])
         else:
-            alpha = (bounds[0] - line_string.coords[start_i - 1][2]) / (
-                    line_string.coords[start_i][2] - line_string.coords[start_i - 1][2]
+            return LineString(
+                [lower_bound_point]
+                + line_string_coords[start_index:end_index]
+                + [upper_bound_point]
             )
-            x0 = tuple(
-                (c1 + alpha * (c2 - c1))
-                for c1, c2 in zip(line_string.coords[start_i - 1], line_string.coords[start_i])
-            )
-            if alpha > 0.9:
-                # value close to the first node (start_i), so let's skip that one
-                start_i = start_i + 1
 
-        if end_i is None:
-            if bounds[1] - line_string.coords[-1][2] > 0.1:
-                raise Exception(
-                    "Upper chainage bound {} is larger than the maximum chainage {} available".format(
-                        bounds[1], line_string.coords[-1][2]
-                    )
+    @staticmethod
+    def _find_mask_index(
+            station_bound: float, line_string_coords: np.ndarray
+    ) -> Optional[int]:
+        """Find the start and end indices for clipping the chainage line.
+
+        Args:
+            station_bound (float):
+                Station bound for clipping.
+            line_string_coords (np.ndarray):
+                Coordinates of the line string.
+
+        Returns:
+            Optional[int]: index for clipping.
+        """
+        mask_index = next(
+            (
+                index
+                for index, coord in enumerate(line_string_coords)
+                if coord[2] >= station_bound
+            ),
+            None,
+        )
+        return mask_index
+
+    @staticmethod
+    def _handle_bound(
+        index: Optional[int],
+        station_bound: float,
+        is_lower: bool,
+        line_string_coords: np.ndarray,
+    ) -> Tuple[Optional[Tuple[float, float, float]], Optional[int]]:
+        """Handle the clipping of the stations line for a given bound.
+
+        Args:
+            index (Optional[int]):
+                Index for clipping (start or end).
+            station_bound (float):
+                Station bound for clipping.
+            is_lower (bool):
+                True if handling the lower bound, False for the upper bound.
+            line_string_coords (np.ndarray):
+                Coordinates of the line string.
+
+        Returns:
+            Tuple[Optional[Tuple[float, float, float]], Optional[int]]:
+                Adjusted bound point and updated index.
+        """
+        if index is None:
+            bound_type = "Lower" if is_lower else "Upper"
+            end_station = line_string_coords[-1][2]
+            if is_lower or (station_bound - end_station > 0.1):
+                raise ValueError(
+                    f"{bound_type} chainage bound {station_bound} "
+                    f"is larger than the maximum chainage {end_station} available"
                 )
-            # else station[1] matches chainage of the last point
-            if x0 is None:
-                # whole range available selected
-                pass
-            else:
-                line_string = LineString([x0] + line_string.coords[start_i:])
-        elif end_i == 0:
-            raise Exception(
-                "Upper chainage bound {} is smaller than the minimum chainage {} available".format(
-                    bounds[1], line_string.coords[0][2]
+            return None, index
+
+        if index == 0:
+            bound_type = "Lower" if is_lower else "Upper"
+            start_station = line_string_coords[0][2]
+            if not is_lower or (start_station - station_bound > 0.1):
+                raise ValueError(
+                    f"{bound_type} chainage bound {station_bound} "
+                    f"is smaller than the minimum chainage {start_station} available"
                 )
+            return None, index
+
+        # Interpolate the point
+        alpha, interpolated_point = LineGeometry._interpolate_point(
+            index, station_bound, line_string_coords
+        )
+
+        # Adjust the index based on the interpolation factor
+        if is_lower and alpha > 0.9:
+            index += 1
+        elif not is_lower and alpha < 0.1:
+            index -= 1
+
+        return interpolated_point, index
+
+    @staticmethod
+    def _interpolate_point(
+            index: int, station_bound: float, line_string_coords: np.ndarray
+    ) -> Tuple[float, Tuple[float, float, float]]:
+        """Interpolate a point between two coordinates.
+
+        Args:
+            index (int):
+                Index of the coordinate to interpolate.
+            station_bound (float):
+                Station bound for interpolation.
+            line_string_coords (np.ndarray):
+                Coordinates of the line string.
+
+        Returns:
+            float: Interpolation factor.
+            Tuple[float, float, float]: Interpolated point.
+        """
+        alpha = (station_bound - line_string_coords[index - 1][2]) / (
+                line_string_coords[index][2] - line_string_coords[index - 1][2]
+        )
+        interpolated_point = tuple(
+            prev_coord + alpha * (next_coord - prev_coord)
+            for prev_coord, next_coord in zip(
+                line_string_coords[index - 1], line_string_coords[index]
             )
-        else:
-            alpha = (bounds[1] - line_string.coords[end_i - 1][2]) / (
-                    line_string.coords[end_i][2] - line_string.coords[end_i - 1][2]
-            )
-            x1 = tuple(
-                (c1 + alpha * (c2 - c1))
-                for c1, c2 in zip(line_string.coords[end_i - 1], line_string.coords[end_i])
-            )
-            if alpha < 0.1:
-                # value close to the previous point (end_i - 1), so let's skip that one
-                end_i = end_i - 1
-            if x0 is None:
-                line_string = LineString(line_string.coords[:end_i] + [x1])
-            else:
-                line_string = LineString([x0] + line_string.coords[start_i:end_i] + [x1])
-        return line_string
+        )
+        return alpha, interpolated_point
 
     def intersect_with_line(
         self, reference_line_with_stations: np.ndarray
@@ -1530,15 +1610,28 @@ class BaseRiverData:
         Examples:
             ```python
             >>> from dfastbe.io import ConfigFile, BaseRiverData
-            >>> config_file = ConfigFile("tests/data/erosion/meuse_manual.cfg")
-            >>> river_data = BaseRiverData(config_file)
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> river_data = RiverData(config_file)
+            No message found for read_chainage
+            No message found for clip_chainage
+
             ```
         """
         self.config_file = config_file
         center_line = config_file.get_river_center_line()
         bounds = config_file.get_start_end_stations()
-        self.river_center_line = LineGeometry(center_line, bounds)
-        self.station_bounds: Tuple = config_file.get_start_end_stations()
+        self._river_center_line = LineGeometry(center_line, bounds)
+        self._station_bounds: Tuple = config_file.get_start_end_stations()
+
+    @property
+    def river_center_line(self) -> LineGeometry:
+        """LineGeometry: the clipped river center line."""
+        return self._river_center_line
+
+    @property
+    def station_bounds(self) -> Tuple[float, float]:
+        """Tuple: the lower and upper bounds of the river center line."""
+        return self._station_bounds
 
     @staticmethod
     def get_bbox(

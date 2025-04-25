@@ -1,6 +1,7 @@
 from typing import List, Tuple
 from shapely.geometry import LineString, Point
 from shapely.geometry.polygon import Polygon
+from shapely.geometry import MultiLineString
 from dfastbe.io import BaseRiverData, ConfigFile, LineGeometry, log_text, BaseSimulationData
 
 
@@ -15,6 +16,8 @@ class SearchLines:
         Args:
             lines (List[LineString]):
                 List of search lines.
+            mask (LineGeometry, optional):
+                Center line for masking the search lines. Defaults to None.
         """
         if mask is None:
             self.values = lines
@@ -45,12 +48,27 @@ class SearchLines:
         Clip the list of lines to the envelope of a certain size surrounding a reference line.
 
         Arg:
+            search_lines (List[LineString]):
+                List of lines to be clipped.
+            river_center_line (LineString):
+                Reference line to which the search lines are clipped.
             max_river_width: float
                 Maximum distance away from river_profile.
 
         Returns:
             List[LineString]: List of clipped search lines.
             float: Maximum distance from any point within line to reference line.
+
+        Examples:
+            ```python
+            >>> from shapely.geometry import LineString
+            >>> search_lines = [LineString([(0, 0), (1, 1)]), LineString([(2, 2), (3, 3)])]
+            >>> river_center_line = LineString([(0, 0), (2, 2)])
+            >>> search_lines_clipped, max_distance = SearchLines.mask(search_lines, river_center_line)
+            >>> max_distance
+            2.0
+
+            ```
         """
         num = len(search_lines)
         profile_buffer = river_center_line.buffer(max_river_width, cap_style=2)
@@ -66,15 +84,9 @@ class SearchLines:
 
             # If the bank search line breaks into multiple parts, select the part closest to the reference line.
             if search_lines[ind].geom_type == "MultiLineString":
-                distance_min = max_river_width
-                i_min = 0
-                for i in range(len(search_lines[ind])):
-                    line_simplified = search_lines[ind][i].simplify(1)
-                    distance_min_i = line_simplified.distance(profile_simplified)
-                    if distance_min_i < distance_min:
-                        distance_min = distance_min_i
-                        i_min = i
-                search_lines[ind] = search_lines[ind][i_min]
+                search_lines[ind] = SearchLines._select_closest_part(
+                    search_lines[ind], profile_simplified, max_river_width
+                )
 
             # Determine the maximum distance from a point on this line to the reference line.
             line_simplified = search_lines[ind].simplify(1)
@@ -87,6 +99,37 @@ class SearchLines:
 
         return search_lines, max_distance
 
+    @staticmethod
+    def _select_closest_part(
+            search_lines_segments: MultiLineString,
+            reference_line: LineString,
+            max_river_width: float,
+    ) -> LineString:
+        """Select the closest part of a MultiLineString to the reference line.
+
+        Args:
+            search_lines_segments (MultiLineString):
+                The MultiLineString containing multiple line segments to evaluate.
+            reference_line (LineString):
+                The reference line to calculate distances.
+            max_river_width (float):
+                Maximum allowable distance.
+
+        Returns:
+            LineString: The closest part of the MultiLineString.
+        """
+        closest_part = search_lines_segments.geoms[0]
+        min_distance = max_river_width
+
+        for part in search_lines_segments.geoms:
+            simplified_part = part.simplify(1)
+            distance = simplified_part.distance(reference_line)
+            if distance < min_distance:
+                min_distance = distance
+                closest_part = part
+
+        return closest_part
+
     def to_polygons(self) -> List[Polygon]:
         """
         Construct a series of polygons surrounding the bank search lines.
@@ -94,11 +137,22 @@ class SearchLines:
         Returns:
             bank_areas:
                 Array containing the areas of interest surrounding the bank search lines.
-        """
-        bank_areas = [None] * self.size
-        for b, distance in enumerate(self.d_lines):
-            bank_areas[b] = self.values[b].buffer(distance, cap_style=2)
 
+        Examples:
+            ```python
+            >>> search_lines = [LineString([(0, 0), (1, 1)]), LineString([(2, 2), (3, 3)])]
+            >>> search_lines_clipped = SearchLines(search_lines)
+            >>> search_lines_clipped.d_lines = [10, 20]
+            >>> bank_areas = search_lines_clipped.to_polygons()
+            >>> len(bank_areas)
+            2
+
+            ```
+        """
+        bank_areas = [
+            self.values[b].buffer(distance, cap_style=2)
+            for b, distance in enumerate(self.d_lines)
+        ]
         return bank_areas
 
 
