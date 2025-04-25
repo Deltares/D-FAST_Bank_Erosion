@@ -1588,21 +1588,21 @@ class GeometryLine:
         """
         if index is None:
             bound_type = "Lower" if is_lower else "Upper"
-            max_chainage = line_string_coords[-1][2]
-            if is_lower or (station_bound - max_chainage > 0.1):
+            end_station = line_string_coords[-1][2]
+            if is_lower or (station_bound - end_station > 0.1):
                 raise ValueError(
                     f"{bound_type} chainage bound {station_bound} "
-                    f"is larger than the maximum chainage {max_chainage} available"
+                    f"is larger than the maximum chainage {end_station} available"
                 )
             return None, index
 
         if index == 0:
             bound_type = "Lower" if is_lower else "Upper"
-            min_chainage = line_string_coords[0][2]
-            if not is_lower or (min_chainage - station_bound > 0.1):
+            start_station = line_string_coords[0][2]
+            if not is_lower or (start_station - station_bound > 0.1):
                 raise ValueError(
                     f"{bound_type} chainage bound {station_bound} "
-                    f"is smaller than the minimum chainage {min_chainage} available"
+                    f"is smaller than the minimum chainage {start_station} available"
                 )
             return None, index
 
