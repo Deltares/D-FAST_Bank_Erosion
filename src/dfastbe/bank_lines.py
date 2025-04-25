@@ -52,28 +52,11 @@ class BankLines:
 
         Examples:
             ```python
+            >>> from unittest.mock import patch
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> bank_lines = BankLines(config_file)
-            No message found for banklines_out
-            No message found for overwrite_dir
-            No message found for figure_dir
-            No message found for overwrite_dir
-            No message found for read_chainage
-            No message found for clip_chainage
-            No message found for read_search_line
-            No message found for read_search_line
-            No message found for read_simdata
-            No message found for read_grid
-            No message found for read_bathymetry
-            No message found for read_water_level
-            No message found for read_water_depth
-            No message found for read_velocity
-            No message found for read_chezy
-            No message found for read_drywet
-            No message found for clip_data
-            No message found for read_search_line
-            No message found for read_search_line
+            >>> with patch("dfastbe.io.log_text"):
+            ...    bank_lines = BankLines(config_file)
 
             ```
         """
@@ -93,12 +76,12 @@ class BankLines:
 
     @property
     def config_file(self) -> ConfigFile:
-        """Configuration file object."""
+        """ConfigFile: object containing the configuration settings."""
         return self._config_file
 
     @property
     def max_river_width(self) -> int:
-        """Maximum river width in meters."""
+        """int: Maximum river width in meters."""
         return MAX_RIVER_WIDTH
 
     def _get_bank_output_dir(self) -> Path:
@@ -112,7 +95,22 @@ class BankLines:
         return Path(bank_output_dir)
 
     def detect(self) -> None:
-        """Run the bank line detection analysis for a specified configuration."""
+        """Run the bank line detection analysis for a specified configuration.
+
+        Examples:
+            ```python
+            >>> import matplotlib
+            >>> matplotlib.use('Agg')
+            >>> import sys
+            >>> from io import StringIO
+            >>> from dfastbe.io import ConfigFile
+            >>> sys.stdout = StringIO()
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> bank_lines = BankLines(config_file)
+            >>> bank_lines.detect()
+
+            ```
+        """
         config_file = self.config_file
         river_data = self.river_data
         timed_logger("-- start analysis --")
