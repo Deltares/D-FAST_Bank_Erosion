@@ -64,7 +64,6 @@ class BankLines:
 
         self.simulation_data, self.h0 = self.river_data.simulation_data()
 
-
     @property
     def config_file(self) -> ConfigFile:
         """Configuration file object."""
@@ -135,7 +134,6 @@ class BankLines:
         # save bank_file
         self.save(bank, banklines, clipped_banklines, bank_areas, config_file)
 
-
         if self.plot_flags["plot_data"]:
             self.plot(
                 center_line_arr,
@@ -160,10 +158,8 @@ class BankLines:
             bank_area (Polygon):
                 A search area corresponding to one of the bank search lines.
 
-        Returns
-        -------
-        clipped_banklines : MultiLineString
-            Un-ordered set of bank line segments, clipped to bank area.
+        Returns:
+            MultiLineString: Un-ordered set of bank line segments, clipped to bank area.
         """
         # intersection returns one MultiLineString object
         clipped_banklines = banklines.intersection(bank_area)[0]
