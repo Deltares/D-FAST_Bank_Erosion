@@ -16,6 +16,7 @@ from dfastbe import __version__
 from dfastbe import plotting as df_plt
 from dfastbe.io import (
     ConfigFile,
+    LineGeometry,
     BaseSimulationData,
     log_text,
     get_bbox
@@ -24,7 +25,6 @@ from dfastbe.bank_lines.data_models import BankLinesRiverData
 from dfastbe.kernel import get_zoom_extends
 from dfastbe.support import (
     poly_to_line,
-    project_km_on_line,
     sort_connect_bank_lines,
     tri_to_line,
     on_right_side,
@@ -178,7 +178,8 @@ class BankLines:
             bank_km: List[np.ndarray] = []
             for ib in range(n_search_lines):
                 bcrds_numpy = np.array(bank[ib])
-                km_numpy = project_km_on_line(bcrds_numpy, xy_km_numpy)
+                line_geom = LineGeometry(bcrds_numpy)
+                km_numpy = line_geom.intersect_with_line(xy_km_numpy)
                 bank_crds.append(bcrds_numpy)
                 bank_km.append(km_numpy)
             km_zoom, xy_zoom = get_zoom_extends(

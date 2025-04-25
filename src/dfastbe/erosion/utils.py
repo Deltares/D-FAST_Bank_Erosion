@@ -3,8 +3,8 @@ import numpy as np
 import math
 from shapely.geometry import Point, Polygon, LineString
 
-from dfastbe.io import log_text
-from dfastbe.support import project_km_on_line, on_right_side, get_slices, enlarge, get_slices_core
+from dfastbe.io import log_text, LineGeometry
+from dfastbe.support import on_right_side, get_slices, enlarge, get_slices_core
 from dfastbe.erosion.data_models import ErosionRiverData, BankData, MeshData
 
 
@@ -37,9 +37,8 @@ class BankLinesProcessor:
         bank_chainage_midpoints = [None] * n_bank_lines
         is_right_bank = [True] * n_bank_lines
         for bank_index, coords in enumerate(bank_line_coords):
-            segment_mid_points = (coords[:-1, :] + coords[1:, :]) / 2
-            chainage_mid_points = project_km_on_line(segment_mid_points,
-                                                     self.river_center_line)
+            segment_mid_points = LineGeometry((coords[:-1, :] + coords[1:, :]) / 2)
+            chainage_mid_points = segment_mid_points.intersect_with_line(self.river_center_line)
 
             # check if the bank line is defined from low chainage to high chainage
             if chainage_mid_points[0] > chainage_mid_points[-1]:

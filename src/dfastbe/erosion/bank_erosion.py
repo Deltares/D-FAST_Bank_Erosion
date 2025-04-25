@@ -37,10 +37,10 @@ import matplotlib.pyplot as plt
 from dfastbe import __version__
 from dfastbe.kernel import get_km_bins, moving_avg, comp_erosion_eq, comp_erosion, get_km_eroded_volume, \
                             get_zoom_extends
-from dfastbe.support import project_km_on_line, move_line
+from dfastbe.support import move_line
 from dfastbe import plotting as df_plt
 from dfastbe.io import (
-    ConfigFile,
+    LineGeometry, ConfigFile,
     log_text,
     write_shp_pnt,
     write_km_eroded_volumes,
@@ -123,9 +123,9 @@ class Erosion:
     def _prepare_river_axis(
         self, stations_coords: np.ndarray, crs: Any
     ) -> Tuple[np.ndarray, np.ndarray, LineString]:
-        # read river axis file
-        river_axis = self.river_data.read_river_axis()
-        river_axis_numpy = np.array(river_axis.coords)
+
+        river_axis = LineGeometry(self.river_data.read_river_axis())
+        river_axis_numpy = river_axis.as_array()
         # optional sorting --> see 04_Waal_D3D example
         # check: sum all distances and determine maximum distance ...
         # if maximum > alpha * sum then perform sort
@@ -138,7 +138,7 @@ class Erosion:
 
         # map km to axis points, further using axis
         log_text("chainage_to_axis")
-        river_axis_km = project_km_on_line(river_axis_numpy, self.river_center_line_arr)
+        river_axis_km = river_axis.intersect_with_line(self.river_center_line_arr)
         write_shp_pnt(
             river_axis_numpy,
             {"chainage": river_axis_km},
@@ -173,8 +173,9 @@ class Erosion:
 
         # map km to fairway points, further using axis
         log_text("chainage_to_fairway")
-        fairway_numpy = np.array(river_axis.coords)
-        fairway_km = project_km_on_line(fairway_numpy, self.river_center_line_arr)
+        river_axis = LineGeometry(river_axis)
+        fairway_numpy = river_axis.as_array()
+        fairway_km = river_axis.intersect_with_line(self.river_center_line_arr)
         write_shp_pnt(
             fairway_numpy,
             {"chainage": fairway_km},
