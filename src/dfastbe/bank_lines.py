@@ -49,6 +49,33 @@ class BankLines:
                 Analysis configuration settings.
             gui : bool
                 Flag indicating whether this routine is called from the GUI.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> bank_lines = BankLines(config_file)
+            No message found for banklines_out
+            No message found for overwrite_dir
+            No message found for figure_dir
+            No message found for overwrite_dir
+            No message found for read_chainage
+            No message found for clip_chainage
+            No message found for read_search_line
+            No message found for read_search_line
+            No message found for read_simdata
+            No message found for read_grid
+            No message found for read_bathymetry
+            No message found for read_water_level
+            No message found for read_water_depth
+            No message found for read_velocity
+            No message found for read_chezy
+            No message found for read_drywet
+            No message found for clip_data
+            No message found for read_search_line
+            No message found for read_search_line
+
+            ```
         """
         # the root_dir is used to get the FigureDir in the `_get_plotting_flags`
         self.root_dir = config_file.root_dir
