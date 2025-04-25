@@ -127,5 +127,22 @@ The Commit Status Publisher is a feature used in some TeamCity configurations to
 - The token is securely stored in TeamCity as a parameter. To view or manage the list of tokens in TeamCity, navigate to Project Settings → Parameters.
 - The token is accessed in the build configuration using the %parameter_name% syntax. This ensures that sensitive information, such as the token, is protected and not exposed in the build logs or configuration files.
 
+### Triggering Builds Based on Environment
+To avoid unnecessary builds in a test environment, TeamCity allows you to control triggering using a context parameter. This ensures that builds are only triggered in the appropriate environment, such as production.
+
+1. How to Enable or Disable Triggering
+- Enable Triggering:
+  Set the context parameter environment to "production". This allows builds to be triggered automatically.
+- Disable Triggering:
+  Set the context parameter environment to "test". This prevents builds from being triggered automatically.
+
+2. Where to Set the Context Parameter
+The context parameter can be configured in Versioned Settings under Context Parameters. This allows you to manage the environment-specific behavior of your build configurations directly in the versioned settings.
+
+3. Benefits
+- Efficiency: Prevents unnecessary builds in non-production environments, saving resources.
+- Flexibility: Easily switch between environments by updating the context parameter.
+- Control: Ensures that builds are only triggered when appropriate, reducing noise in the CI/CD pipeline.
+
 ### Folder Overview
 The `DFastBETests` folder is structured to modularize the TeamCity build configurations and templates for the D-FAST Bank Erosion project. Each file serves a specific purpose, such as running tests, building the project, or managing dependencies, while the `settings.kts` file ties everything together into a cohesive project.
