@@ -5,26 +5,29 @@ from configparser import ConfigParser
 from contextlib import contextmanager
 from io import StringIO
 from pathlib import Path
-from typing import Dict
-from unittest.mock import patch, MagicMock
+from typing import Dict, List, Tuple
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 from geopandas import GeoDataFrame
 from pyfakefs.fake_filesystem import FakeFilesystem
-from shapely.geometry import LineString
+from shapely import Polygon
+from shapely.geometry import LineString, MultiLineString
 
 from dfastbe.io import (
-    SimulationData,
-    SimulationFilesError,
+    GeometryLine,
     ConfigFile,
     RiverData,
+    SearchLines,
+    SimulationData,
+    SimulationFilesError,
+    _read_fm_map,
     absolute_path,
     get_filename,
     get_text,
     load_program_texts,
     log_text,
-    _read_fm_map,
     relative_path,
 )
 from dfastbe.structures import MeshData
@@ -875,10 +878,15 @@ class TestConfigFileE2E:
 
 
 class TestRiverData:
-    def test_initialization(self):
+
+    @pytest.fixture
+    def river_data(self) -> RiverData:
         path = "tests/data/erosion/meuse_manual.cfg"
         config_file = ConfigFile.read(path)
         river_data = RiverData(config_file)
+        return river_data
+
+    def test_initialization(self, river_data: RiverData):
         assert isinstance(river_data.config_file, ConfigFile)
         search_lines = river_data.search_lines
         assert search_lines.size == 2
@@ -889,3 +897,236 @@ class TestRiverData:
         center_line_arr = center_line.as_array()
         assert isinstance(center_line_arr, np.ndarray)
         assert center_line_arr.shape == (251, 3)
+
+    @patch("dfastbe.io.SimulationData")
+    @patch("dfastbe.io.GeometryLine")
+    @patch("dfastbe.io.SearchLines")
+    def test_simulation_data(
+        self, mock_search_lines, mock_center_line, mock_simulation_data
+    ):
+        """Test the simulation_data method of the RiverData class with a mocked SimulationData."""
+        # Mock the SimulationData instance
+        mock_simulation_data_class = MagicMock()
+        mock_simulation_data_class.dry_wet_threshold = 0.1
+        mock_simulation_data.read.return_value = mock_simulation_data_class
+
+        # Mock the ConfigFile
+        mock_config_file = MagicMock()
+        mock_config_file.get_sim_file.return_value = "mock_sim_file.nc"
+        mock_config_file.get_float.return_value = 0.5  # Critical water depth
+        mock_config_file.get_start_end_stations.return_value = (0.0, 10.0)
+        mock_config_file.get_search_lines.return_value = [
+            LineString([(0, 0), (1, 1)]),
+            LineString([(2, 2), (3, 3)]),
+        ]
+        mock_config_file.get_bank_search_distances.return_value = [1.0, 2.0]
+
+        mock_center_line_class = MagicMock()
+        mock_center_line_class.values = LineString([(0, 0), (1, 1), (2, 2)])
+        mock_center_line.return_value = mock_center_line_class
+
+        # Mock the SearchLines instance
+        mock_search_lines_class = MagicMock()
+        mock_search_lines_class.max_distance = 2.0
+        mock_search_lines.return_value = mock_search_lines_class
+
+        # Create a RiverData instance
+        river_data = RiverData(mock_config_file)
+
+        # Call the simulation_data method
+        simulation_data, h0 = river_data.simulation_data()
+
+        # Assertions
+        mock_simulation_data_class.clip.assert_called_once_with(
+            mock_center_line_class.values, mock_search_lines_class.max_distance
+        )
+        assert h0 == 0.6  # Critical water depth (0.5) + dry_wet_threshold (0.1)
+        assert simulation_data == mock_simulation_data_class
+
+    @patch("dfastbe.io.XYCModel.read")
+    def test_read_river_axis(self, mock_read, river_data):
+        """Test the read_river_axis method by mocking XYCModel.read."""
+        mock_river_axis = LineString([(0, 0), (1, 1), (2, 2)])
+        mock_read.return_value = mock_river_axis
+        expected_path = Path("tests/data/erosion/inputs/maas_rivieras_mod.xyc")
+
+        river_axis = river_data.read_river_axis()
+
+        mock_read.assert_called_once_with(str(expected_path.resolve()))
+        assert isinstance(river_axis, LineString)
+        assert river_axis.equals(mock_river_axis)
+
+
+class TestSearchLines:
+    def test_mask_with_multilinestring(self):
+        """Test the mask method with a LineString and a MultiLineString."""
+        # Define a LineString and a MultiLineString
+        line1 = LineString([(0, 0), (1, 1), (2, 2)])
+        line2 = MultiLineString([[(3, 3), (4, 4)], [(5, 5), (6, 6)]])
+
+        # Combine them into search_lines
+        search_lines = [line1, line2]
+
+        # Define a river center line
+        river_center_line = LineString([(0, 0), (6, 6)])
+
+        # Call the mask method
+        masked_lines, max_distance = SearchLines.mask(
+            search_lines, river_center_line, max_river_width=10
+        )
+
+        # Assertions
+        assert len(masked_lines) == 2
+        assert isinstance(masked_lines[0], LineString)
+        assert isinstance(masked_lines[1], LineString)
+        assert max_distance > 0
+
+    @pytest.fixture
+    def lines(self) -> List[LineString]:
+        return [LineString([(0, 0), (1, 1)]), LineString([(2, 2), (3, 3)])]
+
+    def test_d_lines(self, lines):
+        search_lines = SearchLines(lines)
+        search_lines.d_lines = lines
+        assert search_lines.d_lines == lines
+
+    @patch("dfastbe.io.GeometryLine")
+    def test_searchlines_with_center_line(self, mock_center_line, lines):
+        mask = LineString([(0, 0), (2, 2)])
+        mock_center_line.values = mask
+        search_lines = SearchLines(lines, mask=mock_center_line)
+        assert search_lines.max_distance == pytest.approx(2.0)
+
+    def test_d_lines_not_set(self, lines):
+        search_lines = SearchLines(lines)
+        with pytest.raises(
+            ValueError, match="The d_lines property has not been set yet."
+        ):
+            search_lines.d_lines
+
+    def test_to_polygons(self):
+        """Test the to_polygons method of the SearchLines class."""
+        line1 = LineString([(0, 0), (1, 1), (2, 2)])
+        line2 = LineString([(3, 3), (4, 4), (5, 5)])
+        search_lines = [line1, line2]
+
+        search_lines_obj = SearchLines(search_lines)
+        search_lines_obj.d_lines = [1.0, 2.0]
+        polygons = search_lines_obj.to_polygons()
+
+        assert len(polygons) == 2
+        assert isinstance(polygons[0], Polygon)
+        assert isinstance(polygons[1], Polygon)
+        assert polygons[0].buffer(-1.0).is_empty
+        assert polygons[1].buffer(-2.0).is_empty
+
+
+class TestGeometryLine:
+    @pytest.fixture
+    def river_line(self):
+        """Fixture to create a RiverData instance with mock data."""
+        line_string = LineString(
+            [
+                (0, 0, 0),
+                (1, 1, 1),
+                (2, 2, 2),
+                (3, 3, 3),
+                (4, 4, 4),
+            ]
+        )
+
+        return line_string
+
+    @pytest.mark.parametrize(
+        "mask, expected_profile",
+        [
+            (
+                (1.5, 3.5),
+                LineString([(1.5, 1.5, 1.5), (2, 2, 2), (3, 3, 3), (3.5, 3.5, 3.5)]),
+            ),
+            (
+                (2, 4.05),
+                LineString([(2, 2, 2), (3, 3, 3), (4, 4, 4)]),
+            ),
+            (
+                (-0.05, 3),
+                LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2), (3, 3, 3)]),
+            ),
+            (
+                (-0.05, 4.05),
+                LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 4)]),
+            ),
+        ],
+        ids=[
+            "Normal bounds",
+            "Upper bound exceeds max",
+            "Lower bound below min",
+            "Both bounds out of range",
+        ],
+    )
+    def test_mask_profile(
+        self,
+        river_line: LineString,
+        mask: Tuple[float],
+        expected_profile: LineString,
+    ):
+        """Test the mask_profile method with various station bounds."""
+        center_line = GeometryLine(river_line, mask)
+
+        assert isinstance(center_line.values, LineString)
+        assert center_line.values.equals(expected_profile)
+
+    @pytest.mark.parametrize(
+        "mask, expected_error",
+        [
+            (
+                (5.0, 6.0),
+                "Lower chainage bound 5.0 is larger than the maximum chainage 4.0 available",
+            ),
+            (
+                (-0.2, 3.0),
+                "Lower chainage bound -0.2 is smaller than the minimum chainage 0.0 available",
+            ),
+            (
+                (0.0, -0.5),
+                "Upper chainage bound -0.5 is smaller than the minimum chainage 0.0 available",
+            ),
+            (
+                (0.0, 5.0),
+                "Upper chainage bound 5.0 is larger than the maximum chainage 4.0 available",
+            ),
+        ],
+        ids=[
+            "Lower bound exceeds max",
+            "Lower bound below min",
+            "Upper bound below min",
+            "Upper bound exceeds max",
+        ],
+    )
+    def test_mask_profile_out_of_bounds(
+        self, river_line: LineString, mask: Tuple[float], expected_error: str
+    ):
+        """Test the mask_profile method for out-of-bounds station bounds."""
+        with pytest.raises(ValueError, match=expected_error):
+            GeometryLine(river_line, mask)
+
+    def test_as_array(self):
+        """Test the as_array method."""
+        line_string = LineString(
+            [
+                (0, 0, 0),
+                (1, 1, 1),
+                (2, 2, 2),
+                (3, 3, 3),
+                (4, 4, 4),
+            ]
+        )
+        center_line = GeometryLine(line_string)
+
+        result = center_line.as_array()
+
+        assert isinstance(result, np.ndarray)
+        assert result.shape == (5, 3)
+        assert np.array_equal(result[:, 0], np.array([0, 1, 2, 3, 4]))
+        assert np.array_equal(result[:, 1], np.array([0, 1, 2, 3, 4]))
+        assert np.array_equal(result[:, 2], np.array([0, 1, 2, 3, 4]))

@@ -35,12 +35,12 @@ import geopandas as gpd
 import netCDF4
 import numpy as np
 import pandas as pd
-from shapely.geometry.polygon import Polygon
 from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
 from shapely import prepare
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString, MultiLineString, Point
+from shapely.geometry.polygon import Polygon
 
 from dfastbe.structures import MeshData
 
@@ -249,7 +249,7 @@ class SimulationData:
             No message found for read_velocity
             No message found for read_chezy
             No message found for read_drywet
-            >>> river_profile = LineString([
+            >>> river_center_line = LineString([
             ... [194949.796875, 361366.90625],
             ... [194966.515625, 361399.46875],
             ... [194982.8125, 361431.03125]
@@ -1449,21 +1449,30 @@ class ConfigFile:
 
         return output_dir
 
-class CenterLine:
-    """Center line class."""
+
+class GeometryLine:
+    """Geometry line class."""
 
     def __init__(self, line_string: LineString, mask: Tuple[float, float] = None):
-        """Center Line initialization.
+        """Geometry Line initialization.
 
         Args:
-            config_file : ConfigFile
-                Configuration file with settings for the analysis.
+            line_string (LineString):
+                River center line as a linestring.
+            mask (Tuple[float, float], optional):
+                Lower and upper limit for the chainage. Defaults to None.
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile, CenterLine
-            >>> config_file = ConfigFile("tests/data/erosion/meuse_manual.cfg")
-            >>> center_line = CenterLine(config_file)
+            >>> line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])
+            >>> mask = (0.5, 1.5)
+            >>> center_line = GeometryLine(line_string, mask)
+            No message found for clip_chainage
+            >>> np.array(center_line.values.coords)
+            array([[0.5, 0.5, 0.5],
+                   [1. , 1. , 1. ],
+                   [1.5, 1.5, 1.5]])
+
             ```
         """
         self.station_bounds = mask
@@ -1472,17 +1481,17 @@ class CenterLine:
         else:
             self.values: LineString = self.mask(line_string, mask)
 
-        log_text(
-            "clip_chainage", data={"low": self.station_bounds[0], "high": self.station_bounds[1]}
-        )
+            log_text(
+                "clip_chainage",
+                data={"low": self.station_bounds[0], "high": self.station_bounds[1]},
+            )
 
     def as_array(self):
         return np.array(self.values.coords)
 
     @staticmethod
-    def mask(line_string, bounds: Tuple[float, float]) -> LineString:
-        """
-        Clip a chainage line to the relevant reach.
+    def mask(line_string: LineString, bounds: Tuple[float, float]) -> LineString:
+        """Clip a chainage line to the relevant reach.
 
         Args:
             line_string (LineString):
@@ -1492,87 +1501,163 @@ class CenterLine:
 
         Returns:
             LineString: Clipped river chainage line.
+
+        Examples:
+            ```python
+            >>> line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])
+            >>> bounds = (0.5, 1.5)
+            >>> center_line = GeometryLine.mask(line_string, bounds)
+            >>> np.array(center_line.coords)
+            array([[0.5, 0.5, 0.5],
+                   [1. , 1. , 1. ],
+                   [1.5, 1.5, 1.5]])
+
+            ```
         """
-        start_i = None
-        end_i = None
-        for i, c in enumerate(line_string.coords):
-            if start_i is None and c[2] >= bounds[0]:
-                start_i = i
-            if c[2] >= bounds[1]:
-                end_i = i
-                break
+        line_string_coords = line_string.coords
+        start_index = GeometryLine._find_mask_index(bounds[0], line_string_coords)
+        end_index = GeometryLine._find_mask_index(bounds[1], line_string_coords)
+        lower_bound_point, start_index = GeometryLine._handle_bound(
+            start_index, bounds[0], True, line_string_coords
+        )
+        upper_bound_point, end_index = GeometryLine._handle_bound(
+            end_index, bounds[1], False, line_string_coords
+        )
 
-        if start_i is None:
-            raise Exception(
-                "Lower chainage bound {} is larger than the maximum chainage {} available".format(
-                    bounds[0], line_string.coords[-1][2]
-                )
-            )
-        elif start_i == 0:
-            # lower bound (potentially) clipped to available reach
-            if line_string.coords[0][2] - bounds[0] > 0.1:
-                raise Exception(
-                    "Lower chainage bound {} is smaller than the minimum chainage {} available".format(
-                        bounds[0], line_string.coords[0][2]
-                    )
-                )
-            x0 = None
+        if lower_bound_point is None and upper_bound_point is None:
+            return line_string
+        elif lower_bound_point is None:
+            return LineString(line_string_coords[: end_index + 1] + [upper_bound_point])
+        elif upper_bound_point is None:
+            return LineString([lower_bound_point] + line_string_coords[start_index:])
         else:
-            alpha = (bounds[0] - line_string.coords[start_i - 1][2]) / (
-                    line_string.coords[start_i][2] - line_string.coords[start_i - 1][2]
+            return LineString(
+                [lower_bound_point]
+                + line_string_coords[start_index:end_index]
+                + [upper_bound_point]
             )
-            x0 = tuple(
-                (c1 + alpha * (c2 - c1))
-                for c1, c2 in zip(line_string.coords[start_i - 1], line_string.coords[start_i])
-            )
-            if alpha > 0.9:
-                # value close to the first node (start_i), so let's skip that one
-                start_i = start_i + 1
 
-        if end_i is None:
-            if bounds[1] - line_string.coords[-1][2] > 0.1:
-                raise Exception(
-                    "Upper chainage bound {} is larger than the maximum chainage {} available".format(
-                        bounds[1], line_string.coords[-1][2]
-                    )
+    @staticmethod
+    def _find_mask_index(
+        station_bound: float, line_string_coords: np.ndarray
+    ) -> Optional[int]:
+        """Find the start and end indices for clipping the chainage line.
+
+        Args:
+            station_bound (float):
+                Station bound for clipping.
+            line_string_coords (np.ndarray):
+                Coordinates of the line string.
+
+        Returns:
+            Optional[int]: index for clipping.
+        """
+        mask_index = next(
+            (
+                index
+                for index, coord in enumerate(line_string_coords)
+                if coord[2] >= station_bound
+            ),
+            None,
+        )
+        return mask_index
+
+    @staticmethod
+    def _handle_bound(
+        index: Optional[int],
+        station_bound: float,
+        is_lower: bool,
+        line_string_coords: np.ndarray,
+    ) -> Tuple[Optional[Tuple[float, float, float]], Optional[int]]:
+        """Handle the clipping of the stations line for a given bound.
+
+        Args:
+            index (Optional[int]):
+                Index for clipping (start or end).
+            station_bound (float):
+                Station bound for clipping.
+            is_lower (bool):
+                True if handling the lower bound, False for the upper bound.
+            line_string_coords (np.ndarray):
+                Coordinates of the line string.
+
+        Returns:
+            Tuple[Optional[Tuple[float, float, float]], Optional[int]]:
+                Adjusted bound point and updated index.
+        """
+        if index is None:
+            bound_type = "Lower" if is_lower else "Upper"
+            end_station = line_string_coords[-1][2]
+            if is_lower or (station_bound - end_station > 0.1):
+                raise ValueError(
+                    f"{bound_type} chainage bound {station_bound} "
+                    f"is larger than the maximum chainage {end_station} available"
                 )
-            # else kmbounds[1] matches chainage of last point
-            if x0 is None:
-                # whole range available selected
-                pass
-            else:
-                line_string = LineString([x0] + line_string.coords[start_i:])
-        elif end_i == 0:
-            raise Exception(
-                "Upper chainage bound {} is smaller than the minimum chainage {} available".format(
-                    bounds[1], line_string.coords[0][2]
+            return None, index
+
+        if index == 0:
+            bound_type = "Lower" if is_lower else "Upper"
+            start_station = line_string_coords[0][2]
+            if not is_lower or (start_station - station_bound > 0.1):
+                raise ValueError(
+                    f"{bound_type} chainage bound {station_bound} "
+                    f"is smaller than the minimum chainage {start_station} available"
                 )
+            return None, index
+
+        # Interpolate the point
+        alpha, interpolated_point = GeometryLine._interpolate_point(
+            index, station_bound, line_string_coords
+        )
+
+        # Adjust the index based on the interpolation factor
+        if is_lower and alpha > 0.9:
+            index += 1
+        elif not is_lower and alpha < 0.1:
+            index -= 1
+
+        return interpolated_point, index
+
+    @staticmethod
+    def _interpolate_point(
+        index: int, station_bound: float, line_string_coords: np.ndarray
+    ) -> Tuple[float, Tuple[float, float, float]]:
+        """Interpolate a point between two coordinates.
+
+        Args:
+            index (int):
+                Index of the coordinate to interpolate.
+            station_bound (float):
+                Station bound for interpolation.
+            line_string_coords (np.ndarray):
+                Coordinates of the line string.
+
+        Returns:
+            float: Interpolation factor.
+            Tuple[float, float, float]: Interpolated point.
+        """
+        alpha = (station_bound - line_string_coords[index - 1][2]) / (
+            line_string_coords[index][2] - line_string_coords[index - 1][2]
+        )
+        interpolated_point = tuple(
+            prev_coord + alpha * (next_coord - prev_coord)
+            for prev_coord, next_coord in zip(
+                line_string_coords[index - 1], line_string_coords[index]
             )
-        else:
-            alpha = (bounds[1] - line_string.coords[end_i - 1][2]) / (
-                    line_string.coords[end_i][2] - line_string.coords[end_i - 1][2]
-            )
-            x1 = tuple(
-                (c1 + alpha * (c2 - c1))
-                for c1, c2 in zip(line_string.coords[end_i - 1], line_string.coords[end_i])
-            )
-            if alpha < 0.1:
-                # value close to the previous point (end_i - 1), so let's skip that one
-                end_i = end_i - 1
-            if x0 is None:
-                line_string = LineString(line_string.coords[:end_i] + [x1])
-            else:
-                line_string = LineString([x0] + line_string.coords[start_i:end_i] + [x1])
-        return line_string
+        )
+        return alpha, interpolated_point
+
 
 class SearchLines:
 
-    def __init__(self, lines: List[LineString], mask: CenterLine = None):
+    def __init__(self, lines: List[LineString], mask: GeometryLine = None):
         """Search lines initialization.
 
         Args:
             lines (List[LineString]):
                 List of search lines.
+            mask (GeometryLine, optional):
+                Center line for masking the search lines. Defaults to None.
         """
         if mask is None:
             self.values = lines
@@ -1603,12 +1688,27 @@ class SearchLines:
         Clip the list of lines to the envelope of a certain size surrounding a reference line.
 
         Arg:
+            search_lines (List[LineString]):
+                List of lines to be clipped.
+            river_center_line (LineString):
+                Reference line to which the search lines are clipped.
             max_river_width: float
                 Maximum distance away from river_profile.
 
         Returns:
             List[LineString]: List of clipped search lines.
             float: Maximum distance from any point within line to reference line.
+
+        Examples:
+            ```python
+            >>> from shapely.geometry import LineString
+            >>> search_lines = [LineString([(0, 0), (1, 1)]), LineString([(2, 2), (3, 3)])]
+            >>> river_center_line = LineString([(0, 0), (2, 2)])
+            >>> search_lines_clipped, max_distance = SearchLines.mask(search_lines, river_center_line)
+            >>> max_distance
+            2.0
+
+            ```
         """
         num = len(search_lines)
         profile_buffer = river_center_line.buffer(max_river_width, cap_style=2)
@@ -1624,15 +1724,9 @@ class SearchLines:
 
             # If the bank search line breaks into multiple parts, select the part closest to the reference line.
             if search_lines[ind].geom_type == "MultiLineString":
-                distance_min = max_river_width
-                i_min = 0
-                for i in range(len(search_lines[ind])):
-                    line_simplified = search_lines[ind][i].simplify(1)
-                    distance_min_i = line_simplified.distance(profile_simplified)
-                    if distance_min_i < distance_min:
-                        distance_min = distance_min_i
-                        i_min = i
-                search_lines[ind] = search_lines[ind][i_min]
+                search_lines[ind] = SearchLines._select_closest_part(
+                    search_lines[ind], profile_simplified, max_river_width
+                )
 
             # Determine the maximum distance from a point on this line to the reference line.
             line_simplified = search_lines[ind].simplify(1)
@@ -1645,6 +1739,37 @@ class SearchLines:
 
         return search_lines, max_distance
 
+    @staticmethod
+    def _select_closest_part(
+        search_lines_segments: MultiLineString,
+        reference_line: LineString,
+        max_river_width: float,
+    ) -> LineString:
+        """Select the closest part of a MultiLineString to the reference line.
+
+        Args:
+            search_lines_segments (MultiLineString):
+                The MultiLineString containing multiple line segments to evaluate.
+            reference_line (LineString):
+                The reference line to calculate distances.
+            max_river_width (float):
+                Maximum allowable distance.
+
+        Returns:
+            LineString: The closest part of the MultiLineString.
+        """
+        closest_part = search_lines_segments.geoms[0]
+        min_distance = max_river_width
+
+        for part in search_lines_segments.geoms:
+            simplified_part = part.simplify(1)
+            distance = simplified_part.distance(reference_line)
+            if distance < min_distance:
+                min_distance = distance
+                closest_part = part
+
+        return closest_part
+
     def to_polygons(self) -> List[Polygon]:
         """
         Construct a series of polygons surrounding the bank search lines.
@@ -1652,11 +1777,22 @@ class SearchLines:
         Returns:
             bank_areas:
                 Array containing the areas of interest surrounding the bank search lines.
-        """
-        bank_areas = [None] * self.size
-        for b, distance in enumerate(self.d_lines):
-            bank_areas[b] = self.values[b].buffer(distance, cap_style=2)
 
+        Examples:
+            ```python
+            >>> search_lines = [LineString([(0, 0), (1, 1)]), LineString([(2, 2), (3, 3)])]
+            >>> search_lines_clipped = SearchLines(search_lines)
+            >>> search_lines_clipped.d_lines = [10, 20]
+            >>> bank_areas = search_lines_clipped.to_polygons()
+            >>> len(bank_areas)
+            2
+
+            ```
+        """
+        bank_areas = [
+            self.values[b].buffer(distance, cap_style=2)
+            for b, distance in enumerate(self.d_lines)
+        ]
         return bank_areas
 
 class RiverData:
@@ -1672,15 +1808,28 @@ class RiverData:
         Examples:
             ```python
             >>> from dfastbe.io import ConfigFile, RiverData
-            >>> config_file = ConfigFile("tests/data/erosion/meuse_manual.cfg")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> river_data = RiverData(config_file)
+            No message found for read_chainage
+            No message found for clip_chainage
+
             ```
         """
         self.config_file = config_file
         center_line = config_file.get_river_center_line()
         bounds = config_file.get_start_end_stations()
-        self.river_center_line: CenterLine = CenterLine(center_line, bounds)
-        self.station_bounds: Tuple = config_file.get_start_end_stations()
+        self._river_center_line = GeometryLine(center_line, bounds)
+        self._station_bounds = config_file.get_start_end_stations()
+
+    @property
+    def river_center_line(self) -> GeometryLine:
+        """GeometryLine: the clipped river center line."""
+        return self._river_center_line
+
+    @property
+    def station_bounds(self) -> Tuple[float, float]:
+        """Tuple: the lower and upper bounds of the river center line."""
+        return self._station_bounds
 
     @property
     def search_lines(self) -> SearchLines:
@@ -1689,9 +1838,7 @@ class RiverData:
         return search_lines
 
     def _get_bank_lines_simulation_data(self) -> Tuple[SimulationData, float]:
-        """
-        read simulation data and drying flooding threshold dh0
-        """
+        """read simulation data and drying flooding threshold dh0"""
         sim_file = self.config_file.get_sim_file("Detect", "")
         log_text("read_simdata", data={"file": sim_file})
         simulation_data = SimulationData.read(sim_file)
@@ -1705,13 +1852,16 @@ class RiverData:
 
     def simulation_data(self):
         simulation_data, h0 = self._get_bank_lines_simulation_data()
-        # clip simulation data to boundaries ...
         log_text("clip_data")
         simulation_data.clip(self.river_center_line.values, self.search_lines.max_distance)
         return simulation_data, h0
 
     def read_river_axis(self):
-        """Get the river axis from the analysis settings."""
+        """Get the river axis from the configuration file.
+
+        Returns:
+            LineString: River axis.
+        """
         river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
         log_text("read_river_axis", data={"file": river_axis_file})
         river_axis = XYCModel.read(river_axis_file)
