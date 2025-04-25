@@ -988,6 +988,7 @@ class TestSearchLines:
     def test_d_lines(self, lines):
         search_lines = SearchLines(lines)
         search_lines.d_lines = lines
+        assert search_lines.d_lines == lines
 
     @patch("dfastbe.io.CenterLine")
     def test_searchlines_with_center_line(self, mock_center_line, lines):
