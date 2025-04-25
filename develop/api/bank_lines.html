@@ -1979,11 +1979,7 @@
 <span class="normal">327</span>
 <span class="normal">328</span>
 <span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLines</span><span class="p">:</span>
+<span class="normal">330</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLines</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Bank line detection class.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
@@ -2008,7 +2004,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">search_lines</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">()</span>
-
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConfigFile</span><span class="p">:</span>
@@ -2080,7 +2075,6 @@
         <span class="c1"># save bank_file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">bank</span><span class="p">,</span> <span class="n">banklines</span><span class="p">,</span> <span class="n">clipped_banklines</span><span class="p">,</span> <span class="n">bank_areas</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
 
-
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_flags</span><span class="p">[</span><span class="s2">&quot;plot_data&quot;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
                 <span class="n">center_line_arr</span><span class="p">,</span>
@@ -2105,10 +2099,8 @@
 <span class="sd">            bank_area (Polygon):</span>
 <span class="sd">                A search area corresponding to one of the bank search lines.</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        clipped_banklines : MultiLineString</span>
-<span class="sd">            Un-ordered set of bank line segments, clipped to bank area.</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            MultiLineString: Un-ordered set of bank line segments, clipped to bank area.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># intersection returns one MultiLineString object</span>
         <span class="n">clipped_banklines</span> <span class="o">=</span> <span class="n">banklines</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">bank_area</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -2460,7 +2452,8 @@ Flag indicating whether this routine is called from the GUI.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 88</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 87</span>
+<span class="normal"> 88</span>
 <span class="normal"> 89</span>
 <span class="normal"> 90</span>
 <span class="normal"> 91</span>
@@ -2520,9 +2513,7 @@ Flag indicating whether this routine is called from the GUI.</p>
 <span class="normal">145</span>
 <span class="normal">146</span>
 <span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">detect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">148</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">detect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the bank line detection analysis for a specified configuration.&quot;&quot;&quot;</span>
     <span class="n">config_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span>
     <span class="n">river_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span>
@@ -2571,7 +2562,6 @@ Flag indicating whether this routine is called from the GUI.</p>
 
     <span class="c1"># save bank_file</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">bank</span><span class="p">,</span> <span class="n">banklines</span><span class="p">,</span> <span class="n">clipped_banklines</span><span class="p">,</span> <span class="n">bank_areas</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
-
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_flags</span><span class="p">[</span><span class="s2">&quot;plot_data&quot;</span><span class="p">]:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
@@ -2682,7 +2672,11 @@ The collection of all detected bank segments in the remaining model area.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">259</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
 <span class="normal">260</span>
 <span class="normal">261</span>
 <span class="normal">262</span>
@@ -2753,11 +2747,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="normal">327</span>
 <span class="normal">328</span>
 <span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="normal">330</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">detect_bank_lines</span><span class="p">(</span>
     <span class="n">simulation_data</span><span class="p">:</span> <span class="n">SimulationData</span><span class="p">,</span> <span class="n">h0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">:</span>
@@ -2902,13 +2892,35 @@ The collection of all detected bank segments in the remaining model area.</p>
           </tr>
       </tbody>
     </table>
-        <h6 id="dfastbe.bank_lines.BankLines.mask--returns"><a class="toclink" href="#dfastbe.bank_lines.BankLines.mask--returns">Returns</a><a class="headerlink" href="#dfastbe.bank_lines.BankLines.mask--returns" title="Permanent link">#</a></h6>
-<p>clipped_banklines : MultiLineString
-    Un-ordered set of bank line segments, clipped to bank area.</p>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>MultiLineString</code></td>            <td>
+                  <code><span title="shapely.geometry.MultiLineString">MultiLineString</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Un-ordered set of bank line segments, clipped to bank area.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">152</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
 <span class="normal">153</span>
 <span class="normal">154</span>
 <span class="normal">155</span>
@@ -2923,11 +2935,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="normal">164</span>
 <span class="normal">165</span>
 <span class="normal">166</span>
-<span class="normal">167</span>
-<span class="normal">168</span>
-<span class="normal">169</span>
-<span class="normal">170</span>
-<span class="normal">171</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="normal">167</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">mask</span><span class="p">(</span><span class="n">banklines</span><span class="p">:</span> <span class="n">GeoSeries</span><span class="p">,</span> <span class="n">bank_area</span><span class="p">:</span> <span class="n">Polygon</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiLineString</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Clip the bank line segments to the area of interest.</span>
@@ -2938,10 +2946,8 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="sd">        bank_area (Polygon):</span>
 <span class="sd">            A search area corresponding to one of the bank search lines.</span>
 
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    clipped_banklines : MultiLineString</span>
-<span class="sd">        Un-ordered set of bank line segments, clipped to bank area.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        MultiLineString: Un-ordered set of bank line segments, clipped to bank area.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># intersection returns one MultiLineString object</span>
     <span class="n">clipped_banklines</span> <span class="o">=</span> <span class="n">banklines</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">bank_area</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -2968,7 +2974,11 @@ The collection of all detected bank segments in the remaining model area.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">173</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
 <span class="normal">174</span>
 <span class="normal">175</span>
 <span class="normal">176</span>
@@ -3029,11 +3039,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="normal">231</span>
 <span class="normal">232</span>
 <span class="normal">233</span>
-<span class="normal">234</span>
-<span class="normal">235</span>
-<span class="normal">236</span>
-<span class="normal">237</span>
-<span class="normal">238</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
+<span class="normal">234</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">xy_km_numpy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">n_search_lines</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -3120,7 +3126,11 @@ The collection of all detected bank segments in the remaining model area.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">240</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span>
+<span class="normal">240</span>
 <span class="normal">241</span>
 <span class="normal">242</span>
 <span class="normal">243</span>
@@ -3133,11 +3143,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="normal">250</span>
 <span class="normal">251</span>
 <span class="normal">252</span>
-<span class="normal">253</span>
-<span class="normal">254</span>
-<span class="normal">255</span>
-<span class="normal">256</span>
-<span class="normal">257</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span>
+<span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">bank</span><span class="p">,</span> <span class="n">banklines</span><span class="p">,</span> <span class="n">clipped_banklines</span><span class="p">,</span> <span class="n">bank_areas</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Save result files.&quot;&quot;&quot;</span>
