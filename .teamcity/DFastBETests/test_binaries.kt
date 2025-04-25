@@ -59,7 +59,7 @@ object TestBinaries : BuildType({
     if (DslContext.getParameter("environment") == "production") {
         triggers {
             vcs {
-                branchFilter = "+:refs/heads/*"
+                branchFilter = "+:*"
             }
         }
     }
