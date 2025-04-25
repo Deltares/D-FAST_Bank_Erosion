@@ -1776,11 +1776,22 @@ class SearchLines:
         Returns:
             bank_areas:
                 Array containing the areas of interest surrounding the bank search lines.
-        """
-        bank_areas = [None] * self.size
-        for b, distance in enumerate(self.d_lines):
-            bank_areas[b] = self.values[b].buffer(distance, cap_style=2)
 
+        Examples:
+            ```python
+            >>> search_lines = [LineString([(0, 0), (1, 1)]), LineString([(2, 2), (3, 3)])]
+            >>> search_lines_clipped = SearchLines(search_lines)
+            >>> search_lines_clipped.d_lines = [10, 20]
+            >>> bank_areas = search_lines_clipped.to_polygons()
+            >>> len(bank_areas)
+            2
+
+            ```
+        """
+        bank_areas = [
+            self.values[b].buffer(distance, cap_style=2)
+            for b, distance in enumerate(self.d_lines)
+        ]
         return bank_areas
 
 class RiverData:
