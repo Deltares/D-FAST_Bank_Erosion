@@ -1710,7 +1710,7 @@ class SearchLines:
         Returns:
             LineString: The closest part of the MultiLineString.
         """
-        closest_part = None
+        closest_part = multiline.geoms[0]
         min_distance = max_river_width
 
         for part in multiline.geoms:
