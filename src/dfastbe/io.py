@@ -1347,6 +1347,24 @@ class LineGeometry:
     def as_array(self) -> np.ndarray:
         return np.array(self.values.coords)
 
+    def to_shapefile(
+        self, data: Dict[str, np.ndarray], filename: str, crs: Any
+    ) -> None:
+        """
+        Write a shape point file with x, y, and values.
+
+        Args:
+            data : Dict[str, np.ndarray]
+                Dictionary of quantities to be written, each np array should have length k.
+            filename : str
+                Name of the file to be written.
+            crs: Any
+        """
+        xy = self.as_array()
+        xy_points = [Point(xy1) for xy1 in xy]
+        geom = GeoSeries(xy_points, crs=crs)
+        write_shp(geom, data, filename)
+
     @staticmethod
     def mask(line_string: LineString, bounds: Tuple[float, float]) -> LineString:
         """Clip a chainage line to the relevant reach.
@@ -1960,30 +1978,6 @@ def relative_path(rootdir: str, file: str) -> str:
         return str(file_path.relative_to(root_path))
     except ValueError:
         return str(file_path)
-
-
-def write_shp_pnt(
-    xy: np.ndarray, data: Dict[str, np.ndarray], filename: str, crs: Any
-) -> None:
-    """
-    Write a shape point file with x, y, and values.
-
-    Arguments
-    ---------
-    xy : np.ndarray
-        N x 2 array containing x and y coordinates.
-    data : Dict[str, np.ndarray]
-        Dictionary of quantities to be written, each np array should have length k.
-    filename : str
-        Name of the file to be written.
-
-    Returns
-    -------
-    None
-    """
-    xy_points = [Point(xy1) for xy1 in xy]
-    geom = GeoSeries(xy_points, crs=crs)
-    write_shp(geom, data, filename)
 
 
 def write_shp(geom: GeoSeries, data: Dict[str, np.ndarray], filename: str) -> None:

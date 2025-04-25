@@ -42,7 +42,6 @@ from dfastbe import plotting as df_plt
 from dfastbe.io import (
     LineGeometry, ConfigFile,
     log_text,
-    write_shp_pnt,
     write_km_eroded_volumes,
     write_shp,
     write_csv,
@@ -139,8 +138,7 @@ class Erosion:
         # map km to axis points, further using axis
         log_text("chainage_to_axis")
         river_axis_km = river_axis.intersect_with_line(self.river_center_line_arr)
-        write_shp_pnt(
-            river_axis_numpy,
+        river_axis.to_shapefile(
             {"chainage": river_axis_km},
             f"{str(self.river_data.output_dir)}{os.sep}river_axis_chainage.shp",
             crs,
@@ -168,16 +166,15 @@ class Erosion:
         crs: Any,
     ):
         # read fairway file
-        fairway_file = self.config_file.get_str("Erosion", "Fairway")
-        log_text("read_fairway", data={"file": fairway_file})
+        # fairway_file = self.config_file.get_str("Erosion", "Fairway")
+        # log_text("read_fairway", data={"file": fairway_file})
 
         # map km to fairway points, further using axis
         log_text("chainage_to_fairway")
         river_axis = LineGeometry(river_axis)
         fairway_numpy = river_axis.as_array()
         fairway_km = river_axis.intersect_with_line(self.river_center_line_arr)
-        write_shp_pnt(
-            fairway_numpy,
+        river_axis.to_shapefile(
             {"chainage": fairway_km},
             str(self.river_data.output_dir) + os.sep + "fairway_chainage.shp",
             crs,
@@ -198,9 +195,9 @@ class Erosion:
             fairway_numpy, mesh_data
         )
         if self.river_data.debug:
-            write_shp_pnt(
-                (fairway_intersection_coords[:-1] + fairway_intersection_coords[1:])
-                / 2,
+            arr = (fairway_intersection_coords[:-1] + fairway_intersection_coords[1:])/ 2
+            line_geom = LineGeometry(arr)
+            line_geom.to_shapefile(
                 {"iface": fairway_face_indices},
                 f"{str(self.river_data.output_dir)}{os.sep}fairway_face_indices.shp",
                 crs,
@@ -310,8 +307,8 @@ class Erosion:
                 distance_fw[ib][ip] = dbfw
 
             if self.river_data.debug:
-                write_shp_pnt(
-                    bcrds_mid,
+                line_geom = LineGeometry(bcrds_mid)
+                line_geom.to_shapefile(
                     {
                         "chainage": bank_data.bank_chainage_midpoints[ib],
                         "iface_fw": bp_fw_face_idx[ib],
