@@ -26,7 +26,7 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Tuple, List, Dict
+from typing import Tuple, List, Dict, Any
 import os
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
@@ -120,10 +120,8 @@ class Erosion:
         }
         return ship_data
 
-
-
     def _prepare_river_axis(
-        self, stations_coords: np.ndarray, config_file: ConfigFile
+        self, stations_coords: np.ndarray, crs: Any
     ) -> Tuple[np.ndarray, np.ndarray, LineString]:
         # read river axis file
         river_axis = self.river_data.read_river_axis()
@@ -145,7 +143,7 @@ class Erosion:
             river_axis_numpy,
             {"chainage": river_axis_km},
             f"{str(self.river_data.output_dir)}{os.sep}river_axis_chainage.shp",
-            config_file,
+            crs,
         )
 
         # clip river axis to reach of interest
@@ -167,7 +165,7 @@ class Erosion:
         river_axis: LineString,
         stations_coords: np.ndarray,
         mesh_data: MeshData,
-        config_file: ConfigFile,
+        crs: Any,
     ):
         # read fairway file
         fairway_file = self.config_file.get_str("Erosion", "Fairway")
@@ -181,7 +179,7 @@ class Erosion:
             fairway_numpy,
             {"chainage": fairway_km},
             str(self.river_data.output_dir) + os.sep + "fairway_chainage.shp",
-            config_file,
+            crs,
         )
 
         # clip fairway to reach of interest
@@ -204,7 +202,7 @@ class Erosion:
                 / 2,
                 {"iface": fairway_face_indices},
                 f"{str(self.river_data.output_dir)}{os.sep}fairway_face_indices.shp",
-                config_file,
+                crs,
             )
 
         return FairwayData(fairway_face_indices, fairway_intersection_coords)
@@ -214,7 +212,7 @@ class Erosion:
         bank_data: BankData,
         fairway_data: FairwayData,
         simulation_data: ErosionSimulationData,
-        config_file: ConfigFile,
+        crs: Any,
     ):
         # distance fairway-bankline (bankfairway)
         log_text("bank_distance_fairway")
@@ -318,7 +316,7 @@ class Erosion:
                         "iface_fw": bp_fw_face_idx[ib],
                     },
                     f"{self.river_data.output_dir}/bank_{ib + 1}_chainage_and_fairway_face_idx.shp",
-                    config_file,
+                    crs,
                 )
 
         bank_data.fairway_face_indices = bp_fw_face_idx
@@ -850,22 +848,21 @@ class Erosion:
         log_text("derive_topology")
 
         mesh_data = self.simulation_data.compute_mesh_topology()
-        river_center_line_coords = self.river_center_line_arr[:, :2]
 
         # map bank lines to mesh cells
         log_text("intersect_bank_mesh")
         bank_data = self.bl_processor.intersect_with_mesh(mesh_data)
 
         river_axis_km, _, river_axis = self._prepare_river_axis(
-            river_center_line_coords, config_file
+            self.river_center_line_arr[:, :2], config_file.crs
         )
-        # map to output interval
+        # map to the output interval
         km_bin = (river_axis_km.min(), river_axis_km.max(), self.river_data.output_intervals)
         km_mid = get_km_bins(km_bin, type=3)  # get mid-points
 
-        fairway_data = self._prepare_fairway(river_axis, river_center_line_coords, mesh_data, config_file)
+        fairway_data = self._prepare_fairway(river_axis, self.river_center_line_arr[:, :2], mesh_data, config_file.crs)
 
-        self._map_bank_to_fairway(bank_data, fairway_data, self.simulation_data, config_file)
+        self._map_bank_to_fairway(bank_data, fairway_data, self.simulation_data, config_file.crs)
 
         erosion_inputs = self._prepare_initial_conditions(
             config_file, bank_data, fairway_data

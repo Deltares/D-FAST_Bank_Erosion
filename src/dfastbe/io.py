@@ -1803,7 +1803,7 @@ def write_shp_pnt(
     None
     """
     xy_points = [Point(xy1) for xy1 in xy]
-    geom = GeoSeries(xy_points, crs=config_file.crs)
+    geom = GeoSeries(xy_points, crs=crs)
     write_shp(geom, data, filename)
 
 

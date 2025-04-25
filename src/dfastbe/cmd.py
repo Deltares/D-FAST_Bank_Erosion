@@ -71,7 +71,7 @@ def run(
         run(language="NL", run_mode="BANKEROSION", configfile="custom_config.cfg")
         ```
 
-        Running the program in default mode (GUI) with English language:
+        Running the program in default mode (GUI) with the English language:
 
         ```python
         run()
