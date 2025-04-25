@@ -1447,13 +1447,6 @@ class BaseRiverData:
         self.river_center_line = LineGeometry(center_line, bounds)
         self.station_bounds: Tuple = config_file.get_start_end_stations()
 
-    def read_river_axis(self):
-        """Get the river axis from the analysis settings."""
-        river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
-        log_text("read_river_axis", data={"file": river_axis_file})
-        river_axis = XYCModel.read(river_axis_file)
-        return river_axis
-
     @staticmethod
     def get_bbox(
         coords: np.ndarray, buffer: float = 0.1
@@ -1784,7 +1777,7 @@ def relative_path(rootdir: str, file: str) -> str:
 
 
 def write_shp_pnt(
-    xy: np.ndarray, data: Dict[str, np.ndarray], filename: str, config_file: ConfigFile
+    xy: np.ndarray, data: Dict[str, np.ndarray], filename: str, crs: Any
 ) -> None:
     """
     Write a shape point file with x, y, and values.

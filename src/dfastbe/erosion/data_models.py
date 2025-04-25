@@ -5,8 +5,8 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Tuple, ClassVar
 import numpy as np
 from geopandas import GeoDataFrame
-
-
+from shapely.geometry import LineString
+from dfastio.xyc.models import XYCModel
 from dfastbe.io import ConfigFile, BaseRiverData, BaseSimulationData, log_text
 
 
@@ -446,6 +446,12 @@ class ErosionRiverData(BaseRiverData):
         else:
             return bank_dir
 
+    def read_river_axis(self) -> LineString:
+        """Get the river axis from the analysis settings."""
+        river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
+        log_text("read_river_axis", data={"file": river_axis_file})
+        river_axis = XYCModel.read(river_axis_file)
+        return river_axis
 
 class BankLinesResultsError(Exception):
     """Custom exception for BankLine results errors."""
