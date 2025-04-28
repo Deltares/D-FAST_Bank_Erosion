@@ -1,12 +1,17 @@
 from pathlib import Path
-import pytest
+from unittest.mock import MagicMock, patch
+
+import geopandas as gpd
 import matplotlib
+import numpy as np
+import pytest
 from shapely.geometry import LineString, MultiLineString, Polygon
 
-matplotlib.use('Agg')
-import geopandas as gpd
-
+from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.cmd import run
+from dfastbe.io import BaseSimulationData, ConfigFile
+
+matplotlib.use('Agg')
 
 
 @pytest.mark.e2e
@@ -57,3 +62,71 @@ def test_bank_lines():
     # check the bankline plotted image
     fig_1 = test_r_dir / r"output/figures/1_banklinedetection.png"
     assert fig_1.exists()
+
+
+class TestBankLines:
+    @pytest.fixture
+    def mock_simulation_data(self):
+        """Fixture to create a mock BaseSimulationData object."""
+        mock_data = MagicMock(spec=BaseSimulationData)
+        mock_data.face_node = np.array([[0, 1, 2], [2, 3, 4]])
+        mock_data.x_node = np.array([0, 1, 2, 3, 4])
+        mock_data.y_node = np.array([0, 1, 2, 3, 4])
+        mock_data.water_level_face = np.array([1.0, 2.0])
+        mock_data.bed_elevation_values = np.array([0.5, 0.5, 0.5, 0.5, 0.5])
+        mock_data.n_nodes = np.array([3, 3])
+        return mock_data
+
+    @pytest.fixture
+    def mock_config_file(self):
+        """Fixture to create a mock ConfigFile object."""
+        mock_config = MagicMock(spec=ConfigFile)
+        mock_config.crs = "EPSG:4326"
+        return mock_config
+
+    def test_calculate_water_depth_per_node(self, mock_simulation_data):
+        """Test the calculate_water_depth_per_node method."""
+        h_node = BankLines._calculate_water_depth(mock_simulation_data)
+        assert h_node.shape == mock_simulation_data.face_node.shape
+        assert np.all(h_node >= 0)  # Water depth should be non-negative
+
+    def test_generate_bank_lines(self, mock_simulation_data):
+        """Test the _generate_bank_lines method."""
+        wet_node = np.array([[True, False, True], [False, True, True]])
+        n_wet_arr = np.ma.masked_array([2, 2])
+        h_node = np.array([[0.5, 0.0, 0.5], [0.0, 0.5, 0.5]])
+        h0 = 0.3
+
+        lines = BankLines._generate_bank_lines(
+            mock_simulation_data, wet_node, n_wet_arr, h_node, h0
+        )
+        assert isinstance(lines, list)
+        assert all(isinstance(line, LineString) for line in lines)
+
+    def test_detect_bank_lines(self, mock_simulation_data, mock_config_file):
+        """Test the detect_bank_lines method."""
+        h0 = 0.3
+        with patch(
+            "dfastbe.bank_lines.bank_lines.BankLines._generate_bank_lines"
+        ) as mock_generate:
+            mock_generate.return_value = [LineString([(0, 0), (1, 1)])]
+            result = BankLines.detect_bank_lines(
+                mock_simulation_data, h0, mock_config_file
+            )
+            assert isinstance(result, gpd.GeoSeries)
+            assert len(result) == 1
+
+    def test_mask(self):
+        """Test the mask method."""
+        banklines = gpd.GeoSeries([LineString([(0, 0), (1, 1)])])
+        bank_area = Polygon([(0, 0), (1, 1), (1, 0)])
+        result = BankLines.mask(banklines, bank_area)
+        assert isinstance(result, LineString)
+
+    def test_progress_bar(self, capsys):
+        """Test the _progress_bar method."""
+        total = 1000
+        for i in range(total):
+            BankLines._progress_bar(i, total)
+        captured = capsys.readouterr()
+        assert "Progress: 100.00%" in captured.out
