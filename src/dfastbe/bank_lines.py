@@ -335,51 +335,52 @@ class BankLines:
 
             ```
         """
-        fnc = simulation_data.face_node
-        n_nodes = simulation_data.n_nodes
-        max_nnodes = fnc.shape[1]
-        x_node = simulation_data.x_node[fnc]
-        y_node = simulation_data.y_node[fnc]
-        zb = simulation_data.bed_elevation_values[fnc]
-        zw = simulation_data.water_level_face
+        face_node = simulation_data.face_node
+        max_n_nodes = simulation_data.face_node.shape[1]
+        x_node = simulation_data.x_node[face_node]
+        y_node = simulation_data.y_node[face_node]
+        n_nodes_total = len(simulation_data.x_node)
 
-        nnodes_total = len(simulation_data.x_node)
-        if hasattr(fnc, "mask"):
-            mask = ~fnc.mask
-            non_masked = sum(mask.reshape(fnc.size))
-            f_nc_m = fnc[mask]
-            zwm = np.repeat(zw, max_nnodes)[mask]
+        if hasattr(face_node, "mask"):
+            mask = ~face_node.mask
+            non_masked = sum(mask.reshape(face_node.size))
+            f_nc_m = face_node[mask]
+            zwm = np.repeat(simulation_data.water_level_face, max_n_nodes)[mask]
         else:
-            mask = np.repeat(True, fnc.size)
-            non_masked = fnc.size
-            f_nc_m = fnc.reshape(non_masked)
-            zwm = np.repeat(zw, max_nnodes).reshape(non_masked)
+            mask = np.repeat(True, face_node.size)
+            non_masked = face_node.size
+            f_nc_m = face_node.reshape(non_masked)
+            zwm = np.repeat(simulation_data.water_level_face, max_n_nodes).reshape(
+                non_masked
+            )
 
-        zw_node = np.bincount(f_nc_m, weights=zwm, minlength=nnodes_total)
-        n_val = np.bincount(f_nc_m, weights=np.ones(non_masked), minlength=nnodes_total)
+        zw_node = np.bincount(f_nc_m, weights=zwm, minlength=n_nodes_total)
+        n_val = np.bincount(
+            f_nc_m, weights=np.ones(non_masked), minlength=n_nodes_total
+        )
         zw_node = zw_node / np.maximum(n_val, 1)
         zw_node[n_val == 0] = simulation_data.bed_elevation_values[n_val == 0]
 
-        h_node = zw_node[fnc] - zb
+        h_node = zw_node[face_node] - simulation_data.bed_elevation_values[face_node]
         wet_node = h_node > h0
         n_wet_arr = wet_node.sum(axis=1)
         mask = n_wet_arr.mask.size > 1
 
-        n_faces = len(fnc)
-        lines = [None] * n_faces
+        n_faces = len(face_node)
+        lines = []
         frac = 0
         for i in range(n_faces):
             if i >= frac * (n_faces - 1) / 10:
                 print(int(frac * 10))
                 frac = frac + 1
-            nnodes = n_nodes[i]
+            n_nodes = simulation_data.n_nodes[i]
             n_wet = n_wet_arr[i]
-            if (mask and n_wet.mask) or n_wet == 0 or n_wet == nnodes:
+            if (mask and n_wet.mask) or n_wet == 0 or n_wet == n_nodes:
                 # all dry or all wet
                 pass
             else:
                 # some nodes dry and some nodes wet: determine the line
-                if nnodes == 3:
+                if n_nodes == 3:
                     lines[i] = tri_to_line(
                         x_node[i], y_node[i], wet_node[i], h_node[i], h0
                     )
