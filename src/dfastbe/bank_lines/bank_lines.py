@@ -277,6 +277,24 @@ class BankLines:
                 A search area corresponding to one of the bank search lines.
             config_file (ConfigFile):
                 Configuration file object.
+
+        Examples:
+            ```python
+            >>> from unittest.mock import patch
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> with patch("dfastbe.io.log_text"):
+            ...    bank_lines = BankLines(config_file)
+            No message found for read_simdata
+            No message found for clip_data
+            >>> bank = [LineString([(0, 0), (1, 1)])]
+            >>> banklines = gpd.GeoSeries([LineString([(0, 0), (1, 1)])])
+            >>> clipped_banklines = [MultiLineString([LineString([(0, 0), (1, 1)])])]
+            >>> bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]
+            >>> bank_lines.save(bank, banklines, clipped_banklines, bank_areas, config_file)
+            No message found for save_banklines
+
+            ```
         """
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
         bank_file = self.bank_output_dir / f"{bank_name}.shp"
