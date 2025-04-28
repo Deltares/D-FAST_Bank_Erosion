@@ -27,7 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 from typing import Tuple, List
-from dfastbe.structures import ErosionInputs
+from dfastbe.bank_erosion.data_models import ErosionInputs
 
 import numpy
 import math

@@ -39,18 +39,13 @@ from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
 from shapely import prepare
-from shapely.geometry import LineString, MultiLineString, Point
-from shapely.geometry.polygon import Polygon
-
-from dfastbe.structures import MeshData
-
-MAX_RIVER_WIDTH = 1000
+from shapely.geometry import LineString, Point
 
 
 PROGTEXTS: Dict[str, List[str]]
 
 
-class SimulationData:
+class BaseSimulationData:
     """Class to hold simulation data.
 
     This class contains the simulation data read from a UGRID netCDF file.
@@ -117,7 +112,7 @@ class SimulationData:
         self.dry_wet_threshold = dry_wet_threshold
 
     @classmethod
-    def read(cls, file_name: str, indent: str = "") -> "SimulationData":
+    def read(cls, file_name: str, indent: str = "") -> "BaseSimulationData":
         """Read a default set of quantities from a UGRID netCDF file.
 
         Supported files are coming from D-Flow FM (or similar).
@@ -133,13 +128,13 @@ class SimulationData:
                 If the file is not recognized as a D-Flow FM map-file.
 
         Returns:
-            SimulationData: Dictionary containing the data read from the simulation output file.
+            BaseSimulationData: Dictionary containing the data read from the simulation output file.
             float: Threshold depth for detecting drying and flooding.
 
         Examples:
             ```python
-            >>> from dfastbe.io import SimulationData
-            >>> sim_data = SimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
+            >>> from dfastbe.io import BaseSimulationData
+            >>> sim_data = BaseSimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
             No message found for read_grid
             No message found for read_bathymetry
             No message found for read_water_level
@@ -240,8 +235,8 @@ class SimulationData:
 
         Examples:
             ```python
-            >>> from dfastbe.io import SimulationData
-            >>> sim_data = SimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
+            >>> from dfastbe.io import BaseSimulationData
+            >>> sim_data = BaseSimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
             No message found for read_grid
             No message found for read_bathymetry
             No message found for read_water_level
@@ -249,7 +244,7 @@ class SimulationData:
             No message found for read_velocity
             No message found for read_chezy
             No message found for read_drywet
-            >>> river_center_line = LineString([
+            >>> river_profile = LineString([
             ... [194949.796875, 361366.90625],
             ... [194966.515625, 361399.46875],
             ... [194982.8125, 361431.03125]
@@ -296,143 +291,6 @@ class SimulationData:
         self.velocity_x_face = self.velocity_x_face[keep_face]
         self.velocity_y_face = self.velocity_y_face[keep_face]
         self.chezy_face = self.chezy_face[keep_face]
-
-    def compute_mesh_topology(self) -> MeshData:
-        """Derive secondary topology arrays from the face-node connectivity of the mesh.
-
-        This function computes the edge-node, edge-face, and face-edge connectivity arrays,
-        as well as the boundary edges of the mesh, based on the face-node connectivity provided
-        in the simulation data.
-
-        Returns:
-            MeshData: a dataclass containing the following attributes:
-                - `x_face_coords`: x-coordinates of face nodes
-                - `y_face_coords`: y-coordinates of face nodes
-                - `x_edge_coords`: x-coordinates of edge nodes
-                - `y_edge_coords`: y-coordinates of edge nodes
-                - `face_node`: the node indices for each of the mesh faces.
-                - `n_nodes`: number of nodes per face
-                - `edge_node`: the node indices for each of the mesh edges.
-                - `edge_face_connectivity`: the face indices for each of the mesh edge
-                - `face_edge_connectivity`: the edge indices for each of the mesh face
-                - `boundary_edge_nrs`: indices of boundary edges
-
-        Raises:
-            KeyError:
-                If required keys (e.g., `face_node`, `nnodes`, `x_node`, `y_node`) are missing from the `sim` object.
-
-        Notes:
-            - The function identifies unique edges by sorting and comparing node indices.
-            - Boundary edges are identified as edges that belong to only one face.
-            - The function assumes that the mesh is well-formed, with consistent face-node connectivity.
-        """
-
-        # get a sorted list of edge node connections (shared edges occur twice)
-        # face_nr contains the face index to which the edge belongs
-        n_faces = self.face_node.shape[0]
-        n_edges = sum(self.n_nodes)
-        edge_node = np.zeros((n_edges, 2), dtype=int)
-        face_nr = np.zeros((n_edges,), dtype=int)
-        i = 0
-        for face_i in range(n_faces):
-            num_edges = self.n_nodes[face_i]  # note: nEdges = nNodes
-            for edge_i in range(num_edges):
-                if edge_i == 0:
-                    edge_node[i, 1] = self.face_node[face_i, num_edges - 1]
-                else:
-                    edge_node[i, 1] = self.face_node[face_i, edge_i - 1]
-                edge_node[i, 0] = self.face_node[face_i, edge_i]
-                face_nr[i] = face_i
-                i = i + 1
-        edge_node.sort(axis=1)
-        i2 = np.argsort(edge_node[:, 1], kind="stable")
-        i1 = np.argsort(edge_node[i2, 0], kind="stable")
-        i12 = i2[i1]
-        edge_node = edge_node[i12, :]
-        face_nr = face_nr[i12]
-
-        # detect which edges are equal to the previous edge, and get a list of all unique edges
-        numpy_true = np.array([True])
-        equal_to_previous = np.concatenate(
-            (~numpy_true, (np.diff(edge_node, axis=0) == 0).all(axis=1))
-        )
-        unique_edge = ~equal_to_previous
-        n_unique_edges = np.sum(unique_edge)
-        # reduce the edge node connections to only the unique edges
-        edge_node = edge_node[unique_edge, :]
-
-        # number the edges
-        edge_nr = np.zeros(n_edges, dtype=int)
-        edge_nr[unique_edge] = np.arange(n_unique_edges, dtype=int)
-        edge_nr[equal_to_previous] = edge_nr[
-            np.concatenate((equal_to_previous[1:], equal_to_previous[:1]))
-        ]
-
-        # if two consecutive edges are unique, the first one occurs only once and represents a boundary edge
-        is_boundary_edge = unique_edge & np.concatenate((unique_edge[1:], numpy_true))
-        boundary_edge_nrs = edge_nr[is_boundary_edge]
-
-        # go back to the original face order
-        edge_nr_in_face_order = np.zeros(n_edges, dtype=int)
-        edge_nr_in_face_order[i12] = edge_nr
-        # create the face edge connectivity array
-        face_edge_connectivity = np.zeros(self.face_node.shape, dtype=int)
-
-        i = 0
-        for face_i in range(n_faces):
-            num_edges = self.n_nodes[face_i]  # note: num_edges = n_nodes
-            for edge_i in range(num_edges):
-                face_edge_connectivity[face_i, edge_i] = edge_nr_in_face_order[i]
-                i = i + 1
-
-        # determine the edge face connectivity
-        edge_face = -np.ones((n_unique_edges, 2), dtype=int)
-        edge_face[edge_nr[unique_edge], 0] = face_nr[unique_edge]
-        edge_face[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
-
-        x_face_coords = SimulationData.apply_masked_indexing(
-            self.x_node, self.face_node
-        )
-        y_face_coords = SimulationData.apply_masked_indexing(
-            self.y_node, self.face_node
-        )
-        x_edge_coords = self.x_node[edge_node]
-        y_edge_coords = self.y_node[edge_node]
-
-        return MeshData(
-            x_face_coords=x_face_coords,
-            y_face_coords=y_face_coords,
-            x_edge_coords=x_edge_coords,
-            y_edge_coords=y_edge_coords,
-            face_node=self.face_node,
-            n_nodes=self.n_nodes,
-            edge_node=edge_node,
-            edge_face_connectivity=edge_face,
-            face_edge_connectivity=face_edge_connectivity,
-            boundary_edge_nrs=boundary_edge_nrs,
-        )
-
-    @staticmethod
-    def apply_masked_indexing(
-        x0: np.array, idx: np.ma.masked_array
-    ) -> np.ma.masked_array:
-        """
-        Index one array by another transferring the mask.
-
-        Args:
-            x0 : np.ndarray
-                A linear array.
-            idx : np.ma.masked_array
-                An index array with possibly masked indices.
-
-        returns:
-            x1: np.ma.masked_array
-                An array with same shape as idx, with mask.
-        """
-        idx_safe = idx.copy()
-        idx_safe.data[np.ma.getmask(idx)] = 0
-        x1 = np.ma.masked_where(np.ma.getmask(idx), x0[idx_safe])
-        return x1
 
 
 class ConfigFile:
@@ -1449,11 +1307,10 @@ class ConfigFile:
 
         return output_dir
 
+class LineGeometry:
+    """Center line class."""
 
-class GeometryLine:
-    """Geometry line class."""
-
-    def __init__(self, line_string: LineString, mask: Tuple[float, float] = None):
+    def __init__(self, line: Union[LineString, np.ndarray], mask: Tuple[float, float] = None, crs: str = None):
         """Geometry Line initialization.
 
         Args:
@@ -1466,7 +1323,7 @@ class GeometryLine:
             ```python
             >>> line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])
             >>> mask = (0.5, 1.5)
-            >>> center_line = GeometryLine(line_string, mask)
+            >>> center_line = LineGeometry(line_string, mask)
             No message found for clip_chainage
             >>> np.array(center_line.values.coords)
             array([[0.5, 0.5, 0.5],
@@ -1476,22 +1333,41 @@ class GeometryLine:
             ```
         """
         self.station_bounds = mask
+        self.crs = crs
+        if isinstance(line, np.ndarray):
+            line = LineString(line)
         if mask is None:
-            self.values = line_string
+            self.values = line
         else:
-            self.values: LineString = self.mask(line_string, mask)
+            self.values: LineString = self.mask(line, mask)
 
             log_text(
-                "clip_chainage",
-                data={"low": self.station_bounds[0], "high": self.station_bounds[1]},
+                "clip_chainage", data={"low": self.station_bounds[0], "high": self.station_bounds[1]}
             )
 
-    def as_array(self):
+    def as_array(self) -> np.ndarray:
         return np.array(self.values.coords)
+
+    def to_shapefile(
+        self, data: Dict[str, np.ndarray], file_name: str
+    ) -> None:
+        """
+        Write a shape point file with x, y, and values.
+
+        Args:
+            data : Dict[str, np.ndarray]
+                Dictionary of quantities to be written, each np array should have length k.
+            file_name : str
+                Name of the file to be written.
+            crs: Any
+        """
+        xy = self.as_array()
+        geom = [Point(xy_i) for xy_i in xy]
+        GeoDataFrame(data, geometry=geom, crs=self.crs).to_file(file_name)
 
     @staticmethod
     def mask(line_string: LineString, bounds: Tuple[float, float]) -> LineString:
-        """Clip a chainage line to the relevant reach.
+        """Clip a LineGeometry to the relevant reach.
 
         Args:
             line_string (LineString):
@@ -1515,12 +1391,12 @@ class GeometryLine:
             ```
         """
         line_string_coords = line_string.coords
-        start_index = GeometryLine._find_mask_index(bounds[0], line_string_coords)
-        end_index = GeometryLine._find_mask_index(bounds[1], line_string_coords)
-        lower_bound_point, start_index = GeometryLine._handle_bound(
+        start_index = LineGeometry._find_mask_index(bounds[0], line_string_coords)
+        end_index = LineGeometry._find_mask_index(bounds[1], line_string_coords)
+        lower_bound_point, start_index = LineGeometry._handle_bound(
             start_index, bounds[0], True, line_string_coords
         )
-        upper_bound_point, end_index = GeometryLine._handle_bound(
+        upper_bound_point, end_index = LineGeometry._handle_bound(
             end_index, bounds[1], False, line_string_coords
         )
 
@@ -1539,7 +1415,7 @@ class GeometryLine:
 
     @staticmethod
     def _find_mask_index(
-        station_bound: float, line_string_coords: np.ndarray
+            station_bound: float, line_string_coords: np.ndarray
     ) -> Optional[int]:
         """Find the start and end indices for clipping the chainage line.
 
@@ -1606,7 +1482,7 @@ class GeometryLine:
             return None, index
 
         # Interpolate the point
-        alpha, interpolated_point = GeometryLine._interpolate_point(
+        alpha, interpolated_point = LineGeometry._interpolate_point(
             index, station_bound, line_string_coords
         )
 
@@ -1620,7 +1496,7 @@ class GeometryLine:
 
     @staticmethod
     def _interpolate_point(
-        index: int, station_bound: float, line_string_coords: np.ndarray
+            index: int, station_bound: float, line_string_coords: np.ndarray
     ) -> Tuple[float, Tuple[float, float, float]]:
         """Interpolate a point between two coordinates.
 
@@ -1637,7 +1513,7 @@ class GeometryLine:
             Tuple[float, float, float]: Interpolated point.
         """
         alpha = (station_bound - line_string_coords[index - 1][2]) / (
-            line_string_coords[index][2] - line_string_coords[index - 1][2]
+                line_string_coords[index][2] - line_string_coords[index - 1][2]
         )
         interpolated_point = tuple(
             prev_coord + alpha * (next_coord - prev_coord)
@@ -1647,155 +1523,99 @@ class GeometryLine:
         )
         return alpha, interpolated_point
 
+    def intersect_with_line(
+        self, reference_line_with_stations: np.ndarray
+    ) -> np.ndarray:
+        """
+        Project chainage(stations) values from a reference line onto a target line by spatial proximity and interpolation.
 
-class SearchLines:
+        Project chainage values from source line L1 onto another line L2.
 
-    def __init__(self, lines: List[LineString], mask: GeometryLine = None):
-        """Search lines initialization.
+        The chainage values are giving along a line L1 (xykm_numpy). For each node
+        of the line L2 (line_xy) on which we would like to know the chainage, first
+        the closest node (discrete set of nodes) on L1 is determined and
+        subsequently the exact chainage isobtained by determining the closest point
+        (continuous line) on L1 for which the chainage is determined using by means
+        of interpolation.
 
         Args:
-            lines (List[LineString]):
-                List of search lines.
-            mask (GeometryLine, optional):
-                Center line for masking the search lines. Defaults to None.
-        """
-        if mask is None:
-            self.values = lines
-            self.max_distance = None
-        else:
-            self.values, self.max_distance = self.mask(lines, mask.values)
-
-        self.size = len(lines)
-
-    @property
-    def d_lines(self) -> List[float]:
-        if hasattr(self, "_d_lines"):
-            return self._d_lines
-        else:
-            raise ValueError("The d_lines property has not been set yet.")
-
-    @d_lines.setter
-    def d_lines(self, value: List[float]):
-        self._d_lines = value
-
-    @staticmethod
-    def mask(
-        search_lines: List[LineString],
-        river_center_line: LineString,
-        max_river_width: float = MAX_RIVER_WIDTH,
-    ) -> Tuple[List[LineString], float]:
-        """
-        Clip the list of lines to the envelope of a certain size surrounding a reference line.
-
-        Arg:
-            search_lines (List[LineString]):
-                List of lines to be clipped.
-            river_center_line (LineString):
-                Reference line to which the search lines are clipped.
-            max_river_width: float
-                Maximum distance away from river_profile.
+            target_line_coords (np.ndarray):
+                Nx2 array of x, y coordinates for the target line.
+            reference_line_with_stations (np.ndarray):
+                Mx3 array with x, y, and chainage values for the reference line.
 
         Returns:
-            List[LineString]: List of clipped search lines.
-            float: Maximum distance from any point within line to reference line.
-
-        Examples:
-            ```python
-            >>> from shapely.geometry import LineString
-            >>> search_lines = [LineString([(0, 0), (1, 1)]), LineString([(2, 2), (3, 3)])]
-            >>> river_center_line = LineString([(0, 0), (2, 2)])
-            >>> search_lines_clipped, max_distance = SearchLines.mask(search_lines, river_center_line)
-            >>> max_distance
-            2.0
-
-            ```
+            line_km : np.ndarray
+                Array containing the chainage for every coordinate specified in line_xy.
         """
-        num = len(search_lines)
-        profile_buffer = river_center_line.buffer(max_river_width, cap_style=2)
+        coords = self.as_array()
+        # pre-allocates the array for the mapped chainage values
+        projected_stations = np.zeros(coords.shape[0])
 
-        # The algorithm uses simplified geometries for determining the distance between lines for speed.
-        # Stay accurate to within about 1 m
-        profile_simplified = river_center_line.simplify(1)
+        # get an array with only the x,y coordinates of line L1
+        ref_coords = reference_line_with_stations[:, :2]
+        last_index = reference_line_with_stations.shape[0] - 1
 
-        max_distance = 0
-        for ind in range(num):
-            # Clip the bank search lines to the reach of interest (indicated by the reference line).
-            search_lines[ind] = search_lines[ind].intersection(profile_buffer)
+        # for each node rp on line L2 get the chainage ...
+        for i, station_i in enumerate(coords):
+            # find the node on L1 closest to rp
+            # get the distance to all the nodes on the reference line, and find the closest one
+            closest_ind = np.argmin(((station_i - ref_coords) ** 2).sum(axis=1))
+            closest_coords = ref_coords[closest_ind]
 
-            # If the bank search line breaks into multiple parts, select the part closest to the reference line.
-            if search_lines[ind].geom_type == "MultiLineString":
-                search_lines[ind] = SearchLines._select_closest_part(
-                    search_lines[ind], profile_simplified, max_river_width
-                )
+            # determine the distance between that node and rp
+            squared_distance = ((station_i - closest_coords) ** 2).sum()
 
-            # Determine the maximum distance from a point on this line to the reference line.
-            line_simplified = search_lines[ind].simplify(1)
-            max_distance = max(
-                [Point(c).distance(profile_simplified) for c in line_simplified.coords]
-            )
+            # chainage value of that node
+            station = reference_line_with_stations[closest_ind, 2]
 
-            # Increase the value of max_distance by 2 to account for error introduced by using simplified lines.
-            max_distance = max(max_distance, max_distance + 2)
+            # if we didn't get the first node
+            if closest_ind > 0:
+                # project rp onto the line segment before this node
+                closest_coord_minus_1 = ref_coords[closest_ind - 1]
+                alpha = (
+                                (closest_coord_minus_1[0] - closest_coords[0]) * (station_i[0] - closest_coords[0])
+                                + (closest_coord_minus_1[1] - closest_coords[1]) * (station_i[1] - closest_coords[1])
+                        ) / ((closest_coord_minus_1[0] - closest_coords[0]) ** 2 + (closest_coord_minus_1[1] - closest_coords[1]) ** 2)
+                # if there is a closest point not coinciding with the nodes ...
+                if 0 < alpha < 1:
+                    dist2link = (station_i[0] - closest_coords[0] - alpha * (closest_coord_minus_1[0] - closest_coords[0])) ** 2 + (
+                            station_i[1] - closest_coords[1] - alpha * (closest_coord_minus_1[1] - closest_coords[1])
+                    ) ** 2
+                    # if it's actually closer than the node ...
+                    if dist2link < squared_distance:
+                        # update the closest point information
+                        squared_distance = dist2link
+                        station = reference_line_with_stations[closest_ind, 2] + alpha * (
+                                reference_line_with_stations[closest_ind - 1, 2] - reference_line_with_stations[closest_ind, 2]
+                        )
 
-        return search_lines, max_distance
+            # if we didn't get the last node
+            if closest_ind < last_index:
+                # project rp onto the line segment after this node
+                closest_coord_minus_1 = ref_coords[closest_ind + 1]
+                alpha = (
+                                (closest_coord_minus_1[0] - closest_coords[0]) * (station_i[0] - closest_coords[0])
+                                + (closest_coord_minus_1[1] - closest_coords[1]) * (station_i[1] - closest_coords[1])
+                        ) / ((closest_coord_minus_1[0] - closest_coords[0]) ** 2 + (closest_coord_minus_1[1] - closest_coords[1]) ** 2)
+                # if there is a closest point not coinciding with the nodes ...
+                if alpha > 0 and alpha < 1:
+                    dist2link = (station_i[0] - closest_coords[0] - alpha * (closest_coord_minus_1[0] - closest_coords[0])) ** 2 + (
+                            station_i[1] - closest_coords[1] - alpha * (closest_coord_minus_1[1] - closest_coords[1])
+                    ) ** 2
+                    # if it's actually closer than the previous value ...
+                    if dist2link < squared_distance:
+                        # update the closest point information
+                        # squared_distance = dist2link
+                        station = reference_line_with_stations[closest_ind, 2] + alpha * (
+                                reference_line_with_stations[closest_ind + 1, 2] - reference_line_with_stations[closest_ind, 2]
+                        )
+            # store the chainage value, loop ... and return
+            projected_stations[i] = station
+        return projected_stations
 
-    @staticmethod
-    def _select_closest_part(
-        search_lines_segments: MultiLineString,
-        reference_line: LineString,
-        max_river_width: float,
-    ) -> LineString:
-        """Select the closest part of a MultiLineString to the reference line.
 
-        Args:
-            search_lines_segments (MultiLineString):
-                The MultiLineString containing multiple line segments to evaluate.
-            reference_line (LineString):
-                The reference line to calculate distances.
-            max_river_width (float):
-                Maximum allowable distance.
-
-        Returns:
-            LineString: The closest part of the MultiLineString.
-        """
-        closest_part = search_lines_segments.geoms[0]
-        min_distance = max_river_width
-
-        for part in search_lines_segments.geoms:
-            simplified_part = part.simplify(1)
-            distance = simplified_part.distance(reference_line)
-            if distance < min_distance:
-                min_distance = distance
-                closest_part = part
-
-        return closest_part
-
-    def to_polygons(self) -> List[Polygon]:
-        """
-        Construct a series of polygons surrounding the bank search lines.
-
-        Returns:
-            bank_areas:
-                Array containing the areas of interest surrounding the bank search lines.
-
-        Examples:
-            ```python
-            >>> search_lines = [LineString([(0, 0), (1, 1)]), LineString([(2, 2), (3, 3)])]
-            >>> search_lines_clipped = SearchLines(search_lines)
-            >>> search_lines_clipped.d_lines = [10, 20]
-            >>> bank_areas = search_lines_clipped.to_polygons()
-            >>> len(bank_areas)
-            2
-
-            ```
-        """
-        bank_areas = [
-            self.values[b].buffer(distance, cap_style=2)
-            for b, distance in enumerate(self.d_lines)
-        ]
-        return bank_areas
-
-class RiverData:
+class BaseRiverData:
     """River data class."""
 
     def __init__(self, config_file: ConfigFile):
@@ -1807,7 +1627,7 @@ class RiverData:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile, RiverData
+            >>> from dfastbe.io import ConfigFile, BaseRiverData
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> river_data = RiverData(config_file)
             No message found for read_chainage
@@ -1818,54 +1638,18 @@ class RiverData:
         self.config_file = config_file
         center_line = config_file.get_river_center_line()
         bounds = config_file.get_start_end_stations()
-        self._river_center_line = GeometryLine(center_line, bounds)
-        self._station_bounds = config_file.get_start_end_stations()
+        self._river_center_line = LineGeometry(center_line, bounds, crs=config_file.crs)
+        self._station_bounds: Tuple = config_file.get_start_end_stations()
 
     @property
-    def river_center_line(self) -> GeometryLine:
-        """GeometryLine: the clipped river center line."""
+    def river_center_line(self) -> LineGeometry:
+        """LineGeometry: the clipped river center line."""
         return self._river_center_line
 
     @property
     def station_bounds(self) -> Tuple[float, float]:
         """Tuple: the lower and upper bounds of the river center line."""
         return self._station_bounds
-
-    @property
-    def search_lines(self) -> SearchLines:
-        search_lines = SearchLines(self.config_file.get_search_lines(), self.river_center_line)
-        search_lines.d_lines = self.config_file.get_bank_search_distances(search_lines.size)
-        return search_lines
-
-    def _get_bank_lines_simulation_data(self) -> Tuple[SimulationData, float]:
-        """read simulation data and drying flooding threshold dh0"""
-        sim_file = self.config_file.get_sim_file("Detect", "")
-        log_text("read_simdata", data={"file": sim_file})
-        simulation_data = SimulationData.read(sim_file)
-        # increase critical water depth h0 by flooding threshold dh0
-        # get critical water depth used for defining bank line (default = 0.0 m)
-        critical_water_depth = self.config_file.get_float(
-            "Detect", "WaterDepth", default=0
-        )
-        h0 = critical_water_depth + simulation_data.dry_wet_threshold
-        return simulation_data, h0
-
-    def simulation_data(self):
-        simulation_data, h0 = self._get_bank_lines_simulation_data()
-        log_text("clip_data")
-        simulation_data.clip(self.river_center_line.values, self.search_lines.max_distance)
-        return simulation_data, h0
-
-    def read_river_axis(self):
-        """Get the river axis from the configuration file.
-
-        Returns:
-            LineString: River axis.
-        """
-        river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
-        log_text("read_river_axis", data={"file": river_axis_file})
-        river_axis = XYCModel.read(river_axis_file)
-        return river_axis
 
     @staticmethod
     def get_bbox(
@@ -1886,6 +1670,17 @@ class RiverData:
         """
         return get_bbox(coords, buffer)
 
+    def get_erosion_sim_data(self, num_discharge_levels: int) -> Tuple[List[str], List[float]]:
+        # get pdischarges
+        sim_files = []
+        p_discharge = []
+        for iq in range(num_discharge_levels):
+            iq_str = str(iq + 1)
+            sim_files.append(self.config_file.get_sim_file("Erosion", iq_str))
+            p_discharge.append(
+                self.config_file.get_float("Erosion", f"PDischarge{iq_str}")
+            )
+        return sim_files, p_discharge
 
 def get_bbox(
         coords: np.ndarray, buffer: float = 0.1
@@ -2185,30 +1980,6 @@ def relative_path(rootdir: str, file: str) -> str:
         return str(file_path)
 
 
-def write_shp_pnt(
-    xy: np.ndarray, data: Dict[str, np.ndarray], filename: str, config_file: ConfigFile
-) -> None:
-    """
-    Write a shape point file with x, y, and values.
-
-    Arguments
-    ---------
-    xy : np.ndarray
-        N x 2 array containing x and y coordinates.
-    data : Dict[str, np.ndarray]
-        Dictionary of quantities to be written, each np array should have length k.
-    filename : str
-        Name of the file to be written.
-
-    Returns
-    -------
-    None
-    """
-    xy_points = [Point(xy1) for xy1 in xy]
-    geom = GeoSeries(xy_points, crs=config_file.crs)
-    write_shp(geom, data, filename)
-
-
 def write_shp(geom: GeoSeries, data: Dict[str, np.ndarray], filename: str) -> None:
     """Write a shape file.
 
@@ -2228,8 +1999,7 @@ def write_shp(geom: GeoSeries, data: Dict[str, np.ndarray], filename: str) -> No
     -------
     None
     """
-    df = pd.DataFrame(data)
-    GeoDataFrame(df, geometry=geom).to_file(filename)
+    GeoDataFrame(data, geometry=geom).to_file(filename)
 
 
 def write_csv(data: Dict[str, np.ndarray], filename: str) -> None:

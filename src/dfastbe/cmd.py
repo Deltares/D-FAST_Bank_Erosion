@@ -27,8 +27,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 from pathlib import Path
 from dfastbe.io import ConfigFile, load_program_texts
-from dfastbe.bank_erosion import Erosion
-from dfastbe.bank_lines import BankLines
+from dfastbe.bank_erosion.bank_erosion import Erosion
+from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.gui import main
 from dfastbe import __file__
 R_DIR = Path(__file__).resolve().parent
@@ -71,7 +71,7 @@ def run(
         run(language="NL", run_mode="BANKEROSION", configfile="custom_config.cfg")
         ```
 
-        Running the program in default mode (GUI) with English language:
+        Running the program in default mode (GUI) with the English language:
 
         ```python
         run()

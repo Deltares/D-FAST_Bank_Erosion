@@ -14,12 +14,12 @@ from shapely.geometry.polygon import Polygon
 
 from dfastbe import __version__
 from dfastbe import plotting as df_plt
-from dfastbe.io import ConfigFile, RiverData, SimulationData, get_bbox, log_text
+from dfastbe.bank_lines.data_models import BankLinesRiverData
+from dfastbe.io import BaseSimulationData, ConfigFile, LineGeometry, get_bbox, log_text
 from dfastbe.kernel import get_zoom_extends
 from dfastbe.support import (
     on_right_side,
     poly_to_line,
-    project_km_on_line,
     sort_connect_bank_lines,
     tri_to_line,
 )
@@ -65,9 +65,8 @@ class BankLines:
 
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)
-        self.river_data = RiverData(config_file)
+        self.river_data = BankLinesRiverData(config_file)
         self.search_lines = self.river_data.search_lines
-
         self.simulation_data, self.h0 = self.river_data.simulation_data()
 
     @property
@@ -79,16 +78,6 @@ class BankLines:
     def max_river_width(self) -> int:
         """int: Maximum river width in meters."""
         return MAX_RIVER_WIDTH
-
-    def _get_bank_output_dir(self) -> Path:
-        bank_output_dir = self.config_file.get_str("General", "BankDir")
-        log_text("bankdir_out", data={"dir": bank_output_dir})
-        if os.path.exists(bank_output_dir):
-            log_text("overwrite_dir", data={"dir": bank_output_dir})
-        else:
-            os.makedirs(bank_output_dir)
-
-        return Path(bank_output_dir)
 
     def detect(self) -> None:
         """Run the bank line detection analysis for a specified configuration.
@@ -220,7 +209,8 @@ class BankLines:
             bank_km: List[np.ndarray] = []
             for ib in range(n_search_lines):
                 bcrds_numpy = np.array(bank[ib])
-                km_numpy = project_km_on_line(bcrds_numpy, xy_km_numpy)
+                line_geom = LineGeometry(bcrds_numpy, crs=config_file.crs)
+                km_numpy = line_geom.intersect_with_line(xy_km_numpy)
                 bank_crds.append(bcrds_numpy)
                 bank_km.append(km_numpy)
             km_zoom, xy_zoom = get_zoom_extends(
@@ -306,14 +296,14 @@ class BankLines:
 
     @staticmethod
     def detect_bank_lines(
-        simulation_data: SimulationData, h0: float, config_file: ConfigFile
+        simulation_data: BaseSimulationData, h0: float, config_file: ConfigFile
     ) -> gpd.GeoSeries:
         """Detect all possible bank line segments based on simulation data.
 
         Use a critical water depth h0 as a water depth threshold for dry/wet boundary.
 
         Args:
-            simulation_data (SimulationData):
+            simulation_data (BaseSimulationData):
                 Simulation data: mesh, bed levels, water levels, velocities, etc.
             h0 (float):
                 Critical water depth for determining the banks.

@@ -3,10 +3,10 @@ import numpy as np
 import pytest
 from unittest.mock import MagicMock
 
-from dfastbe.bank_erosion import Erosion
+from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.cmd import run
 from dfastbe.io import ConfigFile
-from dfastbe.structures import BankData, FairwayData
+from dfastbe.bank_erosion.data_models import BankData, FairwayData
 
 matplotlib.use('Agg')
 

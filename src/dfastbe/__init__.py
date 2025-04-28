@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 D-FAST Bank Erosion package
 
