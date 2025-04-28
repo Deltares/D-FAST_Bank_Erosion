@@ -1350,6 +1350,17 @@ class LineGeometry:
     def as_array(self) -> np.ndarray:
         return np.array(self.values.coords)
 
+    def add_data(self, data: Dict[str, np.ndarray]) -> None:
+        """
+        Add data to the LineGeometry object.
+
+        Args:
+            data (Dict[str, np.ndarray]):
+                Dictionary of quantities to be added, each np array should have length k.
+        """
+        for key, value in data.items():
+            setattr(self, key, value)
+
     def to_shapefile(
         self, data: Dict[str, np.ndarray], file_name: str
     ) -> None:

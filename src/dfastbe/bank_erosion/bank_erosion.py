@@ -119,11 +119,13 @@ class Erosion:
         }
         return ship_data
 
-    def _prepare_river_axis(
-        self, stations_coords: np.ndarray, crs: Any
-    ) -> Tuple[np.ndarray, np.ndarray, LineString]:
+    def _process_river_axis_by_center_line(self) -> LineGeometry:
+        """
+        Intersect the river center line with the river axis to map the stations from the first to the latter
+        then clip the river axis by the first and last station of the centerline.
+        """
 
-        river_axis = LineGeometry(self.river_data.river_axis, crs=crs)
+        river_axis = LineGeometry(self.river_data.river_axis, crs=self.config_file.crs)
         river_axis_numpy = river_axis.as_array()
         # optional sorting --> see 04_Waal_D3D example
         # check: sum all distances and determine maximum distance ...
@@ -138,14 +140,15 @@ class Erosion:
         # map km to axis points, further using axis
         log_text("chainage_to_axis")
         river_axis_km = river_axis.intersect_with_line(self.river_center_line_arr)
-        river_axis.to_shapefile(
-            {"chainage": river_axis_km},
-            f"{str(self.river_data.output_dir)}{os.sep}river_axis_chainage.shp",
-        )
+        # save the river axis before masking with the stations
+        # river_axis.to_shapefile(
+        #     {"chainage": river_axis_km},
+        #     f"{str(self.river_data.output_dir)}{os.sep}river_axis_chainage.shp",
+        # )
 
         # clip river axis to reach of interest (get closes point to the first and last station)
-        i1 = np.argmin(((stations_coords[0] - river_axis_numpy) ** 2).sum(axis=1))
-        i2 = np.argmin(((stations_coords[-1] - river_axis_numpy) ** 2).sum(axis=1))
+        i1 = np.argmin(((self.river_center_line_arr[0, :2] - river_axis_numpy) ** 2).sum(axis=1))
+        i2 = np.argmin(((self.river_center_line_arr[-1, :2] - river_axis_numpy) ** 2).sum(axis=1))
         if i1 < i2:
             river_axis_km = river_axis_km[i1 : i2 + 1]
             river_axis_numpy = river_axis_numpy[i1 : i2 + 1]
@@ -154,13 +157,14 @@ class Erosion:
             river_axis_km = river_axis_km[i2 : i1 + 1][::-1]
             river_axis_numpy = river_axis_numpy[i2 : i1 + 1][::-1]
 
-        river_axis = LineString(river_axis_numpy)
-
-        return river_axis_km, river_axis_numpy, river_axis
+        # river_axis = LineString(river_axis_numpy)
+        river_axis = LineGeometry(river_axis_numpy, crs=self.config_file.crs)
+        river_axis.add_data(data={"stations": river_axis_km})
+        return river_axis
 
     def _prepare_fairway(
         self,
-        river_axis: LineString,
+        river_axis: LineGeometry,
         stations_coords: np.ndarray,
         mesh_data: MeshData,
         crs: Any,
@@ -171,14 +175,14 @@ class Erosion:
 
         # map km to fairway points, further using axis
         log_text("chainage_to_fairway")
-        river_axis = LineGeometry(river_axis, crs=crs)
-        fairway_numpy = river_axis.as_array()
-        fairway_km = river_axis.intersect_with_line(self.river_center_line_arr)
+        # river_axis = LineGeometry(river_axis, crs=crs)
+        fairway_with_stations = river_axis.intersect_with_line(self.river_center_line_arr)
         river_axis.to_shapefile(
-            {"chainage": fairway_km},
+            {"chainage": fairway_with_stations},
             str(self.river_data.output_dir) + os.sep + "fairway_chainage.shp",
         )
 
+        fairway_numpy = river_axis.as_array()
         # clip fairway to reach of interest
         i1 = np.argmin(((stations_coords[0] - fairway_numpy) ** 2).sum(axis=1))
         i2 = np.argmin(((stations_coords[-1] - fairway_numpy) ** 2).sum(axis=1))
@@ -848,11 +852,10 @@ class Erosion:
         log_text("intersect_bank_mesh")
         bank_data = self.bl_processor.intersect_with_mesh(mesh_data)
 
-        river_axis_km, _, river_axis = self._prepare_river_axis(
-            self.river_center_line_arr[:, :2], config_file.crs
-        )
+        river_axis: LineGeometry = self._process_river_axis_by_center_line()
+
         # map to the output interval
-        km_bin = (river_axis_km.min(), river_axis_km.max(), self.river_data.output_intervals)
+        km_bin = (river_axis.stations.min(), river_axis.stations.max(), self.river_data.output_intervals)
         km_mid = get_km_bins(km_bin, type=3)  # get mid-points
 
         fairway_data = self._prepare_fairway(river_axis, self.river_center_line_arr[:, :2], mesh_data, config_file.crs)
@@ -887,7 +890,7 @@ class Erosion:
 
         # create various plots
         self._generate_plots(
-            river_axis_km,
+            river_axis.stations,
             self.simulation_data,
             xy_line_eq_list,
             km_mid,
