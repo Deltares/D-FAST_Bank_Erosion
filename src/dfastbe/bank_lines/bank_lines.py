@@ -197,7 +197,37 @@ class BankLines:
         bank_areas,
         config_file: ConfigFile,
     ):
-        """Plot the bank lines and the simulation data."""
+        """Plot the bank lines and the simulation data.
+
+        Args:
+            xy_km_numpy (np.ndarray):
+                Array of x and y coordinates in km.
+            n_search_lines (int):
+                Number of search lines.
+            bank (List):
+                List of bank lines.
+            km_bounds (Tuple[float, float]):
+                Minimum and maximum km bounds.
+            bank_areas (List[Polygon]):
+                A search area corresponding to one of the bank search lines.
+            config_file (ConfigFile):
+                Configuration file object.
+
+        Examples:
+            ```python
+            >>> import matplotlib
+            >>> matplotlib.use('Agg')
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> bank_lines = BankLines(config_file)
+            >>> xy_km_numpy = np.array([[0, 0], [1, 1]])
+            >>> n_search_lines = 1
+            >>> bank = [LineString([(0, 0), (1, 1)])]
+            >>> km_bounds = (0, 1)
+            >>> bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]
+            >>> bank_lines.plot(xy_km_numpy, n_search_lines, bank, km_bounds, bank_areas, config_file)
+
+            ```
+        """
         log_text("=")
         log_text("create_figures")
         i_fig = 0
