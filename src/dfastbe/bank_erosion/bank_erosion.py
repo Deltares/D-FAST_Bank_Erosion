@@ -124,7 +124,6 @@ class Erosion:
         Intersect the river center line with the river axis to map the stations from the first to the latter
         then clip the river axis by the first and last station of the centerline.
         """
-
         river_axis = LineGeometry(self.river_data.river_axis, crs=self.config_file.crs)
         river_axis_numpy = river_axis.as_array()
         # optional sorting --> see 04_Waal_D3D example
@@ -164,10 +163,6 @@ class Erosion:
         mesh_data: MeshData,
         crs: Any,
     ):
-        # read fairway file
-        # fairway_file = self.config_file.get_str("Erosion", "Fairway")
-        # log_text("read_fairway", data={"file": fairway_file})
-
         # map km to fairway points, further using axis
         log_text("chainage_to_fairway")
         # river_axis = LineGeometry(river_axis, crs=crs)
