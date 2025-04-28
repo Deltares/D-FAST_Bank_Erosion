@@ -1310,7 +1310,7 @@ class ConfigFile:
 class LineGeometry:
     """Center line class."""
 
-    def __init__(self, line: Union[LineString, np.ndarray], mask: Tuple[float, float] = None):
+    def __init__(self, line: Union[LineString, np.ndarray], mask: Tuple[float, float] = None, crs: str = None):
         """Geometry Line initialization.
 
         Args:
@@ -1333,6 +1333,7 @@ class LineGeometry:
             ```
         """
         self.station_bounds = mask
+        self.crs = crs
         if isinstance(line, np.ndarray):
             line = LineString(line)
         if mask is None:
@@ -1637,7 +1638,7 @@ class BaseRiverData:
         self.config_file = config_file
         center_line = config_file.get_river_center_line()
         bounds = config_file.get_start_end_stations()
-        self._river_center_line = LineGeometry(center_line, bounds)
+        self._river_center_line = LineGeometry(center_line, bounds, crs=config_file.crs)
         self._station_bounds: Tuple = config_file.get_start_end_stations()
 
     @property

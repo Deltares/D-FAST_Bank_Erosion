@@ -178,7 +178,7 @@ class BankLines:
             bank_km: List[np.ndarray] = []
             for ib in range(n_search_lines):
                 bcrds_numpy = np.array(bank[ib])
-                line_geom = LineGeometry(bcrds_numpy)
+                line_geom = LineGeometry(bcrds_numpy, crs=config_file.crs)
                 km_numpy = line_geom.intersect_with_line(xy_km_numpy)
                 bank_crds.append(bcrds_numpy)
                 bank_km.append(km_numpy)

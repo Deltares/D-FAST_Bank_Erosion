@@ -123,7 +123,7 @@ class Erosion:
         self, stations_coords: np.ndarray, crs: Any
     ) -> Tuple[np.ndarray, np.ndarray, LineString]:
 
-        river_axis = LineGeometry(self.river_data.river_axis)
+        river_axis = LineGeometry(self.river_data.river_axis, crs=crs)
         river_axis_numpy = river_axis.as_array()
         # optional sorting --> see 04_Waal_D3D example
         # check: sum all distances and determine maximum distance ...
@@ -172,7 +172,7 @@ class Erosion:
 
         # map km to fairway points, further using axis
         log_text("chainage_to_fairway")
-        river_axis = LineGeometry(river_axis)
+        river_axis = LineGeometry(river_axis, crs=crs)
         fairway_numpy = river_axis.as_array()
         fairway_km = river_axis.intersect_with_line(self.river_center_line_arr)
         river_axis.to_shapefile(
@@ -197,7 +197,7 @@ class Erosion:
         )
         if self.river_data.debug:
             arr = (fairway_intersection_coords[:-1] + fairway_intersection_coords[1:])/ 2
-            line_geom = LineGeometry(arr)
+            line_geom = LineGeometry(arr, crs=crs)
             line_geom.to_shapefile(
                 {"iface": fairway_face_indices},
                 f"{str(self.river_data.output_dir)}{os.sep}fairway_face_indices.shp",
@@ -308,7 +308,7 @@ class Erosion:
                 distance_fw[ib][ip] = dbfw
 
             if self.river_data.debug:
-                line_geom = LineGeometry(bcrds_mid)
+                line_geom = LineGeometry(bcrds_mid, crs=crs)
                 line_geom.to_shapefile(
                     {
                         "chainage": bank_data.bank_chainage_midpoints[ib],
