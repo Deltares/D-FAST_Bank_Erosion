@@ -156,33 +156,17 @@ class Erosion:
         river_axis.add_data(data={"stations": river_axis_km})
         return river_axis
 
-    def _prepare_fairway(
+    def _get_fairway_data(
         self,
         river_axis: LineGeometry,
         mesh_data: MeshData,
     ):
         # map km to fairway points, further using axis
         log_text("chainage_to_fairway")
-        fairway_with_stations = river_axis.intersect_with_line(self.river_center_line_arr)
-        river_axis.to_file(
-            file_name= f"{self.river_data.output_dir}{os.sep}fairway_chainage.shp",
-            data={"chainage": fairway_with_stations},
-        )
-
-        fairway_numpy = river_axis.as_array()
-        # clip fairway to reach of interest
-        i1 = np.argmin(((self.river_center_line_arr[0, :2] - fairway_numpy) ** 2).sum(axis=1))
-        i2 = np.argmin(((self.river_center_line_arr[-1, :2] - fairway_numpy) ** 2).sum(axis=1))
-        if i1 < i2:
-            fairway_numpy = fairway_numpy[i1 : i2 + 1]
-        else:
-            # reverse fairway
-            fairway_numpy = fairway_numpy[i2 : i1 + 1][::-1]
-
         # intersect fairway and mesh
-        log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
+        # log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
         fairway_intersection_coords, fairway_face_indices = intersect_line_mesh(
-            fairway_numpy, mesh_data
+            river_axis.as_array(), mesh_data
         )
         if self.river_data.debug:
             arr = (fairway_intersection_coords[:-1] + fairway_intersection_coords[1:])/ 2
@@ -845,7 +829,7 @@ class Erosion:
         km_bin = (river_axis.data["stations"].min(), river_axis.data["stations"].max(), self.river_data.output_intervals)
         km_mid = get_km_bins(km_bin, type=3)  # get mid-points
 
-        fairway_data = self._prepare_fairway(river_axis, mesh_data)
+        fairway_data = self._get_fairway_data(river_axis, mesh_data)
 
         self._map_bank_to_fairway(bank_data, fairway_data, self.simulation_data, config_file.crs)
 
