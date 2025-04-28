@@ -377,18 +377,19 @@ class BankLines:
             n_wet = n_wet_arr[i]
             if (mask and n_wet.mask) or n_wet == 0 or n_wet == n_nodes:
                 # all dry or all wet
-                pass
+                continue
+
+            if n_nodes == 3:
+                lines.append(
+                    tri_to_line(x_node[i], y_node[i], wet_node[i], h_node[i], h0)
+                )
             else:
-                # some nodes dry and some nodes wet: determine the line
-                if n_nodes == 3:
-                    lines[i] = tri_to_line(
-                        x_node[i], y_node[i], wet_node[i], h_node[i], h0
+                lines.append(
+                    poly_to_line(
+                        n_nodes, x_node[i], y_node[i], wet_node[i], h_node[i], h0
                     )
-                else:
-                    lines[i] = poly_to_line(
-                        nnodes, x_node[i], y_node[i], wet_node[i], h_node[i], h0
-                    )
-        lines = [line for line in lines if line is not None and not line.is_empty]
+                )
+        lines = [line for line in lines if line is not None]
         multi_line = union_all(lines)
         merged_line = line_merge(multi_line)
 
