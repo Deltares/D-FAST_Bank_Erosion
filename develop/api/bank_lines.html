@@ -2049,7 +2049,8 @@
 <span class="normal">391</span>
 <span class="normal">392</span>
 <span class="normal">393</span>
-<span class="normal">394</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLines</span><span class="p">:</span>
+<span class="normal">394</span>
+<span class="normal">395</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLines</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Bank line detection class.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
@@ -2352,51 +2353,52 @@
 
 <span class="sd">            ```</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">fnc</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span>
-        <span class="n">n_nodes</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">n_nodes</span>
-        <span class="n">max_nnodes</span> <span class="o">=</span> <span class="n">fnc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">x_node</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span>
-        <span class="n">y_node</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">y_node</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span>
-        <span class="n">zb</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">bed_elevation_values</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span>
-        <span class="n">zw</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">water_level_face</span>
+        <span class="n">face_node</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span>
+        <span class="n">max_n_nodes</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">x_node</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">[</span><span class="n">face_node</span><span class="p">]</span>
+        <span class="n">y_node</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">y_node</span><span class="p">[</span><span class="n">face_node</span><span class="p">]</span>
+        <span class="n">n_nodes_total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">)</span>
 
-        <span class="n">nnodes_total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">fnc</span><span class="p">,</span> <span class="s2">&quot;mask&quot;</span><span class="p">):</span>
-            <span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">fnc</span><span class="o">.</span><span class="n">mask</span>
-            <span class="n">non_masked</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">fnc</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
-            <span class="n">f_nc_m</span> <span class="o">=</span> <span class="n">fnc</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
-            <span class="n">zwm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">zw</span><span class="p">,</span> <span class="n">max_nnodes</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">face_node</span><span class="p">,</span> <span class="s2">&quot;mask&quot;</span><span class="p">):</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">face_node</span><span class="o">.</span><span class="n">mask</span>
+            <span class="n">non_masked</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">face_node</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+            <span class="n">f_nc_m</span> <span class="o">=</span> <span class="n">face_node</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+            <span class="n">zwm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">water_level_face</span><span class="p">,</span> <span class="n">max_n_nodes</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">fnc</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
-            <span class="n">non_masked</span> <span class="o">=</span> <span class="n">fnc</span><span class="o">.</span><span class="n">size</span>
-            <span class="n">f_nc_m</span> <span class="o">=</span> <span class="n">fnc</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">non_masked</span><span class="p">)</span>
-            <span class="n">zwm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">zw</span><span class="p">,</span> <span class="n">max_nnodes</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">non_masked</span><span class="p">)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">face_node</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+            <span class="n">non_masked</span> <span class="o">=</span> <span class="n">face_node</span><span class="o">.</span><span class="n">size</span>
+            <span class="n">f_nc_m</span> <span class="o">=</span> <span class="n">face_node</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">non_masked</span><span class="p">)</span>
+            <span class="n">zwm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">water_level_face</span><span class="p">,</span> <span class="n">max_n_nodes</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="n">non_masked</span>
+            <span class="p">)</span>
 
-        <span class="n">zw_node</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">f_nc_m</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">zwm</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">nnodes_total</span><span class="p">)</span>
-        <span class="n">n_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">f_nc_m</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">non_masked</span><span class="p">),</span> <span class="n">minlength</span><span class="o">=</span><span class="n">nnodes_total</span><span class="p">)</span>
+        <span class="n">zw_node</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">f_nc_m</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">zwm</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">n_nodes_total</span><span class="p">)</span>
+        <span class="n">n_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span>
+            <span class="n">f_nc_m</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">non_masked</span><span class="p">),</span> <span class="n">minlength</span><span class="o">=</span><span class="n">n_nodes_total</span>
+        <span class="p">)</span>
         <span class="n">zw_node</span> <span class="o">=</span> <span class="n">zw_node</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">n_val</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">zw_node</span><span class="p">[</span><span class="n">n_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">bed_elevation_values</span><span class="p">[</span><span class="n">n_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
 
-        <span class="n">h_node</span> <span class="o">=</span> <span class="n">zw_node</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span> <span class="o">-</span> <span class="n">zb</span>
+        <span class="n">h_node</span> <span class="o">=</span> <span class="n">zw_node</span><span class="p">[</span><span class="n">face_node</span><span class="p">]</span> <span class="o">-</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">bed_elevation_values</span><span class="p">[</span><span class="n">face_node</span><span class="p">]</span>
         <span class="n">wet_node</span> <span class="o">=</span> <span class="n">h_node</span> <span class="o">&gt;</span> <span class="n">h0</span>
         <span class="n">n_wet_arr</span> <span class="o">=</span> <span class="n">wet_node</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">n_wet_arr</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span>
 
-        <span class="n">n_faces</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fnc</span><span class="p">)</span>
-        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_faces</span>
+        <span class="n">n_faces</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">face_node</span><span class="p">)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">frac</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_faces</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">frac</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_faces</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">frac</span> <span class="o">*</span> <span class="mi">10</span><span class="p">))</span>
                 <span class="n">frac</span> <span class="o">=</span> <span class="n">frac</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="n">nnodes</span> <span class="o">=</span> <span class="n">n_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">n_nodes</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="n">n_wet</span> <span class="o">=</span> <span class="n">n_wet_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="k">if</span> <span class="p">(</span><span class="n">mask</span> <span class="ow">and</span> <span class="n">n_wet</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="ow">or</span> <span class="n">n_wet</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n_wet</span> <span class="o">==</span> <span class="n">nnodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">mask</span> <span class="ow">and</span> <span class="n">n_wet</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="ow">or</span> <span class="n">n_wet</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n_wet</span> <span class="o">==</span> <span class="n">n_nodes</span><span class="p">:</span>
                 <span class="c1"># all dry or all wet</span>
                 <span class="k">pass</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># some nodes dry and some nodes wet: determine the line</span>
-                <span class="k">if</span> <span class="n">nnodes</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">n_nodes</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                     <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">tri_to_line</span><span class="p">(</span>
                         <span class="n">x_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">wet_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">h_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">h0</span>
                     <span class="p">)</span>
@@ -2983,7 +2985,8 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="normal">391</span>
 <span class="normal">392</span>
 <span class="normal">393</span>
-<span class="normal">394</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="normal">394</span>
+<span class="normal">395</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">detect_bank_lines</span><span class="p">(</span>
     <span class="n">simulation_data</span><span class="p">:</span> <span class="n">SimulationData</span><span class="p">,</span> <span class="n">h0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">:</span>
@@ -3014,51 +3017,52 @@ The collection of all detected bank segments in the remaining model area.</p>
 
 <span class="sd">        ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">fnc</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span>
-    <span class="n">n_nodes</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">n_nodes</span>
-    <span class="n">max_nnodes</span> <span class="o">=</span> <span class="n">fnc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">x_node</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span>
-    <span class="n">y_node</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">y_node</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span>
-    <span class="n">zb</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">bed_elevation_values</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span>
-    <span class="n">zw</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">water_level_face</span>
+    <span class="n">face_node</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span>
+    <span class="n">max_n_nodes</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">x_node</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">[</span><span class="n">face_node</span><span class="p">]</span>
+    <span class="n">y_node</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">y_node</span><span class="p">[</span><span class="n">face_node</span><span class="p">]</span>
+    <span class="n">n_nodes_total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">)</span>
 
-    <span class="n">nnodes_total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">fnc</span><span class="p">,</span> <span class="s2">&quot;mask&quot;</span><span class="p">):</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">fnc</span><span class="o">.</span><span class="n">mask</span>
-        <span class="n">non_masked</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">fnc</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
-        <span class="n">f_nc_m</span> <span class="o">=</span> <span class="n">fnc</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
-        <span class="n">zwm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">zw</span><span class="p">,</span> <span class="n">max_nnodes</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">face_node</span><span class="p">,</span> <span class="s2">&quot;mask&quot;</span><span class="p">):</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">face_node</span><span class="o">.</span><span class="n">mask</span>
+        <span class="n">non_masked</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">face_node</span><span class="o">.</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">f_nc_m</span> <span class="o">=</span> <span class="n">face_node</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+        <span class="n">zwm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">water_level_face</span><span class="p">,</span> <span class="n">max_n_nodes</span><span class="p">)[</span><span class="n">mask</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">fnc</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
-        <span class="n">non_masked</span> <span class="o">=</span> <span class="n">fnc</span><span class="o">.</span><span class="n">size</span>
-        <span class="n">f_nc_m</span> <span class="o">=</span> <span class="n">fnc</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">non_masked</span><span class="p">)</span>
-        <span class="n">zwm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">zw</span><span class="p">,</span> <span class="n">max_nnodes</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">non_masked</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">face_node</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">non_masked</span> <span class="o">=</span> <span class="n">face_node</span><span class="o">.</span><span class="n">size</span>
+        <span class="n">f_nc_m</span> <span class="o">=</span> <span class="n">face_node</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">non_masked</span><span class="p">)</span>
+        <span class="n">zwm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">water_level_face</span><span class="p">,</span> <span class="n">max_n_nodes</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+            <span class="n">non_masked</span>
+        <span class="p">)</span>
 
-    <span class="n">zw_node</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">f_nc_m</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">zwm</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">nnodes_total</span><span class="p">)</span>
-    <span class="n">n_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">f_nc_m</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">non_masked</span><span class="p">),</span> <span class="n">minlength</span><span class="o">=</span><span class="n">nnodes_total</span><span class="p">)</span>
+    <span class="n">zw_node</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span><span class="n">f_nc_m</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">zwm</span><span class="p">,</span> <span class="n">minlength</span><span class="o">=</span><span class="n">n_nodes_total</span><span class="p">)</span>
+    <span class="n">n_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span>
+        <span class="n">f_nc_m</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">non_masked</span><span class="p">),</span> <span class="n">minlength</span><span class="o">=</span><span class="n">n_nodes_total</span>
+    <span class="p">)</span>
     <span class="n">zw_node</span> <span class="o">=</span> <span class="n">zw_node</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">n_val</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">zw_node</span><span class="p">[</span><span class="n">n_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">bed_elevation_values</span><span class="p">[</span><span class="n">n_val</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
 
-    <span class="n">h_node</span> <span class="o">=</span> <span class="n">zw_node</span><span class="p">[</span><span class="n">fnc</span><span class="p">]</span> <span class="o">-</span> <span class="n">zb</span>
+    <span class="n">h_node</span> <span class="o">=</span> <span class="n">zw_node</span><span class="p">[</span><span class="n">face_node</span><span class="p">]</span> <span class="o">-</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">bed_elevation_values</span><span class="p">[</span><span class="n">face_node</span><span class="p">]</span>
     <span class="n">wet_node</span> <span class="o">=</span> <span class="n">h_node</span> <span class="o">&gt;</span> <span class="n">h0</span>
     <span class="n">n_wet_arr</span> <span class="o">=</span> <span class="n">wet_node</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">n_wet_arr</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span>
 
-    <span class="n">n_faces</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fnc</span><span class="p">)</span>
-    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_faces</span>
+    <span class="n">n_faces</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">face_node</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">frac</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_faces</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">frac</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_faces</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">frac</span> <span class="o">*</span> <span class="mi">10</span><span class="p">))</span>
             <span class="n">frac</span> <span class="o">=</span> <span class="n">frac</span> <span class="o">+</span> <span class="mi">1</span>
-        <span class="n">nnodes</span> <span class="o">=</span> <span class="n">n_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">n_nodes</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
         <span class="n">n_wet</span> <span class="o">=</span> <span class="n">n_wet_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">mask</span> <span class="ow">and</span> <span class="n">n_wet</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="ow">or</span> <span class="n">n_wet</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n_wet</span> <span class="o">==</span> <span class="n">nnodes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">mask</span> <span class="ow">and</span> <span class="n">n_wet</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span> <span class="ow">or</span> <span class="n">n_wet</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n_wet</span> <span class="o">==</span> <span class="n">n_nodes</span><span class="p">:</span>
             <span class="c1"># all dry or all wet</span>
             <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># some nodes dry and some nodes wet: determine the line</span>
-            <span class="k">if</span> <span class="n">nnodes</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">n_nodes</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">tri_to_line</span><span class="p">(</span>
                     <span class="n">x_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">wet_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">h_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">h0</span>
                 <span class="p">)</span>
