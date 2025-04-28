@@ -57,6 +57,8 @@ class BankLines:
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> with patch("dfastbe.io.log_text"):
             ...    bank_lines = BankLines(config_file)
+            ...    isinstance(bank_lines, BankLines)
+            True
 
             ```
         """
@@ -185,6 +187,22 @@ class BankLines:
 
         Returns:
             MultiLineString: Un-ordered set of bank line segments, clipped to bank area.
+
+        Examples:
+            ```python
+            >>> import sys
+            >>> from io import StringIO
+            >>> from dfastbe.io import ConfigFile
+            >>> sys.stdout = StringIO()
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> river_data = RiverData(config_file)
+            >>> bank_lines = BankLines(config_file)
+            >>> simulation_data, h0 = river_data.simulation_data()
+            >>> banklines = bank_lines.detect_bank_lines(simulation_data, h0, config_file)
+            >>> bank_area = bank_lines.search_lines.to_polygons()[0]
+            >>> bank_lines.mask(banklines, bank_area)
+
+            ```
         """
         # intersection returns one MultiLineString object
         clipped_banklines = banklines.intersection(bank_area)[0]
