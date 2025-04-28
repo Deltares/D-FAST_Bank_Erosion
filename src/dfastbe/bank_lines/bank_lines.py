@@ -216,15 +216,20 @@ class BankLines:
         Examples:
             ```python
             >>> import matplotlib
+            >>> from unittest.mock import patch
             >>> matplotlib.use('Agg')
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> bank_lines = BankLines(config_file)
-            >>> xy_km_numpy = np.array([[0, 0], [1, 1]])
+            >>> with patch("dfastbe.io.log_text"), patch("dfastbe.bank_lines.data_models.log_text"):
+            ...     bank_lines = BankLines(config_file)
+            ...     bank_lines.plot_flags["save_plot"] = False
+            >>> xy_km_numpy = np.array([[0, 0, 0], [1, 1, 0]])
             >>> n_search_lines = 1
             >>> bank = [LineString([(0, 0), (1, 1)])]
             >>> km_bounds = (0, 1)
             >>> bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]
             >>> bank_lines.plot(xy_km_numpy, n_search_lines, bank, km_bounds, bank_areas, config_file)
+            No message found for =
+            No message found for create_figures
 
             ```
         """
