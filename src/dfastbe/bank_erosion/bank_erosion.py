@@ -168,8 +168,8 @@ class Erosion:
         # river_axis = LineGeometry(river_axis, crs=crs)
         fairway_with_stations = river_axis.intersect_with_line(self.river_center_line_arr)
         river_axis.to_shapefile(
-            {"chainage": fairway_with_stations},
-            str(self.river_data.output_dir) + os.sep + "fairway_chainage.shp",
+            file_name= f"{self.river_data.output_dir}{os.sep}fairway_chainage.shp",
+            data={"chainage": fairway_with_stations},
         )
 
         fairway_numpy = river_axis.as_array()
@@ -191,8 +191,8 @@ class Erosion:
             arr = (fairway_intersection_coords[:-1] + fairway_intersection_coords[1:])/ 2
             line_geom = LineGeometry(arr, crs=crs)
             line_geom.to_shapefile(
-                {"iface": fairway_face_indices},
-                f"{str(self.river_data.output_dir)}{os.sep}fairway_face_indices.shp",
+                file_name=f"{str(self.river_data.output_dir)}{os.sep}fairway_face_indices.shp",
+                data={"iface": fairway_face_indices},
             )
 
         return FairwayData(fairway_face_indices, fairway_intersection_coords)
@@ -301,7 +301,8 @@ class Erosion:
             if self.river_data.debug:
                 line_geom = LineGeometry(bcrds_mid, crs=crs)
                 line_geom.to_shapefile(
-                    {
+                    file_name=f"{self.river_data.output_dir}/bank_{ib + 1}_chainage_and_fairway_face_idx.shp",
+                    data={
                         "chainage": bank_data.bank_chainage_midpoints[ib],
                         "iface_fw": bp_fw_face_idx[ib],
                     },
