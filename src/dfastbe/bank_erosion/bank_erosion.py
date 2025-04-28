@@ -183,18 +183,30 @@ class Erosion:
         bank_data: BankData,
         fairway_data: FairwayData,
         simulation_data: ErosionSimulationData,
-        crs: Any,
     ):
-        # distance fairway-bankline (bankfairway)
+        """Map bank data to fairway data.
+
+        Args:
+            bank_data (BankData):
+            fairway_data (FairwayData):
+            simulation_data (ErosionSimulationData):
+
+        Returns:
+            The method updates the following attributes in the `bank_data` instance
+            - fairway_face_indices
+            - fairway_distances
+            - fairway_initial_water_levels
+        """
+        # distance fairway-bankline (bank-fairway)
         log_text("bank_distance_fairway")
         distance_fw = []
         bp_fw_face_idx = []
-        nfw = len(fairway_data.fairway_face_indices)
-        for ib, bcrds in enumerate(bank_data.bank_line_coords):
-            bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
-            distance_fw.append(np.zeros(len(bcrds_mid)))
-            bp_fw_face_idx.append(np.zeros(len(bcrds_mid), dtype=int))
-            for ip, bp in enumerate(bcrds_mid):
+        num_fairway_face_ind = len(fairway_data.fairway_face_indices)
+        for bank_i, bank_coords in enumerate(bank_data.bank_line_coords):
+            coords_mid = (bank_coords[:-1] + bank_coords[1:]) / 2
+            distance_fw.append(np.zeros(len(coords_mid)))
+            bp_fw_face_idx.append(np.zeros(len(coords_mid), dtype=int))
+            for ip, bp in enumerate(coords_mid):
                 # find closest fairway support node
                 ifw = np.argmin(
                     ((bp - fairway_data.intersection_coords) ** 2).sum(axis=1)
@@ -233,7 +245,7 @@ class Erosion:
                         )
                         ** 2
                     )
-                    if alpha > 0 and alpha < 1:
+                    if 0 < alpha < 1:
                         fwp1 = fairway_data.intersection_coords[ifw - 1] + alpha * (
                             fairway_data.intersection_coords[ifw]
                             - fairway_data.intersection_coords[ifw - 1]
@@ -242,7 +254,7 @@ class Erosion:
                         if d1 < dbfw:
                             dbfw = d1
                             # projected point located on segment before, which corresponds to initial choice: iseg = ifw - 1
-                if ifw < nfw:
+                if ifw < num_fairway_face_ind:
                     alpha = (
                         (
                             fairway_data.intersection_coords[ifw + 1, 0]
@@ -266,7 +278,7 @@ class Erosion:
                         )
                         ** 2
                     )
-                    if alpha > 0 and alpha < 1:
+                    if 0 < alpha < 1:
                         fwp1 = fairway_data.intersection_coords[ifw] + alpha * (
                             fairway_data.intersection_coords[ifw + 1]
                             - fairway_data.intersection_coords[ifw]
@@ -276,16 +288,16 @@ class Erosion:
                             dbfw = d1
                             iseg = ifw
 
-                bp_fw_face_idx[ib][ip] = fairway_data.fairway_face_indices[iseg]
-                distance_fw[ib][ip] = dbfw
+                bp_fw_face_idx[bank_i][ip] = fairway_data.fairway_face_indices[iseg]
+                distance_fw[bank_i][ip] = dbfw
 
             if self.river_data.debug:
-                line_geom = LineGeometry(bcrds_mid, crs=crs)
+                line_geom = LineGeometry(coords_mid, crs=self.config_file.crs)
                 line_geom.to_file(
-                    file_name=f"{self.river_data.output_dir}/bank_{ib + 1}_chainage_and_fairway_face_idx.shp",
+                    file_name=f"{self.river_data.output_dir}/bank_{bank_i + 1}_chainage_and_fairway_face_idx.shp",
                     data={
-                        "chainage": bank_data.bank_chainage_midpoints[ib],
-                        "iface_fw": bp_fw_face_idx[ib],
+                        "chainage": bank_data.bank_chainage_midpoints[bank_i],
+                        "iface_fw": bp_fw_face_idx[bank_i],
                     },
                 )
 
@@ -294,8 +306,8 @@ class Erosion:
 
         # water level at fairway
         zfw_ini = []
-        for ib in range(bank_data.n_bank_lines):
-            ii = bank_data.fairway_face_indices[ib]
+        for bank_i in range(bank_data.n_bank_lines):
+            ii = bank_data.fairway_face_indices[bank_i]
             zfw_ini.append(simulation_data.water_level_face[ii])
         fairway_data.fairway_initial_water_levels = zfw_ini
 
