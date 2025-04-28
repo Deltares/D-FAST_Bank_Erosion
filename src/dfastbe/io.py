@@ -1349,7 +1349,7 @@ class LineGeometry:
         return np.array(self.values.coords)
 
     def to_shapefile(
-        self, data: Dict[str, np.ndarray], file_name: str, crs: Any
+        self, data: Dict[str, np.ndarray], file_name: str
     ) -> None:
         """
         Write a shape point file with x, y, and values.
@@ -1363,7 +1363,7 @@ class LineGeometry:
         """
         xy = self.as_array()
         geom = [Point(xy_i) for xy_i in xy]
-        GeoDataFrame(data, geometry=geom, crs=crs).to_file(file_name)
+        GeoDataFrame(data, geometry=geom, crs=self.crs).to_file(file_name)
 
     @staticmethod
     def mask(line_string: LineString, bounds: Tuple[float, float]) -> LineString:

@@ -141,7 +141,6 @@ class Erosion:
         river_axis.to_shapefile(
             {"chainage": river_axis_km},
             f"{str(self.river_data.output_dir)}{os.sep}river_axis_chainage.shp",
-            crs,
         )
 
         # clip river axis to reach of interest (get closes point to the first and last station)
@@ -178,7 +177,6 @@ class Erosion:
         river_axis.to_shapefile(
             {"chainage": fairway_km},
             str(self.river_data.output_dir) + os.sep + "fairway_chainage.shp",
-            crs,
         )
 
         # clip fairway to reach of interest
@@ -201,7 +199,6 @@ class Erosion:
             line_geom.to_shapefile(
                 {"iface": fairway_face_indices},
                 f"{str(self.river_data.output_dir)}{os.sep}fairway_face_indices.shp",
-                crs,
             )
 
         return FairwayData(fairway_face_indices, fairway_intersection_coords)
@@ -315,7 +312,6 @@ class Erosion:
                         "iface_fw": bp_fw_face_idx[ib],
                     },
                     f"{self.river_data.output_dir}/bank_{ib + 1}_chainage_and_fairway_face_idx.shp",
-                    crs,
                 )
 
         bank_data.fairway_face_indices = bp_fw_face_idx
