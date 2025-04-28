@@ -41,7 +41,6 @@ from geopandas.geoseries import GeoSeries
 from shapely import prepare
 from shapely.geometry import LineString, Point
 
-
 PROGTEXTS: Dict[str, List[str]]
 
 
@@ -185,7 +184,7 @@ class BaseSimulationData:
                     dry_wet_threshold = 0.1
                 else:
                     dry_wet_threshold = 0.01
-            except:
+            except AttributeError:
                 dry_wet_threshold = 0.01
 
         elif name.startswith("SDS"):

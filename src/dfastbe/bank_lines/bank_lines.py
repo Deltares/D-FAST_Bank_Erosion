@@ -1,7 +1,6 @@
 """Bank line detection module."""
 
 import os
-from pathlib import Path
 from typing import List
 
 import geopandas as gpd
@@ -49,7 +48,7 @@ class BankLines:
             >>> from unittest.mock import patch
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> with patch("dfastbe.io.log_text"):
+            >>> with patch("dfastbe.io.log_text"), patch("dfastbe.bank_lines.data_models.log_text"):
             ...    bank_lines = BankLines(config_file)
             ...    isinstance(bank_lines, BankLines)
             True
@@ -175,7 +174,7 @@ class BankLines:
             >>> from dfastbe.io import ConfigFile
             >>> sys.stdout = StringIO()
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> river_data = RiverData(config_file)
+            >>> river_data = BankLinesRiverData(config_file)
             >>> bank_lines = BankLines(config_file)
             >>> simulation_data, h0 = river_data.simulation_data()
             >>> banklines = bank_lines.detect_bank_lines(simulation_data, h0, config_file)
@@ -316,8 +315,8 @@ class BankLines:
             ```python
             >>> from unittest.mock import patch
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> with patch("dfastbe.io.log_text"), patch("dfastbe.bank_lines.print"):
-            ...     river_data = RiverData(config_file)
+            >>> with patch("dfastbe.io.log_text"), patch("dfastbe.bank_lines.bank_lines.print"), patch("dfastbe.bank_lines.data_models.log_text"):
+            ...     river_data = BankLinesRiverData(config_file)
             ...     simulation_data, h0 = river_data.simulation_data()
             ...     BankLines.detect_bank_lines(simulation_data, h0, config_file)
             0    MULTILINESTRING ((207927.151 391960.747, 20792...
@@ -387,7 +386,7 @@ class BankLines:
 
     @staticmethod
     def _detect_lines(
-        simulation_data: SimulationData,
+        simulation_data: BaseSimulationData,
         wet_node: np.ndarray,
         n_wet_arr: np.ndarray,
         h_node: np.ndarray,
@@ -397,6 +396,7 @@ class BankLines:
         face_node = simulation_data.face_node
         x_node = simulation_data.x_node[face_node]
         y_node = simulation_data.y_node[face_node]
+        mask = n_wet_arr.mask.size > 1
         lines = []
         frac = 0
 
@@ -408,20 +408,16 @@ class BankLines:
 
             # Skip faces that are all dry or all wet
             n_wet = n_wet_arr[i]
-            if n_wet == 0 or n_wet == simulation_data.n_nodes[i]:
+            n_node = simulation_data.n_nodes[i]
+            if (mask and n_wet.mask) or n_wet == 0 or n_wet == n_node:
                 continue
 
             # Generate bank line segments
-            if simulation_data.n_nodes[i] == 3:
+            if n_node == 3:
                 line = tri_to_line(x_node[i], y_node[i], wet_node[i], h_node[i], h0)
             else:
                 line = poly_to_line(
-                    simulation_data.n_nodes[i],
-                    x_node[i],
-                    y_node[i],
-                    wet_node[i],
-                    h_node[i],
-                    h0,
+                    n_node, x_node[i], y_node[i], wet_node[i], h_node[i], h0
                 )
 
             if line is not None:
