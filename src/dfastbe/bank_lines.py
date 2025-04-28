@@ -308,8 +308,7 @@ class BankLines:
     def detect_bank_lines(
         simulation_data: SimulationData, h0: float, config_file: ConfigFile
     ) -> gpd.GeoSeries:
-        """
-        Detect all possible bank line segments based on simulation data.
+        """Detect all possible bank line segments based on simulation data.
 
         Use a critical water depth h0 as a water depth threshold for dry/wet boundary.
 
@@ -322,6 +321,19 @@ class BankLines:
         Returns:
             geopandas.GeoSeries:
                 The collection of all detected bank segments in the remaining model area.
+
+        Examples:
+            ```python
+            >>> from unittest.mock import patch
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> with patch("dfastbe.io.log_text"), patch("dfastbe.bank_lines.print"):
+            ...     river_data = RiverData(config_file)
+            ...     simulation_data, h0 = river_data.simulation_data()
+            ...     BankLines.detect_bank_lines(simulation_data, h0, config_file)
+            0    MULTILINESTRING ((207927.151 391960.747, 20792...
+            dtype: geometry
+
+            ```
         """
         fnc = simulation_data.face_node
         n_nodes = simulation_data.n_nodes
@@ -332,12 +344,12 @@ class BankLines:
         zw = simulation_data.water_level_face
 
         nnodes_total = len(simulation_data.x_node)
-        try:
+        if hasattr(fnc, "mask"):
             mask = ~fnc.mask
             non_masked = sum(mask.reshape(fnc.size))
             f_nc_m = fnc[mask]
             zwm = np.repeat(zw, max_nnodes)[mask]
-        except:
+        else:
             mask = np.repeat(True, fnc.size)
             non_masked = fnc.size
             f_nc_m = fnc.reshape(non_masked)
