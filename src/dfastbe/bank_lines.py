@@ -2,32 +2,26 @@
 
 import os
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import List
 
 import geopandas as gpd
 import numpy as np
-from matplotlib import pyplot as plt
-from shapely.geometry.polygon import Polygon
-from shapely.geometry import MultiLineString
 from geopandas.geoseries import GeoSeries
-from shapely import union_all, line_merge
+from matplotlib import pyplot as plt
+from shapely import line_merge, union_all
+from shapely.geometry import LineString, MultiLineString
+from shapely.geometry.polygon import Polygon
 
 from dfastbe import __version__
 from dfastbe import plotting as df_plt
-from dfastbe.io import (
-    ConfigFile,
-    RiverData,
-    SimulationData,
-    log_text,
-    get_bbox
-)
+from dfastbe.io import ConfigFile, RiverData, SimulationData, get_bbox, log_text
 from dfastbe.kernel import get_zoom_extends
 from dfastbe.support import (
+    on_right_side,
     poly_to_line,
     project_km_on_line,
     sort_connect_bank_lines,
     tri_to_line,
-    on_right_side,
 )
 from dfastbe.utils import timed_logger
 
@@ -133,7 +127,6 @@ class BankLines:
         center_line_arr = river_center_line.as_array()
         stations_coords = center_line_arr[:, :2]
 
-        # convert search lines to bank polygons
         bank_areas: List[Polygon] = self.search_lines.to_polygons()
 
         # determine whether search lines are located on the left or right
@@ -143,7 +136,6 @@ class BankLines:
                 np.array(self.search_lines.values[ib].coords), stations_coords
             )
 
-        # derive bank lines (get_banklines)
         log_text("identify_banklines")
         banklines = self.detect_bank_lines(self.simulation_data, self.h0, config_file)
 
@@ -158,7 +150,6 @@ class BankLines:
                 clipped_banklines[ib], river_center_line_values, to_right[ib]
             )
 
-        # save bank_file
         self.save(bank, banklines, clipped_banklines, bank_areas, config_file)
 
         if self.plot_flags["plot_data"]:
@@ -277,9 +268,27 @@ class BankLines:
             plt.show(block=not self.gui)
 
     def save(
-        self, bank, banklines, clipped_banklines, bank_areas, config_file: ConfigFile
+        self,
+        bank: List[LineString],
+        banklines: GeoSeries,
+        clipped_banklines: List[MultiLineString],
+        bank_areas: List[Polygon],
+        config_file: ConfigFile,
     ):
-        """Save result files."""
+        """Save results to files.
+
+        Args:
+            bank (List[LineString]):
+                List of bank lines.
+            banklines (GeoSeries):
+                Un-ordered set of bank line segments.
+            clipped_banklines (List[MultiLineString]):
+                Un-ordered set of bank line segments, clipped to bank area.
+            bank_areas (List[Polygon]):
+                A search area corresponding to one of the bank search lines.
+            config_file (ConfigFile):
+                Configuration file object.
+        """
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
         bank_file = self.bank_output_dir / f"{bank_name}.shp"
         log_text("save_banklines", data={"file": bank_file})
