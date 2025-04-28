@@ -410,6 +410,7 @@ class ErosionRiverData(BaseRiverData):
         self.num_discharge_levels = config_file.get_int("Erosion", "NLevel")
         self.output_intervals = config_file.get_float("Erosion", "OutputInterval", 1.0)
         self.bank_lines = config_file.read_bank_lines(str(self.bank_dir))
+        self.river_axis = self._read_river_axis()
 
     def simulation_data(self) -> ErosionSimulationData:
 
@@ -446,7 +447,7 @@ class ErosionRiverData(BaseRiverData):
         else:
             return bank_dir
 
-    def read_river_axis(self) -> LineString:
+    def _read_river_axis(self) -> LineString:
         """Get the river axis from the analysis settings."""
         river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
         log_text("read_river_axis", data={"file": river_axis_file})

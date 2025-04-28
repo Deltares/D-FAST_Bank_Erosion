@@ -123,7 +123,7 @@ class Erosion:
         self, stations_coords: np.ndarray, crs: Any
     ) -> Tuple[np.ndarray, np.ndarray, LineString]:
 
-        river_axis = LineGeometry(self.river_data.read_river_axis())
+        river_axis = LineGeometry(self.river_data.river_axis)
         river_axis_numpy = river_axis.as_array()
         # optional sorting --> see 04_Waal_D3D example
         # check: sum all distances and determine maximum distance ...
@@ -144,7 +144,7 @@ class Erosion:
             crs,
         )
 
-        # clip river axis to reach of interest
+        # clip river axis to reach of interest (get closes point to the first and last station)
         i1 = np.argmin(((stations_coords[0] - river_axis_numpy) ** 2).sum(axis=1))
         i2 = np.argmin(((stations_coords[-1] - river_axis_numpy) ** 2).sum(axis=1))
         if i1 < i2:
@@ -154,6 +154,7 @@ class Erosion:
             # reverse river axis
             river_axis_km = river_axis_km[i2 : i1 + 1][::-1]
             river_axis_numpy = river_axis_numpy[i2 : i1 + 1][::-1]
+
         river_axis = LineString(river_axis_numpy)
 
         return river_axis_km, river_axis_numpy, river_axis
