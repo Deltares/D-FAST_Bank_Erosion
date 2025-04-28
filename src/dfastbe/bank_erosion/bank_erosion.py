@@ -46,7 +46,7 @@ from dfastbe.io import (
     write_shp,
     write_csv,
 )
-from dfastbe.erosion.data_models import (
+from dfastbe.bank_erosion.data_models import (
     ErosionRiverData,
     ErosionSimulationData,
     ErosionInputs,
@@ -56,7 +56,7 @@ from dfastbe.erosion.data_models import (
     FairwayData,
     ErosionResults,
 )
-from dfastbe.erosion.utils import intersect_line_mesh, BankLinesProcessor
+from dfastbe.bank_erosion.utils import intersect_line_mesh, BankLinesProcessor
 from dfastbe.utils import timed_logger
 
 

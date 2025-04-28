@@ -1366,7 +1366,7 @@ class LineGeometry:
 
     @staticmethod
     def mask(line_string: LineString, bounds: Tuple[float, float]) -> LineString:
-        """Clip a chainage line to the relevant reach.
+        """Clip a LineGeometry to the relevant reach.
 
         Args:
             line_string (LineString):

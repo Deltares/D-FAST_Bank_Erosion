@@ -43,7 +43,7 @@ import subprocess
 from functools import partial
 from dfastbe import __version__, __file__
 from dfastbe.bank_lines.bank_lines import BankLines
-from dfastbe.erosion.bank_erosion import Erosion
+from dfastbe.bank_erosion.bank_erosion import Erosion
 
 USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
 

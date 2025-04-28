@@ -30,7 +30,7 @@ from typing import List, Tuple
 
 import numpy as np
 
-from dfastbe.erosion.data_models import MeshData
+from dfastbe.bank_erosion.data_models import MeshData
 import numpy
 import math
 from shapely.geometry import (

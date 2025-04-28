@@ -5,7 +5,7 @@ from unittest.mock import patch, MagicMock
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
 from dfastbe.io import ConfigFile
-from dfastbe.erosion.data_models import (
+from dfastbe.bank_erosion.data_models import (
     ErosionRiverData,
     ErosionInputs,
     WaterLevelData,
@@ -261,7 +261,7 @@ class TestErosionRiverData:
         mock_read.return_value = mock_river_axis
         expected_path = Path("tests/data/erosion/inputs/maas_rivieras_mod.xyc")
 
-        river_axis = river_data.read_river_axis()
+        river_axis = river_data._read_river_axis()
 
         mock_read.assert_called_once_with(str(expected_path.resolve()))
         assert isinstance(river_axis, LineString)

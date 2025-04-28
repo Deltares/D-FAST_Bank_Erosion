@@ -5,7 +5,7 @@ from shapely.geometry import Point, Polygon, LineString
 
 from dfastbe.io import log_text, LineGeometry
 from dfastbe.support import on_right_side, get_slices, enlarge, get_slices_core
-from dfastbe.erosion.data_models import ErosionRiverData, BankData, MeshData
+from dfastbe.bank_erosion.data_models import ErosionRiverData, BankData, MeshData
 
 
 class BankLinesProcessor:
