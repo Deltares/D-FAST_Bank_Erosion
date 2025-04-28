@@ -394,8 +394,7 @@ class BankLines:
     def _calculate_water_depth(
         simulation_data: BaseSimulationData,
     ) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        Calculate the water depth at each node in the simulation data.
+        """Calculate the water depth at each node in the simulation data.
 
         This method computes the water depth for each node by considering the
         water levels at the faces and the bed elevation values.
@@ -489,7 +488,12 @@ class BankLines:
 
     @staticmethod
     def _progress_bar(current: int, total: int) -> None:
-        """Print progress bar."""
+        """Print progress bar.
+
+        Args:
+            current (int): Current iteration.
+            total (int): Total iterations.
+        """
         if current % 100 == 0:
             percent = (current / total) * 100
             print(f"Progress: {percent:.2f}% ({current}/{total})", end="\r")
