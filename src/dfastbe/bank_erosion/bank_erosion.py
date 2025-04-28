@@ -140,11 +140,6 @@ class Erosion:
         # map km to axis points, further using axis
         log_text("chainage_to_axis")
         river_axis_km = river_axis.intersect_with_line(self.river_center_line_arr)
-        # save the river axis before masking with the stations
-        # river_axis.to_shapefile(
-        #     f"{str(self.river_data.output_dir)}{os.sep}river_axis_chainage.shp",
-        #     {"chainage": river_axis_km},
-        # )
 
         # clip river axis to reach of interest (get closes point to the first and last station)
         i1 = np.argmin(((self.river_center_line_arr[0, :2] - river_axis_numpy) ** 2).sum(axis=1))
