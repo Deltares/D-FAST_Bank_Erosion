@@ -193,9 +193,10 @@ class Erosion:
 
         Returns:
             The method updates the following attributes in the `bank_data` instance
-            - fairway_face_indices
-            - fairway_distances
-            - fairway_initial_water_levels
+                - fairway_face_indices
+                - fairway_distances
+            and the following attributes in the `fairway_data` instance
+                - fairway_initial_water_levels
         """
         # distance fairway-bankline (bank-fairway)
         log_text("bank_distance_fairway")
@@ -843,7 +844,8 @@ class Erosion:
 
         fairway_data = self._get_fairway_data(river_axis, mesh_data)
 
-        self._map_bank_to_fairway(bank_data, fairway_data, self.simulation_data, config_file.crs)
+        # map the bank data to the fairway data (the bank_data and fairway_data will be updated)
+        self._map_bank_to_fairway(bank_data, fairway_data, self.simulation_data)
 
         erosion_inputs = self._prepare_initial_conditions(
             config_file, bank_data, fairway_data
