@@ -1314,10 +1314,12 @@ class LineGeometry:
         """Geometry Line initialization.
 
         Args:
-            line_string (LineString):
+            line (LineString):
                 River center line as a linestring.
             mask (Tuple[float, float], optional):
                 Lower and upper limit for the chainage. Defaults to None.
+            crs (str, Optional):
+                the coordinate reference system number as a string.
 
         Examples:
             ```python
