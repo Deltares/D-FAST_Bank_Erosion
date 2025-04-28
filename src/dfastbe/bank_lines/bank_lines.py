@@ -326,8 +326,6 @@ class BankLines:
         """
         face_node = simulation_data.face_node
         max_n_nodes = simulation_data.face_node.shape[1]
-        x_node = simulation_data.x_node[face_node]
-        y_node = simulation_data.y_node[face_node]
         n_nodes_total = len(simulation_data.x_node)
 
         if hasattr(face_node, "mask"):
@@ -353,32 +351,10 @@ class BankLines:
         h_node = zw_node[face_node] - simulation_data.bed_elevation_values[face_node]
         wet_node = h_node > h0
         n_wet_arr = wet_node.sum(axis=1)
-        mask = n_wet_arr.mask.size > 1
 
-        n_faces = len(face_node)
-        lines = []
-        frac = 0
-        for i in range(n_faces):
-            if i >= frac * (n_faces - 1) / 10:
-                print(int(frac * 10))
-                frac = frac + 1
-            n_nodes = simulation_data.n_nodes[i]
-            n_wet = n_wet_arr[i]
-            if (mask and n_wet.mask) or n_wet == 0 or n_wet == n_nodes:
-                # all dry or all wet
-                continue
-
-            if n_nodes == 3:
-                lines.append(
-                    tri_to_line(x_node[i], y_node[i], wet_node[i], h_node[i], h0)
-                )
-            else:
-                lines.append(
-                    poly_to_line(
-                        n_nodes, x_node[i], y_node[i], wet_node[i], h_node[i], h0
-                    )
-                )
-        lines = [line for line in lines if line is not None]
+        lines = BankLines._detect_lines(
+            simulation_data, wet_node, n_wet_arr, h_node, h0
+        )
         multi_line = union_all(lines)
         merged_line = line_merge(multi_line)
 
@@ -392,27 +368,39 @@ class BankLines:
         h_node: np.ndarray,
         h0: float,
     ) -> List[LineString]:
-        """Detect bank lines based on wet/dry nodes."""
-        face_node = simulation_data.face_node
-        x_node = simulation_data.x_node[face_node]
-        y_node = simulation_data.y_node[face_node]
+        """Detect bank lines based on wet/dry nodes.
+
+        Args:
+            simulation_data (BaseSimulationData):
+                Simulation data: mesh, bed levels, water levels, velocities, etc.
+            wet_node (np.ndarray):
+                Wet/dry boolean array for each face node.
+            n_wet_arr (np.ndarray):
+                Number of wet nodes for each face.
+            h_node (np.ndarray):
+                Water depth at each node.
+            h0 (float):
+                Critical water depth for determining the banks.
+
+        Returns:
+            List[LineString or MultiLineString]:
+                List of detected bank lines.
+        """
+        num_faces = len(simulation_data.face_node)
+        x_node = simulation_data.x_node[simulation_data.face_node]
+        y_node = simulation_data.y_node[simulation_data.face_node]
         mask = n_wet_arr.mask.size > 1
         lines = []
-        frac = 0
 
-        for i in range(len(face_node)):
-            # Progress logging
-            if i >= frac * (len(face_node) - 1) / 10:
-                print(int(frac * 10))
-                frac += 1
+        for i in range(num_faces):
+            # TODO: determine if this is needed
+            BankLines._progress_bar(i, num_faces)
 
-            # Skip faces that are all dry or all wet
             n_wet = n_wet_arr[i]
             n_node = simulation_data.n_nodes[i]
             if (mask and n_wet.mask) or n_wet == 0 or n_wet == n_node:
                 continue
 
-            # Generate bank line segments
             if n_node == 3:
                 line = tri_to_line(x_node[i], y_node[i], wet_node[i], h_node[i], h0)
             else:
@@ -424,3 +412,12 @@ class BankLines:
                 lines.append(line)
 
         return lines
+
+    @staticmethod
+    def _progress_bar(current: int, total: int) -> None:
+        """Print progress bar."""
+        if current % 100 == 0:
+            percent = (current / total) * 100
+            print(f"Progress: {percent:.2f}% ({current}/{total})", end="\r")
+        if current == total - 1:
+            print("Progress: 100.00% (100%)")
