@@ -1,7 +1,7 @@
 """Bank line detection module."""
 
 import os
-from typing import List
+from typing import List, Tuple
 
 import geopandas as gpd
 import numpy as np
@@ -324,6 +324,38 @@ class BankLines:
 
             ```
         """
+        h_node = BankLines._calculate_water_depth(simulation_data)
+
+        wet_node = h_node > h0
+        n_wet_arr = wet_node.sum(axis=1)
+
+        lines = BankLines._generate_bank_lines(
+            simulation_data, wet_node, n_wet_arr, h_node, h0
+        )
+        multi_line = union_all(lines)
+        merged_line = line_merge(multi_line)
+
+        return gpd.GeoSeries(merged_line, crs=config_file.crs)
+
+    @staticmethod
+    def _calculate_water_depth(
+        simulation_data: BaseSimulationData,
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Calculate the water depth at each node in the simulation data.
+
+        This method computes the water depth for each node by considering the
+        water levels at the faces and the bed elevation values.
+
+        Args:
+            simulation_data (BaseSimulationData):
+                Simulation data containing face-node relationships, water levels,
+                and bed elevation values.
+
+        Returns:
+            np.ndarray:
+                An array representing the water depth at each node.
+        """
         face_node = simulation_data.face_node
         max_n_nodes = simulation_data.face_node.shape[1]
         n_nodes_total = len(simulation_data.x_node)
@@ -347,21 +379,11 @@ class BankLines:
         )
         zw_node = zw_node / np.maximum(n_val, 1)
         zw_node[n_val == 0] = simulation_data.bed_elevation_values[n_val == 0]
-
         h_node = zw_node[face_node] - simulation_data.bed_elevation_values[face_node]
-        wet_node = h_node > h0
-        n_wet_arr = wet_node.sum(axis=1)
-
-        lines = BankLines._detect_lines(
-            simulation_data, wet_node, n_wet_arr, h_node, h0
-        )
-        multi_line = union_all(lines)
-        merged_line = line_merge(multi_line)
-
-        return gpd.GeoSeries(merged_line, crs=config_file.crs)
+        return h_node
 
     @staticmethod
-    def _detect_lines(
+    def _generate_bank_lines(
         simulation_data: BaseSimulationData,
         wet_node: np.ndarray,
         n_wet_arr: np.ndarray,
@@ -393,7 +415,6 @@ class BankLines:
         lines = []
 
         for i in range(num_faces):
-            # TODO: determine if this is needed
             BankLines._progress_bar(i, num_faces)
 
             n_wet = n_wet_arr[i]
