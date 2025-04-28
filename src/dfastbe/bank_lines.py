@@ -394,3 +394,47 @@ class BankLines:
         merged_line = line_merge(multi_line)
 
         return gpd.GeoSeries(merged_line, crs=config_file.crs)
+
+    @staticmethod
+    def _detect_lines(
+        simulation_data: SimulationData,
+        wet_node: np.ndarray,
+        n_wet_arr: np.ndarray,
+        h_node: np.ndarray,
+        h0: float,
+    ) -> List[LineString]:
+        """Detect bank lines based on wet/dry nodes."""
+        face_node = simulation_data.face_node
+        x_node = simulation_data.x_node[face_node]
+        y_node = simulation_data.y_node[face_node]
+        lines = []
+        frac = 0
+
+        for i in range(len(face_node)):
+            # Progress logging
+            if i >= frac * (len(face_node) - 1) / 10:
+                print(int(frac * 10))
+                frac += 1
+
+            # Skip faces that are all dry or all wet
+            n_wet = n_wet_arr[i]
+            if n_wet == 0 or n_wet == simulation_data.n_nodes[i]:
+                continue
+
+            # Generate bank line segments
+            if simulation_data.n_nodes[i] == 3:
+                line = tri_to_line(x_node[i], y_node[i], wet_node[i], h_node[i], h0)
+            else:
+                line = poly_to_line(
+                    simulation_data.n_nodes[i],
+                    x_node[i],
+                    y_node[i],
+                    wet_node[i],
+                    h_node[i],
+                    h0,
+                )
+
+            if line is not None:
+                lines.append(line)
+
+        return lines
