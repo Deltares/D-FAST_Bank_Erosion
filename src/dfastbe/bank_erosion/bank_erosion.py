@@ -142,8 +142,8 @@ class Erosion:
         river_axis_km = river_axis.intersect_with_line(self.river_center_line_arr)
         # save the river axis before masking with the stations
         # river_axis.to_shapefile(
-        #     {"chainage": river_axis_km},
         #     f"{str(self.river_data.output_dir)}{os.sep}river_axis_chainage.shp",
+        #     {"chainage": river_axis_km},
         # )
 
         # clip river axis to reach of interest (get closes point to the first and last station)
@@ -855,7 +855,7 @@ class Erosion:
         river_axis: LineGeometry = self._process_river_axis_by_center_line()
 
         # map to the output interval
-        km_bin = (river_axis.stations.min(), river_axis.stations.max(), self.river_data.output_intervals)
+        km_bin = (river_axis.data["stations"].min(), river_axis.data["stations"].max(), self.river_data.output_intervals)
         km_mid = get_km_bins(km_bin, type=3)  # get mid-points
 
         fairway_data = self._prepare_fairway(river_axis, self.river_center_line_arr[:, :2], mesh_data, config_file.crs)
@@ -890,7 +890,7 @@ class Erosion:
 
         # create various plots
         self._generate_plots(
-            river_axis.stations,
+            river_axis.data["stations"],
             self.simulation_data,
             xy_line_eq_list,
             km_mid,
