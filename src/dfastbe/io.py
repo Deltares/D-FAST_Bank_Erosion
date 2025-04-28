@@ -1365,7 +1365,7 @@ class LineGeometry:
         """
         self._data = self.data | data
 
-    def to_shapefile(
+    def to_file(
         self, file_name: str, data: Dict[str, np.ndarray] = None,
     ) -> None:
         """
