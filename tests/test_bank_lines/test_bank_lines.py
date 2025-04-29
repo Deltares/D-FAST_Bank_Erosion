@@ -69,11 +69,13 @@ class TestBankLines:
     def mock_simulation_data(self):
         """Fixture to create a mock BaseSimulationData object."""
         mock_data = MagicMock(spec=BaseSimulationData)
-        mock_data.face_node = np.array([[0, 1, 2], [2, 3, 4]])
-        mock_data.x_node = np.array([0, 1, 2, 3, 4])
-        mock_data.y_node = np.array([0, 1, 2, 3, 4])
-        mock_data.water_level_face = np.array([1.0, 2.0])
-        mock_data.bed_elevation_values = np.array([0.5, 0.5, 0.5, 0.5, 0.5])
+        mock_data.face_node = np.array([[0, 1, 2], [1, 2, 3], [2, 3, 4]])
+        mock_data.x_node = np.array([0, 1, 2, 3, 4, 5, 6, 7])
+        mock_data.y_node = np.array([0, 1, 2, 3, 4, 5, 6, 7])
+        mock_data.water_level_face = np.array([1.0, 2.0, 1.0])
+        mock_data.bed_elevation_values = np.ma.masked_array(
+            [0.9, 0.9, 1.1, 1.1, 1.1, 0.9, 1.1, 0.9]
+        )
         mock_data.n_nodes = np.array([3, 3])
         return mock_data
 
@@ -104,25 +106,68 @@ class TestBankLines:
         assert all(isinstance(line, LineString) for line in lines)
 
     @pytest.mark.parametrize(
-        "face_node, expected",
+        "face_node, n_nodes, expected",
         [
-            (np.array([[0, 1, 2], [2, 3, 4]]), LineString([(0, 0), (1, 1)])),
-            (np.array([[0, 1, 2, 3], [1, 2, 3, 4]]), LineString([(0, 0), (1, 1)])),
+            (
+                np.array([[0, 1, 2], [1, 2, 3], [2, 3, 4]]),
+                np.array([3, 3, 3]),
+                LineString(
+                    [
+                        (0.4, 0.4),
+                        (1.818181818, 1.818181818),
+                        (2.4, 2.4),
+                        (3.199999999, 3.199999999),
+                    ]
+                ),
+            ),
+            (
+                np.array([[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 7]]),
+                np.array([4, 4, 4]),
+                MultiLineString(
+                    [
+                        [
+                            (2.0, 2.0),
+                            (1.666666666, 1.66666666),
+                            (1.333333333, 1.33333333),
+                        ],
+                        [
+                            (4.399999999, 4.399999999),
+                            (4.999999999, 4.999999999),
+                            (5.428571428, 5.428571428),
+                        ],
+                    ],
+                ),
+            ),
             (
                 np.ma.masked_array(
-                    [[0, 1, 2, 3], [1, 2, 3, 4]],
+                    [[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 7]],
                     mask=[
+                        [False, False, False, False],
                         [False, False, False, False],
                         [True, True, True, True],
                     ],
                 ),
-                LineString([(0, 0), (1, 1)]),
+                np.array([4, 4, 4]),
+                MultiLineString(
+                    [
+                        [
+                            (2.0, 2.0),
+                            (1.666666666, 1.66666666),
+                            (1.333333333, 1.33333333),
+                        ],
+                        [
+                            (5.333333333, 5.33333333),
+                            (5.727272727, 5.72727272),
+                            (6, 6),
+                        ],
+                    ]
+                ),
             ),
         ],
         ids=["triangle faces", "polygonal faces", "masked faces"],
     )
     def test_detect_bank_lines(
-        self, mock_simulation_data, mock_config_file, face_node, expected
+        self, mock_simulation_data, mock_config_file, face_node, n_nodes, expected
     ):
         """Test the detect_bank_lines method.
 
@@ -132,17 +177,16 @@ class TestBankLines:
         masked faces: a masked array with 4 nodes, where the last row is masked.
         """
         mock_simulation_data.face_node = face_node
+        mock_simulation_data.n_nodes = n_nodes
         h0 = 0.3
-        with patch(
-            "dfastbe.bank_lines.bank_lines.BankLines._generate_bank_lines"
-        ) as mock_generate:
-            mock_generate.return_value = [LineString([(0, 0), (1, 1)])]
-            result = BankLines.detect_bank_lines(
-                mock_simulation_data, h0, mock_config_file
-            )
-            assert isinstance(result, gpd.GeoSeries)
-            assert result.iloc[0].equals(expected)
-            assert len(result) == 1
+        # with patch(
+        #     "dfastbe.bank_lines.bank_lines.BankLines._generate_bank_lines"
+        # ) as mock_generate:
+        # mock_generate.return_value = [LineString([(0, 0), (1, 1)])]
+        result = BankLines.detect_bank_lines(mock_simulation_data, h0, mock_config_file)
+        assert isinstance(result, gpd.GeoSeries)
+        assert result.iloc[0].equals_exact(expected, tolerance=1e-8)
+        assert len(result) == 1
 
     def test_mask(self):
         """Test the mask method."""
