@@ -10667,7 +10667,7 @@ and adds an empty line before the start of a new block.</p>
 <span class="sd">            ```python</span>
 <span class="sd">            &gt;&gt;&gt; line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])</span>
 <span class="sd">            &gt;&gt;&gt; bounds = (0.5, 1.5)</span>
-<span class="sd">            &gt;&gt;&gt; center_line = LineGeometry.mask(line_string, bounds)</span>
+<span class="sd">            &gt;&gt;&gt; center_line = GeometryLine.mask(line_string, bounds)</span>
 <span class="sd">            &gt;&gt;&gt; np.array(center_line.coords)</span>
 <span class="sd">            array([[0.5, 0.5, 0.5],</span>
 <span class="sd">                   [1. , 1. , 1. ],</span>
@@ -11540,7 +11540,7 @@ Array containing the chainage for every coordinate specified in line_xy.</p>
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">line_string</span> <span class="o">=</span> <span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)])</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">bounds</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">center_line</span> <span class="o">=</span> <span class="n">LineGeometry</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">line_string</span><span class="p">,</span> <span class="n">bounds</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">center_line</span> <span class="o">=</span> <span class="n">GeometryLine</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">line_string</span><span class="p">,</span> <span class="n">bounds</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">center_line</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
 <span class="n">array</span><span class="p">([[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
        <span class="p">[</span><span class="mf">1.</span> <span class="p">,</span> <span class="mf">1.</span> <span class="p">,</span> <span class="mf">1.</span> <span class="p">],</span>
@@ -11612,7 +11612,7 @@ Array containing the chainage for every coordinate specified in line_xy.</p>
 <span class="sd">        ```python</span>
 <span class="sd">        &gt;&gt;&gt; line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])</span>
 <span class="sd">        &gt;&gt;&gt; bounds = (0.5, 1.5)</span>
-<span class="sd">        &gt;&gt;&gt; center_line = LineGeometry.mask(line_string, bounds)</span>
+<span class="sd">        &gt;&gt;&gt; center_line = GeometryLine.mask(line_string, bounds)</span>
 <span class="sd">        &gt;&gt;&gt; np.array(center_line.coords)</span>
 <span class="sd">        array([[0.5, 0.5, 0.5],</span>
 <span class="sd">               [1. , 1. , 1. ],</span>
