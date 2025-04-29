@@ -1350,6 +1350,7 @@ class LineGeometry:
 
     @property
     def data(self) -> Dict[str, np.ndarray]:
+        """anny data assined to the line using the `add_data` method."""
         return self._data
 
     def as_array(self) -> np.ndarray:
