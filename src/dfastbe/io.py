@@ -244,10 +244,10 @@ class BaseSimulationData:
             No message found for read_velocity
             No message found for read_chezy
             No message found for read_drywet
-            >>> river_profile = LineString([
-            ... [194949.796875, 361366.90625],
-            ... [194966.515625, 361399.46875],
-            ... [194982.8125, 361431.03125]
+            >>> river_center_line = LineString([
+            ...     [194949.796875, 361366.90625],
+            ...     [194966.515625, 361399.46875],
+            ...     [194982.8125, 361431.03125]
             ... ])
             >>> max_distance = 10.0
             >>> sim_data.clip(river_center_line, max_distance)
