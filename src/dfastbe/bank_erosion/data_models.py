@@ -456,3 +456,4 @@ class BankLinesResultsError(Exception):
     """Custom exception for BankLine results errors."""
 
     pass
+
