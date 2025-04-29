@@ -243,3 +243,75 @@ class TestBankLines:
         assert (tmp_path / "raw_detected_bankline_fragments.shp").exists()
         assert (tmp_path / "bank_areas.shp").exists()
         assert (tmp_path / "bankline_fragments_per_bank_area.shp").exists()
+
+    def test_plot(self, mock_config_file):
+        """Test the plot method of the BankLines class."""
+        # Mock data
+        xy_km_numpy = np.array([[0, 0], [1, 1]])
+        n_search_lines = 1
+        bank = [LineString([(0, 0), (1, 1)])]
+        km_bounds = (0, 1)
+        bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]
+
+        # Mock simulation data
+        mock_simulation_data = MagicMock()
+        mock_simulation_data.face_node = np.array([[0, 1, 2]])
+        mock_simulation_data.n_nodes = np.array([3])
+        mock_simulation_data.x_node = np.array([0, 1, 2])
+        mock_simulation_data.y_node = np.array([0, 1, 2])
+        mock_simulation_data.water_depth_face = np.array([1.0, 2.0, 1.5])
+
+        # Mock BankLines instance
+        with patch(
+            "dfastbe.bank_lines.bank_lines.BankLinesRiverData"
+        ) as mock_river_data:
+            mock_river_data.return_value.simulation_data.return_value = (
+                0.3,
+                mock_simulation_data,
+            )
+            bank_lines = BankLines(mock_config_file)
+            bank_lines.plot_flags = {
+                "save_plot": False,
+                "save_plot_zoomed": True,
+                "close_plot": True,
+            }
+
+        # Patch plotting functions
+        with patch("dfastbe.plotting.plot_detect1") as mock_plot_detect1, patch(
+            "matplotlib.pyplot.show"
+        ) as mock_show, patch("matplotlib.pyplot.close") as mock_close:
+            # Mock the return value of plot_detect1
+            mock_plot_detect1.return_value = (MagicMock(), MagicMock())
+
+            # Call the plot method
+            bank_lines.plot(
+                xy_km_numpy,
+                n_search_lines,
+                bank,
+                km_bounds,
+                bank_areas,
+                mock_config_file,
+            )
+
+            # Assertions
+            mock_plot_detect1.assert_called_once_with(
+                [0, 1],  # bbox
+                xy_km_numpy,
+                bank_areas,
+                bank,
+                mock_simulation_data.face_node,
+                mock_simulation_data.n_nodes,
+                mock_simulation_data.x_node,
+                mock_simulation_data.y_node,
+                mock_simulation_data.water_depth_face,
+                1.1 * mock_simulation_data.water_depth_face.max(),
+                "x-coordinate [m]",
+                "y-coordinate [m]",
+                "water depth and detected bank lines",
+                "water depth [m]",
+                "bank search area",
+                "detected bank line",
+                mock_config_file,
+            )
+            mock_show.assert_not_called()  # Ensure show is not called when save_plot is False
+            mock_close.assert_called_once()  # Ensure plots are closed
