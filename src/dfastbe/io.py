@@ -1407,7 +1407,7 @@ class LineGeometry:
             ```python
             >>> line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])
             >>> bounds = (0.5, 1.5)
-            >>> center_line = GeometryLine.mask(line_string, bounds)
+            >>> center_line = LineGeometry.mask(line_string, bounds)
             >>> np.array(center_line.coords)
             array([[0.5, 0.5, 0.5],
                    [1. , 1. , 1. ],
