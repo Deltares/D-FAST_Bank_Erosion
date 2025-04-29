@@ -1653,7 +1653,7 @@ class BaseRiverData:
             ```python
             >>> from dfastbe.io import ConfigFile, BaseRiverData
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> river_data = RiverData(config_file)
+            >>> river_data = BaseRiverData(config_file)
             No message found for read_chainage
             No message found for clip_chainage
 
