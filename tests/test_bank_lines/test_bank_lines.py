@@ -76,7 +76,7 @@ class TestBankLines:
         mock_data.bed_elevation_values = np.ma.masked_array(
             [0.9, 0.9, 1.1, 1.1, 1.1, 0.9, 1.1, 0.9]
         )
-        mock_data.n_nodes = np.array([3, 3])
+        mock_data.n_nodes = np.array([3, 3, 3])
         return mock_data
 
     @pytest.fixture
@@ -89,21 +89,39 @@ class TestBankLines:
     def test_calculate_water_depth_per_node(self, mock_simulation_data):
         """Test the calculate_water_depth_per_node method."""
         h_node = BankLines._calculate_water_depth(mock_simulation_data)
+        expected_h_node = np.array(
+            [
+                [0.1, 0.6, 0.2333333333],
+                [0.6, 0.2333333333, 0.4],
+                [0.2333333333, 0.4, -0.1],
+            ]
+        )
         assert h_node.shape == mock_simulation_data.face_node.shape
-        assert np.all(h_node >= 0)  # Water depth should be non-negative
+        assert np.allclose(h_node, expected_h_node)
 
     def test_generate_bank_lines(self, mock_simulation_data):
         """Test the _generate_bank_lines method."""
-        wet_node = np.array([[True, False, True], [False, True, True]])
-        n_wet_arr = np.ma.masked_array([2, 2])
-        h_node = np.array([[0.5, 0.0, 0.5], [0.0, 0.5, 0.5]])
+        wet_node = np.array(
+            [[True, False, True], [False, True, True], [True, False, True]]
+        )
+        n_wet_arr = np.ma.masked_array([2, 2, 2])
+        h_node = np.array([[0.9, 1.1, 0.9], [0.9, 0.5, 1.1], [0.9, 0.5, 1.1]])
         h0 = 0.3
 
         lines = BankLines._generate_bank_lines(
             mock_simulation_data, wet_node, n_wet_arr, h_node, h0
         )
-        assert isinstance(lines, list)
-        assert all(isinstance(line, LineString) for line in lines)
+        expected = [
+            LineString([(-2.999999999, -2.999999999), (5.0, 5.0)]),
+            LineString([(-4.999999999, -4.999999999), (2.5, 2.5)]),
+            LineString([(3.5, 3.5), (2.6666666666, 2.6666666666)]),
+        ]
+        assert all(
+            [
+                line.equals_exact(expected[i], tolerance=1e-8)
+                for i, line in enumerate(lines)
+            ]
+        )
 
     @pytest.mark.parametrize(
         "face_node, n_nodes, expected",
