@@ -103,8 +103,35 @@ class TestBankLines:
         assert isinstance(lines, list)
         assert all(isinstance(line, LineString) for line in lines)
 
-    def test_detect_bank_lines(self, mock_simulation_data, mock_config_file):
-        """Test the detect_bank_lines method."""
+    @pytest.mark.parametrize(
+        "face_node, expected",
+        [
+            (np.array([[0, 1, 2], [2, 3, 4]]), LineString([(0, 0), (1, 1)])),
+            (np.array([[0, 1, 2, 3], [1, 2, 3, 4]]), LineString([(0, 0), (1, 1)])),
+            (
+                np.ma.masked_array(
+                    [[0, 1, 2, 3], [1, 2, 3, 4]],
+                    mask=[
+                        [False, False, False, False],
+                        [True, True, True, True],
+                    ],
+                ),
+                LineString([(0, 0), (1, 1)]),
+            ),
+        ],
+        ids=["triangle faces", "polygonal faces", "masked faces"],
+    )
+    def test_detect_bank_lines(
+        self, mock_simulation_data, mock_config_file, face_node, expected
+    ):
+        """Test the detect_bank_lines method.
+
+        Test the detect_bank_lines method with different face_node inputs.
+        triangle faces: a simple triangle face with 3 nodes.
+        polygonal faces: a polygon with 4 nodes.
+        masked faces: a masked array with 4 nodes, where the last row is masked.
+        """
+        mock_simulation_data.face_node = face_node
         h0 = 0.3
         with patch(
             "dfastbe.bank_lines.bank_lines.BankLines._generate_bank_lines"
@@ -114,6 +141,7 @@ class TestBankLines:
                 mock_simulation_data, h0, mock_config_file
             )
             assert isinstance(result, gpd.GeoSeries)
+            assert result.iloc[0].equals(expected)
             assert len(result) == 1
 
     def test_mask(self):

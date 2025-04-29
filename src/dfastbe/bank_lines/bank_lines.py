@@ -416,7 +416,9 @@ class BankLines:
             mask = ~face_node.mask
             non_masked = sum(mask.reshape(face_node.size))
             f_nc_m = face_node[mask]
-            zwm = np.repeat(simulation_data.water_level_face, max_n_nodes)[mask]
+            zwm = np.repeat(simulation_data.water_level_face, max_n_nodes)[
+                mask.flatten()
+            ]
         else:
             mask = np.repeat(True, face_node.size)
             non_masked = face_node.size
