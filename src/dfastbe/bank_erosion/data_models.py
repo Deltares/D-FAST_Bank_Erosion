@@ -253,8 +253,6 @@ class ErosionResults:
 
 class ErosionSimulationData(BaseSimulationData):
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
     def compute_mesh_topology(self) -> MeshData:
         """Derive secondary topology arrays from the face-node connectivity of the mesh.
@@ -400,7 +398,7 @@ class ErosionRiverData(BaseRiverData):
         super().__init__(config_file)
         self.bank_dir = self._get_bank_line_dir()
         self.output_dir = config_file.get_output_dir("erosion")
-        self.debug = config_file.get_bool("General", "DebugOutput", False)
+        self.debug = config_file.debug
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(config_file.root_dir)
         # get filter settings for bank levels and flow velocities along banks
@@ -458,3 +456,4 @@ class BankLinesResultsError(Exception):
     """Custom exception for BankLine results errors."""
 
     pass
+

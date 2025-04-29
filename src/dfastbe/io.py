@@ -244,10 +244,10 @@ class BaseSimulationData:
             No message found for read_velocity
             No message found for read_chezy
             No message found for read_drywet
-            >>> river_profile = LineString([
-            ... [194949.796875, 361366.90625],
-            ... [194966.515625, 361399.46875],
-            ... [194982.8125, 361431.03125]
+            >>> river_center_line = LineString([
+            ...     [194949.796875, 361366.90625],
+            ...     [194966.515625, 361399.46875],
+            ...     [194982.8125, 361431.03125]
             ... ])
             >>> max_distance = 10.0
             >>> sim_data.clip(river_center_line, max_distance)
@@ -350,6 +350,10 @@ class ConfigFile:
     def version(self) -> str:
         """str: Get the version of the configuration file."""
         return self.get_str("General", "Version")
+
+    @property
+    def debug(self) -> bool:
+        return self.get_bool("General", "DebugOutput", False)
 
     @property
     def root_dir(self) -> Path:
@@ -1350,6 +1354,7 @@ class LineGeometry:
 
     @property
     def data(self) -> Dict[str, np.ndarray]:
+        """anny data assined to the line using the `add_data` method."""
         return self._data
 
     def as_array(self) -> np.ndarray:
@@ -1435,7 +1440,7 @@ class LineGeometry:
 
     @staticmethod
     def _find_mask_index(
-            station_bound: float, line_string_coords: np.ndarray
+        station_bound: float, line_string_coords: np.ndarray
     ) -> Optional[int]:
         """Find the start and end indices for clipping the chainage line.
 
@@ -1516,7 +1521,7 @@ class LineGeometry:
 
     @staticmethod
     def _interpolate_point(
-            index: int, station_bound: float, line_string_coords: np.ndarray
+        index: int, station_bound: float, line_string_coords: np.ndarray
     ) -> Tuple[float, Tuple[float, float, float]]:
         """Interpolate a point between two coordinates.
 
@@ -1532,8 +1537,7 @@ class LineGeometry:
             float: Interpolation factor.
             Tuple[float, float, float]: Interpolated point.
         """
-        alpha = (station_bound - line_string_coords[index - 1][2]) / (
-                line_string_coords[index][2] - line_string_coords[index - 1][2]
+        alpha = (station_bound - line_string_coords[index - 1][2]) / (line_string_coords[index][2] - line_string_coords[index - 1][2]
         )
         interpolated_point = tuple(
             prev_coord + alpha * (next_coord - prev_coord)
@@ -1649,7 +1653,7 @@ class BaseRiverData:
             ```python
             >>> from dfastbe.io import ConfigFile, BaseRiverData
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> river_data = RiverData(config_file)
+            >>> river_data = BaseRiverData(config_file)
             No message found for read_chainage
             No message found for clip_chainage
 
