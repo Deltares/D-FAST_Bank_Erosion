@@ -119,11 +119,12 @@ class Erosion:
         }
         return ship_data
 
-    def _prepare_river_axis(
-        self, stations_coords: np.ndarray, crs: Any
-    ) -> Tuple[np.ndarray, np.ndarray, LineString]:
-
-        river_axis = LineGeometry(self.river_data.river_axis, crs=crs)
+    def _process_river_axis_by_center_line(self) -> LineGeometry:
+        """
+        Intersect the river center line with the river axis to map the stations from the first to the latter
+        then clip the river axis by the first and last station of the centerline.
+        """
+        river_axis = LineGeometry(self.river_data.river_axis, crs=self.config_file.crs)
         river_axis_numpy = river_axis.as_array()
         # optional sorting --> see 04_Waal_D3D example
         # check: sum all distances and determine maximum distance ...
@@ -138,14 +139,10 @@ class Erosion:
         # map km to axis points, further using axis
         log_text("chainage_to_axis")
         river_axis_km = river_axis.intersect_with_line(self.river_center_line_arr)
-        river_axis.to_shapefile(
-            {"chainage": river_axis_km},
-            f"{str(self.river_data.output_dir)}{os.sep}river_axis_chainage.shp",
-        )
 
         # clip river axis to reach of interest (get closes point to the first and last station)
-        i1 = np.argmin(((stations_coords[0] - river_axis_numpy) ** 2).sum(axis=1))
-        i2 = np.argmin(((stations_coords[-1] - river_axis_numpy) ** 2).sum(axis=1))
+        i1 = np.argmin(((self.river_center_line_arr[0, :2] - river_axis_numpy) ** 2).sum(axis=1))
+        i2 = np.argmin(((self.river_center_line_arr[-1, :2] - river_axis_numpy) ** 2).sum(axis=1))
         if i1 < i2:
             river_axis_km = river_axis_km[i1 : i2 + 1]
             river_axis_numpy = river_axis_numpy[i1 : i2 + 1]
@@ -154,51 +151,29 @@ class Erosion:
             river_axis_km = river_axis_km[i2 : i1 + 1][::-1]
             river_axis_numpy = river_axis_numpy[i2 : i1 + 1][::-1]
 
-        river_axis = LineString(river_axis_numpy)
+        # river_axis = LineString(river_axis_numpy)
+        river_axis = LineGeometry(river_axis_numpy, crs=self.config_file.crs)
+        river_axis.add_data(data={"stations": river_axis_km})
+        return river_axis
 
-        return river_axis_km, river_axis_numpy, river_axis
-
-    def _prepare_fairway(
+    def _get_fairway_data(
         self,
-        river_axis: LineString,
-        stations_coords: np.ndarray,
+        river_axis: LineGeometry,
         mesh_data: MeshData,
-        crs: Any,
     ):
-        # read fairway file
-        # fairway_file = self.config_file.get_str("Erosion", "Fairway")
-        # log_text("read_fairway", data={"file": fairway_file})
-
         # map km to fairway points, further using axis
         log_text("chainage_to_fairway")
-        river_axis = LineGeometry(river_axis, crs=crs)
-        fairway_numpy = river_axis.as_array()
-        fairway_km = river_axis.intersect_with_line(self.river_center_line_arr)
-        river_axis.to_shapefile(
-            {"chainage": fairway_km},
-            str(self.river_data.output_dir) + os.sep + "fairway_chainage.shp",
-        )
-
-        # clip fairway to reach of interest
-        i1 = np.argmin(((stations_coords[0] - fairway_numpy) ** 2).sum(axis=1))
-        i2 = np.argmin(((stations_coords[-1] - fairway_numpy) ** 2).sum(axis=1))
-        if i1 < i2:
-            fairway_numpy = fairway_numpy[i1 : i2 + 1]
-        else:
-            # reverse fairway
-            fairway_numpy = fairway_numpy[i2 : i1 + 1][::-1]
-
         # intersect fairway and mesh
-        log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
+        # log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
         fairway_intersection_coords, fairway_face_indices = intersect_line_mesh(
-            fairway_numpy, mesh_data
+            river_axis.as_array(), mesh_data
         )
         if self.river_data.debug:
             arr = (fairway_intersection_coords[:-1] + fairway_intersection_coords[1:])/ 2
-            line_geom = LineGeometry(arr, crs=crs)
-            line_geom.to_shapefile(
-                {"iface": fairway_face_indices},
-                f"{str(self.river_data.output_dir)}{os.sep}fairway_face_indices.shp",
+            line_geom = LineGeometry(arr, crs=self.config_file.crs)
+            line_geom.to_file(
+                file_name=f"{str(self.river_data.output_dir)}{os.sep}fairway_face_indices.shp",
+                data={"iface": fairway_face_indices},
             )
 
         return FairwayData(fairway_face_indices, fairway_intersection_coords)
@@ -208,18 +183,31 @@ class Erosion:
         bank_data: BankData,
         fairway_data: FairwayData,
         simulation_data: ErosionSimulationData,
-        crs: Any,
     ):
-        # distance fairway-bankline (bankfairway)
+        """Map bank data to fairway data.
+
+        Args:
+            bank_data (BankData):
+            fairway_data (FairwayData):
+            simulation_data (ErosionSimulationData):
+
+        Returns:
+            The method updates the following attributes in the `bank_data` instance
+                - fairway_face_indices
+                - fairway_distances
+            and the following attributes in the `fairway_data` instance
+                - fairway_initial_water_levels
+        """
+        # distance fairway-bankline (bank-fairway)
         log_text("bank_distance_fairway")
         distance_fw = []
         bp_fw_face_idx = []
-        nfw = len(fairway_data.fairway_face_indices)
-        for ib, bcrds in enumerate(bank_data.bank_line_coords):
-            bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
-            distance_fw.append(np.zeros(len(bcrds_mid)))
-            bp_fw_face_idx.append(np.zeros(len(bcrds_mid), dtype=int))
-            for ip, bp in enumerate(bcrds_mid):
+        num_fairway_face_ind = len(fairway_data.fairway_face_indices)
+        for bank_i, bank_coords in enumerate(bank_data.bank_line_coords):
+            coords_mid = (bank_coords[:-1] + bank_coords[1:]) / 2
+            distance_fw.append(np.zeros(len(coords_mid)))
+            bp_fw_face_idx.append(np.zeros(len(coords_mid), dtype=int))
+            for ip, bp in enumerate(coords_mid):
                 # find closest fairway support node
                 ifw = np.argmin(
                     ((bp - fairway_data.intersection_coords) ** 2).sum(axis=1)
@@ -258,7 +246,7 @@ class Erosion:
                         )
                         ** 2
                     )
-                    if alpha > 0 and alpha < 1:
+                    if 0 < alpha < 1:
                         fwp1 = fairway_data.intersection_coords[ifw - 1] + alpha * (
                             fairway_data.intersection_coords[ifw]
                             - fairway_data.intersection_coords[ifw - 1]
@@ -267,7 +255,7 @@ class Erosion:
                         if d1 < dbfw:
                             dbfw = d1
                             # projected point located on segment before, which corresponds to initial choice: iseg = ifw - 1
-                if ifw < nfw:
+                if ifw < num_fairway_face_ind:
                     alpha = (
                         (
                             fairway_data.intersection_coords[ifw + 1, 0]
@@ -291,7 +279,7 @@ class Erosion:
                         )
                         ** 2
                     )
-                    if alpha > 0 and alpha < 1:
+                    if 0 < alpha < 1:
                         fwp1 = fairway_data.intersection_coords[ifw] + alpha * (
                             fairway_data.intersection_coords[ifw + 1]
                             - fairway_data.intersection_coords[ifw]
@@ -301,17 +289,17 @@ class Erosion:
                             dbfw = d1
                             iseg = ifw
 
-                bp_fw_face_idx[ib][ip] = fairway_data.fairway_face_indices[iseg]
-                distance_fw[ib][ip] = dbfw
+                bp_fw_face_idx[bank_i][ip] = fairway_data.fairway_face_indices[iseg]
+                distance_fw[bank_i][ip] = dbfw
 
             if self.river_data.debug:
-                line_geom = LineGeometry(bcrds_mid, crs=crs)
-                line_geom.to_shapefile(
-                    {
-                        "chainage": bank_data.bank_chainage_midpoints[ib],
-                        "iface_fw": bp_fw_face_idx[ib],
+                line_geom = LineGeometry(coords_mid, crs=self.config_file.crs)
+                line_geom.to_file(
+                    file_name=f"{self.river_data.output_dir}/bank_{bank_i + 1}_chainage_and_fairway_face_idx.shp",
+                    data={
+                        "chainage": bank_data.bank_chainage_midpoints[bank_i],
+                        "iface_fw": bp_fw_face_idx[bank_i],
                     },
-                    f"{self.river_data.output_dir}/bank_{ib + 1}_chainage_and_fairway_face_idx.shp",
                 )
 
         bank_data.fairway_face_indices = bp_fw_face_idx
@@ -319,8 +307,8 @@ class Erosion:
 
         # water level at fairway
         zfw_ini = []
-        for ib in range(bank_data.n_bank_lines):
-            ii = bank_data.fairway_face_indices[ib]
+        for bank_i in range(bank_data.n_bank_lines):
+            ii = bank_data.fairway_face_indices[bank_i]
             zfw_ini.append(simulation_data.water_level_face[ii])
         fairway_data.fairway_initial_water_levels = zfw_ini
 
@@ -848,16 +836,16 @@ class Erosion:
         log_text("intersect_bank_mesh")
         bank_data = self.bl_processor.intersect_with_mesh(mesh_data)
 
-        river_axis_km, _, river_axis = self._prepare_river_axis(
-            self.river_center_line_arr[:, :2], config_file.crs
-        )
+        river_axis: LineGeometry = self._process_river_axis_by_center_line()
+
         # map to the output interval
-        km_bin = (river_axis_km.min(), river_axis_km.max(), self.river_data.output_intervals)
+        km_bin = (river_axis.data["stations"].min(), river_axis.data["stations"].max(), self.river_data.output_intervals)
         km_mid = get_km_bins(km_bin, type=3)  # get mid-points
 
-        fairway_data = self._prepare_fairway(river_axis, self.river_center_line_arr[:, :2], mesh_data, config_file.crs)
+        fairway_data = self._get_fairway_data(river_axis, mesh_data)
 
-        self._map_bank_to_fairway(bank_data, fairway_data, self.simulation_data, config_file.crs)
+        # map the bank data to the fairway data (the bank_data and fairway_data will be updated)
+        self._map_bank_to_fairway(bank_data, fairway_data, self.simulation_data)
 
         erosion_inputs = self._prepare_initial_conditions(
             config_file, bank_data, fairway_data
@@ -887,7 +875,7 @@ class Erosion:
 
         # create various plots
         self._generate_plots(
-            river_axis_km,
+            river_axis.data["stations"],
             self.simulation_data,
             xy_line_eq_list,
             km_mid,

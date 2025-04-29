@@ -1313,10 +1313,12 @@ class LineGeometry:
         """Geometry Line initialization.
 
         Args:
-            line_string (LineString):
+            line (LineString):
                 River center line as a linestring.
             mask (Tuple[float, float], optional):
                 Lower and upper limit for the chainage. Defaults to None.
+            crs (str, Optional):
+                the coordinate reference system number as a string.
 
         Examples:
             ```python
@@ -1333,6 +1335,7 @@ class LineGeometry:
         """
         self.station_bounds = mask
         self.crs = crs
+        self._data = {}
         if isinstance(line, np.ndarray):
             line = LineString(line)
         if mask is None:
@@ -1344,24 +1347,41 @@ class LineGeometry:
                 "clip_chainage", data={"low": self.station_bounds[0], "high": self.station_bounds[1]}
             )
 
+    @property
+    def data(self) -> Dict[str, np.ndarray]:
+        return self._data
+
     def as_array(self) -> np.ndarray:
         return np.array(self.values.coords)
 
-    def to_shapefile(
-        self, data: Dict[str, np.ndarray], file_name: str
+    def add_data(self, data: Dict[str, np.ndarray]) -> None:
+        """
+        Add data to the LineGeometry object.
+
+        Args:
+            data (Dict[str, np.ndarray]):
+                Dictionary of quantities to be added, each np array should have length k.
+        """
+        self._data = self.data | data
+
+    def to_file(
+        self, file_name: str, data: Dict[str, np.ndarray] = None,
     ) -> None:
         """
         Write a shape point file with x, y, and values.
 
         Args:
-            data : Dict[str, np.ndarray]
-                Dictionary of quantities to be written, each np array should have length k.
             file_name : str
                 Name of the file to be written.
-            crs: Any
+            data : Dict[str, np.ndarray]
+                Dictionary of quantities to be written, each np array should have length k.
         """
         xy = self.as_array()
         geom = [Point(xy_i) for xy_i in xy]
+        if data is None:
+            data = self.data
+        else:
+            data = data | self.data
         GeoDataFrame(data, geometry=geom, crs=self.crs).to_file(file_name)
 
     @staticmethod
