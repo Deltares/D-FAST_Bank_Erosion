@@ -253,8 +253,6 @@ class ErosionResults:
 
 class ErosionSimulationData(BaseSimulationData):
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
     def compute_mesh_topology(self) -> MeshData:
         """Derive secondary topology arrays from the face-node connectivity of the mesh.
