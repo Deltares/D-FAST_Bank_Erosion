@@ -398,7 +398,7 @@ class ErosionRiverData(BaseRiverData):
         super().__init__(config_file)
         self.bank_dir = self._get_bank_line_dir()
         self.output_dir = config_file.get_output_dir("erosion")
-        self.debug = config_file.get_bool("General", "DebugOutput", False)
+        self.debug = config_file.debug
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(config_file.root_dir)
         # get filter settings for bank levels and flow velocities along banks

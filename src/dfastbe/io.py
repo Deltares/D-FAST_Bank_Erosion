@@ -352,6 +352,10 @@ class ConfigFile:
         return self.get_str("General", "Version")
 
     @property
+    def debug(self) -> bool:
+        return self.get_bool("General", "DebugOutput", False)
+
+    @property
     def root_dir(self) -> Path:
         """Path: Get the root directory of the configuration file."""
         return self._root_dir
@@ -1436,7 +1440,7 @@ class LineGeometry:
 
     @staticmethod
     def _find_mask_index(
-            station_bound: float, line_string_coords: np.ndarray
+        station_bound: float, line_string_coords: np.ndarray
     ) -> Optional[int]:
         """Find the start and end indices for clipping the chainage line.
 
@@ -1517,7 +1521,7 @@ class LineGeometry:
 
     @staticmethod
     def _interpolate_point(
-            index: int, station_bound: float, line_string_coords: np.ndarray
+        index: int, station_bound: float, line_string_coords: np.ndarray
     ) -> Tuple[float, Tuple[float, float, float]]:
         """Interpolate a point between two coordinates.
 
@@ -1533,8 +1537,7 @@ class LineGeometry:
             float: Interpolation factor.
             Tuple[float, float, float]: Interpolated point.
         """
-        alpha = (station_bound - line_string_coords[index - 1][2]) / (
-                line_string_coords[index][2] - line_string_coords[index - 1][2]
+        alpha = (station_bound - line_string_coords[index - 1][2]) / (line_string_coords[index][2] - line_string_coords[index - 1][2]
         )
         interpolated_point = tuple(
             prev_coord + alpha * (next_coord - prev_coord)
