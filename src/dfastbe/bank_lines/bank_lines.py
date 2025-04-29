@@ -117,7 +117,6 @@ class BankLines:
 
         bank_areas: List[Polygon] = self.search_lines.to_polygons()
 
-        # determine whether search lines are located on the left or right
         to_right = [True] * self.search_lines.size
         for ib in range(self.search_lines.size):
             to_right[ib] = on_right_side(

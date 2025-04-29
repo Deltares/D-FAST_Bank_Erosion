@@ -158,9 +158,6 @@ class SearchLines:
 
 class BankLinesRiverData(BaseRiverData):
 
-    def __init__(self, config_file: ConfigFile):
-        super().__init__(config_file)
-
     @property
     def search_lines(self) -> SearchLines:
         search_lines = SearchLines(self.config_file.get_search_lines(), self.river_center_line)

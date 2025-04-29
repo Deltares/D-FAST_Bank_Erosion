@@ -41,6 +41,7 @@ from geopandas.geoseries import GeoSeries
 from shapely import prepare
 from shapely.geometry import LineString, Point
 
+
 PROGTEXTS: Dict[str, List[str]]
 
 
@@ -243,10 +244,10 @@ class BaseSimulationData:
             No message found for read_velocity
             No message found for read_chezy
             No message found for read_drywet
-            >>> river_profile = LineString([
-            ... [194949.796875, 361366.90625],
-            ... [194966.515625, 361399.46875],
-            ... [194982.8125, 361431.03125]
+            >>> river_center_line = LineString([
+            ...     [194949.796875, 361366.90625],
+            ...     [194966.515625, 361399.46875],
+            ...     [194982.8125, 361431.03125]
             ... ])
             >>> max_distance = 10.0
             >>> sim_data.clip(river_center_line, max_distance)
@@ -349,6 +350,10 @@ class ConfigFile:
     def version(self) -> str:
         """str: Get the version of the configuration file."""
         return self.get_str("General", "Version")
+
+    @property
+    def debug(self) -> bool:
+        return self.get_bool("General", "DebugOutput", False)
 
     @property
     def root_dir(self) -> Path:
@@ -1349,6 +1354,7 @@ class LineGeometry:
 
     @property
     def data(self) -> Dict[str, np.ndarray]:
+        """any data assined to the line using the `add_data` method."""
         return self._data
 
     def as_array(self) -> np.ndarray:
@@ -1401,7 +1407,7 @@ class LineGeometry:
             ```python
             >>> line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])
             >>> bounds = (0.5, 1.5)
-            >>> center_line = GeometryLine.mask(line_string, bounds)
+            >>> center_line = LineGeometry.mask(line_string, bounds)
             >>> np.array(center_line.coords)
             array([[0.5, 0.5, 0.5],
                    [1. , 1. , 1. ],
@@ -1648,7 +1654,7 @@ class BaseRiverData:
             ```python
             >>> from dfastbe.io import ConfigFile, BaseRiverData
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> river_data = RiverData(config_file)
+            >>> river_data = BaseRiverData(config_file)
             No message found for read_chainage
             No message found for clip_chainage
 
