@@ -39,6 +39,7 @@ class TestErosion:
     ):
         """Test the _prepare_initial_conditions method."""
         bank_chainage_midpoints = [np.array([3.0, 3.0, 3.0])]
+        num_stations_per_bank = [len(bank_i) for bank_i in bank_chainage_midpoints]
         mock_fairway_data = MagicMock(spec=FairwayData)
         mock_fairway_data.fairway_initial_water_levels = [np.array([10, 20, 30])]
         taucls = np.array([1, 1, 1])
@@ -51,7 +52,7 @@ class TestErosion:
         )
 
         erosion_inputs = erosion_instance._prepare_initial_conditions(
-            config_file, bank_chainage_midpoints, mock_fairway_data
+            config_file, num_stations_per_bank, mock_fairway_data
         )
 
         assert np.array_equal(

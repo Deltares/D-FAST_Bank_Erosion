@@ -137,7 +137,7 @@ class BankData:
     """
 
     is_right_bank: List[bool]
-    bank_chainage_midpoints: List[np.ndarray]
+    bank_chainage_midpoints: np.ndarray
     bank_line_coords: List[np.ndarray]
     bank_face_indices: List[np.ndarray]
     bank_lines: GeoDataFrame
@@ -456,4 +456,3 @@ class BankLinesResultsError(Exception):
     """Custom exception for BankLine results errors."""
 
     pass
-

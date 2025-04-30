@@ -886,7 +886,7 @@ class ConfigFile:
         self,
         group: str,
         key: str,
-        bank_km: List[np.ndarray],
+        num_stations_per_bank: List[np.ndarray],
         default=None,
         ext: str = "",
         positive: bool = False,
@@ -896,15 +896,23 @@ class ConfigFile:
         """Get a parameter field from a selected group and keyword in the analysis settings.
 
         Args:
-            group (str): Name of the group from which to read.
-            key (str): Name of the keyword from which to read.
-            bank_km (List[np.ndarray]): For each bank a listing of the bank points (bank chainage locations).
-            default (Optional[Union[float, List[np.ndarray]]]): Optional default value or default parameter field; default None.
-            ext (str): File name extension; default empty string.
-            positive (bool): Flag specifying which boolean values are accepted.
+            group (str):
+                Name of the group from which to read.
+            key (str):
+                Name of the keyword from which to read.
+            num_stations_per_bank (List[int]):
+                Number of stations (points) For each bank (bank chainage locations).
+            default (Optional[Union[float, List[np.ndarray]]]):
+                Optional default value or default parameter field; default None.
+            ext (str):
+                File name extension; default empty string.
+            positive (bool):
+                Flag specifying which boolean values are accepted.
                 All values are accepted (if False), or only strictly positive values (if True); default False.
-            valid (Optional[List[float]]): Optional list of valid values; default None.
-            onefile (bool): Flag indicating whether parameters are read from one file.
+            valid (Optional[List[float]]):
+                Optional list of valid values; default None.
+            onefile (bool):
+                Flag indicating whether parameters are read from one file.
                 One file should be used for all bank lines (True) or one file per bank line (False; default).
 
         Raises:
@@ -921,14 +929,15 @@ class ConfigFile:
             ```python
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5])]
-            >>> config_file.get_parameter("General", "ZoomStepKM", bank_km)
-            [array([1., 1., 1.]), array([1., 1., 1.])]
+            >>> bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5, 6, 7])]
+            >>> num_stations_per_bank = [len(bank) for bank in bank_km]
+            >>> config_file.get_parameter("General", "ZoomStepKM", num_stations_per_bank)
+            [array([1., 1., 1.]), array([1., 1., 1., 1., 1.])]
 
             ```
         """
         try:
-            filename = self.config[group][key]
+            value = self.config[group][key]
             use_default = False
         except (KeyError, TypeError) as e:
             if default is None:
@@ -938,45 +947,48 @@ class ConfigFile:
             use_default = True
 
         # if val is value then use that value globally
-        parfield = [None] * len(bank_km)
+        num_banks = len(num_stations_per_bank)
+        parameter_values = [None] * num_banks
         try:
             if use_default:
                 if isinstance(default, list):
                     return default
-                rval = default
+                real_val = default
             else:
-                rval = float(filename)
-                if positive and rval < 0:
+                real_val = float(value)
+                if positive and real_val < 0:
                     raise ValueError(
-                        f'Value of "{key}" should be positive, not {rval}.'
+                        f'Value of "{key}" should be positive, not {real_val}.'
                     )
-                if valid is not None and valid.count(rval) == 0:
+                if valid is not None and valid.count(real_val) == 0:
                     raise ValueError(
-                        f'Value of "{key}" should be in {valid}, not {rval}.'
+                        f'Value of "{key}" should be in {valid}, not {real_val}.'
                     )
-            for ib, bkm in enumerate(bank_km):
-                parfield[ib] = np.zeros(len(bkm)) + rval
+            for ib, num_stations in enumerate(num_stations_per_bank):
+                parameter_values[ib] = np.zeros(num_stations) + real_val
+
         except (ValueError, TypeError):
             if onefile:
-                log_text("read_param", data={"param": key, "file": filename})
-                km_thr, val = _get_kmval(filename, key, positive, valid)
-            for ib, bkm in enumerate(bank_km):
+                log_text("read_param", data={"param": key, "file": value})
+                km_thr, val = _get_kmval(value, key, positive, valid)
+            for ib, num_stations in enumerate(num_stations_per_bank):
                 if not onefile:
-                    filename_i = filename + f"_{ib + 1}" + ext
+                    filename_i = f"{value}_{ib + 1}{ext}"
                     log_text(
                         "read_param_one_bank",
                         data={"param": key, "i": ib + 1, "file": filename_i},
                     )
                     km_thr, val = _get_kmval(filename_i, key, positive, valid)
                 if km_thr is None:
-                    parfield[ib] = np.zeros(len(bkm)) + val[0]
+                    parameter_values[ib] = np.zeros(num_stations) + val[0]
                 else:
-                    idx = np.zeros(len(bkm), dtype=int)
+                    idx = np.zeros(num_stations, dtype=int)
+
                     for thr in km_thr:
-                        idx[bkm >= thr] += 1
-                    parfield[ib] = val[idx]
+                        idx[num_stations >= thr] += 1
+                    parameter_values[ib] = val[idx]
                 # print("Min/max of data: ", parfield[ib].min(), parfield[ib].max())
-        return parfield
+        return parameter_values
 
     def get_bank_search_distances(self, num_search_lines: int) -> List[float]:
         """Get the search distance per bank line from the analysis settings.
@@ -1407,7 +1419,7 @@ class LineGeometry:
             ```python
             >>> line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])
             >>> bounds = (0.5, 1.5)
-            >>> center_line = GeometryLine.mask(line_string, bounds)
+            >>> center_line = LineGeometry.mask(line_string, bounds)
             >>> np.array(center_line.coords)
             array([[0.5, 0.5, 0.5],
                    [1. , 1. , 1. ],

@@ -84,28 +84,28 @@ class Erosion:
         """Configuration file object."""
         return self._config_file
 
-    def get_ship_parameters(self, bank_km_mid) -> Dict[str, float]:
+    def get_ship_parameters(self, num_stations_per_bank: List[int]) -> Dict[str, float]:
 
         ship_relative_velocity = self.config_file.get_parameter(
-            "Erosion", "VShip", bank_km_mid, positive=True, onefile=True
+            "Erosion", "VShip", num_stations_per_bank, positive=True, onefile=True
         )
         num_ships_year = self.config_file.get_parameter(
-            "Erosion", "NShip", bank_km_mid, positive=True, onefile=True
+            "Erosion", "NShip", num_stations_per_bank, positive=True, onefile=True
         )
         num_waves_p_ship = self.config_file.get_parameter(
-            "Erosion", "NWave", bank_km_mid, default=5, positive=True, onefile=True
+            "Erosion", "NWave", num_stations_per_bank, default=5, positive=True, onefile=True
         )
         ship_draught = self.config_file.get_parameter(
-            "Erosion", "Draught", bank_km_mid, positive=True, onefile=True
+            "Erosion", "Draught", num_stations_per_bank, positive=True, onefile=True
         )
         ship_type = self.config_file.get_parameter(
-            "Erosion", "ShipType", bank_km_mid, valid=[1, 2, 3], onefile=True
+            "Erosion", "ShipType", num_stations_per_bank, valid=[1, 2, 3], onefile=True
         )
         parslope0 = self.config_file.get_parameter(
-            "Erosion", "Slope", bank_km_mid, default=20, positive=True, ext="slp"
+            "Erosion", "Slope", num_stations_per_bank, default=20, positive=True, ext="slp"
         )
         reed_wave_damping_coeff = self.config_file.get_parameter(
-            "Erosion", "Reed", bank_km_mid, default=0, positive=True, ext="rdd"
+            "Erosion", "Reed", num_stations_per_bank, default=0, positive=True, ext="rdd"
         )
 
         ship_data = {
@@ -313,13 +313,13 @@ class Erosion:
         fairway_data.fairway_initial_water_levels = zfw_ini
 
     def _prepare_initial_conditions(
-        self, config_file: ConfigFile, bank_chainage_midpoints: np.ndarray, fairway_data: FairwayData
+        self, config_file: ConfigFile, num_stations_per_bank: List[int], fairway_data: FairwayData
     ) -> ErosionInputs:
         # wave reduction s0, s1
         wave_fairway_distance_0 = config_file.get_parameter(
             "Erosion",
             "Wave0",
-            bank_chainage_midpoints,
+            num_stations_per_bank,
             default=200,
             positive=True,
             onefile=True,
@@ -327,7 +327,7 @@ class Erosion:
         wave_fairway_distance_1 = config_file.get_parameter(
             "Erosion",
             "Wave1",
-            bank_chainage_midpoints,
+            num_stations_per_bank,
             default=150,
             positive=True,
             onefile=True,
@@ -335,7 +335,7 @@ class Erosion:
 
         # save 1_banklines
         # read vship, nship, nwave, draught (tship), shiptype ... independent of level number
-        shipping_data = self.get_ship_parameters(bank_chainage_midpoints)
+        shipping_data = self.get_ship_parameters(num_stations_per_bank)
 
         # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
         classes = config_file.get_bool("Erosion", "Classes")
@@ -343,7 +343,7 @@ class Erosion:
             bank_type = config_file.get_parameter(
                 "Erosion",
                 "BankType",
-                bank_chainage_midpoints,
+                num_stations_per_bank,
                 default=0,
                 ext=".btp",
             )
@@ -354,7 +354,7 @@ class Erosion:
             tauc = config_file.get_parameter(
                 "Erosion",
                 "BankType",
-                bank_chainage_midpoints,
+                num_stations_per_bank,
                 default=0,
                 ext=".btp",
             )
@@ -371,7 +371,7 @@ class Erosion:
         zss = config_file.get_parameter(
             "Erosion",
             "ProtectionLevel",
-            bank_chainage_midpoints,
+            num_stations_per_bank,
             default=zss_miss,
             ext=".bpl",
         )
@@ -842,11 +842,12 @@ class Erosion:
         # map bank lines to mesh cells
         log_text("intersect_bank_mesh")
         bank_data = self.bl_processor.intersect_with_mesh(mesh_data)
-        # map the bank data to the fairway data (the bank_data and fairway_data will be updated)
+        # map the bank data to the fairway data (the bank_data and fairway_data will be updated inside the `_map_bank_to_fairway` function)
         self._map_bank_to_fairway(bank_data, fairway_data, self.simulation_data)
 
+        num_stations_per_bank = [len(bank_i) for bank_i in bank_data.bank_chainage_midpoints]
         erosion_inputs = self._prepare_initial_conditions(
-            config_file, bank_data.bank_chainage_midpoints, fairway_data
+            config_file, num_stations_per_bank, fairway_data
         )
 
         # initialize arrays for erosion loop over all discharges
@@ -1175,4 +1176,3 @@ class Erosion:
                 plt.close("all")
             else:
                 plt.show(block=not self.gui)
-
