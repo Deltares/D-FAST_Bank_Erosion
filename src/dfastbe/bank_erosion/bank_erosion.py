@@ -432,70 +432,16 @@ class Erosion:
 
             log_text("read_q_params", indent="  ")
             # read vship, nship, nwave, draught, shiptype, slope, reed, fairwaydepth, ... (level specific values)
-            vship = config_file.get_parameter(
-                "Erosion",
-                f"VShip{iq_str}",
-                num_stations_per_bank,
-                default=erosion_inputs.shipping_data["vship0"],
-                positive=True,
-                onefile=True,
-            )
-            Nship = config_file.get_parameter(
-                "Erosion",
-                f"NShip{iq_str}",
-                num_stations_per_bank,
-                default=erosion_inputs.shipping_data["Nship0"],
-                positive=True,
-                onefile=True,
-            )
-            nwave = config_file.get_parameter(
-                "Erosion",
-                f"NWave{iq_str}",
-                num_stations_per_bank,
-                default=erosion_inputs.shipping_data["nwave0"],
-                positive=True,
-                onefile=True,
-            )
-            Tship = config_file.get_parameter(
-                "Erosion",
-                f"Draught{iq_str}",
-                num_stations_per_bank,
-                default=erosion_inputs.shipping_data["Tship0"],
-                positive=True,
-                onefile=True,
-            )
-            ship_type = config_file.get_parameter(
-                "Erosion",
-                f"ShipType{iq_str}",
-                num_stations_per_bank,
-                default=erosion_inputs.shipping_data["ship0"],
-                valid=[1, 2, 3],
-                onefile=True,
-            )
-
-            parslope = config_file.get_parameter(
-                "Erosion",
-                f"Slope{iq_str}",
-                num_stations_per_bank,
-                default=erosion_inputs.shipping_data["parslope0"],
-                positive=True,
-                ext="slp",
-            )
-            parreed = config_file.get_parameter(
-                "Erosion",
-                f"Reed{iq_str}",
-                num_stations_per_bank,
-                default=erosion_inputs.shipping_data["parreed0"],
-                positive=True,
-                ext="rdd",
+            v_ship, n_ship, n_wave, t_ship, ship_type, par_slope, par_reed = self._read_discharge_parameters(
+                iq, erosion_inputs, num_stations_per_bank
             )
             mu_slope = [None] * bank_data.n_bank_lines
             mu_reed = [None] * bank_data.n_bank_lines
             for ib in range(bank_data.n_bank_lines):
-                mus = parslope[ib].copy()
+                mus = par_slope[ib].copy()
                 mus[mus > 0] = 1 / mus[mus > 0]
                 mu_slope[ib] = mus
-                mu_reed[ib] = 8.5e-4 * parreed[ib] ** 0.8
+                mu_reed[ib] = 8.5e-4 * par_reed[ib] ** 0.8
 
             log_text("-", indent="  ")
             log_text("read_simdata", data={"file": self.sim_files[iq]}, indent="  ")
@@ -577,9 +523,9 @@ class Erosion:
                         bank_height[ib],
                         line_size[ib],
                         fairway_data.fairway_initial_water_levels[ib],
-                        vship[ib],
+                        v_ship[ib],
                         ship_type[ib],
-                        Tship[ib],
+                        t_ship[ib],
                         mu_slope[ib],
                         bank_data.fairway_distances[ib],
                         hfw,
@@ -605,9 +551,9 @@ class Erosion:
                             "zb": bank_height[ib],
                             "len": line_size[ib],
                             "zw0": fairway_data.fairway_initial_water_levels[ib],
-                            "vship": vship[ib],
+                            "vship": v_ship[ib],
                             "shiptype": ship_type[ib],
-                            "draught": Tship[ib],
+                            "draught": t_ship[ib],
                             "mu_slp": mu_slope[ib],
                             "dist_fw": bank_data.fairway_distances[ib],
                             "dfw0": erosion_inputs.wave_fairway_distance_0[ib],
@@ -628,11 +574,11 @@ class Erosion:
                         line_size[ib],
                         water_level[iq][ib],
                         fairway_data.fairway_initial_water_levels[ib],
-                        Nship[ib],
-                        vship[ib],
-                        nwave[ib],
+                        n_ship[ib],
+                        v_ship[ib],
+                        n_wave[ib],
                         ship_type[ib],
-                        Tship[ib],
+                        t_ship[ib],
                         erosion_time * self.p_discharge[iq],
                         mu_slope[ib],
                         mu_reed[ib],
@@ -665,11 +611,11 @@ class Erosion:
                         "zw": water_level[iq][ib],
                         "zw0": fairway_data.fairway_initial_water_levels[ib],
                         "tauc": erosion_inputs.tauc[ib],
-                        "nship": Nship[ib],
-                        "vship": vship[ib],
-                        "nwave": nwave[ib],
+                        "nship": n_ship[ib],
+                        "vship": v_ship[ib],
+                        "nwave": n_wave[ib],
                         "shiptype": ship_type[ib],
-                        "draught": Tship[ib],
+                        "draught": t_ship[ib],
                         "mu_slp": mu_slope[ib],
                         "mu_reed": mu_reed[ib],
                         "dist_fw": bank_data.fairway_distances[ib],
@@ -814,6 +760,48 @@ class Erosion:
         erosion_results.total_eroded_vol_per_km = total_eroded_vol_per_km
 
         return bankline_new_list, bankline_eq_list, xy_line_eq_list
+
+    def _get_param(self, name: str, default_val, iq_str, num_stations_per_bank, **kwargs):
+        return self.config_file.get_parameter(
+            "Erosion", f"{name}{iq_str}", num_stations_per_bank,
+            default=default_val, **kwargs
+        )
+
+    def _read_discharge_parameters(                       # ❶ helper
+        self,
+        iq: int,
+        erosion_inputs: ErosionInputs,
+        num_stations_per_bank: List[int],
+    ) -> tuple[list[ndarray], list[ndarray], list[ndarray], list[ndarray], list[ndarray], list[ndarray], list[ndarray]]:
+        """
+        Read all discharge–specific input arrays for level *iq*.
+        Returns a dict with keys: vship, n_ship, n_wave, t_ship, ship_type,
+        mu_slope, mu_reed, par_slope, par_reed.
+        """
+        iq_str = f"{iq + 1}"
+
+        v_ship = self._get_param("VShip", erosion_inputs.shipping_data["vship0"], iq_str, num_stations_per_bank)
+        n_ship = self._get_param("NShip", erosion_inputs.shipping_data["Nship0"], iq_str, num_stations_per_bank)
+        n_wave = self._get_param("NWave", erosion_inputs.shipping_data["nwave0"], iq_str, num_stations_per_bank)
+        t_ship = self._get_param("Draught", erosion_inputs.shipping_data["Tship0"], iq_str, num_stations_per_bank)
+        ship_type = self._get_param("ShipType", erosion_inputs.shipping_data["ship0"], iq_str, num_stations_per_bank, valid=[1, 2, 3], onefile=True)
+        par_slope = self._get_param("Slope", erosion_inputs.shipping_data["parslope0"], iq_str, num_stations_per_bank, positive=True, ext="slp")
+        par_reed = self._get_param("Reed", erosion_inputs.shipping_data["parreed0"], iq_str, num_stations_per_bank, positive=True, ext="rdd")
+
+        # mu_slope, mu_reed = [], []
+        # for ps, pr in zip(parslope, parreed):
+        #     mus = ps.copy()
+        #     mus[mus > 0] = 1.0 / mus[mus > 0]   # 1/slope for non-zero values
+        #     mu_slope.append(mus)
+        #     mu_reed.append(8.5e-4 * pr ** 0.8)  # empirical damping coefficient
+        #
+        # return {
+        #     "vship": vship, "Nship": Nship, "nwave": nwave, "Tship": Tship,
+        #     "ship_type": ship_type,
+        #     "parslope": parslope, "parreed": parreed,
+        #     "mu_slope": mu_slope, "mu_reed": mu_reed,
+        # }
+        return v_ship, n_ship, n_wave, t_ship, ship_type, par_slope, par_reed
 
     def run(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
