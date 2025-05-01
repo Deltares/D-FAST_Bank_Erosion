@@ -886,7 +886,7 @@ class ConfigFile:
         self,
         group: str,
         key: str,
-        num_stations_per_bank: List[np.ndarray],
+        num_stations_per_bank: List[int],
         default=None,
         ext: str = "",
         positive: bool = False,
@@ -940,12 +940,87 @@ class ConfigFile:
             value = self.config[group][key]
             use_default = False
         except (KeyError, TypeError) as e:
+            value = None
             if default is None:
                 raise ConfigFileError(
                     f'No value specified for required keyword "{key}" in block "{group}".'
                 ) from e
             use_default = True
 
+        return self.process_parameter(
+            value=value,
+            key=key,
+            num_stations_per_bank=num_stations_per_bank,
+            use_default=use_default,
+            default=default,
+            ext=ext,
+            positive=positive,
+            valid=valid,
+            onefile=onefile,
+        )
+
+    def validate_parameter_value(
+        self,
+        value: float,
+        key: str,
+        positive: bool = False,
+        valid: Optional[List[float]] = None,
+    ) -> float:
+        """Validate a parameter value against constraints.
+
+        Args:
+            value (float): The parameter value to validate.
+            key (str): Name of the parameter for error messages.
+            positive (bool): Flag specifying whether all values are accepted (if False),
+                or only positive values (if True); default False.
+            valid (Optional[List[float]]): Optional list of valid values; default None.
+
+        Raises:
+            ValueError: If the value doesn't meet the constraints.
+
+        Returns:
+            float: The validated parameter value.
+        """
+        if positive and value < 0:
+            raise ValueError(
+                f'Value of "{key}" should be positive, not {value}.'
+            )
+        if valid is not None and valid.count(value) == 0:
+            raise ValueError(
+                f'Value of "{key}" should be in {valid}, not {value}.'
+            )
+        return value
+
+    def process_parameter(
+        self,
+        value: Union[str, float],
+        key: str,
+        num_stations_per_bank: List[int],
+        use_default: bool = False,
+        default=None,
+        ext: str = "",
+        positive: bool = False,
+        valid: Optional[List[float]] = None,
+        onefile: bool = False,
+    ) -> List[np.ndarray]:
+        """Process a parameter value into arrays for each bank.
+
+        Args:
+            value (Union[str, float]): The parameter value or filename.
+            key (str): Name of the parameter for error messages.
+            num_stations_per_bank (List[int]): Number of stations for each bank.
+            use_default (bool): Flag indicating whether to use the default value; default False.
+            default: Default value to use if use_default is True; default None.
+            ext (str): File name extension; default empty string.
+            positive (bool): Flag specifying whether all values are accepted (if False),
+                or only positive values (if True); default False.
+            valid (Optional[List[float]]): Optional list of valid values; default None.
+            onefile (bool): Flag indicating whether parameters are read from one file.
+                One file should be used for all bank lines (True) or one file per bank line (False; default).
+
+        Returns:
+            List[np.ndarray]: Parameter values for each bank.
+        """
         # if val is value then use that value globally
         num_banks = len(num_stations_per_bank)
         parameter_values = [None] * num_banks
@@ -956,21 +1031,16 @@ class ConfigFile:
                 real_val = default
             else:
                 real_val = float(value)
-                if positive and real_val < 0:
-                    raise ValueError(
-                        f'Value of "{key}" should be positive, not {real_val}.'
-                    )
-                if valid is not None and valid.count(real_val) == 0:
-                    raise ValueError(
-                        f'Value of "{key}" should be in {valid}, not {real_val}.'
-                    )
+                self.validate_parameter_value(real_val, key, positive, valid)
+
             for ib, num_stations in enumerate(num_stations_per_bank):
                 parameter_values[ib] = np.zeros(num_stations) + real_val
 
         except (ValueError, TypeError):
             if onefile:
                 log_text("read_param", data={"param": key, "file": value})
-                km_thr, val = _get_kmval(value, key, positive, valid)
+                km_thr, val = _get_stations(value, key, positive, valid)
+
             for ib, num_stations in enumerate(num_stations_per_bank):
                 if not onefile:
                     filename_i = f"{value}_{ib + 1}{ext}"
@@ -978,7 +1048,8 @@ class ConfigFile:
                         "read_param_one_bank",
                         data={"param": key, "i": ib + 1, "file": filename_i},
                     )
-                    km_thr, val = _get_kmval(filename_i, key, positive, valid)
+                    km_thr, val = _get_stations(filename_i, key, positive, valid)
+
                 if km_thr is None:
                     parameter_values[ib] = np.zeros(num_stations) + val[0]
                 else:
@@ -988,6 +1059,7 @@ class ConfigFile:
                         idx[num_stations >= thr] += 1
                     parameter_values[ib] = val[idx]
                 # print("Min/max of data: ", parfield[ib].min(), parfield[ib].max())
+
         return parameter_values
 
     def get_bank_search_distances(self, num_search_lines: int) -> List[float]:
@@ -2153,7 +2225,7 @@ def _sim2nc(oldfile: str) -> str:
     return nc_file
 
 
-def _get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[float]]):
+def _get_stations(filename: str, key: str, positive: bool, valid: Optional[List[float]]):
     """
     Read a parameter file, check its contents and return arrays of chainages and values.
 
