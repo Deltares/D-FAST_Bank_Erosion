@@ -492,17 +492,12 @@ class Erosion:
         eq_eroded_vol = []
 
         num_stations_per_bank = [len(bank_i) for bank_i in bank_data.bank_chainage_midpoints]
-        erosion_time = config_file.get_int("Erosion", "TErosion", positive=True)
-        log_text("total_time", data={"t": erosion_time})
+        log_text("total_time", data={"t": self.river_data.erosion_time})
 
         for iq in range(self.river_data.num_discharge_levels):
             log_text(
                 "discharge_header",
-                data={
-                    "i": iq + 1,
-                    "p": self.p_discharge[iq],
-                    "t": self.p_discharge[iq] * erosion_time,
-                },
+                data={"i": iq + 1, "p": self.p_discharge[iq], "t": self.p_discharge[iq] * self.river_data.erosion_time,},
             )
 
             iq_str = f"{iq + 1}"
@@ -626,7 +621,7 @@ class Erosion:
                         pars["n_wave"][ib],
                         pars["ship_type"][ib],
                         pars["t_ship"][ib],
-                        erosion_time * self.p_discharge[iq],
+                        self.river_data.erosion_time * self.p_discharge[iq],
                         pars["mu_slope"][ib],
                         pars["mu_reed"][ib],
                         bank_data.fairway_distances[ib],
@@ -680,7 +675,7 @@ class Erosion:
             vol_per_discharge=vol_per_discharge,
             eq_eroded_vol=eq_eroded_vol,
             total_eroded_vol=total_eroded_vol,
-            erosion_time=erosion_time,
+            erosion_time=self.river_data.erosion_time,
         )
 
         water_level_data = WaterLevelData(

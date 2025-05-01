@@ -409,6 +409,7 @@ class ErosionRiverData(BaseRiverData):
         self.output_intervals = config_file.get_float("Erosion", "OutputInterval", 1.0)
         self.bank_lines = config_file.read_bank_lines(str(self.bank_dir))
         self.river_axis = self._read_river_axis()
+        self.erosion_time = self.config_file.get_int("Erosion", "TErosion", positive=True)
 
     def simulation_data(self) -> ErosionSimulationData:
 
