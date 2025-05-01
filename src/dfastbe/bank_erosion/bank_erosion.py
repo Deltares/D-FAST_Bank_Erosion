@@ -30,6 +30,7 @@ from typing import Tuple, List, Dict, Any
 import os
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
+from numpy import ndarray
 from shapely.geometry import LineString, Point
 import numpy as np
 import matplotlib.pyplot as plt
@@ -431,17 +432,10 @@ class Erosion:
             iq_str = f"{iq + 1}"
 
             log_text("read_q_params", indent="  ")
-            # read vship, nship, nwave, draught, shiptype, slope, reed, fairwaydepth, ... (level specific values)
-            v_ship, n_ship, n_wave, t_ship, ship_type, par_slope, par_reed = self._read_discharge_parameters(
+            # read v_ship, n_ship, nwave, draught, ship_type, slope, reed, fairway_depth, ... (level specific values)
+            pars = self._read_discharge_parameters(
                 iq, erosion_inputs, num_stations_per_bank
             )
-            mu_slope = [None] * bank_data.n_bank_lines
-            mu_reed = [None] * bank_data.n_bank_lines
-            for ib in range(bank_data.n_bank_lines):
-                mus = par_slope[ib].copy()
-                mus[mus > 0] = 1 / mus[mus > 0]
-                mu_slope[ib] = mus
-                mu_reed[ib] = 8.5e-4 * par_reed[ib] ** 0.8
 
             log_text("-", indent="  ")
             log_text("read_simdata", data={"file": self.sim_files[iq]}, indent="  ")
@@ -523,10 +517,10 @@ class Erosion:
                         bank_height[ib],
                         line_size[ib],
                         fairway_data.fairway_initial_water_levels[ib],
-                        v_ship[ib],
-                        ship_type[ib],
-                        t_ship[ib],
-                        mu_slope[ib],
+                        pars["v_ship"][ib],
+                        pars["ship_type"][ib],
+                        pars["t_ship"][ib],
+                        pars["mu_slope"][ib],
                         bank_data.fairway_distances[ib],
                         hfw,
                         erosion_inputs,
@@ -551,10 +545,10 @@ class Erosion:
                             "zb": bank_height[ib],
                             "len": line_size[ib],
                             "zw0": fairway_data.fairway_initial_water_levels[ib],
-                            "vship": v_ship[ib],
-                            "shiptype": ship_type[ib],
-                            "draught": t_ship[ib],
-                            "mu_slp": mu_slope[ib],
+                            "vship": pars["v_ship"][ib],
+                            "shiptype": pars["ship_type"][ib],
+                            "draught": pars["t_ship"][ib],
+                            "mu_slp": pars["mu_slope"][ib],
                             "dist_fw": bank_data.fairway_distances[ib],
                             "dfw0": erosion_inputs.wave_fairway_distance_0[ib],
                             "dfw1": erosion_inputs.wave_fairway_distance_1[ib],
@@ -574,14 +568,14 @@ class Erosion:
                         line_size[ib],
                         water_level[iq][ib],
                         fairway_data.fairway_initial_water_levels[ib],
-                        n_ship[ib],
-                        v_ship[ib],
-                        n_wave[ib],
-                        ship_type[ib],
-                        t_ship[ib],
+                        pars["n_ship"][ib],
+                        pars["v_ship"][ib],
+                        pars["n_wave"][ib],
+                        pars["ship_type"][ib],
+                        pars["t_ship"][ib],
                         erosion_time * self.p_discharge[iq],
-                        mu_slope[ib],
-                        mu_reed[ib],
+                        pars["mu_slope"][ib],
+                        pars["mu_reed"][ib],
                         bank_data.fairway_distances[ib],
                         hfw,
                         chezy[iq][ib],
@@ -611,13 +605,13 @@ class Erosion:
                         "zw": water_level[iq][ib],
                         "zw0": fairway_data.fairway_initial_water_levels[ib],
                         "tauc": erosion_inputs.tauc[ib],
-                        "nship": n_ship[ib],
-                        "vship": v_ship[ib],
-                        "nwave": n_wave[ib],
-                        "shiptype": ship_type[ib],
-                        "draught": t_ship[ib],
-                        "mu_slp": mu_slope[ib],
-                        "mu_reed": mu_reed[ib],
+                        "nship": pars["n_ship"][ib],
+                        "vship": pars["v_ship"][ib],
+                        "nwave": pars["n_wave"][ib],
+                        "shiptype": pars["ship_type"][ib],
+                        "draught": pars["t_ship"][ib],
+                        "mu_slp": pars["mu_slope"][ib],
+                        "mu_reed": pars["mu_reed"][ib],
                         "dist_fw": bank_data.fairway_distances[ib],
                         "dfw0": erosion_inputs.wave_fairway_distance_0[ib],
                         "dfw1": erosion_inputs.wave_fairway_distance_1[ib],
@@ -772,9 +766,9 @@ class Erosion:
         iq: int,
         erosion_inputs: ErosionInputs,
         num_stations_per_bank: List[int],
-    ) -> tuple[list[ndarray], list[ndarray], list[ndarray], list[ndarray], list[ndarray], list[ndarray], list[ndarray]]:
+    ) -> dict[str, list[ndarray] | list[Any]]:
         """
-        Read all discharge–specific input arrays for level *iq*.
+        Read all discharge-specific input arrays for level *iq*.
         Returns a dict with keys: vship, n_ship, n_wave, t_ship, ship_type,
         mu_slope, mu_reed, par_slope, par_reed.
         """
@@ -788,20 +782,18 @@ class Erosion:
         par_slope = self._get_param("Slope", erosion_inputs.shipping_data["parslope0"], iq_str, num_stations_per_bank, positive=True, ext="slp")
         par_reed = self._get_param("Reed", erosion_inputs.shipping_data["parreed0"], iq_str, num_stations_per_bank, positive=True, ext="rdd")
 
-        # mu_slope, mu_reed = [], []
-        # for ps, pr in zip(parslope, parreed):
-        #     mus = ps.copy()
-        #     mus[mus > 0] = 1.0 / mus[mus > 0]   # 1/slope for non-zero values
-        #     mu_slope.append(mus)
-        #     mu_reed.append(8.5e-4 * pr ** 0.8)  # empirical damping coefficient
-        #
-        # return {
-        #     "vship": vship, "Nship": Nship, "nwave": nwave, "Tship": Tship,
-        #     "ship_type": ship_type,
-        #     "parslope": parslope, "parreed": parreed,
-        #     "mu_slope": mu_slope, "mu_reed": mu_reed,
-        # }
-        return v_ship, n_ship, n_wave, t_ship, ship_type, par_slope, par_reed
+        mu_slope, mu_reed = [], []
+        for ps, pr in zip(par_slope, par_reed):
+            mus = ps.copy()
+            mus[mus > 0] = 1.0 / mus[mus > 0]   # 1/slope for non-zero values
+            mu_slope.append(mus)
+            mu_reed.append(8.5e-4 * pr ** 0.8)  # empirical damping coefficient
+
+        return {
+            "v_ship": v_ship, "n_ship": n_ship, "n_wave": n_wave, "t_ship": t_ship,
+            "ship_type": ship_type, "par_slope": par_slope, "par_reed": par_reed,
+            "mu_slope": mu_slope, "mu_reed": mu_reed,
+        }
 
     def run(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
