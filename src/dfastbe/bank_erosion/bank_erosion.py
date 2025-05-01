@@ -313,6 +313,40 @@ class Erosion:
             zfw_ini.append(simulation_data.water_level_face[ii])
         fairway_data.fairway_initial_water_levels = zfw_ini
 
+    def debug_process_discharge_levels_2(
+            self, ib, bank_data, fairway_data, erosion_inputs, pars, hfw, dn_eq1, dv_eq1, bcrds, bank_height,
+            line_size
+    ):
+        bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
+        bank_coords_points = [Point(xy) for xy in bcrds_mid]
+        bank_coords_geo = GeoSeries(
+            bank_coords_points, crs=self.config_file.crs
+        )
+        params = {
+            "chainage": bank_data.bank_chainage_midpoints[ib],
+            "x": bcrds_mid[:, 0],
+            "y": bcrds_mid[:, 1],
+            "iface_fw": bank_data.fairway_face_indices[ib],
+            "iface_bank": bank_data.bank_face_indices[ib],  # bank_index
+            "zb": bank_height[ib],
+            "len": line_size[ib],
+            "zw0": fairway_data.fairway_initial_water_levels[ib],
+            "vship": pars["v_ship"][ib],
+            "shiptype": pars["ship_type"][ib],
+            "draught": pars["t_ship"][ib],
+            "mu_slp": pars["mu_slope"][ib],
+            "dist_fw": bank_data.fairway_distances[ib],
+            "dfw0": erosion_inputs.wave_fairway_distance_0[ib],
+            "dfw1": erosion_inputs.wave_fairway_distance_1[ib],
+            "hfw": hfw,
+            "zss": erosion_inputs.bank_protection_level[ib],
+            "dn": dn_eq1,
+            "dv": dv_eq1,
+        }
+
+        write_shp(bank_coords_geo, params, f"{str(self.river_data.output_dir)}{os.sep}debug.EQ.B{ib + 1}.shp")
+        write_csv(params, f"{str(self.river_data.output_dir)}{os.sep}debug.EQ.B{ib + 1}.csv")
+
     def _prepare_initial_conditions(
         self, config_file: ConfigFile, num_stations_per_bank: List[int], fairway_data: FairwayData
     ) -> ErosionInputs:
@@ -531,35 +565,10 @@ class Erosion:
                     eq_eroded_vol.append(dv_eq1)
 
                     if self.river_data.debug:
-                        bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
-                        bank_coords_points = [Point(xy1) for xy1 in bcrds_mid]
-                        bank_coords_geo = GeoSeries(
-                            bank_coords_points, crs=config_file.crs
+                        self.debug_process_discharge_levels_2(
+                            ib, bank_data, fairway_data, erosion_inputs, pars, hfw, dn_eq1, dv_eq1, bcrds,
+                            bank_height, line_size
                         )
-                        params = {
-                            "chainage": bank_data.bank_chainage_midpoints[ib],
-                            "x": bcrds_mid[:, 0],
-                            "y": bcrds_mid[:, 1],
-                            "iface_fw": bank_data.fairway_face_indices[ib],
-                            "iface_bank": bank_data.bank_face_indices[ib],  # bank_index
-                            "zb": bank_height[ib],
-                            "len": line_size[ib],
-                            "zw0": fairway_data.fairway_initial_water_levels[ib],
-                            "vship": pars["v_ship"][ib],
-                            "shiptype": pars["ship_type"][ib],
-                            "draught": pars["t_ship"][ib],
-                            "mu_slp": pars["mu_slope"][ib],
-                            "dist_fw": bank_data.fairway_distances[ib],
-                            "dfw0": erosion_inputs.wave_fairway_distance_0[ib],
-                            "dfw1": erosion_inputs.wave_fairway_distance_1[ib],
-                            "hfw": hfw,
-                            "zss": erosion_inputs.bank_protection_level[ib],
-                            "dn": dn_eq1,
-                            "dv": dv_eq1,
-                        }
-
-                        write_shp(bank_coords_geo, params, f"{str(self.river_data.output_dir)}{os.sep}debug.EQ.B{ib + 1}.shp")
-                        write_csv(params, f"{str(self.river_data.output_dir)}{os.sep}debug.EQ.B{ib + 1}.csv")
 
                 dniqib, dviqib, dn_ship, dn_flow, ship_wave_max_ib, ship_wave_min_ib = (
                     comp_erosion(
