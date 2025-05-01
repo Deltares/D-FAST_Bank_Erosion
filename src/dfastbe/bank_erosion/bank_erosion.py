@@ -414,7 +414,7 @@ class Erosion:
         total_eroded_vol: List[np.ndarray] = []
         eq_erosion_dist: List[np.ndarray] = []
         eq_eroded_vol: List[np.ndarray] = []
-
+        num_stations_per_bank = [len(bank_i) for bank_i in bank_data.bank_chainage_midpoints]
         erosion_time = config_file.get_int("Erosion", "TErosion", positive=True)
         log_text("total_time", data={"t": erosion_time})
 
@@ -428,14 +428,14 @@ class Erosion:
                 },
             )
 
-            iq_str = "{}".format(iq + 1)
+            iq_str = f"{iq + 1}"
 
             log_text("read_q_params", indent="  ")
             # read vship, nship, nwave, draught, shiptype, slope, reed, fairwaydepth, ... (level specific values)
             vship = config_file.get_parameter(
                 "Erosion",
                 f"VShip{iq_str}",
-                bank_data.bank_chainage_midpoints,
+                num_stations_per_bank,
                 default=erosion_inputs.shipping_data["vship0"],
                 positive=True,
                 onefile=True,
@@ -443,7 +443,7 @@ class Erosion:
             Nship = config_file.get_parameter(
                 "Erosion",
                 f"NShip{iq_str}",
-                bank_data.bank_chainage_midpoints,
+                num_stations_per_bank,
                 default=erosion_inputs.shipping_data["Nship0"],
                 positive=True,
                 onefile=True,
@@ -451,7 +451,7 @@ class Erosion:
             nwave = config_file.get_parameter(
                 "Erosion",
                 f"NWave{iq_str}",
-                bank_data.bank_chainage_midpoints,
+                num_stations_per_bank,
                 default=erosion_inputs.shipping_data["nwave0"],
                 positive=True,
                 onefile=True,
@@ -459,7 +459,7 @@ class Erosion:
             Tship = config_file.get_parameter(
                 "Erosion",
                 f"Draught{iq_str}",
-                bank_data.bank_chainage_midpoints,
+                num_stations_per_bank,
                 default=erosion_inputs.shipping_data["Tship0"],
                 positive=True,
                 onefile=True,
@@ -467,7 +467,7 @@ class Erosion:
             ship_type = config_file.get_parameter(
                 "Erosion",
                 f"ShipType{iq_str}",
-                bank_data.bank_chainage_midpoints,
+                num_stations_per_bank,
                 default=erosion_inputs.shipping_data["ship0"],
                 valid=[1, 2, 3],
                 onefile=True,
@@ -476,7 +476,7 @@ class Erosion:
             parslope = config_file.get_parameter(
                 "Erosion",
                 f"Slope{iq_str}",
-                bank_data.bank_chainage_midpoints,
+                num_stations_per_bank,
                 default=erosion_inputs.shipping_data["parslope0"],
                 positive=True,
                 ext="slp",
@@ -484,7 +484,7 @@ class Erosion:
             parreed = config_file.get_parameter(
                 "Erosion",
                 f"Reed{iq_str}",
-                bank_data.bank_chainage_midpoints,
+                num_stations_per_bank,
                 default=erosion_inputs.shipping_data["parreed0"],
                 positive=True,
                 ext="rdd",
@@ -708,7 +708,7 @@ class Erosion:
             erovol_file = config_file.get_str("Erosion", f"EroVol{iq_str}", default=f"erovolQ{iq_str}.evo")
             log_text("save_erovol", data={"file": erovol_file}, indent="  ")
             write_km_eroded_volumes(
-                km_mid, dvol_bank, str(self.river_data.output_dir) + os.sep + erovol_file
+                km_mid, dvol_bank, f"{self.river_data.output_dir}{os.sep}{erovol_file}"
             )
 
         erosion_results = ErosionResults(
