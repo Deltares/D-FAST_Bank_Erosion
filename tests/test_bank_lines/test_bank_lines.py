@@ -202,12 +202,12 @@ class TestBankLines:
         assert result.iloc[0].equals_exact(expected, tolerance=1e-8)
         assert len(result) == 1
 
-    def test_mask(self):
-        """Test the mask method."""
-        banklines = gpd.GeoSeries([LineString([(0, 0), (1, 1)])])
-        bank_area = Polygon([(0, 0), (1, 1), (1, 0)])
-        result = BankLines.mask(banklines, bank_area)
-        assert isinstance(result, LineString)
+    # def test_mask(self):
+    #     """Test the mask method."""
+    #     banklines = gpd.GeoSeries([LineString([(0, 0), (1, 1)])])
+    #     bank_area = Polygon([(0, 0), (1, 1), (1, 0)])
+    #     result = BankLines.mask(banklines, bank_area)
+    #     assert isinstance(result, LineString)
 
     def test_progress_bar(self, capsys):
         """Test the _progress_bar method."""
@@ -316,3 +316,30 @@ class TestBankLines:
             )
             mock_show.assert_not_called()  # Ensure show is not called when save_plot is False
             mock_close.assert_called_once()  # Ensure plots are closed
+
+    def test_mask(self):
+        """Test the mask method of the BankLines class."""
+        # Mock banklines as a GeoSeries
+        banklines = gpd.GeoSeries(
+            [
+                LineString([(0, 0), (2, 2)]),
+                LineString([(1, 1), (3, 3)]),
+                LineString([(2, 0), (2, 3)]),
+            ],
+            crs="EPSG:4326",
+        )
+
+        # Mock bank_area as a Polygon
+        bank_area = Polygon([(0, 0), (2, 0), (2, 2), (0, 2), (0, 0)])
+
+        # Call the mask method
+        clipped_banklines = BankLines.mask(banklines, bank_area)
+
+        # Expected result
+        expected_clipped = MultiLineString(
+            [LineString([(0, 0), (2, 2)]), LineString([(1, 1), (2, 2)])]
+        )
+
+        # Assertions
+        assert isinstance(clipped_banklines, LineString)
+        assert clipped_banklines.equals(expected_clipped)
