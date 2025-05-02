@@ -96,7 +96,6 @@ class TestBankLines:
                 0.3,
             )
             bank_lines = BankLines(MagicMock())
-        bank_lines.simulation_data = mock_simulation_data
         max_river_width = bank_lines.max_river_width
         assert max_river_width == 1000
 
