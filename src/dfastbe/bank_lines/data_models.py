@@ -1,9 +1,9 @@
 from typing import List, Tuple
-from shapely.geometry import LineString, Point
-from shapely.geometry.polygon import Polygon
-from shapely.geometry import MultiLineString
-from dfastbe.io import BaseRiverData, ConfigFile, LineGeometry, log_text, BaseSimulationData
 
+from shapely.geometry import LineString, MultiLineString, Point
+from shapely.geometry.polygon import Polygon
+
+from dfastbe.io import BaseRiverData, BaseSimulationData, LineGeometry, log_text
 
 MAX_RIVER_WIDTH = 1000
 
@@ -165,9 +165,7 @@ class BankLinesRiverData(BaseRiverData):
         return search_lines
 
     def _get_bank_lines_simulation_data(self) -> Tuple[BaseSimulationData, float]:
-        """
-        read simulation data and drying flooding threshold dh0
-        """
+        """read simulation data and drying flooding threshold dh0"""
         sim_file = self.config_file.get_sim_file("Detect", "")
         log_text("read_simdata", data={"file": sim_file})
         simulation_data = BaseSimulationData.read(sim_file)
