@@ -86,6 +86,46 @@ class TestBankLines:
         mock_config.crs = "EPSG:4326"
         return mock_config
 
+    @patch("dfastbe.bank_lines.bank_lines.BankLinesRiverData")
+    def test_detect(self, mock_river_data_class):
+        """Test the detect method of the BankLines class."""
+        mock_config_file = MagicMock(spec=ConfigFile)
+        mock_config_file.get_output_dir.return_value = "mock_output_dir"
+        mock_config_file.get_plotting_flags.return_value = {"plot_data": False}
+
+        mock_river_data = MagicMock()
+        mock_river_data.river_center_line.station_bounds = (0, 100)
+        mock_river_data.river_center_line.values = MagicMock()
+        mock_river_data.river_center_line.as_array.return_value = np.array(
+            [[0, 0], [100, 100]]
+        )
+        mock_river_data.search_lines.to_polygons.return_value = [
+            Polygon([(0, 0), (1, 1), (1, 0)])
+        ]
+        mock_river_data.search_lines.size = 1
+        mock_river_data.search_lines.values = [LineString([(0, 0), (1, 1)])]
+        mock_river_data.simulation_data.return_value = (MagicMock(), 0.8)
+        mock_river_data_class.return_value = mock_river_data
+
+        bank_lines = BankLines(mock_config_file)
+        bank_lines.detect_bank_lines = MagicMock(return_value=MagicMock())
+        bank_lines.mask = MagicMock(return_value=MagicMock())
+        bank_lines.save = MagicMock()
+        bank_lines.plot = MagicMock()
+
+        with patch(
+            "dfastbe.bank_lines.bank_lines.sort_connect_bank_lines"
+        ) as mock_sort:
+            mock_sort.return_value = [LineString([(0, 0), (1, 1)])]
+            bank_lines.detect()
+
+        bank_lines.detect_bank_lines.assert_called_once_with(
+            bank_lines.simulation_data, bank_lines.h0, mock_config_file
+        )
+        bank_lines.save.assert_called_once()
+        if mock_config_file.get_plotting_flags.return_value["plot_data"]:
+            bank_lines.plot.assert_called_once()
+
     def test_calculate_water_depth_per_node(self, mock_simulation_data):
         """Test the calculate_water_depth_per_node method."""
         h_node = BankLines._calculate_water_depth(mock_simulation_data)
