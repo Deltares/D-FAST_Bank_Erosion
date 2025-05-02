@@ -323,8 +323,6 @@ class TestBankLines:
 
         clipped_banklines = BankLines.mask(banklines, bank_area)
 
-        expected_clipped = MultiLineString(
-            [LineString([(0, 0), (2, 2)]), LineString([(1, 1), (2, 2)])]
-        )
+        expected_clipped = LineString([(0, 0), (2, 2)])
         assert isinstance(clipped_banklines, LineString)
         assert clipped_banklines.equals(expected_clipped)
