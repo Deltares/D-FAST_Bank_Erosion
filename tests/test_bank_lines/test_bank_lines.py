@@ -96,8 +96,7 @@ class TestBankLines:
                 0.3,
             )
             bank_lines = BankLines(MagicMock())
-        max_river_width = bank_lines.max_river_width
-        assert max_river_width == 1000
+        assert bank_lines.max_river_width == 1000
 
     @patch("dfastbe.bank_lines.bank_lines.BankLinesRiverData")
     def test_detect(self, mock_river_data_class):
