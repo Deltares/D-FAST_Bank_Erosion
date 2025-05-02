@@ -86,6 +86,20 @@ class TestBankLines:
         mock_config.crs = "EPSG:4326"
         return mock_config
 
+    def test_max_river_width(self, mock_simulation_data):
+        """Test the _max_river_width method."""
+        with patch(
+            "dfastbe.bank_lines.bank_lines.BankLinesRiverData"
+        ) as mock_river_data:
+            mock_river_data.return_value.simulation_data.return_value = (
+                mock_simulation_data,
+                0.3,
+            )
+            bank_lines = BankLines(MagicMock())
+        bank_lines.simulation_data = mock_simulation_data
+        max_river_width = bank_lines.max_river_width
+        assert max_river_width == 1000
+
     @patch("dfastbe.bank_lines.bank_lines.BankLinesRiverData")
     def test_detect(self, mock_river_data_class):
         """Test the detect method of the BankLines class."""
