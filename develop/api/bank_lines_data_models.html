@@ -1689,8 +1689,7 @@
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_lines/data_models.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">159</span>
-<span class="normal">160</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">160</span>
 <span class="normal">161</span>
 <span class="normal">162</span>
 <span class="normal">163</span>
@@ -1761,7 +1760,8 @@
 <span class="normal">228</span>
 <span class="normal">229</span>
 <span class="normal">230</span>
-<span class="normal">231</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesRiverData</span><span class="p">(</span><span class="n">BaseRiverData</span><span class="p">):</span>
+<span class="normal">231</span>
+<span class="normal">232</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesRiverData</span><span class="p">(</span><span class="n">BaseRiverData</span><span class="p">):</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">search_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchLines</span><span class="p">:</span>
@@ -1958,8 +1958,7 @@ simulation data and critical water depth (h0).</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines/data_models.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">206</span>
-<span class="normal">207</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">207</span>
 <span class="normal">208</span>
 <span class="normal">209</span>
 <span class="normal">210</span>
@@ -1983,7 +1982,8 @@ simulation data and critical water depth (h0).</p>
 <span class="normal">228</span>
 <span class="normal">229</span>
 <span class="normal">230</span>
-<span class="normal">231</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">simulation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">BaseSimulationData</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="normal">231</span>
+<span class="normal">232</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">simulation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">BaseSimulationData</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get simulation data and critical water depth and clip to river center line.</span>
 
 <span class="sd">    Returns:</span>
@@ -2189,7 +2189,8 @@ simulation data and critical water depth (h0).</p>
 <span class="normal">153</span>
 <span class="normal">154</span>
 <span class="normal">155</span>
-<span class="normal">156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SearchLines</span><span class="p">:</span>
+<span class="normal">156</span>
+<span class="normal">157</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SearchLines</span><span class="p">:</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">],</span> <span class="n">mask</span><span class="p">:</span> <span class="n">LineGeometry</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Search lines initialization.</span>
@@ -2237,8 +2238,9 @@ simulation data and critical water depth (h0).</p>
 <span class="sd">                Maximum distance away from river_profile.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            List[LineString]: List of clipped search lines.</span>
-<span class="sd">            float: Maximum distance from any point within line to reference line.</span>
+<span class="sd">            Tuple[List[LineString], float]:</span>
+<span class="sd">                - List of clipped search lines.</span>
+<span class="sd">                - Maximum distance from any point within line to reference line.</span>
 
 <span class="sd">        Examples:</span>
 <span class="sd">            ```python</span>
@@ -2535,28 +2537,20 @@ Maximum distance away from river_profile.</p>
     <table>
       <thead>
         <tr>
-<th>Name</th>          <th>Type</th>
+          <th>Type</th>
           <th>Description</th>
         </tr>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-<td></td>            <td>
-                  <code><span title="typing.List">List</span>[<span title="shapely.geometry.LineString">LineString</span>]</code>
+            <td>
+                  <code><span title="typing.Tuple">Tuple</span>[<span title="typing.List">List</span>[<span title="shapely.geometry.LineString">LineString</span>], <span title="float">float</span>]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>List[LineString]: List of clipped search lines.</p>
-              </div>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-<td><code>float</code></td>            <td>
-                  <code><span title="float">float</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Maximum distance from any point within line to reference line.</p>
+                <p>Tuple[List[LineString], float]:
+- List of clipped search lines.
+- Maximum distance from any point within line to reference line.</p>
               </div>
             </td>
           </tr>
@@ -2634,7 +2628,8 @@ Maximum distance away from river_profile.</p>
 <span class="normal"> 97</span>
 <span class="normal"> 98</span>
 <span class="normal"> 99</span>
-<span class="normal">100</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="normal">100</span>
+<span class="normal">101</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">mask</span><span class="p">(</span>
     <span class="n">search_lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">],</span>
     <span class="n">river_center_line</span><span class="p">:</span> <span class="n">LineString</span><span class="p">,</span>
@@ -2652,8 +2647,9 @@ Maximum distance away from river_profile.</p>
 <span class="sd">            Maximum distance away from river_profile.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        List[LineString]: List of clipped search lines.</span>
-<span class="sd">        float: Maximum distance from any point within line to reference line.</span>
+<span class="sd">        Tuple[List[LineString], float]:</span>
+<span class="sd">            - List of clipped search lines.</span>
+<span class="sd">            - Maximum distance from any point within line to reference line.</span>
 
 <span class="sd">    Examples:</span>
 <span class="sd">        ```python</span>
@@ -2748,8 +2744,7 @@ Maximum distance away from river_profile.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines/data_models.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">133</span>
-<span class="normal">134</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">134</span>
 <span class="normal">135</span>
 <span class="normal">136</span>
 <span class="normal">137</span>
@@ -2771,7 +2766,8 @@ Maximum distance away from river_profile.</p>
 <span class="normal">153</span>
 <span class="normal">154</span>
 <span class="normal">155</span>
-<span class="normal">156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Polygon</span><span class="p">]:</span>
+<span class="normal">156</span>
+<span class="normal">157</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">to_polygons</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Polygon</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Construct a series of polygons surrounding the bank search lines.</span>
 
