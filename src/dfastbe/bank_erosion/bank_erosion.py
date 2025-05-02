@@ -529,11 +529,6 @@ class Erosion:
                     eq_erosion_dist.append(dn_eq1)
                     eq_eroded_vol.append(dv_eq1)
 
-                    if self.river_data.debug:
-                        self.debugger.debug_process_discharge_levels_1(
-                            ind, bank_data, fairway_data, erosion_inputs, pars, hfw, dn_eq1, dv_eq1, coords_i,
-                            bank_height, line_size
-                        )
 
                 dniqib, dviqib, dn_ship, dn_flow, ship_wave_max_ib, ship_wave_min_ib = (
                     comp_erosion(
@@ -563,6 +558,11 @@ class Erosion:
                 ship_wave_min[iq].append(ship_wave_min_ib)
 
                 if self.river_data.debug:
+                    if iq == num_levels - 1:  # ref_level:
+                        self.debugger.debug_process_discharge_levels_1(
+                            ind, bank_data, fairway_data, erosion_inputs, pars, hfw, dn_eq1, dv_eq1, coords_i,
+                            bank_height, line_size
+                        )
                     self.debugger.debug_process_discharge_levels_2(
                         ind, iq, bank_data, fairway_data, erosion_inputs, pars, hfw, coords_i, velocity_iq, bank_height, line_size,
                         water_level_iq, chezy_iq, dn_tot, dv_tot, dn_ship, dn_flow
