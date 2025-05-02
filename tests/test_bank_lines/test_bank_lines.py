@@ -247,7 +247,7 @@ class TestBankLines:
     def test_plot(self, mock_config_file):
         """Test the plot method of the BankLines class."""
         # Mock data
-        xy_km_numpy = np.array([[0, 0], [1, 1]])
+        xy_km_numpy = np.array([[0, 0, 0], [1, 1, 0]])
         n_search_lines = 1
         bank = [LineString([(0, 0), (1, 1)])]
         km_bounds = (0, 1)
@@ -266,14 +266,15 @@ class TestBankLines:
             "dfastbe.bank_lines.bank_lines.BankLinesRiverData"
         ) as mock_river_data:
             mock_river_data.return_value.simulation_data.return_value = (
-                0.3,
                 mock_simulation_data,
+                0.3,
             )
             bank_lines = BankLines(mock_config_file)
             bank_lines.plot_flags = {
                 "save_plot": False,
                 "save_plot_zoomed": True,
                 "close_plot": True,
+                "zoom_km_step": 0.1,
             }
 
         # Patch plotting functions
@@ -295,7 +296,7 @@ class TestBankLines:
 
             # Assertions
             mock_plot_detect1.assert_called_once_with(
-                [0, 1],  # bbox
+                (-0.1, -0.1, 1.1, 1.1),  # bbox
                 xy_km_numpy,
                 bank_areas,
                 bank,

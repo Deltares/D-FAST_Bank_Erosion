@@ -191,9 +191,9 @@ class BankLines:
         self,
         xy_km_numpy: np.ndarray,
         n_search_lines: int,
-        bank: List,
-        km_bounds,
-        bank_areas,
+        bank: List[LineString],
+        km_bounds: Tuple[float, float],
+        bank_areas: List[Polygon],
         config_file: ConfigFile,
     ):
         """Plot the bank lines and the simulation data.
@@ -241,7 +241,7 @@ class BankLines:
             bank_crds: List[np.ndarray] = []
             bank_km: List[np.ndarray] = []
             for ib in range(n_search_lines):
-                bcrds_numpy = np.array(bank[ib])
+                bcrds_numpy = np.array(bank[ib].coords)
                 line_geom = LineGeometry(bcrds_numpy, crs=config_file.crs)
                 km_numpy = line_geom.intersect_with_line(xy_km_numpy)
                 bank_crds.append(bcrds_numpy)
