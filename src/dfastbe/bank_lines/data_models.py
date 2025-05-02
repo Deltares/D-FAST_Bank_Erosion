@@ -56,8 +56,9 @@ class SearchLines:
                 Maximum distance away from river_profile.
 
         Returns:
-            List[LineString]: List of clipped search lines.
-            float: Maximum distance from any point within line to reference line.
+            Tuple[List[LineString], float]:
+                - List of clipped search lines.
+                - Maximum distance from any point within line to reference line.
 
         Examples:
             ```python
