@@ -47,7 +47,7 @@ class SearchLines:
         """
         Clip the list of lines to the envelope of a certain size surrounding a reference line.
 
-        Arg:
+        Args:
             search_lines (List[LineString]):
                 List of lines to be clipped.
             river_center_line (LineString):
@@ -160,12 +160,38 @@ class BankLinesRiverData(BaseRiverData):
 
     @property
     def search_lines(self) -> SearchLines:
+        """Get search lines for bank lines.
+
+        Returns:
+            SearchLines:
+                Search lines for bank lines.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> bank_lines_river_data = BankLinesRiverData(config_file)
+            No message found for read_chainage
+            No message found for clip_chainage
+            >>> search_lines = bank_lines_river_data.search_lines
+            No message found for read_search_line
+            No message found for read_search_line
+            >>> len(search_lines.values)
+            2
+
+            ```
+        """
         search_lines = SearchLines(self.config_file.get_search_lines(), self.river_center_line)
         search_lines.d_lines = self.config_file.get_bank_search_distances(search_lines.size)
         return search_lines
 
     def _get_bank_lines_simulation_data(self) -> Tuple[BaseSimulationData, float]:
-        """read simulation data and drying flooding threshold dh0"""
+        """read simulation data and drying flooding threshold dh0
+
+        Returns:
+            Tuple[BaseSimulationData, float]:
+                simulation data and critical water depth (h0).
+        """
         sim_file = self.config_file.get_sim_file("Detect", "")
         log_text("read_simdata", data={"file": sim_file})
         simulation_data = BaseSimulationData.read(sim_file)
@@ -178,6 +204,25 @@ class BankLinesRiverData(BaseRiverData):
         return simulation_data, h0
 
     def simulation_data(self) -> Tuple[BaseSimulationData, float]:
+        """Get simulation data and critical water depth and clip to river center line.
+
+        Returns:
+            Tuple[BaseSimulationData, float]:
+                simulation data and critical water depth (h0).
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> from unittest.mock import patch
+            >>> with patch("dfastbe.io.log_text"), patch("dfastbe.bank_lines.data_models.log_text"):
+            ...    config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            ...    bank_lines_river_data = BankLinesRiverData(config_file)
+            ...    simulation_data, h0 = bank_lines_river_data.simulation_data()
+            >>> h0
+            0.1
+
+            ```
+        """
         simulation_data, h0 = self._get_bank_lines_simulation_data()
         # clip simulation data to boundaries ...
         log_text("clip_data")
