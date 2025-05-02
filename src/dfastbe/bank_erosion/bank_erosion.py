@@ -141,7 +141,6 @@ class Erosion:
         river_axis_km = river_axis.intersect_with_line(self.river_center_line_arr)
 
         # clip river axis to reach of interest (get closest point to the first and last station)
-
         i1 = np.argmin(((self.river_center_line_arr[0, :2] - river_axis_numpy) ** 2).sum(axis=1))
         i2 = np.argmin(((self.river_center_line_arr[-1, :2] - river_axis_numpy) ** 2).sum(axis=1))
         if i1 < i2:
