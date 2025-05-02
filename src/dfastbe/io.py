@@ -41,7 +41,6 @@ from geopandas.geoseries import GeoSeries
 from shapely import prepare
 from shapely.geometry import LineString, Point
 
-
 PROGTEXTS: Dict[str, List[str]]
 
 
@@ -1440,7 +1439,7 @@ class LineGeometry:
 
     @staticmethod
     def _find_mask_index(
-            station_bound: float, line_string_coords: np.ndarray
+        station_bound: float, line_string_coords: np.ndarray
     ) -> Optional[int]:
         """Find the start and end indices for clipping the chainage line.
 
@@ -1521,7 +1520,7 @@ class LineGeometry:
 
     @staticmethod
     def _interpolate_point(
-            index: int, station_bound: float, line_string_coords: np.ndarray
+        index: int, station_bound: float, line_string_coords: np.ndarray
     ) -> Tuple[float, Tuple[float, float, float]]:
         """Interpolate a point between two coordinates.
 
