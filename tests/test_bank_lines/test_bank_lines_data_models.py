@@ -112,7 +112,9 @@ class TestBankLinesRiverData:
         """Test the simulation_data method."""
         mock_read.return_value = mock_simulation_data
 
-        with patch("dfastbe.io.LineGeometry") as mock_search_lines):
+        with patch("dfastbe.io.LineGeometry") as mock_line_geometry, patch.object(
+            BankLinesRiverData, "search_lines"
+        ) as mock_search_lines:
             river_data = BankLinesRiverData(mock_config_file)
             mock_search_lines.max_distance = 50
             simulation_data, h0 = river_data.simulation_data()
