@@ -1011,7 +1011,7 @@ def plot6series_velocity_per_bank(
     velocq_txt: str,
     tauc: List[numpy.ndarray],
     chezy: List[numpy.ndarray],
-    rho: float,
+    water_density: float,
     g: float,
     ucrit_txt: str,
     ylabel_txt: str,
@@ -1035,7 +1035,7 @@ def plot6series_velocity_per_bank(
         List of arrays containing the shear stresses per bank (point) [N/m2].
     chezy: List[numpy.ndarray]
         List of arrays containing the Chezy values per bank [m0.5/s].
-    rho: float
+    water_density: float
         Water density [kg/m3].
     g: float
         Gravitational acceleration [m/s2].
@@ -1065,7 +1065,7 @@ def plot6series_velocity_per_bank(
         setsize(fig)
         bk = bank_km_mid[ib]
         #
-        velc = numpy.sqrt(tauc[ib] * chezy[ib] ** 2 / (rho * g))
+        velc = numpy.sqrt(tauc[ib] * chezy[ib] ** 2 / (water_density * g))
         ax.plot(bank_km_mid[ib], velc, color="k", label=ucrit_txt)
         for iq in range(n_levels):
             ax.plot(

@@ -10,7 +10,7 @@ class Debugger:
 
     def debug_process_discharge_levels_1(
             self, ib, bank_data, fairway_data, erosion_inputs, pars, hfw, dn_eq1, dv_eq1, bcrds, bank_height,
-            line_size
+            segment_length
     ):
         bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
         bank_coords_points = [Point(xy) for xy in bcrds_mid]
@@ -24,7 +24,7 @@ class Debugger:
             "iface_fw": bank_data.fairway_face_indices[ib],
             "iface_bank": bank_data.bank_face_indices[ib],  # bank_index
             "zb": bank_height[ib],
-            "len": line_size[ib],
+            "len": segment_length[ib],
             "zw0": fairway_data.fairway_initial_water_levels[ib],
             "vship": pars["v_ship"][ib],
             "shiptype": pars["ship_type"][ib],
@@ -43,7 +43,7 @@ class Debugger:
         write_csv(params, f"{str(self.river_data.output_dir)}/debug.EQ.B{ib + 1}.csv")
 
     def debug_process_discharge_levels_2(
-        self, ib, iq, bank_data, fairway_data, erosion_inputs, pars, hfw, bcrds, velocity, bank_height, line_size,
+        self, ib, iq, bank_data, fairway_data, erosion_inputs, pars, hfw, bcrds, velocity, bank_height, segment_length,
         water_level, chezy, dniqib, dviqib, dn_ship, dn_flow
     ):
         bcrds_mid = (bcrds[:-1] + bcrds[1:]) / 2
@@ -58,7 +58,7 @@ class Debugger:
             "iface_bank": bank_data.bank_face_indices[ib],  # bank_index
             "u": velocity[iq][ib],
             "zb": bank_height[ib],
-            "len": line_size[ib],
+            "len": segment_length[ib],
             "zw": water_level[iq][ib],
             "zw0": fairway_data.fairway_initial_water_levels[ib],
             "tauc": erosion_inputs.tauc[ib],

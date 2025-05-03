@@ -37,7 +37,7 @@ EPS = sys.float_info.epsilon
 
 def comp_erosion_eq(
     bank_height: np.ndarray,
-    line_size: np.ndarray,
+    segment_length: np.ndarray,
     water_level_fairway_ref: np.ndarray,
     ship_velocity: np.ndarray,
     ship_type: np.ndarray,
@@ -56,7 +56,7 @@ def comp_erosion_eq(
     ---------
     bank_height : np.ndarray
         Array containing bank height [m]
-    line_size : np.ndarray
+    segment_length : np.ndarray
         Array containing length of line segment [m]
     water_level_fairway_ref : np.ndarray
         Array containing water level at fairway [m]
@@ -106,7 +106,7 @@ def comp_erosion_eq(
     ht = np.maximum(zup - zdo, 0)
     hs = np.maximum(bank_height - water_level_fairway_ref + 2 * H0, 0)
     dn_eq = ht / mu_slope
-    dv_eq = (0.5 * ht + hs) * dn_eq * line_size
+    dv_eq = (0.5 * ht + hs) * dn_eq * segment_length
 
     return dn_eq, dv_eq
 
@@ -114,7 +114,7 @@ def comp_erosion_eq(
 def comp_erosion(
     velocity: np.ndarray,
     bank_height: np.ndarray,
-    line_size: np.ndarray,
+    segment_length: np.ndarray,
     water_level_fairway: np.ndarray,
     water_level_fairway_ref: np.ndarray,
     num_ship: np.ndarray,
@@ -147,7 +147,7 @@ def comp_erosion(
         Array containing flow velocity magnitude [m/s]
     bank_height : np.ndarray
         Array containing bank height
-    line_size : np.ndarray
+    segment_length : np.ndarray
         Array containing length of line segment [m]
     water_level_fairway : np.ndarray
         Array containing water levels at fairway [m]
@@ -254,12 +254,12 @@ def comp_erosion(
 
     # compute erosion volume
     mask = (h_line_ship > 0) & (water_level_fairway > erosion_inputs.bank_protection_level[bank_index])
-    dv_ship = dn_ship * line_size * h_line_ship
+    dv_ship = dn_ship * segment_length * h_line_ship
     dv_ship[~mask] = 0.0
     dn_ship[~mask] = 0.0
 
     mask = (h_line_flow > 0) & (water_level_fairway > erosion_inputs.bank_protection_level[bank_index])
-    dv_flow = dn_flow * line_size * h_line_flow
+    dv_flow = dn_flow * segment_length * h_line_flow
     dv_flow[~mask] = 0.0
     dn_flow[~mask] = 0.0
 
