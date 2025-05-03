@@ -36,15 +36,15 @@ import sys
 EPS = sys.float_info.epsilon
 
 def comp_erosion_eq(
-    bankheight: np.ndarray,
-    linesize: np.ndarray,
-    zfw_ini: np.ndarray,
-    vship: np.ndarray,
+    bank_height: np.ndarray,
+    line_size: np.ndarray,
+    water_level_fairway_ref: np.ndarray,
+    ship_velocity: np.ndarray,
     ship_type: np.ndarray,
-    Tship: np.ndarray,
+    ship_draught: np.ndarray,
     mu_slope: np.ndarray,
     distance_fw: np.ndarray,
-    hfw: np.ndarray,
+    water_depth_fairway: np.ndarray,
     erosion_inputs: "ErosionInputs",
     ib: int,
     g: float,
@@ -54,17 +54,17 @@ def comp_erosion_eq(
     
     Arguments
     ---------
-    bankheight : np.ndarray
+    bank_height : np.ndarray
         Array containing bank height [m]
-    linesize : np.ndarray
+    line_size : np.ndarray
         Array containing length of line segment [m]
-    zfw_ini : np.ndarray
+    water_level_fairway_ref : np.ndarray
         Array containing water level at fairway [m]
-    vship : np.ndarray
+    ship_velocity : np.ndarray
         Array containing ship velocity [m/s]
     ship_type : np.ndarray
         Array containing ship type [-]
-    Tship : np.ndarray
+    ship_draught : np.ndarray
         Array containing ship draught [m]
     mu_slope : np.ndarray
         Array containing slope [-]
@@ -74,7 +74,7 @@ def comp_erosion_eq(
         Array containing distance from fairway at which wave reduction starts [m]
     dfw1 : np.ndarray
         Array containing distance from fairway at which all waves are gone [m]
-    hfw : np.ndarray
+    water_depth_fairway : np.ndarray
         Array containing water depth at the fairway [m]
     zss : np.ndarray
         Array containing bank protection height [m]
@@ -93,20 +93,20 @@ def comp_erosion_eq(
         distance_fw,
         erosion_inputs.wave_fairway_distance_0[ib],
         erosion_inputs.wave_fairway_distance_1[ib],
-        hfw,
+        water_depth_fairway,
         ship_type,
-        Tship,
-        vship,
+        ship_draught,
+        ship_velocity,
         g,
     )
     H0 = np.maximum(H0, EPS)
 
-    zup = np.minimum(bankheight, zfw_ini + 2 * H0)
-    zdo = np.maximum(zfw_ini - 2 * H0, erosion_inputs.bank_protection_level[ib])
+    zup = np.minimum(bank_height, water_level_fairway_ref + 2 * H0)
+    zdo = np.maximum(water_level_fairway_ref - 2 * H0, erosion_inputs.bank_protection_level[ib])
     ht = np.maximum(zup - zdo, 0)
-    hs = np.maximum(bankheight - zfw_ini + 2 * H0, 0)
+    hs = np.maximum(bank_height - water_level_fairway_ref + 2 * H0, 0)
     dn_eq = ht / mu_slope
-    dv_eq = (0.5 * ht + hs) * dn_eq * linesize
+    dv_eq = (0.5 * ht + hs) * dn_eq * line_size
 
     return dn_eq, dv_eq
 
@@ -115,23 +115,21 @@ def comp_erosion(
     velocity: np.ndarray,
     bank_height: np.ndarray,
     line_size: np.ndarray,
-    zfw: np.ndarray,
-    zfw_ini: np.ndarray,
+    water_level_fairway: np.ndarray,
+    water_level_fairway_ref: np.ndarray,
     num_ship: np.ndarray,
     ship_velocity: np.ndarray,
     num_waves_per_ship: np.ndarray,
     ship_type: np.ndarray,
     ship_draught: np.ndarray,
     time_erosion: float,
-    mu_slope: np.ndarray,
-    mu_reed: np.ndarray,
     bank_fairway_dist: np.ndarray,
     water_depth_fairway: np.ndarray,
     chezy: np.ndarray,
     erosion_inputs: "ErosionInputs",
-    rho: float,
+    water_density: float,
     g: float,
-    ib: int,
+    bank_index: int,
 ) -> [
     np.ndarray,
     np.ndarray,
@@ -151,9 +149,9 @@ def comp_erosion(
         Array containing bank height
     line_size : np.ndarray
         Array containing length of line segment [m]
-    zfw : np.ndarray
+    water_level_fairway : np.ndarray
         Array containing water levels at fairway [m]
-    zfw_ini : np.ndarray
+    water_level_fairway_ref : np.ndarray
         Array containing reference water levels at fairway [m]
     tauc : np.ndarray
         Array containing critical shear stress [N/m2]
@@ -169,10 +167,6 @@ def comp_erosion(
         Array containing ship draught [m]
     time_erosion : float
         Erosion period [yr]
-    mu_slope : np.ndarray
-        Array containing 
-    mu_reed : np.ndarray
-        Array containing 
     bank_fairway_dist : np.ndarray
         Array containing distance from bank to fairway [m]
     dfw0 : np.ndarray
@@ -185,7 +179,7 @@ def comp_erosion(
         Array containing Chezy values [m0.5/s]
     zss : np.ndarray
         Array containing bank protection height [m]
-    rho : float
+    water_density : float
         Water density [kg/m3]
     g : float
         Gravitational acceleration [m/s2]
@@ -200,83 +194,71 @@ def comp_erosion(
         Bank erosion distance due to shipping [m]
     dn_flow : np.ndarray
         Bank erosion distance due to current [m]
-    shipmwavemax : np.ndarray
+    ship_wave_max : np.ndarray
         Maximum bank level subject to ship waves [m]
-    shipwavemin : np.ndarray
+    ship_wave_min : np.ndarray
         Minimum bank level subject to ship waves [m]
     """
-
     sec_year = 3600 * 24 * 365
 
     # period of ship waves [s]
-    T = 0.51 * ship_velocity / g
-    # [s]
-    ts = T * num_ship * num_waves_per_ship
-
-    # number of line segments
-    # xlen = len(velocity)
-    # total erosion per segment
-    # dn = np.zeros(xlen)
-    # erosion volume per segment
-    # dv = np.zeros(xlen)
-    # total wave damping coefficient
-    # mu_tot = np.zeros(xlen)
-
+    ship_wave_period = 0.51 * ship_velocity / g
+    ts = ship_wave_period * num_ship * num_waves_per_ship
     vel = velocity
 
-    # ship induced wave height at the beginning of the foreshore
-    H0 = comp_hw_ship_at_bank(
+    # the ship induced wave height at the beginning of the foreshore
+    wave_height = comp_hw_ship_at_bank(
         bank_fairway_dist,
-        erosion_inputs.wave_fairway_distance_0[ib],
-        erosion_inputs.wave_fairway_distance_1[ib],
+        erosion_inputs.wave_fairway_distance_0[bank_index],
+        erosion_inputs.wave_fairway_distance_1[bank_index],
         water_depth_fairway,
         ship_type,
         ship_draught,
         ship_velocity,
         g,
     )
-    H0 = np.maximum(H0, EPS)
+    wave_height = np.maximum(wave_height, EPS)
 
     # compute erosion parameters for each line part
     # erosion coefficient
-    E = 0.2 * np.sqrt(erosion_inputs.tauc[ib]) * 1e-6
+    erosion_coef = 0.2 * np.sqrt(erosion_inputs.tauc[bank_index]) * 1e-6
 
     # critical velocity
-    velc = np.sqrt(erosion_inputs.tauc[ib] / rho * chezy**2 / g)
+    critical_velocity = np.sqrt(erosion_inputs.tauc[bank_index] / water_density * chezy ** 2 / g)
 
     # strength
-    cE = 1.85e-4 / erosion_inputs.tauc[ib]
+    cE = 1.85e-4 / erosion_inputs.tauc[bank_index]
 
-    # total wavedamping coefficient
+    # total wave damping coefficient
     # mu_tot = (mu_slope / H0) + mu_reed
     # water level along bank line
-    ho_line_ship = np.minimum(zfw - erosion_inputs.bank_protection_level[ib], 2 * H0)
-    ho_line_flow = np.minimum(zfw - erosion_inputs.bank_protection_level[ib], water_depth_fairway)
-    h_line_ship = np.maximum(bank_height - zfw + ho_line_ship, 0)
-    h_line_flow = np.maximum(bank_height - zfw + ho_line_flow, 0)
+    ho_line_ship = np.minimum(water_level_fairway - erosion_inputs.bank_protection_level[bank_index], 2 * wave_height)
+    ho_line_flow = np.minimum(water_level_fairway - erosion_inputs.bank_protection_level[bank_index], water_depth_fairway)
+    h_line_ship = np.maximum(bank_height - water_level_fairway + ho_line_ship, 0)
+    h_line_flow = np.maximum(bank_height - water_level_fairway + ho_line_flow, 0)
 
     # compute displacement due to flow
-    crit_ratio = np.ones(velc.shape)
-    mask = (vel > velc) & (zfw > erosion_inputs.bank_protection_level[ib])
-    crit_ratio[mask] = (vel[mask] / velc[mask]) ** 2
-    dn_flow = E * (crit_ratio - 1) * time_erosion * sec_year
+    crit_ratio = np.ones(critical_velocity.shape)
+    mask = (vel > critical_velocity) & (water_level_fairway > erosion_inputs.bank_protection_level[bank_index])
+    crit_ratio[mask] = (vel[mask] / critical_velocity[mask]) ** 2
+    dn_flow = erosion_coef * (crit_ratio - 1) * time_erosion * sec_year
 
-    # compute displacement due to shipwaves
-    shipwavemax = zfw + 0.5 * H0
-    shipwavemin = zfw - 2 * H0
-    mask = (shipwavemin < zfw_ini) & (zfw_ini < shipwavemax)
+    # compute displacement due to ship waves
+    ship_wave_max = water_level_fairway + 0.5 * wave_height
+    ship_wave_min = water_level_fairway - 2 * wave_height
+    mask = (ship_wave_min < water_level_fairway_ref) & (water_level_fairway_ref < ship_wave_max)
     # limit mu -> 0
 
-    dn_ship = cE * H0 ** 2 * ts * time_erosion
+    dn_ship = cE * wave_height ** 2 * ts * time_erosion
     dn_ship[~mask] = 0
 
     # compute erosion volume
-    mask = (h_line_ship > 0) & (zfw > erosion_inputs.bank_protection_level[ib])
+    mask = (h_line_ship > 0) & (water_level_fairway > erosion_inputs.bank_protection_level[bank_index])
     dv_ship = dn_ship * line_size * h_line_ship
     dv_ship[~mask] = 0.0
     dn_ship[~mask] = 0.0
 
-    mask = (h_line_flow > 0) & (zfw > erosion_inputs.bank_protection_level[ib])
+    mask = (h_line_flow > 0) & (water_level_fairway > erosion_inputs.bank_protection_level[bank_index])
     dv_flow = dn_flow * line_size * h_line_flow
     dv_flow[~mask] = 0.0
     dn_flow[~mask] = 0.0
@@ -284,7 +266,7 @@ def comp_erosion(
     dn = dn_ship + dn_flow
     dv = dv_ship + dv_flow
 
-    return dn, dv, dn_ship, dn_flow, shipwavemax, shipwavemin
+    return dn, dv, dn_ship, dn_flow, ship_wave_max, ship_wave_min
 
 
 def comp_hw_ship_at_bank(
