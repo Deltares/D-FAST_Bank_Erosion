@@ -402,13 +402,13 @@ class Erosion:
         fairway_data: FairwayData,
     ) -> Tuple[WaterLevelData, ErosionResults]:
         # initialize arrays for erosion loop over all discharges
-        velocity_iq: List[List[np.ndarray]] = []
+        velocity_all: List[List[np.ndarray]] = []
         bank_height = []
-        water_level_iq: List[List[np.ndarray]] = []
-        chezy_iq: List[List[np.ndarray]] = []
-        vol_per_discharge_iq: List[List[np.ndarray]] = []
-        ship_wave_max_iq: List[List[np.ndarray]] = []
-        ship_wave_min_iq: List[List[np.ndarray]] = []
+        water_level_all: List[List[np.ndarray]] = []
+        chezy_all: List[List[np.ndarray]] = []
+        vol_per_discharge_all: List[List[np.ndarray]] = []
+        ship_wave_max_all: List[List[np.ndarray]] = []
+        ship_wave_min_all: List[List[np.ndarray]] = []
 
         line_size = []
         flow_erosion_dist = []
@@ -444,13 +444,13 @@ class Erosion:
 
             log_text("bank_erosion", indent="  ")
 
-            velocity_iq.append([])
-            water_level_iq.append([])
-            chezy_iq.append([])
+            velocity_all.append([])
+            water_level_all.append([])
+            chezy_all.append([])
 
-            ship_wave_max_iq.append([])
-            ship_wave_min_iq.append([])
-            vol_per_discharge_iq.append([])
+            ship_wave_max_all.append([])
+            ship_wave_min_all.append([])
+            vol_per_discharge_all.append([])
 
             n_km = len(km_mid)
             n_bank = bank_data.n_bank_lines
@@ -480,7 +480,7 @@ class Erosion:
                     vel_bank = moving_avg(
                         bank_data.bank_chainage_midpoints[ind], vel_bank, self.river_data.vel_dx
                     )
-                velocity_iq[iq].append(vel_bank)
+                velocity_all[iq].append(vel_bank)
 
                 if iq == 0:
                     # determine velocity and bankheight along banks ...
@@ -507,9 +507,9 @@ class Erosion:
                 hfw = simulation_data.water_depth_face[ii_face]
                 hfw_max_iq = max(hfw_max_iq, hfw.max())
 
-                water_level_iq[iq].append(simulation_data.water_level_face[ii_face])
+                water_level_all[iq].append(simulation_data.water_level_face[ii_face])
                 chez_face = simulation_data.chezy_face[ii_face]
-                chezy_iq[iq].append(0 * chez_face + chez_face.mean())
+                chezy_all[iq].append(0 * chez_face + chez_face.mean())
 
                 if iq == num_levels - 1:  # ref_level:
                     dn_eq1, dv_eq1 = comp_erosion_eq(
@@ -532,10 +532,10 @@ class Erosion:
 
                 dn_tot, dv_tot, dn_ship, dn_flow, ship_w_max, ship_w_min = (
                     comp_erosion(
-                        velocity_iq[iq][ind],
+                        velocity_all[iq][ind],
                         bank_height[ind],
                         line_size[ind],
-                        water_level_iq[iq][ind],
+                        water_level_all[iq][ind],
                         fairway_data.fairway_initial_water_levels[ind],
                         pars["n_ship"][ind],
                         pars["v_ship"][ind],
@@ -547,15 +547,15 @@ class Erosion:
                         pars["mu_reed"][ind],
                         bank_data.fairway_distances[ind],
                         hfw,
-                        chezy_iq[iq][ind],
+                        chezy_all[iq][ind],
                         erosion_inputs,
                         RHO,
                         g,
                         ind,
                     )
                 )
-                ship_wave_max_iq[iq].append(ship_w_max)
-                ship_wave_min_iq[iq].append(ship_w_min)
+                ship_wave_max_all[iq].append(ship_w_max)
+                ship_wave_min_all[iq].append(ship_w_min)
 
                 if self.river_data.debug:
                     if iq == num_levels - 1:
@@ -566,8 +566,8 @@ class Erosion:
                         )
                     # Q-specific debug
                     self.debugger.debug_process_discharge_levels_2(
-                        ind, iq, bank_data, fairway_data, erosion_inputs, pars, hfw, coords_i, velocity_iq, bank_height, line_size,
-                        water_level_iq, chezy_iq, dn_tot, dv_tot, dn_ship, dn_flow
+                        ind, iq, bank_data, fairway_data, erosion_inputs, pars, hfw, coords_i, velocity_all, bank_height, line_size,
+                        water_level_all, chezy_all, dn_tot, dv_tot, dn_ship, dn_flow
                     )
 
                 # shift bank lines
@@ -586,7 +586,7 @@ class Erosion:
                 dvol = get_km_eroded_volume(
                     bank_data.bank_chainage_midpoints[ind], dv_tot, km_bin
                 )
-                vol_per_discharge_iq[iq].append(dvol)
+                vol_per_discharge_all[iq].append(dvol)
                 dvol_bank[:, ind] += dvol
 
             erovol_file = config_file.get_str("Erosion", f"EroVol{iq_str}", default=f"erovolQ{iq_str}.evo")
@@ -600,7 +600,7 @@ class Erosion:
             total_erosion_dist=total_erosion_dist,
             flow_erosion_dist=flow_erosion_dist,
             ship_erosion_dist=ship_erosion_dist,
-            vol_per_discharge=vol_per_discharge_iq,
+            vol_per_discharge=vol_per_discharge_all,
             eq_eroded_vol=eq_eroded_vol,
             total_eroded_vol=total_eroded_vol,
             erosion_time=self.river_data.erosion_time,
@@ -608,12 +608,12 @@ class Erosion:
 
         water_level_data = WaterLevelData(
             hfw_max=hfw_max_iq,
-            water_level=water_level_iq,
-            ship_wave_max=ship_wave_max_iq,
-            ship_wave_min=ship_wave_min_iq,
-            velocity=velocity_iq,
+            water_level=water_level_all,
+            ship_wave_max=ship_wave_max_all,
+            ship_wave_min=ship_wave_min_all,
+            velocity=velocity_all,
             bank_height=bank_height,
-            chezy=chezy_iq,
+            chezy=chezy_all,
         )
         bank_data.bank_line_size = line_size
 
