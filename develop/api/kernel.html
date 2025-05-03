@@ -1642,7 +1642,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
 
 <h3 id="dfastbe.kernel.comp_erosion" class="doc doc-heading"><a href="#dfastbe.kernel.comp_erosion" class="toclink">
-            <code class="highlight language-python"><span class="n">comp_erosion</span><span class="p">(</span><span class="n">velocity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">bank_height</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">line_size</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">zfw</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">zfw_ini</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">num_ship</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ship_velocity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">num_waves_per_ship</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ship_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ship_draught</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">time_erosion</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mu_slope</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mu_reed</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">bank_fairway_dist</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">water_depth_fairway</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">chezy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">erosion_inputs</span><span class="p">:</span> <span class="n">ErosionInputs</span><span class="p">,</span> <span class="n">rho</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ib</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">comp_erosion</span><span class="p">(</span><span class="n">velocity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">bank_height</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">segment_length</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">water_level_fairway</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">water_level_fairway_ref</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">num_ship</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ship_velocity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">num_waves_per_ship</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ship_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ship_draught</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">time_erosion</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">bank_fairway_dist</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">water_depth_fairway</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">chezy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">erosion_inputs</span><span class="p">:</span> <span class="n">ErosionInputs</span><span class="p">,</span> <span class="n">water_density</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">bank_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.kernel.comp_erosion" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -1655,11 +1655,11 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
     Array containing flow velocity magnitude [m/s]
 bank_height : np.ndarray
     Array containing bank height
-line_size : np.ndarray
+segment_length : np.ndarray
     Array containing length of line segment [m]
-zfw : np.ndarray
+water_level_fairway : np.ndarray
     Array containing water levels at fairway [m]
-zfw_ini : np.ndarray
+water_level_fairway_ref : np.ndarray
     Array containing reference water levels at fairway [m]
 tauc : np.ndarray
     Array containing critical shear stress [N/m2]
@@ -1675,10 +1675,6 @@ ship_draught : np.ndarray
     Array containing ship draught [m]
 time_erosion : float
     Erosion period [yr]
-mu_slope : np.ndarray
-    Array containing 
-mu_reed : np.ndarray
-    Array containing 
 bank_fairway_dist : np.ndarray
     Array containing distance from bank to fairway [m]
 dfw0 : np.ndarray
@@ -1691,7 +1687,7 @@ chezy : np.ndarray
     Array containing Chezy values [m0.5/s]
 zss : np.ndarray
     Array containing bank protection height [m]
-rho : float
+water_density : float
     Water density [kg/m3]
 g : float
     Gravitational acceleration [m/s2]</p>
@@ -1704,9 +1700,9 @@ dn_ship : np.ndarray
     Bank erosion distance due to shipping [m]
 dn_flow : np.ndarray
     Bank erosion distance due to current [m]
-shipmwavemax : np.ndarray
+ship_wave_max : np.ndarray
     Maximum bank level subject to ship waves [m]
-shipwavemin : np.ndarray
+ship_wave_min : np.ndarray
     Minimum bank level subject to ship waves [m]</p>
 
             <details class="quote">
@@ -1866,45 +1862,25 @@ shipwavemin : np.ndarray
 <span class="normal">266</span>
 <span class="normal">267</span>
 <span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span>
-<span class="normal">271</span>
-<span class="normal">272</span>
-<span class="normal">273</span>
-<span class="normal">274</span>
-<span class="normal">275</span>
-<span class="normal">276</span>
-<span class="normal">277</span>
-<span class="normal">278</span>
-<span class="normal">279</span>
-<span class="normal">280</span>
-<span class="normal">281</span>
-<span class="normal">282</span>
-<span class="normal">283</span>
-<span class="normal">284</span>
-<span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">comp_erosion</span><span class="p">(</span>
+<span class="normal">269</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">comp_erosion</span><span class="p">(</span>
     <span class="n">velocity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">bank_height</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">line_size</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">zfw</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">zfw_ini</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">segment_length</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">water_level_fairway</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">water_level_fairway_ref</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">num_ship</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">ship_velocity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">num_waves_per_ship</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">ship_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">ship_draught</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">time_erosion</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">mu_slope</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">mu_reed</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">bank_fairway_dist</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">water_depth_fairway</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">chezy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">erosion_inputs</span><span class="p">:</span> <span class="s2">&quot;ErosionInputs&quot;</span><span class="p">,</span>
-    <span class="n">rho</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">water_density</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">g</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">ib</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">bank_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span>
     <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -1922,11 +1898,11 @@ shipwavemin : np.ndarray
 <span class="sd">        Array containing flow velocity magnitude [m/s]</span>
 <span class="sd">    bank_height : np.ndarray</span>
 <span class="sd">        Array containing bank height</span>
-<span class="sd">    line_size : np.ndarray</span>
+<span class="sd">    segment_length : np.ndarray</span>
 <span class="sd">        Array containing length of line segment [m]</span>
-<span class="sd">    zfw : np.ndarray</span>
+<span class="sd">    water_level_fairway : np.ndarray</span>
 <span class="sd">        Array containing water levels at fairway [m]</span>
-<span class="sd">    zfw_ini : np.ndarray</span>
+<span class="sd">    water_level_fairway_ref : np.ndarray</span>
 <span class="sd">        Array containing reference water levels at fairway [m]</span>
 <span class="sd">    tauc : np.ndarray</span>
 <span class="sd">        Array containing critical shear stress [N/m2]</span>
@@ -1942,10 +1918,6 @@ shipwavemin : np.ndarray
 <span class="sd">        Array containing ship draught [m]</span>
 <span class="sd">    time_erosion : float</span>
 <span class="sd">        Erosion period [yr]</span>
-<span class="sd">    mu_slope : np.ndarray</span>
-<span class="sd">        Array containing </span>
-<span class="sd">    mu_reed : np.ndarray</span>
-<span class="sd">        Array containing </span>
 <span class="sd">    bank_fairway_dist : np.ndarray</span>
 <span class="sd">        Array containing distance from bank to fairway [m]</span>
 <span class="sd">    dfw0 : np.ndarray</span>
@@ -1958,7 +1930,7 @@ shipwavemin : np.ndarray
 <span class="sd">        Array containing Chezy values [m0.5/s]</span>
 <span class="sd">    zss : np.ndarray</span>
 <span class="sd">        Array containing bank protection height [m]</span>
-<span class="sd">    rho : float</span>
+<span class="sd">    water_density : float</span>
 <span class="sd">        Water density [kg/m3]</span>
 <span class="sd">    g : float</span>
 <span class="sd">        Gravitational acceleration [m/s2]</span>
@@ -1973,91 +1945,79 @@ shipwavemin : np.ndarray
 <span class="sd">        Bank erosion distance due to shipping [m]</span>
 <span class="sd">    dn_flow : np.ndarray</span>
 <span class="sd">        Bank erosion distance due to current [m]</span>
-<span class="sd">    shipmwavemax : np.ndarray</span>
+<span class="sd">    ship_wave_max : np.ndarray</span>
 <span class="sd">        Maximum bank level subject to ship waves [m]</span>
-<span class="sd">    shipwavemin : np.ndarray</span>
+<span class="sd">    ship_wave_min : np.ndarray</span>
 <span class="sd">        Minimum bank level subject to ship waves [m]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">sec_year</span> <span class="o">=</span> <span class="mi">3600</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">365</span>
 
     <span class="c1"># period of ship waves [s]</span>
-    <span class="n">T</span> <span class="o">=</span> <span class="mf">0.51</span> <span class="o">*</span> <span class="n">ship_velocity</span> <span class="o">/</span> <span class="n">g</span>
-    <span class="c1"># [s]</span>
-    <span class="n">ts</span> <span class="o">=</span> <span class="n">T</span> <span class="o">*</span> <span class="n">num_ship</span> <span class="o">*</span> <span class="n">num_waves_per_ship</span>
-
-    <span class="c1"># number of line segments</span>
-    <span class="c1"># xlen = len(velocity)</span>
-    <span class="c1"># total erosion per segment</span>
-    <span class="c1"># dn = np.zeros(xlen)</span>
-    <span class="c1"># erosion volume per segment</span>
-    <span class="c1"># dv = np.zeros(xlen)</span>
-    <span class="c1"># total wave damping coefficient</span>
-    <span class="c1"># mu_tot = np.zeros(xlen)</span>
-
+    <span class="n">ship_wave_period</span> <span class="o">=</span> <span class="mf">0.51</span> <span class="o">*</span> <span class="n">ship_velocity</span> <span class="o">/</span> <span class="n">g</span>
+    <span class="n">ts</span> <span class="o">=</span> <span class="n">ship_wave_period</span> <span class="o">*</span> <span class="n">num_ship</span> <span class="o">*</span> <span class="n">num_waves_per_ship</span>
     <span class="n">vel</span> <span class="o">=</span> <span class="n">velocity</span>
 
-    <span class="c1"># ship induced wave height at the beginning of the foreshore</span>
-    <span class="n">H0</span> <span class="o">=</span> <span class="n">comp_hw_ship_at_bank</span><span class="p">(</span>
+    <span class="c1"># the ship induced wave height at the beginning of the foreshore</span>
+    <span class="n">wave_height</span> <span class="o">=</span> <span class="n">comp_hw_ship_at_bank</span><span class="p">(</span>
         <span class="n">bank_fairway_dist</span><span class="p">,</span>
-        <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">wave_fairway_distance_0</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
-        <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">wave_fairway_distance_1</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
+        <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">wave_fairway_distance_0</span><span class="p">[</span><span class="n">bank_index</span><span class="p">],</span>
+        <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">wave_fairway_distance_1</span><span class="p">[</span><span class="n">bank_index</span><span class="p">],</span>
         <span class="n">water_depth_fairway</span><span class="p">,</span>
         <span class="n">ship_type</span><span class="p">,</span>
         <span class="n">ship_draught</span><span class="p">,</span>
         <span class="n">ship_velocity</span><span class="p">,</span>
         <span class="n">g</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">H0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">H0</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
+    <span class="n">wave_height</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">wave_height</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
 
     <span class="c1"># compute erosion parameters for each line part</span>
     <span class="c1"># erosion coefficient</span>
-    <span class="n">E</span> <span class="o">=</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">erosion_inputs</span><span class="o">.</span><span class="n">tauc</span><span class="p">[</span><span class="n">ib</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-6</span>
+    <span class="n">erosion_coef</span> <span class="o">=</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">erosion_inputs</span><span class="o">.</span><span class="n">tauc</span><span class="p">[</span><span class="n">bank_index</span><span class="p">])</span> <span class="o">*</span> <span class="mf">1e-6</span>
 
     <span class="c1"># critical velocity</span>
-    <span class="n">velc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">erosion_inputs</span><span class="o">.</span><span class="n">tauc</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">/</span> <span class="n">rho</span> <span class="o">*</span> <span class="n">chezy</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">g</span><span class="p">)</span>
+    <span class="n">critical_velocity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">erosion_inputs</span><span class="o">.</span><span class="n">tauc</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span> <span class="o">/</span> <span class="n">water_density</span> <span class="o">*</span> <span class="n">chezy</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="n">g</span><span class="p">)</span>
 
     <span class="c1"># strength</span>
-    <span class="n">cE</span> <span class="o">=</span> <span class="mf">1.85e-4</span> <span class="o">/</span> <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">tauc</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span>
+    <span class="n">cE</span> <span class="o">=</span> <span class="mf">1.85e-4</span> <span class="o">/</span> <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">tauc</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span>
 
-    <span class="c1"># total wavedamping coefficient</span>
+    <span class="c1"># total wave damping coefficient</span>
     <span class="c1"># mu_tot = (mu_slope / H0) + mu_reed</span>
     <span class="c1"># water level along bank line</span>
-    <span class="n">ho_line_ship</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">zfw</span> <span class="o">-</span> <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">bank_protection_level</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">H0</span><span class="p">)</span>
-    <span class="n">ho_line_flow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">zfw</span> <span class="o">-</span> <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">bank_protection_level</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span> <span class="n">water_depth_fairway</span><span class="p">)</span>
-    <span class="n">h_line_ship</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">bank_height</span> <span class="o">-</span> <span class="n">zfw</span> <span class="o">+</span> <span class="n">ho_line_ship</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">h_line_flow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">bank_height</span> <span class="o">-</span> <span class="n">zfw</span> <span class="o">+</span> <span class="n">ho_line_flow</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">ho_line_ship</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">water_level_fairway</span> <span class="o">-</span> <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">bank_protection_level</span><span class="p">[</span><span class="n">bank_index</span><span class="p">],</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">wave_height</span><span class="p">)</span>
+    <span class="n">ho_line_flow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">water_level_fairway</span> <span class="o">-</span> <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">bank_protection_level</span><span class="p">[</span><span class="n">bank_index</span><span class="p">],</span> <span class="n">water_depth_fairway</span><span class="p">)</span>
+    <span class="n">h_line_ship</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">bank_height</span> <span class="o">-</span> <span class="n">water_level_fairway</span> <span class="o">+</span> <span class="n">ho_line_ship</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">h_line_flow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">bank_height</span> <span class="o">-</span> <span class="n">water_level_fairway</span> <span class="o">+</span> <span class="n">ho_line_flow</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="c1"># compute displacement due to flow</span>
-    <span class="n">crit_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">velc</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
-    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">vel</span> <span class="o">&gt;</span> <span class="n">velc</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">zfw</span> <span class="o">&gt;</span> <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">bank_protection_level</span><span class="p">[</span><span class="n">ib</span><span class="p">])</span>
-    <span class="n">crit_ratio</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">vel</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">/</span> <span class="n">velc</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
-    <span class="n">dn_flow</span> <span class="o">=</span> <span class="n">E</span> <span class="o">*</span> <span class="p">(</span><span class="n">crit_ratio</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">time_erosion</span> <span class="o">*</span> <span class="n">sec_year</span>
+    <span class="n">crit_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">critical_velocity</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">vel</span> <span class="o">&gt;</span> <span class="n">critical_velocity</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">water_level_fairway</span> <span class="o">&gt;</span> <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">bank_protection_level</span><span class="p">[</span><span class="n">bank_index</span><span class="p">])</span>
+    <span class="n">crit_ratio</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">vel</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">/</span> <span class="n">critical_velocity</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">dn_flow</span> <span class="o">=</span> <span class="n">erosion_coef</span> <span class="o">*</span> <span class="p">(</span><span class="n">crit_ratio</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">time_erosion</span> <span class="o">*</span> <span class="n">sec_year</span>
 
-    <span class="c1"># compute displacement due to shipwaves</span>
-    <span class="n">shipwavemax</span> <span class="o">=</span> <span class="n">zfw</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">H0</span>
-    <span class="n">shipwavemin</span> <span class="o">=</span> <span class="n">zfw</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">H0</span>
-    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">shipwavemin</span> <span class="o">&lt;</span> <span class="n">zfw_ini</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">zfw_ini</span> <span class="o">&lt;</span> <span class="n">shipwavemax</span><span class="p">)</span>
+    <span class="c1"># compute displacement due to ship waves</span>
+    <span class="n">ship_wave_max</span> <span class="o">=</span> <span class="n">water_level_fairway</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">wave_height</span>
+    <span class="n">ship_wave_min</span> <span class="o">=</span> <span class="n">water_level_fairway</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">wave_height</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">ship_wave_min</span> <span class="o">&lt;</span> <span class="n">water_level_fairway_ref</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">water_level_fairway_ref</span> <span class="o">&lt;</span> <span class="n">ship_wave_max</span><span class="p">)</span>
     <span class="c1"># limit mu -&gt; 0</span>
 
-    <span class="n">dn_ship</span> <span class="o">=</span> <span class="n">cE</span> <span class="o">*</span> <span class="n">H0</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ts</span> <span class="o">*</span> <span class="n">time_erosion</span>
+    <span class="n">dn_ship</span> <span class="o">=</span> <span class="n">cE</span> <span class="o">*</span> <span class="n">wave_height</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ts</span> <span class="o">*</span> <span class="n">time_erosion</span>
     <span class="n">dn_ship</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="c1"># compute erosion volume</span>
-    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">h_line_ship</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">zfw</span> <span class="o">&gt;</span> <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">bank_protection_level</span><span class="p">[</span><span class="n">ib</span><span class="p">])</span>
-    <span class="n">dv_ship</span> <span class="o">=</span> <span class="n">dn_ship</span> <span class="o">*</span> <span class="n">line_size</span> <span class="o">*</span> <span class="n">h_line_ship</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">h_line_ship</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">water_level_fairway</span> <span class="o">&gt;</span> <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">bank_protection_level</span><span class="p">[</span><span class="n">bank_index</span><span class="p">])</span>
+    <span class="n">dv_ship</span> <span class="o">=</span> <span class="n">dn_ship</span> <span class="o">*</span> <span class="n">segment_length</span> <span class="o">*</span> <span class="n">h_line_ship</span>
     <span class="n">dv_ship</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">dn_ship</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
 
-    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">h_line_flow</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">zfw</span> <span class="o">&gt;</span> <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">bank_protection_level</span><span class="p">[</span><span class="n">ib</span><span class="p">])</span>
-    <span class="n">dv_flow</span> <span class="o">=</span> <span class="n">dn_flow</span> <span class="o">*</span> <span class="n">line_size</span> <span class="o">*</span> <span class="n">h_line_flow</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">h_line_flow</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">water_level_fairway</span> <span class="o">&gt;</span> <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">bank_protection_level</span><span class="p">[</span><span class="n">bank_index</span><span class="p">])</span>
+    <span class="n">dv_flow</span> <span class="o">=</span> <span class="n">dn_flow</span> <span class="o">*</span> <span class="n">segment_length</span> <span class="o">*</span> <span class="n">h_line_flow</span>
     <span class="n">dv_flow</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">dn_flow</span><span class="p">[</span><span class="o">~</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
 
     <span class="n">dn</span> <span class="o">=</span> <span class="n">dn_ship</span> <span class="o">+</span> <span class="n">dn_flow</span>
     <span class="n">dv</span> <span class="o">=</span> <span class="n">dv_ship</span> <span class="o">+</span> <span class="n">dv_flow</span>
 
-    <span class="k">return</span> <span class="n">dn</span><span class="p">,</span> <span class="n">dv</span><span class="p">,</span> <span class="n">dn_ship</span><span class="p">,</span> <span class="n">dn_flow</span><span class="p">,</span> <span class="n">shipwavemax</span><span class="p">,</span> <span class="n">shipwavemin</span>
+    <span class="k">return</span> <span class="n">dn</span><span class="p">,</span> <span class="n">dv</span><span class="p">,</span> <span class="n">dn_ship</span><span class="p">,</span> <span class="n">dn_flow</span><span class="p">,</span> <span class="n">ship_wave_max</span><span class="p">,</span> <span class="n">ship_wave_min</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2068,7 +2028,7 @@ shipwavemin : np.ndarray
 
 
 <h3 id="dfastbe.kernel.comp_erosion_eq" class="doc doc-heading"><a href="#dfastbe.kernel.comp_erosion_eq" class="toclink">
-            <code class="highlight language-python"><span class="n">comp_erosion_eq</span><span class="p">(</span><span class="n">bankheight</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">linesize</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">zfw_ini</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">vship</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ship_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">Tship</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mu_slope</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">distance_fw</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">hfw</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">erosion_inputs</span><span class="p">:</span> <span class="n">ErosionInputs</span><span class="p">,</span> <span class="n">ib</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">comp_erosion_eq</span><span class="p">(</span><span class="n">bank_height</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">segment_length</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">water_level_fairway_ref</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ship_velocity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ship_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ship_draught</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mu_slope</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">distance_fw</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">water_depth_fairway</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">erosion_inputs</span><span class="p">:</span> <span class="n">ErosionInputs</span><span class="p">,</span> <span class="n">ib</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">g</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.kernel.comp_erosion_eq" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -2077,17 +2037,17 @@ shipwavemin : np.ndarray
 
         <p>Compute the equilibrium bank erosion.</p>
 <h5 id="dfastbe.kernel.comp_erosion_eq--arguments"><a class="toclink" href="#dfastbe.kernel.comp_erosion_eq--arguments">Arguments</a><a class="headerlink" href="#dfastbe.kernel.comp_erosion_eq--arguments" title="Permanent link">#</a></h5>
-<p>bankheight : np.ndarray
+<p>bank_height : np.ndarray
     Array containing bank height [m]
-linesize : np.ndarray
+segment_length : np.ndarray
     Array containing length of line segment [m]
-zfw_ini : np.ndarray
+water_level_fairway_ref : np.ndarray
     Array containing water level at fairway [m]
-vship : np.ndarray
+ship_velocity : np.ndarray
     Array containing ship velocity [m/s]
 ship_type : np.ndarray
     Array containing ship type [-]
-Tship : np.ndarray
+ship_draught : np.ndarray
     Array containing ship draught [m]
 mu_slope : np.ndarray
     Array containing slope [-]
@@ -2097,7 +2057,7 @@ dfw0 : np.ndarray
     Array containing distance from fairway at which wave reduction starts [m]
 dfw1 : np.ndarray
     Array containing distance from fairway at which all waves are gone [m]
-hfw : np.ndarray
+water_depth_fairway : np.ndarray
     Array containing water depth at the fairway [m]
 zss : np.ndarray
     Array containing bank protection height [m]
@@ -2185,15 +2145,15 @@ dv_eq : np.ndarray
 <span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">comp_erosion_eq</span><span class="p">(</span>
-    <span class="n">bankheight</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">linesize</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">zfw_ini</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">vship</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">bank_height</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">segment_length</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">water_level_fairway_ref</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">ship_velocity</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">ship_type</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">Tship</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">ship_draught</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">mu_slope</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">distance_fw</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">hfw</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">water_depth_fairway</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">erosion_inputs</span><span class="p">:</span> <span class="s2">&quot;ErosionInputs&quot;</span><span class="p">,</span>
     <span class="n">ib</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">g</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -2203,17 +2163,17 @@ dv_eq : np.ndarray
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
-<span class="sd">    bankheight : np.ndarray</span>
+<span class="sd">    bank_height : np.ndarray</span>
 <span class="sd">        Array containing bank height [m]</span>
-<span class="sd">    linesize : np.ndarray</span>
+<span class="sd">    segment_length : np.ndarray</span>
 <span class="sd">        Array containing length of line segment [m]</span>
-<span class="sd">    zfw_ini : np.ndarray</span>
+<span class="sd">    water_level_fairway_ref : np.ndarray</span>
 <span class="sd">        Array containing water level at fairway [m]</span>
-<span class="sd">    vship : np.ndarray</span>
+<span class="sd">    ship_velocity : np.ndarray</span>
 <span class="sd">        Array containing ship velocity [m/s]</span>
 <span class="sd">    ship_type : np.ndarray</span>
 <span class="sd">        Array containing ship type [-]</span>
-<span class="sd">    Tship : np.ndarray</span>
+<span class="sd">    ship_draught : np.ndarray</span>
 <span class="sd">        Array containing ship draught [m]</span>
 <span class="sd">    mu_slope : np.ndarray</span>
 <span class="sd">        Array containing slope [-]</span>
@@ -2223,7 +2183,7 @@ dv_eq : np.ndarray
 <span class="sd">        Array containing distance from fairway at which wave reduction starts [m]</span>
 <span class="sd">    dfw1 : np.ndarray</span>
 <span class="sd">        Array containing distance from fairway at which all waves are gone [m]</span>
-<span class="sd">    hfw : np.ndarray</span>
+<span class="sd">    water_depth_fairway : np.ndarray</span>
 <span class="sd">        Array containing water depth at the fairway [m]</span>
 <span class="sd">    zss : np.ndarray</span>
 <span class="sd">        Array containing bank protection height [m]</span>
@@ -2242,20 +2202,20 @@ dv_eq : np.ndarray
         <span class="n">distance_fw</span><span class="p">,</span>
         <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">wave_fairway_distance_0</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
         <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">wave_fairway_distance_1</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span>
-        <span class="n">hfw</span><span class="p">,</span>
+        <span class="n">water_depth_fairway</span><span class="p">,</span>
         <span class="n">ship_type</span><span class="p">,</span>
-        <span class="n">Tship</span><span class="p">,</span>
-        <span class="n">vship</span><span class="p">,</span>
+        <span class="n">ship_draught</span><span class="p">,</span>
+        <span class="n">ship_velocity</span><span class="p">,</span>
         <span class="n">g</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">H0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">H0</span><span class="p">,</span> <span class="n">EPS</span><span class="p">)</span>
 
-    <span class="n">zup</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">bankheight</span><span class="p">,</span> <span class="n">zfw_ini</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">H0</span><span class="p">)</span>
-    <span class="n">zdo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">zfw_ini</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">H0</span><span class="p">,</span> <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">bank_protection_level</span><span class="p">[</span><span class="n">ib</span><span class="p">])</span>
+    <span class="n">zup</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">bank_height</span><span class="p">,</span> <span class="n">water_level_fairway_ref</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">H0</span><span class="p">)</span>
+    <span class="n">zdo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">water_level_fairway_ref</span> <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">H0</span><span class="p">,</span> <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">bank_protection_level</span><span class="p">[</span><span class="n">ib</span><span class="p">])</span>
     <span class="n">ht</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">zup</span> <span class="o">-</span> <span class="n">zdo</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">hs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">bankheight</span> <span class="o">-</span> <span class="n">zfw_ini</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">H0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">hs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">bank_height</span> <span class="o">-</span> <span class="n">water_level_fairway_ref</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">H0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">dn_eq</span> <span class="o">=</span> <span class="n">ht</span> <span class="o">/</span> <span class="n">mu_slope</span>
-    <span class="n">dv_eq</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">ht</span> <span class="o">+</span> <span class="n">hs</span><span class="p">)</span> <span class="o">*</span> <span class="n">dn_eq</span> <span class="o">*</span> <span class="n">linesize</span>
+    <span class="n">dv_eq</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="n">ht</span> <span class="o">+</span> <span class="n">hs</span><span class="p">)</span> <span class="o">*</span> <span class="n">dn_eq</span> <span class="o">*</span> <span class="n">segment_length</span>
 
     <span class="k">return</span> <span class="n">dn_eq</span><span class="p">,</span> <span class="n">dv_eq</span>
 </code></pre></div></td></tr></table></div>
@@ -2299,7 +2259,25 @@ g : float
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/kernel.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">290</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
 <span class="normal">291</span>
 <span class="normal">292</span>
 <span class="normal">293</span>
@@ -2339,25 +2317,7 @@ g : float
 <span class="normal">327</span>
 <span class="normal">328</span>
 <span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
-<span class="normal">346</span>
-<span class="normal">347</span>
-<span class="normal">348</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">comp_hw_ship_at_bank</span><span class="p">(</span>
+<span class="normal">330</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">comp_hw_ship_at_bank</span><span class="p">(</span>
     <span class="n">distance_fw</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">dfw0</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">dfw1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
@@ -2451,7 +2411,25 @@ adjust : bool
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/kernel.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">351</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
+<span class="normal">340</span>
+<span class="normal">341</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
 <span class="normal">352</span>
 <span class="normal">353</span>
 <span class="normal">354</span>
@@ -2481,25 +2459,7 @@ adjust : bool
 <span class="normal">378</span>
 <span class="normal">379</span>
 <span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span>
-<span class="normal">394</span>
-<span class="normal">395</span>
-<span class="normal">396</span>
-<span class="normal">397</span>
-<span class="normal">398</span>
-<span class="normal">399</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">type</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">adjust</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">381</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="nb">type</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">adjust</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get an array of representative chainage values.</span>
 
@@ -2579,7 +2539,25 @@ km_bin : Tuple[float, float, float]
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/kernel.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">402</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
+<span class="normal">399</span>
+<span class="normal">400</span>
+<span class="normal">401</span>
+<span class="normal">402</span>
 <span class="normal">403</span>
 <span class="normal">404</span>
 <span class="normal">405</span>
@@ -2594,25 +2572,7 @@ km_bin : Tuple[float, float, float]
 <span class="normal">414</span>
 <span class="normal">415</span>
 <span class="normal">416</span>
-<span class="normal">417</span>
-<span class="normal">418</span>
-<span class="normal">419</span>
-<span class="normal">420</span>
-<span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
-<span class="normal">425</span>
-<span class="normal">426</span>
-<span class="normal">427</span>
-<span class="normal">428</span>
-<span class="normal">429</span>
-<span class="normal">430</span>
-<span class="normal">431</span>
-<span class="normal">432</span>
-<span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_km_eroded_volume</span><span class="p">(</span>
+<span class="normal">417</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_km_eroded_volume</span><span class="p">(</span>
     <span class="n">bank_km_mid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dv</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_bin</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2683,7 +2643,25 @@ xyzoom : List[Tuple[float, float, float, float]]
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/kernel.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">496</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
 <span class="normal">497</span>
 <span class="normal">498</span>
 <span class="normal">499</span>
@@ -2718,25 +2696,7 @@ xyzoom : List[Tuple[float, float, float, float]]
 <span class="normal">528</span>
 <span class="normal">529</span>
 <span class="normal">530</span>
-<span class="normal">531</span>
-<span class="normal">532</span>
-<span class="normal">533</span>
-<span class="normal">534</span>
-<span class="normal">535</span>
-<span class="normal">536</span>
-<span class="normal">537</span>
-<span class="normal">538</span>
-<span class="normal">539</span>
-<span class="normal">540</span>
-<span class="normal">541</span>
-<span class="normal">542</span>
-<span class="normal">543</span>
-<span class="normal">544</span>
-<span class="normal">545</span>
-<span class="normal">546</span>
-<span class="normal">547</span>
-<span class="normal">548</span>
-<span class="normal">549</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_zoom_extends</span><span class="p">(</span><span class="n">km_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">km_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">zoom_km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">bank_crds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">bank_km</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="normal">531</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_zoom_extends</span><span class="p">(</span><span class="n">km_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">km_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">zoom_km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">bank_crds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">bank_km</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Zoom .</span>
 
@@ -2821,7 +2781,25 @@ dx: float
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/kernel.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">438</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">420</span>
+<span class="normal">421</span>
+<span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
 <span class="normal">439</span>
 <span class="normal">440</span>
 <span class="normal">441</span>
@@ -2859,25 +2837,7 @@ dx: float
 <span class="normal">473</span>
 <span class="normal">474</span>
 <span class="normal">475</span>
-<span class="normal">476</span>
-<span class="normal">477</span>
-<span class="normal">478</span>
-<span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span>
-<span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span>
-<span class="normal">485</span>
-<span class="normal">486</span>
-<span class="normal">487</span>
-<span class="normal">488</span>
-<span class="normal">489</span>
-<span class="normal">490</span>
-<span class="normal">491</span>
-<span class="normal">492</span>
-<span class="normal">493</span>
-<span class="normal">494</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">moving_avg</span><span class="p">(</span><span class="n">xi</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">yi</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="normal">476</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">moving_avg</span><span class="p">(</span><span class="n">xi</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">yi</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform a moving average for given averaging distance.</span>
 
