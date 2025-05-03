@@ -423,12 +423,14 @@ class Erosion:
 
         return zb_bank
 
-    def _get_bank_velocity(self, bank_data: BankData, bank_i: int, segment_length) -> np.ndarray:
+    def _get_bank_velocity(
+        self, bank_data: BankData, simulation_data: ErosionSimulationData, bank_i: int, segment_length
+    ) -> np.ndarray:
         bank_face_indices = bank_data.bank_face_indices[bank_i]
         vel_bank = (
                 np.abs(
-                    self.simulation_data.velocity_x_face[bank_face_indices] * bank_data.dx[bank_i]
-                    + self.simulation_data.velocity_y_face[bank_face_indices] * bank_data.dy[bank_i]
+                    simulation_data.velocity_x_face[bank_face_indices] * bank_data.dx[bank_i]
+                    + simulation_data.velocity_y_face[bank_face_indices] * bank_data.dy[bank_i]
                 )
                 / segment_length[bank_i]
         )
@@ -516,7 +518,7 @@ class Erosion:
             for bank_i, bank_i_coords in enumerate(bank_data.bank_line_coords):
                 # bank_i = 0: left bank, bank_i = 1: right bank
                 # calculate velocity along banks ...
-                vel_bank = self._get_bank_velocity(bank_data, bank_i, segment_length)
+                vel_bank = self._get_bank_velocity(bank_data, simulation_data, bank_i, segment_length)
 
                 velocity_all[level_i].append(vel_bank)
 
