@@ -423,12 +423,12 @@ class Erosion:
 
         return zb_bank
 
-    def _get_bank_velocity(self, bank_data: BankData, bank_i: int, segment_length, dx, dy) -> np.ndarray:
+    def _get_bank_velocity(self, bank_data: BankData, bank_i: int, segment_length) -> np.ndarray:
         bank_face_indices = bank_data.bank_face_indices[bank_i]
         vel_bank = (
                 np.abs(
-                    self.simulation_data.velocity_x_face[bank_face_indices] * dx
-                    + self.simulation_data.velocity_y_face[bank_face_indices] * dy
+                    self.simulation_data.velocity_x_face[bank_face_indices] * bank_data.dx[bank_i]
+                    + self.simulation_data.velocity_y_face[bank_face_indices] * bank_data.dy[bank_i]
                 )
                 / segment_length[bank_i]
         )
@@ -455,7 +455,7 @@ class Erosion:
         num_levels = self.river_data.num_discharge_levels
         num_km = len(km_mid)
         num_bank = bank_data.n_bank_lines
-
+        segment_length = bank_data.segment_length
         # initialize arrays for erosion loop over all discharges
         # shape is (num_levels, 2, (num_stations_per_bank))
         # if num_levels = 13 and the num_stations_per_bank = [10, 15]
@@ -469,7 +469,7 @@ class Erosion:
         ship_wave_min_all: List[List[np.ndarray]] = []
 
         bank_height = []
-        segment_length = []
+        # segment_length = []
         flow_erosion_dist = []
         ship_erosion_dist = []
         total_erosion_dist = []
@@ -515,13 +515,8 @@ class Erosion:
 
             for bank_i, bank_i_coords in enumerate(bank_data.bank_line_coords):
                 # bank_i = 0: left bank, bank_i = 1: right bank
-                # determine velocity along banks ...
-                dx = np.diff(bank_i_coords[:, 0])
-                dy = np.diff(bank_i_coords[:, 1])
-                if level_i == 0:
-                    segment_length.append(np.sqrt(dx ** 2 + dy ** 2))
-
-                vel_bank = self._get_bank_velocity(bank_data, bank_i, segment_length, dx, dy)
+                # calculate velocity along banks ...
+                vel_bank = self._get_bank_velocity(bank_data, bank_i, segment_length)
 
                 velocity_all[level_i].append(vel_bank)
 
@@ -731,7 +726,7 @@ class Erosion:
             default=default_val, **kwargs
         )
 
-    def _read_discharge_parameters(                       # ❶ helper
+    def _read_discharge_parameters(
         self,
         iq: int,
         erosion_inputs: ErosionInputs,

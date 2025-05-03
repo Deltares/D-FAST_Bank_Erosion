@@ -146,6 +146,39 @@ class BankData:
     fairway_distances: List[np.ndarray] = field(default_factory=list)
     fairway_face_indices: List[np.ndarray] = field(default_factory=list)
 
+    segment_length: List = field(init=False)
+    dx: List = field(init=False)
+    dy: List = field(init=False)
+
+    def __post_init__(self):
+        """Post-initialization to ensure bank_line_coords is a list of numpy arrays."""
+        self.segment_length = self._segment_length()
+        self.dx = self._dx()
+        self.dy = self._dy()
+
+    def _segment_length(self) -> List[np.ndarray]:
+        """Calculate the length of each segment in the bank line.
+
+        Returns:
+            List[np.ndarray]: Length of each segment in the bank line.
+        """
+        return [np.linalg.norm(np.diff(line, axis=0), axis=1) for line in self.bank_line_coords]
+
+    def _dx(self):
+        """Calculate the distance between each bank line point.
+
+        Returns:
+            List[np.ndarray]: Distance to the closest fairway point for each bank line point.
+        """
+        return [np.diff(coords[:, 0]) for coords in self.bank_line_coords]
+
+    def _dy(self):
+        """Calculate the distance between each bank line point.
+
+        Returns:
+            List[np.ndarray]: Distance to the closest fairway point for each bank line point.
+        """
+        return [np.diff(coords[:, 1]) for coords in self.bank_line_coords]
 
 @dataclass
 class FairwayData:
