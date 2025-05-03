@@ -423,6 +423,25 @@ class Erosion:
 
         return zb_bank
 
+    def _get_bank_velocity(self, bank_data: BankData, bank_i: int, segment_length, dx, dy) -> np.ndarray:
+        bank_face_indices = bank_data.bank_face_indices[bank_i]
+        vel_bank = (
+                np.abs(
+                    self.simulation_data.velocity_x_face[bank_face_indices] * dx
+                    + self.simulation_data.velocity_y_face[bank_face_indices] * dy
+                )
+                / segment_length[bank_i]
+        )
+
+        if self.river_data.vel_dx > 0.0:
+            if bank_i == 0:
+                log_text("apply_velocity_filter", indent="  ", data={"dx": self.river_data.vel_dx})
+            vel_bank = moving_avg(
+                bank_data.bank_chainage_midpoints[bank_i], vel_bank, self.river_data.vel_dx
+            )
+
+        return vel_bank
+
     def _process_discharge_levels(
         self,
         km_mid,
@@ -502,22 +521,8 @@ class Erosion:
                 if level_i == 0:
                     segment_length.append(np.sqrt(dx ** 2 + dy ** 2))
 
-                bank_face_indices = bank_data.bank_face_indices[bank_i]
+                vel_bank = self._get_bank_velocity(bank_data, bank_i, segment_length, dx, dy)
 
-                vel_bank = (
-                    np.abs(
-                        simulation_data.velocity_x_face[bank_face_indices] * dx
-                        + simulation_data.velocity_y_face[bank_face_indices] * dy
-                    )
-                    / segment_length[bank_i]
-                )
-
-                if self.river_data.vel_dx > 0.0:
-                    if bank_i == 0:
-                        log_text("apply_velocity_filter", indent="  ", data={"dx": self.river_data.vel_dx})
-                    vel_bank = moving_avg(
-                        bank_data.bank_chainage_midpoints[bank_i], vel_bank, self.river_data.vel_dx
-                    )
                 velocity_all[level_i].append(vel_bank)
 
                 if level_i == 0:
