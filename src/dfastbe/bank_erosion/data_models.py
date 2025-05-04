@@ -539,6 +539,58 @@ class ErosionRiverData(BaseRiverData):
         river_axis = XYCModel.read(river_axis_file)
         return river_axis
 
+
+@dataclass
+class ParametersPerBank:
+    ship_velocity: float
+    num_ship: float
+    num_waves_per_ship: float
+    ship_draught: float
+    ship_type: float
+    par_slope: float
+    par_reed: float
+    mu_slope: float
+    mu_reed: float
+
+
+@dataclass
+class DischargeLevelParameters:
+
+    id: int
+    left: ParametersPerBank
+    right: ParametersPerBank
+
+    @staticmethod
+    def from_column_arrays(data: dict) -> "DischargeLevelParameters":
+        id_val = data["id"]
+
+        # Extract the first and second array for each parameter (excluding id)
+        left_args = {}
+        right_args = {}
+        for key, value in data.items():
+            if key == "id":
+                continue
+            if not isinstance(value, list) or len(value) != 2:
+                raise ValueError(f"Expected 2-column array for key '{key}', got shape {value.shape}")
+            left_array, right_array = value
+            if not (isinstance(left_array, np.ndarray) and isinstance(right_array, np.ndarray)):
+                raise ValueError(f"Both left and right for '{key}' must be numpy arrays")
+
+            left_args[key] = left_array
+            right_args[key] = right_array
+
+        left = ParametersPerBank(**left_args)
+        right = ParametersPerBank(**right_args)
+        return DischargeLevelParameters(id=id_val, left=left, right=right)
+
+    def get_bank(self, bank_index: int) -> ParametersPerBank:
+        if bank_index == 0:
+            return self.left
+        elif bank_index == 1:
+            return self.right
+        else:
+            raise ValueError("bank_index must be 0 (left) or 1 (right)")
+
 class BankLinesResultsError(Exception):
     """Custom exception for BankLine results errors."""
 

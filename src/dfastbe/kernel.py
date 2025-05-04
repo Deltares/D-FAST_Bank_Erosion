@@ -27,7 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 from typing import Tuple, List
-from dfastbe.bank_erosion.data_models import ErosionInputs
+from dfastbe.bank_erosion.data_models import ErosionInputs, ParametersPerBank
 
 import numpy as np
 import math
@@ -42,10 +42,7 @@ def comp_erosion_eq(
     bank_height: np.ndarray,
     segment_length: np.ndarray,
     water_level_fairway_ref: np.ndarray,
-    ship_velocity: np.ndarray,
-    ship_type: np.ndarray,
-    ship_draught: np.ndarray,
-    mu_slope: np.ndarray,
+    discharge_level_pars: ParametersPerBank,
     bank_fairway_dist: np.ndarray,
     water_depth_fairway: np.ndarray,
     erosion_inputs: "ErosionInputs",
@@ -90,9 +87,9 @@ def comp_erosion_eq(
         erosion_inputs.wave_fairway_distance_0[bank_index],
         erosion_inputs.wave_fairway_distance_1[bank_index],
         water_depth_fairway,
-        ship_type,
-        ship_draught,
-        ship_velocity,
+        discharge_level_pars.ship_type,
+        discharge_level_pars.ship_draught,
+        discharge_level_pars.ship_velocity,
     )
     h0 = np.maximum(h0, EPS)
 
@@ -100,7 +97,7 @@ def comp_erosion_eq(
     zdo = np.maximum(water_level_fairway_ref - 2 * h0, erosion_inputs.bank_protection_level[bank_index])
     ht = np.maximum(zup - zdo, 0)
     hs = np.maximum(bank_height - water_level_fairway_ref + 2 * h0, 0)
-    dn_eq = ht / mu_slope
+    dn_eq = ht / discharge_level_pars.mu_slope[bank_index]
     dv_eq = (0.5 * ht + hs) * dn_eq * segment_length
 
     return dn_eq, dv_eq
@@ -112,11 +109,7 @@ def compute_bank_erosion_dynamics(
     segment_length: np.ndarray,
     water_level_fairway: np.ndarray,
     water_level_fairway_ref: np.ndarray,
-    num_ship: np.ndarray,
-    ship_velocity: np.ndarray,
-    num_waves_per_ship: np.ndarray,
-    ship_type: np.ndarray,
-    ship_draught: np.ndarray,
+    discharge_level_pars: ParametersPerBank,
     time_erosion: float,
     bank_fairway_dist: np.ndarray,
     water_depth_fairway: np.ndarray,
@@ -148,16 +141,17 @@ def compute_bank_erosion_dynamics(
         Array containing reference water levels at fairway [m]
     tauc : np.ndarray
         Array containing critical shear stress [N/m2]
-    num_ship : np.ndarray
-        Array containing number of ships [-]
-    ship_velocity : np.ndarray
-        Array containing ship velocity [m/s]
-    num_waves_per_ship : np.ndarray
-        Array containing number of waves per ship [-]
-    ship_type : np.ndarray
-        Array containing ship type [-]
-    ship_draught : np.ndarray
-        Array containing ship draught [m]
+    discharge_level_pars: DischargeLevelParameters,
+        num_ship : np.ndarray
+            Array containing number of ships [-]
+        ship_velocity : np.ndarray
+            Array containing ship velocity [m/s]
+        num_waves_per_ship : np.ndarray
+            Array containing number of waves per ship [-]
+        ship_type : np.ndarray
+            Array containing ship type [-]
+        ship_draught : np.ndarray
+            Array containing ship draught [m]
     time_erosion : float
         Erosion period [yr]
     bank_fairway_dist : np.ndarray
@@ -193,8 +187,8 @@ def compute_bank_erosion_dynamics(
     sec_year = 3600 * 24 * 365
 
     # period of ship waves [s]
-    ship_wave_period = 0.51 * ship_velocity / g
-    ts = ship_wave_period * num_ship * num_waves_per_ship
+    ship_wave_period = 0.51 * discharge_level_pars.ship_velocity / g
+    ts = ship_wave_period * discharge_level_pars.num_ship * discharge_level_pars.num_waves_per_ship
     vel = velocity
 
     # the ship induced wave height at the beginning of the foreshore
@@ -203,9 +197,9 @@ def compute_bank_erosion_dynamics(
         erosion_inputs.wave_fairway_distance_0[bank_index],
         erosion_inputs.wave_fairway_distance_1[bank_index],
         water_depth_fairway,
-        ship_type,
-        ship_draught,
-        ship_velocity,
+        discharge_level_pars.ship_type,
+        discharge_level_pars.ship_draught,
+        discharge_level_pars.ship_velocity,
     )
     wave_height = np.maximum(wave_height, EPS)
 
