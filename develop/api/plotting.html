@@ -2622,7 +2622,7 @@ ax : matplotlib.axes.Axes
 
 
 <h3 id="dfastbe.plotting.plot3_eroded_volume" class="doc doc-heading"><a href="#dfastbe.plotting.plot3_eroded_volume" class="toclink">
-            <code class="highlight language-python"><span class="n">plot3_eroded_volume</span><span class="p">(</span><span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dv</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">plot3_eroded_volume</span><span class="p">(</span><span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.plotting.plot3_eroded_volume" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -2637,7 +2637,7 @@ km_step : float
     Bin width.
 chainage_txt : str
     Label for the horizontal chainage axes.
-dv : List[List[numpy.ndarray]]
+erosion_volume : List[List[numpy.ndarray]]
     List of nQ lists of N arrays containing the total erosion distance values
 ylabel_txt : str
     Label for the vertical erosion volume axes.
@@ -2709,7 +2709,7 @@ ax : matplotlib.axes.Axes
     <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">dv</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
     <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -2726,7 +2726,7 @@ ax : matplotlib.axes.Axes
 <span class="sd">        Bin width.</span>
 <span class="sd">    chainage_txt : str</span>
 <span class="sd">        Label for the horizontal chainage axes.</span>
-<span class="sd">    dv : List[List[numpy.ndarray]]</span>
+<span class="sd">    erosion_volume : List[List[numpy.ndarray]]</span>
 <span class="sd">        List of nQ lists of N arrays containing the total erosion distance values</span>
 <span class="sd">    ylabel_txt : str</span>
 <span class="sd">        Label for the vertical erosion volume axes.</span>
@@ -2747,8 +2747,8 @@ ax : matplotlib.axes.Axes
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
     <span class="n">setsize</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
     <span class="c1">#</span>
-    <span class="n">plot3_stacked_per_discharge</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">km_mid</span> <span class="o">+</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">km_step</span><span class="p">,</span> <span class="n">km_step</span><span class="p">,</span> <span class="n">dv</span><span class="p">,</span> <span class="n">qlabel</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">)</span>
-    <span class="n">plot3_stacked_per_bank</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">km_mid</span> <span class="o">-</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">km_step</span><span class="p">,</span> <span class="n">km_step</span><span class="p">,</span> <span class="n">dv</span><span class="p">,</span> <span class="n">banklabel</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">)</span>
+    <span class="n">plot3_stacked_per_discharge</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">km_mid</span> <span class="o">+</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">km_step</span><span class="p">,</span> <span class="n">km_step</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">,</span> <span class="n">qlabel</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">)</span>
+    <span class="n">plot3_stacked_per_bank</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">km_mid</span> <span class="o">-</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">km_step</span><span class="p">,</span> <span class="n">km_step</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">,</span> <span class="n">banklabel</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">)</span>
     <span class="c1">#</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">chainage_txt</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel_txt</span><span class="p">)</span>
@@ -2766,7 +2766,7 @@ ax : matplotlib.axes.Axes
 
 
 <h3 id="dfastbe.plotting.plot3_eroded_volume_subdivided_1" class="doc doc-heading"><a href="#dfastbe.plotting.plot3_eroded_volume_subdivided_1" class="toclink">
-            <code class="highlight language-python"><span class="n">plot3_eroded_volume_subdivided_1</span><span class="p">(</span><span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dv</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">plot3_eroded_volume_subdivided_1</span><span class="p">(</span><span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.plotting.plot3_eroded_volume_subdivided_1" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -2781,7 +2781,7 @@ km_step : float
     Bin width.
 chainage_txt : str
     Label for the horizontal chainage axes.
-dv : List[List[numpy.ndarray]]
+erosion_volume : List[List[numpy.ndarray]]
     List of nQ lists of N arrays containing the total erosion distance values
 ylabel_txt : str
     Label for the vertical erosion volume axes.
@@ -2847,7 +2847,7 @@ ax : matplotlib.axes.Axes
     <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">dv</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
     <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -2863,7 +2863,7 @@ ax : matplotlib.axes.Axes
 <span class="sd">        Bin width.</span>
 <span class="sd">    chainage_txt : str</span>
 <span class="sd">        Label for the horizontal chainage axes.</span>
-<span class="sd">    dv : List[List[numpy.ndarray]]</span>
+<span class="sd">    erosion_volume : List[List[numpy.ndarray]]</span>
 <span class="sd">        List of nQ lists of N arrays containing the total erosion distance values</span>
 <span class="sd">    ylabel_txt : str</span>
 <span class="sd">        Label for the vertical erosion volume axes.</span>
@@ -2882,7 +2882,7 @@ ax : matplotlib.axes.Axes
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
     <span class="n">setsize</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
     <span class="c1">#</span>
-    <span class="n">plot3_stacked_per_discharge</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">,</span> <span class="n">km_step</span><span class="p">,</span> <span class="n">dv</span><span class="p">,</span> <span class="n">qlabel</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)</span>
+    <span class="n">plot3_stacked_per_discharge</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">,</span> <span class="n">km_step</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">,</span> <span class="n">qlabel</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)</span>
     <span class="c1">#</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">chainage_txt</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel_txt</span><span class="p">)</span>
@@ -2900,7 +2900,7 @@ ax : matplotlib.axes.Axes
 
 
 <h3 id="dfastbe.plotting.plot3_eroded_volume_subdivided_2" class="doc doc-heading"><a href="#dfastbe.plotting.plot3_eroded_volume_subdivided_2" class="toclink">
-            <code class="highlight language-python"><span class="n">plot3_eroded_volume_subdivided_2</span><span class="p">(</span><span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dv</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">plot3_eroded_volume_subdivided_2</span><span class="p">(</span><span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.plotting.plot3_eroded_volume_subdivided_2" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -2915,7 +2915,7 @@ km_step : float
     Bin width.
 chainage_txt : str
     Label for the horizontal chainage axes.
-dv : List[List[numpy.ndarray]]
+erosion_volume : List[List[numpy.ndarray]]
     List of nQ lists of N arrays containing the total erosion distance values
 ylabel_txt : str
     Label for the vertical erosion volume axes.
@@ -2981,7 +2981,7 @@ ax : matplotlib.axes.Axes
     <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">dv</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
     <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -2997,7 +2997,7 @@ ax : matplotlib.axes.Axes
 <span class="sd">        Bin width.</span>
 <span class="sd">    chainage_txt : str</span>
 <span class="sd">        Label for the horizontal chainage axes.</span>
-<span class="sd">    dv : List[List[numpy.ndarray]]</span>
+<span class="sd">    erosion_volume : List[List[numpy.ndarray]]</span>
 <span class="sd">        List of nQ lists of N arrays containing the total erosion distance values</span>
 <span class="sd">    ylabel_txt : str</span>
 <span class="sd">        Label for the vertical erosion volume axes.</span>
@@ -3016,7 +3016,7 @@ ax : matplotlib.axes.Axes
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
     <span class="n">setsize</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
     <span class="c1">#</span>
-    <span class="n">plot3_stacked_per_bank</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">,</span> <span class="n">km_step</span><span class="p">,</span> <span class="n">dv</span><span class="p">,</span> <span class="n">banklabel</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)</span>
+    <span class="n">plot3_stacked_per_bank</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">,</span> <span class="n">km_step</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">,</span> <span class="n">banklabel</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">)</span>
     <span class="c1">#</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">chainage_txt</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel_txt</span><span class="p">)</span>
@@ -3034,7 +3034,7 @@ ax : matplotlib.axes.Axes
 
 
 <h3 id="dfastbe.plotting.plot3_stacked_per_bank" class="doc doc-heading"><a href="#dfastbe.plotting.plot3_stacked_per_bank" class="toclink">
-            <code class="highlight language-python"><span class="n">plot3_stacked_per_bank</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dv</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wfrac</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+            <code class="highlight language-python"><span class="n">plot3_stacked_per_bank</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wfrac</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 </a><a href="#dfastbe.plotting.plot3_stacked_per_bank" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -3051,7 +3051,7 @@ km_mid : numpy.ndarray
     Array containing the mid points for the chainage bins.
 km_step : float
     Bin width.
-dv : List[List[numpy.ndarray]]
+erosion_volume : List[List[numpy.ndarray]]
     List of nQ lists of N arrays containing the total erosion distance values
 banklabel : str
     Label for bank id.
@@ -3124,7 +3124,7 @@ wfrac : float
    <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span>
    <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
    <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-   <span class="n">dv</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+   <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
    <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
    <span class="n">wfrac</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -3141,7 +3141,7 @@ wfrac : float
 <span class="sd">        Array containing the mid points for the chainage bins.</span>
 <span class="sd">    km_step : float</span>
 <span class="sd">        Bin width.</span>
-<span class="sd">    dv : List[List[numpy.ndarray]]</span>
+<span class="sd">    erosion_volume : List[List[numpy.ndarray]]</span>
 <span class="sd">        List of nQ lists of N arrays containing the total erosion distance values</span>
 <span class="sd">    banklabel : str</span>
 <span class="sd">        Label for bank id.</span>
@@ -3152,14 +3152,14 @@ wfrac : float
 <span class="sd">    -------</span>
 <span class="sd">    None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">n_banklines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">n_banklines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">erosion_volume</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">clrs</span> <span class="o">=</span> <span class="n">get_colors</span><span class="p">(</span><span class="s2">&quot;plasma&quot;</span><span class="p">,</span> <span class="n">n_banklines</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_banklines</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">iq</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dv</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">iq</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">erosion_volume</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">iq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">dvq</span> <span class="o">=</span> <span class="n">dv</span><span class="p">[</span><span class="n">iq</span><span class="p">][</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">dvq</span> <span class="o">=</span> <span class="n">erosion_volume</span><span class="p">[</span><span class="n">iq</span><span class="p">][</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">dvq</span> <span class="o">=</span> <span class="n">dvq</span> <span class="o">+</span> <span class="n">dv</span><span class="p">[</span><span class="n">iq</span><span class="p">][</span><span class="n">ib</span><span class="p">]</span>
+                <span class="n">dvq</span> <span class="o">=</span> <span class="n">dvq</span> <span class="o">+</span> <span class="n">erosion_volume</span><span class="p">[</span><span class="n">iq</span><span class="p">][</span><span class="n">ib</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">ib</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span>
                 <span class="n">km_mid</span><span class="p">,</span>
@@ -3189,7 +3189,7 @@ wfrac : float
 
 
 <h3 id="dfastbe.plotting.plot3_stacked_per_discharge" class="doc doc-heading"><a href="#dfastbe.plotting.plot3_stacked_per_discharge" class="toclink">
-            <code class="highlight language-python"><span class="n">plot3_stacked_per_discharge</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">dv</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wfrac</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+            <code class="highlight language-python"><span class="n">plot3_stacked_per_discharge</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wfrac</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 </a><a href="#dfastbe.plotting.plot3_stacked_per_discharge" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -3206,7 +3206,7 @@ km_mid : numpy.ndarray
     Array containing the mid points for the chainage bins.
 km_step : float
     Bin width.
-dv : List[List[numpy.ndarray]]
+erosion_volume : List[List[numpy.ndarray]]
     List of nQ lists of N arrays containing the total erosion distance values
 qlabel : str
     Label for discharge level.
@@ -3279,7 +3279,7 @@ wfrac : float
    <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span>
    <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
    <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-   <span class="n">dv</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+   <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
    <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
    <span class="n">wfrac</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -3296,7 +3296,7 @@ wfrac : float
 <span class="sd">        Array containing the mid points for the chainage bins.</span>
 <span class="sd">    km_step : float</span>
 <span class="sd">        Bin width.</span>
-<span class="sd">    dv : List[List[numpy.ndarray]]</span>
+<span class="sd">    erosion_volume : List[List[numpy.ndarray]]</span>
 <span class="sd">        List of nQ lists of N arrays containing the total erosion distance values</span>
 <span class="sd">    qlabel : str</span>
 <span class="sd">        Label for discharge level.</span>
@@ -3307,14 +3307,14 @@ wfrac : float
 <span class="sd">    -------</span>
 <span class="sd">    None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">n_levels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dv</span><span class="p">)</span>
+    <span class="n">n_levels</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">erosion_volume</span><span class="p">)</span>
     <span class="n">clrs</span> <span class="o">=</span> <span class="n">get_colors</span><span class="p">(</span><span class="s2">&quot;Blues&quot;</span><span class="p">,</span> <span class="n">n_levels</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">iq</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_levels</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dv</span><span class="p">[</span><span class="n">iq</span><span class="p">])):</span>
+        <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">erosion_volume</span><span class="p">[</span><span class="n">iq</span><span class="p">])):</span>
             <span class="k">if</span> <span class="n">ib</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">dvq</span> <span class="o">=</span> <span class="n">dv</span><span class="p">[</span><span class="n">iq</span><span class="p">][</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">dvq</span> <span class="o">=</span> <span class="n">erosion_volume</span><span class="p">[</span><span class="n">iq</span><span class="p">][</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">dvq</span> <span class="o">=</span> <span class="n">dvq</span> <span class="o">+</span> <span class="n">dv</span><span class="p">[</span><span class="n">iq</span><span class="p">][</span><span class="n">ib</span><span class="p">]</span>
+                <span class="n">dvq</span> <span class="o">=</span> <span class="n">dvq</span> <span class="o">+</span> <span class="n">erosion_volume</span><span class="p">[</span><span class="n">iq</span><span class="p">][</span><span class="n">ib</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">iq</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span>
                 <span class="n">km_mid</span><span class="p">,</span>
