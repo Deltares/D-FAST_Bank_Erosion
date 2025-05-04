@@ -424,6 +424,27 @@ class ErosionSimulationData(BaseSimulationData):
         x1 = np.ma.masked_where(np.ma.getmask(idx), x0[idx_safe])
         return x1
 
+    def calculate_bank_velocity(
+        self, bank_data: BankData, bank_i: int, vel_dx
+    ) -> np.ndarray:
+        from dfastbe.kernel import moving_avg
+        bank_face_indices = bank_data.bank_face_indices[bank_i]
+        vel_bank = (
+                np.abs(
+                    self.velocity_x_face[bank_face_indices] * bank_data.dx[bank_i]
+                    + self.velocity_y_face[bank_face_indices] * bank_data.dy[bank_i]
+                )
+                / bank_data.segment_length[bank_i]
+        )
+
+        if vel_dx > 0.0:
+            if bank_i == 0:
+                log_text("apply_velocity_filter", indent="  ", data={"dx": vel_dx})
+            vel_bank = moving_avg(
+                bank_data.bank_chainage_midpoints[bank_i], vel_bank, vel_dx
+            )
+
+        return vel_bank
 
 class ErosionRiverData(BaseRiverData):
 
