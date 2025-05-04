@@ -545,7 +545,7 @@ def plot3_eroded_volume(
     km_mid: numpy.ndarray,
     km_step: float,
     chainage_txt: str,
-    dv: List[List[numpy.ndarray]],
+    erosion_volume: List[List[numpy.ndarray]],
     ylabel_txt: str,
     title_txt: str,
     qlabel: str,
@@ -562,7 +562,7 @@ def plot3_eroded_volume(
         Bin width.
     chainage_txt : str
         Label for the horizontal chainage axes.
-    dv : List[List[numpy.ndarray]]
+    erosion_volume : List[List[numpy.ndarray]]
         List of nQ lists of N arrays containing the total erosion distance values
     ylabel_txt : str
         Label for the vertical erosion volume axes.
@@ -583,8 +583,8 @@ def plot3_eroded_volume(
     fig, ax = matplotlib.pyplot.subplots()
     setsize(fig)
     #
-    plot3_stacked_per_discharge(ax, km_mid + 0.2 * km_step, km_step, dv, qlabel, 0.4)
-    plot3_stacked_per_bank(ax, km_mid - 0.2 * km_step, km_step, dv, banklabel, 0.4)
+    plot3_stacked_per_discharge(ax, km_mid + 0.2 * km_step, km_step, erosion_volume, qlabel, 0.4)
+    plot3_stacked_per_bank(ax, km_mid - 0.2 * km_step, km_step, erosion_volume, banklabel, 0.4)
     #
     ax.set_xlabel(chainage_txt)
     ax.set_ylabel(ylabel_txt)
@@ -598,7 +598,7 @@ def plot3_stacked_per_discharge(
    ax: matplotlib.axes.Axes,
    km_mid: numpy.ndarray,
    km_step: float,
-   dv: List[List[numpy.ndarray]],
+   erosion_volume: List[List[numpy.ndarray]],
    qlabel: str,
    wfrac: float,
 ) -> None:
@@ -615,7 +615,7 @@ def plot3_stacked_per_discharge(
         Array containing the mid points for the chainage bins.
     km_step : float
         Bin width.
-    dv : List[List[numpy.ndarray]]
+    erosion_volume : List[List[numpy.ndarray]]
         List of nQ lists of N arrays containing the total erosion distance values
     qlabel : str
         Label for discharge level.
@@ -626,14 +626,14 @@ def plot3_stacked_per_discharge(
     -------
     None
     """
-    n_levels = len(dv)
+    n_levels = len(erosion_volume)
     clrs = get_colors("Blues", n_levels + 1)
     for iq in range(n_levels):
-        for ib in range(len(dv[iq])):
+        for ib in range(len(erosion_volume[iq])):
             if ib == 0:
-                dvq = dv[iq][ib].copy()
+                dvq = erosion_volume[iq][ib].copy()
             else:
-                dvq = dvq + dv[iq][ib]
+                dvq = dvq + erosion_volume[iq][ib]
         if iq == 0:
             ax.bar(
                 km_mid,
@@ -659,7 +659,7 @@ def plot3_stacked_per_bank(
    ax: matplotlib.axes.Axes,
    km_mid: numpy.ndarray,
    km_step: float,
-   dv: List[List[numpy.ndarray]],
+   erosion_volume: List[List[numpy.ndarray]],
    banklabel: str,
    wfrac: float,
 ) -> None:
@@ -676,7 +676,7 @@ def plot3_stacked_per_bank(
         Array containing the mid points for the chainage bins.
     km_step : float
         Bin width.
-    dv : List[List[numpy.ndarray]]
+    erosion_volume : List[List[numpy.ndarray]]
         List of nQ lists of N arrays containing the total erosion distance values
     banklabel : str
         Label for bank id.
@@ -687,14 +687,14 @@ def plot3_stacked_per_bank(
     -------
     None
     """
-    n_banklines = len(dv[0])
+    n_banklines = len(erosion_volume[0])
     clrs = get_colors("plasma", n_banklines + 1)
     for ib in range(n_banklines):
-        for iq in range(len(dv)):
+        for iq in range(len(erosion_volume)):
             if iq == 0:
-                dvq = dv[iq][ib].copy()
+                dvq = erosion_volume[iq][ib].copy()
             else:
-                dvq = dvq + dv[iq][ib]
+                dvq = dvq + erosion_volume[iq][ib]
         if ib == 0:
             ax.bar(
                 km_mid,
@@ -720,7 +720,7 @@ def plot3_eroded_volume_subdivided_1(
     km_mid: numpy.ndarray,
     km_step: float,
     chainage_txt: str,
-    dv: List[List[numpy.ndarray]],
+    erosion_volume: List[List[numpy.ndarray]],
     ylabel_txt: str,
     title_txt: str,
     qlabel: str,
@@ -736,7 +736,7 @@ def plot3_eroded_volume_subdivided_1(
         Bin width.
     chainage_txt : str
         Label for the horizontal chainage axes.
-    dv : List[List[numpy.ndarray]]
+    erosion_volume : List[List[numpy.ndarray]]
         List of nQ lists of N arrays containing the total erosion distance values
     ylabel_txt : str
         Label for the vertical erosion volume axes.
@@ -755,7 +755,7 @@ def plot3_eroded_volume_subdivided_1(
     fig, ax = matplotlib.pyplot.subplots()
     setsize(fig)
     #
-    plot3_stacked_per_discharge(ax, km_mid, km_step, dv, qlabel, 0.8)
+    plot3_stacked_per_discharge(ax, km_mid, km_step, erosion_volume, qlabel, 0.8)
     #
     ax.set_xlabel(chainage_txt)
     ax.set_ylabel(ylabel_txt)
@@ -769,7 +769,7 @@ def plot3_eroded_volume_subdivided_2(
     km_mid: numpy.ndarray,
     km_step: float,
     chainage_txt: str,
-    dv: List[List[numpy.ndarray]],
+    erosion_volume: List[List[numpy.ndarray]],
     ylabel_txt: str,
     title_txt: str,
     banklabel: str,
@@ -785,7 +785,7 @@ def plot3_eroded_volume_subdivided_2(
         Bin width.
     chainage_txt : str
         Label for the horizontal chainage axes.
-    dv : List[List[numpy.ndarray]]
+    erosion_volume : List[List[numpy.ndarray]]
         List of nQ lists of N arrays containing the total erosion distance values
     ylabel_txt : str
         Label for the vertical erosion volume axes.
@@ -804,7 +804,7 @@ def plot3_eroded_volume_subdivided_2(
     fig, ax = matplotlib.pyplot.subplots()
     setsize(fig)
     #
-    plot3_stacked_per_bank(ax, km_mid, km_step, dv, banklabel, 0.8)
+    plot3_stacked_per_bank(ax, km_mid, km_step, erosion_volume, banklabel, 0.8)
     #
     ax.set_xlabel(chainage_txt)
     ax.set_ylabel(ylabel_txt)

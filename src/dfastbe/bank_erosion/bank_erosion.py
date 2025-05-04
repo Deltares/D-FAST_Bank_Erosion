@@ -198,12 +198,12 @@ class Erosion:
         """
         # distance fairway-bankline (bank-fairway)
         log_text("bank_distance_fairway")
-        distance_fw = []
+        bank_fairway_dist = []
         bp_fw_face_idx = []
         num_fairway_face_ind = len(fairway_data.fairway_face_indices)
         for bank_i, bank_coords in enumerate(bank_data.bank_line_coords):
             coords_mid = (bank_coords[:-1] + bank_coords[1:]) / 2
-            distance_fw.append(np.zeros(len(coords_mid)))
+            bank_fairway_dist.append(np.zeros(len(coords_mid)))
             bp_fw_face_idx.append(np.zeros(len(coords_mid), dtype=int))
             for ip, bp in enumerate(coords_mid):
                 # find closest fairway support node
@@ -288,7 +288,7 @@ class Erosion:
                             iseg = ifw
 
                 bp_fw_face_idx[bank_i][ip] = fairway_data.fairway_face_indices[iseg]
-                distance_fw[bank_i][ip] = dbfw
+                bank_fairway_dist[bank_i][ip] = dbfw
 
             if self.river_data.debug:
                 line_geom = LineGeometry(coords_mid, crs=self.config_file.crs)
@@ -301,7 +301,7 @@ class Erosion:
                 )
 
         bank_data.fairway_face_indices = bp_fw_face_idx
-        bank_data.fairway_distances = distance_fw
+        bank_data.fairway_distances = bank_fairway_dist
 
         # water level at fairway
         water_level_fairway_ref = []
@@ -364,17 +364,17 @@ class Erosion:
                     bt[shear_stress < thr_i] += 1
                 bank_type[ib] = bt
 
-        # read bank protection level zss
+        # read bank protection level dike_height
         zss_miss = -1000
-        zss = config_file.get_parameter(
+        dike_height = config_file.get_parameter(
             "Erosion",
             "ProtectionLevel",
             num_stations_per_bank,
             default=zss_miss,
             ext=".bpl",
         )
-        # if zss undefined, set zss equal to water_level_fairway_ref - 1
-        for ib, one_zss in enumerate(zss):
+        # if dike_height undefined, set dike_height equal to water_level_fairway_ref - 1
+        for ib, one_zss in enumerate(dike_height):
             mask = one_zss == zss_miss
             one_zss[mask] = fairway_data.fairway_initial_water_levels[ib][mask] - 1
 
@@ -382,7 +382,7 @@ class Erosion:
             shipping_data=shipping_data,
             wave_fairway_distance_0=wave_fairway_distance_0,
             wave_fairway_distance_1=wave_fairway_distance_1,
-            bank_protection_level=zss,
+            bank_protection_level=dike_height,
             tauc=tauc,
             bank_type=bank_type,
         )
@@ -497,7 +497,7 @@ class Erosion:
                     eq_eroded_vol.append(dv_eq1)
 
 
-                dn_tot, dv_tot, dn_ship, dn_flow, ship_w_max, ship_w_min = (
+                dn_tot, dv_tot, erosion_distance_shipping, erosion_distance_flow, ship_w_max, ship_w_min = (
                     compute_bank_erosion_dynamics(
                         velocity_all[level_i][bank_i],
                         bank_height[bank_i],
@@ -530,18 +530,18 @@ class Erosion:
                     # Q-specific debug
                     self.debugger.debug_process_discharge_levels_2(
                         bank_i, level_i, bank_data, fairway_data, erosion_inputs, pars, water_depth_fairway, bank_i_coords, velocity_all, bank_height, segment_length,
-                        water_level_all, chezy_all, dn_tot, dv_tot, dn_ship, dn_flow
+                        water_level_all, chezy_all, dn_tot, dv_tot, erosion_distance_shipping, erosion_distance_flow
                     )
 
                 # shift bank lines
                 if len(total_erosion_dist) == bank_i:
-                    flow_erosion_dist.append(dn_flow.copy())
-                    ship_erosion_dist.append(dn_ship.copy())
+                    flow_erosion_dist.append(erosion_distance_flow.copy())
+                    ship_erosion_dist.append(erosion_distance_shipping.copy())
                     total_erosion_dist.append(dn_tot.copy())
                     total_eroded_vol.append(dv_tot.copy())
                 else:
-                    flow_erosion_dist[bank_i] += dn_flow
-                    ship_erosion_dist[bank_i] += dn_ship
+                    flow_erosion_dist[bank_i] += erosion_distance_flow
+                    ship_erosion_dist[bank_i] += erosion_distance_shipping
                     total_erosion_dist[bank_i] += dn_tot
                     total_eroded_vol[bank_i] += dv_tot
 
@@ -679,8 +679,8 @@ class Erosion:
         """
         iq_str = f"{iq + 1}"
 
-        v_ship = self._get_param("VShip", erosion_inputs.shipping_data["vship0"], iq_str, num_stations_per_bank)
-        n_ship = self._get_param("NShip", erosion_inputs.shipping_data["Nship0"], iq_str, num_stations_per_bank)
+        ship_velocity = self._get_param("VShip", erosion_inputs.shipping_data["vship0"], iq_str, num_stations_per_bank)
+        num_ship = self._get_param("NShip", erosion_inputs.shipping_data["Nship0"], iq_str, num_stations_per_bank)
         n_wave = self._get_param("NWave", erosion_inputs.shipping_data["nwave0"], iq_str, num_stations_per_bank)
         t_ship = self._get_param("Draught", erosion_inputs.shipping_data["Tship0"], iq_str, num_stations_per_bank)
         ship_type = self._get_param("ShipType", erosion_inputs.shipping_data["ship0"], iq_str, num_stations_per_bank, valid=[1, 2, 3], onefile=True)
@@ -695,7 +695,7 @@ class Erosion:
             mu_reed.append(8.5e-4 * pr ** 0.8)  # empirical damping coefficient
 
         return {
-            "v_ship": v_ship, "n_ship": n_ship, "n_wave": n_wave, "t_ship": t_ship,
+            "v_ship": ship_velocity, "n_ship": num_ship, "n_wave": n_wave, "t_ship": t_ship,
             "ship_type": ship_type, "par_slope": par_slope, "par_reed": par_reed,
             "mu_slope": mu_slope, "mu_reed": mu_reed,
         }
