@@ -404,7 +404,7 @@ class ErosionSimulationData(BaseSimulationData):
 
     @staticmethod
     def apply_masked_indexing(
-            x0: np.array, idx: np.ma.masked_array
+        x0: np.array, idx: np.ma.masked_array
     ) -> np.ma.masked_array:
         """
         Index one array by another transferring the mask.
@@ -445,6 +445,38 @@ class ErosionSimulationData(BaseSimulationData):
             )
 
         return vel_bank
+
+    def calculate_bank_height(self, bank_i: int, bank_data: BankData, zb_dx):
+        """
+
+        Args:
+            bank_data:
+            bank_i:
+            zb_dx:
+
+        Returns:
+            zb_bank:
+
+        """
+        from dfastbe.kernel import moving_avg
+        bank_index = bank_data.bank_face_indices[bank_i]
+        if self.bed_elevation_location == "node":
+            zb_nodes = self.bed_elevation_values
+            zb_all = self.apply_masked_indexing(
+                zb_nodes, self.face_node[bank_index, :]
+            )
+            zb_bank = zb_all.max(axis=1)
+            if zb_dx > 0.0:
+                if bank_i == 0:
+                    log_text("apply_bank_level_filter", indent="  ", data={"dx": zb_dx})
+                zb_bank = moving_avg(
+                    bank_data.bank_chainage_midpoints[bank_i], zb_bank, zb_dx,
+                )
+        else:
+            # don't know ... need to check neighbouring cells ...
+            zb_bank = None
+
+        return zb_bank
 
 class ErosionRiverData(BaseRiverData):
 

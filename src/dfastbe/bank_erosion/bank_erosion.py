@@ -392,37 +392,6 @@ class Erosion:
             bank_type=bank_type,
         )
 
-    def _get_zb_bank(self, bank_i: int, bank_data: BankData, simulation_data: ErosionSimulationData):
-        """
-
-        Args:
-            bank_data:
-            bank_i:
-            simulation_data:
-
-        Returns:
-            zb_bank:
-
-        """
-        bank_index = bank_data.bank_face_indices[bank_i]
-        if simulation_data.bed_elevation_location == "node":
-            zb_nodes = simulation_data.bed_elevation_values
-            zb_all = ErosionSimulationData.apply_masked_indexing(
-                zb_nodes, simulation_data.face_node[bank_index, :]
-            )
-            zb_bank = zb_all.max(axis=1)
-            if self.river_data.zb_dx > 0.0:
-                if bank_i == 0:
-                    log_text("apply_bank_level_filter", indent="  ", data={"dx": self.river_data.zb_dx})
-                zb_bank = moving_avg(
-                    bank_data.bank_chainage_midpoints[bank_i], zb_bank, self.river_data.zb_dx,
-                )
-        else:
-            # don't know ... need to check neighbouring cells ...
-            zb_bank = None
-
-        return zb_bank
-
     def _process_discharge_levels(
         self,
         km_mid,
@@ -502,7 +471,7 @@ class Erosion:
                 if level_i == 0:
                     # determine velocity and bank height along banks ...
                     # bank height = maximum bed elevation per cell
-                    zb_bank = self._get_zb_bank(bank_i, bank_data, simulation_data)
+                    zb_bank = simulation_data.calculate_bank_height(bank_i, bank_data, self.river_data.zb_dx)
                     bank_height.append(zb_bank)
 
                 # get water depth along the fair-way
