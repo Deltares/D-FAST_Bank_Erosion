@@ -31,12 +31,12 @@ import os
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
 from numpy import ndarray
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString
 import numpy as np
 import matplotlib.pyplot as plt
 
 from dfastbe import __version__
-from dfastbe.kernel import get_km_bins, moving_avg, comp_erosion_eq, comp_erosion, get_km_eroded_volume, \
+from dfastbe.kernel import get_km_bins, comp_erosion_eq, compute_bank_erosion_dynamics, get_km_eroded_volume, \
                             get_zoom_extends
 from dfastbe.support import move_line
 from dfastbe import plotting as df_plt
@@ -45,8 +45,6 @@ from dfastbe.io import (
     LineGeometry, ConfigFile,
     log_text,
     write_km_eroded_volumes,
-    write_shp,
-    write_csv,
 )
 from dfastbe.bank_erosion.data_models import (
     ErosionRiverData,
@@ -61,9 +59,6 @@ from dfastbe.bank_erosion.data_models import (
 from dfastbe.bank_erosion.utils import intersect_line_mesh, BankLinesProcessor
 from dfastbe.utils import timed_logger
 
-
-RHO = 1000  # density of water [kg/m3]
-g = 9.81  # gravitational acceleration [m/s2]
 
 X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
@@ -497,14 +492,13 @@ class Erosion:
                         water_depth_fairway,
                         erosion_inputs,
                         bank_i,
-                        g,
                     )
                     eq_erosion_dist.append(dn_eq1)
                     eq_eroded_vol.append(dv_eq1)
 
 
                 dn_tot, dv_tot, dn_ship, dn_flow, ship_w_max, ship_w_min = (
-                    comp_erosion(
+                    compute_bank_erosion_dynamics(
                         velocity_all[level_i][bank_i],
                         bank_height[bank_i],
                         segment_length[bank_i],
@@ -520,8 +514,6 @@ class Erosion:
                         water_depth_fairway,
                         chezy_all[level_i][bank_i],
                         erosion_inputs,
-                        RHO,
-                        g,
                         bank_i,
                     )
                 )
@@ -1011,8 +1003,6 @@ class Erosion:
                 "velocity at Q{iq}",
                 erosion_inputs.tauc,
                 water_level_data.chezy[0],
-                RHO,
-                g,
                 "critical velocity",
                 "velocity",
                 "velocity along bank line {ib}",

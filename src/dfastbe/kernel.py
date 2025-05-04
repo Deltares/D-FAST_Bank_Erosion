@@ -34,6 +34,9 @@ import math
 import sys
 
 EPS = sys.float_info.epsilon
+water_density = 1000  # density of water [kg/m3]
+g = 9.81  # gravitational acceleration [m/s2]
+
 
 def comp_erosion_eq(
     bank_height: np.ndarray,
@@ -47,7 +50,6 @@ def comp_erosion_eq(
     water_depth_fairway: np.ndarray,
     erosion_inputs: "ErosionInputs",
     ib: int,
-    g: float,
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
     Compute the equilibrium bank erosion.
@@ -111,7 +113,7 @@ def comp_erosion_eq(
     return dn_eq, dv_eq
 
 
-def comp_erosion(
+def compute_bank_erosion_dynamics(
     velocity: np.ndarray,
     bank_height: np.ndarray,
     segment_length: np.ndarray,
@@ -127,8 +129,6 @@ def comp_erosion(
     water_depth_fairway: np.ndarray,
     chezy: np.ndarray,
     erosion_inputs: "ErosionInputs",
-    water_density: float,
-    g: float,
     bank_index: int,
 ) -> [
     np.ndarray,

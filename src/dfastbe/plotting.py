@@ -35,7 +35,7 @@ import geopandas
 import numpy
 
 from dfastbe.io import ConfigFile
-
+from dfastbe.kernel import water_density, g
 
 def savefig(fig: matplotlib.figure.Figure, filename: str) -> None:
     """
@@ -65,8 +65,9 @@ def setsize(fig: matplotlib.figure.Figure) -> None:
     fig : matplotlib.figure.Figure
         Figure to a be saved.
     """
+    # the size of an a3 is (16.5, 11.75)
     fig.set_size_inches(11.75, 8.25)  # a4
-    # fig.set_size_inches(16.5, 11.75) # a3
+
 
 
 def set_bbox(
@@ -1011,8 +1012,6 @@ def plot6series_velocity_per_bank(
     velocq_txt: str,
     tauc: List[numpy.ndarray],
     chezy: List[numpy.ndarray],
-    water_density: float,
-    g: float,
     ucrit_txt: str,
     ylabel_txt: str,
     title_txt: str,
@@ -1035,10 +1034,6 @@ def plot6series_velocity_per_bank(
         List of arrays containing the shear stresses per bank (point) [N/m2].
     chezy: List[numpy.ndarray]
         List of arrays containing the Chezy values per bank [m0.5/s].
-    water_density: float
-        Water density [kg/m3].
-    g: float
-        Gravitational acceleration [m/s2].
     ucrit_txt: str
         Label for the critical velocity.
     ylabel_txt: str
