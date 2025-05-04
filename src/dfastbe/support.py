@@ -51,22 +51,20 @@ def on_right_side(line_xy: numpy.ndarray, ref_xy: numpy.ndarray) -> bool:
 
     Left and right are relative to the path along ref_xy from the first to the
     last node. It is assumed that line_xy can be uniquely identified as on the
-    left or right side of ref_xy, i.e. the lines may not cross each other or
-    themselves. Also line_xy should be alongside ref_xy and not "before" or
+    left or right side of ref_xy, i.e., the lines may not cross each other or
+    themselves. Also, line_xy should be alongside ref_xy and not "before" or
     "after" ref_xy. The typical use case is to relate a bank line line_xy to a
-    centre line ref_xy.
+    center line ref_xy.
 
-    Arguments
-    ---------
-    line_xy : numpy.ndarray
-        Array containing the x,y coordinates of a line.
-    ref_xy : numpy.ndarray
-        Array containing the x,y,chainage data.
+    Args:
+        line_xy : numpy.ndarray
+            Array containing the x,y coordinates of a line.
+        ref_xy : numpy.ndarray
+            Array containing the x,y,chainage data.
 
-    Results
-    -------
-    right_side : bool
-        Flag indicating whether line is on the right side.
+    Returns:
+        right_side : bool
+            Flag indicating whether the line is on the right side.
     """
 
     # determine the reference point based on the line with the fewest points
@@ -74,7 +72,7 @@ def on_right_side(line_xy: numpy.ndarray, ref_xy: numpy.ndarray) -> bool:
     npnt = line_xy.shape[0]
     if ref_npnt < npnt:
         # determine the mid-point p0 of ref_xy
-        p0 = (ref_xy[0] + ref_xy[1]) / 2
+        # p0 = (ref_xy[0] + ref_xy[1]) / 2
         if ref_npnt == 2:
             imin = 0
             imind = 0
