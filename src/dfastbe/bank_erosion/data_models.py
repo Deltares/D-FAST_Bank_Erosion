@@ -2,12 +2,15 @@
 import os
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import List, Dict, Tuple, ClassVar
+from typing import List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type
 import numpy as np
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
 from dfastio.xyc.models import XYCModel
 from dfastbe.io import ConfigFile, BaseRiverData, BaseSimulationData, log_text
+
+
+GenericType = TypeVar("GenericType")
 
 
 @dataclass
@@ -539,29 +542,24 @@ class ErosionRiverData(BaseRiverData):
         river_axis = XYCModel.read(river_axis_file)
         return river_axis
 
-
 @dataclass
-class ParametersPerBank:
-    ship_velocity: float
-    num_ship: float
-    num_waves_per_ship: float
-    ship_draught: float
-    ship_type: float
-    par_slope: float
-    par_reed: float
-    mu_slope: float
-    mu_reed: float
-
-
-@dataclass
-class DischargeLevelParameters:
-
+class LeftRightBankBase(Generic[GenericType]):
     id: int
-    left: ParametersPerBank
-    right: ParametersPerBank
+    left: GenericType
+    right: GenericType
 
-    @staticmethod
-    def from_column_arrays(data: dict) -> "DischargeLevelParameters":
+    def get_bank(self, bank_index: int) -> GenericType:
+        if bank_index == 0:
+            return self.left
+        elif bank_index == 1:
+            return self.right
+        else:
+            raise ValueError("bank_index must be 0 (left) or 1 (right)")
+
+    @classmethod
+    def from_column_arrays(
+        cls: Type["LeftRighBankBase[GenericType]"], data: Dict[str, Any], bank_cls: Type[GenericType]
+    ) -> "LeftRightBankBase[GenericType]":
         id_val = data["id"]
 
         # Extract the first and second array for each parameter (excluding id)
@@ -579,17 +577,28 @@ class DischargeLevelParameters:
             left_args[key] = left_array
             right_args[key] = right_array
 
-        left = ParametersPerBank(**left_args)
-        right = ParametersPerBank(**right_args)
-        return DischargeLevelParameters(id=id_val, left=left, right=right)
+        left = bank_cls(**left_args)
+        right = bank_cls(**right_args)
+        return cls(id=id_val, left=left, right=right)
 
-    def get_bank(self, bank_index: int) -> ParametersPerBank:
-        if bank_index == 0:
-            return self.left
-        elif bank_index == 1:
-            return self.right
-        else:
-            raise ValueError("bank_index must be 0 (left) or 1 (right)")
+@dataclass
+class ParametersPerBank:
+    ship_velocity: float
+    num_ship: float
+    num_waves_per_ship: float
+    ship_draught: float
+    ship_type: float
+    par_slope: float
+    par_reed: float
+    mu_slope: float
+    mu_reed: float
+
+
+@dataclass
+class DischargeLevelParameters(LeftRightBankBase[ParametersPerBank]):
+    pass
+
+
 
 class BankLinesResultsError(Exception):
     """Custom exception for BankLine results errors."""

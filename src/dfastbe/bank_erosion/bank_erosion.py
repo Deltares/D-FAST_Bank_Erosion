@@ -50,12 +50,13 @@ from dfastbe.bank_erosion.data_models import (
     ErosionRiverData,
     ErosionSimulationData,
     ErosionInputs,
+    ParametersPerBank,
     WaterLevelData,
     MeshData,
     BankData,
     FairwayData,
     ErosionResults,
-    DischargeLevelParameters
+    DischargeLevelParameters,
 )
 from dfastbe.bank_erosion.utils import intersect_line_mesh, BankLinesProcessor
 from dfastbe.utils import timed_logger
@@ -661,7 +662,7 @@ class Erosion:
 
     def _read_discharge_parameters(
         self,
-        iq: int,
+        level_i: int,
         erosion_inputs: ErosionInputs,
         num_stations_per_bank: List[int],
     ) -> DischargeLevelParameters:
@@ -670,7 +671,7 @@ class Erosion:
         Returns a dict with keys: vship, num_ship, n_wave, t_ship, ship_type,
         mu_slope, mu_reed, par_slope, par_reed.
         """
-        iq_str = f"{iq + 1}"
+        iq_str = f"{level_i + 1}"
 
         ship_velocity = self._get_param("VShip", erosion_inputs.shipping_data["vship0"], iq_str, num_stations_per_bank)
         num_ship = self._get_param("NShip", erosion_inputs.shipping_data["Nship0"], iq_str, num_stations_per_bank)
@@ -688,10 +689,10 @@ class Erosion:
             mu_reed.append(8.5e-4 * pr ** 0.8)  # empirical damping coefficient
 
         return DischargeLevelParameters.from_column_arrays({
-            "id": iq, "ship_velocity": ship_velocity, "num_ship": num_ship, "num_waves_per_ship": num_waves_per_ship,
+            "id": level_i, "ship_velocity": ship_velocity, "num_ship": num_ship, "num_waves_per_ship": num_waves_per_ship,
             "ship_draught": ship_draught, "ship_type": ship_type, "par_slope": par_slope, "par_reed": par_reed,
             "mu_slope": mu_slope, "mu_reed": mu_reed,
-        })
+        }, ParametersPerBank)
 
     def run(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
