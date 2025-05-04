@@ -207,13 +207,13 @@ class Erosion:
             coords_mid = (bank_coords[:-1] + bank_coords[1:]) / 2
             bank_fairway_dist.append(np.zeros(len(coords_mid)))
             bp_fw_face_idx.append(np.zeros(len(coords_mid), dtype=int))
-            for ip, bp in enumerate(coords_mid):
+            for ind, coord_i in enumerate(coords_mid):
                 # find closest fairway support node
-                ifw = np.argmin(
-                    ((bp - fairway_data.intersection_coords) ** 2).sum(axis=1)
+                closest_ind = np.argmin(
+                    ((coord_i - fairway_data.intersection_coords) ** 2).sum(axis=1)
                 )
-                fwp = fairway_data.intersection_coords[ifw]
-                dbfw = ((bp - fwp) ** 2).sum() ** 0.5
+                fairway_coord = fairway_data.intersection_coords[closest_ind]
+                fairway_bank_distance = ((coord_i - fairway_coord) ** 2).sum() ** 0.5
                 # If fairway support node is also the closest projected fairway point, then it likely
                 # that that point is one of the original support points (a corner) of the fairway path
                 # and located inside a grid cell. The segments before and after that point will then
@@ -221,76 +221,32 @@ class Erosion:
                 # If the point happens to coincide with a grid edge and the two segments are located
                 # in different grid cells, then we could either simply choose one or add complexity to
                 # average the values of the two grid cells. Let's go for the simplest approach ...
-                iseg = max(ifw - 1, 0)
-                if ifw > 0:
-                    alpha = (
-                        (
-                            fairway_data.intersection_coords[ifw, 0]
-                            - fairway_data.intersection_coords[ifw - 1, 0]
-                        )
-                        * (bp[0] - fairway_data.intersection_coords[ifw - 1, 0])
-                        + (
-                            fairway_data.intersection_coords[ifw, 1]
-                            - fairway_data.intersection_coords[ifw - 1, 1]
-                        )
-                        * (bp[1] - fairway_data.intersection_coords[ifw - 1, 1])
-                    ) / (
-                        (
-                            fairway_data.intersection_coords[ifw, 0]
-                            - fairway_data.intersection_coords[ifw - 1, 0]
-                        )
-                        ** 2
-                        + (
-                            fairway_data.intersection_coords[ifw, 1]
-                            - fairway_data.intersection_coords[ifw - 1, 1]
-                        )
-                        ** 2
-                    )
+                iseg = max(closest_ind - 1, 0)
+                if closest_ind > 0:
+                    alpha = calculate_alpha(fairway_data.intersection_coords, closest_ind, closest_ind - 1, coord_i)
                     if 0 < alpha < 1:
-                        fwp1 = fairway_data.intersection_coords[ifw - 1] + alpha * (
-                            fairway_data.intersection_coords[ifw]
-                            - fairway_data.intersection_coords[ifw - 1]
+                        fwp1 = fairway_data.intersection_coords[closest_ind - 1] + alpha * (
+                            fairway_data.intersection_coords[closest_ind]
+                            - fairway_data.intersection_coords[closest_ind - 1]
                         )
-                        d1 = ((bp - fwp1) ** 2).sum() ** 0.5
-                        if d1 < dbfw:
-                            dbfw = d1
+                        d1 = ((coord_i - fwp1) ** 2).sum() ** 0.5
+                        if d1 < fairway_bank_distance:
+                            fairway_bank_distance = d1
                             # projected point located on segment before, which corresponds to initial choice: iseg = ifw - 1
-                if ifw < num_fairway_face_ind:
-                    alpha = (
-                        (
-                            fairway_data.intersection_coords[ifw + 1, 0]
-                            - fairway_data.intersection_coords[ifw, 0]
-                        )
-                        * (bp[0] - fairway_data.intersection_coords[ifw, 0])
-                        + (
-                            fairway_data.intersection_coords[ifw + 1, 1]
-                            - fairway_data.intersection_coords[ifw, 1]
-                        )
-                        * (bp[1] - fairway_data.intersection_coords[ifw, 1])
-                    ) / (
-                        (
-                            fairway_data.intersection_coords[ifw + 1, 0]
-                            - fairway_data.intersection_coords[ifw, 0]
-                        )
-                        ** 2
-                        + (
-                            fairway_data.intersection_coords[ifw + 1, 1]
-                            - fairway_data.intersection_coords[ifw, 1]
-                        )
-                        ** 2
-                    )
+                if closest_ind < num_fairway_face_ind:
+                    alpha = calculate_alpha(fairway_data.intersection_coords, closest_ind + 1, closest_ind, coord_i)
                     if 0 < alpha < 1:
-                        fwp1 = fairway_data.intersection_coords[ifw] + alpha * (
-                            fairway_data.intersection_coords[ifw + 1]
-                            - fairway_data.intersection_coords[ifw]
+                        fwp1 = fairway_data.intersection_coords[closest_ind] + alpha * (
+                            fairway_data.intersection_coords[closest_ind + 1]
+                            - fairway_data.intersection_coords[closest_ind]
                         )
-                        d1 = ((bp - fwp1) ** 2).sum() ** 0.5
-                        if d1 < dbfw:
-                            dbfw = d1
-                            iseg = ifw
+                        d1 = ((coord_i - fwp1) ** 2).sum() ** 0.5
+                        if d1 < fairway_bank_distance:
+                            fairway_bank_distance = d1
+                            iseg = closest_ind
 
-                bp_fw_face_idx[bank_i][ip] = fairway_data.fairway_face_indices[iseg]
-                bank_fairway_dist[bank_i][ip] = dbfw
+                bp_fw_face_idx[bank_i][ind] = fairway_data.fairway_face_indices[iseg]
+                bank_fairway_dist[bank_i][ind] = fairway_bank_distance
 
             if self.river_data.debug:
                 line_geom = LineGeometry(coords_mid, crs=self.config_file.crs)
@@ -1053,3 +1009,29 @@ class Erosion:
                 plt.close("all")
             else:
                 plt.show(block=not self.gui)
+
+def calculate_alpha(coords, ind_1, ind_2, bp):
+    # ind_1 = ifw
+    # ind_2 = ifw - 1
+    alpha = (
+                    (coords[ind_1, 0] - coords[ind_2, 0])
+                    * (bp[0] - coords[ind_2, 0])
+                    + (coords[ind_1, 1] - coords[ind_2, 1])
+                    * (bp[1] - coords[ind_2, 1])
+            ) / (
+                    (coords[ind_1, 0] - coords[ind_2, 0]) ** 2
+                    + (coords[ind_1, 1] - coords[ind_2, 1]) ** 2
+            )
+
+    return alpha
+# ind_1 = ifw + 1
+# ind_2 = ifw
+# alpha = (
+#             (coords[ind_1, 0] - coords[ind_2, 0])
+#             * (bp[0] - coords[ind_2, 0])
+#             + (coords[ind_1, 1] - coords[ind_2, 1])
+#             * (bp[1] - coords[ind_2, 1])
+#     ) / (
+#             (coords[ind_1, 0] - coords[ind_2, 0]) ** 2
+#             + (coords[ind_1, 1] - coords[ind_2, 1]) ** 2
+#     )
