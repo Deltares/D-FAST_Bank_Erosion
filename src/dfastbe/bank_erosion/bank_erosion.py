@@ -419,11 +419,12 @@ class Erosion:
         ship_wave_max_all: List[List[np.ndarray]] = []
         ship_wave_min_all: List[List[np.ndarray]] = []
 
+        num_stations = bank_data.num_stations_per_bank
         bank_height = []
-        flow_erosion_dist = []
-        ship_erosion_dist = []
-        total_erosion_dist = []
-        total_eroded_vol = []
+        flow_erosion_dist = [np.zeros(num_stations[0]), np.zeros(num_stations[1])]
+        ship_erosion_dist = [np.zeros(num_stations[0]), np.zeros(num_stations[1])]
+        total_erosion_dist = [np.zeros(num_stations[0]), np.zeros(num_stations[1])]
+        total_eroded_vol = [np.zeros(num_stations[0]), np.zeros(num_stations[1])]
 
         eq_erosion_dist = []
         eq_eroded_vol = []
@@ -476,6 +477,7 @@ class Erosion:
             chezy_level_i = []
             ship_wave_max_level_i = []
             ship_wave_min_level_i = []
+            vol_per_discharge_level_i = []
             for ind, bank_i in enumerate(bank_data):
                 # bank_i = 0: left bank, bank_i = 1: right bank
                 # calculate velocity along banks ...
@@ -573,30 +575,24 @@ class Erosion:
                         erosion_distance_flow,
                     )
 
-                # shift bank lines
-                if len(total_erosion_dist) == ind:
-                    flow_erosion_dist.append(erosion_distance_flow.copy())
-                    ship_erosion_dist.append(erosion_distance_shipping.copy())
-                    total_erosion_dist.append(erosion_distance_tot.copy())
-                    total_eroded_vol.append(erosion_volume_tot.copy())
-                else:
-                    flow_erosion_dist[ind] += erosion_distance_flow
-                    ship_erosion_dist[ind] += erosion_distance_shipping
-                    total_erosion_dist[ind] += erosion_distance_tot
-                    total_eroded_vol[ind] += erosion_volume_tot
-
                 # accumulate eroded volumes per km
                 dvol = get_km_eroded_volume(
                     bank_i.bank_chainage_midpoints, erosion_volume_tot, km_bin
                 )
-                vol_per_discharge_all[level_i].append(dvol)
+                vol_per_discharge_level_i.append(dvol)
                 dvol_bank[:, ind] += dvol
+
+                flow_erosion_dist[ind] += erosion_distance_flow
+                ship_erosion_dist[ind] += erosion_distance_shipping
+                total_erosion_dist[ind] += erosion_distance_tot
+                total_eroded_vol[ind] += erosion_volume_tot
 
             velocity_all[level_i] = vel_bank_level_i
             water_level_all[level_i] = water_level_level_i
             chezy_all[level_i] = chezy_level_i
             ship_wave_max_all[level_i] = ship_wave_max_level_i
             ship_wave_min_all[level_i] = ship_wave_min_level_i
+            vol_per_discharge_all[level_i] = vol_per_discharge_level_i
 
             error_vol_file = config_file.get_str(
                 "Erosion", f"EroVol{level_i + 1}", default=f"erovolQ{level_i + 1}.evo"
