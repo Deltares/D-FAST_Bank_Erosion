@@ -41,10 +41,9 @@ class Debugger:
         write_csv(params, f"{str(self.river_data.output_dir)}/debug.EQ.B{bank_index + 1}.csv")
 
     def debug_process_discharge_levels_2(
-        self, ib, iq, single_bank: SingleBank, fairway_data, erosion_inputs: SingleErosion, discharge_level_pars: (
-        ParametersPerBank),
-        water_depth_fairway, velocity, bank_height, water_level, chezy, dniqib, dviqib,
-        erosion_distance_shipping, erosion_distance_flow
+        self, bank_ind, q_level, single_bank: SingleBank, fairway_data, erosion_inputs: SingleErosion,
+        discharge_level_pars: ParametersPerBank, water_depth_fairway, velocity, bank_height, water_level, chezy,
+        dniqib, dviqib, erosion_distance_shipping, erosion_distance_flow
     ):
         bank_coords = single_bank.bank_line_coords
         bank_coords_mind = (bank_coords[:-1] + bank_coords[1:]) / 2
@@ -56,11 +55,11 @@ class Debugger:
             "y": bank_coords_mind[:, 1],
             "iface_fw": single_bank.fairway_face_indices,
             "iface_bank": single_bank.bank_face_indices,
-            "velocity": velocity[iq][ib],
-            "bank_height": bank_height[ib],
+            "velocity": velocity[bank_ind],
+            "bank_height": bank_height[bank_ind],
             "segment_length": single_bank.segment_length,
-            "zw": water_level[iq][ib],
-            "zw0": fairway_data.fairway_initial_water_levels[ib],
+            "zw": water_level[bank_ind],
+            "zw0": fairway_data.fairway_initial_water_levels[bank_ind],
             "tauc": erosion_inputs.tauc,
             "num_ship": discharge_level_pars.num_ship,
             "ship_velocity": discharge_level_pars.ship_velocity,
@@ -73,12 +72,12 @@ class Debugger:
             "fairway_wave_reduction_distance": erosion_inputs.wave_fairway_distance_0,
             "fairway_wave_disappear_distance": erosion_inputs.wave_fairway_distance_1,
             "water_depth_fairway": water_depth_fairway,
-            "chez": chezy[iq][ib],
+            "chez": chezy[bank_ind],
             "dike_height": erosion_inputs.bank_protection_level,
             "erosion_distance": dniqib,
             "erosion_volume": dviqib,
             "erosion_distance_shipping": erosion_distance_shipping,
             "erosion_distance_flow": erosion_distance_flow,
         }
-        write_shp(bank_coords_geo, params, f"{str(self.river_data.output_dir)}/debug.Q{iq + 1}.B{ib + 1}.shp")
-        write_csv(params, f"{str(self.river_data.output_dir)}/debug.Q{iq + 1}.B{ib + 1}.csv")
+        write_shp(bank_coords_geo, params, f"{str(self.river_data.output_dir)}/debug.Q{q_level + 1}.B{bank_ind + 1}.shp")
+        write_csv(params, f"{str(self.river_data.output_dir)}/debug.Q{q_level + 1}.B{bank_ind + 1}.csv")

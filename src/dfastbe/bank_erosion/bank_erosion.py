@@ -167,7 +167,7 @@ class Erosion:
         log_text("chainage_to_axis")
         river_axis_km = river_axis.intersect_with_line(self.river_center_line_arr)
 
-        # clip river axis to reach of interest (get closest point to the first and last station)
+        # clip river axis to reach of interest (get the closest point to the first and last station)
         i1 = np.argmin(
             ((self.river_center_line_arr[0, :2] - river_axis_numpy) ** 2).sum(axis=1)
         )
@@ -471,14 +471,18 @@ class Erosion:
             dvol_bank = np.zeros((num_km, num_bank))
 
             hfw_max_level = 0
-
+            vel_bank_level_i = []
+            water_level_level_i = []
+            chezy_level_i = []
+            ship_wave_max_level_i = []
+            ship_wave_min_level_i = []
             for ind, bank_i in enumerate(bank_data):
                 # bank_i = 0: left bank, bank_i = 1: right bank
                 # calculate velocity along banks ...
                 vel_bank = simulation_data.calculate_bank_velocity(
                     bank_i, self.river_data.vel_dx
                 )
-                velocity_all[level_i].append(vel_bank)
+                vel_bank_level_i.append(vel_bank)
 
                 if level_i == 0:
                     # determine velocity and bank height along banks ...
@@ -493,11 +497,11 @@ class Erosion:
                 water_depth_fairway = simulation_data.water_depth_face[ii_face]
                 hfw_max_level = max(hfw_max_level, water_depth_fairway.max())
 
-                water_level_all[level_i].append(
+                water_level_level_i.append(
                     simulation_data.water_level_face[ii_face]
                 )
                 chez_face = simulation_data.chezy_face[ii_face]
-                chezy_all[level_i].append(0 * chez_face + chez_face.mean())
+                chezy_level_i.append(0 * chez_face + chez_face.mean())
 
                 # last discharge level
                 if level_i == num_levels - 1:
@@ -521,20 +525,20 @@ class Erosion:
                     ship_w_max,
                     ship_w_min,
                 ) = compute_bank_erosion_dynamics(
-                    velocity_all[level_i][ind],
+                    vel_bank_level_i[ind],
                     bank_height[ind],
                     bank_i.segment_length,
-                    water_level_all[level_i][ind],
+                    water_level_level_i[ind],
                     fairway_data.fairway_initial_water_levels[ind],
                     discharge_level_pars.get_bank(ind),
                     self.river_data.erosion_time * self.p_discharge[level_i],
                     bank_i.fairway_distances,
                     water_depth_fairway,
-                    chezy_all[level_i][ind],
+                    chezy_level_i[ind],
                     erosion_inputs.get_bank(ind),
                 )
-                ship_wave_max_all[level_i].append(ship_w_max)
-                ship_wave_min_all[level_i].append(ship_w_min)
+                ship_wave_max_level_i.append(ship_w_max)
+                ship_wave_min_level_i.append(ship_w_min)
 
                 if self.river_data.debug:
                     if level_i == num_levels - 1:
@@ -559,10 +563,10 @@ class Erosion:
                         erosion_inputs.get_bank(ind),
                         discharge_level_pars.get_bank(ind),
                         water_depth_fairway,
-                        velocity_all,
+                        vel_bank_level_i,
                         bank_height,
-                        water_level_all,
-                        chezy_all,
+                        water_level_level_i,
+                        chezy_level_i,
                         erosion_distance_tot,
                         erosion_volume_tot,
                         erosion_distance_shipping,
@@ -587,6 +591,12 @@ class Erosion:
                 )
                 vol_per_discharge_all[level_i].append(dvol)
                 dvol_bank[:, ind] += dvol
+
+            velocity_all[level_i] = vel_bank_level_i
+            water_level_all[level_i] = water_level_level_i
+            chezy_all[level_i] = chezy_level_i
+            ship_wave_max_all[level_i] = ship_wave_max_level_i
+            ship_wave_min_all[level_i] = ship_wave_min_level_i
 
             error_vol_file = config_file.get_str(
                 "Erosion", f"EroVol{level_i + 1}", default=f"erovolQ{level_i + 1}.evo"
