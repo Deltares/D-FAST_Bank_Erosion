@@ -403,7 +403,7 @@ class Erosion:
         bank_data: BankData,
         fairway_data: FairwayData,
     ) -> Tuple[WaterLevelData, ErosionResults]:
-        num_stations_per_bank = [bank_data.left.length, bank_data.right.length]
+
         num_levels = self.river_data.num_discharge_levels
         num_km = len(km_mid)
         num_bank = bank_data.n_bank_lines
@@ -444,7 +444,7 @@ class Erosion:
             # 1) read level-specific parameters
             # read ship_velocity, num_ship, nwave, draught, ship_type, slope, reed, fairway_depth, ... (level specific values)
             discharge_level_pars = self._read_discharge_parameters(
-                level_i, erosion_inputs, num_stations_per_bank
+                level_i, erosion_inputs, bank_data.num_stations_per_bank
             )
 
             # 2) load FM result
@@ -543,30 +543,26 @@ class Erosion:
                         # EQ debug
                         self.debugger.debug_process_discharge_levels_1(
                             ind,
-                            bank_data,
+                            bank_data.get_bank(ind),
                             fairway_data,
                             erosion_inputs,
                             discharge_level_pars.get_bank(ind),
                             water_depth_fairway,
                             dn_eq1,
                             dv_eq1,
-                            bank_i.bank_line_coords,
                             bank_height,
-                            bank_i.segment_length,
                         )
                     # Q-specific debug
                     self.debugger.debug_process_discharge_levels_2(
                         ind,
                         level_i,
-                        bank_data,
+                        bank_data.get_bank(ind),
                         fairway_data,
                         erosion_inputs,
                         discharge_level_pars.get_bank(ind),
                         water_depth_fairway,
-                        bank_i.bank_line_coords,
                         velocity_all,
                         bank_height,
-                        bank_i.segment_length,
                         water_level_all,
                         chezy_all,
                         dn_tot,

@@ -5,7 +5,8 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type, Optional
 import numpy as np
 from geopandas import GeoDataFrame
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Point
+from geopandas.geoseries import GeoSeries
 from dfastio.xyc.models import XYCModel
 from dfastbe.io import ConfigFile, BaseRiverData, BaseSimulationData, log_text
 
@@ -13,7 +14,7 @@ from dfastbe.io import ConfigFile, BaseRiverData, BaseSimulationData, log_text
 GenericType = TypeVar("GenericType")
 
 @dataclass
-class LeftRightBankBase(Generic[GenericType]):
+class BaseBank(Generic[GenericType]):
     left: GenericType
     right: GenericType
     id: Optional[int] = field(default=None)
@@ -28,11 +29,11 @@ class LeftRightBankBase(Generic[GenericType]):
 
     @classmethod
     def from_column_arrays(
-        cls: Type["LeftRighBankBase[GenericType]"],
+        cls: Type["BaseBank[GenericType]"],
         data: Dict[str, Any],
         bank_cls: Type[GenericType],
         bank_order: Tuple[str, str] = ("left", "right")
-    ) -> "LeftRightBankBase[GenericType]":
+    ) -> "BaseBank[GenericType]":
         if set(bank_order) != {"left", "right"}:
             raise ValueError("bank_order must be a permutation of ('left', 'right')")
 
@@ -204,8 +205,16 @@ class SingleBank:
         """
         return np.diff(self.bank_line_coords[:, 1])
 
+    def get_mid_points(self, crs) -> GeoSeries:
+        bank_coords = self.bank_line_coords
+        bank_coords_mind = (bank_coords[:-1] + bank_coords[1:]) / 2
+
+        bank_coords_points = [Point(xy) for xy in bank_coords_mind]
+        geo_series = GeoSeries(bank_coords_points, crs=crs)
+        return geo_series
+
 @dataclass
-class BankData(LeftRightBankBase[SingleBank]):
+class BankData(BaseBank[SingleBank]):
     """Class to hold bank-related data.
 
     args:
@@ -242,7 +251,7 @@ class BankData(LeftRightBankBase[SingleBank]):
     ) -> "BankData":
         # Only include fields that belong to the bank-specific data
         base_fields = {k: v for k, v in data.items() if k != "id"}
-        base = LeftRightBankBase.from_column_arrays(
+        base = BaseBank.from_column_arrays(
             {"id": data.get("id"), **base_fields}, bank_cls, bank_order=bank_order
         )
 
@@ -268,6 +277,12 @@ class BankData(LeftRightBankBase[SingleBank]):
     def bank_chainage_midpoints(self) -> List[np.ndarray]:
         """Get the chainage midpoints of the bank lines."""
         return [self.left.bank_chainage_midpoints, self.right.bank_chainage_midpoints]
+
+    @property
+    def num_stations_per_bank(self) -> List[int]:
+        """Get the number of stations per bank."""
+        return [self.left.length, self.right.length]
+
 
 @dataclass
 class FairwayData:
@@ -637,7 +652,7 @@ class ParametersPerBank:
 
 
 @dataclass
-class DischargeLevelParameters(LeftRightBankBase[ParametersPerBank]):
+class DischargeLevelParameters(BaseBank[ParametersPerBank]):
     pass
 
 
