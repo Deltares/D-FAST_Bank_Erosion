@@ -41,6 +41,7 @@ from dfastbe.bank_erosion.data_models import (
     BankData,
     DischargeLevelParameters,
     ErosionInputs,
+    SingleErosion,
     ErosionResults,
     ErosionRiverData,
     ErosionSimulationData,
@@ -94,7 +95,7 @@ class Erosion:
         """Configuration file object."""
         return self._config_file
 
-    def get_ship_parameters(self, num_stations_per_bank: List[int]) -> Dict[str, float]:
+    def get_ship_parameters(self, num_stations_per_bank: List[int]) -> Dict[str, List[np.ndarray]]:
         """Get ship parameters from the configuration file."""
         ship_relative_velocity = self.config_file.get_parameter(
             "Erosion", "VShip", num_stations_per_bank, positive=True, onefile=True
@@ -385,14 +386,13 @@ class Erosion:
             mask = one_zss == zss_miss
             one_zss[mask] = fairway_data.fairway_initial_water_levels[ib][mask] - 1
 
-        return ErosionInputs(
-            shipping_data=shipping_data,
+        data = dict(
             wave_fairway_distance_0=wave_fairway_distance_0,
             wave_fairway_distance_1=wave_fairway_distance_1,
             bank_protection_level=dike_height,
             tauc=tauc,
-            bank_type=bank_type,
         )
+        return ErosionInputs.from_column_arrays(data, SingleErosion, shipping_data=shipping_data, bank_type=bank_type)
 
     def _process_discharge_levels(
         self,
@@ -444,7 +444,7 @@ class Erosion:
             # 1) read level-specific parameters
             # read ship_velocity, num_ship, nwave, draught, ship_type, slope, reed, fairway_depth, ... (level specific values)
             discharge_level_pars = self._read_discharge_parameters(
-                level_i, erosion_inputs, bank_data.num_stations_per_bank
+                level_i, erosion_inputs.shipping_data, bank_data.num_stations_per_bank
             )
 
             # 2) load FM result
@@ -501,22 +501,21 @@ class Erosion:
 
                 # last discharge level
                 if level_i == num_levels - 1:
-                    dn_eq1, dv_eq1 = comp_erosion_eq(
+                    erosion_distance, erosion_volume = comp_erosion_eq(
                         bank_height[ind],
                         bank_i.segment_length,
                         fairway_data.fairway_initial_water_levels[ind],
                         discharge_level_pars.get_bank(ind),
                         bank_i.fairway_distances,
                         water_depth_fairway,
-                        erosion_inputs,
-                        ind,
+                        erosion_inputs.get_bank(ind),
                     )
-                    eq_erosion_dist.append(dn_eq1)
-                    eq_eroded_vol.append(dv_eq1)
+                    eq_erosion_dist.append(erosion_distance)
+                    eq_eroded_vol.append(erosion_volume)
 
                 (
-                    dn_tot,
-                    dv_tot,
+                    erosion_distance_tot,
+                    erosion_volume_tot,
                     erosion_distance_shipping,
                     erosion_distance_flow,
                     ship_w_max,
@@ -532,8 +531,7 @@ class Erosion:
                     bank_i.fairway_distances,
                     water_depth_fairway,
                     chezy_all[level_i][ind],
-                    erosion_inputs,
-                    ind,
+                    erosion_inputs.get_bank(ind),
                 )
                 ship_wave_max_all[level_i].append(ship_w_max)
                 ship_wave_min_all[level_i].append(ship_w_min)
@@ -545,11 +543,11 @@ class Erosion:
                             ind,
                             bank_data.get_bank(ind),
                             fairway_data,
-                            erosion_inputs,
+                            erosion_inputs.get_bank(ind),
                             discharge_level_pars.get_bank(ind),
                             water_depth_fairway,
-                            dn_eq1,
-                            dv_eq1,
+                            erosion_distance,
+                            erosion_volume,
                             bank_height,
                         )
                     # Q-specific debug
@@ -558,15 +556,15 @@ class Erosion:
                         level_i,
                         bank_data.get_bank(ind),
                         fairway_data,
-                        erosion_inputs,
+                        erosion_inputs.get_bank(ind),
                         discharge_level_pars.get_bank(ind),
                         water_depth_fairway,
                         velocity_all,
                         bank_height,
                         water_level_all,
                         chezy_all,
-                        dn_tot,
-                        dv_tot,
+                        erosion_distance_tot,
+                        erosion_volume_tot,
                         erosion_distance_shipping,
                         erosion_distance_flow,
                     )
@@ -575,17 +573,17 @@ class Erosion:
                 if len(total_erosion_dist) == ind:
                     flow_erosion_dist.append(erosion_distance_flow.copy())
                     ship_erosion_dist.append(erosion_distance_shipping.copy())
-                    total_erosion_dist.append(dn_tot.copy())
-                    total_eroded_vol.append(dv_tot.copy())
+                    total_erosion_dist.append(erosion_distance_tot.copy())
+                    total_eroded_vol.append(erosion_volume_tot.copy())
                 else:
                     flow_erosion_dist[ind] += erosion_distance_flow
                     ship_erosion_dist[ind] += erosion_distance_shipping
-                    total_erosion_dist[ind] += dn_tot
-                    total_eroded_vol[ind] += dv_tot
+                    total_erosion_dist[ind] += erosion_distance_tot
+                    total_eroded_vol[ind] += erosion_volume_tot
 
                 # accumulate eroded volumes per km
                 dvol = get_km_eroded_volume(
-                    bank_i.bank_chainage_midpoints, dv_tot, km_bin
+                    bank_i.bank_chainage_midpoints, erosion_volume_tot, km_bin
                 )
                 vol_per_discharge_all[level_i].append(dvol)
                 dvol_bank[:, ind] += dvol
@@ -720,7 +718,7 @@ class Erosion:
     def _read_discharge_parameters(
         self,
         level_i: int,
-        erosion_inputs: ErosionInputs,
+        shipping_data: Dict[str, List[np.ndarray]],
         num_stations_per_bank: List[int],
     ) -> DischargeLevelParameters:
         """Read Discharge level parameters.
@@ -733,31 +731,31 @@ class Erosion:
 
         ship_velocity = self._get_param(
             "VShip",
-            erosion_inputs.shipping_data["vship0"],
+            shipping_data["vship0"],
             iq_str,
             num_stations_per_bank,
         )
         num_ship = self._get_param(
             "NShip",
-            erosion_inputs.shipping_data["Nship0"],
+            shipping_data["Nship0"],
             iq_str,
             num_stations_per_bank,
         )
         num_waves_per_ship = self._get_param(
             "NWave",
-            erosion_inputs.shipping_data["nwave0"],
+            shipping_data["nwave0"],
             iq_str,
             num_stations_per_bank,
         )
         ship_draught = self._get_param(
             "Draught",
-            erosion_inputs.shipping_data["Tship0"],
+            shipping_data["Tship0"],
             iq_str,
             num_stations_per_bank,
         )
         ship_type = self._get_param(
             "ShipType",
-            erosion_inputs.shipping_data["ship0"],
+            shipping_data["ship0"],
             iq_str,
             num_stations_per_bank,
             valid=[1, 2, 3],
@@ -765,7 +763,7 @@ class Erosion:
         )
         par_slope = self._get_param(
             "Slope",
-            erosion_inputs.shipping_data["parslope0"],
+            shipping_data["parslope0"],
             iq_str,
             num_stations_per_bank,
             positive=True,
@@ -773,7 +771,7 @@ class Erosion:
         )
         par_reed = self._get_param(
             "Reed",
-            erosion_inputs.shipping_data["parreed0"],
+            shipping_data["parreed0"],
             iq_str,
             num_stations_per_bank,
             positive=True,

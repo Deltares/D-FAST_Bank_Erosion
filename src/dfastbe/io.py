@@ -887,7 +887,7 @@ class ConfigFile:
         group: str,
         key: str,
         num_stations_per_bank: List[int],
-        default=None,
+        default: Any = None,
         ext: str = "",
         positive: bool = False,
         valid: Optional[List[float]] = None,

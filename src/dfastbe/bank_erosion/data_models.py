@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type, Optional
+from typing import Iterator, List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type, Optional
 import numpy as np
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString, Point
@@ -57,13 +57,33 @@ class BaseBank(Generic[GenericType]):
 
         return cls(id=id_val, left=left, right=right)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[GenericType]:
         """Iterate over the banks."""
         return iter([self.left, self.right])
 
 
 @dataclass
-class ErosionInputs:
+class SingleErosion:
+    """Class to hold erosion data for a single bank.
+
+    args:
+        bank_line_coords (np.ndarray):
+            Coordinates of the bank line.
+        bank_face_indices (np.ndarray):
+            Indices of the faces associated with the bank.
+        fairway_face_indices (np.ndarray):
+            Indices of the faces associated with the fairway.
+        bank_chainage_midpoints (np.ndarray):
+            River chainage for the midpoints of each segment of the bank line.
+    """
+    wave_fairway_distance_0: np.ndarray
+    wave_fairway_distance_1: np.ndarray
+    bank_protection_level: np.ndarray
+    tauc: np.ndarray
+
+
+@dataclass
+class ErosionInputs(BaseBank[SingleErosion]):
     """Class to hold erosion inputs.
 
     args:
@@ -84,13 +104,8 @@ class ErosionInputs:
         taucls_str (Tuple[str]):
             String representation for different bank types.
     """
-
-    shipping_data: Dict[str, np.ndarray]
-    wave_fairway_distance_0: List[np.ndarray]
-    wave_fairway_distance_1: List[np.ndarray]
-    bank_protection_level: List[np.ndarray]
-    tauc: List[np.ndarray]
-    bank_type: List[np.ndarray]
+    shipping_data: Dict[str, List[np.ndarray]] = field(default_factory=dict)
+    bank_type: np.ndarray = field(default_factory=lambda: np.array([]))
     taucls: ClassVar[np.ndarray] = np.array([1e20, 95, 3.0, 0.95, 0.15])
     taucls_str: ClassVar[Tuple[str]] = (
         "protected",
@@ -100,6 +115,34 @@ class ErosionInputs:
         "sand",
     )
 
+    @classmethod
+    def from_column_arrays(
+        cls, data: dict, bank_cls: Type["SingleErosion"], shipping_data: Dict[str, List[np.ndarray]],
+        bank_type: np.ndarray, bank_order: Tuple[str, str] = ("left", "right")
+    ) -> "ErosionInputs":
+        # Only include fields that belong to the bank-specific data
+        base_fields = {k: v for k, v in data.items() if k != "id"}
+        base = BaseBank.from_column_arrays(
+            {"id": data.get("id"), **base_fields}, bank_cls, bank_order=bank_order
+        )
+
+        return cls(
+            id=base.id,
+            left=base.left,
+            right=base.right,
+            shipping_data=shipping_data,
+            bank_type=bank_type,
+        )
+
+    @property
+    def bank_protection_level(self) -> List[np.ndarray]:
+        """Get the bank protection level."""
+        return [self.left.bank_protection_level, self.right.bank_protection_level]
+
+    @property
+    def tauc(self) -> List[np.ndarray]:
+        """Get the critical bank shear stress values."""
+        return [self.left.tauc, self.right.tauc]
 
 @dataclass
 class WaterLevelData:

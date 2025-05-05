@@ -14,23 +14,38 @@ from dfastbe.bank_erosion.data_models import (
     FairwayData,
     ErosionResults,
     ErosionSimulationData,
-    SingleBank
+    SingleBank,
+    SingleErosion
 )
 
 
-def test_erosion_inputs():
-    """Test instantiation of the ErosionInputs dataclass."""
-    erosion_inputs = ErosionInputs(
-        shipping_data={"ship1": np.array([1.0, 2.0])},
-        wave_fairway_distance_0=[np.array([10.0, 20.0])],
-        wave_fairway_distance_1=[np.array([15.0, 25.0])],
-        bank_protection_level=[np.array([1, 0])],
-        tauc=[np.array([0.5, 0.6])],
-        bank_type=[np.array([1, 2])],
+class TestErosionInputs:
+    @pytest.mark.parametrize(
+        "bank_order, result",
+        [(("right", "left"), (1, 2)), (("left", "right"), (1, 2))],
+        ids=[
+            "right-left bank order",
+            "left-right bank order",
+        ],
     )
-    assert erosion_inputs.shipping_data["ship1"][0] == pytest.approx(1.0)
-    assert erosion_inputs.taucls[1] == 95
-    assert erosion_inputs.taucls_str[0] == "protected"
+    def test_erosion_inputs(self, bank_order, result):
+        """Test instantiation of the ErosionInputs dataclass."""
+        shipping_data = {"ship1": [np.array([1.0, 1.0])]}
+        bank_type = np.array([1.0, 1.0])
+        data = dict(
+            wave_fairway_distance_0=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
+            wave_fairway_distance_1=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
+            bank_protection_level=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
+            tauc=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
+        )
+        erosion_inputs = ErosionInputs.from_column_arrays(
+            data, SingleErosion, shipping_data=shipping_data, bank_order=bank_order, bank_type=bank_type
+        )
+        assert erosion_inputs.right.wave_fairway_distance_0[0] == result[bank_order.index("right")]
+        assert erosion_inputs.left.wave_fairway_distance_0[0] == result[bank_order.index("left")]
+        assert erosion_inputs.shipping_data["ship1"][0] == pytest.approx(1.0)
+        assert erosion_inputs.taucls[1] == 95
+        assert erosion_inputs.taucls_str[0] == "protected"
 
 
 def test_water_level_data():
