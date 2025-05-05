@@ -235,7 +235,7 @@ class Erosion:
 
         num_fairway_face_ind = len(fairway_data.fairway_face_indices)
 
-        for bank_i, single_bank in enumerate([bank_data.left, bank_data.right]):
+        for bank_i, single_bank in enumerate(bank_data):
             bank_coords = single_bank.bank_line_coords
             coords_mid = (bank_coords[:-1] + bank_coords[1:]) / 2
             bank_fairway_dist = np.zeros(len(coords_mid))
@@ -309,7 +309,7 @@ class Erosion:
 
         # water level at fairway
         water_level_fairway_ref = []
-        for single_bank in [bank_data.left, bank_data.right]:
+        for single_bank in bank_data:
             ii = single_bank.fairway_face_indices
             water_level_fairway_ref.append(simulation_data.water_level_face[ii])
         fairway_data.fairway_initial_water_levels = water_level_fairway_ref
@@ -472,7 +472,7 @@ class Erosion:
 
             hfw_max_level = 0
 
-            for ind, bank_i in enumerate([bank_data.left, bank_data.right]):
+            for ind, bank_i in enumerate(bank_data):
                 # bank_i = 0: left bank, bank_i = 1: right bank
                 # calculate velocity along banks ...
                 vel_bank = simulation_data.calculate_bank_velocity(
@@ -646,7 +646,7 @@ class Erosion:
         bankline_new_list = []
         xy_line_eq_list = []
         bankline_eq_list = []
-        for ib, single_bank in enumerate([bank_data.left, bank_data.right]):
+        for ib, single_bank in enumerate(bank_data):
             bank_coords = single_bank.bank_line_coords
             avg_erosion_rate[ib] = (
                 erosion_results.total_erosion_dist[ib] * single_bank.bank_line_size

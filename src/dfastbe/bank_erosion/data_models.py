@@ -57,6 +57,10 @@ class BaseBank(Generic[GenericType]):
 
         return cls(id=id_val, left=left, right=right)
 
+    def __iter__(self):
+        """Iterate over the banks."""
+        return iter([self.left, self.right])
+
 
 @dataclass
 class ErosionInputs:
