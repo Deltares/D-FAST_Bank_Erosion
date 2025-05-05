@@ -478,6 +478,12 @@ class Erosion:
             ship_wave_max_level_i = []
             ship_wave_min_level_i = []
             vol_per_discharge_level_i = []
+
+            erosion_distance_flow_level_i = []
+            erosion_distance_shipping_level_i = []
+            erosion_distance_tot_level_i = []
+            erosion_volume_tot_level_i = []
+
             for ind, bank_i in enumerate(bank_data):
                 # bank_i = 0: left bank, bank_i = 1: right bank
                 # calculate velocity along banks ...
@@ -541,6 +547,10 @@ class Erosion:
                 )
                 ship_wave_max_level_i.append(ship_w_max)
                 ship_wave_min_level_i.append(ship_w_min)
+                erosion_distance_flow_level_i.append(erosion_distance_flow)
+                erosion_distance_shipping_level_i.append(erosion_distance_shipping)
+                erosion_distance_tot_level_i.append(erosion_distance_tot)
+                erosion_volume_tot_level_i.append(erosion_volume_tot)
 
                 if self.river_data.debug:
                     if level_i == num_levels - 1:
@@ -582,10 +592,10 @@ class Erosion:
                 vol_per_discharge_level_i.append(dvol)
                 dvol_bank[:, ind] += dvol
 
-                flow_erosion_dist[ind] += erosion_distance_flow
-                ship_erosion_dist[ind] += erosion_distance_shipping
-                total_erosion_dist[ind] += erosion_distance_tot
-                total_eroded_vol[ind] += erosion_volume_tot
+            flow_erosion_dist = [old + new for old, new in zip(erosion_distance_flow_level_i, flow_erosion_dist)]
+            ship_erosion_dist = [old + new for old, new in zip(erosion_distance_shipping_level_i,ship_erosion_dist)]
+            total_erosion_dist = [old + new for old, new in zip(erosion_distance_tot_level_i,total_erosion_dist)]
+            total_eroded_vol = [old + new for old, new in zip(erosion_volume_tot_level_i,total_eroded_vol)]
 
             velocity_all[level_i] = vel_bank_level_i
             water_level_all[level_i] = water_level_level_i
