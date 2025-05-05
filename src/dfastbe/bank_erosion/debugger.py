@@ -25,7 +25,7 @@ class Debugger:
             "iface_fw": bank_data.fairway_face_indices[bank_index],
             "iface_bank": bank_data.bank_face_indices[bank_index],  # bank_index
             "bank_height": bank_height[bank_index],
-            "segment_length": segment_length[bank_index],
+            "segment_length": segment_length,
             "zw0": fairway_data.fairway_initial_water_levels[bank_index],
             "ship_velocity": discharge_level_pars.ship_velocity,
             "ship_type": discharge_level_pars.ship_type,

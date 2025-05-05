@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type
+from typing import List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type, Optional
 import numpy as np
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
@@ -11,6 +11,50 @@ from dfastbe.io import ConfigFile, BaseRiverData, BaseSimulationData, log_text
 
 
 GenericType = TypeVar("GenericType")
+
+@dataclass
+class LeftRightBankBase(Generic[GenericType]):
+    left: GenericType
+    right: GenericType
+    id: Optional[int] = field(default=None)
+
+    def get_bank(self, bank_index: int) -> GenericType:
+        if bank_index == 0:
+            return self.left
+        elif bank_index == 1:
+            return self.right
+        else:
+            raise ValueError("bank_index must be 0 (left) or 1 (right)")
+
+    @classmethod
+    def from_column_arrays(
+        cls: Type["LeftRighBankBase[GenericType]"],
+        data: Dict[str, Any],
+        bank_cls: Type[GenericType],
+        bank_order: Tuple[str, str] = ("left", "right")
+    ) -> "LeftRightBankBase[GenericType]":
+        if set(bank_order) != {"left", "right"}:
+            raise ValueError("bank_order must be a permutation of ('left', 'right')")
+
+        id_val = data.get("id")
+
+        # Extract the first and second array for each parameter (excluding id)
+        first_args = {}
+        second_args = {}
+        for key, value in data.items():
+            if key == "id":
+                continue
+            if not isinstance(value, list) or len(value) != 2:
+                raise ValueError(f"Expected 2-column array for key '{key}', got shape {value.shape}")
+
+            split = dict(zip(bank_order, value))
+            first_args[key] = split["left"]
+            second_args[key] = split["right"]
+
+        left = bank_cls(**first_args)
+        right = bank_cls(**second_args)
+
+        return cls(id=id_val, left=left, right=right)
 
 
 @dataclass
@@ -115,7 +159,53 @@ class MeshData:
 
 
 @dataclass
-class BankData:
+class SingleBank:
+    is_right_bank: bool
+    bank_line_coords: np.ndarray
+    bank_face_indices: np.ndarray
+    bank_line_size: np.ndarray = field(default_factory=lambda: np.array([]))
+    fairway_distances: np.ndarray = field(default_factory=lambda: np.array([]))
+    fairway_face_indices: np.ndarray = field(default_factory=lambda: np.array([]))
+    bank_chainage_midpoints: np.ndarray = field(default_factory=lambda: np.array([]))
+
+    segment_length: np.ndarray = field(init=False)
+    dx: np.ndarray = field(init=False)
+    dy: np.ndarray = field(init=False)
+    length: int = field(init=False)
+
+    def __post_init__(self):
+        """Post-initialization to ensure bank_line_coords is a list of numpy arrays."""
+        self.segment_length = self._segment_length()
+        self.dx = self._dx()
+        self.dy = self._dy()
+        self.length = len(self.bank_chainage_midpoints)
+
+    def _segment_length(self) -> np.ndarray:
+        """Calculate the length of each segment in the bank line.
+
+        Returns:
+            List[np.ndarray]: Length of each segment in the bank line.
+        """
+        return np.linalg.norm(np.diff(self.bank_line_coords, axis=0), axis=1)
+
+    def _dx(self) -> np.ndarray:
+        """Calculate the distance between each bank line point.
+
+        Returns:
+            List[np.ndarray]: Distance to the closest fairway point for each bank line point.
+        """
+        return np.diff(self.bank_line_coords[:, 0])
+
+    def _dy(self) -> np.ndarray:
+        """Calculate the distance between each bank line point.
+
+        Returns:
+            List[np.ndarray]: Distance to the closest fairway point for each bank line point.
+        """
+        return np.diff(self.bank_line_coords[:, 1])
+
+@dataclass
+class BankData(LeftRightBankBase[SingleBank]):
     """Class to hold bank-related data.
 
     args:
@@ -138,50 +228,46 @@ class BankData:
         fairway_face_indices (List[np.ndarray]):
             The face index of the closest fairway point for each bank line point.
     """
+    bank_lines: GeoDataFrame = field(default_factory=GeoDataFrame)
+    n_bank_lines: int = 0
 
-    is_right_bank: List[bool]
-    bank_chainage_midpoints: np.ndarray
-    bank_line_coords: List[np.ndarray]
-    bank_face_indices: List[np.ndarray]
-    bank_lines: GeoDataFrame
-    n_bank_lines: int
-    bank_line_size: List[np.ndarray] = field(default_factory=list)
-    fairway_distances: List[np.ndarray] = field(default_factory=list)
-    fairway_face_indices: List[np.ndarray] = field(default_factory=list)
+    @classmethod
+    def from_column_arrays(
+        cls,
+        data: dict,
+        bank_cls: Type["SingleBank"],
+        bank_lines: GeoDataFrame,
+        n_bank_lines: int,
+        bank_order: Tuple[str, str] = ("left", "right")
+    ) -> "BankData":
+        # Only include fields that belong to the bank-specific data
+        base_fields = {k: v for k, v in data.items() if k != "id"}
+        base = LeftRightBankBase.from_column_arrays(
+            {"id": data.get("id"), **base_fields}, bank_cls, bank_order=bank_order
+        )
 
-    segment_length: List = field(init=False)
-    dx: List = field(init=False)
-    dy: List = field(init=False)
+        return cls(
+            id=base.id,
+            left=base.left,
+            right=base.right,
+            bank_lines=bank_lines,
+            n_bank_lines=n_bank_lines,
+        )
 
-    def __post_init__(self):
-        """Post-initialization to ensure bank_line_coords is a list of numpy arrays."""
-        self.segment_length = self._segment_length()
-        self.dx = self._dx()
-        self.dy = self._dy()
+    @property
+    def bank_line_coords(self) -> List[np.ndarray]:
+        """Get the coordinates of the bank lines."""
+        return [self.left.bank_line_coords, self.right.bank_line_coords]
 
-    def _segment_length(self) -> List[np.ndarray]:
-        """Calculate the length of each segment in the bank line.
+    @property
+    def is_right_bank(self) -> List[bool]:
+        """Get the bank direction."""
+        return [self.left.is_right_bank, self.right.is_right_bank]
 
-        Returns:
-            List[np.ndarray]: Length of each segment in the bank line.
-        """
-        return [np.linalg.norm(np.diff(line, axis=0), axis=1) for line in self.bank_line_coords]
-
-    def _dx(self):
-        """Calculate the distance between each bank line point.
-
-        Returns:
-            List[np.ndarray]: Distance to the closest fairway point for each bank line point.
-        """
-        return [np.diff(coords[:, 0]) for coords in self.bank_line_coords]
-
-    def _dy(self):
-        """Calculate the distance between each bank line point.
-
-        Returns:
-            List[np.ndarray]: Distance to the closest fairway point for each bank line point.
-        """
-        return [np.diff(coords[:, 1]) for coords in self.bank_line_coords]
+    @property
+    def bank_chainage_midpoints(self) -> List[np.ndarray]:
+        """Get the chainage midpoints of the bank lines."""
+        return [self.left.bank_chainage_midpoints, self.right.bank_chainage_midpoints]
 
 @dataclass
 class FairwayData:
@@ -427,33 +513,29 @@ class ErosionSimulationData(BaseSimulationData):
         x1 = np.ma.masked_where(np.ma.getmask(idx), x0[idx_safe])
         return x1
 
-    def calculate_bank_velocity(
-        self, bank_data: BankData, bank_i: int, vel_dx
-    ) -> np.ndarray:
+    def calculate_bank_velocity(self, single_bank: SingleBank, vel_dx) -> np.ndarray:
         from dfastbe.kernel import moving_avg
-        bank_face_indices = bank_data.bank_face_indices[bank_i]
+        bank_face_indices = single_bank.bank_face_indices
         vel_bank = (
                 np.abs(
-                    self.velocity_x_face[bank_face_indices] * bank_data.dx[bank_i]
-                    + self.velocity_y_face[bank_face_indices] * bank_data.dy[bank_i]
+                    self.velocity_x_face[bank_face_indices] * single_bank.dx
+                    + self.velocity_y_face[bank_face_indices] * single_bank.dy
                 )
-                / bank_data.segment_length[bank_i]
+                / single_bank.segment_length
         )
 
         if vel_dx > 0.0:
-            if bank_i == 0:
-                log_text("apply_velocity_filter", indent="  ", data={"dx": vel_dx})
             vel_bank = moving_avg(
-                bank_data.bank_chainage_midpoints[bank_i], vel_bank, vel_dx
+                single_bank.bank_chainage_midpoints, vel_bank, vel_dx
             )
 
         return vel_bank
 
-    def calculate_bank_height(self, bank_i: int, bank_data: BankData, zb_dx):
+    def calculate_bank_height(self, single_bank: SingleBank, zb_dx):
         """
 
         Args:
-            bank_data:
+            single_bank:
             bank_i:
             zb_dx:
 
@@ -462,7 +544,7 @@ class ErosionSimulationData(BaseSimulationData):
 
         """
         from dfastbe.kernel import moving_avg
-        bank_index = bank_data.bank_face_indices[bank_i]
+        bank_index = single_bank.bank_face_indices
         if self.bed_elevation_location == "node":
             zb_nodes = self.bed_elevation_values
             zb_all = self.apply_masked_indexing(
@@ -470,10 +552,8 @@ class ErosionSimulationData(BaseSimulationData):
             )
             zb_bank = zb_all.max(axis=1)
             if zb_dx > 0.0:
-                if bank_i == 0:
-                    log_text("apply_bank_level_filter", indent="  ", data={"dx": zb_dx})
                 zb_bank = moving_avg(
-                    bank_data.bank_chainage_midpoints[bank_i], zb_bank, zb_dx,
+                    single_bank.bank_chainage_midpoints, zb_bank, zb_dx,
                 )
         else:
             # don't know ... need to check neighbouring cells ...
@@ -514,7 +594,7 @@ class ErosionRiverData(BaseRiverData):
 
     def _get_bank_output_dir(self) -> Path:
         bank_output_dir = self.config_file.get_str("General", "BankDir")
-        log_text("bankdir_out", data={"dir": bank_output_dir})
+        log_text("bank_dir_out", data={"dir": bank_output_dir})
         if os.path.exists(bank_output_dir):
             log_text("overwrite_dir", data={"dir": bank_output_dir})
         else:
@@ -524,7 +604,7 @@ class ErosionRiverData(BaseRiverData):
 
     def _get_bank_line_dir(self) -> Path:
         bank_dir = self.config_file.get_str("General", "BankDir")
-        log_text("bankdir_in", data={"dir": bank_dir})
+        log_text("bank_dir_in", data={"dir": bank_dir})
         bank_dir = Path(bank_dir)
         if not bank_dir.exists():
             log_text("missing_dir", data={"dir": bank_dir})
@@ -542,44 +622,6 @@ class ErosionRiverData(BaseRiverData):
         river_axis = XYCModel.read(river_axis_file)
         return river_axis
 
-@dataclass
-class LeftRightBankBase(Generic[GenericType]):
-    id: int
-    left: GenericType
-    right: GenericType
-
-    def get_bank(self, bank_index: int) -> GenericType:
-        if bank_index == 0:
-            return self.left
-        elif bank_index == 1:
-            return self.right
-        else:
-            raise ValueError("bank_index must be 0 (left) or 1 (right)")
-
-    @classmethod
-    def from_column_arrays(
-        cls: Type["LeftRighBankBase[GenericType]"], data: Dict[str, Any], bank_cls: Type[GenericType]
-    ) -> "LeftRightBankBase[GenericType]":
-        id_val = data["id"]
-
-        # Extract the first and second array for each parameter (excluding id)
-        left_args = {}
-        right_args = {}
-        for key, value in data.items():
-            if key == "id":
-                continue
-            if not isinstance(value, list) or len(value) != 2:
-                raise ValueError(f"Expected 2-column array for key '{key}', got shape {value.shape}")
-            left_array, right_array = value
-            if not (isinstance(left_array, np.ndarray) and isinstance(right_array, np.ndarray)):
-                raise ValueError(f"Both left and right for '{key}' must be numpy arrays")
-
-            left_args[key] = left_array
-            right_args[key] = right_array
-
-        left = bank_cls(**left_args)
-        right = bank_cls(**right_args)
-        return cls(id=id_val, left=left, right=right)
 
 @dataclass
 class ParametersPerBank:
@@ -597,7 +639,6 @@ class ParametersPerBank:
 @dataclass
 class DischargeLevelParameters(LeftRightBankBase[ParametersPerBank]):
     pass
-
 
 
 class BankLinesResultsError(Exception):
