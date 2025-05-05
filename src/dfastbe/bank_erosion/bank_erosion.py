@@ -26,48 +26,56 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Tuple, List, Dict, Any
 import os
+from typing import Dict, List, Tuple
+
+import matplotlib.pyplot as plt
+import numpy as np
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
-
 from shapely.geometry import LineString
-import numpy as np
-import matplotlib.pyplot as plt
 
 from dfastbe import __version__
-from dfastbe.kernel import get_km_bins, comp_erosion_eq, compute_bank_erosion_dynamics, get_km_eroded_volume, \
-                            get_zoom_extends
-from dfastbe.support import move_line
 from dfastbe import plotting as df_plt
+from dfastbe.bank_erosion.data_models import (
+    BankData,
+    DischargeLevelParameters,
+    ErosionInputs,
+    ErosionResults,
+    ErosionRiverData,
+    ErosionSimulationData,
+    FairwayData,
+    MeshData,
+    ParametersPerBank,
+    WaterLevelData,
+)
 from dfastbe.bank_erosion.debugger import Debugger
+from dfastbe.bank_erosion.utils import BankLinesProcessor, intersect_line_mesh
 from dfastbe.io import (
-    LineGeometry, ConfigFile,
+    ConfigFile,
+    LineGeometry,
     log_text,
     write_km_eroded_volumes,
 )
-from dfastbe.bank_erosion.data_models import (
-    ErosionRiverData,
-    ErosionSimulationData,
-    ErosionInputs,
-    ParametersPerBank,
-    WaterLevelData,
-    MeshData,
-    BankData,
-    FairwayData,
-    ErosionResults,
-    DischargeLevelParameters,
+from dfastbe.kernel import (
+    comp_erosion_eq,
+    compute_bank_erosion_dynamics,
+    get_km_bins,
+    get_km_eroded_volume,
+    get_zoom_extends,
 )
-from dfastbe.bank_erosion.utils import intersect_line_mesh, BankLinesProcessor
+from dfastbe.support import move_line
 from dfastbe.utils import timed_logger
-
 
 X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
 
 
 class Erosion:
+    """Class to handle the bank erosion calculations."""
+
     def __init__(self, config_file: ConfigFile, gui: bool = False):
+        """Initialize the Erosion class."""
         self.root_dir = config_file.root_dir
         self._config_file = config_file
         self.gui = gui
@@ -75,7 +83,9 @@ class Erosion:
         self.river_data = ErosionRiverData(config_file)
         self.river_center_line_arr = self.river_data.river_center_line.as_array()
         self.simulation_data = self.river_data.simulation_data()
-        self.sim_files, self.p_discharge = self.river_data.get_erosion_sim_data(self.river_data.num_discharge_levels)
+        self.sim_files, self.p_discharge = self.river_data.get_erosion_sim_data(
+            self.river_data.num_discharge_levels
+        )
         self.bl_processor = BankLinesProcessor(self.river_data)
         self.debugger = Debugger(config_file, self.river_data)
 
@@ -85,7 +95,7 @@ class Erosion:
         return self._config_file
 
     def get_ship_parameters(self, num_stations_per_bank: List[int]) -> Dict[str, float]:
-
+        """Get ship parameters from the configuration file."""
         ship_relative_velocity = self.config_file.get_parameter(
             "Erosion", "VShip", num_stations_per_bank, positive=True, onefile=True
         )
@@ -93,7 +103,12 @@ class Erosion:
             "Erosion", "NShip", num_stations_per_bank, positive=True, onefile=True
         )
         num_waves_p_ship = self.config_file.get_parameter(
-            "Erosion", "NWave", num_stations_per_bank, default=5, positive=True, onefile=True
+            "Erosion",
+            "NWave",
+            num_stations_per_bank,
+            default=5,
+            positive=True,
+            onefile=True,
         )
         ship_draught = self.config_file.get_parameter(
             "Erosion", "Draught", num_stations_per_bank, positive=True, onefile=True
@@ -102,10 +117,20 @@ class Erosion:
             "Erosion", "ShipType", num_stations_per_bank, valid=[1, 2, 3], onefile=True
         )
         parslope0 = self.config_file.get_parameter(
-            "Erosion", "Slope", num_stations_per_bank, default=20, positive=True, ext="slp"
+            "Erosion",
+            "Slope",
+            num_stations_per_bank,
+            default=20,
+            positive=True,
+            ext="slp",
         )
         reed_wave_damping_coeff = self.config_file.get_parameter(
-            "Erosion", "Reed", num_stations_per_bank, default=0, positive=True, ext="rdd"
+            "Erosion",
+            "Reed",
+            num_stations_per_bank,
+            default=0,
+            positive=True,
+            ext="rdd",
         )
 
         ship_data = {
@@ -120,7 +145,8 @@ class Erosion:
         return ship_data
 
     def _process_river_axis_by_center_line(self) -> LineGeometry:
-        """
+        """Process the river axis by the center line.
+
         Intersect the river center line with the river axis to map the stations from the first to the latter
         then clip the river axis by the first and last station of the centerline.
         """
@@ -141,8 +167,12 @@ class Erosion:
         river_axis_km = river_axis.intersect_with_line(self.river_center_line_arr)
 
         # clip river axis to reach of interest (get closest point to the first and last station)
-        i1 = np.argmin(((self.river_center_line_arr[0, :2] - river_axis_numpy) ** 2).sum(axis=1))
-        i2 = np.argmin(((self.river_center_line_arr[-1, :2] - river_axis_numpy) ** 2).sum(axis=1))
+        i1 = np.argmin(
+            ((self.river_center_line_arr[0, :2] - river_axis_numpy) ** 2).sum(axis=1)
+        )
+        i2 = np.argmin(
+            ((self.river_center_line_arr[-1, :2] - river_axis_numpy) ** 2).sum(axis=1)
+        )
         if i1 < i2:
             river_axis_km = river_axis_km[i1 : i2 + 1]
             river_axis_numpy = river_axis_numpy[i1 : i2 + 1]
@@ -169,7 +199,9 @@ class Erosion:
             river_axis.as_array(), mesh_data
         )
         if self.river_data.debug:
-            arr = (fairway_intersection_coords[:-1] + fairway_intersection_coords[1:])/ 2
+            arr = (
+                fairway_intersection_coords[:-1] + fairway_intersection_coords[1:]
+            ) / 2
             line_geom = LineGeometry(arr, crs=self.config_file.crs)
             line_geom.to_file(
                 file_name=f"{str(self.river_data.output_dir)}{os.sep}fairway_face_indices.shp",
@@ -225,9 +257,16 @@ class Erosion:
                 # average the values of the two grid cells. Let's go for the simplest approach ...
                 iseg = max(closest_ind - 1, 0)
                 if closest_ind > 0:
-                    alpha = calculate_alpha(fairway_data.intersection_coords, closest_ind, closest_ind - 1, coord_i)
+                    alpha = calculate_alpha(
+                        fairway_data.intersection_coords,
+                        closest_ind,
+                        closest_ind - 1,
+                        coord_i,
+                    )
                     if 0 < alpha < 1:
-                        fwp1 = fairway_data.intersection_coords[closest_ind - 1] + alpha * (
+                        fwp1 = fairway_data.intersection_coords[
+                            closest_ind - 1
+                        ] + alpha * (
                             fairway_data.intersection_coords[closest_ind]
                             - fairway_data.intersection_coords[closest_ind - 1]
                         )
@@ -236,7 +275,12 @@ class Erosion:
                             fairway_bank_distance = d1
                             # projected point located on segment before, which corresponds to initial choice: iseg = ifw - 1
                 if closest_ind < num_fairway_face_ind:
-                    alpha = calculate_alpha(fairway_data.intersection_coords, closest_ind + 1, closest_ind, coord_i)
+                    alpha = calculate_alpha(
+                        fairway_data.intersection_coords,
+                        closest_ind + 1,
+                        closest_ind,
+                        coord_i,
+                    )
                     if 0 < alpha < 1:
                         fwp1 = fairway_data.intersection_coords[closest_ind] + alpha * (
                             fairway_data.intersection_coords[closest_ind + 1]
@@ -271,7 +315,10 @@ class Erosion:
         fairway_data.fairway_initial_water_levels = water_level_fairway_ref
 
     def _prepare_initial_conditions(
-        self, config_file: ConfigFile, num_stations_per_bank: List[int], fairway_data: FairwayData
+        self,
+        config_file: ConfigFile,
+        num_stations_per_bank: List[int],
+        fairway_data: FairwayData,
     ) -> ErosionInputs:
         # wave reduction s0, s1
         wave_fairway_distance_0 = config_file.get_parameter(
@@ -386,19 +433,29 @@ class Erosion:
         for level_i in range(num_levels):
             log_text(
                 "discharge_header",
-                data={"i": level_i + 1, "p": self.p_discharge[level_i], "t": self.p_discharge[level_i] * self.river_data.erosion_time, },
+                data={
+                    "i": level_i + 1,
+                    "p": self.p_discharge[level_i],
+                    "t": self.p_discharge[level_i] * self.river_data.erosion_time,
+                },
             )
 
             log_text("read_q_params", indent="  ")
             # 1) read level-specific parameters
             # read ship_velocity, num_ship, nwave, draught, ship_type, slope, reed, fairway_depth, ... (level specific values)
-            discharge_level_pars = self._read_discharge_parameters(level_i, erosion_inputs, num_stations_per_bank)
+            discharge_level_pars = self._read_discharge_parameters(
+                level_i, erosion_inputs, num_stations_per_bank
+            )
 
             # 2) load FM result
             log_text("-", indent="  ")
-            log_text("read_simdata", data={"file": self.sim_files[level_i]}, indent="  ")
+            log_text(
+                "read_simdata", data={"file": self.sim_files[level_i]}, indent="  "
+            )
             log_text("-", indent="  ")
-            simulation_data = ErosionSimulationData.read(self.sim_files[level_i], indent="  ")
+            simulation_data = ErosionSimulationData.read(
+                self.sim_files[level_i], indent="  "
+            )
             log_text("-", indent="  ")
 
             log_text("bank_erosion", indent="  ")
@@ -418,13 +475,17 @@ class Erosion:
             for ind, bank_i in enumerate([bank_data.left, bank_data.right]):
                 # bank_i = 0: left bank, bank_i = 1: right bank
                 # calculate velocity along banks ...
-                vel_bank = simulation_data.calculate_bank_velocity(bank_i, self.river_data.vel_dx)
+                vel_bank = simulation_data.calculate_bank_velocity(
+                    bank_i, self.river_data.vel_dx
+                )
                 velocity_all[level_i].append(vel_bank)
 
                 if level_i == 0:
                     # determine velocity and bank height along banks ...
                     # bank height = maximum bed elevation per cell
-                    zb_bank = simulation_data.calculate_bank_height(bank_i, self.river_data.zb_dx)
+                    zb_bank = simulation_data.calculate_bank_height(
+                        bank_i, self.river_data.zb_dx
+                    )
                     bank_height.append(zb_bank)
 
                 # get water depth along the fair-way
@@ -432,7 +493,9 @@ class Erosion:
                 water_depth_fairway = simulation_data.water_depth_face[ii_face]
                 hfw_max_level = max(hfw_max_level, water_depth_fairway.max())
 
-                water_level_all[level_i].append(simulation_data.water_level_face[ii_face])
+                water_level_all[level_i].append(
+                    simulation_data.water_level_face[ii_face]
+                )
                 chez_face = simulation_data.chezy_face[ii_face]
                 chezy_all[level_i].append(0 * chez_face + chez_face.mean())
 
@@ -451,22 +514,26 @@ class Erosion:
                     eq_erosion_dist.append(dn_eq1)
                     eq_eroded_vol.append(dv_eq1)
 
-
-                dn_tot, dv_tot, erosion_distance_shipping, erosion_distance_flow, ship_w_max, ship_w_min = (
-                    compute_bank_erosion_dynamics(
-                        velocity_all[level_i][ind],
-                        bank_height[ind],
-                        bank_i.segment_length,
-                        water_level_all[level_i][ind],
-                        fairway_data.fairway_initial_water_levels[ind],
-                        discharge_level_pars.get_bank(ind),
-                        self.river_data.erosion_time * self.p_discharge[level_i],
-                        bank_i.fairway_distances,
-                        water_depth_fairway,
-                        chezy_all[level_i][ind],
-                        erosion_inputs,
-                        ind,
-                    )
+                (
+                    dn_tot,
+                    dv_tot,
+                    erosion_distance_shipping,
+                    erosion_distance_flow,
+                    ship_w_max,
+                    ship_w_min,
+                ) = compute_bank_erosion_dynamics(
+                    velocity_all[level_i][ind],
+                    bank_height[ind],
+                    bank_i.segment_length,
+                    water_level_all[level_i][ind],
+                    fairway_data.fairway_initial_water_levels[ind],
+                    discharge_level_pars.get_bank(ind),
+                    self.river_data.erosion_time * self.p_discharge[level_i],
+                    bank_i.fairway_distances,
+                    water_depth_fairway,
+                    chezy_all[level_i][ind],
+                    erosion_inputs,
+                    ind,
                 )
                 ship_wave_max_all[level_i].append(ship_w_max)
                 ship_wave_min_all[level_i].append(ship_w_min)
@@ -475,15 +542,37 @@ class Erosion:
                     if level_i == num_levels - 1:
                         # EQ debug
                         self.debugger.debug_process_discharge_levels_1(
-                            ind, bank_data, fairway_data, erosion_inputs, discharge_level_pars.get_bank(ind),
-                            water_depth_fairway, dn_eq1, dv_eq1, bank_i.bank_line_coords,
-                            bank_height, bank_i.segment_length
+                            ind,
+                            bank_data,
+                            fairway_data,
+                            erosion_inputs,
+                            discharge_level_pars.get_bank(ind),
+                            water_depth_fairway,
+                            dn_eq1,
+                            dv_eq1,
+                            bank_i.bank_line_coords,
+                            bank_height,
+                            bank_i.segment_length,
                         )
                     # Q-specific debug
                     self.debugger.debug_process_discharge_levels_2(
-                        ind, level_i, bank_data, fairway_data, erosion_inputs, discharge_level_pars.get_bank(ind),
-                        water_depth_fairway, bank_i.bank_line_coords, velocity_all, bank_height, bank_i.segment_length,
-                        water_level_all, chezy_all, dn_tot, dv_tot, erosion_distance_shipping, erosion_distance_flow
+                        ind,
+                        level_i,
+                        bank_data,
+                        fairway_data,
+                        erosion_inputs,
+                        discharge_level_pars.get_bank(ind),
+                        water_depth_fairway,
+                        bank_i.bank_line_coords,
+                        velocity_all,
+                        bank_height,
+                        bank_i.segment_length,
+                        water_level_all,
+                        chezy_all,
+                        dn_tot,
+                        dv_tot,
+                        erosion_distance_shipping,
+                        erosion_distance_flow,
                     )
 
                 # shift bank lines
@@ -505,9 +594,13 @@ class Erosion:
                 vol_per_discharge_all[level_i].append(dvol)
                 dvol_bank[:, ind] += dvol
 
-            error_vol_file = config_file.get_str("Erosion", f"EroVol{level_i + 1}", default=f"erovolQ{level_i + 1}.evo")
+            error_vol_file = config_file.get_str(
+                "Erosion", f"EroVol{level_i + 1}", default=f"erovolQ{level_i + 1}.evo"
+            )
             log_text("save_error_vol", data={"file": error_vol_file}, indent="  ")
-            write_km_eroded_volumes(km_mid, dvol_bank, f"{self.river_data.output_dir}/{error_vol_file}")
+            write_km_eroded_volumes(
+                km_mid, dvol_bank, f"{self.river_data.output_dir}/{error_vol_file}"
+            )
 
         erosion_results = ErosionResults(
             eq_erosion_dist=eq_erosion_dist,
@@ -529,8 +622,10 @@ class Erosion:
             bank_height=bank_height,
             chezy=chezy_all,
         )
-        bank_data.left.bank_line_size, bank_data.right.bank_line_size = (bank_data.left.segment_length,
-                                                                     bank_data.right.segment_length)
+        bank_data.left.bank_line_size, bank_data.right.bank_line_size = (
+            bank_data.left.segment_length,
+            bank_data.right.segment_length,
+        )
 
         return water_level_data, erosion_results
 
@@ -615,10 +710,15 @@ class Erosion:
 
         return bankline_new_list, bankline_eq_list, xy_line_eq_list
 
-    def _get_param(self, name: str, default_val, iq_str, num_stations_per_bank, **kwargs):
+    def _get_param(
+        self, name: str, default_val, iq_str, num_stations_per_bank, **kwargs
+    ):
         return self.config_file.get_parameter(
-            "Erosion", f"{name}{iq_str}", num_stations_per_bank,
-            default=default_val, **kwargs
+            "Erosion",
+            f"{name}{iq_str}",
+            num_stations_per_bank,
+            default=default_val,
+            **kwargs,
         )
 
     def _read_discharge_parameters(
@@ -627,33 +727,85 @@ class Erosion:
         erosion_inputs: ErosionInputs,
         num_stations_per_bank: List[int],
     ) -> DischargeLevelParameters:
-        """
+        """Read Discharge level parameters.
+
         Read all discharge-specific input arrays for level *iq*.
         Returns a dict with keys: vship, num_ship, n_wave, t_ship, ship_type,
         mu_slope, mu_reed, par_slope, par_reed.
         """
         iq_str = f"{level_i + 1}"
 
-        ship_velocity = self._get_param("VShip", erosion_inputs.shipping_data["vship0"], iq_str, num_stations_per_bank)
-        num_ship = self._get_param("NShip", erosion_inputs.shipping_data["Nship0"], iq_str, num_stations_per_bank)
-        num_waves_per_ship = self._get_param("NWave", erosion_inputs.shipping_data["nwave0"], iq_str, num_stations_per_bank)
-        ship_draught = self._get_param("Draught", erosion_inputs.shipping_data["Tship0"], iq_str, num_stations_per_bank)
-        ship_type = self._get_param("ShipType", erosion_inputs.shipping_data["ship0"], iq_str, num_stations_per_bank, valid=[1, 2, 3], onefile=True)
-        par_slope = self._get_param("Slope", erosion_inputs.shipping_data["parslope0"], iq_str, num_stations_per_bank, positive=True, ext="slp")
-        par_reed = self._get_param("Reed", erosion_inputs.shipping_data["parreed0"], iq_str, num_stations_per_bank, positive=True, ext="rdd")
+        ship_velocity = self._get_param(
+            "VShip",
+            erosion_inputs.shipping_data["vship0"],
+            iq_str,
+            num_stations_per_bank,
+        )
+        num_ship = self._get_param(
+            "NShip",
+            erosion_inputs.shipping_data["Nship0"],
+            iq_str,
+            num_stations_per_bank,
+        )
+        num_waves_per_ship = self._get_param(
+            "NWave",
+            erosion_inputs.shipping_data["nwave0"],
+            iq_str,
+            num_stations_per_bank,
+        )
+        ship_draught = self._get_param(
+            "Draught",
+            erosion_inputs.shipping_data["Tship0"],
+            iq_str,
+            num_stations_per_bank,
+        )
+        ship_type = self._get_param(
+            "ShipType",
+            erosion_inputs.shipping_data["ship0"],
+            iq_str,
+            num_stations_per_bank,
+            valid=[1, 2, 3],
+            onefile=True,
+        )
+        par_slope = self._get_param(
+            "Slope",
+            erosion_inputs.shipping_data["parslope0"],
+            iq_str,
+            num_stations_per_bank,
+            positive=True,
+            ext="slp",
+        )
+        par_reed = self._get_param(
+            "Reed",
+            erosion_inputs.shipping_data["parreed0"],
+            iq_str,
+            num_stations_per_bank,
+            positive=True,
+            ext="rdd",
+        )
 
         mu_slope, mu_reed = [], []
         for ps, pr in zip(par_slope, par_reed):
             mus = ps.copy()
-            mus[mus > 0] = 1.0 / mus[mus > 0]   # 1/slope for non-zero values
+            mus[mus > 0] = 1.0 / mus[mus > 0]  # 1/slope for non-zero values
             mu_slope.append(mus)
-            mu_reed.append(8.5e-4 * pr ** 0.8)  # empirical damping coefficient
+            mu_reed.append(8.5e-4 * pr**0.8)  # empirical damping coefficient
 
-        return DischargeLevelParameters.from_column_arrays({
-            "id": level_i, "ship_velocity": ship_velocity, "num_ship": num_ship, "num_waves_per_ship": num_waves_per_ship,
-            "ship_draught": ship_draught, "ship_type": ship_type, "par_slope": par_slope, "par_reed": par_reed,
-            "mu_slope": mu_slope, "mu_reed": mu_reed,
-        }, ParametersPerBank)
+        return DischargeLevelParameters.from_column_arrays(
+            {
+                "id": level_i,
+                "ship_velocity": ship_velocity,
+                "num_ship": num_ship,
+                "num_waves_per_ship": num_waves_per_ship,
+                "ship_draught": ship_draught,
+                "ship_type": ship_type,
+                "par_slope": par_slope,
+                "par_reed": par_reed,
+                "mu_slope": mu_slope,
+                "mu_reed": mu_reed,
+            },
+            ParametersPerBank,
+        )
 
     def run(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
@@ -674,7 +826,11 @@ class Erosion:
         river_axis = self._process_river_axis_by_center_line()
 
         # map to the output interval
-        km_bin = (river_axis.data["stations"].min(), river_axis.data["stations"].max(), self.river_data.output_intervals)
+        km_bin = (
+            river_axis.data["stations"].min(),
+            river_axis.data["stations"].max(),
+            self.river_data.output_intervals,
+        )
         km_mid = get_km_bins(km_bin, type=3)  # get mid-points
 
         fairway_data = self._get_fairway_data(river_axis, mesh_data)
@@ -683,7 +839,9 @@ class Erosion:
         log_text("intersect_bank_mesh")
         bank_data = self.bl_processor.intersect_with_mesh(mesh_data)
         # map the bank data to the fairway data (the bank_data and fairway_data will be updated inside the `_map_bank_to_fairway` function)
-        self.calculate_fairway_bank_line_distance(bank_data, fairway_data, self.simulation_data)
+        self.calculate_fairway_bank_line_distance(
+            bank_data, fairway_data, self.simulation_data
+        )
 
         num_stations_per_bank = [bank_data.left.length, bank_data.right.length]
         erosion_inputs = self._prepare_initial_conditions(
@@ -709,7 +867,9 @@ class Erosion:
             )
         )
 
-        self._write_bankline_shapefiles(bankline_new_list, bankline_eq_list, config_file)
+        self._write_bankline_shapefiles(
+            bankline_new_list, bankline_eq_list, config_file
+        )
         self._write_volume_outputs(erosion_results, km_mid)
 
         # create various plots
@@ -747,7 +907,9 @@ class Erosion:
         banklines_eq.to_file(bank_file)
 
     def _write_volume_outputs(self, erosion_results: ErosionResults, km_mid):
-        erosion_vol_file = self.config_file.get_str("Erosion", "EroVol", default="erovol.evo")
+        erosion_vol_file = self.config_file.get_str(
+            "Erosion", "EroVol", default="erovol.evo"
+        )
         log_text("save_tot_erovol", data={"file": erosion_vol_file})
         write_km_eroded_volumes(
             km_mid,
@@ -756,7 +918,9 @@ class Erosion:
         )
 
         # write eroded volumes per km (equilibrium)
-        erosion_vol_file = self.config_file.get_str("Erosion", "EroVolEqui", default="erovol_eq.evo")
+        erosion_vol_file = self.config_file.get_str(
+            "Erosion", "EroVolEqui", default="erovol_eq.evo"
+        )
         log_text("save_eq_erovol", data={"file": erosion_vol_file})
         write_km_eroded_volumes(
             km_mid,
@@ -819,10 +983,18 @@ class Erosion:
             )
             if self.river_data.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
-                fig_base = f"{self.river_data.plot_flags['fig_dir']}{os.sep}{fig_i}_banklines"
+                fig_base = (
+                    f"{self.river_data.plot_flags['fig_dir']}{os.sep}{fig_i}_banklines"
+                )
 
                 if self.river_data.plot_flags["save_plot_zoomed"]:
-                    df_plt.zoom_xy_and_save(fig, ax, fig_base, self.river_data.plot_flags["plot_ext"], xy_zoom)
+                    df_plt.zoom_xy_and_save(
+                        fig,
+                        ax,
+                        fig_base,
+                        self.river_data.plot_flags["plot_ext"],
+                        xy_zoom,
+                    )
 
                 fig_path = fig_base + self.river_data.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_path)
@@ -849,7 +1021,13 @@ class Erosion:
                 fig_base = f"{self.river_data.plot_flags['fig_dir']}{os.sep}{fig_i}_erosion_sensitivity"
 
                 if self.river_data.plot_flags["save_plot_zoomed"]:
-                    df_plt.zoom_xy_and_save(fig, ax, fig_base, self.river_data.plot_flags["plot_ext"], xy_zoom)
+                    df_plt.zoom_xy_and_save(
+                        fig,
+                        ax,
+                        fig_base,
+                        self.river_data.plot_flags["plot_ext"],
+                        xy_zoom,
+                    )
 
                 fig_path = fig_base + self.river_data.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_path)
@@ -869,7 +1047,13 @@ class Erosion:
                 fig_base = f"{self.river_data.plot_flags['fig_dir']}{os.sep}{fig_i}_eroded_volume"
 
                 if self.river_data.plot_flags["save_plot_zoomed"]:
-                    df_plt.zoom_x_and_save(fig, ax, fig_base, self.river_data.plot_flags["plot_ext"], km_zoom)
+                    df_plt.zoom_x_and_save(
+                        fig,
+                        ax,
+                        fig_base,
+                        self.river_data.plot_flags["plot_ext"],
+                        km_zoom,
+                    )
 
                 fig_path = fig_base + self.river_data.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_path)
@@ -885,9 +1069,20 @@ class Erosion:
             )
             if self.river_data.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
-                fig_base = self.river_data.plot_flags["fig_dir"] + os.sep + str(fig_i) + "_eroded_volume_per_discharge"
+                fig_base = (
+                    self.river_data.plot_flags["fig_dir"]
+                    + os.sep
+                    + str(fig_i)
+                    + "_eroded_volume_per_discharge"
+                )
                 if self.river_data.plot_flags["save_plot_zoomed"]:
-                    df_plt.zoom_x_and_save(fig, ax, fig_base, self.river_data.plot_flags["plot_ext"], km_zoom)
+                    df_plt.zoom_x_and_save(
+                        fig,
+                        ax,
+                        fig_base,
+                        self.river_data.plot_flags["plot_ext"],
+                        km_zoom,
+                    )
                 fig_path = fig_base + self.river_data.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_path)
 
@@ -902,9 +1097,20 @@ class Erosion:
             )
             if self.river_data.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
-                fig_base = self.river_data.plot_flags["fig_dir"] + os.sep + str(fig_i) + "_eroded_volume_per_bank"
+                fig_base = (
+                    self.river_data.plot_flags["fig_dir"]
+                    + os.sep
+                    + str(fig_i)
+                    + "_eroded_volume_per_bank"
+                )
                 if self.river_data.plot_flags["save_plot_zoomed"]:
-                    df_plt.zoom_x_and_save(fig, ax, fig_base, self.river_data.plot_flags["plot_ext"], km_zoom)
+                    df_plt.zoom_x_and_save(
+                        fig,
+                        ax,
+                        fig_base,
+                        self.river_data.plot_flags["plot_ext"],
+                        km_zoom,
+                    )
                 fig_path = fig_base + self.river_data.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_path)
 
@@ -918,9 +1124,20 @@ class Erosion:
             )
             if self.river_data.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
-                fig_base = self.river_data.plot_flags["fig_dir"] + os.sep + str(fig_i) + "_eroded_volume_eq"
+                fig_base = (
+                    self.river_data.plot_flags["fig_dir"]
+                    + os.sep
+                    + str(fig_i)
+                    + "_eroded_volume_eq"
+                )
                 if self.river_data.plot_flags["save_plot_zoomed"]:
-                    df_plt.zoom_x_and_save(fig, ax, fig_base, self.river_data.plot_flags["plot_ext"], km_zoom)
+                    df_plt.zoom_x_and_save(
+                        fig,
+                        ax,
+                        fig_base,
+                        self.river_data.plot_flags["plot_ext"],
+                        km_zoom,
+                    )
                 fig_path = fig_base + self.river_data.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_path)
 
@@ -947,7 +1164,13 @@ class Erosion:
                     fig_base = f"{self.river_data.plot_flags['fig_dir']}/{fig_i}_levels_bank_{ib + 1}"
 
                     if self.river_data.plot_flags["save_plot_zoomed"]:
-                        df_plt.zoom_x_and_save(fig, axlist[ib], fig_base, self.river_data.plot_flags["plot_ext"], km_zoom)
+                        df_plt.zoom_x_and_save(
+                            fig,
+                            axlist[ib],
+                            fig_base,
+                            self.river_data.plot_flags["plot_ext"],
+                            km_zoom,
+                        )
                     fig_file = f"{fig_base}{self.river_data.plot_flags['plot_ext']}"
                     df_plt.savefig(fig, fig_file)
 
@@ -969,7 +1192,13 @@ class Erosion:
                     fig_base = f"{self.river_data.plot_flags['fig_dir']}{os.sep}{fig_i}_velocity_bank_{ib + 1}"
 
                     if self.river_data.plot_flags["save_plot_zoomed"]:
-                        df_plt.zoom_x_and_save(fig, axlist[ib], fig_base, self.river_data.plot_flags["plot_ext"], km_zoom)
+                        df_plt.zoom_x_and_save(
+                            fig,
+                            axlist[ib],
+                            fig_base,
+                            self.river_data.plot_flags["plot_ext"],
+                            km_zoom,
+                        )
 
                     fig_file = fig_base + self.river_data.plot_flags["plot_ext"]
                     df_plt.savefig(fig, fig_file)
@@ -986,9 +1215,20 @@ class Erosion:
             )
             if self.river_data.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
-                fig_base = self.river_data.plot_flags["fig_dir"] + os.sep + str(fig_i) + "_banktype"
+                fig_base = (
+                    self.river_data.plot_flags["fig_dir"]
+                    + os.sep
+                    + str(fig_i)
+                    + "_banktype"
+                )
                 if self.river_data.plot_flags["save_plot_zoomed"]:
-                    df_plt.zoom_xy_and_save(fig, ax, fig_base, self.river_data.plot_flags["plot_ext"], xy_zoom)
+                    df_plt.zoom_xy_and_save(
+                        fig,
+                        ax,
+                        fig_base,
+                        self.river_data.plot_flags["plot_ext"],
+                        xy_zoom,
+                    )
                 fig_file = fig_base + self.river_data.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_file)
 
@@ -1004,9 +1244,20 @@ class Erosion:
             )
             if self.river_data.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
-                fig_base = self.river_data.plot_flags["fig_dir"] + os.sep + str(fig_i) + "_erodis"
+                fig_base = (
+                    self.river_data.plot_flags["fig_dir"]
+                    + os.sep
+                    + str(fig_i)
+                    + "_erodis"
+                )
                 if self.river_data.plot_flags["save_plot_zoomed"]:
-                    df_plt.zoom_x_and_save(fig, ax, fig_base, self.river_data.plot_flags["plot_ext"], km_zoom)
+                    df_plt.zoom_x_and_save(
+                        fig,
+                        ax,
+                        fig_base,
+                        self.river_data.plot_flags["plot_ext"],
+                        km_zoom,
+                    )
                 fig_file = fig_base + self.river_data.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_file)
 
@@ -1015,28 +1266,15 @@ class Erosion:
             else:
                 plt.show(block=not self.gui)
 
+
 def calculate_alpha(coords, ind_1, ind_2, bp):
-    # ind_1 = ifw
-    # ind_2 = ifw - 1
+    """Calculate the alpha value for the bank erosion model."""
     alpha = (
-                    (coords[ind_1, 0] - coords[ind_2, 0])
-                    * (bp[0] - coords[ind_2, 0])
-                    + (coords[ind_1, 1] - coords[ind_2, 1])
-                    * (bp[1] - coords[ind_2, 1])
-            ) / (
-                    (coords[ind_1, 0] - coords[ind_2, 0]) ** 2
-                    + (coords[ind_1, 1] - coords[ind_2, 1]) ** 2
-            )
+        (coords[ind_1, 0] - coords[ind_2, 0]) * (bp[0] - coords[ind_2, 0])
+        + (coords[ind_1, 1] - coords[ind_2, 1]) * (bp[1] - coords[ind_2, 1])
+    ) / (
+        (coords[ind_1, 0] - coords[ind_2, 0]) ** 2
+        + (coords[ind_1, 1] - coords[ind_2, 1]) ** 2
+    )
 
     return alpha
-# ind_1 = ifw + 1
-# ind_2 = ifw
-# alpha = (
-#             (coords[ind_1, 0] - coords[ind_2, 0])
-#             * (bp[0] - coords[ind_2, 0])
-#             + (coords[ind_1, 1] - coords[ind_2, 1])
-#             * (bp[1] - coords[ind_2, 1])
-#     ) / (
-#             (coords[ind_1, 0] - coords[ind_2, 0]) ** 2
-#             + (coords[ind_1, 1] - coords[ind_2, 1]) ** 2
-#     )
