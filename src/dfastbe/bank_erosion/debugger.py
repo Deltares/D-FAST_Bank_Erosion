@@ -1,5 +1,3 @@
-from shapely.geometry import Point
-from geopandas.geoseries import GeoSeries
 from dfastbe.io import write_shp, write_csv, ConfigFile
 from dfastbe.bank_erosion.data_models import ParametersPerBank, SingleBank
 
