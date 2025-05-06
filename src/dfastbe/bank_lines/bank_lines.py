@@ -83,6 +83,10 @@ class BankLines:
     def detect(self) -> None:
         """Run the bank line detection analysis for a specified configuration.
 
+        This method performs bank line detection using the provided configuration file.
+        It generates shapefiles that can be opened with GeoPandas or QGIS, and also
+        creates a plot of the detected bank lines along with the simulation data.
+
         Examples:
             ```python
             >>> import matplotlib
@@ -92,9 +96,16 @@ class BankLines:
             >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS
             N...e
             >>> bank_lines.detect()
-               0...-
+                0...-
 
             ```
+            In the BankDir directory specified in the .cfg, the following files are created:
+            - "raw_detected_bankline_fragments.shp"
+            - "bank_areas.shp"
+            - "bankline_fragments_per_bank_area.shp"
+            - "bankfile.shp"
+            In the FigureDir directory specified in the .cfg, the following files are created:
+            - "1_banklinedetection.png"
         """
         config_file = self.config_file
         river_data = self.river_data
