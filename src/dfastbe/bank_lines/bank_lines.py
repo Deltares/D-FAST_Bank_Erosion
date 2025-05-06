@@ -70,7 +70,7 @@ class BankLines:
 
     @property
     def config_file(self) -> ConfigFile:
-        """ConfigFile: object containing the configuration settings."""
+        """ConfigFile: object containing the configuration file."""
         return self._config_file
 
     @property
