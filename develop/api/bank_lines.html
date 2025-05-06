@@ -2180,7 +2180,20 @@
 <span class="normal">496</span>
 <span class="normal">497</span>
 <span class="normal">498</span>
-<span class="normal">499</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLines</span><span class="p">:</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span>
+<span class="normal">511</span>
+<span class="normal">512</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLines</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Bank line detection class.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
@@ -2215,7 +2228,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_flags</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_plotting_flags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_dir</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span> <span class="o">=</span> <span class="n">BankLinesRiverData</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">search_lines</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">critical_water_depth</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">()</span>
+        <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConfigFile</span><span class="p">:</span>
@@ -2272,7 +2287,9 @@
             <span class="p">)</span>
 
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;identify_banklines&quot;</span><span class="p">)</span>
-        <span class="n">banklines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_bank_lines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h0</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
+        <span class="n">banklines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_bank_lines</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">critical_water_depth</span><span class="p">,</span> <span class="n">config_file</span>
+        <span class="p">)</span>
 
         <span class="c1"># clip the set of detected bank lines to the bank areas</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;simplify_banklines&quot;</span><span class="p">)</span>
@@ -2322,9 +2339,9 @@
 <span class="sd">            N...e</span>
 <span class="sd">            &gt;&gt;&gt; bank_lines = BankLines(config_file)</span>
 <span class="sd">            N...e</span>
-<span class="sd">            &gt;&gt;&gt; simulation_data, h0 = river_data.simulation_data()</span>
+<span class="sd">            &gt;&gt;&gt; simulation_data, critical_water_depth = river_data.simulation_data()</span>
 <span class="sd">            N...e</span>
-<span class="sd">            &gt;&gt;&gt; banklines = bank_lines.detect_bank_lines(simulation_data, h0, config_file)</span>
+<span class="sd">            &gt;&gt;&gt; banklines = bank_lines.detect_bank_lines(simulation_data, critical_water_depth, config_file)</span>
 <span class="sd">            P...)</span>
 <span class="sd">            &gt;&gt;&gt; bank_area = bank_lines.search_lines.to_polygons()[0]</span>
 <span class="sd">            &gt;&gt;&gt; bank_lines.mask(banklines, bank_area)</span>
@@ -2492,16 +2509,18 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">detect_bank_lines</span><span class="p">(</span>
-        <span class="n">simulation_data</span><span class="p">:</span> <span class="n">BaseSimulationData</span><span class="p">,</span> <span class="n">h0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
+        <span class="n">simulation_data</span><span class="p">:</span> <span class="n">BaseSimulationData</span><span class="p">,</span>
+        <span class="n">critical_water_depth</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Detect all possible bank line segments based on simulation data.</span>
 
-<span class="sd">        Use a critical water depth h0 as a water depth threshold for dry/wet boundary.</span>
+<span class="sd">        Use a critical water depth critical_water_depth as a water depth threshold for dry/wet boundary.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            simulation_data (BaseSimulationData):</span>
 <span class="sd">                Simulation data: mesh, bed levels, water levels, velocities, etc.</span>
-<span class="sd">            h0 (float):</span>
+<span class="sd">            critical_water_depth (float):</span>
 <span class="sd">                Critical water depth for determining the banks.</span>
 
 <span class="sd">        Returns:</span>
@@ -2513,9 +2532,9 @@
 <span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)</span>
 <span class="sd">            &gt;&gt;&gt; river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS</span>
 <span class="sd">            N...e</span>
-<span class="sd">            &gt;&gt;&gt; simulation_data, h0 = river_data.simulation_data()</span>
+<span class="sd">            &gt;&gt;&gt; simulation_data, critical_water_depth = river_data.simulation_data()</span>
 <span class="sd">            N...e</span>
-<span class="sd">            &gt;&gt;&gt; BankLines.detect_bank_lines(simulation_data, h0, config_file)</span>
+<span class="sd">            &gt;&gt;&gt; BankLines.detect_bank_lines(simulation_data, critical_water_depth, config_file)</span>
 <span class="sd">            P...</span>
 <span class="sd">            0    MULTILINESTRING ((207927.151 391960.747, 20792...</span>
 <span class="sd">            dtype: geometry</span>
@@ -2524,11 +2543,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">h_node</span> <span class="o">=</span> <span class="n">BankLines</span><span class="o">.</span><span class="n">_calculate_water_depth</span><span class="p">(</span><span class="n">simulation_data</span><span class="p">)</span>
 
-        <span class="n">wet_node</span> <span class="o">=</span> <span class="n">h_node</span> <span class="o">&gt;</span> <span class="n">h0</span>
+        <span class="n">wet_node</span> <span class="o">=</span> <span class="n">h_node</span> <span class="o">&gt;</span> <span class="n">critical_water_depth</span>
         <span class="n">num_wet_arr</span> <span class="o">=</span> <span class="n">wet_node</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="n">lines</span> <span class="o">=</span> <span class="n">BankLines</span><span class="o">.</span><span class="n">_generate_bank_lines</span><span class="p">(</span>
-            <span class="n">simulation_data</span><span class="p">,</span> <span class="n">wet_node</span><span class="p">,</span> <span class="n">num_wet_arr</span><span class="p">,</span> <span class="n">h_node</span><span class="p">,</span> <span class="n">h0</span>
+            <span class="n">simulation_data</span><span class="p">,</span> <span class="n">wet_node</span><span class="p">,</span> <span class="n">num_wet_arr</span><span class="p">,</span> <span class="n">h_node</span><span class="p">,</span> <span class="n">critical_water_depth</span>
         <span class="p">)</span>
         <span class="n">multi_line</span> <span class="o">=</span> <span class="n">union_all</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
         <span class="n">merged_line</span> <span class="o">=</span> <span class="n">line_merge</span><span class="p">(</span><span class="n">multi_line</span><span class="p">)</span>
@@ -2587,7 +2606,7 @@
         <span class="n">wet_node</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">num_wet_arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">h_node</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="n">h0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">critical_water_depth</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Detect bank lines based on wet/dry nodes.</span>
 
@@ -2600,7 +2619,7 @@
 <span class="sd">                Number of wet nodes for each face.</span>
 <span class="sd">            h_node (np.ndarray):</span>
 <span class="sd">                Water depth at each node.</span>
-<span class="sd">            h0 (float):</span>
+<span class="sd">            critical_water_depth (float):</span>
 <span class="sd">                Critical water depth for determining the banks.</span>
 
 <span class="sd">        Returns:</span>
@@ -2622,10 +2641,17 @@
                 <span class="k">continue</span>
 
             <span class="k">if</span> <span class="n">n_node</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                <span class="n">line</span> <span class="o">=</span> <span class="n">tri_to_line</span><span class="p">(</span><span class="n">x_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">wet_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">h_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">h0</span><span class="p">)</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">tri_to_line</span><span class="p">(</span>
+                    <span class="n">x_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">wet_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">h_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">critical_water_depth</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">line</span> <span class="o">=</span> <span class="n">poly_to_line</span><span class="p">(</span>
-                    <span class="n">n_node</span><span class="p">,</span> <span class="n">x_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">wet_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">h_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">h0</span>
+                    <span class="n">n_node</span><span class="p">,</span>
+                    <span class="n">x_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="n">y_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="n">wet_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="n">h_node</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="n">critical_water_depth</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">line</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -2808,7 +2834,9 @@ Flag indicating whether this routine is called from the GUI.</p>
 <span class="normal">66</span>
 <span class="normal">67</span>
 <span class="normal">68</span>
-<span class="normal">69</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Bank line initializer.</span>
 
 <span class="sd">    Args:</span>
@@ -2840,7 +2868,9 @@ Flag indicating whether this routine is called from the GUI.</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">plot_flags</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_plotting_flags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">root_dir</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span> <span class="o">=</span> <span class="n">BankLinesRiverData</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">search_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">search_lines</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">critical_water_depth</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">()</span>
+    <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2874,9 +2904,7 @@ Flag indicating whether this routine is called from the GUI.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 81</span>
-<span class="normal"> 82</span>
-<span class="normal"> 83</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 83</span>
 <span class="normal"> 84</span>
 <span class="normal"> 85</span>
 <span class="normal"> 86</span>
@@ -2945,7 +2973,11 @@ Flag indicating whether this routine is called from the GUI.</p>
 <span class="normal">149</span>
 <span class="normal">150</span>
 <span class="normal">151</span>
-<span class="normal">152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">detect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">detect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the bank line detection analysis for a specified configuration.</span>
 
 <span class="sd">    Examples:</span>
@@ -2990,7 +3022,9 @@ Flag indicating whether this routine is called from the GUI.</p>
         <span class="p">)</span>
 
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;identify_banklines&quot;</span><span class="p">)</span>
-    <span class="n">banklines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_bank_lines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">h0</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
+    <span class="n">banklines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_bank_lines</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">critical_water_depth</span><span class="p">,</span> <span class="n">config_file</span>
+    <span class="p">)</span>
 
     <span class="c1"># clip the set of detected bank lines to the bank areas</span>
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;simplify_banklines&quot;</span><span class="p">)</span>
@@ -3027,7 +3061,7 @@ Flag indicating whether this routine is called from the GUI.</p>
 
 
 <h4 id="dfastbe.bank_lines.bank_lines.BankLines.detect_bank_lines" class="doc doc-heading"><a href="#dfastbe.bank_lines.bank_lines.BankLines.detect_bank_lines" class="toclink">
-            <code class="highlight language-python"><span class="n">detect_bank_lines</span><span class="p">(</span><span class="n">simulation_data</span><span class="p">:</span> <span class="n">BaseSimulationData</span><span class="p">,</span> <span class="n">h0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span></code>
+            <code class="highlight language-python"><span class="n">detect_bank_lines</span><span class="p">(</span><span class="n">simulation_data</span><span class="p">:</span> <span class="n">BaseSimulationData</span><span class="p">,</span> <span class="n">critical_water_depth</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span></code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-staticmethod"><code>staticmethod</code></small>
@@ -3039,7 +3073,7 @@ Flag indicating whether this routine is called from the GUI.</p>
     <div class="doc doc-contents ">
 
         <p>Detect all possible bank line segments based on simulation data.</p>
-<p>Use a critical water depth h0 as a water depth threshold for dry/wet boundary.</p>
+<p>Use a critical water depth critical_water_depth as a water depth threshold for dry/wet boundary.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3071,7 +3105,7 @@ Flag indicating whether this routine is called from the GUI.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>h0</code>
+                <code>critical_water_depth</code>
             </td>
             <td>
                   <code><span title="float">float</span></code>
@@ -3117,9 +3151,9 @@ The collection of all detected bank segments in the remaining model area.</p>
     <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;examples/data/meuse_manual.cfg&quot;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">river_data</span> <span class="o">=</span> <span class="n">BankLinesRiverData</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>  <span class="c1"># doctest: +ELLIPSIS</span>
 <span class="n">N</span><span class="o">...</span><span class="n">e</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">simulation_data</span><span class="p">,</span> <span class="n">h0</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">simulation_data</span><span class="p">,</span> <span class="n">critical_water_depth</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">()</span>
 <span class="n">N</span><span class="o">...</span><span class="n">e</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">BankLines</span><span class="o">.</span><span class="n">detect_bank_lines</span><span class="p">(</span><span class="n">simulation_data</span><span class="p">,</span> <span class="n">h0</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">BankLines</span><span class="o">.</span><span class="n">detect_bank_lines</span><span class="p">(</span><span class="n">simulation_data</span><span class="p">,</span> <span class="n">critical_water_depth</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
 <span class="n">P</span><span class="o">...</span>
 <span class="mi">0</span>    <span class="n">MULTILINESTRING</span> <span class="p">((</span><span class="mf">207927.151</span> <span class="mf">391960.747</span><span class="p">,</span> <span class="mf">20792.</span><span class="o">..</span>
 <span class="n">dtype</span><span class="p">:</span> <span class="n">geometry</span>
@@ -3127,11 +3161,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">344</span>
-<span class="normal">345</span>
-<span class="normal">346</span>
-<span class="normal">347</span>
-<span class="normal">348</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">348</span>
 <span class="normal">349</span>
 <span class="normal">350</span>
 <span class="normal">351</span>
@@ -3170,18 +3200,26 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="normal">384</span>
 <span class="normal">385</span>
 <span class="normal">386</span>
-<span class="normal">387</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">detect_bank_lines</span><span class="p">(</span>
-    <span class="n">simulation_data</span><span class="p">:</span> <span class="n">BaseSimulationData</span><span class="p">,</span> <span class="n">h0</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
+    <span class="n">simulation_data</span><span class="p">:</span> <span class="n">BaseSimulationData</span><span class="p">,</span>
+    <span class="n">critical_water_depth</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">gpd</span><span class="o">.</span><span class="n">GeoSeries</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect all possible bank line segments based on simulation data.</span>
 
-<span class="sd">    Use a critical water depth h0 as a water depth threshold for dry/wet boundary.</span>
+<span class="sd">    Use a critical water depth critical_water_depth as a water depth threshold for dry/wet boundary.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        simulation_data (BaseSimulationData):</span>
 <span class="sd">            Simulation data: mesh, bed levels, water levels, velocities, etc.</span>
-<span class="sd">        h0 (float):</span>
+<span class="sd">        critical_water_depth (float):</span>
 <span class="sd">            Critical water depth for determining the banks.</span>
 
 <span class="sd">    Returns:</span>
@@ -3193,9 +3231,9 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS</span>
 <span class="sd">        N...e</span>
-<span class="sd">        &gt;&gt;&gt; simulation_data, h0 = river_data.simulation_data()</span>
+<span class="sd">        &gt;&gt;&gt; simulation_data, critical_water_depth = river_data.simulation_data()</span>
 <span class="sd">        N...e</span>
-<span class="sd">        &gt;&gt;&gt; BankLines.detect_bank_lines(simulation_data, h0, config_file)</span>
+<span class="sd">        &gt;&gt;&gt; BankLines.detect_bank_lines(simulation_data, critical_water_depth, config_file)</span>
 <span class="sd">        P...</span>
 <span class="sd">        0    MULTILINESTRING ((207927.151 391960.747, 20792...</span>
 <span class="sd">        dtype: geometry</span>
@@ -3204,11 +3242,11 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">h_node</span> <span class="o">=</span> <span class="n">BankLines</span><span class="o">.</span><span class="n">_calculate_water_depth</span><span class="p">(</span><span class="n">simulation_data</span><span class="p">)</span>
 
-    <span class="n">wet_node</span> <span class="o">=</span> <span class="n">h_node</span> <span class="o">&gt;</span> <span class="n">h0</span>
+    <span class="n">wet_node</span> <span class="o">=</span> <span class="n">h_node</span> <span class="o">&gt;</span> <span class="n">critical_water_depth</span>
     <span class="n">num_wet_arr</span> <span class="o">=</span> <span class="n">wet_node</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="n">lines</span> <span class="o">=</span> <span class="n">BankLines</span><span class="o">.</span><span class="n">_generate_bank_lines</span><span class="p">(</span>
-        <span class="n">simulation_data</span><span class="p">,</span> <span class="n">wet_node</span><span class="p">,</span> <span class="n">num_wet_arr</span><span class="p">,</span> <span class="n">h_node</span><span class="p">,</span> <span class="n">h0</span>
+        <span class="n">simulation_data</span><span class="p">,</span> <span class="n">wet_node</span><span class="p">,</span> <span class="n">num_wet_arr</span><span class="p">,</span> <span class="n">h_node</span><span class="p">,</span> <span class="n">critical_water_depth</span>
     <span class="p">)</span>
     <span class="n">multi_line</span> <span class="o">=</span> <span class="n">union_all</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
     <span class="n">merged_line</span> <span class="o">=</span> <span class="n">line_merge</span><span class="p">(</span><span class="n">multi_line</span><span class="p">)</span>
@@ -3315,9 +3353,9 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="n">N</span><span class="o">...</span><span class="n">e</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">bank_lines</span> <span class="o">=</span> <span class="n">BankLines</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
 <span class="n">N</span><span class="o">...</span><span class="n">e</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">simulation_data</span><span class="p">,</span> <span class="n">h0</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">simulation_data</span><span class="p">,</span> <span class="n">critical_water_depth</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">()</span>
 <span class="n">N</span><span class="o">...</span><span class="n">e</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">banklines</span> <span class="o">=</span> <span class="n">bank_lines</span><span class="o">.</span><span class="n">detect_bank_lines</span><span class="p">(</span><span class="n">simulation_data</span><span class="p">,</span> <span class="n">h0</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">banklines</span> <span class="o">=</span> <span class="n">bank_lines</span><span class="o">.</span><span class="n">detect_bank_lines</span><span class="p">(</span><span class="n">simulation_data</span><span class="p">,</span> <span class="n">critical_water_depth</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
 <span class="n">P</span><span class="o">...</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">bank_area</span> <span class="o">=</span> <span class="n">bank_lines</span><span class="o">.</span><span class="n">search_lines</span><span class="o">.</span><span class="n">to_polygons</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">bank_lines</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">banklines</span><span class="p">,</span> <span class="n">bank_area</span><span class="p">)</span>
@@ -3326,11 +3364,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">158</span>
 <span class="normal">159</span>
 <span class="normal">160</span>
 <span class="normal">161</span>
@@ -3361,7 +3395,11 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="normal">186</span>
 <span class="normal">187</span>
 <span class="normal">188</span>
-<span class="normal">189</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">mask</span><span class="p">(</span><span class="n">banklines</span><span class="p">:</span> <span class="n">GeoSeries</span><span class="p">,</span> <span class="n">bank_area</span><span class="p">:</span> <span class="n">Polygon</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MultiLineString</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Clip the bank line segments to the area of interest.</span>
@@ -3383,9 +3421,9 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="sd">        N...e</span>
 <span class="sd">        &gt;&gt;&gt; bank_lines = BankLines(config_file)</span>
 <span class="sd">        N...e</span>
-<span class="sd">        &gt;&gt;&gt; simulation_data, h0 = river_data.simulation_data()</span>
+<span class="sd">        &gt;&gt;&gt; simulation_data, critical_water_depth = river_data.simulation_data()</span>
 <span class="sd">        N...e</span>
-<span class="sd">        &gt;&gt;&gt; banklines = bank_lines.detect_bank_lines(simulation_data, h0, config_file)</span>
+<span class="sd">        &gt;&gt;&gt; banklines = bank_lines.detect_bank_lines(simulation_data, critical_water_depth, config_file)</span>
 <span class="sd">        P...)</span>
 <span class="sd">        &gt;&gt;&gt; bank_area = bank_lines.search_lines.to_polygons()[0]</span>
 <span class="sd">        &gt;&gt;&gt; bank_lines.mask(banklines, bank_area)</span>
@@ -3546,11 +3584,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">191</span>
-<span class="normal">192</span>
-<span class="normal">193</span>
-<span class="normal">194</span>
-<span class="normal">195</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">195</span>
 <span class="normal">196</span>
 <span class="normal">197</span>
 <span class="normal">198</span>
@@ -3645,7 +3679,11 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="normal">287</span>
 <span class="normal">288</span>
 <span class="normal">289</span>
-<span class="normal">290</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">station_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">num_search_lines</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -3875,11 +3913,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_lines/bank_lines.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">292</span>
-<span class="normal">293</span>
-<span class="normal">294</span>
-<span class="normal">295</span>
-<span class="normal">296</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">296</span>
 <span class="normal">297</span>
 <span class="normal">298</span>
 <span class="normal">299</span>
@@ -3925,7 +3959,11 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="normal">339</span>
 <span class="normal">340</span>
 <span class="normal">341</span>
-<span class="normal">342</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span>
+<span class="normal">342</span>
+<span class="normal">343</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">],</span>
     <span class="n">banklines</span><span class="p">:</span> <span class="n">GeoSeries</span><span class="p">,</span>
