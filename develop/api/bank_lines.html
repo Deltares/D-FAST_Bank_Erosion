@@ -2209,7 +2209,7 @@
 <span class="sd">            ```python</span>
 <span class="sd">            &gt;&gt;&gt; from unittest.mock import patch</span>
 <span class="sd">            &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
-<span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/bank_lines/meuse_manual.cfg&quot;)</span>
 <span class="sd">            &gt;&gt;&gt; bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS</span>
 <span class="sd">            N...e</span>
 <span class="sd">            &gt;&gt;&gt; isinstance(bank_lines, BankLines)</span>
@@ -2250,7 +2250,7 @@
 <span class="sd">            &gt;&gt;&gt; import matplotlib</span>
 <span class="sd">            &gt;&gt;&gt; matplotlib.use(&#39;Agg&#39;)</span>
 <span class="sd">            &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
-<span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/bank_lines/meuse_manual.cfg&quot;)</span>
 <span class="sd">            &gt;&gt;&gt; bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS</span>
 <span class="sd">            N...e</span>
 <span class="sd">            &gt;&gt;&gt; bank_lines.detect()</span>
@@ -2334,7 +2334,7 @@
 <span class="sd">        Examples:</span>
 <span class="sd">            ```python</span>
 <span class="sd">            &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
-<span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/bank_lines/meuse_manual.cfg&quot;)</span>
 <span class="sd">            &gt;&gt;&gt; river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS</span>
 <span class="sd">            N...e</span>
 <span class="sd">            &gt;&gt;&gt; bank_lines = BankLines(config_file)</span>
@@ -2383,7 +2383,7 @@
 <span class="sd">            ```python</span>
 <span class="sd">            &gt;&gt;&gt; import matplotlib</span>
 <span class="sd">            &gt;&gt;&gt; matplotlib.use(&#39;Agg&#39;)</span>
-<span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)  # doctest: +ELLIPSIS</span>
+<span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/bank_lines/meuse_manual.cfg&quot;)  # doctest: +ELLIPSIS</span>
 <span class="sd">            &gt;&gt;&gt; bank_lines = BankLines(config_file)</span>
 <span class="sd">            N...e</span>
 <span class="sd">            &gt;&gt;&gt; bank_lines.plot_flags[&quot;save_plot&quot;] = False</span>
@@ -2480,7 +2480,7 @@
 <span class="sd">        Examples:</span>
 <span class="sd">            ```python</span>
 <span class="sd">            &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
-<span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)  # doctest: +ELLIPSIS</span>
+<span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/bank_lines/meuse_manual.cfg&quot;)  # doctest: +ELLIPSIS</span>
 <span class="sd">            &gt;&gt;&gt; bank_lines = BankLines(config_file)</span>
 <span class="sd">            N...e</span>
 <span class="sd">            &gt;&gt;&gt; bank = [LineString([(0, 0), (1, 1)])]</span>
@@ -2529,7 +2529,7 @@
 
 <span class="sd">        Examples:</span>
 <span class="sd">            ```python</span>
-<span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/bank_lines/meuse_manual.cfg&quot;)</span>
 <span class="sd">            &gt;&gt;&gt; river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS</span>
 <span class="sd">            N...e</span>
 <span class="sd">            &gt;&gt;&gt; simulation_data, critical_water_depth = river_data.simulation_data()</span>
@@ -2793,7 +2793,7 @@ Flag indicating whether this routine is called from the GUI.</p>
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigFile</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;examples/data/meuse_manual.cfg&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/data/bank_lines/meuse_manual.cfg&quot;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">bank_lines</span> <span class="o">=</span> <span class="n">BankLines</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>  <span class="c1"># doctest: +ELLIPSIS</span>
 <span class="n">N</span><span class="o">...</span><span class="n">e</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bank_lines</span><span class="p">,</span> <span class="n">BankLines</span><span class="p">)</span>
@@ -2849,7 +2849,7 @@ Flag indicating whether this routine is called from the GUI.</p>
 <span class="sd">        ```python</span>
 <span class="sd">        &gt;&gt;&gt; from unittest.mock import patch</span>
 <span class="sd">        &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
-<span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/bank_lines/meuse_manual.cfg&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS</span>
 <span class="sd">        N...e</span>
 <span class="sd">        &gt;&gt;&gt; isinstance(bank_lines, BankLines)</span>
@@ -2895,7 +2895,7 @@ Flag indicating whether this routine is called from the GUI.</p>
     <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;Agg&#39;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigFile</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;examples/data/meuse_manual.cfg&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/data/bank_lines/meuse_manual.cfg&quot;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">bank_lines</span> <span class="o">=</span> <span class="n">BankLines</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>  <span class="c1"># doctest: +ELLIPSIS</span>
 <span class="n">N</span><span class="o">...</span><span class="n">e</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">bank_lines</span><span class="o">.</span><span class="n">detect</span><span class="p">()</span>
@@ -2985,7 +2985,7 @@ Flag indicating whether this routine is called from the GUI.</p>
 <span class="sd">        &gt;&gt;&gt; import matplotlib</span>
 <span class="sd">        &gt;&gt;&gt; matplotlib.use(&#39;Agg&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
-<span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/bank_lines/meuse_manual.cfg&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS</span>
 <span class="sd">        N...e</span>
 <span class="sd">        &gt;&gt;&gt; bank_lines.detect()</span>
@@ -3148,7 +3148,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 
 
 <p><span class="doc-section-title">Examples:</span></p>
-    <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;examples/data/meuse_manual.cfg&quot;</span><span class="p">)</span>
+    <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/data/bank_lines/meuse_manual.cfg&quot;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">river_data</span> <span class="o">=</span> <span class="n">BankLinesRiverData</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>  <span class="c1"># doctest: +ELLIPSIS</span>
 <span class="n">N</span><span class="o">...</span><span class="n">e</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">simulation_data</span><span class="p">,</span> <span class="n">critical_water_depth</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">()</span>
@@ -3228,7 +3228,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 
 <span class="sd">    Examples:</span>
 <span class="sd">        ```python</span>
-<span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/bank_lines/meuse_manual.cfg&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS</span>
 <span class="sd">        N...e</span>
 <span class="sd">        &gt;&gt;&gt; simulation_data, critical_water_depth = river_data.simulation_data()</span>
@@ -3348,7 +3348,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigFile</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;examples/data/meuse_manual.cfg&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/data/bank_lines/meuse_manual.cfg&quot;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">river_data</span> <span class="o">=</span> <span class="n">BankLinesRiverData</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>  <span class="c1"># doctest: +ELLIPSIS</span>
 <span class="n">N</span><span class="o">...</span><span class="n">e</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">bank_lines</span> <span class="o">=</span> <span class="n">BankLines</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
@@ -3416,7 +3416,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="sd">    Examples:</span>
 <span class="sd">        ```python</span>
 <span class="sd">        &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
-<span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/bank_lines/meuse_manual.cfg&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS</span>
 <span class="sd">        N...e</span>
 <span class="sd">        &gt;&gt;&gt; bank_lines = BankLines(config_file)</span>
@@ -3569,7 +3569,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">&#39;Agg&#39;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;examples/data/meuse_manual.cfg&quot;</span><span class="p">)</span>  <span class="c1"># doctest: +ELLIPSIS</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/data/bank_lines/meuse_manual.cfg&quot;</span><span class="p">)</span>  <span class="c1"># doctest: +ELLIPSIS</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">bank_lines</span> <span class="o">=</span> <span class="n">BankLines</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
 <span class="n">N</span><span class="o">...</span><span class="n">e</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">bank_lines</span><span class="o">.</span><span class="n">plot_flags</span><span class="p">[</span><span class="s2">&quot;save_plot&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
@@ -3712,7 +3712,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="sd">        ```python</span>
 <span class="sd">        &gt;&gt;&gt; import matplotlib</span>
 <span class="sd">        &gt;&gt;&gt; matplotlib.use(&#39;Agg&#39;)</span>
-<span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)  # doctest: +ELLIPSIS</span>
+<span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/bank_lines/meuse_manual.cfg&quot;)  # doctest: +ELLIPSIS</span>
 <span class="sd">        &gt;&gt;&gt; bank_lines = BankLines(config_file)</span>
 <span class="sd">        N...e</span>
 <span class="sd">        &gt;&gt;&gt; bank_lines.plot_flags[&quot;save_plot&quot;] = False</span>
@@ -3900,7 +3900,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigFile</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;examples/data/meuse_manual.cfg&quot;</span><span class="p">)</span>  <span class="c1"># doctest: +ELLIPSIS</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/data/bank_lines/meuse_manual.cfg&quot;</span><span class="p">)</span>  <span class="c1"># doctest: +ELLIPSIS</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">bank_lines</span> <span class="o">=</span> <span class="n">BankLines</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
 <span class="n">N</span><span class="o">...</span><span class="n">e</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">bank</span> <span class="o">=</span> <span class="p">[</span><span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])]</span>
@@ -3988,7 +3988,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="sd">    Examples:</span>
 <span class="sd">        ```python</span>
 <span class="sd">        &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
-<span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)  # doctest: +ELLIPSIS</span>
+<span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/bank_lines/meuse_manual.cfg&quot;)  # doctest: +ELLIPSIS</span>
 <span class="sd">        &gt;&gt;&gt; bank_lines = BankLines(config_file)</span>
 <span class="sd">        N...e</span>
 <span class="sd">        &gt;&gt;&gt; bank = [LineString([(0, 0), (1, 1)])]</span>
