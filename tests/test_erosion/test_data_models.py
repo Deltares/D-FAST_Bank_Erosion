@@ -13,23 +13,39 @@ from dfastbe.bank_erosion.data_models import (
     BankData,
     FairwayData,
     ErosionResults,
-    ErosionSimulationData
+    ErosionSimulationData,
+    SingleBank,
+    SingleErosion
 )
 
 
-def test_erosion_inputs():
-    """Test instantiation of the ErosionInputs dataclass."""
-    erosion_inputs = ErosionInputs(
-        shipping_data={"ship1": np.array([1.0, 2.0])},
-        wave_fairway_distance_0=[np.array([10.0, 20.0])],
-        wave_fairway_distance_1=[np.array([15.0, 25.0])],
-        bank_protection_level=[np.array([1, 0])],
-        tauc=[np.array([0.5, 0.6])],
-        bank_type=[np.array([1, 2])],
+class TestErosionInputs:
+    @pytest.mark.parametrize(
+        "bank_order, result",
+        [(("right", "left"), (1, 2)), (("left", "right"), (1, 2))],
+        ids=[
+            "right-left bank order",
+            "left-right bank order",
+        ],
     )
-    assert erosion_inputs.shipping_data["ship1"][0] == pytest.approx(1.0)
-    assert erosion_inputs.taucls[1] == 95
-    assert erosion_inputs.taucls_str[0] == "protected"
+    def test_erosion_inputs(self, bank_order, result):
+        """Test instantiation of the ErosionInputs dataclass."""
+        shipping_data = {"ship1": [np.array([1.0, 1.0])]}
+        bank_type = np.array([1.0, 1.0])
+        data = dict(
+            wave_fairway_distance_0=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
+            wave_fairway_distance_1=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
+            bank_protection_level=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
+            tauc=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
+        )
+        erosion_inputs = ErosionInputs.from_column_arrays(
+            data, SingleErosion, shipping_data=shipping_data, bank_order=bank_order, bank_type=bank_type
+        )
+        assert erosion_inputs.right.wave_fairway_distance_0[0] == result[bank_order.index("right")]
+        assert erosion_inputs.left.wave_fairway_distance_0[0] == result[bank_order.index("left")]
+        assert erosion_inputs.shipping_data["ship1"][0] == pytest.approx(1.0)
+        assert erosion_inputs.taucls[1] == 95
+        assert erosion_inputs.taucls_str[0] == "protected"
 
 
 def test_water_level_data():
@@ -66,23 +82,34 @@ def test_mesh_data():
     assert mesh_data.face_node[1][1] == 2
     assert mesh_data.boundary_edge_nrs[1] == 1
 
-
-def test_bank_data():
-    """Test instantiation of the BankData dataclass."""
-    bank_data = BankData(
-        is_right_bank=[True, False],
-        bank_chainage_midpoints=[np.array([0.0, 1.0])],
-        bank_line_coords=[np.array([[0.0, 0.0], [1.0, 1.0]])],
-        bank_face_indices=[np.array([0, 1])],
-        bank_lines=GeoDataFrame(geometry=[LineString([(0, 0), (1, 1)])]),
-        n_bank_lines=1,
-        bank_line_size=[np.array([10.0, 20.0])],
-        fairway_distances=[np.array([5.0, 10.0])],
-        fairway_face_indices=[np.array([0, 1])],
+class TestBankData:
+    @pytest.mark.parametrize(
+        "bank_order, result",
+        [(("right", "left"), (1, 2)), (("left", "right"), (1, 2))],
+        ids=[
+            "right-left bank order",
+            "left-right bank order",
+        ],
     )
-    assert bank_data.is_right_bank[0] is True
-    assert bank_data.bank_chainage_midpoints[0][1] == pytest.approx(1.0)
-    assert len(bank_data.bank_lines) == 1
+    def test_default_parameters(self, bank_order, result):
+        """Test instantiation of the BankData dataclass."""
+        bank_lines=GeoDataFrame(geometry=[LineString([(0, 0), (1, 1)])])
+        n_bank_lines=1
+        bank_data = dict(
+            is_right_bank=[True, False],
+            bank_line_coords=[np.array([[1.0, 1.0], [1.0, 1.0]]), np.array([[2.0, 2.0], [2.0, 2.0]])],
+            bank_face_indices=[np.array([1, 1]), np.array([2, 2])],
+            bank_line_size=[np.array([1.0, 1.0]), np.array([2, 2])],
+            fairway_distances=[np.array([1.0, 1.0]), np.array([2, 2])],
+            fairway_face_indices=[np.array([1, 1]), np.array([2, 2])],
+            bank_chainage_midpoints=[np.array([1.0, 1.0]), np.array([2.0, 2.0])]
+        )
+        bank_data = BankData.from_column_arrays(
+            bank_data, SingleBank, bank_lines=bank_lines, n_bank_lines=n_bank_lines, bank_order=bank_order
+        )
+        assert bank_data.right.bank_line_coords[0, 0] == result[bank_order.index("right")]
+        assert bank_data.left.bank_line_coords[0, 0] == result[bank_order.index("left")]
+
 
 
 def test_fairway_data():

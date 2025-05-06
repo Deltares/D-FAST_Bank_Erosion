@@ -886,8 +886,8 @@ class ConfigFile:
         self,
         group: str,
         key: str,
-        bank_km: List[np.ndarray],
-        default=None,
+        num_stations_per_bank: List[int],
+        default: Any = None,
         ext: str = "",
         positive: bool = False,
         valid: Optional[List[float]] = None,
@@ -896,15 +896,23 @@ class ConfigFile:
         """Get a parameter field from a selected group and keyword in the analysis settings.
 
         Args:
-            group (str): Name of the group from which to read.
-            key (str): Name of the keyword from which to read.
-            bank_km (List[np.ndarray]): For each bank a listing of the bank points (bank chainage locations).
-            default (Optional[Union[float, List[np.ndarray]]]): Optional default value or default parameter field; default None.
-            ext (str): File name extension; default empty string.
-            positive (bool): Flag specifying which boolean values are accepted.
+            group (str):
+                Name of the group from which to read.
+            key (str):
+                Name of the keyword from which to read.
+            num_stations_per_bank (List[int]):
+                Number of stations (points) For each bank (bank chainage locations).
+            default (Optional[Union[float, List[np.ndarray]]]):
+                Optional default value or default parameter field; default None.
+            ext (str):
+                File name extension; default empty string.
+            positive (bool):
+                Flag specifying which boolean values are accepted.
                 All values are accepted (if False), or only strictly positive values (if True); default False.
-            valid (Optional[List[float]]): Optional list of valid values; default None.
-            onefile (bool): Flag indicating whether parameters are read from one file.
+            valid (Optional[List[float]]):
+                Optional list of valid values; default None.
+            onefile (bool):
+                Flag indicating whether parameters are read from one file.
                 One file should be used for all bank lines (True) or one file per bank line (False; default).
 
         Raises:
@@ -921,62 +929,138 @@ class ConfigFile:
             ```python
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5])]
-            >>> config_file.get_parameter("General", "ZoomStepKM", bank_km)
-            [array([1., 1., 1.]), array([1., 1., 1.])]
+            >>> bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5, 6, 7])]
+            >>> num_stations_per_bank = [len(bank) for bank in bank_km]
+            >>> config_file.get_parameter("General", "ZoomStepKM", num_stations_per_bank)
+            [array([1., 1., 1.]), array([1., 1., 1., 1., 1.])]
 
             ```
         """
         try:
-            filename = self.config[group][key]
+            value = self.config[group][key]
             use_default = False
         except (KeyError, TypeError) as e:
+            value = None
             if default is None:
                 raise ConfigFileError(
                     f'No value specified for required keyword "{key}" in block "{group}".'
                 ) from e
             use_default = True
 
+        return self.process_parameter(
+            value=value,
+            key=key,
+            num_stations_per_bank=num_stations_per_bank,
+            use_default=use_default,
+            default=default,
+            ext=ext,
+            positive=positive,
+            valid=valid,
+            onefile=onefile,
+        )
+
+    def validate_parameter_value(
+        self,
+        value: float,
+        key: str,
+        positive: bool = False,
+        valid: Optional[List[float]] = None,
+    ) -> float:
+        """Validate a parameter value against constraints.
+
+        Args:
+            value (float): The parameter value to validate.
+            key (str): Name of the parameter for error messages.
+            positive (bool): Flag specifying whether all values are accepted (if False),
+                or only positive values (if True); default False.
+            valid (Optional[List[float]]): Optional list of valid values; default None.
+
+        Raises:
+            ValueError: If the value doesn't meet the constraints.
+
+        Returns:
+            float: The validated parameter value.
+        """
+        if positive and value < 0:
+            raise ValueError(
+                f'Value of "{key}" should be positive, not {value}.'
+            )
+        if valid is not None and valid.count(value) == 0:
+            raise ValueError(
+                f'Value of "{key}" should be in {valid}, not {value}.'
+            )
+        return value
+
+    def process_parameter(
+        self,
+        value: Union[str, float],
+        key: str,
+        num_stations_per_bank: List[int],
+        use_default: bool = False,
+        default=None,
+        ext: str = "",
+        positive: bool = False,
+        valid: Optional[List[float]] = None,
+        onefile: bool = False,
+    ) -> List[np.ndarray]:
+        """Process a parameter value into arrays for each bank.
+
+        Args:
+            value (Union[str, float]): The parameter value or filename.
+            key (str): Name of the parameter for error messages.
+            num_stations_per_bank (List[int]): Number of stations for each bank.
+            use_default (bool): Flag indicating whether to use the default value; default False.
+            default: Default value to use if use_default is True; default None.
+            ext (str): File name extension; default empty string.
+            positive (bool): Flag specifying whether all values are accepted (if False),
+                or only positive values (if True); default False.
+            valid (Optional[List[float]]): Optional list of valid values; default None.
+            onefile (bool): Flag indicating whether parameters are read from one file.
+                One file should be used for all bank lines (True) or one file per bank line (False; default).
+
+        Returns:
+            List[np.ndarray]: Parameter values for each bank.
+        """
         # if val is value then use that value globally
-        parfield = [None] * len(bank_km)
+        num_banks = len(num_stations_per_bank)
+        parameter_values = [None] * num_banks
         try:
             if use_default:
                 if isinstance(default, list):
                     return default
-                rval = default
+                real_val = default
             else:
-                rval = float(filename)
-                if positive and rval < 0:
-                    raise ValueError(
-                        f'Value of "{key}" should be positive, not {rval}.'
-                    )
-                if valid is not None and valid.count(rval) == 0:
-                    raise ValueError(
-                        f'Value of "{key}" should be in {valid}, not {rval}.'
-                    )
-            for ib, bkm in enumerate(bank_km):
-                parfield[ib] = np.zeros(len(bkm)) + rval
+                real_val = float(value)
+                self.validate_parameter_value(real_val, key, positive, valid)
+
+            for ib, num_stations in enumerate(num_stations_per_bank):
+                parameter_values[ib] = np.zeros(num_stations) + real_val
+
         except (ValueError, TypeError):
             if onefile:
-                log_text("read_param", data={"param": key, "file": filename})
-                km_thr, val = _get_kmval(filename, key, positive, valid)
-            for ib, bkm in enumerate(bank_km):
+                log_text("read_param", data={"param": key, "file": value})
+                km_thr, val = _get_stations(value, key, positive, valid)
+
+            for ib, num_stations in enumerate(num_stations_per_bank):
                 if not onefile:
-                    filename_i = filename + f"_{ib + 1}" + ext
+                    filename_i = f"{value}_{ib + 1}{ext}"
                     log_text(
                         "read_param_one_bank",
                         data={"param": key, "i": ib + 1, "file": filename_i},
                     )
-                    km_thr, val = _get_kmval(filename_i, key, positive, valid)
+                    km_thr, val = _get_stations(filename_i, key, positive, valid)
+
                 if km_thr is None:
-                    parfield[ib] = np.zeros(len(bkm)) + val[0]
+                    parameter_values[ib] = np.zeros(num_stations) + val[0]
                 else:
-                    idx = np.zeros(len(bkm), dtype=int)
+                    idx = np.zeros(num_stations, dtype=int)
+
                     for thr in km_thr:
-                        idx[bkm >= thr] += 1
-                    parfield[ib] = val[idx]
+                        idx[num_stations >= thr] += 1
+                    parameter_values[ib] = val[idx]
                 # print("Min/max of data: ", parfield[ib].min(), parfield[ib].max())
-        return parfield
+
+        return parameter_values
 
     def get_bank_search_distances(self, num_search_lines: int) -> List[float]:
         """Get the search distance per bank line from the analysis settings.
@@ -2141,7 +2225,7 @@ def _sim2nc(oldfile: str) -> str:
     return nc_file
 
 
-def _get_kmval(filename: str, key: str, positive: bool, valid: Optional[List[float]]):
+def _get_stations(filename: str, key: str, positive: bool, valid: Optional[List[float]]):
     """
     Read a parameter file, check its contents and return arrays of chainages and values.
 

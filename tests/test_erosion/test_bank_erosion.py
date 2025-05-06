@@ -38,10 +38,9 @@ class TestErosion:
         self, erosion_instance: Erosion, config_file: ConfigFile
     ):
         """Test the _prepare_initial_conditions method."""
-        mock_bank_data = MagicMock(spec=BankData)
-        mock_bank_data.bank_chainage_midpoints = [np.array([3.0, 3.0, 3.0])]
+        num_stations_per_bank = [3, 3]
         mock_fairway_data = MagicMock(spec=FairwayData)
-        mock_fairway_data.fairway_initial_water_levels = [np.array([10, 20, 30])]
+        mock_fairway_data.fairway_initial_water_levels = [np.array([10, 20, 30]), np.array([10, 20, 30])]
         taucls = np.array([1, 1, 1])
         taucls_str = (
             "protected",
@@ -52,17 +51,17 @@ class TestErosion:
         )
 
         erosion_inputs = erosion_instance._prepare_initial_conditions(
-            config_file, mock_bank_data, mock_fairway_data
+            config_file, num_stations_per_bank, mock_fairway_data
         )
 
         assert np.array_equal(
             erosion_inputs.shipping_data["vship0"][0], np.array([5.0, 5.0, 5.0])
         )
         assert np.array_equal(
-            erosion_inputs.wave_fairway_distance_0[0], np.array([150, 150, 150])
+            erosion_inputs.left.wave_fairway_distance_0, np.array([150, 150, 150])
         )
         assert np.array_equal(
-            erosion_inputs.wave_fairway_distance_1[0], np.array([110, 110, 110])
+            erosion_inputs.left.wave_fairway_distance_1, np.array([110, 110, 110])
         )
         assert np.array_equal(
             erosion_inputs.bank_protection_level[0], np.array([-13, -13, -13])

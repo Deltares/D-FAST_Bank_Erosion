@@ -269,7 +269,7 @@ class BankLines:
         max_nnodes = fnc.shape[1]
         x_node = simulation_data.x_node[fnc]
         y_node = simulation_data.y_node[fnc]
-        zb = simulation_data.bed_elevation_values[fnc]
+        bank_height = simulation_data.bed_elevation_values[fnc]
         zw = simulation_data.water_level_face
 
         nnodes_total = len(simulation_data.x_node)
@@ -289,7 +289,7 @@ class BankLines:
         zw_node = zw_node / np.maximum(n_val, 1)
         zw_node[n_val == 0] = simulation_data.bed_elevation_values[n_val == 0]
 
-        h_node = zw_node[fnc] - zb
+        h_node = zw_node[fnc] - bank_height
         wet_node = h_node > h0
         n_wet_arr = wet_node.sum(axis=1)
         mask = n_wet_arr.mask.size > 1

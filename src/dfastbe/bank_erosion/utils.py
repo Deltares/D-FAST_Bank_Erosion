@@ -5,8 +5,7 @@ from shapely.geometry import Point, Polygon, LineString
 
 from dfastbe.io import log_text, LineGeometry
 from dfastbe.support import on_right_side, get_slices, enlarge, get_slices_core
-from dfastbe.bank_erosion.data_models import ErosionRiverData, BankData, MeshData
-
+from dfastbe.bank_erosion.data_models import ErosionRiverData, BankData, MeshData, SingleBank
 
 class BankLinesProcessor:
     def __init__(self, river_data: ErosionRiverData):
@@ -14,10 +13,7 @@ class BankLinesProcessor:
         self.river_center_line = river_data.river_center_line.as_array()
         self.num_bank_lines = len(self.bank_lines)
 
-    def intersect_with_mesh(
-        self,
-        mesh_data: MeshData,
-    ) -> BankData:
+    def intersect_with_mesh(self, mesh_data: MeshData) -> BankData:
         n_bank_lines = len(self.bank_lines)
 
         bank_line_coords = []
@@ -57,13 +53,18 @@ class BankLinesProcessor:
             else:
                 log_text("left_side_bank", data={"ib": bank_index + 1})
 
-        return BankData(
+        bank_order = tuple("right" if val else "left" for val in is_right_bank)
+        data = dict(
+            is_right_bank=is_right_bank,
             bank_line_coords=bank_line_coords,
             bank_face_indices=bank_face_indices,
             bank_chainage_midpoints=bank_chainage_midpoints,
-            is_right_bank=is_right_bank,
+        )
+        return BankData.from_column_arrays(
+            data, SingleBank,
             bank_lines=self.bank_lines,
             n_bank_lines=n_bank_lines,
+            bank_order=bank_order,
         )
 
 
