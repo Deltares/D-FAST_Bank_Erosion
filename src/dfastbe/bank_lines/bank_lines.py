@@ -48,9 +48,9 @@ class BankLines:
             >>> from unittest.mock import patch
             >>> from dfastbe.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> with patch("dfastbe.io.log_text"), patch("dfastbe.bank_lines.data_models.log_text"):
-            ...    bank_lines = BankLines(config_file)
-            ...    isinstance(bank_lines, BankLines)
+            >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS
+            N...e
+            >>> isinstance(bank_lines, BankLines)
             True
 
             ```
@@ -85,13 +85,12 @@ class BankLines:
             ```python
             >>> import matplotlib
             >>> matplotlib.use('Agg')
-            >>> import sys
-            >>> from io import StringIO
             >>> from dfastbe.io import ConfigFile
-            >>> sys.stdout = StringIO()
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> bank_lines = BankLines(config_file)
+            >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS
+            N...e
             >>> bank_lines.detect()
+               0...-
 
             ```
         """
@@ -168,17 +167,19 @@ class BankLines:
 
         Examples:
             ```python
-            >>> import sys
-            >>> from io import StringIO
             >>> from dfastbe.io import ConfigFile
-            >>> sys.stdout = StringIO()
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> river_data = BankLinesRiverData(config_file)
+            >>> river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
+            N...e
             >>> bank_lines = BankLines(config_file)
+            N...e
             >>> simulation_data, h0 = river_data.simulation_data()
+            N...e
             >>> banklines = bank_lines.detect_bank_lines(simulation_data, h0, config_file)
+            P...)
             >>> bank_area = bank_lines.search_lines.to_polygons()[0]
             >>> bank_lines.mask(banklines, bank_area)
+            <MULTILINESTRING ((207830.389 392063.658, 2078...>
 
             ```
         """
@@ -215,20 +216,18 @@ class BankLines:
         Examples:
             ```python
             >>> import matplotlib
-            >>> from unittest.mock import patch
             >>> matplotlib.use('Agg')
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> with patch("dfastbe.io.log_text"), patch("dfastbe.bank_lines.data_models.log_text"):
-            ...     bank_lines = BankLines(config_file)
-            ...     bank_lines.plot_flags["save_plot"] = False
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")  # doctest: +ELLIPSIS
+            >>> bank_lines = BankLines(config_file)
+            N...e
+            >>> bank_lines.plot_flags["save_plot"] = False
             >>> xy_km_numpy = np.array([[0, 0, 0], [1, 1, 0]])
             >>> n_search_lines = 1
             >>> bank = [LineString([(0, 0), (1, 1)])]
             >>> km_bounds = (0, 1)
             >>> bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]
             >>> bank_lines.plot(xy_km_numpy, n_search_lines, bank, km_bounds, bank_areas, config_file)
-            No message found for =
-            No message found for create_figures
+            N...s
 
             ```
         """
@@ -314,13 +313,10 @@ class BankLines:
 
         Examples:
             ```python
-            >>> from unittest.mock import patch
             >>> from dfastbe.io import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> with patch("dfastbe.io.log_text"):
-            ...    bank_lines = BankLines(config_file)
-            No message found for read_simdata
-            No message found for clip_data
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")  # doctest: +ELLIPSIS
+            >>> bank_lines = BankLines(config_file)
+            N...e
             >>> bank = [LineString([(0, 0), (1, 1)])]
             >>> banklines = gpd.GeoSeries([LineString([(0, 0), (1, 1)])])
             >>> clipped_banklines = [MultiLineString([LineString([(0, 0), (1, 1)])])]
@@ -365,12 +361,13 @@ class BankLines:
 
         Examples:
             ```python
-            >>> from unittest.mock import patch
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> with patch("dfastbe.io.log_text"), patch("dfastbe.bank_lines.bank_lines.print"), patch("dfastbe.bank_lines.data_models.log_text"):
-            ...     river_data = BankLinesRiverData(config_file)
-            ...     simulation_data, h0 = river_data.simulation_data()
-            ...     BankLines.detect_bank_lines(simulation_data, h0, config_file)
+            >>> river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
+            N...e
+            >>> simulation_data, h0 = river_data.simulation_data()
+            N...e
+            >>> BankLines.detect_bank_lines(simulation_data, h0, config_file)
+            P...
             0    MULTILINESTRING ((207927.151 391960.747, 20792...
             dtype: geometry
 
