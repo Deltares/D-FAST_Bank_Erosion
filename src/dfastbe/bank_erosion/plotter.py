@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 import numpy as np
 
 from dfastbe.bank_erosion.data_models import (
@@ -17,7 +19,7 @@ class ErosionPlotter:
         bank_data: BankData,
         water_level_data: WaterLevelData,
         erosion_inputs: ErosionInputs,
-        midpoint_chainages: np.ndarray,
+        plot_flags: Dict[str, Any],
     ):
         """Initialize the ErosionPlotter with the required data.
         
@@ -33,8 +35,33 @@ class ErosionPlotter:
             midpoint_chainages (np.ndarray):
                 The midpoint chainages for the analysis.
         """
+        self._plot_flags = plot_flags
         self._erosion_results = erosion_results
         self._bank_data = bank_data
         self._water_level_data = water_level_data
         self._erosion_inputs = erosion_inputs
-        self._midpoint_chainages = midpoint_chainages
+
+    @property
+    def erosion_results(self) -> ErosionResults:
+        """ErosionResults: the results from the erosion analysis."""
+        return self._erosion_results
+
+    @property
+    def bank_data(self) -> BankData:
+        """BankData: the bank data used in the analysis."""
+        return self._bank_data
+
+    @property
+    def water_level_data(self) -> WaterLevelData:
+        """WaterLevelData: the water level data used in the analysis."""
+        return self._water_level_data
+
+    @property
+    def erosion_inputs(self) -> ErosionInputs:
+        """ErosionInputs: the inputs for the erosion analysis."""
+        return self._erosion_inputs
+
+    @property
+    def plot_flags(self) -> dict:
+        """dict: the flags for plotting."""
+        return self._plot_flags
