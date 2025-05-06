@@ -96,7 +96,7 @@ class BankLines:
             >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS
             N...e
             >>> bank_lines.detect()
-                0...-
+               0...-
 
             ```
             In the BankDir directory specified in the .cfg, the following files are created:

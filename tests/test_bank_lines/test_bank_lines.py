@@ -132,7 +132,9 @@ class TestBankLines:
             bank_lines.detect()
 
         bank_lines.detect_bank_lines.assert_called_once_with(
-            bank_lines.simulation_data, bank_lines.h0, mock_config_file
+            bank_lines.simulation_data,
+            bank_lines.critical_water_depth,
+            mock_config_file,
         )
         bank_lines.save.assert_called_once()
         if mock_config_file.get_plotting_flags.return_value["plot_data"]:
