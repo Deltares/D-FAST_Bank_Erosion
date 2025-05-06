@@ -190,8 +190,8 @@ class BankLines:
 
     def plot(
         self,
-        xy_km_numpy: np.ndarray,
-        n_search_lines: int,
+        station_coords: np.ndarray,
+        num_search_lines: int,
         bank: List[LineString],
         km_bounds: Tuple[float, float],
         bank_areas: List[Polygon],
@@ -200,9 +200,9 @@ class BankLines:
         """Plot the bank lines and the simulation data.
 
         Args:
-            xy_km_numpy (np.ndarray):
+            station_coords (np.ndarray):
                 Array of x and y coordinates in km.
-            n_search_lines (int):
+            num_search_lines (int):
                 Number of search lines.
             bank (List):
                 List of bank lines.
@@ -221,12 +221,12 @@ class BankLines:
             >>> bank_lines = BankLines(config_file)
             N...e
             >>> bank_lines.plot_flags["save_plot"] = False
-            >>> xy_km_numpy = np.array([[0, 0, 0], [1, 1, 0]])
-            >>> n_search_lines = 1
+            >>> station_coords = np.array([[0, 0, 0], [1, 1, 0]])
+            >>> num_search_lines = 1
             >>> bank = [LineString([(0, 0), (1, 1)])]
             >>> km_bounds = (0, 1)
             >>> bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]
-            >>> bank_lines.plot(xy_km_numpy, n_search_lines, bank, km_bounds, bank_areas, config_file)
+            >>> bank_lines.plot(station_coords, num_search_lines, bank, km_bounds, bank_areas, config_file)
             N...s
 
             ```
@@ -234,15 +234,15 @@ class BankLines:
         log_text("=")
         log_text("create_figures")
         i_fig = 0
-        bbox = get_bbox(xy_km_numpy)
+        bbox = get_bbox(station_coords)
 
         if self.plot_flags["save_plot_zoomed"]:
             bank_crds: List[np.ndarray] = []
             bank_km: List[np.ndarray] = []
-            for ib in range(n_search_lines):
+            for ib in range(num_search_lines):
                 bcrds_numpy = np.array(bank[ib].coords)
                 line_geom = LineGeometry(bcrds_numpy, crs=config_file.crs)
-                km_numpy = line_geom.intersect_with_line(xy_km_numpy)
+                km_numpy = line_geom.intersect_with_line(station_coords)
                 bank_crds.append(bcrds_numpy)
                 bank_km.append(km_numpy)
             km_zoom, xy_zoom = get_zoom_extends(
@@ -255,7 +255,7 @@ class BankLines:
 
         fig, ax = df_plt.plot_detect1(
             bbox,
-            xy_km_numpy,
+            station_coords,
             bank_areas,
             bank,
             self.simulation_data.face_node,
@@ -376,10 +376,10 @@ class BankLines:
         h_node = BankLines._calculate_water_depth(simulation_data)
 
         wet_node = h_node > h0
-        n_wet_arr = wet_node.sum(axis=1)
+        num_wet_arr = wet_node.sum(axis=1)
 
         lines = BankLines._generate_bank_lines(
-            simulation_data, wet_node, n_wet_arr, h_node, h0
+            simulation_data, wet_node, num_wet_arr, h_node, h0
         )
         multi_line = union_all(lines)
         merged_line = line_merge(multi_line)
@@ -405,30 +405,30 @@ class BankLines:
                 An array representing the water depth at each node.
         """
         face_node = simulation_data.face_node
-        max_n_nodes = simulation_data.face_node.shape[1]
-        n_nodes_total = len(simulation_data.x_node)
+        max_num_nodes = simulation_data.face_node.shape[1]
+        num_nodes_total = len(simulation_data.x_node)
 
         if hasattr(face_node, "mask"):
             mask = ~face_node.mask
             non_masked = sum(mask.reshape(face_node.size))
             f_nc_m = face_node[mask]
-            zwm = np.repeat(simulation_data.water_level_face, max_n_nodes)[
+            zwm = np.repeat(simulation_data.water_level_face, max_num_nodes)[
                 mask.flatten()
             ]
         else:
             mask = np.repeat(True, face_node.size)
             non_masked = face_node.size
             f_nc_m = face_node.reshape(non_masked)
-            zwm = np.repeat(simulation_data.water_level_face, max_n_nodes).reshape(
+            zwm = np.repeat(simulation_data.water_level_face, max_num_nodes).reshape(
                 non_masked
             )
 
-        zw_node = np.bincount(f_nc_m, weights=zwm, minlength=n_nodes_total)
-        n_val = np.bincount(
-            f_nc_m, weights=np.ones(non_masked), minlength=n_nodes_total
+        zw_node = np.bincount(f_nc_m, weights=zwm, minlength=num_nodes_total)
+        num_val = np.bincount(
+            f_nc_m, weights=np.ones(non_masked), minlength=num_nodes_total
         )
-        zw_node = zw_node / np.maximum(n_val, 1)
-        zw_node[n_val == 0] = simulation_data.bed_elevation_values[n_val == 0]
+        zw_node = zw_node / np.maximum(num_val, 1)
+        zw_node[num_val == 0] = simulation_data.bed_elevation_values[num_val == 0]
         h_node = zw_node[face_node] - simulation_data.bed_elevation_values[face_node]
         return h_node
 
@@ -436,7 +436,7 @@ class BankLines:
     def _generate_bank_lines(
         simulation_data: BaseSimulationData,
         wet_node: np.ndarray,
-        n_wet_arr: np.ndarray,
+        num_wet_arr: np.ndarray,
         h_node: np.ndarray,
         h0: float,
     ) -> List[LineString]:
@@ -447,7 +447,7 @@ class BankLines:
                 Simulation data: mesh, bed levels, water levels, velocities, etc.
             wet_node (np.ndarray):
                 Wet/dry boolean array for each face node.
-            n_wet_arr (np.ndarray):
+            num_wet_arr (np.ndarray):
                 Number of wet nodes for each face.
             h_node (np.ndarray):
                 Water depth at each node.
@@ -461,13 +461,13 @@ class BankLines:
         num_faces = len(simulation_data.face_node)
         x_node = simulation_data.x_node[simulation_data.face_node]
         y_node = simulation_data.y_node[simulation_data.face_node]
-        mask = n_wet_arr.mask.size > 1
+        mask = num_wet_arr.mask.size > 1
         lines = []
 
         for i in range(num_faces):
             BankLines._progress_bar(i, num_faces)
 
-            n_wet = n_wet_arr[i]
+            n_wet = num_wet_arr[i]
             n_node = simulation_data.n_nodes[i]
             if (mask and n_wet.mask) or n_wet == 0 or n_wet == n_node:
                 continue
