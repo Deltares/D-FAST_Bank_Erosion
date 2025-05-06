@@ -27,7 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 import os
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -1277,7 +1277,7 @@ class Erosion:
                 plt.show(block=not self.gui)
 
 
-def calculate_alpha(coords, ind_1, ind_2, bp):
+def calculate_alpha(coords: np.ndarray, ind_1: int, ind_2: int, bp: Tuple[int, Any]):
     """Calculate the alpha value for the bank erosion model."""
     alpha = (
         (coords[ind_1, 0] - coords[ind_2, 0]) * (bp[0] - coords[ind_2, 0])
