@@ -66,7 +66,9 @@ class BankLines:
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)
         self.river_data = BankLinesRiverData(config_file)
         self.search_lines = self.river_data.search_lines
-        self.simulation_data, self.h0 = self.river_data.simulation_data()
+        self.simulation_data, self.critical_water_depth = (
+            self.river_data.simulation_data()
+        )
 
     @property
     def config_file(self) -> ConfigFile:
@@ -123,7 +125,9 @@ class BankLines:
             )
 
         log_text("identify_banklines")
-        banklines = self.detect_bank_lines(self.simulation_data, self.h0, config_file)
+        banklines = self.detect_bank_lines(
+            self.simulation_data, self.critical_water_depth, config_file
+        )
 
         # clip the set of detected bank lines to the bank areas
         log_text("simplify_banklines")
@@ -173,9 +177,9 @@ class BankLines:
             N...e
             >>> bank_lines = BankLines(config_file)
             N...e
-            >>> simulation_data, h0 = river_data.simulation_data()
+            >>> simulation_data, critical_water_depth = river_data.simulation_data()
             N...e
-            >>> banklines = bank_lines.detect_bank_lines(simulation_data, h0, config_file)
+            >>> banklines = bank_lines.detect_bank_lines(simulation_data, critical_water_depth, config_file)
             P...)
             >>> bank_area = bank_lines.search_lines.to_polygons()[0]
             >>> bank_lines.mask(banklines, bank_area)
@@ -343,16 +347,18 @@ class BankLines:
 
     @staticmethod
     def detect_bank_lines(
-        simulation_data: BaseSimulationData, h0: float, config_file: ConfigFile
+        simulation_data: BaseSimulationData,
+        critical_water_depth: float,
+        config_file: ConfigFile,
     ) -> gpd.GeoSeries:
         """Detect all possible bank line segments based on simulation data.
 
-        Use a critical water depth h0 as a water depth threshold for dry/wet boundary.
+        Use a critical water depth critical_water_depth as a water depth threshold for dry/wet boundary.
 
         Args:
             simulation_data (BaseSimulationData):
                 Simulation data: mesh, bed levels, water levels, velocities, etc.
-            h0 (float):
+            critical_water_depth (float):
                 Critical water depth for determining the banks.
 
         Returns:
@@ -364,9 +370,9 @@ class BankLines:
             >>> config_file = ConfigFile.read("examples/data/meuse_manual.cfg")
             >>> river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
             N...e
-            >>> simulation_data, h0 = river_data.simulation_data()
+            >>> simulation_data, critical_water_depth = river_data.simulation_data()
             N...e
-            >>> BankLines.detect_bank_lines(simulation_data, h0, config_file)
+            >>> BankLines.detect_bank_lines(simulation_data, critical_water_depth, config_file)
             P...
             0    MULTILINESTRING ((207927.151 391960.747, 20792...
             dtype: geometry
@@ -375,11 +381,11 @@ class BankLines:
         """
         h_node = BankLines._calculate_water_depth(simulation_data)
 
-        wet_node = h_node > h0
+        wet_node = h_node > critical_water_depth
         num_wet_arr = wet_node.sum(axis=1)
 
         lines = BankLines._generate_bank_lines(
-            simulation_data, wet_node, num_wet_arr, h_node, h0
+            simulation_data, wet_node, num_wet_arr, h_node, critical_water_depth
         )
         multi_line = union_all(lines)
         merged_line = line_merge(multi_line)
@@ -438,7 +444,7 @@ class BankLines:
         wet_node: np.ndarray,
         num_wet_arr: np.ndarray,
         h_node: np.ndarray,
-        h0: float,
+        critical_water_depth: float,
     ) -> List[LineString]:
         """Detect bank lines based on wet/dry nodes.
 
@@ -451,7 +457,7 @@ class BankLines:
                 Number of wet nodes for each face.
             h_node (np.ndarray):
                 Water depth at each node.
-            h0 (float):
+            critical_water_depth (float):
                 Critical water depth for determining the banks.
 
         Returns:
@@ -473,10 +479,17 @@ class BankLines:
                 continue
 
             if n_node == 3:
-                line = tri_to_line(x_node[i], y_node[i], wet_node[i], h_node[i], h0)
+                line = tri_to_line(
+                    x_node[i], y_node[i], wet_node[i], h_node[i], critical_water_depth
+                )
             else:
                 line = poly_to_line(
-                    n_node, x_node[i], y_node[i], wet_node[i], h_node[i], h0
+                    n_node,
+                    x_node[i],
+                    y_node[i],
+                    wet_node[i],
+                    h_node[i],
+                    critical_water_depth,
                 )
 
             if line is not None:
