@@ -423,13 +423,4 @@ class ErosionPlotter:
             bbox (Tuple[float, float, float, float]):
                 Tuple bounding box consisting of [min x, min y, max x, max y)
         """
-        x = coords[:, 0]
-        y = coords[:, 1]
-        x_min = x.min()
-        y_min = y.min()
-        x_max = x.max()
-        y_max = y.max()
-        d = buffer * max(x_max - x_min, y_max - y_min)
-        bbox = (x_min - d, y_min - d, x_max + d, y_max + d)
-
-        return bbox
+        return df_plt.get_bbox(coords, buffer)

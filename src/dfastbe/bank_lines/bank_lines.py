@@ -6,28 +6,22 @@ from typing import List
 
 import geopandas as gpd
 import numpy as np
-from matplotlib import pyplot as plt
-from shapely.geometry.polygon import Polygon
-from shapely.geometry import MultiLineString
 from geopandas.geoseries import GeoSeries
-from shapely import union_all, line_merge
+from matplotlib import pyplot as plt
+from shapely import line_merge, union_all
+from shapely.geometry import MultiLineString
+from shapely.geometry.polygon import Polygon
 
 from dfastbe import __version__
 from dfastbe import plotting as df_plt
-from dfastbe.io import (
-    ConfigFile,
-    LineGeometry,
-    BaseSimulationData,
-    log_text,
-    get_bbox
-)
 from dfastbe.bank_lines.data_models import BankLinesRiverData
+from dfastbe.io import BaseSimulationData, ConfigFile, LineGeometry, log_text
 from dfastbe.kernel import get_zoom_extends
 from dfastbe.support import (
+    on_right_side,
     poly_to_line,
     sort_connect_bank_lines,
     tri_to_line,
-    on_right_side,
 )
 from dfastbe.utils import timed_logger
 
@@ -123,7 +117,6 @@ class BankLines:
         # save bank_file
         self.save(bank, banklines, clipped_banklines, bank_areas, config_file)
 
-
         if self.plot_flags["plot_data"]:
             self.plot(
                 center_line_arr,
@@ -171,7 +164,7 @@ class BankLines:
         log_text("=")
         log_text("create_figures")
         i_fig = 0
-        bbox = get_bbox(xy_km_numpy)
+        bbox = df_plt.get_bbox(xy_km_numpy)
 
         if self.plot_flags["save_plot_zoomed"]:
             bank_crds: List[np.ndarray] = []

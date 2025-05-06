@@ -26,16 +26,17 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
-from shapely.geometry import LineString, Polygon
+import geopandas
 import matplotlib
 import matplotlib.pyplot
-import geopandas
-import numpy
+import numpy as np
+from shapely.geometry import LineString, Polygon
 
 from dfastbe.io import ConfigFile
-from dfastbe.kernel import water_density, g
+from dfastbe.kernel import g, water_density
+
 
 def savefig(fig: matplotlib.figure.Figure, filename: str) -> None:
     """
@@ -69,7 +70,6 @@ def setsize(fig: matplotlib.figure.Figure) -> None:
     fig.set_size_inches(11.75, 8.25)  # a4
 
 
-
 def set_bbox(
     ax: matplotlib.axes.Axes,
     bbox: Tuple[float, float, float, float],
@@ -92,14 +92,14 @@ def set_bbox(
 
 
 def chainage_markers(
-    xykm: numpy.ndarray, ax: matplotlib.axes.Axes, ndec: int = 1, scale: float = 1000
+    xykm: np.ndarray, ax: matplotlib.axes.Axes, ndec: int = 1, scale: float = 1000
 ) -> None:
     """
     Add markers indicating the river chainage to a plot.
-    
+
     Arguments
     ---------
-    xykm : numpy.ndarray
+    xykm : np.ndarray
         Array containing the x, y, and chainage; unit m for x and y, km for chainage.
     ax : matplotlib.axes.Axes
         Axes object in which to add the markers.
@@ -111,7 +111,7 @@ def chainage_markers(
     step = 10 ** (-ndec)
     labelstr = " {:." + str(ndec) + "f}"
     km_rescaled = xykm[:, 2] / step
-    mask = numpy.isclose(numpy.round(km_rescaled), km_rescaled)
+    mask = np.isclose(np.round(km_rescaled), km_rescaled)
     ax.plot(
         xykm[mask, 0] / scale,
         xykm[mask, 1] / scale,
@@ -119,7 +119,7 @@ def chainage_markers(
         marker="+",
         color="k",
     )
-    for i in numpy.nonzero(mask)[0]:
+    for i in np.nonzero(mask)[0]:
         ax.text(
             xykm[i, 0] / scale,
             xykm[i, 1] / scale,
@@ -130,28 +130,28 @@ def chainage_markers(
 
 
 def plot_mesh(
-    ax: matplotlib.axes.Axes, xe: numpy.ndarray, ye: numpy.ndarray, scale: float = 1000
+    ax: matplotlib.axes.Axes, xe: np.ndarray, ye: np.ndarray, scale: float = 1000
 ) -> None:
     """
     Add a mesh to a plot.
-    
+
     Arguments
     ---------
     ax : matplotlib.axes.Axes
         Axes object in which to add the mesh.
-    xe : numpy.ndarray
+    xe : np.ndarray
         M x 2 array of begin/end x-coordinates of mesh edges.
-    ye : numpy.ndarray
+    ye : np.ndarray
         M x 2 array of begin/end y-coordinates of mesh edges.
     scale : float
         Indicates whether the axes are in m (1) or km (1000).
     """
     xe1 = xe[:, (0, 1, 1)] / scale
-    xe1[:, 2] = numpy.nan
+    xe1[:, 2] = np.nan
     xev = xe1.reshape((xe1.size,))
 
     ye1 = ye[:, (0, 1, 1)] / scale
-    ye1[:, 2] = numpy.nan
+    ye1[:, 2] = np.nan
     yev = ye1.reshape((ye1.size,))
 
     # to avoid OverflowError: In draw_path: Exceeded cell block limit
@@ -164,31 +164,31 @@ def plot_mesh(
 
 def plot_mesh_patches(
     ax: matplotlib.axes.Axes,
-    fn: numpy.ndarray,
-    nnodes: numpy.ndarray,
-    xn: numpy.ndarray,
-    yn: numpy.ndarray,
-    val: numpy.ndarray,
+    fn: np.ndarray,
+    nnodes: np.ndarray,
+    xn: np.ndarray,
+    yn: np.ndarray,
+    val: np.ndarray,
     minval: Optional[float] = None,
     maxval: Optional[float] = None,
     scale: float = 1000,
 ) -> matplotlib.collections.PolyCollection:
     """
     Add a collection of patches to the plot one for every face of the mesh.
-    
+
     Arguments
     ---------
     ax : matplotlib.axes.Axes
         Axes object in which to add the mesh.
-    fn : numpy.ndarray
+    fn : np.ndarray
         N x M array listing the nodes (max M) per face (total N) of the mesh.
-    nnodes : numpy.ndarray
+    nnodes : np.ndarray
         Number of nodes per face (max M).
-    xn : numpy.ndarray
+    xn : np.ndarray
         X-coordinates of the mesh nodes.
-    yn : numpy.ndarray
+    yn : np.ndarray
         Y-coordinates of the mesh nodes.
-    val : numpy.ndarray
+    val : np.ndarray
         Array of length N containing the value per face.
     minval : Optional[float]
         Lower limit for the color scale.
@@ -196,7 +196,7 @@ def plot_mesh_patches(
         Upper limit for the color scale.
     scale : float
         Indicates whether the axes are in m (1) or km (1000).
-    
+
     Returns
     -------
     p : matplotlib.collections.PolyCollection
@@ -209,13 +209,13 @@ def plot_mesh_patches(
         fn_masked = fn[mask, :]
         tfn_list.append(fn_masked[:, (0, n - 2, n - 1)])
         tval_list.append(val[mask])
-    tfn = numpy.concatenate(tfn_list, axis=0)
-    tval = numpy.concatenate(tval_list, axis=0)
+    tfn = np.concatenate(tfn_list, axis=0)
+    tval = np.concatenate(tval_list, axis=0)
     # cmap = matplotlib.pyplot.get_cmap('Spectral')
     if minval is None:
-        minval = numpy.min(tval)
+        minval = np.min(tval)
     if maxval is None:
-        maxval = numpy.max(tval)
+        maxval = np.max(tval)
     p = ax.tripcolor(
         xn / scale,
         yn / scale,
@@ -230,14 +230,14 @@ def plot_mesh_patches(
 
 def plot_detect1(
     bbox: Tuple[float, float, float, float],
-    xykm: numpy.ndarray,
+    xykm: np.ndarray,
     bankareas: List[Polygon],
     bank: List[LineString],
-    fn: numpy.ndarray,
-    nnodes: numpy.ndarray,
-    xn: numpy.ndarray,
-    yn: numpy.ndarray,
-    h: numpy.ndarray,
+    fn: np.ndarray,
+    nnodes: np.ndarray,
+    xn: np.ndarray,
+    yn: np.ndarray,
+    h: np.ndarray,
     hmax: float,
     xlabel_txt: str,
     ylabel_txt: str,
@@ -257,21 +257,21 @@ def plot_detect1(
     ---------
     bbox : Tuple[float, float, float, float]
         Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
-    xykm : numpy.ndarray
+    xykm : np.ndarray
         Array containing the x, y, and chainage; unit m for x and y, km for chainage.
     bankareas : List[Polygon]
         List of bank polygons.
     bank : List[LineString]
         List of bank lines.
-    fn : numpy.ndarray
+    fn : np.ndarray
         N x M array listing the nodes (max M) per face (total N) of the mesh.
-    nnodes : numpy.ndarray
+    nnodes : np.ndarray
         Number of nodes per face (max M).
-    xn : numpy.ndarray
+    xn : np.ndarray
         X-coordinates of the mesh nodes.
-    yn : numpy.ndarray
+    yn : np.ndarray
         Y-coordinates of the mesh nodes.
-    h : numpy.ndarray
+    h : np.ndarray
         Array of water depth values.
     hmax : float
         Water depth value to be used as upper limit for coloring.
@@ -325,13 +325,13 @@ def plot_detect1(
 
 def plot1_waterdepth_and_banklines(
     bbox: Tuple[float, float, float, float],
-    xykm: numpy.ndarray,
+    xykm: np.ndarray,
     banklines: geopandas.geodataframe.GeoDataFrame,
-    fn: numpy.ndarray,
-    nnodes: numpy.ndarray,
-    xn: numpy.ndarray,
-    yn: numpy.ndarray,
-    h: numpy.ndarray,
+    fn: np.ndarray,
+    nnodes: np.ndarray,
+    xn: np.ndarray,
+    yn: np.ndarray,
+    h: np.ndarray,
     hmax: float,
     xlabel_txt: str,
     ylabel_txt: str,
@@ -340,23 +340,23 @@ def plot1_waterdepth_and_banklines(
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with water depths and initial bank lines.
-    
+
     bbox : Tuple[float, float, float, float]
         Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
-    xykm : numpy.ndarray
+    xykm : np.ndarray
         Array containing the x, y, and chainage; unit m for x and y, km for chainage.
     banklines : geopandas.geodataframe.GeoDataFrame
         Pandas object containing the bank lines.
-        
-    fn : numpy.ndarray
+
+    fn : np.ndarray
         N x M array listing the nodes (max M) per face (total N) of the mesh.
-    nnodes : numpy.ndarray
+    nnodes : np.ndarray
         Number of nodes per face (max M).
-    xn : numpy.ndarray
+    xn : np.ndarray
         X-coordinates of the mesh nodes.
-    yn : numpy.ndarray
+    yn : np.ndarray
         Y-coordinates of the mesh nodes.
-    h : numpy.ndarray
+    h : np.ndarray
         Array of water depth values.
     hmax : float
         Water depth value to be used as upper limit for coloring.
@@ -368,7 +368,7 @@ def plot1_waterdepth_and_banklines(
         Label for the axes title.
     waterdepth_txt : str
         Label for the color bar.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -384,7 +384,7 @@ def plot1_waterdepth_and_banklines(
     chainage_markers(xykm, ax, ndec=0, scale=scale)
     ax.plot(xykm[:, 0] / scale, xykm[:, 1] / scale, linestyle="--", color="k")
     for bl in banklines.geometry:
-        bp = numpy.array(bl.coords)
+        bp = np.array(bl.coords)
         ax.plot(bp[:, 0] / scale, bp[:, 1] / scale, color="k")
     p = plot_mesh_patches(ax, fn, nnodes, xn, yn, h, 0, hmax)
     cbar = fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=waterdepth_txt)
@@ -399,14 +399,14 @@ def plot1_waterdepth_and_banklines(
 
 def plot2_eroded_distance_and_equilibrium(
     bbox: Tuple[float, float, float, float],
-    xykm: numpy.ndarray,
-    bank_crds: List[numpy.ndarray],
-    dn_tot: List[numpy.ndarray],
+    xykm: np.ndarray,
+    bank_crds: List[np.ndarray],
+    dn_tot: List[np.ndarray],
     to_right: List[bool],
-    dnav: numpy.ndarray,
-    xy_eq: List[numpy.ndarray],
-    xe: numpy.ndarray,
-    ye: numpy.ndarray,
+    dnav: np.ndarray,
+    xy_eq: List[np.ndarray],
+    xe: np.ndarray,
+    ye: np.ndarray,
     xlabel_txt: str,
     ylabel_txt: str,
     title_txt: str,
@@ -416,28 +416,28 @@ def plot2_eroded_distance_and_equilibrium(
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with predicted bank line shift and equilibrium bank line.
-    
+
     Arguments
     ---------
     bbox : Tuple[float, float, float, float]
         Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
-    xykm : numpy.ndarray
+    xykm : np.ndarray
         Array containing the x, y, and chainage; unit m for x and y, km for chainage.
-    bank_crds : List[numpy.ndarray]
+    bank_crds : List[np.ndarray]
         List of N arrays containing the x- and y-coordinates of the original
         bank lines.
-    dn_tot : List[numpy.ndarray]
+    dn_tot : List[np.ndarray]
         List of N arrays containing the total erosion distance values.
     to_right : List[bool]
         List of N booleans indicating whether the bank is on the right.
-    dnav : numpy.ndarray
+    dnav : np.ndarray
         Array of N average erosion distance values.
-    xy_eq : List[numpy.ndarray]
+    xy_eq : List[np.ndarray]
         List of N arrays containing the x- and y-coordinates of the equilibrium
         bank line.
-    xe : numpy.ndarray
+    xe : np.ndarray
         M x 2 array of begin/end x-coordinates of mesh edges.
-    ye : numpy.ndarray
+    ye : np.ndarray
         M x 2 array of begin/end y-coordinates of mesh edges.
     xlabel_txt : str
         Label for the x-axis.
@@ -451,7 +451,7 @@ def plot2_eroded_distance_and_equilibrium(
         Label for the color bar.
     eqbank_txt : str
         Label for the equilibrium bank position.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -481,22 +481,22 @@ def plot2_eroded_distance_and_equilibrium(
         nbp = len(bankc)
         #
         dxy = bankc[1:] - bankc[:-1]
-        ds = numpy.sqrt((dxy ** 2).sum(axis=1))
+        ds = np.sqrt((dxy**2).sum(axis=1))
         dxy = dxy * (dn_tot[ib] / ds).reshape((nbp - 1, 1))
         #
-        x = numpy.zeros(((nbp - 1) * 4,))
+        x = np.zeros(((nbp - 1) * 4,))
         x[0::4] = bankc[:-1, 0]
         x[1::4] = bankc[1:, 0]
         x[2::4] = bankc[:-1, 0] + dxy[:, 1]
         x[3::4] = bankc[1:, 0] + dxy[:, 1]
         #
-        y = numpy.zeros(((nbp - 1) * 4,))
+        y = np.zeros(((nbp - 1) * 4,))
         y[0::4] = bankc[:-1, 1]
         y[1::4] = bankc[1:, 1]
         y[2::4] = bankc[:-1, 1] - dxy[:, 0]
         y[3::4] = bankc[1:, 1] - dxy[:, 0]
         #
-        tfn = numpy.zeros(((nbp - 1) * 2, 3))
+        tfn = np.zeros(((nbp - 1) * 2, 3))
         tfn[0::2, 0] = [4 * i for i in range(nbp - 1)]
         tfn[0::2, 1] = tfn[0::2, 0] + 1
         tfn[0::2, 2] = tfn[0::2, 0] + 2
@@ -505,7 +505,7 @@ def plot2_eroded_distance_and_equilibrium(
         tfn[1::2, 1] = tfn[0::2, 0] + 2
         tfn[1::2, 2] = tfn[0::2, 0] + 3
         #
-        tval = numpy.zeros(((nbp - 1) * 2,))
+        tval = np.zeros(((nbp - 1) * 2,))
         tval[0::2] = dnc
         tval[1::2] = dnc
         #
@@ -542,10 +542,10 @@ def plot2_eroded_distance_and_equilibrium(
 
 
 def plot3_eroded_volume(
-    km_mid: numpy.ndarray,
+    km_mid: np.ndarray,
     km_step: float,
     chainage_txt: str,
-    erosion_volume: List[List[numpy.ndarray]],
+    erosion_volume: List[List[np.ndarray]],
     ylabel_txt: str,
     title_txt: str,
     qlabel: str,
@@ -553,16 +553,16 @@ def plot3_eroded_volume(
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with total eroded volume subdivided per discharge level.
-    
+
     Arguments
     ---------
-    km_mid : numpy.ndarray
+    km_mid : np.ndarray
         Array containing the mid points for the chainage bins.
     km_step : float
         Bin width.
     chainage_txt : str
         Label for the horizontal chainage axes.
-    erosion_volume : List[List[numpy.ndarray]]
+    erosion_volume : List[List[np.ndarray]]
         List of nQ lists of N arrays containing the total erosion distance values
     ylabel_txt : str
         Label for the vertical erosion volume axes.
@@ -572,7 +572,7 @@ def plot3_eroded_volume(
         Label for discharge level.
     banklabel : str
         Label for bank id.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -595,33 +595,33 @@ def plot3_eroded_volume(
 
 
 def plot3_stacked_per_discharge(
-   ax: matplotlib.axes.Axes,
-   km_mid: numpy.ndarray,
-   km_step: float,
-   erosion_volume: List[List[numpy.ndarray]],
-   qlabel: str,
-   wfrac: float,
+    ax: matplotlib.axes.Axes,
+    km_mid: np.ndarray,
+    km_step: float,
+    erosion_volume: List[List[np.ndarray]],
+    qlabel: str,
+    wfrac: float,
 ) -> None:
     """
     Add a stacked plot of bank erosion with total eroded volume subdivided per discharge level to the selected axes.
-    
+
     Arguments
     ---------
     fig : matplotlib.figure.Figure
         Figure object.
     ax : matplotlib.axes.Axes
         Axes object.
-    km_mid : numpy.ndarray
+    km_mid : np.ndarray
         Array containing the mid points for the chainage bins.
     km_step : float
         Bin width.
-    erosion_volume : List[List[numpy.ndarray]]
+    erosion_volume : List[List[np.ndarray]]
         List of nQ lists of N arrays containing the total erosion distance values
     qlabel : str
         Label for discharge level.
     wfrac : float
         Width fraction for the stacked column.
-    
+
     Results
     -------
     None
@@ -656,33 +656,33 @@ def plot3_stacked_per_discharge(
 
 
 def plot3_stacked_per_bank(
-   ax: matplotlib.axes.Axes,
-   km_mid: numpy.ndarray,
-   km_step: float,
-   erosion_volume: List[List[numpy.ndarray]],
-   banklabel: str,
-   wfrac: float,
+    ax: matplotlib.axes.Axes,
+    km_mid: np.ndarray,
+    km_step: float,
+    erosion_volume: List[List[np.ndarray]],
+    banklabel: str,
+    wfrac: float,
 ) -> None:
     """
     Add a stacked plot of bank erosion with total eroded volume subdivided per bank to the selected axes.
-    
+
     Arguments
     ---------
     fig : matplotlib.figure.Figure
         Figure object.
     ax : matplotlib.axes.Axes
         Axes object.
-    km_mid : numpy.ndarray
+    km_mid : np.ndarray
         Array containing the mid points for the chainage bins.
     km_step : float
         Bin width.
-    erosion_volume : List[List[numpy.ndarray]]
+    erosion_volume : List[List[np.ndarray]]
         List of nQ lists of N arrays containing the total erosion distance values
     banklabel : str
         Label for bank id.
     wfrac : float
         Width fraction for the stacked column.
-    
+
     Results
     -------
     None
@@ -717,26 +717,26 @@ def plot3_stacked_per_bank(
 
 
 def plot3_eroded_volume_subdivided_1(
-    km_mid: numpy.ndarray,
+    km_mid: np.ndarray,
     km_step: float,
     chainage_txt: str,
-    erosion_volume: List[List[numpy.ndarray]],
+    erosion_volume: List[List[np.ndarray]],
     ylabel_txt: str,
     title_txt: str,
     qlabel: str,
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with total eroded volume subdivided per discharge level.
-    
+
     Arguments
     ---------
-    km_mid : numpy.ndarray
+    km_mid : np.ndarray
         Array containing the mid points for the chainage bins.
     km_step : float
         Bin width.
     chainage_txt : str
         Label for the horizontal chainage axes.
-    erosion_volume : List[List[numpy.ndarray]]
+    erosion_volume : List[List[np.ndarray]]
         List of nQ lists of N arrays containing the total erosion distance values
     ylabel_txt : str
         Label for the vertical erosion volume axes.
@@ -744,7 +744,7 @@ def plot3_eroded_volume_subdivided_1(
         Label for axes title.
     qlabel : str
         Label for discharge level.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -766,26 +766,26 @@ def plot3_eroded_volume_subdivided_1(
 
 
 def plot3_eroded_volume_subdivided_2(
-    km_mid: numpy.ndarray,
+    km_mid: np.ndarray,
     km_step: float,
     chainage_txt: str,
-    erosion_volume: List[List[numpy.ndarray]],
+    erosion_volume: List[List[np.ndarray]],
     ylabel_txt: str,
     title_txt: str,
     banklabel: str,
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with total eroded volume subdivided per bank.
-    
+
     Arguments
     ---------
-    km_mid : numpy.ndarray
+    km_mid : np.ndarray
         Array containing the mid points for the chainage bins.
     km_step : float
         Bin width.
     chainage_txt : str
         Label for the horizontal chainage axes.
-    erosion_volume : List[List[numpy.ndarray]]
+    erosion_volume : List[List[np.ndarray]]
         List of nQ lists of N arrays containing the total erosion distance values
     ylabel_txt : str
         Label for the vertical erosion volume axes.
@@ -793,7 +793,7 @@ def plot3_eroded_volume_subdivided_2(
         Label for axes title.
     banklabel : str
         Label for bank id.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -815,31 +815,31 @@ def plot3_eroded_volume_subdivided_2(
 
 
 def plot4_eroded_volume_eq(
-    km_mid: numpy.ndarray,
+    km_mid: np.ndarray,
     km_step: float,
     chainage_txt: str,
-    vol_eq: numpy.ndarray,
+    vol_eq: np.ndarray,
     ylabel_txt: str,
     title_txt: str,
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with equilibrium eroded volume.
-    
+
     Arguments
     ---------
-    km_mid : numpy.ndarray
+    km_mid : np.ndarray
         Array containing the mid points for the chainage bins.
     km_step : float
         Bin width.
     chainage_txt : str
         Label for the horizontal chainage axes.
-    vol_eq : numpy.ndarray
+    vol_eq : np.ndarray
         Array containing the equilibrium eroded volume per bin.
     ylabel_txt : str
         Label for the vertical erosion volume axes.
     title_txt : str
         Label for axes title.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -850,7 +850,7 @@ def plot4_eroded_volume_eq(
     fig, ax = matplotlib.pyplot.subplots()
     setsize(fig)
     #
-    tvol = numpy.zeros(km_mid.shape)
+    tvol = np.zeros(km_mid.shape)
     for i in range(len(km_mid)):
         tvol[i] = vol_eq[i].sum()
     ax.bar(km_mid, tvol, width=0.8 * km_step)
@@ -863,17 +863,17 @@ def plot4_eroded_volume_eq(
 
 
 def plot5series_waterlevels_per_bank(
-    bank_km_mid: List[numpy.ndarray],
+    bank_km_mid: List[np.ndarray],
     chainage_txt: str,
-    waterlevel: List[List[numpy.ndarray]],
-    shipwavemax: List[List[numpy.ndarray]],
-    shipwavemin: List[List[numpy.ndarray]],
+    waterlevel: List[List[np.ndarray]],
+    shipwavemax: List[List[np.ndarray]],
+    shipwavemin: List[List[np.ndarray]],
     waterlevelq_txt: str,
     avg_waterlevel_txt: str,
     shipwave_txt: str,
-    bankheight: List[numpy.ndarray],
+    bankheight: List[np.ndarray],
     bankheight_txt: str,
-    bankprotect: List[numpy.ndarray],
+    bankprotect: List[np.ndarray],
     bankprotect_txt: str,
     elevation_txt: str,
     title_txt: str,
@@ -881,18 +881,18 @@ def plot5series_waterlevels_per_bank(
 ) -> [List[matplotlib.figure.Figure], List[matplotlib.axes.Axes]]:
     """
     Create the bank erosion plots with water levels, bank height and bank protection height along each bank.
-    
+
     Arguments
     ---------
-    bank_km_mid : List[numpy.ndarray]
+    bank_km_mid : List[np.ndarray]
         List of arrays containing the chainage values per bank (segment) [km].
     chainage_txt : str
         Label for the horizontal chainage axes.
-    waterlevel : List[List[numpy.ndarray]]
+    waterlevel : List[List[np.ndarray]]
         List of arrays containing the water levels per bank (point) [elevation_unit].
-    shipmwavemax : numpy.ndarray
+    shipmwavemax : np.ndarray
         Maximum bank level subject to ship waves [m]
-    shipwavemin : numpy.ndarray
+    shipwavemin : np.ndarray
         Minimum bank level subject to ship waves [m]
     waterlevelq_txt : str
         Label for the water level per discharge level.
@@ -900,11 +900,11 @@ def plot5series_waterlevels_per_bank(
         Label for the average water level.
     shipwave_txt : str
         Label for the elevation range influenced by ship waves.
-    bankheight : List[numpy.ndarray]
+    bankheight : List[np.ndarray]
         List of arrays containing the bank heights per bank (segment) [elevation_unit].
     bankheight_txt : str
         Label for the bank height.
-    bankprotect : List[numpy.ndarray]
+    bankprotect : List[np.ndarray]
         List of arrays containing the bank protection height per bank (point) [elevation_unit].
     bankprotect_txt : str
         Label for the bank protection height.
@@ -914,7 +914,7 @@ def plot5series_waterlevels_per_bank(
         Label for the axes title.
     elevation_unit : str
         Unit used for all elevation data.
-    
+
     Results
     -------
     figlist : List[matplotlib.figure.Figure]
@@ -1006,12 +1006,12 @@ def plot5series_waterlevels_per_bank(
 
 
 def plot6series_velocity_per_bank(
-    bank_km_mid: List[numpy.ndarray],
+    bank_km_mid: List[np.ndarray],
     chainage_txt: str,
-    veloc: List[List[numpy.ndarray]],
+    veloc: List[List[np.ndarray]],
     velocq_txt: str,
-    tauc: List[numpy.ndarray],
-    chezy: List[numpy.ndarray],
+    tauc: List[np.ndarray],
+    chezy: List[np.ndarray],
     ucrit_txt: str,
     ylabel_txt: str,
     title_txt: str,
@@ -1019,20 +1019,20 @@ def plot6series_velocity_per_bank(
 ) -> [List[matplotlib.figure.Figure], List[matplotlib.axes.Axes]]:
     """
     Create the bank erosion plots with velocities and critical velocities along each bank.
-    
+
     Arguments
     ---------
-    bank_km_mid : List[numpy.ndarray]
+    bank_km_mid : List[np.ndarray]
         List of arrays containing the chainage values per bank (segment) [km].
     chainage_txt : str
         Label for the horizontal chainage axes.
-    veloc: List[List[numpy.ndarray]]
+    veloc: List[List[np.ndarray]]
         List of arrays containing the velocities per bank (segment) [m/s].
     velocq_txt: str,
         Label for the velocity per discharge level.
-    tauc: List[numpy.ndarray]
+    tauc: List[np.ndarray]
         List of arrays containing the shear stresses per bank (point) [N/m2].
-    chezy: List[numpy.ndarray]
+    chezy: List[np.ndarray]
         List of arrays containing the Chezy values per bank [m0.5/s].
     ucrit_txt: str
         Label for the critical velocity.
@@ -1042,7 +1042,7 @@ def plot6series_velocity_per_bank(
         Label for the axes title.
     veloc_unit: str
         Unit used for all velocities.
-    
+
     Results
     -------
     figlist : List[matplotlib.figure.Figure]
@@ -1060,7 +1060,7 @@ def plot6series_velocity_per_bank(
         setsize(fig)
         bk = bank_km_mid[ib]
         #
-        velc = numpy.sqrt(tauc[ib] * chezy[ib] ** 2 / (water_density * g))
+        velc = np.sqrt(tauc[ib] * chezy[ib] ** 2 / (water_density * g))
         ax.plot(bank_km_mid[ib], velc, color="k", label=ucrit_txt)
         for iq in range(n_levels):
             ax.plot(
@@ -1082,9 +1082,9 @@ def plot6series_velocity_per_bank(
 
 def plot7_banktype(
     bbox: Tuple[float, float, float, float],
-    xykm: numpy.ndarray,
-    bank_crds: List[numpy.ndarray],
-    banktype: List[numpy.ndarray],
+    xykm: np.ndarray,
+    bank_crds: List[np.ndarray],
+    banktype: List[np.ndarray],
     taucls_str: List[str],
     xlabel_txt: str,
     ylabel_txt: str,
@@ -1092,17 +1092,17 @@ def plot7_banktype(
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with colour-coded bank types.
-    
+
     Arguments
     ---------
     bbox : Tuple[float, float, float, float]
         Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
-    xykm : numpy.ndarray
+    xykm : np.ndarray
         Array containing the x, y, and chainage; unit m for x and y, km for chainage.
-    bank_crds : List[numpy.ndarray]
+    bank_crds : List[np.ndarray]
         List of N arrays containing the x- and y-coordinates of the oroginal
         bank lines.
-    banktype : List[numpy.ndarray]
+    banktype : List[np.ndarray]
         List of N arrays containing the bank type values.
     taucls_str : List[str]
         List of strings representing the distinct bank type classes.
@@ -1112,7 +1112,7 @@ def plot7_banktype(
         Label for the y-axis.
     title_txt : str
         Label for the axes title.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -1129,11 +1129,11 @@ def plot7_banktype(
     clrs = get_colors("plasma", len(taucls_str) + 1)
     for ib in range(len(bank_crds)):
         for ibt in range(len(taucls_str)):
-            ibtEdges = numpy.nonzero(banktype[ib] == ibt)[0]
+            ibtEdges = np.nonzero(banktype[ib] == ibt)[0]
             if len(ibtEdges) > 0:
                 nedges = len(ibtEdges)
                 nx = max(3 * nedges - 1, 0)
-                x = numpy.zeros((nx,)) + numpy.nan
+                x = np.zeros((nx,)) + np.nan
                 y = x.copy()
                 x[0::3] = bank_crds[ib][ibtEdges, 0].copy() / scale
                 y[0::3] = bank_crds[ib][ibtEdges, 1].copy() / scale
@@ -1146,9 +1146,7 @@ def plot7_banktype(
                     ax.plot(x, y, color=clrs[ibt])
             else:
                 if ib == 0:
-                    ax.plot(
-                        numpy.nan, numpy.nan, color=clrs[ibt], label=taucls_str[ibt]
-                    )
+                    ax.plot(np.nan, np.nan, color=clrs[ibt], label=taucls_str[ibt])
     #
     set_bbox(ax, bbox)
     ax.set_xlabel(xlabel_txt)
@@ -1160,29 +1158,29 @@ def plot7_banktype(
 
 
 def plot8_eroded_distance(
-    bank_km_mid: List[numpy.ndarray],
+    bank_km_mid: List[np.ndarray],
     chainage_txt: str,
-    dn_tot: List[numpy.ndarray],
+    dn_tot: List[np.ndarray],
     dn_tot_txt: str,
-    dn_eq: List[numpy.ndarray],
+    dn_eq: List[np.ndarray],
     dn_eq_txt: str,
     dn_txt: str,
     dn_unit: str,
 ) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """
     Create the bank erosion plot with total and equilibrium eroded distance.
-    
+
     Arguments
     ---------
-    bank_km_mid : List[numpy.ndarray]
+    bank_km_mid : List[np.ndarray]
         List of arrays containing the chainage values per bank (segment) [km].
     chainage_txt : str
         Label for the horizontal chainage axes.
-    dn_tot : List[numpy.ndarray]
+    dn_tot : List[np.ndarray]
         List of arrays containing the total bank erosion distance per bank (segment) [m].
     dn_tot_txt : str
         Label for the total bank erosion distance.
-    dn_eq : List[numpy.ndarray]
+    dn_eq : List[np.ndarray]
         List of arrays containing the equilibrium bank erosion distance per bank (segment) [m].
     dn_eq_txt : str
         Label for equilibrium bank erosion distance.
@@ -1190,7 +1188,7 @@ def plot8_eroded_distance(
         General label for bank erosion distance.
     dn_unit: str
         Unit used for bank erosion distance.
-    
+
     Results
     -------
     fig : matplotlib.figure.Figure
@@ -1294,7 +1292,7 @@ def zoom_xy_and_save(fig: matplotlib.figure.Figure, ax: matplotlib.axes.Axes, fi
     """
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
-    
+
     dx_zoom = 0
     xy_ratio = (ymax - ymin) / (xmax - xmin)
     for ix in range(len(xyzoom)):
@@ -1311,7 +1309,7 @@ def zoom_xy_and_save(fig: matplotlib.figure.Figure, ax: matplotlib.axes.Axes, fi
             # y range limiting
             dx_zoom = max(dx_zoom, dy / xy_ratio)
     dy_zoom = dx_zoom * xy_ratio
-    
+
     for ix in range(len(xyzoom)):
         x0 = (xyzoom[ix][0] + xyzoom[ix][1]) / 2
         y0 = (xyzoom[ix][2] + xyzoom[ix][3]) / 2
@@ -1324,6 +1322,32 @@ def zoom_xy_and_save(fig: matplotlib.figure.Figure, ax: matplotlib.axes.Axes, fi
             + plot_ext
         )
         savefig(fig, figfile)
-    
+
     ax.set_xlim(xmin=xmin, xmax=xmax)
     ax.set_ylim(ymin=ymin, ymax=ymax)
+
+
+def get_bbox(
+    coords: np.ndarray, buffer: float = 0.1
+) -> Tuple[float, float, float, float]:
+    """
+    Derive the bounding box from a line.
+    Args:
+        coords (np.ndarray):
+            An N x M array containing x- and y-coordinates as first two M entries
+        buffer : float
+            Buffer fraction surrounding the tight bounding box
+    Returns:
+        bbox (Tuple[float, float, float, float]):
+            Tuple bounding box consisting of [min x, min y, max x, max y)
+    """
+    x = coords[:, 0]
+    y = coords[:, 1]
+    x_min = x.min()
+    y_min = y.min()
+    x_max = x.max()
+    y_max = y.max()
+    d = buffer * max(x_max - x_min, y_max - y_min)
+    bbox = (x_min - d, y_min - d, x_max + d, y_max + d)
+
+    return bbox
