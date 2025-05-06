@@ -49,6 +49,7 @@ from dfastbe.bank_erosion.data_models import (
     WaterLevelData,
 )
 from dfastbe.bank_erosion.debugger import Debugger
+from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.utils import BankLinesProcessor, intersect_line_mesh
 from dfastbe.io import ConfigFile, LineGeometry, log_text, write_km_eroded_volumes
 from dfastbe.kernel import (
@@ -891,17 +892,22 @@ class Erosion:
         self._write_volume_outputs(erosion_results, km_mid)
 
         # create various plots
-        self._generate_plots(
+        erosion_plotter = ErosionPlotter(
+            self.gui,
+            erosion_results,
+            bank_data,
+            water_level_data,
+            erosion_inputs,
+            self.river_data.plot_flags,
+        )
+        erosion_plotter.plot_all(
             river_axis.data["stations"],
-            self.simulation_data,
             xy_line_eq_list,
             km_mid,
             self.river_data.output_intervals,
-            erosion_inputs,
-            water_level_data,
+            self.river_center_line_arr,
             mesh_data,
-            bank_data,
-            erosion_results,
+            self.simulation_data,
         )
         log_text("end_bankerosion")
         timed_logger("-- end analysis --")
