@@ -1245,6 +1245,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#dfastbe.plotting.get_bbox" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_bbox
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#dfastbe.plotting.get_colors" class="md-nav__link">
     <span class="md-ellipsis">
       get_colors
@@ -1630,6 +1639,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#dfastbe.plotting.get_bbox" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_bbox
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#dfastbe.plotting.get_colors" class="md-nav__link">
     <span class="md-ellipsis">
       get_colors
@@ -1912,7 +1930,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
 
 <h3 id="dfastbe.plotting.chainage_markers" class="doc doc-heading"><a href="#dfastbe.plotting.chainage_markers" class="toclink">
-            <code class="highlight language-python"><span class="n">chainage_markers</span><span class="p">(</span><span class="n">xykm</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">ndec</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+            <code class="highlight language-python"><span class="n">chainage_markers</span><span class="p">(</span><span class="n">xykm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">ndec</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 </a><a href="#dfastbe.plotting.chainage_markers" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -1921,7 +1939,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
         <p>Add markers indicating the river chainage to a plot.</p>
 <h5 id="dfastbe.plotting.chainage_markers--arguments"><a class="toclink" href="#dfastbe.plotting.chainage_markers--arguments">Arguments</a><a class="headerlink" href="#dfastbe.plotting.chainage_markers--arguments" title="Permanent link">#</a></h5>
-<p>xykm : numpy.ndarray
+<p>xykm : np.ndarray
     Array containing the x, y, and chainage; unit m for x and y, km for chainage.
 ax : matplotlib.axes.Axes
     Axes object in which to add the markers.
@@ -1968,14 +1986,14 @@ scale: float
 <span class="normal">127</span>
 <span class="normal">128</span>
 <span class="normal">129</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">chainage_markers</span><span class="p">(</span>
-    <span class="n">xykm</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">ndec</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1000</span>
+    <span class="n">xykm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">ndec</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1000</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add markers indicating the river chainage to a plot.</span>
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
-<span class="sd">    xykm : numpy.ndarray</span>
+<span class="sd">    xykm : np.ndarray</span>
 <span class="sd">        Array containing the x, y, and chainage; unit m for x and y, km for chainage.</span>
 <span class="sd">    ax : matplotlib.axes.Axes</span>
 <span class="sd">        Axes object in which to add the markers.</span>
@@ -1987,7 +2005,7 @@ scale: float
     <span class="n">step</span> <span class="o">=</span> <span class="mi">10</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">ndec</span><span class="p">)</span>
     <span class="n">labelstr</span> <span class="o">=</span> <span class="s2">&quot; {:.&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ndec</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;f}&quot;</span>
     <span class="n">km_rescaled</span> <span class="o">=</span> <span class="n">xykm</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="n">step</span>
-    <span class="n">mask</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">km_rescaled</span><span class="p">),</span> <span class="n">km_rescaled</span><span class="p">)</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">km_rescaled</span><span class="p">),</span> <span class="n">km_rescaled</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
         <span class="n">xykm</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">scale</span><span class="p">,</span>
         <span class="n">xykm</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">scale</span><span class="p">,</span>
@@ -1995,7 +2013,7 @@ scale: float
         <span class="n">marker</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
         <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">mask</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span>
             <span class="n">xykm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">scale</span><span class="p">,</span>
             <span class="n">xykm</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">scale</span><span class="p">,</span>
@@ -2003,6 +2021,82 @@ scale: float
             <span class="n">fontsize</span><span class="o">=</span><span class="s2">&quot;x-small&quot;</span><span class="p">,</span>
             <span class="n">clip_on</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="dfastbe.plotting.get_bbox" class="doc doc-heading"><a href="#dfastbe.plotting.get_bbox" class="toclink">
+            <code class="highlight language-python"><span class="n">get_bbox</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span></code>
+
+</a><a href="#dfastbe.plotting.get_bbox" class="headerlink" title="Permanent link">#</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Derive the bounding box from a line.
+Args:
+    coords (np.ndarray):
+        An N x M array containing x- and y-coordinates as first two M entries
+    buffer : float
+        Buffer fraction surrounding the tight bounding box
+Returns:
+    bbox (Tuple[float, float, float, float]):
+        Tuple bounding box consisting of [min x, min y, max x, max y)</p>
+
+            <details class="quote">
+              <summary>Source code in <code>src/dfastbe/plotting.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1330</span>
+<span class="normal">1331</span>
+<span class="normal">1332</span>
+<span class="normal">1333</span>
+<span class="normal">1334</span>
+<span class="normal">1335</span>
+<span class="normal">1336</span>
+<span class="normal">1337</span>
+<span class="normal">1338</span>
+<span class="normal">1339</span>
+<span class="normal">1340</span>
+<span class="normal">1341</span>
+<span class="normal">1342</span>
+<span class="normal">1343</span>
+<span class="normal">1344</span>
+<span class="normal">1345</span>
+<span class="normal">1346</span>
+<span class="normal">1347</span>
+<span class="normal">1348</span>
+<span class="normal">1349</span>
+<span class="normal">1350</span>
+<span class="normal">1351</span>
+<span class="normal">1352</span>
+<span class="normal">1353</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bbox</span><span class="p">(</span>
+    <span class="n">coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Derive the bounding box from a line.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        coords (np.ndarray):</span>
+<span class="sd">            An N x M array containing x- and y-coordinates as first two M entries</span>
+<span class="sd">        buffer : float</span>
+<span class="sd">            Buffer fraction surrounding the tight bounding box</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        bbox (Tuple[float, float, float, float]):</span>
+<span class="sd">            Tuple bounding box consisting of [min x, min y, max x, max y)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">x_min</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">y_min</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+    <span class="n">x_max</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">y_max</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">buffer</span> <span class="o">*</span> <span class="nb">max</span><span class="p">(</span><span class="n">x_max</span> <span class="o">-</span> <span class="n">x_min</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">-</span> <span class="n">y_min</span><span class="p">)</span>
+    <span class="n">bbox</span> <span class="o">=</span> <span class="p">(</span><span class="n">x_min</span> <span class="o">-</span> <span class="n">d</span><span class="p">,</span> <span class="n">y_min</span> <span class="o">-</span> <span class="n">d</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">+</span> <span class="n">d</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">+</span> <span class="n">d</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">bbox</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2032,7 +2126,9 @@ n : int
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/plotting.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1225</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1223</span>
+<span class="normal">1224</span>
+<span class="normal">1225</span>
 <span class="normal">1226</span>
 <span class="normal">1227</span>
 <span class="normal">1228</span>
@@ -2048,9 +2144,7 @@ n : int
 <span class="normal">1238</span>
 <span class="normal">1239</span>
 <span class="normal">1240</span>
-<span class="normal">1241</span>
-<span class="normal">1242</span>
-<span class="normal">1243</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_colors</span><span class="p">(</span><span class="n">cmap_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
+<span class="normal">1241</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_colors</span><span class="p">(</span><span class="n">cmap_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Obtain N colors from the specified colormap.</span>
 
@@ -2079,7 +2173,7 @@ n : int
 
 
 <h3 id="dfastbe.plotting.plot1_waterdepth_and_banklines" class="doc doc-heading"><a href="#dfastbe.plotting.plot1_waterdepth_and_banklines" class="toclink">
-            <code class="highlight language-python"><span class="n">plot1_waterdepth_and_banklines</span><span class="p">(</span><span class="n">bbox</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">xykm</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">banklines</span><span class="p">:</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">geodataframe</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">yn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">hmax</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xlabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">waterdepth_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">plot1_waterdepth_and_banklines</span><span class="p">(</span><span class="n">bbox</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">xykm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">banklines</span><span class="p">:</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">geodataframe</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">yn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">hmax</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xlabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">waterdepth_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.plotting.plot1_waterdepth_and_banklines" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -2092,22 +2186,22 @@ n : int
 <details class="bbox-" open>
   <summary>Tuple[float, float, float, float]</summary>
   <p>Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.</p>
-</details>        <p>xykm : numpy.ndarray
+</details>        <p>xykm : np.ndarray
     Array containing the x, y, and chainage; unit m for x and y, km for chainage.
 banklines : geopandas.geodataframe.GeoDataFrame
     Pandas object containing the bank lines.</p>
 
 
 <details class="fn-" open>
-  <summary>numpy.ndarray</summary>
+  <summary>np.ndarray</summary>
   <p>N x M array listing the nodes (max M) per face (total N) of the mesh.</p>
-</details>        <p>nnodes : numpy.ndarray
+</details>        <p>nnodes : np.ndarray
     Number of nodes per face (max M).
-xn : numpy.ndarray
+xn : np.ndarray
     X-coordinates of the mesh nodes.
-yn : numpy.ndarray
+yn : np.ndarray
     Y-coordinates of the mesh nodes.
-h : numpy.ndarray
+h : np.ndarray
     Array of water depth values.
 hmax : float
     Water depth value to be used as upper limit for coloring.
@@ -2200,13 +2294,13 @@ ax : matplotlib.axes.Axes
 <span class="normal">396</span>
 <span class="normal">397</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot1_waterdepth_and_banklines</span><span class="p">(</span>
     <span class="n">bbox</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
-    <span class="n">xykm</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">xykm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">banklines</span><span class="p">:</span> <span class="n">geopandas</span><span class="o">.</span><span class="n">geodataframe</span><span class="o">.</span><span class="n">GeoDataFrame</span><span class="p">,</span>
-    <span class="n">fn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">nnodes</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">xn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">yn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">h</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">fn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">nnodes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">xn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">yn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">h</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">hmax</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">xlabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -2218,20 +2312,20 @@ ax : matplotlib.axes.Axes
 
 <span class="sd">    bbox : Tuple[float, float, float, float]</span>
 <span class="sd">        Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.</span>
-<span class="sd">    xykm : numpy.ndarray</span>
+<span class="sd">    xykm : np.ndarray</span>
 <span class="sd">        Array containing the x, y, and chainage; unit m for x and y, km for chainage.</span>
 <span class="sd">    banklines : geopandas.geodataframe.GeoDataFrame</span>
 <span class="sd">        Pandas object containing the bank lines.</span>
 
-<span class="sd">    fn : numpy.ndarray</span>
+<span class="sd">    fn : np.ndarray</span>
 <span class="sd">        N x M array listing the nodes (max M) per face (total N) of the mesh.</span>
-<span class="sd">    nnodes : numpy.ndarray</span>
+<span class="sd">    nnodes : np.ndarray</span>
 <span class="sd">        Number of nodes per face (max M).</span>
-<span class="sd">    xn : numpy.ndarray</span>
+<span class="sd">    xn : np.ndarray</span>
 <span class="sd">        X-coordinates of the mesh nodes.</span>
-<span class="sd">    yn : numpy.ndarray</span>
+<span class="sd">    yn : np.ndarray</span>
 <span class="sd">        Y-coordinates of the mesh nodes.</span>
-<span class="sd">    h : numpy.ndarray</span>
+<span class="sd">    h : np.ndarray</span>
 <span class="sd">        Array of water depth values.</span>
 <span class="sd">    hmax : float</span>
 <span class="sd">        Water depth value to be used as upper limit for coloring.</span>
@@ -2259,7 +2353,7 @@ ax : matplotlib.axes.Axes
     <span class="n">chainage_markers</span><span class="p">(</span><span class="n">xykm</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ndec</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">scale</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xykm</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">scale</span><span class="p">,</span> <span class="n">xykm</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">scale</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">bl</span> <span class="ow">in</span> <span class="n">banklines</span><span class="o">.</span><span class="n">geometry</span><span class="p">:</span>
-        <span class="n">bp</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bl</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">bp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bl</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bp</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">scale</span><span class="p">,</span> <span class="n">bp</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">scale</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">)</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">plot_mesh_patches</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">fn</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">,</span> <span class="n">xn</span><span class="p">,</span> <span class="n">yn</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">hmax</span><span class="p">)</span>
     <span class="n">cbar</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">shrink</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">drawedges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">waterdepth_txt</span><span class="p">)</span>
@@ -2280,7 +2374,7 @@ ax : matplotlib.axes.Axes
 
 
 <h3 id="dfastbe.plotting.plot2_eroded_distance_and_equilibrium" class="doc doc-heading"><a href="#dfastbe.plotting.plot2_eroded_distance_and_equilibrium" class="toclink">
-            <code class="highlight language-python"><span class="n">plot2_eroded_distance_and_equilibrium</span><span class="p">(</span><span class="n">bbox</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">xykm</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">bank_crds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">dn_tot</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">to_right</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">dnav</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xy_eq</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">xe</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ye</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xlabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">erosion_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">eroclr_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">eqbank_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">plot2_eroded_distance_and_equilibrium</span><span class="p">(</span><span class="n">bbox</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">xykm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">bank_crds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">dn_tot</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">to_right</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span> <span class="n">dnav</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xy_eq</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">xe</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ye</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xlabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">erosion_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">eroclr_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">eqbank_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.plotting.plot2_eroded_distance_and_equilibrium" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -2291,23 +2385,23 @@ ax : matplotlib.axes.Axes
 <h5 id="dfastbe.plotting.plot2_eroded_distance_and_equilibrium--arguments"><a class="toclink" href="#dfastbe.plotting.plot2_eroded_distance_and_equilibrium--arguments">Arguments</a><a class="headerlink" href="#dfastbe.plotting.plot2_eroded_distance_and_equilibrium--arguments" title="Permanent link">#</a></h5>
 <p>bbox : Tuple[float, float, float, float]
     Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
-xykm : numpy.ndarray
+xykm : np.ndarray
     Array containing the x, y, and chainage; unit m for x and y, km for chainage.
-bank_crds : List[numpy.ndarray]
+bank_crds : List[np.ndarray]
     List of N arrays containing the x- and y-coordinates of the original
     bank lines.
-dn_tot : List[numpy.ndarray]
+dn_tot : List[np.ndarray]
     List of N arrays containing the total erosion distance values.
 to_right : List[bool]
     List of N booleans indicating whether the bank is on the right.
-dnav : numpy.ndarray
+dnav : np.ndarray
     Array of N average erosion distance values.
-xy_eq : List[numpy.ndarray]
+xy_eq : List[np.ndarray]
     List of N arrays containing the x- and y-coordinates of the equilibrium
     bank line.
-xe : numpy.ndarray
+xe : np.ndarray
     M x 2 array of begin/end x-coordinates of mesh edges.
-ye : numpy.ndarray
+ye : np.ndarray
     M x 2 array of begin/end y-coordinates of mesh edges.
 xlabel_txt : str
     Label for the x-axis.
@@ -2472,14 +2566,14 @@ ax : matplotlib.axes.Axes
 <span class="normal">540</span>
 <span class="normal">541</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot2_eroded_distance_and_equilibrium</span><span class="p">(</span>
     <span class="n">bbox</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
-    <span class="n">xykm</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">bank_crds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-    <span class="n">dn_tot</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">xykm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">bank_crds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">dn_tot</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">to_right</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">bool</span><span class="p">],</span>
-    <span class="n">dnav</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">xy_eq</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-    <span class="n">xe</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">ye</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">dnav</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">xy_eq</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">xe</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">ye</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">xlabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -2494,23 +2588,23 @@ ax : matplotlib.axes.Axes
 <span class="sd">    ---------</span>
 <span class="sd">    bbox : Tuple[float, float, float, float]</span>
 <span class="sd">        Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.</span>
-<span class="sd">    xykm : numpy.ndarray</span>
+<span class="sd">    xykm : np.ndarray</span>
 <span class="sd">        Array containing the x, y, and chainage; unit m for x and y, km for chainage.</span>
-<span class="sd">    bank_crds : List[numpy.ndarray]</span>
+<span class="sd">    bank_crds : List[np.ndarray]</span>
 <span class="sd">        List of N arrays containing the x- and y-coordinates of the original</span>
 <span class="sd">        bank lines.</span>
-<span class="sd">    dn_tot : List[numpy.ndarray]</span>
+<span class="sd">    dn_tot : List[np.ndarray]</span>
 <span class="sd">        List of N arrays containing the total erosion distance values.</span>
 <span class="sd">    to_right : List[bool]</span>
 <span class="sd">        List of N booleans indicating whether the bank is on the right.</span>
-<span class="sd">    dnav : numpy.ndarray</span>
+<span class="sd">    dnav : np.ndarray</span>
 <span class="sd">        Array of N average erosion distance values.</span>
-<span class="sd">    xy_eq : List[numpy.ndarray]</span>
+<span class="sd">    xy_eq : List[np.ndarray]</span>
 <span class="sd">        List of N arrays containing the x- and y-coordinates of the equilibrium</span>
 <span class="sd">        bank line.</span>
-<span class="sd">    xe : numpy.ndarray</span>
+<span class="sd">    xe : np.ndarray</span>
 <span class="sd">        M x 2 array of begin/end x-coordinates of mesh edges.</span>
-<span class="sd">    ye : numpy.ndarray</span>
+<span class="sd">    ye : np.ndarray</span>
 <span class="sd">        M x 2 array of begin/end y-coordinates of mesh edges.</span>
 <span class="sd">    xlabel_txt : str</span>
 <span class="sd">        Label for the x-axis.</span>
@@ -2554,22 +2648,22 @@ ax : matplotlib.axes.Axes
         <span class="n">nbp</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">bankc</span><span class="p">)</span>
         <span class="c1">#</span>
         <span class="n">dxy</span> <span class="o">=</span> <span class="n">bankc</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">bankc</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">ds</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">dxy</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">ds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">dxy</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
         <span class="n">dxy</span> <span class="o">=</span> <span class="n">dxy</span> <span class="o">*</span> <span class="p">(</span><span class="n">dn_tot</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">/</span> <span class="n">ds</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">nbp</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
         <span class="c1">#</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(((</span><span class="n">nbp</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,))</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(((</span><span class="n">nbp</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,))</span>
         <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">bankc</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">bankc</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">::</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">bankc</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dxy</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
         <span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">::</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">bankc</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">dxy</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
         <span class="c1">#</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(((</span><span class="n">nbp</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,))</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(((</span><span class="n">nbp</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,))</span>
         <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">bankc</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
         <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">bankc</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">]</span>
         <span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">::</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">bankc</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dxy</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="n">y</span><span class="p">[</span><span class="mi">3</span><span class="p">::</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="n">bankc</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">dxy</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
         <span class="c1">#</span>
-        <span class="n">tfn</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(((</span><span class="n">nbp</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="n">tfn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(((</span><span class="n">nbp</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
         <span class="n">tfn</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span> <span class="o">*</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nbp</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
         <span class="n">tfn</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">tfn</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
         <span class="n">tfn</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">tfn</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span>
@@ -2578,7 +2672,7 @@ ax : matplotlib.axes.Axes
         <span class="n">tfn</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">tfn</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">2</span>
         <span class="n">tfn</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">tfn</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">3</span>
         <span class="c1">#</span>
-        <span class="n">tval</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(((</span><span class="n">nbp</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,))</span>
+        <span class="n">tval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(((</span><span class="n">nbp</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,))</span>
         <span class="n">tval</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">dnc</span>
         <span class="n">tval</span><span class="p">[</span><span class="mi">1</span><span class="p">::</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">dnc</span>
         <span class="c1">#</span>
@@ -2622,7 +2716,7 @@ ax : matplotlib.axes.Axes
 
 
 <h3 id="dfastbe.plotting.plot3_eroded_volume" class="doc doc-heading"><a href="#dfastbe.plotting.plot3_eroded_volume" class="toclink">
-            <code class="highlight language-python"><span class="n">plot3_eroded_volume</span><span class="p">(</span><span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">plot3_eroded_volume</span><span class="p">(</span><span class="n">km_mid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.plotting.plot3_eroded_volume" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -2631,13 +2725,13 @@ ax : matplotlib.axes.Axes
 
         <p>Create the bank erosion plot with total eroded volume subdivided per discharge level.</p>
 <h5 id="dfastbe.plotting.plot3_eroded_volume--arguments"><a class="toclink" href="#dfastbe.plotting.plot3_eroded_volume--arguments">Arguments</a><a class="headerlink" href="#dfastbe.plotting.plot3_eroded_volume--arguments" title="Permanent link">#</a></h5>
-<p>km_mid : numpy.ndarray
+<p>km_mid : np.ndarray
     Array containing the mid points for the chainage bins.
 km_step : float
     Bin width.
 chainage_txt : str
     Label for the horizontal chainage axes.
-erosion_volume : List[List[numpy.ndarray]]
+erosion_volume : List[List[np.ndarray]]
     List of nQ lists of N arrays containing the total erosion distance values
 ylabel_txt : str
     Label for the vertical erosion volume axes.
@@ -2706,10 +2800,10 @@ ax : matplotlib.axes.Axes
 <span class="normal">592</span>
 <span class="normal">593</span>
 <span class="normal">594</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot3_eroded_volume</span><span class="p">(</span>
-    <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">km_mid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
     <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -2720,13 +2814,13 @@ ax : matplotlib.axes.Axes
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
-<span class="sd">    km_mid : numpy.ndarray</span>
+<span class="sd">    km_mid : np.ndarray</span>
 <span class="sd">        Array containing the mid points for the chainage bins.</span>
 <span class="sd">    km_step : float</span>
 <span class="sd">        Bin width.</span>
 <span class="sd">    chainage_txt : str</span>
 <span class="sd">        Label for the horizontal chainage axes.</span>
-<span class="sd">    erosion_volume : List[List[numpy.ndarray]]</span>
+<span class="sd">    erosion_volume : List[List[np.ndarray]]</span>
 <span class="sd">        List of nQ lists of N arrays containing the total erosion distance values</span>
 <span class="sd">    ylabel_txt : str</span>
 <span class="sd">        Label for the vertical erosion volume axes.</span>
@@ -2766,7 +2860,7 @@ ax : matplotlib.axes.Axes
 
 
 <h3 id="dfastbe.plotting.plot3_eroded_volume_subdivided_1" class="doc doc-heading"><a href="#dfastbe.plotting.plot3_eroded_volume_subdivided_1" class="toclink">
-            <code class="highlight language-python"><span class="n">plot3_eroded_volume_subdivided_1</span><span class="p">(</span><span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">plot3_eroded_volume_subdivided_1</span><span class="p">(</span><span class="n">km_mid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.plotting.plot3_eroded_volume_subdivided_1" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -2775,13 +2869,13 @@ ax : matplotlib.axes.Axes
 
         <p>Create the bank erosion plot with total eroded volume subdivided per discharge level.</p>
 <h5 id="dfastbe.plotting.plot3_eroded_volume_subdivided_1--arguments"><a class="toclink" href="#dfastbe.plotting.plot3_eroded_volume_subdivided_1--arguments">Arguments</a><a class="headerlink" href="#dfastbe.plotting.plot3_eroded_volume_subdivided_1--arguments" title="Permanent link">#</a></h5>
-<p>km_mid : numpy.ndarray
+<p>km_mid : np.ndarray
     Array containing the mid points for the chainage bins.
 km_step : float
     Bin width.
 chainage_txt : str
     Label for the horizontal chainage axes.
-erosion_volume : List[List[numpy.ndarray]]
+erosion_volume : List[List[np.ndarray]]
     List of nQ lists of N arrays containing the total erosion distance values
 ylabel_txt : str
     Label for the vertical erosion volume axes.
@@ -2844,10 +2938,10 @@ ax : matplotlib.axes.Axes
 <span class="normal">763</span>
 <span class="normal">764</span>
 <span class="normal">765</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot3_eroded_volume_subdivided_1</span><span class="p">(</span>
-    <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">km_mid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
     <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -2857,13 +2951,13 @@ ax : matplotlib.axes.Axes
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
-<span class="sd">    km_mid : numpy.ndarray</span>
+<span class="sd">    km_mid : np.ndarray</span>
 <span class="sd">        Array containing the mid points for the chainage bins.</span>
 <span class="sd">    km_step : float</span>
 <span class="sd">        Bin width.</span>
 <span class="sd">    chainage_txt : str</span>
 <span class="sd">        Label for the horizontal chainage axes.</span>
-<span class="sd">    erosion_volume : List[List[numpy.ndarray]]</span>
+<span class="sd">    erosion_volume : List[List[np.ndarray]]</span>
 <span class="sd">        List of nQ lists of N arrays containing the total erosion distance values</span>
 <span class="sd">    ylabel_txt : str</span>
 <span class="sd">        Label for the vertical erosion volume axes.</span>
@@ -2900,7 +2994,7 @@ ax : matplotlib.axes.Axes
 
 
 <h3 id="dfastbe.plotting.plot3_eroded_volume_subdivided_2" class="doc doc-heading"><a href="#dfastbe.plotting.plot3_eroded_volume_subdivided_2" class="toclink">
-            <code class="highlight language-python"><span class="n">plot3_eroded_volume_subdivided_2</span><span class="p">(</span><span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">plot3_eroded_volume_subdivided_2</span><span class="p">(</span><span class="n">km_mid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.plotting.plot3_eroded_volume_subdivided_2" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -2909,13 +3003,13 @@ ax : matplotlib.axes.Axes
 
         <p>Create the bank erosion plot with total eroded volume subdivided per bank.</p>
 <h5 id="dfastbe.plotting.plot3_eroded_volume_subdivided_2--arguments"><a class="toclink" href="#dfastbe.plotting.plot3_eroded_volume_subdivided_2--arguments">Arguments</a><a class="headerlink" href="#dfastbe.plotting.plot3_eroded_volume_subdivided_2--arguments" title="Permanent link">#</a></h5>
-<p>km_mid : numpy.ndarray
+<p>km_mid : np.ndarray
     Array containing the mid points for the chainage bins.
 km_step : float
     Bin width.
 chainage_txt : str
     Label for the horizontal chainage axes.
-erosion_volume : List[List[numpy.ndarray]]
+erosion_volume : List[List[np.ndarray]]
     List of nQ lists of N arrays containing the total erosion distance values
 ylabel_txt : str
     Label for the vertical erosion volume axes.
@@ -2978,10 +3072,10 @@ ax : matplotlib.axes.Axes
 <span class="normal">812</span>
 <span class="normal">813</span>
 <span class="normal">814</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot3_eroded_volume_subdivided_2</span><span class="p">(</span>
-    <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">km_mid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
     <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -2991,13 +3085,13 @@ ax : matplotlib.axes.Axes
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
-<span class="sd">    km_mid : numpy.ndarray</span>
+<span class="sd">    km_mid : np.ndarray</span>
 <span class="sd">        Array containing the mid points for the chainage bins.</span>
 <span class="sd">    km_step : float</span>
 <span class="sd">        Bin width.</span>
 <span class="sd">    chainage_txt : str</span>
 <span class="sd">        Label for the horizontal chainage axes.</span>
-<span class="sd">    erosion_volume : List[List[numpy.ndarray]]</span>
+<span class="sd">    erosion_volume : List[List[np.ndarray]]</span>
 <span class="sd">        List of nQ lists of N arrays containing the total erosion distance values</span>
 <span class="sd">    ylabel_txt : str</span>
 <span class="sd">        Label for the vertical erosion volume axes.</span>
@@ -3034,7 +3128,7 @@ ax : matplotlib.axes.Axes
 
 
 <h3 id="dfastbe.plotting.plot3_stacked_per_bank" class="doc doc-heading"><a href="#dfastbe.plotting.plot3_stacked_per_bank" class="toclink">
-            <code class="highlight language-python"><span class="n">plot3_stacked_per_bank</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wfrac</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+            <code class="highlight language-python"><span class="n">plot3_stacked_per_bank</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wfrac</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 </a><a href="#dfastbe.plotting.plot3_stacked_per_bank" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -3047,11 +3141,11 @@ ax : matplotlib.axes.Axes
     Figure object.
 ax : matplotlib.axes.Axes
     Axes object.
-km_mid : numpy.ndarray
+km_mid : np.ndarray
     Array containing the mid points for the chainage bins.
 km_step : float
     Bin width.
-erosion_volume : List[List[numpy.ndarray]]
+erosion_volume : List[List[np.ndarray]]
     List of nQ lists of N arrays containing the total erosion distance values
 banklabel : str
     Label for bank id.
@@ -3121,12 +3215,12 @@ wfrac : float
 <span class="normal">714</span>
 <span class="normal">715</span>
 <span class="normal">716</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot3_stacked_per_bank</span><span class="p">(</span>
-   <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span>
-   <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-   <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-   <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-   <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-   <span class="n">wfrac</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span>
+    <span class="n">km_mid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">banklabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">wfrac</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add a stacked plot of bank erosion with total eroded volume subdivided per bank to the selected axes.</span>
@@ -3137,11 +3231,11 @@ wfrac : float
 <span class="sd">        Figure object.</span>
 <span class="sd">    ax : matplotlib.axes.Axes</span>
 <span class="sd">        Axes object.</span>
-<span class="sd">    km_mid : numpy.ndarray</span>
+<span class="sd">    km_mid : np.ndarray</span>
 <span class="sd">        Array containing the mid points for the chainage bins.</span>
 <span class="sd">    km_step : float</span>
 <span class="sd">        Bin width.</span>
-<span class="sd">    erosion_volume : List[List[numpy.ndarray]]</span>
+<span class="sd">    erosion_volume : List[List[np.ndarray]]</span>
 <span class="sd">        List of nQ lists of N arrays containing the total erosion distance values</span>
 <span class="sd">    banklabel : str</span>
 <span class="sd">        Label for bank id.</span>
@@ -3189,7 +3283,7 @@ wfrac : float
 
 
 <h3 id="dfastbe.plotting.plot3_stacked_per_discharge" class="doc doc-heading"><a href="#dfastbe.plotting.plot3_stacked_per_discharge" class="toclink">
-            <code class="highlight language-python"><span class="n">plot3_stacked_per_discharge</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wfrac</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+            <code class="highlight language-python"><span class="n">plot3_stacked_per_discharge</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">wfrac</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 </a><a href="#dfastbe.plotting.plot3_stacked_per_discharge" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -3202,11 +3296,11 @@ wfrac : float
     Figure object.
 ax : matplotlib.axes.Axes
     Axes object.
-km_mid : numpy.ndarray
+km_mid : np.ndarray
     Array containing the mid points for the chainage bins.
 km_step : float
     Bin width.
-erosion_volume : List[List[numpy.ndarray]]
+erosion_volume : List[List[np.ndarray]]
     List of nQ lists of N arrays containing the total erosion distance values
 qlabel : str
     Label for discharge level.
@@ -3276,12 +3370,12 @@ wfrac : float
 <span class="normal">653</span>
 <span class="normal">654</span>
 <span class="normal">655</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot3_stacked_per_discharge</span><span class="p">(</span>
-   <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span>
-   <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-   <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-   <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-   <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-   <span class="n">wfrac</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span>
+    <span class="n">km_mid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">erosion_volume</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">qlabel</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">wfrac</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add a stacked plot of bank erosion with total eroded volume subdivided per discharge level to the selected axes.</span>
@@ -3292,11 +3386,11 @@ wfrac : float
 <span class="sd">        Figure object.</span>
 <span class="sd">    ax : matplotlib.axes.Axes</span>
 <span class="sd">        Axes object.</span>
-<span class="sd">    km_mid : numpy.ndarray</span>
+<span class="sd">    km_mid : np.ndarray</span>
 <span class="sd">        Array containing the mid points for the chainage bins.</span>
 <span class="sd">    km_step : float</span>
 <span class="sd">        Bin width.</span>
-<span class="sd">    erosion_volume : List[List[numpy.ndarray]]</span>
+<span class="sd">    erosion_volume : List[List[np.ndarray]]</span>
 <span class="sd">        List of nQ lists of N arrays containing the total erosion distance values</span>
 <span class="sd">    qlabel : str</span>
 <span class="sd">        Label for discharge level.</span>
@@ -3344,7 +3438,7 @@ wfrac : float
 
 
 <h3 id="dfastbe.plotting.plot4_eroded_volume_eq" class="doc doc-heading"><a href="#dfastbe.plotting.plot4_eroded_volume_eq" class="toclink">
-            <code class="highlight language-python"><span class="n">plot4_eroded_volume_eq</span><span class="p">(</span><span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">vol_eq</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">plot4_eroded_volume_eq</span><span class="p">(</span><span class="n">km_mid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">vol_eq</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.plotting.plot4_eroded_volume_eq" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -3353,13 +3447,13 @@ wfrac : float
 
         <p>Create the bank erosion plot with equilibrium eroded volume.</p>
 <h5 id="dfastbe.plotting.plot4_eroded_volume_eq--arguments"><a class="toclink" href="#dfastbe.plotting.plot4_eroded_volume_eq--arguments">Arguments</a><a class="headerlink" href="#dfastbe.plotting.plot4_eroded_volume_eq--arguments" title="Permanent link">#</a></h5>
-<p>km_mid : numpy.ndarray
+<p>km_mid : np.ndarray
     Array containing the mid points for the chainage bins.
 km_step : float
     Bin width.
 chainage_txt : str
     Label for the horizontal chainage axes.
-vol_eq : numpy.ndarray
+vol_eq : np.ndarray
     Array containing the equilibrium eroded volume per bin.
 ylabel_txt : str
     Label for the vertical erosion volume axes.
@@ -3419,10 +3513,10 @@ ax : matplotlib.axes.Axes
 <span class="normal">860</span>
 <span class="normal">861</span>
 <span class="normal">862</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot4_eroded_volume_eq</span><span class="p">(</span>
-    <span class="n">km_mid</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">km_mid</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">vol_eq</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">vol_eq</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]:</span>
@@ -3431,13 +3525,13 @@ ax : matplotlib.axes.Axes
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
-<span class="sd">    km_mid : numpy.ndarray</span>
+<span class="sd">    km_mid : np.ndarray</span>
 <span class="sd">        Array containing the mid points for the chainage bins.</span>
 <span class="sd">    km_step : float</span>
 <span class="sd">        Bin width.</span>
 <span class="sd">    chainage_txt : str</span>
 <span class="sd">        Label for the horizontal chainage axes.</span>
-<span class="sd">    vol_eq : numpy.ndarray</span>
+<span class="sd">    vol_eq : np.ndarray</span>
 <span class="sd">        Array containing the equilibrium eroded volume per bin.</span>
 <span class="sd">    ylabel_txt : str</span>
 <span class="sd">        Label for the vertical erosion volume axes.</span>
@@ -3454,7 +3548,7 @@ ax : matplotlib.axes.Axes
     <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">pyplot</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
     <span class="n">setsize</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
     <span class="c1">#</span>
-    <span class="n">tvol</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">km_mid</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">tvol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">km_mid</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">km_mid</span><span class="p">)):</span>
         <span class="n">tvol</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">vol_eq</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">km_mid</span><span class="p">,</span> <span class="n">tvol</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mf">0.8</span> <span class="o">*</span> <span class="n">km_step</span><span class="p">)</span>
@@ -3474,7 +3568,7 @@ ax : matplotlib.axes.Axes
 
 
 <h3 id="dfastbe.plotting.plot5series_waterlevels_per_bank" class="doc doc-heading"><a href="#dfastbe.plotting.plot5series_waterlevels_per_bank" class="toclink">
-            <code class="highlight language-python"><span class="n">plot5series_waterlevels_per_bank</span><span class="p">(</span><span class="n">bank_km_mid</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">waterlevel</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">shipwavemax</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">shipwavemin</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">waterlevelq_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">avg_waterlevel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">shipwave_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bankheight</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">bankheight_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bankprotect</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">bankprotect_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">elevation_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">elevation_unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]]</span></code>
+            <code class="highlight language-python"><span class="n">plot5series_waterlevels_per_bank</span><span class="p">(</span><span class="n">bank_km_mid</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">waterlevel</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">shipwavemax</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">shipwavemin</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">waterlevelq_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">avg_waterlevel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">shipwave_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bankheight</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">bankheight_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bankprotect</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">bankprotect_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">elevation_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">elevation_unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]]</span></code>
 
 </a><a href="#dfastbe.plotting.plot5series_waterlevels_per_bank" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -3483,15 +3577,15 @@ ax : matplotlib.axes.Axes
 
         <p>Create the bank erosion plots with water levels, bank height and bank protection height along each bank.</p>
 <h5 id="dfastbe.plotting.plot5series_waterlevels_per_bank--arguments"><a class="toclink" href="#dfastbe.plotting.plot5series_waterlevels_per_bank--arguments">Arguments</a><a class="headerlink" href="#dfastbe.plotting.plot5series_waterlevels_per_bank--arguments" title="Permanent link">#</a></h5>
-<p>bank_km_mid : List[numpy.ndarray]
+<p>bank_km_mid : List[np.ndarray]
     List of arrays containing the chainage values per bank (segment) [km].
 chainage_txt : str
     Label for the horizontal chainage axes.
-waterlevel : List[List[numpy.ndarray]]
+waterlevel : List[List[np.ndarray]]
     List of arrays containing the water levels per bank (point) [elevation_unit].
-shipmwavemax : numpy.ndarray
+shipmwavemax : np.ndarray
     Maximum bank level subject to ship waves [m]
-shipwavemin : numpy.ndarray
+shipwavemin : np.ndarray
     Minimum bank level subject to ship waves [m]
 waterlevelq_txt : str
     Label for the water level per discharge level.
@@ -3499,11 +3593,11 @@ avg_waterlevel_txt : str
     Label for the average water level.
 shipwave_txt : str
     Label for the elevation range influenced by ship waves.
-bankheight : List[numpy.ndarray]
+bankheight : List[np.ndarray]
     List of arrays containing the bank heights per bank (segment) [elevation_unit].
 bankheight_txt : str
     Label for the bank height.
-bankprotect : List[numpy.ndarray]
+bankprotect : List[np.ndarray]
     List of arrays containing the bank protection height per bank (point) [elevation_unit].
 bankprotect_txt : str
     Label for the bank protection height.
@@ -3662,17 +3756,17 @@ axlist : List[matplotlib.axes.Axes]
 <span class="normal">1003</span>
 <span class="normal">1004</span>
 <span class="normal">1005</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot5series_waterlevels_per_bank</span><span class="p">(</span>
-    <span class="n">bank_km_mid</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">bank_km_mid</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">waterlevel</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-    <span class="n">shipwavemax</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-    <span class="n">shipwavemin</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">waterlevel</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">shipwavemax</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">shipwavemin</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
     <span class="n">waterlevelq_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">avg_waterlevel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">shipwave_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">bankheight</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">bankheight</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">bankheight_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">bankprotect</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">bankprotect</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">bankprotect_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">elevation_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -3683,15 +3777,15 @@ axlist : List[matplotlib.axes.Axes]
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
-<span class="sd">    bank_km_mid : List[numpy.ndarray]</span>
+<span class="sd">    bank_km_mid : List[np.ndarray]</span>
 <span class="sd">        List of arrays containing the chainage values per bank (segment) [km].</span>
 <span class="sd">    chainage_txt : str</span>
 <span class="sd">        Label for the horizontal chainage axes.</span>
-<span class="sd">    waterlevel : List[List[numpy.ndarray]]</span>
+<span class="sd">    waterlevel : List[List[np.ndarray]]</span>
 <span class="sd">        List of arrays containing the water levels per bank (point) [elevation_unit].</span>
-<span class="sd">    shipmwavemax : numpy.ndarray</span>
+<span class="sd">    shipmwavemax : np.ndarray</span>
 <span class="sd">        Maximum bank level subject to ship waves [m]</span>
-<span class="sd">    shipwavemin : numpy.ndarray</span>
+<span class="sd">    shipwavemin : np.ndarray</span>
 <span class="sd">        Minimum bank level subject to ship waves [m]</span>
 <span class="sd">    waterlevelq_txt : str</span>
 <span class="sd">        Label for the water level per discharge level.</span>
@@ -3699,11 +3793,11 @@ axlist : List[matplotlib.axes.Axes]
 <span class="sd">        Label for the average water level.</span>
 <span class="sd">    shipwave_txt : str</span>
 <span class="sd">        Label for the elevation range influenced by ship waves.</span>
-<span class="sd">    bankheight : List[numpy.ndarray]</span>
+<span class="sd">    bankheight : List[np.ndarray]</span>
 <span class="sd">        List of arrays containing the bank heights per bank (segment) [elevation_unit].</span>
 <span class="sd">    bankheight_txt : str</span>
 <span class="sd">        Label for the bank height.</span>
-<span class="sd">    bankprotect : List[numpy.ndarray]</span>
+<span class="sd">    bankprotect : List[np.ndarray]</span>
 <span class="sd">        List of arrays containing the bank protection height per bank (point) [elevation_unit].</span>
 <span class="sd">    bankprotect_txt : str</span>
 <span class="sd">        Label for the bank protection height.</span>
@@ -3812,7 +3906,7 @@ axlist : List[matplotlib.axes.Axes]
 
 
 <h3 id="dfastbe.plotting.plot6series_velocity_per_bank" class="doc doc-heading"><a href="#dfastbe.plotting.plot6series_velocity_per_bank" class="toclink">
-            <code class="highlight language-python"><span class="n">plot6series_velocity_per_bank</span><span class="p">(</span><span class="n">bank_km_mid</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">veloc</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">velocq_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tauc</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">chezy</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">ucrit_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">veloc_unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]]</span></code>
+            <code class="highlight language-python"><span class="n">plot6series_velocity_per_bank</span><span class="p">(</span><span class="n">bank_km_mid</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">veloc</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span> <span class="n">velocq_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tauc</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">chezy</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">ucrit_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">veloc_unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]]</span></code>
 
 </a><a href="#dfastbe.plotting.plot6series_velocity_per_bank" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -3821,17 +3915,17 @@ axlist : List[matplotlib.axes.Axes]
 
         <p>Create the bank erosion plots with velocities and critical velocities along each bank.</p>
 <h5 id="dfastbe.plotting.plot6series_velocity_per_bank--arguments"><a class="toclink" href="#dfastbe.plotting.plot6series_velocity_per_bank--arguments">Arguments</a><a class="headerlink" href="#dfastbe.plotting.plot6series_velocity_per_bank--arguments" title="Permanent link">#</a></h5>
-<p>bank_km_mid : List[numpy.ndarray]
+<p>bank_km_mid : List[np.ndarray]
     List of arrays containing the chainage values per bank (segment) [km].
 chainage_txt : str
     Label for the horizontal chainage axes.
-veloc: List[List[numpy.ndarray]]
+veloc: List[List[np.ndarray]]
     List of arrays containing the velocities per bank (segment) [m/s].
 velocq_txt: str,
     Label for the velocity per discharge level.
-tauc: List[numpy.ndarray]
+tauc: List[np.ndarray]
     List of arrays containing the shear stresses per bank (point) [N/m2].
-chezy: List[numpy.ndarray]
+chezy: List[np.ndarray]
     List of arrays containing the Chezy values per bank [m0.5/s].
 ucrit_txt: str
     Label for the critical velocity.
@@ -3922,12 +4016,12 @@ axlist : List[matplotlib.axes.Axes]
 <span class="normal">1078</span>
 <span class="normal">1079</span>
 <span class="normal">1080</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot6series_velocity_per_bank</span><span class="p">(</span>
-    <span class="n">bank_km_mid</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">bank_km_mid</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">veloc</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
+    <span class="n">veloc</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
     <span class="n">velocq_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">tauc</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-    <span class="n">chezy</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">tauc</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">chezy</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">ucrit_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -3938,17 +4032,17 @@ axlist : List[matplotlib.axes.Axes]
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
-<span class="sd">    bank_km_mid : List[numpy.ndarray]</span>
+<span class="sd">    bank_km_mid : List[np.ndarray]</span>
 <span class="sd">        List of arrays containing the chainage values per bank (segment) [km].</span>
 <span class="sd">    chainage_txt : str</span>
 <span class="sd">        Label for the horizontal chainage axes.</span>
-<span class="sd">    veloc: List[List[numpy.ndarray]]</span>
+<span class="sd">    veloc: List[List[np.ndarray]]</span>
 <span class="sd">        List of arrays containing the velocities per bank (segment) [m/s].</span>
 <span class="sd">    velocq_txt: str,</span>
 <span class="sd">        Label for the velocity per discharge level.</span>
-<span class="sd">    tauc: List[numpy.ndarray]</span>
+<span class="sd">    tauc: List[np.ndarray]</span>
 <span class="sd">        List of arrays containing the shear stresses per bank (point) [N/m2].</span>
-<span class="sd">    chezy: List[numpy.ndarray]</span>
+<span class="sd">    chezy: List[np.ndarray]</span>
 <span class="sd">        List of arrays containing the Chezy values per bank [m0.5/s].</span>
 <span class="sd">    ucrit_txt: str</span>
 <span class="sd">        Label for the critical velocity.</span>
@@ -3976,7 +4070,7 @@ axlist : List[matplotlib.axes.Axes]
         <span class="n">setsize</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
         <span class="n">bk</span> <span class="o">=</span> <span class="n">bank_km_mid</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span>
         <span class="c1">#</span>
-        <span class="n">velc</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">tauc</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">*</span> <span class="n">chezy</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">water_density</span> <span class="o">*</span> <span class="n">g</span><span class="p">))</span>
+        <span class="n">velc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">tauc</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">*</span> <span class="n">chezy</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">water_density</span> <span class="o">*</span> <span class="n">g</span><span class="p">))</span>
         <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">bank_km_mid</span><span class="p">[</span><span class="n">ib</span><span class="p">],</span> <span class="n">velc</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;k&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">ucrit_txt</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">iq</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_levels</span><span class="p">):</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
@@ -4004,7 +4098,7 @@ axlist : List[matplotlib.axes.Axes]
 
 
 <h3 id="dfastbe.plotting.plot7_banktype" class="doc doc-heading"><a href="#dfastbe.plotting.plot7_banktype" class="toclink">
-            <code class="highlight language-python"><span class="n">plot7_banktype</span><span class="p">(</span><span class="n">bbox</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">xykm</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">bank_crds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">banktype</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">taucls_str</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">xlabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">plot7_banktype</span><span class="p">(</span><span class="n">bbox</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">xykm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">bank_crds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">banktype</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">taucls_str</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">xlabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.plotting.plot7_banktype" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -4015,12 +4109,12 @@ axlist : List[matplotlib.axes.Axes]
 <h5 id="dfastbe.plotting.plot7_banktype--arguments"><a class="toclink" href="#dfastbe.plotting.plot7_banktype--arguments">Arguments</a><a class="headerlink" href="#dfastbe.plotting.plot7_banktype--arguments" title="Permanent link">#</a></h5>
 <p>bbox : Tuple[float, float, float, float]
     Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
-xykm : numpy.ndarray
+xykm : np.ndarray
     Array containing the x, y, and chainage; unit m for x and y, km for chainage.
-bank_crds : List[numpy.ndarray]
+bank_crds : List[np.ndarray]
     List of N arrays containing the x- and y-coordinates of the oroginal
     bank lines.
-banktype : List[numpy.ndarray]
+banktype : List[np.ndarray]
     List of N arrays containing the bank type values.
 taucls_str : List[str]
     List of strings representing the distinct bank type classes.
@@ -4112,13 +4206,11 @@ ax : matplotlib.axes.Axes
 <span class="normal">1154</span>
 <span class="normal">1155</span>
 <span class="normal">1156</span>
-<span class="normal">1157</span>
-<span class="normal">1158</span>
-<span class="normal">1159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot7_banktype</span><span class="p">(</span>
+<span class="normal">1157</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot7_banktype</span><span class="p">(</span>
     <span class="n">bbox</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
-    <span class="n">xykm</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">bank_crds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-    <span class="n">banktype</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">xykm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">bank_crds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">banktype</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">taucls_str</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">xlabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -4131,12 +4223,12 @@ ax : matplotlib.axes.Axes
 <span class="sd">    ---------</span>
 <span class="sd">    bbox : Tuple[float, float, float, float]</span>
 <span class="sd">        Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.</span>
-<span class="sd">    xykm : numpy.ndarray</span>
+<span class="sd">    xykm : np.ndarray</span>
 <span class="sd">        Array containing the x, y, and chainage; unit m for x and y, km for chainage.</span>
-<span class="sd">    bank_crds : List[numpy.ndarray]</span>
+<span class="sd">    bank_crds : List[np.ndarray]</span>
 <span class="sd">        List of N arrays containing the x- and y-coordinates of the oroginal</span>
 <span class="sd">        bank lines.</span>
-<span class="sd">    banktype : List[numpy.ndarray]</span>
+<span class="sd">    banktype : List[np.ndarray]</span>
 <span class="sd">        List of N arrays containing the bank type values.</span>
 <span class="sd">    taucls_str : List[str]</span>
 <span class="sd">        List of strings representing the distinct bank type classes.</span>
@@ -4163,11 +4255,11 @@ ax : matplotlib.axes.Axes
     <span class="n">clrs</span> <span class="o">=</span> <span class="n">get_colors</span><span class="p">(</span><span class="s2">&quot;plasma&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">taucls_str</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bank_crds</span><span class="p">)):</span>
         <span class="k">for</span> <span class="n">ibt</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">taucls_str</span><span class="p">)):</span>
-            <span class="n">ibtEdges</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">banktype</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">==</span> <span class="n">ibt</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ibtEdges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">banktype</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">==</span> <span class="n">ibt</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ibtEdges</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">nedges</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ibtEdges</span><span class="p">)</span>
                 <span class="n">nx</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">nedges</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-                <span class="n">x</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nx</span><span class="p">,))</span> <span class="o">+</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nx</span><span class="p">,))</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
                 <span class="n">y</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
                 <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">bank_crds</span><span class="p">[</span><span class="n">ib</span><span class="p">][</span><span class="n">ibtEdges</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="o">/</span> <span class="n">scale</span>
                 <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">::</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">bank_crds</span><span class="p">[</span><span class="n">ib</span><span class="p">][</span><span class="n">ibtEdges</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="o">/</span> <span class="n">scale</span>
@@ -4180,9 +4272,7 @@ ax : matplotlib.axes.Axes
                     <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">clrs</span><span class="p">[</span><span class="n">ibt</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">ib</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span>
-                        <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">clrs</span><span class="p">[</span><span class="n">ibt</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">taucls_str</span><span class="p">[</span><span class="n">ibt</span><span class="p">]</span>
-                    <span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">clrs</span><span class="p">[</span><span class="n">ibt</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">taucls_str</span><span class="p">[</span><span class="n">ibt</span><span class="p">])</span>
     <span class="c1">#</span>
     <span class="n">set_bbox</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">bbox</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel_txt</span><span class="p">)</span>
@@ -4201,7 +4291,7 @@ ax : matplotlib.axes.Axes
 
 
 <h3 id="dfastbe.plotting.plot8_eroded_distance" class="doc doc-heading"><a href="#dfastbe.plotting.plot8_eroded_distance" class="toclink">
-            <code class="highlight language-python"><span class="n">plot8_eroded_distance</span><span class="p">(</span><span class="n">bank_km_mid</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dn_tot</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">dn_tot_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dn_eq</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">dn_eq_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dn_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dn_unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">plot8_eroded_distance</span><span class="p">(</span><span class="n">bank_km_mid</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dn_tot</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">dn_tot_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dn_eq</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">dn_eq_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dn_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dn_unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.plotting.plot8_eroded_distance" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -4210,15 +4300,15 @@ ax : matplotlib.axes.Axes
 
         <p>Create the bank erosion plot with total and equilibrium eroded distance.</p>
 <h5 id="dfastbe.plotting.plot8_eroded_distance--arguments"><a class="toclink" href="#dfastbe.plotting.plot8_eroded_distance--arguments">Arguments</a><a class="headerlink" href="#dfastbe.plotting.plot8_eroded_distance--arguments" title="Permanent link">#</a></h5>
-<p>bank_km_mid : List[numpy.ndarray]
+<p>bank_km_mid : List[np.ndarray]
     List of arrays containing the chainage values per bank (segment) [km].
 chainage_txt : str
     Label for the horizontal chainage axes.
-dn_tot : List[numpy.ndarray]
+dn_tot : List[np.ndarray]
     List of arrays containing the total bank erosion distance per bank (segment) [m].
 dn_tot_txt : str
     Label for the total bank erosion distance.
-dn_eq : List[numpy.ndarray]
+dn_eq : List[np.ndarray]
     List of arrays containing the equilibrium bank erosion distance per bank (segment) [m].
 dn_eq_txt : str
     Label for equilibrium bank erosion distance.
@@ -4234,7 +4324,9 @@ ax : matplotlib.axes.Axes
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/plotting.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1162</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1160</span>
+<span class="normal">1161</span>
+<span class="normal">1162</span>
 <span class="normal">1163</span>
 <span class="normal">1164</span>
 <span class="normal">1165</span>
@@ -4292,14 +4384,12 @@ ax : matplotlib.axes.Axes
 <span class="normal">1217</span>
 <span class="normal">1218</span>
 <span class="normal">1219</span>
-<span class="normal">1220</span>
-<span class="normal">1221</span>
-<span class="normal">1222</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot8_eroded_distance</span><span class="p">(</span>
-    <span class="n">bank_km_mid</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+<span class="normal">1220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot8_eroded_distance</span><span class="p">(</span>
+    <span class="n">bank_km_mid</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">dn_tot</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">dn_tot</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">dn_tot_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">dn_eq</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">dn_eq</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">dn_eq_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">dn_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">dn_unit</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -4309,15 +4399,15 @@ ax : matplotlib.axes.Axes
 
 <span class="sd">    Arguments</span>
 <span class="sd">    ---------</span>
-<span class="sd">    bank_km_mid : List[numpy.ndarray]</span>
+<span class="sd">    bank_km_mid : List[np.ndarray]</span>
 <span class="sd">        List of arrays containing the chainage values per bank (segment) [km].</span>
 <span class="sd">    chainage_txt : str</span>
 <span class="sd">        Label for the horizontal chainage axes.</span>
-<span class="sd">    dn_tot : List[numpy.ndarray]</span>
+<span class="sd">    dn_tot : List[np.ndarray]</span>
 <span class="sd">        List of arrays containing the total bank erosion distance per bank (segment) [m].</span>
 <span class="sd">    dn_tot_txt : str</span>
 <span class="sd">        Label for the total bank erosion distance.</span>
-<span class="sd">    dn_eq : List[numpy.ndarray]</span>
+<span class="sd">    dn_eq : List[np.ndarray]</span>
 <span class="sd">        List of arrays containing the equilibrium bank erosion distance per bank (segment) [m].</span>
 <span class="sd">    dn_eq_txt : str</span>
 <span class="sd">        Label for equilibrium bank erosion distance.</span>
@@ -4365,7 +4455,7 @@ ax : matplotlib.axes.Axes
 
 
 <h3 id="dfastbe.plotting.plot_detect1" class="doc doc-heading"><a href="#dfastbe.plotting.plot_detect1" class="toclink">
-            <code class="highlight language-python"><span class="n">plot_detect1</span><span class="p">(</span><span class="n">bbox</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">xykm</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">bankareas</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Polygon</span><span class="p">],</span> <span class="n">bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">],</span> <span class="n">fn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">yn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">hmax</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xlabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">waterdepth_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bankarea_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bankline_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">plot_detect1</span><span class="p">(</span><span class="n">bbox</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">xykm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">bankareas</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Polygon</span><span class="p">],</span> <span class="n">bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">],</span> <span class="n">fn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">yn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">h</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">hmax</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xlabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">waterdepth_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bankarea_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">bankline_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="p">[</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.plotting.plot_detect1" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -4378,21 +4468,21 @@ bank lines.</p>
 <h5 id="dfastbe.plotting.plot_detect1--arguments"><a class="toclink" href="#dfastbe.plotting.plot_detect1--arguments">Arguments</a><a class="headerlink" href="#dfastbe.plotting.plot_detect1--arguments" title="Permanent link">#</a></h5>
 <p>bbox : Tuple[float, float, float, float]
     Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
-xykm : numpy.ndarray
+xykm : np.ndarray
     Array containing the x, y, and chainage; unit m for x and y, km for chainage.
 bankareas : List[Polygon]
     List of bank polygons.
 bank : List[LineString]
     List of bank lines.
-fn : numpy.ndarray
+fn : np.ndarray
     N x M array listing the nodes (max M) per face (total N) of the mesh.
-nnodes : numpy.ndarray
+nnodes : np.ndarray
     Number of nodes per face (max M).
-xn : numpy.ndarray
+xn : np.ndarray
     X-coordinates of the mesh nodes.
-yn : numpy.ndarray
+yn : np.ndarray
     Y-coordinates of the mesh nodes.
-h : numpy.ndarray
+h : np.ndarray
     Array of water depth values.
 hmax : float
     Water depth value to be used as upper limit for coloring.
@@ -4510,14 +4600,14 @@ ax : matplotlib.axes.Axes
 <span class="normal">322</span>
 <span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_detect1</span><span class="p">(</span>
     <span class="n">bbox</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
-    <span class="n">xykm</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">xykm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">bankareas</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Polygon</span><span class="p">],</span>
     <span class="n">bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">],</span>
-    <span class="n">fn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">nnodes</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">xn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">yn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">h</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">fn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">nnodes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">xn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">yn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">h</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">hmax</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">xlabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -4537,21 +4627,21 @@ ax : matplotlib.axes.Axes
 <span class="sd">    ---------</span>
 <span class="sd">    bbox : Tuple[float, float, float, float]</span>
 <span class="sd">        Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.</span>
-<span class="sd">    xykm : numpy.ndarray</span>
+<span class="sd">    xykm : np.ndarray</span>
 <span class="sd">        Array containing the x, y, and chainage; unit m for x and y, km for chainage.</span>
 <span class="sd">    bankareas : List[Polygon]</span>
 <span class="sd">        List of bank polygons.</span>
 <span class="sd">    bank : List[LineString]</span>
 <span class="sd">        List of bank lines.</span>
-<span class="sd">    fn : numpy.ndarray</span>
+<span class="sd">    fn : np.ndarray</span>
 <span class="sd">        N x M array listing the nodes (max M) per face (total N) of the mesh.</span>
-<span class="sd">    nnodes : numpy.ndarray</span>
+<span class="sd">    nnodes : np.ndarray</span>
 <span class="sd">        Number of nodes per face (max M).</span>
-<span class="sd">    xn : numpy.ndarray</span>
+<span class="sd">    xn : np.ndarray</span>
 <span class="sd">        X-coordinates of the mesh nodes.</span>
-<span class="sd">    yn : numpy.ndarray</span>
+<span class="sd">    yn : np.ndarray</span>
 <span class="sd">        Y-coordinates of the mesh nodes.</span>
-<span class="sd">    h : numpy.ndarray</span>
+<span class="sd">    h : np.ndarray</span>
 <span class="sd">        Array of water depth values.</span>
 <span class="sd">    hmax : float</span>
 <span class="sd">        Water depth value to be used as upper limit for coloring.</span>
@@ -4611,7 +4701,7 @@ ax : matplotlib.axes.Axes
 
 
 <h3 id="dfastbe.plotting.plot_mesh" class="doc doc-heading"><a href="#dfastbe.plotting.plot_mesh" class="toclink">
-            <code class="highlight language-python"><span class="n">plot_mesh</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">xe</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ye</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+            <code class="highlight language-python"><span class="n">plot_mesh</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">xe</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ye</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 </a><a href="#dfastbe.plotting.plot_mesh" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -4622,9 +4712,9 @@ ax : matplotlib.axes.Axes
 <h5 id="dfastbe.plotting.plot_mesh--arguments"><a class="toclink" href="#dfastbe.plotting.plot_mesh--arguments">Arguments</a><a class="headerlink" href="#dfastbe.plotting.plot_mesh--arguments" title="Permanent link">#</a></h5>
 <p>ax : matplotlib.axes.Axes
     Axes object in which to add the mesh.
-xe : numpy.ndarray
+xe : np.ndarray
     M x 2 array of begin/end x-coordinates of mesh edges.
-ye : numpy.ndarray
+ye : np.ndarray
     M x 2 array of begin/end y-coordinates of mesh edges.
 scale : float
     Indicates whether the axes are in m (1) or km (1000).</p>
@@ -4662,7 +4752,7 @@ scale : float
 <span class="normal">160</span>
 <span class="normal">161</span>
 <span class="normal">162</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_mesh</span><span class="p">(</span>
-    <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">xe</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ye</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1000</span>
+    <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">xe</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ye</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1000</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add a mesh to a plot.</span>
@@ -4671,19 +4761,19 @@ scale : float
 <span class="sd">    ---------</span>
 <span class="sd">    ax : matplotlib.axes.Axes</span>
 <span class="sd">        Axes object in which to add the mesh.</span>
-<span class="sd">    xe : numpy.ndarray</span>
+<span class="sd">    xe : np.ndarray</span>
 <span class="sd">        M x 2 array of begin/end x-coordinates of mesh edges.</span>
-<span class="sd">    ye : numpy.ndarray</span>
+<span class="sd">    ye : np.ndarray</span>
 <span class="sd">        M x 2 array of begin/end y-coordinates of mesh edges.</span>
 <span class="sd">    scale : float</span>
 <span class="sd">        Indicates whether the axes are in m (1) or km (1000).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">xe1</span> <span class="o">=</span> <span class="n">xe</span><span class="p">[:,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">/</span> <span class="n">scale</span>
-    <span class="n">xe1</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span>
+    <span class="n">xe1</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
     <span class="n">xev</span> <span class="o">=</span> <span class="n">xe1</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">xe1</span><span class="o">.</span><span class="n">size</span><span class="p">,))</span>
 
     <span class="n">ye1</span> <span class="o">=</span> <span class="n">ye</span><span class="p">[:,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">/</span> <span class="n">scale</span>
-    <span class="n">ye1</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">nan</span>
+    <span class="n">ye1</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
     <span class="n">yev</span> <span class="o">=</span> <span class="n">ye1</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="n">ye1</span><span class="o">.</span><span class="n">size</span><span class="p">,))</span>
 
     <span class="c1"># to avoid OverflowError: In draw_path: Exceeded cell block limit</span>
@@ -4702,7 +4792,7 @@ scale : float
 
 
 <h3 id="dfastbe.plotting.plot_mesh_patches" class="doc doc-heading"><a href="#dfastbe.plotting.plot_mesh_patches" class="toclink">
-            <code class="highlight language-python"><span class="n">plot_mesh_patches</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">yn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">minval</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">maxval</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">PolyCollection</span></code>
+            <code class="highlight language-python"><span class="n">plot_mesh_patches</span><span class="p">(</span><span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">fn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">nnodes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">xn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">yn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">val</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">minval</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">maxval</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">PolyCollection</span></code>
 
 </a><a href="#dfastbe.plotting.plot_mesh_patches" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -4713,15 +4803,15 @@ scale : float
 <h5 id="dfastbe.plotting.plot_mesh_patches--arguments"><a class="toclink" href="#dfastbe.plotting.plot_mesh_patches--arguments">Arguments</a><a class="headerlink" href="#dfastbe.plotting.plot_mesh_patches--arguments" title="Permanent link">#</a></h5>
 <p>ax : matplotlib.axes.Axes
     Axes object in which to add the mesh.
-fn : numpy.ndarray
+fn : np.ndarray
     N x M array listing the nodes (max M) per face (total N) of the mesh.
-nnodes : numpy.ndarray
+nnodes : np.ndarray
     Number of nodes per face (max M).
-xn : numpy.ndarray
+xn : np.ndarray
     X-coordinates of the mesh nodes.
-yn : numpy.ndarray
+yn : np.ndarray
     Y-coordinates of the mesh nodes.
-val : numpy.ndarray
+val : np.ndarray
     Array of length N containing the value per face.
 minval : Optional[float]
     Lower limit for the color scale.
@@ -4800,11 +4890,11 @@ scale : float
 <span class="normal">227</span>
 <span class="normal">228</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">plot_mesh_patches</span><span class="p">(</span>
     <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span>
-    <span class="n">fn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">nnodes</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">xn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">yn</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-    <span class="n">val</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">fn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">nnodes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">xn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">yn</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">val</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">minval</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">maxval</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
@@ -4816,15 +4906,15 @@ scale : float
 <span class="sd">    ---------</span>
 <span class="sd">    ax : matplotlib.axes.Axes</span>
 <span class="sd">        Axes object in which to add the mesh.</span>
-<span class="sd">    fn : numpy.ndarray</span>
+<span class="sd">    fn : np.ndarray</span>
 <span class="sd">        N x M array listing the nodes (max M) per face (total N) of the mesh.</span>
-<span class="sd">    nnodes : numpy.ndarray</span>
+<span class="sd">    nnodes : np.ndarray</span>
 <span class="sd">        Number of nodes per face (max M).</span>
-<span class="sd">    xn : numpy.ndarray</span>
+<span class="sd">    xn : np.ndarray</span>
 <span class="sd">        X-coordinates of the mesh nodes.</span>
-<span class="sd">    yn : numpy.ndarray</span>
+<span class="sd">    yn : np.ndarray</span>
 <span class="sd">        Y-coordinates of the mesh nodes.</span>
-<span class="sd">    val : numpy.ndarray</span>
+<span class="sd">    val : np.ndarray</span>
 <span class="sd">        Array of length N containing the value per face.</span>
 <span class="sd">    minval : Optional[float]</span>
 <span class="sd">        Lower limit for the color scale.</span>
@@ -4845,13 +4935,13 @@ scale : float
         <span class="n">fn_masked</span> <span class="o">=</span> <span class="n">fn</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span>
         <span class="n">tfn_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fn_masked</span><span class="p">[:,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)])</span>
         <span class="n">tval_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="n">mask</span><span class="p">])</span>
-    <span class="n">tfn</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">tfn_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">tval</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">tval_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">tfn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">tfn_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">tval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">tval_list</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="c1"># cmap = matplotlib.pyplot.get_cmap(&#39;Spectral&#39;)</span>
     <span class="k">if</span> <span class="n">minval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">minval</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">tval</span><span class="p">)</span>
+        <span class="n">minval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">tval</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">maxval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">maxval</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">tval</span><span class="p">)</span>
+        <span class="n">maxval</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">tval</span><span class="p">)</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">tripcolor</span><span class="p">(</span>
         <span class="n">xn</span> <span class="o">/</span> <span class="n">scale</span><span class="p">,</span>
         <span class="n">yn</span> <span class="o">/</span> <span class="n">scale</span><span class="p">,</span>
@@ -4888,8 +4978,7 @@ filename : str
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/plotting.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">40</span>
-<span class="normal">41</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
 <span class="normal">44</span>
@@ -4901,7 +4990,8 @@ filename : str
 <span class="normal">50</span>
 <span class="normal">51</span>
 <span class="normal">52</span>
-<span class="normal">53</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">savefig</span><span class="p">(</span><span class="n">fig</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">53</span>
+<span class="normal">54</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">savefig</span><span class="p">(</span><span class="n">fig</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Save a single figure to file.</span>
 
@@ -5006,8 +5096,7 @@ future.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/plotting.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">56</span>
-<span class="normal">57</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">57</span>
 <span class="normal">58</span>
 <span class="normal">59</span>
 <span class="normal">60</span>
@@ -5019,7 +5108,8 @@ future.</p>
 <span class="normal">66</span>
 <span class="normal">67</span>
 <span class="normal">68</span>
-<span class="normal">69</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">setsize</span><span class="p">(</span><span class="n">fig</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">69</span>
+<span class="normal">70</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">setsize</span><span class="p">(</span><span class="n">fig</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Set the size of a figure.</span>
 
@@ -5065,7 +5155,9 @@ xzoom : List[list[float,float]]
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/plotting.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1246</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1244</span>
+<span class="normal">1245</span>
+<span class="normal">1246</span>
 <span class="normal">1247</span>
 <span class="normal">1248</span>
 <span class="normal">1249</span>
@@ -5090,9 +5182,7 @@ xzoom : List[list[float,float]]
 <span class="normal">1268</span>
 <span class="normal">1269</span>
 <span class="normal">1270</span>
-<span class="normal">1271</span>
-<span class="normal">1272</span>
-<span class="normal">1273</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_x_and_save</span><span class="p">(</span><span class="n">fig</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">figbase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plot_ext</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">xzoom</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1271</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_x_and_save</span><span class="p">(</span><span class="n">fig</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">figbase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plot_ext</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">xzoom</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Zoom in on subregions of the x-axis and save the figure.</span>
 
@@ -5154,7 +5244,9 @@ scale: float
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/plotting.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1276</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1274</span>
+<span class="normal">1275</span>
+<span class="normal">1276</span>
 <span class="normal">1277</span>
 <span class="normal">1278</span>
 <span class="normal">1279</span>
@@ -5205,9 +5297,7 @@ scale: float
 <span class="normal">1324</span>
 <span class="normal">1325</span>
 <span class="normal">1326</span>
-<span class="normal">1327</span>
-<span class="normal">1328</span>
-<span class="normal">1329</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_xy_and_save</span><span class="p">(</span><span class="n">fig</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">figbase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plot_ext</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">xyzoom</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1327</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_xy_and_save</span><span class="p">(</span><span class="n">fig</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">figbase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plot_ext</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">xyzoom</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="n">scale</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Zoom in on subregions in x,y-space and save the figure.</span>
 
