@@ -894,11 +894,11 @@ class Erosion:
         # create various plots
         erosion_plotter = ErosionPlotter(
             self.gui,
+            self.river_data.plot_flags,
             erosion_results,
             bank_data,
             water_level_data,
             erosion_inputs,
-            self.river_data.plot_flags,
         )
         erosion_plotter.plot_all(
             river_axis.data["stations"],

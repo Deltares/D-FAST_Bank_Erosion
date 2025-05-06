@@ -24,11 +24,11 @@ class ErosionPlotter:
     def __init__(
         self,
         gui: bool,
+        plot_flags: Dict[str, Any],
         erosion_results: ErosionResults,
         bank_data: BankData,
         water_level_data: WaterLevelData,
         erosion_inputs: ErosionInputs,
-        plot_flags: Dict[str, Any],
     ):
         """Initialize the ErosionPlotter with the required data.
         
