@@ -2342,7 +2342,7 @@
         <span class="n">station_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">num_search_lines</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
         <span class="n">bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">],</span>
-        <span class="n">km_bounds</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">stations_bounds</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
         <span class="n">bank_areas</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Polygon</span><span class="p">],</span>
         <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span>
     <span class="p">):</span>
@@ -2355,7 +2355,7 @@
 <span class="sd">                Number of search lines.</span>
 <span class="sd">            bank (List):</span>
 <span class="sd">                List of bank lines.</span>
-<span class="sd">            km_bounds (Tuple[float, float]):</span>
+<span class="sd">            stations_bounds (Tuple[float, float]):</span>
 <span class="sd">                Minimum and maximum km bounds.</span>
 <span class="sd">            bank_areas (List[Polygon]):</span>
 <span class="sd">                A search area corresponding to one of the bank search lines.</span>
@@ -2373,9 +2373,9 @@
 <span class="sd">            &gt;&gt;&gt; station_coords = np.array([[0, 0, 0], [1, 1, 0]])</span>
 <span class="sd">            &gt;&gt;&gt; num_search_lines = 1</span>
 <span class="sd">            &gt;&gt;&gt; bank = [LineString([(0, 0), (1, 1)])]</span>
-<span class="sd">            &gt;&gt;&gt; km_bounds = (0, 1)</span>
+<span class="sd">            &gt;&gt;&gt; stations_bounds = (0, 1)</span>
 <span class="sd">            &gt;&gt;&gt; bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]</span>
-<span class="sd">            &gt;&gt;&gt; bank_lines.plot(station_coords, num_search_lines, bank, km_bounds, bank_areas, config_file)</span>
+<span class="sd">            &gt;&gt;&gt; bank_lines.plot(station_coords, num_search_lines, bank, stations_bounds, bank_areas, config_file)</span>
 <span class="sd">            N...s</span>
 
 <span class="sd">            ```</span>
@@ -2395,8 +2395,8 @@
                 <span class="n">bank_crds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bcrds_numpy</span><span class="p">)</span>
                 <span class="n">bank_km</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">km_numpy</span><span class="p">)</span>
             <span class="n">km_zoom</span><span class="p">,</span> <span class="n">xy_zoom</span> <span class="o">=</span> <span class="n">get_zoom_extends</span><span class="p">(</span>
-                <span class="n">km_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="n">km_bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                <span class="n">stations_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">stations_bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">plot_flags</span><span class="p">[</span><span class="s2">&quot;zoom_km_step&quot;</span><span class="p">],</span>
                 <span class="n">bank_crds</span><span class="p">,</span>
                 <span class="n">bank_km</span><span class="p">,</span>
@@ -3407,7 +3407,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 
 
 <h4 id="dfastbe.bank_lines.bank_lines.BankLines.plot" class="doc doc-heading"><a href="#dfastbe.bank_lines.bank_lines.BankLines.plot" class="toclink">
-            <code class="highlight language-python"><span class="n">plot</span><span class="p">(</span><span class="n">station_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">num_search_lines</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">],</span> <span class="n">km_bounds</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">bank_areas</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Polygon</span><span class="p">],</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">plot</span><span class="p">(</span><span class="n">station_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">num_search_lines</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">],</span> <span class="n">stations_bounds</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">bank_areas</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Polygon</span><span class="p">],</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">)</span></code>
 
 </a><a href="#dfastbe.bank_lines.bank_lines.BankLines.plot" class="headerlink" title="Permanent link">#</a></h4>
 
@@ -3478,7 +3478,7 @@ The collection of all detected bank segments in the remaining model area.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>km_bounds</code>
+                <code>stations_bounds</code>
             </td>
             <td>
                   <code><span title="typing.Tuple">Tuple</span>[<span title="float">float</span>, <span title="float">float</span>]</code>
@@ -3538,9 +3538,9 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">station_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">num_search_lines</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">bank</span> <span class="o">=</span> <span class="p">[</span><span class="n">LineString</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])]</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">km_bounds</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">stations_bounds</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">bank_areas</span> <span class="o">=</span> <span class="p">[</span><span class="n">Polygon</span><span class="p">([(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)])]</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">bank_lines</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">station_coords</span><span class="p">,</span> <span class="n">num_search_lines</span><span class="p">,</span> <span class="n">bank</span><span class="p">,</span> <span class="n">km_bounds</span><span class="p">,</span> <span class="n">bank_areas</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">bank_lines</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">station_coords</span><span class="p">,</span> <span class="n">num_search_lines</span><span class="p">,</span> <span class="n">bank</span><span class="p">,</span> <span class="n">stations_bounds</span><span class="p">,</span> <span class="n">bank_areas</span><span class="p">,</span> <span class="n">config_file</span><span class="p">)</span>
 <span class="n">N</span><span class="o">...</span><span class="n">s</span>
 </code></pre></div>
 
@@ -3650,7 +3650,7 @@ The collection of all detected bank segments in the remaining model area.</p>
     <span class="n">station_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">num_search_lines</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">],</span>
-    <span class="n">km_bounds</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">stations_bounds</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
     <span class="n">bank_areas</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Polygon</span><span class="p">],</span>
     <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span>
 <span class="p">):</span>
@@ -3663,7 +3663,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="sd">            Number of search lines.</span>
 <span class="sd">        bank (List):</span>
 <span class="sd">            List of bank lines.</span>
-<span class="sd">        km_bounds (Tuple[float, float]):</span>
+<span class="sd">        stations_bounds (Tuple[float, float]):</span>
 <span class="sd">            Minimum and maximum km bounds.</span>
 <span class="sd">        bank_areas (List[Polygon]):</span>
 <span class="sd">            A search area corresponding to one of the bank search lines.</span>
@@ -3681,9 +3681,9 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="sd">        &gt;&gt;&gt; station_coords = np.array([[0, 0, 0], [1, 1, 0]])</span>
 <span class="sd">        &gt;&gt;&gt; num_search_lines = 1</span>
 <span class="sd">        &gt;&gt;&gt; bank = [LineString([(0, 0), (1, 1)])]</span>
-<span class="sd">        &gt;&gt;&gt; km_bounds = (0, 1)</span>
+<span class="sd">        &gt;&gt;&gt; stations_bounds = (0, 1)</span>
 <span class="sd">        &gt;&gt;&gt; bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]</span>
-<span class="sd">        &gt;&gt;&gt; bank_lines.plot(station_coords, num_search_lines, bank, km_bounds, bank_areas, config_file)</span>
+<span class="sd">        &gt;&gt;&gt; bank_lines.plot(station_coords, num_search_lines, bank, stations_bounds, bank_areas, config_file)</span>
 <span class="sd">        N...s</span>
 
 <span class="sd">        ```</span>
@@ -3703,8 +3703,8 @@ The collection of all detected bank segments in the remaining model area.</p>
             <span class="n">bank_crds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bcrds_numpy</span><span class="p">)</span>
             <span class="n">bank_km</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">km_numpy</span><span class="p">)</span>
         <span class="n">km_zoom</span><span class="p">,</span> <span class="n">xy_zoom</span> <span class="o">=</span> <span class="n">get_zoom_extends</span><span class="p">(</span>
-            <span class="n">km_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="n">km_bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="n">stations_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">stations_bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">plot_flags</span><span class="p">[</span><span class="s2">&quot;zoom_km_step&quot;</span><span class="p">],</span>
             <span class="n">bank_crds</span><span class="p">,</span>
             <span class="n">bank_km</span><span class="p">,</span>
