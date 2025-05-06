@@ -91,7 +91,24 @@ class ErosionPlotter:
         mesh_data: MeshData,
         simulation_data: ErosionSimulationData,
     ):
-        # create various plots
+        """Plot all the results of the bank erosion analysis.
+
+        Args:
+            river_axis_km (np.ndarray):
+                The river axis in km.
+            xy_line_eq_list (list):
+                The equilibrium line coordinates.
+            km_mid (np.ndarray):
+                The midpoint chainages for the analysis.
+            km_step (float):
+                The step size for the analysis.
+            river_center_line_arr (np.ndarray):
+                The river center line coordinates.
+            mesh_data (MeshData):
+                The mesh data used in the analysis.
+            simulation_data (ErosionSimulationData):
+                The simulation data used in the analysis.
+        """
         if self.plot_flags["plot_data"]:
             log_text("=")
             log_text("create_figures")
