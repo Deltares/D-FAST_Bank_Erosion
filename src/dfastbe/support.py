@@ -72,7 +72,6 @@ def on_right_side(line_xy: numpy.ndarray, ref_xy: numpy.ndarray) -> bool:
     npnt = line_xy.shape[0]
     if ref_npnt < npnt:
         # determine the mid-point p0 of ref_xy
-        # p0 = (ref_xy[0] + ref_xy[1]) / 2
         if ref_npnt == 2:
             imin = 0
             imind = 0
