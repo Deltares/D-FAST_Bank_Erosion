@@ -64,18 +64,6 @@ class BaseBank(Generic[GenericType]):
 
 @dataclass
 class SingleErosion:
-    """Class to hold erosion data for a single bank.
-
-    args:
-        bank_line_coords (np.ndarray):
-            Coordinates of the bank line.
-        bank_face_indices (np.ndarray):
-            Indices of the faces associated with the bank.
-        fairway_face_indices (np.ndarray):
-            Indices of the faces associated with the fairway.
-        bank_chainage_midpoints (np.ndarray):
-            River chainage for the midpoints of each segment of the bank line.
-    """
     wave_fairway_distance_0: np.ndarray
     wave_fairway_distance_1: np.ndarray
     bank_protection_level: np.ndarray
@@ -594,17 +582,6 @@ class ErosionSimulationData(BaseSimulationData):
         return vel_bank
 
     def calculate_bank_height(self, single_bank: SingleBank, zb_dx):
-        """
-
-        Args:
-            single_bank:
-            bank_i:
-            zb_dx:
-
-        Returns:
-            zb_bank:
-
-        """
         from dfastbe.kernel import moving_avg
         bank_index = single_bank.bank_face_indices
         if self.bed_elevation_location == "node":
