@@ -41,7 +41,6 @@ from geopandas.geoseries import GeoSeries
 from shapely import prepare
 from shapely.geometry import LineString, Point
 
-
 PROGTEXTS: Dict[str, List[str]]
 
 
@@ -1790,32 +1789,6 @@ class BaseRiverData:
             )
         return sim_files, p_discharge
 
-def get_bbox(
-        coords: np.ndarray, buffer: float = 0.1
-) -> Tuple[float, float, float, float]:
-    """
-    Derive the bounding box from a line.
-
-    Args:
-        coords (np.ndarray):
-            An N x M array containing x- and y-coordinates as first two M entries
-        buffer : float
-            Buffer fraction surrounding the tight bounding box
-
-    Returns:
-        bbox (Tuple[float, float, float, float]):
-            Tuple bounding box consisting of [min x, min y, max x, max y)
-    """
-    x = coords[:, 0]
-    y = coords[:, 1]
-    x_min = x.min()
-    y_min = y.min()
-    x_max = x.max()
-    y_max = y.max()
-    d = buffer * max(x_max - x_min, y_max - y_min)
-    bbox = (x_min - d, y_min - d, x_max + d, y_max + d)
-
-    return bbox
 
 def load_program_texts(file_name: Union[str, Path]) -> None:
     """Load texts from a configuration file, and store globally for access.
