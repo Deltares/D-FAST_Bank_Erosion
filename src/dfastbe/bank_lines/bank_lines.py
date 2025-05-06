@@ -128,15 +128,15 @@ class BankLines:
         # clip the set of detected bank lines to the bank areas
         log_text("simplify_banklines")
         bank = [None] * self.search_lines.size
-        clipped_banklines = [None] * self.search_lines.size
+        masked_bank_lines = [None] * self.search_lines.size
         for ib, bank_area in enumerate(bank_areas):
             log_text("bank_lines", data={"ib": ib + 1})
-            clipped_banklines[ib] = self.mask(banklines, bank_area)
+            masked_bank_lines[ib] = self.mask(banklines, bank_area)
             bank[ib] = sort_connect_bank_lines(
-                clipped_banklines[ib], river_center_line_values, to_right[ib]
+                masked_bank_lines[ib], river_center_line_values, to_right[ib]
             )
 
-        self.save(bank, banklines, clipped_banklines, bank_areas, config_file)
+        self.save(bank, banklines, masked_bank_lines, bank_areas, config_file)
 
         if self.plot_flags["plot_data"]:
             self.plot(
@@ -184,9 +184,9 @@ class BankLines:
             ```
         """
         # intersection returns one MultiLineString object
-        clipped_banklines = banklines.intersection(bank_area)[0]
+        masked_bank_lines = banklines.intersection(bank_area)[0]
 
-        return clipped_banklines
+        return masked_bank_lines
 
     def plot(
         self,
@@ -293,7 +293,7 @@ class BankLines:
         self,
         bank: List[LineString],
         banklines: GeoSeries,
-        clipped_banklines: List[MultiLineString],
+        masked_bank_lines: List[MultiLineString],
         bank_areas: List[Polygon],
         config_file: ConfigFile,
     ):
@@ -304,7 +304,7 @@ class BankLines:
                 List of bank lines.
             banklines (GeoSeries):
                 Un-ordered set of bank line segments.
-            clipped_banklines (List[MultiLineString]):
+            masked_bank_lines (List[MultiLineString]):
                 Un-ordered set of bank line segments, clipped to bank area.
             bank_areas (List[Polygon]):
                 A search area corresponding to one of the bank search lines.
@@ -319,9 +319,9 @@ class BankLines:
             N...e
             >>> bank = [LineString([(0, 0), (1, 1)])]
             >>> banklines = gpd.GeoSeries([LineString([(0, 0), (1, 1)])])
-            >>> clipped_banklines = [MultiLineString([LineString([(0, 0), (1, 1)])])]
+            >>> masked_bank_lines = [MultiLineString([LineString([(0, 0), (1, 1)])])]
             >>> bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]
-            >>> bank_lines.save(bank, banklines, clipped_banklines, bank_areas, config_file)
+            >>> bank_lines.save(bank, banklines, masked_bank_lines, bank_areas, config_file)
             No message found for save_banklines
 
             ```
@@ -331,7 +331,7 @@ class BankLines:
         log_text("save_banklines", data={"file": bank_file})
         gpd.GeoSeries(bank, crs=config_file.crs).to_file(bank_file)
 
-        gpd.GeoSeries(clipped_banklines, crs=config_file.crs).to_file(
+        gpd.GeoSeries(masked_bank_lines, crs=config_file.crs).to_file(
             self.bank_output_dir / f"{BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE}{EXTENSION}"
         )
         banklines.to_file(
