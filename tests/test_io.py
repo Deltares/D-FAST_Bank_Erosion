@@ -554,21 +554,21 @@ class TestConfigFile:
                 1.0,
                 None,
                 None,
-                [np.array([1.0, 1.0, 1.0]), np.array([1.0, 1.0, 1.0])],
+                [np.array([1.0, 1.0, 1.0]), np.array([1.0, 1.0, 1.0, 1.0, 1.0])],
             ),
             (
                 "NonExistentKey",
                 None,
                 2.0,
                 None,
-                [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])],
+                [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0, 2.0, 2.0])],
             ),
             (
                 "ValidValue",
                 3.0,
                 None,
                 [1.0, 2.0, 3.0],
-                [np.array([3.0, 3.0, 3.0]), np.array([3.0, 3.0, 3.0])],
+                [np.array([3.0, 3.0, 3.0]), np.array([3.0, 3.0, 3.0, 3.0, 3.0])],
             ),
         ],
         ids=[
@@ -582,12 +582,12 @@ class TestConfigFile:
     ):
         """Test retrieving a parameter field."""
         config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
-        bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5])]
-
+        bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5, 6, 7])]
+        num_stations_per_bank = [len(bank_i) for bank_i in bank_km]
         if value:
             config["General"] = {key: str(value)}
         result = config_file.get_parameter(
-            "General", key, bank_km, default=default, valid=valid
+            "General", key, num_stations_per_bank, default=default, valid=valid
         )
         assert all(np.array_equal(r, e) for r, e in zip(result, expected))
 

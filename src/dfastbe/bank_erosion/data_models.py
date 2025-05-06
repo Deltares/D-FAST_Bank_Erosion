@@ -2,16 +2,76 @@
 import os
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import List, Dict, Tuple, ClassVar
+from typing import Iterator, List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type, Optional
 import numpy as np
 from geopandas import GeoDataFrame
-from shapely.geometry import LineString
+from shapely.geometry import LineString, Point
+from geopandas.geoseries import GeoSeries
 from dfastio.xyc.models import XYCModel
 from dfastbe.io import ConfigFile, BaseRiverData, BaseSimulationData, log_text
 
 
+GenericType = TypeVar("GenericType")
+
 @dataclass
-class ErosionInputs:
+class BaseBank(Generic[GenericType]):
+    left: GenericType
+    right: GenericType
+    id: Optional[int] = field(default=None)
+
+    def get_bank(self, bank_index: int) -> GenericType:
+        if bank_index == 0:
+            return self.left
+        elif bank_index == 1:
+            return self.right
+        else:
+            raise ValueError("bank_index must be 0 (left) or 1 (right)")
+
+    @classmethod
+    def from_column_arrays(
+        cls: Type["BaseBank[GenericType]"],
+        data: Dict[str, Any],
+        bank_cls: Type[GenericType],
+        bank_order: Tuple[str, str] = ("left", "right")
+    ) -> "BaseBank[GenericType]":
+        if set(bank_order) != {"left", "right"}:
+            raise ValueError("bank_order must be a permutation of ('left', 'right')")
+
+        id_val = data.get("id")
+
+        # Extract the first and second array for each parameter (excluding id)
+        first_args = {}
+        second_args = {}
+        for key, value in data.items():
+            if key == "id":
+                continue
+            if not isinstance(value, list) or len(value) != 2:
+                raise ValueError(f"Expected 2-column array for key '{key}', got shape {value.shape}")
+
+            split = dict(zip(bank_order, value))
+            first_args[key] = split["left"]
+            second_args[key] = split["right"]
+
+        left = bank_cls(**first_args)
+        right = bank_cls(**second_args)
+
+        return cls(id=id_val, left=left, right=right)
+
+    def __iter__(self) -> Iterator[GenericType]:
+        """Iterate over the banks."""
+        return iter([self.left, self.right])
+
+
+@dataclass
+class SingleErosion:
+    wave_fairway_distance_0: np.ndarray
+    wave_fairway_distance_1: np.ndarray
+    bank_protection_level: np.ndarray
+    tauc: np.ndarray
+
+
+@dataclass
+class ErosionInputs(BaseBank[SingleErosion]):
     """Class to hold erosion inputs.
 
     args:
@@ -32,13 +92,8 @@ class ErosionInputs:
         taucls_str (Tuple[str]):
             String representation for different bank types.
     """
-
-    shipping_data: Dict[str, np.ndarray]
-    wave_fairway_distance_0: List[np.ndarray]
-    wave_fairway_distance_1: List[np.ndarray]
-    bank_protection_level: List[np.ndarray]
-    tauc: List[np.ndarray]
-    bank_type: List[np.ndarray]
+    shipping_data: Dict[str, List[np.ndarray]] = field(default_factory=dict)
+    bank_type: np.ndarray = field(default_factory=lambda: np.array([]))
     taucls: ClassVar[np.ndarray] = np.array([1e20, 95, 3.0, 0.95, 0.15])
     taucls_str: ClassVar[Tuple[str]] = (
         "protected",
@@ -48,6 +103,34 @@ class ErosionInputs:
         "sand",
     )
 
+    @classmethod
+    def from_column_arrays(
+        cls, data: dict, bank_cls: Type["SingleErosion"], shipping_data: Dict[str, List[np.ndarray]],
+        bank_type: np.ndarray, bank_order: Tuple[str, str] = ("left", "right")
+    ) -> "ErosionInputs":
+        # Only include fields that belong to the bank-specific data
+        base_fields = {k: v for k, v in data.items() if k != "id"}
+        base = BaseBank.from_column_arrays(
+            {"id": data.get("id"), **base_fields}, bank_cls, bank_order=bank_order
+        )
+
+        return cls(
+            id=base.id,
+            left=base.left,
+            right=base.right,
+            shipping_data=shipping_data,
+            bank_type=bank_type,
+        )
+
+    @property
+    def bank_protection_level(self) -> List[np.ndarray]:
+        """Get the bank protection level."""
+        return [self.left.bank_protection_level, self.right.bank_protection_level]
+
+    @property
+    def tauc(self) -> List[np.ndarray]:
+        """Get the critical bank shear stress values."""
+        return [self.left.tauc, self.right.tauc]
 
 @dataclass
 class WaterLevelData:
@@ -112,7 +195,61 @@ class MeshData:
 
 
 @dataclass
-class BankData:
+class SingleBank:
+    is_right_bank: bool
+    bank_line_coords: np.ndarray
+    bank_face_indices: np.ndarray
+    bank_line_size: np.ndarray = field(default_factory=lambda: np.array([]))
+    fairway_distances: np.ndarray = field(default_factory=lambda: np.array([]))
+    fairway_face_indices: np.ndarray = field(default_factory=lambda: np.array([]))
+    bank_chainage_midpoints: np.ndarray = field(default_factory=lambda: np.array([]))
+
+    segment_length: np.ndarray = field(init=False)
+    dx: np.ndarray = field(init=False)
+    dy: np.ndarray = field(init=False)
+    length: int = field(init=False)
+
+    def __post_init__(self):
+        """Post-initialization to ensure bank_line_coords is a list of numpy arrays."""
+        self.segment_length = self._segment_length()
+        self.dx = self._dx()
+        self.dy = self._dy()
+        self.length = len(self.bank_chainage_midpoints)
+
+    def _segment_length(self) -> np.ndarray:
+        """Calculate the length of each segment in the bank line.
+
+        Returns:
+            List[np.ndarray]: Length of each segment in the bank line.
+        """
+        return np.linalg.norm(np.diff(self.bank_line_coords, axis=0), axis=1)
+
+    def _dx(self) -> np.ndarray:
+        """Calculate the distance between each bank line point.
+
+        Returns:
+            List[np.ndarray]: Distance to the closest fairway point for each bank line point.
+        """
+        return np.diff(self.bank_line_coords[:, 0])
+
+    def _dy(self) -> np.ndarray:
+        """Calculate the distance between each bank line point.
+
+        Returns:
+            List[np.ndarray]: Distance to the closest fairway point for each bank line point.
+        """
+        return np.diff(self.bank_line_coords[:, 1])
+
+    def get_mid_points(self, crs) -> GeoSeries:
+        bank_coords = self.bank_line_coords
+        bank_coords_mind = (bank_coords[:-1] + bank_coords[1:]) / 2
+
+        bank_coords_points = [Point(xy) for xy in bank_coords_mind]
+        geo_series = GeoSeries(bank_coords_points, crs=crs)
+        return geo_series
+
+@dataclass
+class BankData(BaseBank[SingleBank]):
     """Class to hold bank-related data.
 
     args:
@@ -135,16 +272,51 @@ class BankData:
         fairway_face_indices (List[np.ndarray]):
             The face index of the closest fairway point for each bank line point.
     """
+    bank_lines: GeoDataFrame = field(default_factory=GeoDataFrame)
+    n_bank_lines: int = 0
 
-    is_right_bank: List[bool]
-    bank_chainage_midpoints: List[np.ndarray]
-    bank_line_coords: List[np.ndarray]
-    bank_face_indices: List[np.ndarray]
-    bank_lines: GeoDataFrame
-    n_bank_lines: int
-    bank_line_size: List[np.ndarray] = field(default_factory=list)
-    fairway_distances: List[np.ndarray] = field(default_factory=list)
-    fairway_face_indices: List[np.ndarray] = field(default_factory=list)
+    @classmethod
+    def from_column_arrays(
+        cls,
+        data: dict,
+        bank_cls: Type["SingleBank"],
+        bank_lines: GeoDataFrame,
+        n_bank_lines: int,
+        bank_order: Tuple[str, str] = ("left", "right")
+    ) -> "BankData":
+        # Only include fields that belong to the bank-specific data
+        base_fields = {k: v for k, v in data.items() if k != "id"}
+        base = BaseBank.from_column_arrays(
+            {"id": data.get("id"), **base_fields}, bank_cls, bank_order=bank_order
+        )
+
+        return cls(
+            id=base.id,
+            left=base.left,
+            right=base.right,
+            bank_lines=bank_lines,
+            n_bank_lines=n_bank_lines,
+        )
+
+    @property
+    def bank_line_coords(self) -> List[np.ndarray]:
+        """Get the coordinates of the bank lines."""
+        return [self.left.bank_line_coords, self.right.bank_line_coords]
+
+    @property
+    def is_right_bank(self) -> List[bool]:
+        """Get the bank direction."""
+        return [self.left.is_right_bank, self.right.is_right_bank]
+
+    @property
+    def bank_chainage_midpoints(self) -> List[np.ndarray]:
+        """Get the chainage midpoints of the bank lines."""
+        return [self.left.bank_chainage_midpoints, self.right.bank_chainage_midpoints]
+
+    @property
+    def num_stations_per_bank(self) -> List[int]:
+        """Get the number of stations per bank."""
+        return [self.left.length, self.right.length]
 
 
 @dataclass
@@ -370,7 +542,7 @@ class ErosionSimulationData(BaseSimulationData):
 
     @staticmethod
     def apply_masked_indexing(
-            x0: np.array, idx: np.ma.masked_array
+        x0: np.array, idx: np.ma.masked_array
     ) -> np.ma.masked_array:
         """
         Index one array by another transferring the mask.
@@ -390,6 +562,42 @@ class ErosionSimulationData(BaseSimulationData):
         x1 = np.ma.masked_where(np.ma.getmask(idx), x0[idx_safe])
         return x1
 
+    def calculate_bank_velocity(self, single_bank: SingleBank, vel_dx) -> np.ndarray:
+        from dfastbe.kernel import moving_avg
+        bank_face_indices = single_bank.bank_face_indices
+        vel_bank = (
+                np.abs(
+                    self.velocity_x_face[bank_face_indices] * single_bank.dx
+                    + self.velocity_y_face[bank_face_indices] * single_bank.dy
+                )
+                / single_bank.segment_length
+        )
+
+        if vel_dx > 0.0:
+            vel_bank = moving_avg(
+                single_bank.bank_chainage_midpoints, vel_bank, vel_dx
+            )
+
+        return vel_bank
+
+    def calculate_bank_height(self, single_bank: SingleBank, zb_dx):
+        from dfastbe.kernel import moving_avg
+        bank_index = single_bank.bank_face_indices
+        if self.bed_elevation_location == "node":
+            zb_nodes = self.bed_elevation_values
+            zb_all = self.apply_masked_indexing(
+                zb_nodes, self.face_node[bank_index, :]
+            )
+            zb_bank = zb_all.max(axis=1)
+            if zb_dx > 0.0:
+                zb_bank = moving_avg(
+                    single_bank.bank_chainage_midpoints, zb_bank, zb_dx,
+                )
+        else:
+            # don't know ... need to check neighbouring cells ...
+            zb_bank = None
+
+        return zb_bank
 
 class ErosionRiverData(BaseRiverData):
 
@@ -408,6 +616,7 @@ class ErosionRiverData(BaseRiverData):
         self.output_intervals = config_file.get_float("Erosion", "OutputInterval", 1.0)
         self.bank_lines = config_file.read_bank_lines(str(self.bank_dir))
         self.river_axis = self._read_river_axis()
+        self.erosion_time = self.config_file.get_int("Erosion", "TErosion", positive=True)
 
     def simulation_data(self) -> ErosionSimulationData:
 
@@ -423,7 +632,7 @@ class ErosionRiverData(BaseRiverData):
 
     def _get_bank_output_dir(self) -> Path:
         bank_output_dir = self.config_file.get_str("General", "BankDir")
-        log_text("bankdir_out", data={"dir": bank_output_dir})
+        log_text("bank_dir_out", data={"dir": bank_output_dir})
         if os.path.exists(bank_output_dir):
             log_text("overwrite_dir", data={"dir": bank_output_dir})
         else:
@@ -433,7 +642,7 @@ class ErosionRiverData(BaseRiverData):
 
     def _get_bank_line_dir(self) -> Path:
         bank_dir = self.config_file.get_str("General", "BankDir")
-        log_text("bankdir_in", data={"dir": bank_dir})
+        log_text("bank_dir_in", data={"dir": bank_dir})
         bank_dir = Path(bank_dir)
         if not bank_dir.exists():
             log_text("missing_dir", data={"dir": bank_dir})
@@ -450,6 +659,25 @@ class ErosionRiverData(BaseRiverData):
         log_text("read_river_axis", data={"file": river_axis_file})
         river_axis = XYCModel.read(river_axis_file)
         return river_axis
+
+
+@dataclass
+class ParametersPerBank:
+    ship_velocity: float
+    num_ship: float
+    num_waves_per_ship: float
+    ship_draught: float
+    ship_type: float
+    par_slope: float
+    par_reed: float
+    mu_slope: float
+    mu_reed: float
+
+
+@dataclass
+class DischargeLevelParameters(BaseBank[ParametersPerBank]):
+    pass
+
 
 class BankLinesResultsError(Exception):
     """Custom exception for BankLine results errors."""

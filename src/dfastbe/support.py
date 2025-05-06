@@ -51,22 +51,20 @@ def on_right_side(line_xy: numpy.ndarray, ref_xy: numpy.ndarray) -> bool:
 
     Left and right are relative to the path along ref_xy from the first to the
     last node. It is assumed that line_xy can be uniquely identified as on the
-    left or right side of ref_xy, i.e. the lines may not cross each other or
-    themselves. Also line_xy should be alongside ref_xy and not "before" or
+    left or right side of ref_xy, i.e., the lines may not cross each other or
+    themselves. Also, line_xy should be alongside ref_xy and not "before" or
     "after" ref_xy. The typical use case is to relate a bank line line_xy to a
-    centre line ref_xy.
+    center line ref_xy.
 
-    Arguments
-    ---------
-    line_xy : numpy.ndarray
-        Array containing the x,y coordinates of a line.
-    ref_xy : numpy.ndarray
-        Array containing the x,y,chainage data.
+    Args:
+        line_xy : numpy.ndarray
+            Array containing the x,y coordinates of a line.
+        ref_xy : numpy.ndarray
+            Array containing the x,y,chainage data.
 
-    Results
-    -------
-    right_side : bool
-        Flag indicating whether line is on the right side.
+    Returns:
+        right_side : bool
+            Flag indicating whether the line is on the right side.
     """
 
     # determine the reference point based on the line with the fewest points
@@ -74,7 +72,6 @@ def on_right_side(line_xy: numpy.ndarray, ref_xy: numpy.ndarray) -> bool:
     npnt = line_xy.shape[0]
     if ref_npnt < npnt:
         # determine the mid-point p0 of ref_xy
-        p0 = (ref_xy[0] + ref_xy[1]) / 2
         if ref_npnt == 2:
             imin = 0
             imind = 0
@@ -326,7 +323,7 @@ def get_slices_ab(
 
 
 def move_line(
-    xylines: numpy.ndarray, dn: numpy.ndarray, right_bank: bool
+    xylines: numpy.ndarray, erosion_distance: numpy.ndarray, right_bank: bool
 ) -> numpy.ndarray:
     """
     Shift a line of a variable distance sideways (positive shift away from centre line).
@@ -339,7 +336,7 @@ def move_line(
     ---------
     xylines : numpy.ndarray
         Nx2 array containing the x- and y-coordinates of the line to be moved.
-    dn : numpy.ndarray
+    erosion_distance : numpy.ndarray
         Distance over which to move the line sideways. A positive shift is
         defined towards the right for the right bank, and towards the left for
         the left bank.
@@ -352,16 +349,16 @@ def move_line(
         Nx2 array containing the x- and y-coordinates of the moved line.
     """
     if right_bank:
-        xylines_new = move_line_right(xylines, dn)
+        xylines_new = move_line_right(xylines, erosion_distance)
     else:
         xylines_rev = xylines[::-1, :]
-        dn_rev = dn[::-1]
+        dn_rev = erosion_distance[::-1]
         xylines_new_rev = move_line_right(xylines_rev, dn_rev)
         xylines_new = xylines_new_rev[::-1, :]
     return xylines_new
 
 
-def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
+def move_line_right(xylines: numpy.ndarray, erosion_distance: numpy.ndarray) -> numpy.ndarray:
     """
     Shift a line of a variable distance sideways (positive shift to the right).
 
@@ -378,7 +375,7 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
     xylines_new : umpy.ndarray
         Nx2 array containing the x- and y-coordinates of the moved line.
     """
-    nsegments = len(dn)
+    nsegments = len(erosion_distance)
     colvec = (nsegments, 1)
 
     # determine segment angle
@@ -387,7 +384,7 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
 
     # determine shift vector nxy for each segment
     ds = numpy.sqrt((dxy ** 2).sum(axis=1))
-    nxy = dxy[:, ::-1] * [1, -1] * (dn / ds).reshape(colvec)
+    nxy = dxy[:, ::-1] * [1, -1] * (erosion_distance / ds).reshape(colvec)
 
     xylines_new = numpy.zeros((100, 2))
     xylines_new[0] = xylines[0] + nxy[0]
@@ -405,13 +402,13 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
             print("{}: current length of new bankline is {}".format(iseg, ixy))
             print(
                 "{}: segment starting at {} to be shifted by {}".format(
-                    iseg, xylines[iseg], dn[iseg]
+                    iseg, xylines[iseg], erosion_distance[iseg]
                 )
             )
             print("{}: change in direction quantified as {}".format(iseg, dtheta))
 
         # create a polyline for the outline of the new segment
-        if dn[iseg] < prec:
+        if erosion_distance[iseg] < prec:
             # no erosion, so just a linear extension
             if verbose:
                 print("{}: no shifting, just linear extension".format(iseg))
@@ -422,7 +419,7 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
                 # almost straight
                 if verbose:
                     print("{}: slight bend to right".format(iseg))
-                if dn[iseg] > dn[iseg]:
+                if erosion_distance[iseg] > erosion_distance[iseg]:
                     poly = numpy.row_stack(
                         [
                             xylines[iseg + 1],
@@ -453,7 +450,7 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
                         xylines[iseg],
                     ]
                 )
-        elif dn[iseg - 1] < prec:
+        elif erosion_distance[iseg - 1] < prec:
             # left bend: previous segment isn't eroded, so nothing to connect to
             if verbose:
                 print("{}: bend to left".format(iseg))
@@ -538,7 +535,7 @@ def move_line_right(xylines: numpy.ndarray, dn: numpy.ndarray) -> numpy.ndarray:
             # no intersections found
             if dtheta < 0:
                 # right bend (not straight)
-                if dn[iseg] > 0:
+                if erosion_distance[iseg] > 0:
                     cross = (xylines_new[ixy, 0] - xylines_new[ixy - 1, 0]) * nxy[
                         iseg, 1
                     ] - (xylines_new[ixy, 1] - xylines_new[ixy - 1, 1]) * nxy[iseg, 0]
