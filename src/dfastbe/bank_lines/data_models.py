@@ -170,7 +170,7 @@ class BankLinesRiverData(BaseRiverData):
         Examples:
             ```python
             >>> from dfastbe.io import ConfigFile
-            >>> config_file = ConfigFile.read("examples/data/meuse_manual.cfg")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
             >>> bank_lines_river_data = BankLinesRiverData(config_file)
             No message found for read_chainage
             No message found for clip_chainage
@@ -215,7 +215,7 @@ class BankLinesRiverData(BaseRiverData):
             ```python
             >>> from dfastbe.io import ConfigFile
             >>> from unittest.mock import patch
-            >>> config_file = ConfigFile.read("examples/data/meuse_manual.cfg")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
             >>> bank_lines_river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
             N...e
             >>> simulation_data, h0 = bank_lines_river_data.simulation_data()

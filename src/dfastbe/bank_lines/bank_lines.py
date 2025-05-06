@@ -47,7 +47,7 @@ class BankLines:
             ```python
             >>> from unittest.mock import patch
             >>> from dfastbe.io import ConfigFile
-            >>> config_file = ConfigFile.read("examples/data/meuse_manual.cfg")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
             >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS
             N...e
             >>> isinstance(bank_lines, BankLines)
@@ -88,7 +88,7 @@ class BankLines:
             >>> import matplotlib
             >>> matplotlib.use('Agg')
             >>> from dfastbe.io import ConfigFile
-            >>> config_file = ConfigFile.read("examples/data/meuse_manual.cfg")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
             >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS
             N...e
             >>> bank_lines.detect()
@@ -172,7 +172,7 @@ class BankLines:
         Examples:
             ```python
             >>> from dfastbe.io import ConfigFile
-            >>> config_file = ConfigFile.read("examples/data/meuse_manual.cfg")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
             >>> river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
             N...e
             >>> bank_lines = BankLines(config_file)
@@ -221,7 +221,7 @@ class BankLines:
             ```python
             >>> import matplotlib
             >>> matplotlib.use('Agg')
-            >>> config_file = ConfigFile.read("examples/data/meuse_manual.cfg")  # doctest: +ELLIPSIS
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")  # doctest: +ELLIPSIS
             >>> bank_lines = BankLines(config_file)
             N...e
             >>> bank_lines.plot_flags["save_plot"] = False
@@ -318,7 +318,7 @@ class BankLines:
         Examples:
             ```python
             >>> from dfastbe.io import ConfigFile
-            >>> config_file = ConfigFile.read("examples/data/meuse_manual.cfg")  # doctest: +ELLIPSIS
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")  # doctest: +ELLIPSIS
             >>> bank_lines = BankLines(config_file)
             N...e
             >>> bank = [LineString([(0, 0), (1, 1)])]
@@ -367,7 +367,7 @@ class BankLines:
 
         Examples:
             ```python
-            >>> config_file = ConfigFile.read("examples/data/meuse_manual.cfg")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
             >>> river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
             N...e
             >>> simulation_data, critical_water_depth = river_data.simulation_data()
