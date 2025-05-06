@@ -1761,7 +1761,8 @@
 <span class="normal">229</span>
 <span class="normal">230</span>
 <span class="normal">231</span>
-<span class="normal">232</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesRiverData</span><span class="p">(</span><span class="n">BaseRiverData</span><span class="p">):</span>
+<span class="normal">232</span>
+<span class="normal">233</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesRiverData</span><span class="p">(</span><span class="n">BaseRiverData</span><span class="p">):</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">search_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SearchLines</span><span class="p">:</span>
@@ -1774,7 +1775,7 @@
 <span class="sd">        Examples:</span>
 <span class="sd">            ```python</span>
 <span class="sd">            &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
-<span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;tests/data/erosion/meuse_manual.cfg&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)</span>
 <span class="sd">            &gt;&gt;&gt; bank_lines_river_data = BankLinesRiverData(config_file)</span>
 <span class="sd">            No message found for read_chainage</span>
 <span class="sd">            No message found for clip_chainage</span>
@@ -1819,10 +1820,11 @@
 <span class="sd">            ```python</span>
 <span class="sd">            &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
 <span class="sd">            &gt;&gt;&gt; from unittest.mock import patch</span>
-<span class="sd">            &gt;&gt;&gt; with patch(&quot;dfastbe.io.log_text&quot;), patch(&quot;dfastbe.bank_lines.data_models.log_text&quot;):</span>
-<span class="sd">            ...    config_file = ConfigFile.read(&quot;tests/data/erosion/meuse_manual.cfg&quot;)</span>
-<span class="sd">            ...    bank_lines_river_data = BankLinesRiverData(config_file)</span>
-<span class="sd">            ...    simulation_data, h0 = bank_lines_river_data.simulation_data()</span>
+<span class="sd">            &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)</span>
+<span class="sd">            &gt;&gt;&gt; bank_lines_river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS</span>
+<span class="sd">            N...e</span>
+<span class="sd">            &gt;&gt;&gt; simulation_data, h0 = bank_lines_river_data.simulation_data()</span>
+<span class="sd">            N...e</span>
 <span class="sd">            &gt;&gt;&gt; h0</span>
 <span class="sd">            0.1</span>
 
@@ -1891,7 +1893,7 @@
 
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigFile</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/data/erosion/meuse_manual.cfg&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;examples/data/meuse_manual.cfg&quot;</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">bank_lines_river_data</span> <span class="o">=</span> <span class="n">BankLinesRiverData</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
 <span class="n">No</span> <span class="n">message</span> <span class="n">found</span> <span class="k">for</span> <span class="n">read_chainage</span>
 <span class="n">No</span> <span class="n">message</span> <span class="n">found</span> <span class="k">for</span> <span class="n">clip_chainage</span>
@@ -1948,10 +1950,11 @@ simulation data and critical water depth (h0).</p>
 <p><span class="doc-section-title">Examples:</span></p>
     <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigFile</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="kn">from</span><span class="w"> </span><span class="nn">unittest.mock</span><span class="w"> </span><span class="kn">import</span> <span class="n">patch</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="k">with</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;dfastbe.io.log_text&quot;</span><span class="p">),</span> <span class="n">patch</span><span class="p">(</span><span class="s2">&quot;dfastbe.bank_lines.data_models.log_text&quot;</span><span class="p">):</span>
-<span class="o">...</span>    <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/data/erosion/meuse_manual.cfg&quot;</span><span class="p">)</span>
-<span class="o">...</span>    <span class="n">bank_lines_river_data</span> <span class="o">=</span> <span class="n">BankLinesRiverData</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
-<span class="o">...</span>    <span class="n">simulation_data</span><span class="p">,</span> <span class="n">h0</span> <span class="o">=</span> <span class="n">bank_lines_river_data</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;examples/data/meuse_manual.cfg&quot;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">bank_lines_river_data</span> <span class="o">=</span> <span class="n">BankLinesRiverData</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>  <span class="c1"># doctest: +ELLIPSIS</span>
+<span class="n">N</span><span class="o">...</span><span class="n">e</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">simulation_data</span><span class="p">,</span> <span class="n">h0</span> <span class="o">=</span> <span class="n">bank_lines_river_data</span><span class="o">.</span><span class="n">simulation_data</span><span class="p">()</span>
+<span class="n">N</span><span class="o">...</span><span class="n">e</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">h0</span>
 <span class="mf">0.1</span>
 </code></pre></div>
@@ -1983,7 +1986,8 @@ simulation data and critical water depth (h0).</p>
 <span class="normal">229</span>
 <span class="normal">230</span>
 <span class="normal">231</span>
-<span class="normal">232</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">simulation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">BaseSimulationData</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="normal">232</span>
+<span class="normal">233</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">simulation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">BaseSimulationData</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get simulation data and critical water depth and clip to river center line.</span>
 
 <span class="sd">    Returns:</span>
@@ -1994,10 +1998,11 @@ simulation data and critical water depth (h0).</p>
 <span class="sd">        ```python</span>
 <span class="sd">        &gt;&gt;&gt; from dfastbe.io import ConfigFile</span>
 <span class="sd">        &gt;&gt;&gt; from unittest.mock import patch</span>
-<span class="sd">        &gt;&gt;&gt; with patch(&quot;dfastbe.io.log_text&quot;), patch(&quot;dfastbe.bank_lines.data_models.log_text&quot;):</span>
-<span class="sd">        ...    config_file = ConfigFile.read(&quot;tests/data/erosion/meuse_manual.cfg&quot;)</span>
-<span class="sd">        ...    bank_lines_river_data = BankLinesRiverData(config_file)</span>
-<span class="sd">        ...    simulation_data, h0 = bank_lines_river_data.simulation_data()</span>
+<span class="sd">        &gt;&gt;&gt; config_file = ConfigFile.read(&quot;examples/data/meuse_manual.cfg&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; bank_lines_river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS</span>
+<span class="sd">        N...e</span>
+<span class="sd">        &gt;&gt;&gt; simulation_data, h0 = bank_lines_river_data.simulation_data()</span>
+<span class="sd">        N...e</span>
 <span class="sd">        &gt;&gt;&gt; h0</span>
 <span class="sd">        0.1</span>
 
