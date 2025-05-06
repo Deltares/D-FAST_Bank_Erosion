@@ -193,7 +193,7 @@ class BankLines:
         station_coords: np.ndarray,
         num_search_lines: int,
         bank: List[LineString],
-        km_bounds: Tuple[float, float],
+        stations_bounds: Tuple[float, float],
         bank_areas: List[Polygon],
         config_file: ConfigFile,
     ):
@@ -206,7 +206,7 @@ class BankLines:
                 Number of search lines.
             bank (List):
                 List of bank lines.
-            km_bounds (Tuple[float, float]):
+            stations_bounds (Tuple[float, float]):
                 Minimum and maximum km bounds.
             bank_areas (List[Polygon]):
                 A search area corresponding to one of the bank search lines.
@@ -224,9 +224,9 @@ class BankLines:
             >>> station_coords = np.array([[0, 0, 0], [1, 1, 0]])
             >>> num_search_lines = 1
             >>> bank = [LineString([(0, 0), (1, 1)])]
-            >>> km_bounds = (0, 1)
+            >>> stations_bounds = (0, 1)
             >>> bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]
-            >>> bank_lines.plot(station_coords, num_search_lines, bank, km_bounds, bank_areas, config_file)
+            >>> bank_lines.plot(station_coords, num_search_lines, bank, stations_bounds, bank_areas, config_file)
             N...s
 
             ```
@@ -246,8 +246,8 @@ class BankLines:
                 bank_crds.append(bcrds_numpy)
                 bank_km.append(km_numpy)
             km_zoom, xy_zoom = get_zoom_extends(
-                km_bounds[0],
-                km_bounds[1],
+                stations_bounds[0],
+                stations_bounds[1],
                 self.plot_flags["zoom_km_step"],
                 bank_crds,
                 bank_km,
