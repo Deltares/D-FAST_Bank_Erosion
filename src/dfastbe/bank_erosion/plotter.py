@@ -1,7 +1,10 @@
-from typing import Any, Dict
+import os
+from typing import Any, Dict, Tuple
 
+import matplotlib.pyplot as plt
 import numpy as np
 
+from dfastbe import plotting as df_plt
 from dfastbe.bank_erosion.data_models import (
     BankData,
     ErosionInputs,
@@ -11,13 +14,16 @@ from dfastbe.bank_erosion.data_models import (
     WaterLevelData,
 )
 from dfastbe.io import log_text
+from dfastbe.kernel import get_zoom_extends
 
-
+X_AXIS_TITLE = "x-coordinate [km]"
+Y_AXIS_TITLE = "y-coordinate [km]"
 class ErosionPlotter:
     """class to plot the results of the bank erosion analysis."""
 
     def __init__(
         self,
+        gui: bool,
         erosion_results: ErosionResults,
         bank_data: BankData,
         water_level_data: WaterLevelData,
@@ -38,11 +44,17 @@ class ErosionPlotter:
             midpoint_chainages (np.ndarray):
                 The midpoint chainages for the analysis.
         """
+        self._gui = gui
         self._plot_flags = plot_flags
         self._erosion_results = erosion_results
         self._bank_data = bank_data
         self._water_level_data = water_level_data
         self._erosion_inputs = erosion_inputs
+
+    @property
+    def gui(self) -> bool:
+        """bool: whether to use the GUI for plotting."""
+        return self._gui
 
     @property
     def erosion_results(self) -> ErosionResults:
@@ -69,344 +81,336 @@ class ErosionPlotter:
         """dict: the flags for plotting."""
         return self._plot_flags
 
-    def _generate_plots(
+    def plot_all(
         self,
         river_axis_km,
-        simulation_data: ErosionSimulationData,
         xy_line_eq_list,
         km_mid,
         km_step,
-        erosion_inputs: ErosionInputs,
-        water_level_data: WaterLevelData,
+        river_center_line_arr: np.ndarray,
         mesh_data: MeshData,
-        bank_data: BankData,
-        erosion_results: ErosionResults,
+        simulation_data: ErosionSimulationData,
     ):
         # create various plots
         if self.plot_flags["plot_data"]:
             log_text("=")
             log_text("create_figures")
             fig_i = 0
-            bbox = self.river_data.get_bbox(self.river_center_line_arr)
+            bbox = ErosionPlotter.get_bbox(river_center_line_arr)
 
-            if self.river_data.plot_flags["save_plot_zoomed"]:
+            if self.plot_flags["save_plot_zoomed"]:
                 bank_coords_mid = []
-                for ib in range(bank_data.n_bank_lines):
+                for ib in range(self.bank_data.n_bank_lines):
                     bank_coords_mid.append(
                         (
-                            bank_data.bank_line_coords[ib][:-1, :]
-                            + bank_data.bank_line_coords[ib][1:, :]
+                            self.bank_data.bank_line_coords[ib][:-1, :]
+                            + self.bank_data.bank_line_coords[ib][1:, :]
                         )
                         / 2
                     )
                 km_zoom, xy_zoom = get_zoom_extends(
                     river_axis_km.min(),
                     river_axis_km.max(),
-                    self.river_data.plot_flags["zoom_km_step"],
+                    self.plot_flags["zoom_km_step"],
                     bank_coords_mid,
-                    bank_data.bank_chainage_midpoints,
+                    self.bank_data.bank_chainage_midpoints,
                 )
 
             fig, ax = df_plt.plot1_waterdepth_and_banklines(
                 bbox,
-                self.river_center_line_arr,
-                bank_data.bank_lines,
+                river_center_line_arr,
+                self.bank_data.bank_lines,
                 simulation_data.face_node,
                 simulation_data.n_nodes,
                 simulation_data.x_node,
                 simulation_data.y_node,
                 simulation_data.water_depth_face,
-                1.1 * water_level_data.hfw_max,
+                1.1 * self.water_level_data.hfw_max,
                 X_AXIS_TITLE,
                 Y_AXIS_TITLE,
                 "water depth and initial bank lines",
                 "water depth [m]",
             )
-            if self.river_data.plot_flags["save_plot"]:
+            if self.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
-                fig_base = (
-                    f"{self.river_data.plot_flags['fig_dir']}{os.sep}{fig_i}_banklines"
-                )
+                fig_base = f"{self.plot_flags['fig_dir']}{os.sep}{fig_i}_banklines"
 
-                if self.river_data.plot_flags["save_plot_zoomed"]:
+                if self.plot_flags["save_plot_zoomed"]:
                     df_plt.zoom_xy_and_save(
                         fig,
                         ax,
                         fig_base,
-                        self.river_data.plot_flags["plot_ext"],
+                        self.plot_flags["plot_ext"],
                         xy_zoom,
                     )
 
-                fig_path = fig_base + self.river_data.plot_flags["plot_ext"]
+                fig_path = fig_base + self.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_path)
 
             fig, ax = df_plt.plot2_eroded_distance_and_equilibrium(
                 bbox,
-                self.river_center_line_arr,
-                bank_data.bank_line_coords,
-                erosion_results.total_erosion_dist,
-                bank_data.is_right_bank,
-                erosion_results.avg_erosion_rate,
+                river_center_line_arr,
+                self.bank_data.bank_line_coords,
+                self.erosion_results.total_erosion_dist,
+                self.bank_data.is_right_bank,
+                self.erosion_results.avg_erosion_rate,
                 xy_line_eq_list,
                 mesh_data.x_edge_coords,
                 mesh_data.y_edge_coords,
                 X_AXIS_TITLE,
                 Y_AXIS_TITLE,
                 "eroded distance and equilibrium bank location",
-                f"eroded during {erosion_results.erosion_time} year",
+                f"eroded during {self.erosion_results.erosion_time} year",
                 "eroded distance [m]",
                 "equilibrium location",
             )
-            if self.river_data.plot_flags["save_plot"]:
+            if self.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
-                fig_base = f"{self.river_data.plot_flags['fig_dir']}{os.sep}{fig_i}_erosion_sensitivity"
+                fig_base = (
+                    f"{self.plot_flags['fig_dir']}{os.sep}{fig_i}_erosion_sensitivity"
+                )
 
-                if self.river_data.plot_flags["save_plot_zoomed"]:
+                if self.plot_flags["save_plot_zoomed"]:
                     df_plt.zoom_xy_and_save(
                         fig,
                         ax,
                         fig_base,
-                        self.river_data.plot_flags["plot_ext"],
+                        self.plot_flags["plot_ext"],
                         xy_zoom,
                     )
 
-                fig_path = fig_base + self.river_data.plot_flags["plot_ext"]
+                fig_path = fig_base + self.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_path)
 
             fig, ax = df_plt.plot3_eroded_volume(
                 km_mid,
                 km_step,
                 "river chainage [km]",
-                erosion_results.vol_per_discharge,
+                self.erosion_results.vol_per_discharge,
                 "eroded volume [m^3]",
-                f"eroded volume per {km_step} chainage km ({erosion_results.erosion_time} years)",
+                f"eroded volume per {km_step} chainage km ({self.erosion_results.erosion_time} years)",
                 "Q{iq}",
                 "Bank {ib}",
             )
-            if self.river_data.plot_flags["save_plot"]:
+            if self.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
-                fig_base = f"{self.river_data.plot_flags['fig_dir']}{os.sep}{fig_i}_eroded_volume"
+                fig_base = f"{self.plot_flags['fig_dir']}{os.sep}{fig_i}_eroded_volume"
 
-                if self.river_data.plot_flags["save_plot_zoomed"]:
+                if self.plot_flags["save_plot_zoomed"]:
                     df_plt.zoom_x_and_save(
                         fig,
                         ax,
                         fig_base,
-                        self.river_data.plot_flags["plot_ext"],
+                        self.plot_flags["plot_ext"],
                         km_zoom,
                     )
 
-                fig_path = fig_base + self.river_data.plot_flags["plot_ext"]
+                fig_path = fig_base + self.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_path)
 
             fig, ax = df_plt.plot3_eroded_volume_subdivided_1(
                 km_mid,
                 km_step,
                 "river chainage [km]",
-                erosion_results.vol_per_discharge,
+                self.erosion_results.vol_per_discharge,
                 "eroded volume [m^3]",
-                f"eroded volume per {km_step} chainage km ({erosion_results.erosion_time} years)",
+                f"eroded volume per {km_step} chainage km ({self.erosion_results.erosion_time} years)",
                 "Q{iq}",
             )
-            if self.river_data.plot_flags["save_plot"]:
+            if self.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
                 fig_base = (
-                    self.river_data.plot_flags["fig_dir"]
+                    self.plot_flags["fig_dir"]
                     + os.sep
                     + str(fig_i)
                     + "_eroded_volume_per_discharge"
                 )
-                if self.river_data.plot_flags["save_plot_zoomed"]:
+                if self.plot_flags["save_plot_zoomed"]:
                     df_plt.zoom_x_and_save(
                         fig,
                         ax,
                         fig_base,
-                        self.river_data.plot_flags["plot_ext"],
+                        self.plot_flags["plot_ext"],
                         km_zoom,
                     )
-                fig_path = fig_base + self.river_data.plot_flags["plot_ext"]
+                fig_path = fig_base + self.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_path)
 
             fig, ax = df_plt.plot3_eroded_volume_subdivided_2(
                 km_mid,
                 km_step,
                 "river chainage [km]",
-                erosion_results.vol_per_discharge,
+                self.erosion_results.vol_per_discharge,
                 "eroded volume [m^3]",
-                f"eroded volume per {km_step} chainage km ({erosion_results.erosion_time} years)",
+                f"eroded volume per {km_step} chainage km ({self.erosion_results.erosion_time} years)",
                 "Bank {ib}",
             )
-            if self.river_data.plot_flags["save_plot"]:
+            if self.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
                 fig_base = (
-                    self.river_data.plot_flags["fig_dir"]
+                    self.plot_flags["fig_dir"]
                     + os.sep
                     + str(fig_i)
                     + "_eroded_volume_per_bank"
                 )
-                if self.river_data.plot_flags["save_plot_zoomed"]:
+                if self.plot_flags["save_plot_zoomed"]:
                     df_plt.zoom_x_and_save(
                         fig,
                         ax,
                         fig_base,
-                        self.river_data.plot_flags["plot_ext"],
+                        self.plot_flags["plot_ext"],
                         km_zoom,
                     )
-                fig_path = fig_base + self.river_data.plot_flags["plot_ext"]
+                fig_path = fig_base + self.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_path)
 
             fig, ax = df_plt.plot4_eroded_volume_eq(
                 km_mid,
                 km_step,
                 "river chainage [km]",
-                erosion_results.eq_eroded_vol_per_km,
+                self.erosion_results.eq_eroded_vol_per_km,
                 "eroded volume [m^3]",
                 f"eroded volume per {km_step} chainage km (equilibrium)",
             )
-            if self.river_data.plot_flags["save_plot"]:
+            if self.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
                 fig_base = (
-                    self.river_data.plot_flags["fig_dir"]
+                    self.plot_flags["fig_dir"]
                     + os.sep
                     + str(fig_i)
                     + "_eroded_volume_eq"
                 )
-                if self.river_data.plot_flags["save_plot_zoomed"]:
+                if self.plot_flags["save_plot_zoomed"]:
                     df_plt.zoom_x_and_save(
                         fig,
                         ax,
                         fig_base,
-                        self.river_data.plot_flags["plot_ext"],
+                        self.plot_flags["plot_ext"],
                         km_zoom,
                     )
-                fig_path = fig_base + self.river_data.plot_flags["plot_ext"]
+                fig_path = fig_base + self.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_path)
 
             figlist, axlist = df_plt.plot5series_waterlevels_per_bank(
-                bank_data.bank_chainage_midpoints,
+                self.bank_data.bank_chainage_midpoints,
                 "river chainage [km]",
-                water_level_data.water_level,
-                water_level_data.ship_wave_max,
-                water_level_data.ship_wave_min,
+                self.water_level_data.water_level,
+                self.water_level_data.ship_wave_max,
+                self.water_level_data.ship_wave_min,
                 "water level at Q{iq}",
                 "average water level",
                 "wave influenced range",
-                water_level_data.bank_height,
+                self.water_level_data.bank_height,
                 "level of bank",
-                erosion_inputs.bank_protection_level,
+                self.erosion_inputs.bank_protection_level,
                 "bank protection level",
                 "elevation",
                 "(water)levels along bank line {ib}",
                 "[m NAP]",
             )
-            if self.river_data.plot_flags["save_plot"]:
+            if self.plot_flags["save_plot"]:
                 for ib, fig in enumerate(figlist):
                     fig_i = fig_i + 1
-                    fig_base = f"{self.river_data.plot_flags['fig_dir']}/{fig_i}_levels_bank_{ib + 1}"
+                    fig_base = (
+                        f"{self.plot_flags['fig_dir']}/{fig_i}_levels_bank_{ib + 1}"
+                    )
 
-                    if self.river_data.plot_flags["save_plot_zoomed"]:
+                    if self.plot_flags["save_plot_zoomed"]:
                         df_plt.zoom_x_and_save(
                             fig,
                             axlist[ib],
                             fig_base,
-                            self.river_data.plot_flags["plot_ext"],
+                            self.plot_flags["plot_ext"],
                             km_zoom,
                         )
-                    fig_file = f"{fig_base}{self.river_data.plot_flags['plot_ext']}"
+                    fig_file = f"{fig_base}{self.plot_flags['plot_ext']}"
                     df_plt.savefig(fig, fig_file)
 
             figlist, axlist = df_plt.plot6series_velocity_per_bank(
-                bank_data.bank_chainage_midpoints,
+                self.bank_data.bank_chainage_midpoints,
                 "river chainage [km]",
-                water_level_data.velocity,
+                self.water_level_data.velocity,
                 "velocity at Q{iq}",
-                erosion_inputs.tauc,
-                water_level_data.chezy[0],
+                self.erosion_inputs.tauc,
+                self.water_level_data.chezy[0],
                 "critical velocity",
                 "velocity",
                 "velocity along bank line {ib}",
                 "[m/s]",
             )
-            if self.river_data.plot_flags["save_plot"]:
+            if self.plot_flags["save_plot"]:
                 for ib, fig in enumerate(figlist):
                     fig_i = fig_i + 1
-                    fig_base = f"{self.river_data.plot_flags['fig_dir']}{os.sep}{fig_i}_velocity_bank_{ib + 1}"
+                    fig_base = f"{self.plot_flags['fig_dir']}{os.sep}{fig_i}_velocity_bank_{ib + 1}"
 
-                    if self.river_data.plot_flags["save_plot_zoomed"]:
+                    if self.plot_flags["save_plot_zoomed"]:
                         df_plt.zoom_x_and_save(
                             fig,
                             axlist[ib],
                             fig_base,
-                            self.river_data.plot_flags["plot_ext"],
+                            self.plot_flags["plot_ext"],
                             km_zoom,
                         )
 
-                    fig_file = fig_base + self.river_data.plot_flags["plot_ext"]
+                    fig_file = fig_base + self.plot_flags["plot_ext"]
                     df_plt.savefig(fig, fig_file)
 
             fig, ax = df_plt.plot7_banktype(
                 bbox,
-                self.river_center_line_arr,
-                bank_data.bank_line_coords,
-                erosion_inputs.bank_type,
-                erosion_inputs.taucls_str,
+                river_center_line_arr,
+                self.bank_data.bank_line_coords,
+                self.erosion_inputs.bank_type,
+                self.erosion_inputs.taucls_str,
                 X_AXIS_TITLE,
                 Y_AXIS_TITLE,
                 "bank type",
             )
-            if self.river_data.plot_flags["save_plot"]:
+            if self.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
                 fig_base = (
-                    self.river_data.plot_flags["fig_dir"]
-                    + os.sep
-                    + str(fig_i)
-                    + "_banktype"
+                    self.plot_flags["fig_dir"] + os.sep + str(fig_i) + "_banktype"
                 )
-                if self.river_data.plot_flags["save_plot_zoomed"]:
+                if self.plot_flags["save_plot_zoomed"]:
                     df_plt.zoom_xy_and_save(
                         fig,
                         ax,
                         fig_base,
-                        self.river_data.plot_flags["plot_ext"],
+                        self.plot_flags["plot_ext"],
                         xy_zoom,
                     )
-                fig_file = fig_base + self.river_data.plot_flags["plot_ext"]
+                fig_file = fig_base + self.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_file)
 
             fig, ax = df_plt.plot8_eroded_distance(
-                bank_data.bank_chainage_midpoints,
+                self.bank_data.bank_chainage_midpoints,
                 "river chainage [km]",
-                erosion_results.total_erosion_dist,
+                self.erosion_results.total_erosion_dist,
                 "Bank {ib}",
-                erosion_results.eq_erosion_dist,
+                self.erosion_results.eq_erosion_dist,
                 "Bank {ib} (eq)",
                 "eroded distance",
                 "[m]",
             )
-            if self.river_data.plot_flags["save_plot"]:
+            if self.plot_flags["save_plot"]:
                 fig_i = fig_i + 1
-                fig_base = (
-                    self.river_data.plot_flags["fig_dir"]
-                    + os.sep
-                    + str(fig_i)
-                    + "_erodis"
-                )
-                if self.river_data.plot_flags["save_plot_zoomed"]:
+                fig_base = self.plot_flags["fig_dir"] + os.sep + str(fig_i) + "_erodis"
+                if self.plot_flags["save_plot_zoomed"]:
                     df_plt.zoom_x_and_save(
                         fig,
                         ax,
                         fig_base,
-                        self.river_data.plot_flags["plot_ext"],
+                        self.plot_flags["plot_ext"],
                         km_zoom,
                     )
-                fig_file = fig_base + self.river_data.plot_flags["plot_ext"]
+                fig_file = fig_base + self.plot_flags["plot_ext"]
                 df_plt.savefig(fig, fig_file)
 
-            if self.river_data.plot_flags["close_plot"]:
+            if self.plot_flags["close_plot"]:
                 plt.close("all")
             else:
                 plt.show(block=not self.gui)
 
+    @staticmethod
     def get_bbox(
         coords: np.ndarray, buffer: float = 0.1
     ) -> Tuple[float, float, float, float]:

@@ -29,14 +29,12 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 import os
 from typing import Dict, List, Tuple
 
-import matplotlib.pyplot as plt
 import numpy as np
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
 
 from dfastbe import __version__
-from dfastbe import plotting as df_plt
 from dfastbe.bank_erosion.data_models import (
     BankData,
     DischargeLevelParameters,
@@ -58,13 +56,9 @@ from dfastbe.kernel import (
     compute_bank_erosion_dynamics,
     get_km_bins,
     get_km_eroded_volume,
-    get_zoom_extends,
 )
 from dfastbe.support import move_line
 from dfastbe.utils import timed_logger
-
-X_AXIS_TITLE = "x-coordinate [km]"
-Y_AXIS_TITLE = "y-coordinate [km]"
 
 
 class Erosion:
