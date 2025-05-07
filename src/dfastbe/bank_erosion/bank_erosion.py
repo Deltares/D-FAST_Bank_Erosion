@@ -476,6 +476,7 @@ class Erosion:
                 level_i, bank_data, simulation_data, fairway_data, discharge_level_pars, erosion_inputs,
                 num_levels, km_bin, num_km, num_bank, bank_height
             )
+            print(vol_per_discharge_level_i)
             flow_erosion_dist = [old + new for old, new in zip(erosion_distance_flow_level_i, flow_erosion_dist)]
             ship_erosion_dist = [old + new for old, new in zip(erosion_distance_shipping_level_i,ship_erosion_dist)]
             total_erosion_dist = [old + new for old, new in zip(erosion_distance_tot_level_i,total_erosion_dist)]
@@ -487,6 +488,7 @@ class Erosion:
             ship_wave_max_all[level_i] = ship_wave_max_level_i
             ship_wave_min_all[level_i] = ship_wave_min_level_i
             vol_per_discharge_all[level_i] = vol_per_discharge_level_i
+            print(vol_per_discharge_all[level_i])
 
             error_vol_file = config_file.get_str(
                 "Erosion", f"EroVol{level_i + 1}", default=f"erovolQ{level_i + 1}.evo"
