@@ -191,7 +191,7 @@ class BankLines:
         )
         if self.plot_flags["save_plot"]:
             fig_i = df_plt.save_plot(
-                fig, ax, fig_i, "banklinedetection", xy_zoom, self.plot_flags
+                fig, ax, fig_i, "banklinedetection", xy_zoom, self.plot_flags, True
             )
 
         if self.plot_flags["close_plot"]:

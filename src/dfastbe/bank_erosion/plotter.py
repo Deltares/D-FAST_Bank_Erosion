@@ -135,7 +135,7 @@ class ErosionPlotter:
             "water depth [m]",
         )
         if self.plot_flags["save_plot"]:
-            fig_i = self._save_plot(fig, ax, fig_i, "banklines", xy_zoom)
+            fig_i = self._save_plot(fig, ax, fig_i, "banklines", xy_zoom, True)
 
         fig, ax = df_plt.plot2_eroded_distance_and_equilibrium(
             bbox,
@@ -155,7 +155,9 @@ class ErosionPlotter:
             "equilibrium location",
         )
         if self.plot_flags["save_plot"]:
-            fig_i = self._save_plot(fig, ax, fig_i, "erosion_sensitivity", xy_zoom)
+            fig_i = self._save_plot(
+                fig, ax, fig_i, "erosion_sensitivity", xy_zoom, True
+            )
 
         fig, ax = df_plt.plot3_eroded_volume(
             km_mid,
@@ -168,20 +170,7 @@ class ErosionPlotter:
             "Bank {ib}",
         )
         if self.plot_flags["save_plot"]:
-            fig_i = fig_i + 1
-            fig_base = f"{self.plot_flags['fig_dir']}{os.sep}{fig_i}_eroded_volume"
-
-            if self.plot_flags["save_plot_zoomed"]:
-                df_plt.zoom_x_and_save(
-                    fig,
-                    ax,
-                    fig_base,
-                    self.plot_flags["plot_ext"],
-                    km_zoom,
-                )
-
-            fig_path = fig_base + self.plot_flags["plot_ext"]
-            df_plt.savefig(fig, fig_path)
+            fig_i = self._save_plot(fig, ax, fig_i, "eroded_volume", km_zoom, False)
 
         fig, ax = df_plt.plot3_eroded_volume_subdivided_1(
             km_mid,
@@ -193,23 +182,9 @@ class ErosionPlotter:
             "Q{iq}",
         )
         if self.plot_flags["save_plot"]:
-            fig_i = fig_i + 1
-            fig_base = (
-                self.plot_flags["fig_dir"]
-                + os.sep
-                + str(fig_i)
-                + "_eroded_volume_per_discharge"
+            fig_i = self._save_plot(
+                fig, ax, fig_i, "eroded_volume_per_discharge", km_zoom, False
             )
-            if self.plot_flags["save_plot_zoomed"]:
-                df_plt.zoom_x_and_save(
-                    fig,
-                    ax,
-                    fig_base,
-                    self.plot_flags["plot_ext"],
-                    km_zoom,
-                )
-            fig_path = fig_base + self.plot_flags["plot_ext"]
-            df_plt.savefig(fig, fig_path)
 
         fig, ax = df_plt.plot3_eroded_volume_subdivided_2(
             km_mid,
@@ -221,23 +196,9 @@ class ErosionPlotter:
             "Bank {ib}",
         )
         if self.plot_flags["save_plot"]:
-            fig_i = fig_i + 1
-            fig_base = (
-                self.plot_flags["fig_dir"]
-                + os.sep
-                + str(fig_i)
-                + "_eroded_volume_per_bank"
+            fig_i = self._save_plot(
+                fig, ax, fig_i, "eroded_volume_per_bank", km_zoom, False
             )
-            if self.plot_flags["save_plot_zoomed"]:
-                df_plt.zoom_x_and_save(
-                    fig,
-                    ax,
-                    fig_base,
-                    self.plot_flags["plot_ext"],
-                    km_zoom,
-                )
-            fig_path = fig_base + self.plot_flags["plot_ext"]
-            df_plt.savefig(fig, fig_path)
 
         fig, ax = df_plt.plot4_eroded_volume_eq(
             km_mid,
@@ -248,20 +209,7 @@ class ErosionPlotter:
             f"eroded volume per {km_step} chainage km (equilibrium)",
         )
         if self.plot_flags["save_plot"]:
-            fig_i = fig_i + 1
-            fig_base = (
-                self.plot_flags["fig_dir"] + os.sep + str(fig_i) + "_eroded_volume_eq"
-            )
-            if self.plot_flags["save_plot_zoomed"]:
-                df_plt.zoom_x_and_save(
-                    fig,
-                    ax,
-                    fig_base,
-                    self.plot_flags["plot_ext"],
-                    km_zoom,
-                )
-            fig_path = fig_base + self.plot_flags["plot_ext"]
-            df_plt.savefig(fig, fig_path)
+            fig_i = self._save_plot(fig, ax, fig_i, "eroded_volume_eq", km_zoom, False)
 
         figlist, axlist = df_plt.plot5series_waterlevels_per_bank(
             self.bank_data.bank_chainage_midpoints,
@@ -282,19 +230,10 @@ class ErosionPlotter:
         )
         if self.plot_flags["save_plot"]:
             for ib, fig in enumerate(figlist):
-                fig_i = fig_i + 1
+                fig_i = self._save_plot(
+                    fig, ax, fig_i, f"levels_bank_{ib + 1}", km_zoom, False
+                )
                 fig_base = f"{self.plot_flags['fig_dir']}/{fig_i}_levels_bank_{ib + 1}"
-
-                if self.plot_flags["save_plot_zoomed"]:
-                    df_plt.zoom_x_and_save(
-                        fig,
-                        axlist[ib],
-                        fig_base,
-                        self.plot_flags["plot_ext"],
-                        km_zoom,
-                    )
-                fig_file = f"{fig_base}{self.plot_flags['plot_ext']}"
-                df_plt.savefig(fig, fig_file)
 
         figlist, axlist = df_plt.plot6series_velocity_per_bank(
             self.bank_data.bank_chainage_midpoints,
@@ -310,20 +249,9 @@ class ErosionPlotter:
         )
         if self.plot_flags["save_plot"]:
             for ib, fig in enumerate(figlist):
-                fig_i = fig_i + 1
-                fig_base = f"{self.plot_flags['fig_dir']}{os.sep}{fig_i}_velocity_bank_{ib + 1}"
-
-                if self.plot_flags["save_plot_zoomed"]:
-                    df_plt.zoom_x_and_save(
-                        fig,
-                        axlist[ib],
-                        fig_base,
-                        self.plot_flags["plot_ext"],
-                        km_zoom,
-                    )
-
-                fig_file = fig_base + self.plot_flags["plot_ext"]
-                df_plt.savefig(fig, fig_file)
+                fig_i = self._save_plot(
+                    fig, ax, fig_i, f"velocity_bank_{ib + 1}", km_zoom, False
+                )
 
         fig, ax = df_plt.plot7_banktype(
             bbox,
@@ -336,7 +264,7 @@ class ErosionPlotter:
             "bank type",
         )
         if self.plot_flags["save_plot"]:
-            fig_i = self._save_plot(fig, ax, fig_i, "banktype", xy_zoom)
+            fig_i = self._save_plot(fig, ax, fig_i, "banktype", xy_zoom, True)
 
         fig, ax = df_plt.plot8_eroded_distance(
             self.bank_data.bank_chainage_midpoints,
@@ -349,18 +277,7 @@ class ErosionPlotter:
             "[m]",
         )
         if self.plot_flags["save_plot"]:
-            fig_i = fig_i + 1
-            fig_base = self.plot_flags["fig_dir"] + os.sep + str(fig_i) + "_erodis"
-            if self.plot_flags["save_plot_zoomed"]:
-                df_plt.zoom_x_and_save(
-                    fig,
-                    ax,
-                    fig_base,
-                    self.plot_flags["plot_ext"],
-                    km_zoom,
-                )
-            fig_file = fig_base + self.plot_flags["plot_ext"]
-            df_plt.savefig(fig, fig_file)
+            fig_i = self._save_plot(fig, ax, fig_i, "erodis", km_zoom, False)
 
         self._finalize_plots()
 
@@ -380,9 +297,11 @@ class ErosionPlotter:
             self.bank_data.bank_chainage_midpoints,
         )
 
-    def _save_plot(self, fig, ax, fig_i, plot_name, zoom_coords) -> int:
+    def _save_plot(self, fig, ax, fig_i, plot_name, zoom_coords, zoom_xy) -> int:
         """Save the plot to a file."""
-        return df_plt.save_plot(fig, ax, fig_i, plot_name, zoom_coords, self.plot_flags)
+        return df_plt.save_plot(
+            fig, ax, fig_i, plot_name, zoom_coords, self.plot_flags, zoom_xy
+        )
 
     def _finalize_plots(self):
         if self.plot_flags["close_plot"]:

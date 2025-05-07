@@ -1243,7 +1243,13 @@ def get_colors(cmap_name: str, n: int) -> List[Tuple[float, float, float]]:
     return clrs
 
 
-def zoom_x_and_save(fig: matplotlib.figure.Figure, ax: matplotlib.axes.Axes, figbase: str, plot_ext: str, xzoom: List[Tuple[float,float]]) -> None:
+def zoom_x_and_save(
+    fig: matplotlib.figure.Figure,
+    ax: matplotlib.axes.Axes,
+    figbase: Path,
+    plot_ext: str,
+    xzoom: List[Tuple[float, float]],
+) -> None:
     """
     Zoom in on subregions of the x-axis and save the figure.
 
@@ -1261,14 +1267,9 @@ def zoom_x_and_save(fig: matplotlib.figure.Figure, ax: matplotlib.axes.Axes, fig
         Values at which to split the x-axis.
     """
     xmin, xmax = ax.get_xlim()
-    for ix in range(len(xzoom)):
-        ax.set_xlim(xmin=xzoom[ix][0], xmax=xzoom[ix][1])
-        figfile = (
-            figbase
-            + ".sub"
-            + str(ix + 1)
-            + plot_ext
-        )
+    for ix, zoom in enumerate(xzoom):
+        ax.set_xlim(xmin=zoom[0], xmax=zoom[1])
+        figfile = figbase.with_name(f"{figbase.stem}.sub{str(ix + 1)}{plot_ext}")
         savefig(fig, figfile)
     ax.set_xlim(xmin=xmin, xmax=xmax)
 
@@ -1357,12 +1358,14 @@ def get_bbox(
     return bbox
 
 
-def save_plot(fig, ax, fig_i, plot_name, zoom_coords, plot_flags) -> int:
+def save_plot(fig, ax, fig_i, plot_name, zoom_coords, plot_flags, zoom_xy) -> int:
     """Save the plot to a file."""
     fig_i += 1
     fig_base = Path(plot_flags['fig_dir']) / f"{fig_i}_{plot_name}"
-    if plot_flags["save_plot_zoomed"] and zoom_coords:
+    if plot_flags["save_plot_zoomed"] and zoom_xy:
         zoom_xy_and_save(fig, ax, fig_base, plot_flags["plot_ext"], zoom_coords)
+    elif plot_flags["save_plot_zoomed"]:
+        zoom_x_and_save(fig, ax, fig_base, plot_flags["plot_ext"], zoom_coords)
     fig_path = fig_base.with_suffix(plot_flags["plot_ext"])
     savefig(fig, fig_path)
     return fig_i
