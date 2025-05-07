@@ -42,9 +42,6 @@ from shapely.geometry import (
 from shapely import line_merge
 
 
-
-
-
 def on_right_side(line_xy: numpy.ndarray, ref_xy: numpy.ndarray) -> bool:
     """
     Determine whether line_xy is to the left or right of ref_xy.
