@@ -133,16 +133,7 @@ class ErosionPlotter:
 
         self._plot_eroded_volume_per_bank(fig_i, km_mid, km_step, km_zoom)
 
-        fig, ax = df_plt.plot4_eroded_volume_eq(
-            km_mid,
-            km_step,
-            "river chainage [km]",
-            self.erosion_results.eq_eroded_vol_per_km,
-            "eroded volume [m^3]",
-            f"eroded volume per {km_step} chainage km (equilibrium)",
-        )
-        if self.plot_flags["save_plot"]:
-            fig_i = self._save_plot(fig, ax, fig_i, "eroded_volume_eq", km_zoom, False)
+        self._plot_eroded_volume_equilibrium(fig_i, km_mid, km_step, km_zoom)
 
         figlist, axlist = df_plt.plot5series_waterlevels_per_bank(
             self.bank_data.bank_chainage_midpoints,
@@ -352,6 +343,25 @@ class ErosionPlotter:
             fig_i = self._save_plot(
                 fig, ax, fig_i, "eroded_volume_per_bank", km_zoom, False
             )
+        return fig_i
+
+    def _plot_eroded_volume_equilibrium(
+        self,
+        fig_i: int,
+        km_mid: np.ndarray,
+        km_step: float,
+        km_zoom: List[Tuple],
+    ) -> int:
+        fig, ax = df_plt.plot4_eroded_volume_eq(
+            km_mid,
+            km_step,
+            "river chainage [km]",
+            self.erosion_results.eq_eroded_vol_per_km,
+            "eroded volume [m^3]",
+            f"eroded volume per {km_step} chainage km (equilibrium)",
+        )
+        if self.plot_flags["save_plot"]:
+            fig_i = self._save_plot(fig, ax, fig_i, "eroded_volume_eq", km_zoom, False)
         return fig_i
 
     def _save_plot(self, fig, ax, fig_i, plot_name, zoom_coords, zoom_xy) -> int:
