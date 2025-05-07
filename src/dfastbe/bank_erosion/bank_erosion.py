@@ -826,14 +826,14 @@ class Erosion:
                     erosion_distance_shipping,
                     erosion_distance_flow,
                 )
-                print(dvol)
-                # accumulate eroded volumes per km
-                dvol = get_km_eroded_volume(
-                    bank_i.bank_chainage_midpoints, erosion_volume_tot, km_bin
-                )
-                vol_per_discharge_level_i.append(dvol)
-                print(vol_per_discharge_level_i)
-                dvol_bank[:, ind] += dvol
+            print(dvol)
+            # accumulate eroded volumes per km
+            dvol = get_km_eroded_volume(
+                bank_i.bank_chainage_midpoints, erosion_volume_tot, km_bin
+            )
+            vol_per_discharge_level_i.append(dvol)
+            print(vol_per_discharge_level_i)
+            dvol_bank[:, ind] += dvol
 
         return vel_bank_level_i, water_level_level_i, chezy_level_i, ship_wave_max_level_i, ship_wave_min_level_i, \
                 vol_per_discharge_level_i, erosion_distance_flow_level_i, erosion_distance_shipping_level_i, \
