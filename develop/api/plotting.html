@@ -2068,8 +2068,7 @@ Returns:
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/plotting.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1334</span>
-<span class="normal">1335</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1335</span>
 <span class="normal">1336</span>
 <span class="normal">1337</span>
 <span class="normal">1338</span>
@@ -2091,7 +2090,8 @@ Returns:
 <span class="normal">1354</span>
 <span class="normal">1355</span>
 <span class="normal">1356</span>
-<span class="normal">1357</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bbox</span><span class="p">(</span>
+<span class="normal">1357</span>
+<span class="normal">1358</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bbox</span><span class="p">(</span>
     <span class="n">coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -4980,7 +4980,7 @@ scale : float
 
 
 <h3 id="dfastbe.plotting.save_plot" class="doc doc-heading"><a href="#dfastbe.plotting.save_plot" class="toclink">
-            <code class="highlight language-python"><span class="n">save_plot</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">fig_i</span><span class="p">,</span> <span class="n">plot_name</span><span class="p">,</span> <span class="n">zoom_coords</span><span class="p">,</span> <span class="n">plot_flags</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span></code>
+            <code class="highlight language-python"><span class="n">save_plot</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">fig_i</span><span class="p">,</span> <span class="n">plot_name</span><span class="p">,</span> <span class="n">zoom_coords</span><span class="p">,</span> <span class="n">plot_flags</span><span class="p">,</span> <span class="n">zoom_xy</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span></code>
 
 </a><a href="#dfastbe.plotting.save_plot" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -4991,20 +4991,24 @@ scale : float
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/plotting.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1360</span>
-<span class="normal">1361</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1361</span>
 <span class="normal">1362</span>
 <span class="normal">1363</span>
 <span class="normal">1364</span>
 <span class="normal">1365</span>
 <span class="normal">1366</span>
 <span class="normal">1367</span>
-<span class="normal">1368</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_plot</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">fig_i</span><span class="p">,</span> <span class="n">plot_name</span><span class="p">,</span> <span class="n">zoom_coords</span><span class="p">,</span> <span class="n">plot_flags</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="normal">1368</span>
+<span class="normal">1369</span>
+<span class="normal">1370</span>
+<span class="normal">1371</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">save_plot</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">fig_i</span><span class="p">,</span> <span class="n">plot_name</span><span class="p">,</span> <span class="n">zoom_coords</span><span class="p">,</span> <span class="n">plot_flags</span><span class="p">,</span> <span class="n">zoom_xy</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Save the plot to a file.&quot;&quot;&quot;</span>
     <span class="n">fig_i</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="n">fig_base</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">plot_flags</span><span class="p">[</span><span class="s1">&#39;fig_dir&#39;</span><span class="p">])</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">fig_i</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">plot_name</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="k">if</span> <span class="n">plot_flags</span><span class="p">[</span><span class="s2">&quot;save_plot_zoomed&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">zoom_coords</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">plot_flags</span><span class="p">[</span><span class="s2">&quot;save_plot_zoomed&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">zoom_xy</span><span class="p">:</span>
         <span class="n">zoom_xy_and_save</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">fig_base</span><span class="p">,</span> <span class="n">plot_flags</span><span class="p">[</span><span class="s2">&quot;plot_ext&quot;</span><span class="p">],</span> <span class="n">zoom_coords</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">plot_flags</span><span class="p">[</span><span class="s2">&quot;save_plot_zoomed&quot;</span><span class="p">]:</span>
+        <span class="n">zoom_x_and_save</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> <span class="n">fig_base</span><span class="p">,</span> <span class="n">plot_flags</span><span class="p">[</span><span class="s2">&quot;plot_ext&quot;</span><span class="p">],</span> <span class="n">zoom_coords</span><span class="p">)</span>
     <span class="n">fig_path</span> <span class="o">=</span> <span class="n">fig_base</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="n">plot_flags</span><span class="p">[</span><span class="s2">&quot;plot_ext&quot;</span><span class="p">])</span>
     <span class="n">savefig</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">fig_path</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">fig_i</span>
@@ -5191,7 +5195,7 @@ future.</p>
 
 
 <h3 id="dfastbe.plotting.zoom_x_and_save" class="doc doc-heading"><a href="#dfastbe.plotting.zoom_x_and_save" class="toclink">
-            <code class="highlight language-python"><span class="n">zoom_x_and_save</span><span class="p">(</span><span class="n">fig</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">figbase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plot_ext</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">xzoom</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+            <code class="highlight language-python"><span class="n">zoom_x_and_save</span><span class="p">(</span><span class="n">fig</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">figbase</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">plot_ext</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">xzoom</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 </a><a href="#dfastbe.plotting.zoom_x_and_save" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -5240,7 +5244,14 @@ xzoom : List[list[float,float]]
 <span class="normal">1270</span>
 <span class="normal">1271</span>
 <span class="normal">1272</span>
-<span class="normal">1273</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_x_and_save</span><span class="p">(</span><span class="n">fig</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span> <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span> <span class="n">figbase</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">plot_ext</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">xzoom</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1273</span>
+<span class="normal">1274</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_x_and_save</span><span class="p">(</span>
+    <span class="n">fig</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span>
+    <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span>
+    <span class="n">figbase</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="n">plot_ext</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">xzoom</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Zoom in on subregions of the x-axis and save the figure.</span>
 
@@ -5258,14 +5269,9 @@ xzoom : List[list[float,float]]
 <span class="sd">        Values at which to split the x-axis.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">ix</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xzoom</span><span class="p">)):</span>
-        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xmin</span><span class="o">=</span><span class="n">xzoom</span><span class="p">[</span><span class="n">ix</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">xmax</span><span class="o">=</span><span class="n">xzoom</span><span class="p">[</span><span class="n">ix</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
-        <span class="n">figfile</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">figbase</span>
-            <span class="o">+</span> <span class="s2">&quot;.sub&quot;</span>
-            <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ix</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
-            <span class="o">+</span> <span class="n">plot_ext</span>
-        <span class="p">)</span>
+    <span class="k">for</span> <span class="n">ix</span><span class="p">,</span> <span class="n">zoom</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">xzoom</span><span class="p">):</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xmin</span><span class="o">=</span><span class="n">zoom</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xmax</span><span class="o">=</span><span class="n">zoom</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">figfile</span> <span class="o">=</span> <span class="n">figbase</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">figbase</span><span class="o">.</span><span class="n">stem</span><span class="si">}</span><span class="s2">.sub</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">ix</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="si">}{</span><span class="n">plot_ext</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">savefig</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">figfile</span><span class="p">)</span>
     <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="n">xmin</span><span class="o">=</span><span class="n">xmin</span><span class="p">,</span> <span class="n">xmax</span><span class="o">=</span><span class="n">xmax</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -5302,8 +5308,7 @@ scale: float
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/plotting.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1276</span>
-<span class="normal">1277</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1277</span>
 <span class="normal">1278</span>
 <span class="normal">1279</span>
 <span class="normal">1280</span>
@@ -5357,7 +5362,8 @@ scale: float
 <span class="normal">1328</span>
 <span class="normal">1329</span>
 <span class="normal">1330</span>
-<span class="normal">1331</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_xy_and_save</span><span class="p">(</span>
+<span class="normal">1331</span>
+<span class="normal">1332</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">zoom_xy_and_save</span><span class="p">(</span>
     <span class="n">fig</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">figure</span><span class="o">.</span><span class="n">Figure</span><span class="p">,</span>
     <span class="n">ax</span><span class="p">:</span> <span class="n">matplotlib</span><span class="o">.</span><span class="n">axes</span><span class="o">.</span><span class="n">Axes</span><span class="p">,</span>
     <span class="n">figbase</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
