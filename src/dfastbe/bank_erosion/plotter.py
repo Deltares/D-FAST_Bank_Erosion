@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -119,23 +119,9 @@ class ErosionPlotter:
 
         km_zoom, xy_zoom = self._generate_zoomed_coordinates(river_axis_km)
 
-        fig, ax = df_plt.plot1_waterdepth_and_banklines(
-            bbox,
-            river_center_line_arr,
-            self.bank_data.bank_lines,
-            simulation_data.face_node,
-            simulation_data.n_nodes,
-            simulation_data.x_node,
-            simulation_data.y_node,
-            simulation_data.water_depth_face,
-            1.1 * self.water_level_data.hfw_max,
-            X_AXIS_TITLE,
-            Y_AXIS_TITLE,
-            "water depth and initial bank lines",
-            "water depth [m]",
+        self._plot_water_level_data(
+            fig_i, bbox, river_center_line_arr, simulation_data, xy_zoom
         )
-        if self.plot_flags["save_plot"]:
-            fig_i = self._save_plot(fig, ax, fig_i, "banklines", xy_zoom, True)
 
         fig, ax = df_plt.plot2_eroded_distance_and_equilibrium(
             bbox,
@@ -233,7 +219,6 @@ class ErosionPlotter:
                 fig_i = self._save_plot(
                     fig, ax, fig_i, f"levels_bank_{ib + 1}", km_zoom, False
                 )
-                fig_base = f"{self.plot_flags['fig_dir']}/{fig_i}_levels_bank_{ib + 1}"
 
         figlist, axlist = df_plt.plot6series_velocity_per_bank(
             self.bank_data.bank_chainage_midpoints,
@@ -296,6 +281,34 @@ class ErosionPlotter:
             bank_coords_mid,
             self.bank_data.bank_chainage_midpoints,
         )
+
+    def _plot_water_level_data(
+        self,
+        fig_i: int,
+        bbox: Tuple[float, float, float, float],
+        river_center_line_arr: np.ndarray,
+        simulation_data: ErosionSimulationData,
+        xy_zoom: List[Tuple],
+    ) -> int:
+        """Plot the water level data."""
+        fig, ax = df_plt.plot1_waterdepth_and_banklines(
+            bbox,
+            river_center_line_arr,
+            self.bank_data.bank_lines,
+            simulation_data.face_node,
+            simulation_data.n_nodes,
+            simulation_data.x_node,
+            simulation_data.y_node,
+            simulation_data.water_depth_face,
+            1.1 * self.water_level_data.hfw_max,
+            X_AXIS_TITLE,
+            Y_AXIS_TITLE,
+            "water depth and initial bank lines",
+            "water depth [m]",
+        )
+        if self.plot_flags["save_plot"]:
+            fig_i = self._save_plot(fig, ax, fig_i, "banklines", xy_zoom, True)
+        return fig_i
 
     def _save_plot(self, fig, ax, fig_i, plot_name, zoom_coords, zoom_xy) -> int:
         """Save the plot to a file."""
