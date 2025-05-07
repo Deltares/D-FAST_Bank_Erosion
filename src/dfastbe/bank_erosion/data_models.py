@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Iterator, List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type, Optional
+from typing import Iterator, List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type, Optional, Union
 import numpy as np
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString, Point
@@ -678,6 +678,106 @@ class ParametersPerBank:
 @dataclass
 class DischargeLevelParameters(BaseBank[ParametersPerBank]):
     pass
+
+
+@dataclass
+class CalculationParameters:
+    bank_velocity: np.ndarray
+    water_level: np.ndarray
+    chezy: np.ndarray
+    ship_wave_max: np.ndarray
+    ship_wave_min: np.ndarray
+    volume_per_discharge: np.ndarray
+    erosion_distance_flow: np.ndarray
+    erosion_distance_shipping: np.ndarray
+    erosion_distance_tot: np.ndarray
+    erosion_volume_tot: np.ndarray
+    erosion_distance: Optional[np.ndarray] = field(default=lambda : np.array([]))
+    erosion_volume: Optional[np.ndarray] = field(default=lambda : np.array([]))
+
+
+@dataclass
+class LevelCalculation(BaseBank[CalculationParameters]):
+    hfw_max: float = field(default=0.0)
+
+    @classmethod
+    def from_column_arrays(
+        cls, data: dict, bank_cls: Type["CalculationParameters"], hfw_max: float,
+        bank_order: Tuple[str, str] = ("left", "right")
+    ) -> "LevelCalculation":
+        # Only include fields that belong to the bank-specific data
+        # base_fields = {k: v for k, v in data.items() if k != "id"}
+        base = BaseBank.from_column_arrays(data, bank_cls, bank_order=bank_order)
+
+        return cls(
+            id=base.id,
+            left=base.left,
+            right=base.right,
+            hfw_max=hfw_max,
+        )
+
+
+class DischargeLevels:
+
+    def __init__(self, levels: List[LevelCalculation]):
+        self.levels = levels
+
+    def __getitem__(self, index: int) -> LevelCalculation:
+        return self.levels[index]
+
+    def __len__(self) -> int:
+        return len(self.levels)
+
+    def append(self, level_calc: LevelCalculation):
+        self.levels.append(level_calc)
+
+    def get_max_hfw_level(self) -> float:
+        return max(level.hfw_max for level in self.levels)
+
+    def total_erosion_volume(self) -> float:
+        return sum(
+            np.sum(level.left.erosion_volume_tot) + np.sum(level.right.erosion_volume_tot)
+            for level in self.levels
+        )
+
+    def __iter__(self):
+        return iter(self.levels)
+
+    def accumulate(self, attribute_name: str, bank_side: Union[str, List[str]] = None) -> List[np.ndarray]:
+        if bank_side is None:
+            bank_side = ["left", "right"]
+        elif isinstance(bank_side, str):
+                bank_side = [bank_side]
+
+        if not all(side in ["left", "right"] for side in bank_side):
+            raise ValueError("bank_side must be 'left', 'right', or a list of these.")
+
+        total = [
+            self._accumulate_attribute_side(attribute_name, side) for side in bank_side
+        ]
+        return total
+
+    def _accumulate_attribute_side(self, attribute_name: str, bank_side: str) -> np.ndarray:
+        for i, level in enumerate(self.levels):
+            bank = getattr(level, bank_side)
+            attr = getattr(bank, attribute_name, None)
+            if attr is None:
+                raise AttributeError(f"{attribute_name} not found in {bank_side} bank of level with id={level.id}")
+            if i == 0:
+                total = attr
+            else:
+                total += attr
+        return total
+
+    def _get_attr_both_sides_level(self, attribute_name: str, level) -> List[np.ndarray]:
+        """Get the attributes of the levels for both left and right bank."""
+        sides = [getattr(self.levels[level], side) for side in ["left", "right"]]
+        attr = [getattr(side, attribute_name, None) for side in sides]
+        return attr
+
+    def get_attr_level(self, attribute_name: str) -> List[List[np.ndarray]]:
+        """Get the attributes of the levels for both left and right bank."""
+        return [self._get_attr_both_sides_level(attribute_name, level) for level in range(len(self.levels))]
 
 
 class BankLinesResultsError(Exception):
