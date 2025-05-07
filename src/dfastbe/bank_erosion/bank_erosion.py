@@ -50,6 +50,7 @@ from dfastbe.bank_erosion.data_models import (
     WaterLevelData,
 )
 from dfastbe.bank_erosion.debugger import Debugger
+from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.utils import BankLinesProcessor, intersect_line_mesh
 from dfastbe.io import ConfigFile, LineGeometry, log_text, write_km_eroded_volumes
 from dfastbe.kernel import (
