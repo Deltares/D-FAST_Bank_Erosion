@@ -123,7 +123,7 @@ class ErosionPlotter:
             fig_i, bbox, river_center_line_arr, simulation_data, xy_zoom
         )
 
-        fig_i = self._plot_eroded_distance(
+        fig_i = self._plot_erosion_sensitivity(
             fig_i, bbox, river_center_line_arr, xy_line_eq_list, mesh_data, xy_zoom
         )
 
@@ -141,7 +141,7 @@ class ErosionPlotter:
 
         fig_i = self._plot_bank_type(fig_i, bbox, river_center_line_arr, xy_zoom)
 
-        fig_i = self._plot_erodis(fig_i, km_zoom)
+        fig_i = self._plot_eroded_distance(fig_i, km_zoom)
 
         self._finalize_plots()
 
@@ -189,7 +189,7 @@ class ErosionPlotter:
             fig_i = self._save_plot(fig, ax, fig_i, "banklines", xy_zoom, True)
         return fig_i
 
-    def _plot_eroded_distance(
+    def _plot_erosion_sensitivity(
         self,
         fig_i: int,
         bbox: Tuple[float, float, float, float],
@@ -379,7 +379,7 @@ class ErosionPlotter:
             fig_i = self._save_plot(fig, ax, fig_i, "banktype", xy_zoom, True)
         return fig_i
 
-    def _plot_erodis(self, fig_i: int, km_zoom: List[Tuple]) -> int:
+    def _plot_eroded_distance(self, fig_i: int, km_zoom: List[Tuple]) -> int:
         fig, ax = df_plt.plot8_eroded_distance(
             self.bank_data.bank_chainage_midpoints,
             "river chainage [km]",
