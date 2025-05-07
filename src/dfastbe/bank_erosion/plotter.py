@@ -135,28 +135,7 @@ class ErosionPlotter:
 
         self._plot_eroded_volume_equilibrium(fig_i, km_mid, km_step, km_zoom)
 
-        figlist, axlist = df_plt.plot5series_waterlevels_per_bank(
-            self.bank_data.bank_chainage_midpoints,
-            "river chainage [km]",
-            self.water_level_data.water_level,
-            self.water_level_data.ship_wave_max,
-            self.water_level_data.ship_wave_min,
-            "water level at Q{iq}",
-            "average water level",
-            "wave influenced range",
-            self.water_level_data.bank_height,
-            "level of bank",
-            self.erosion_inputs.bank_protection_level,
-            "bank protection level",
-            "elevation",
-            "(water)levels along bank line {ib}",
-            "[m NAP]",
-        )
-        if self.plot_flags["save_plot"]:
-            for ib, fig in enumerate(figlist):
-                fig_i = self._save_plot(
-                    fig, ax, fig_i, f"levels_bank_{ib + 1}", km_zoom, False
-                )
+        self._plot_water_levels_per_bank(fig_i, ax, km_zoom)
 
         figlist, axlist = df_plt.plot6series_velocity_per_bank(
             self.bank_data.bank_chainage_midpoints,
@@ -362,6 +341,36 @@ class ErosionPlotter:
         )
         if self.plot_flags["save_plot"]:
             fig_i = self._save_plot(fig, ax, fig_i, "eroded_volume_eq", km_zoom, False)
+        return fig_i
+
+    def _plot_water_levels_per_bank(
+        self,
+        fig_i: int,
+        ax,
+        km_zoom: List[Tuple],
+    ) -> int:
+        figlist, axlist = df_plt.plot5series_waterlevels_per_bank(
+            self.bank_data.bank_chainage_midpoints,
+            "river chainage [km]",
+            self.water_level_data.water_level,
+            self.water_level_data.ship_wave_max,
+            self.water_level_data.ship_wave_min,
+            "water level at Q{iq}",
+            "average water level",
+            "wave influenced range",
+            self.water_level_data.bank_height,
+            "level of bank",
+            self.erosion_inputs.bank_protection_level,
+            "bank protection level",
+            "elevation",
+            "(water)levels along bank line {ib}",
+            "[m NAP]",
+        )
+        if self.plot_flags["save_plot"]:
+            for ib, fig in enumerate(figlist):
+                fig_i = self._save_plot(
+                    fig, ax, fig_i, f"levels_bank_{ib + 1}", km_zoom, False
+                )
         return fig_i
 
     def _save_plot(self, fig, ax, fig_i, plot_name, zoom_coords, zoom_xy) -> int:
