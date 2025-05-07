@@ -400,10 +400,7 @@ class ErosionPlotter:
             fig_file = fig_base + self.plot_flags["plot_ext"]
             df_plt.savefig(fig, fig_file)
 
-        if self.plot_flags["close_plot"]:
-            plt.close("all")
-        else:
-            plt.show(block=not self.gui)
+        self._finalize_plots
 
     def _generate_zoomed_coordinates(self, river_axis_km):
         if not self.plot_flags["save_plot_zoomed"]:
@@ -420,6 +417,23 @@ class ErosionPlotter:
             bank_coords_mid,
             self.bank_data.bank_chainage_midpoints,
         )
+
+    def _save_plot(self, fig, ax, fig_i, plot_name, zoom_coords):
+        fig_i += 1
+        fig_base = f"{self.plot_flags['fig_dir']}{os.sep}{fig_i}_{plot_name}"
+        if self.plot_flags["save_plot_zoomed"] and zoom_coords:
+            df_plt.zoom_xy_and_save(
+                fig, ax, fig_base, self.plot_flags["plot_ext"], zoom_coords
+            )
+        fig_path = fig_base + self.plot_flags["plot_ext"]
+        df_plt.savefig(fig, fig_path)
+        return fig_i
+
+    def _finalize_plots(self):
+        if self.plot_flags["close_plot"]:
+            plt.close("all")
+        else:
+            plt.show(block=not self.gui)
 
     @staticmethod
     def get_bbox(
