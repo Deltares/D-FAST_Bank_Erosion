@@ -163,7 +163,7 @@ class BankLines:
         """Plot the bank lines and the simulation data."""
         log_text("=")
         log_text("create_figures")
-        i_fig = 0
+        fig_i = 0
         bbox = df_plt.get_bbox(xy_km_numpy)
 
         if self.plot_flags["save_plot_zoomed"]:
@@ -203,16 +203,9 @@ class BankLines:
             config_file,
         )
         if self.plot_flags["save_plot"]:
-            i_fig = i_fig + 1
-            fig_base = (
-                f"{self.plot_flags.get('fig_dir')}{os.sep}{i_fig}_banklinedetection"
+            fig_i = df_plt.save_plot(
+                fig, ax, fig_i, "banklinedetection", xy_zoom, self.plot_flags
             )
-            if self.plot_flags["save_plot_zoomed"]:
-                df_plt.zoom_xy_and_save(
-                    fig, ax, fig_base, self.plot_flags.get("plot_ext"), xy_zoom, scale=1
-                )
-            fig_file = fig_base + self.plot_flags["plot_ext"]
-            df_plt.savefig(fig, fig_file)
 
         if self.plot_flags["close_plot"]:
             plt.close("all")
