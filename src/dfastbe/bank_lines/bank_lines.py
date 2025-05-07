@@ -1,7 +1,5 @@
 """Bank line detection module."""
 
-import os
-from pathlib import Path
 from typing import List, Optional, Tuple
 
 import geopandas as gpd

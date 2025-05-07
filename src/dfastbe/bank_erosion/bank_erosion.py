@@ -27,9 +27,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 import os
-from typing import Any, Dict, List, Tuple
+from typing import Dict, List, Tuple
 
-import matplotlib.pyplot as plt
 import numpy as np
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
