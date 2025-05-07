@@ -26,7 +26,8 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import List, Optional, Tuple
+from pathlib import Path
+from typing import List, Optional, Tuple, Union
 
 import geopandas
 import matplotlib
@@ -38,7 +39,7 @@ from dfastbe.io import ConfigFile
 from dfastbe.kernel import g, water_density
 
 
-def savefig(fig: matplotlib.figure.Figure, filename: str) -> None:
+def savefig(fig: matplotlib.figure.Figure, filename: Union[str, Path]) -> None:
     """
     Save a single figure to file.
     
@@ -1272,7 +1273,14 @@ def zoom_x_and_save(fig: matplotlib.figure.Figure, ax: matplotlib.axes.Axes, fig
     ax.set_xlim(xmin=xmin, xmax=xmax)
 
 
-def zoom_xy_and_save(fig: matplotlib.figure.Figure, ax: matplotlib.axes.Axes, figbase: str, plot_ext: str, xyzoom: List[Tuple[float, float, float, float]], scale: float = 1000) -> None:
+def zoom_xy_and_save(
+    fig: matplotlib.figure.Figure,
+    ax: matplotlib.axes.Axes,
+    figbase: Path,
+    plot_ext: str,
+    xyzoom: List[Tuple[float, float, float, float]],
+    scale: float = 1000,
+) -> None:
     """
     Zoom in on subregions in x,y-space and save the figure.
 
@@ -1296,11 +1304,11 @@ def zoom_xy_and_save(fig: matplotlib.figure.Figure, ax: matplotlib.axes.Axes, fi
 
     dx_zoom = 0
     xy_ratio = (ymax - ymin) / (xmax - xmin)
-    for ix in range(len(xyzoom)):
-        xmin0 = xyzoom[ix][0]
-        xmax0 = xyzoom[ix][1]
-        ymin0 = xyzoom[ix][2]
-        ymax0 = xyzoom[ix][3]
+    for zoom in xyzoom:
+        xmin0 = zoom[0]
+        xmax0 = zoom[1]
+        ymin0 = zoom[2]
+        ymax0 = zoom[3]
         dx = xmax0 - xmin0
         dy = ymax0 - ymin0
         if dy < xy_ratio * dx:
@@ -1311,17 +1319,12 @@ def zoom_xy_and_save(fig: matplotlib.figure.Figure, ax: matplotlib.axes.Axes, fi
             dx_zoom = max(dx_zoom, dy / xy_ratio)
     dy_zoom = dx_zoom * xy_ratio
 
-    for ix in range(len(xyzoom)):
-        x0 = (xyzoom[ix][0] + xyzoom[ix][1]) / 2
-        y0 = (xyzoom[ix][2] + xyzoom[ix][3]) / 2
+    for ix, zoom in enumerate(xyzoom):
+        x0 = (zoom[0] + zoom[1]) / 2
+        y0 = (zoom[2] + zoom[3]) / 2
         ax.set_xlim(xmin=(x0 - dx_zoom/2) / scale, xmax=(x0 + dx_zoom/2) / scale)
         ax.set_ylim(ymin=(y0 - dy_zoom/2) / scale, ymax=(y0 + dy_zoom/2) / scale)
-        figfile = (
-            figbase
-            + ".sub"
-            + str(ix + 1)
-            + plot_ext
-        )
+        figfile = figbase.with_name(f"{figbase.stem}.sub{str(ix + 1)}{plot_ext}")
         savefig(fig, figfile)
 
     ax.set_xlim(xmin=xmin, xmax=xmax)
@@ -1352,3 +1355,14 @@ def get_bbox(
     bbox = (x_min - d, y_min - d, x_max + d, y_max + d)
 
     return bbox
+
+
+def save_plot(fig, ax, fig_i, plot_name, zoom_coords, plot_flags) -> int:
+    """Save the plot to a file."""
+    fig_i += 1
+    fig_base = Path(plot_flags['fig_dir']) / f"{fig_i}_{plot_name}"
+    if plot_flags["save_plot_zoomed"] and zoom_coords:
+        zoom_xy_and_save(fig, ax, fig_base, plot_flags["plot_ext"], zoom_coords)
+    fig_path = fig_base.with_suffix(plot_flags["plot_ext"])
+    savefig(fig, fig_path)
+    return fig_i
