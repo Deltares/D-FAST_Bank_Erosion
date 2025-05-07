@@ -826,7 +826,7 @@ class Erosion:
                     erosion_distance_shipping,
                     erosion_distance_flow,
                 )
-            print(dvol)
+
             # accumulate eroded volumes per km
             dvol = get_km_eroded_volume(
                 bank_i.bank_chainage_midpoints, erosion_volume_tot, km_bin
