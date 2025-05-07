@@ -1,15 +1,27 @@
 """Erosion-related data structures."""
 import os
-from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Iterator, List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type, Optional
-import numpy as np
-from geopandas import GeoDataFrame
-from shapely.geometry import LineString, Point
-from geopandas.geoseries import GeoSeries
-from dfastio.xyc.models import XYCModel
-from dfastbe.io import ConfigFile, BaseRiverData, BaseSimulationData, log_text
+from pathlib import Path
+from typing import (
+    Any,
+    ClassVar,
+    Dict,
+    Generic,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+)
 
+import numpy as np
+from dfastio.xyc.models import XYCModel
+from geopandas import GeoDataFrame
+from geopandas.geoseries import GeoSeries
+from shapely.geometry import LineString, Point
+
+from dfastbe.io import BaseRiverData, BaseSimulationData, ConfigFile, log_text
 
 GenericType = TypeVar("GenericType")
 
@@ -64,18 +76,6 @@ class BaseBank(Generic[GenericType]):
 
 @dataclass
 class SingleErosion:
-    """Class to hold erosion data for a single bank.
-
-    args:
-        bank_line_coords (np.ndarray):
-            Coordinates of the bank line.
-        bank_face_indices (np.ndarray):
-            Indices of the faces associated with the bank.
-        fairway_face_indices (np.ndarray):
-            Indices of the faces associated with the fairway.
-        bank_chainage_midpoints (np.ndarray):
-            River chainage for the midpoints of each segment of the bank line.
-    """
     wave_fairway_distance_0: np.ndarray
     wave_fairway_distance_1: np.ndarray
     bank_protection_level: np.ndarray
@@ -594,17 +594,6 @@ class ErosionSimulationData(BaseSimulationData):
         return vel_bank
 
     def calculate_bank_height(self, single_bank: SingleBank, zb_dx):
-        """
-
-        Args:
-            single_bank:
-            bank_i:
-            zb_dx:
-
-        Returns:
-            zb_bank:
-
-        """
         from dfastbe.kernel import moving_avg
         bank_index = single_bank.bank_face_indices
         if self.bed_elevation_location == "node":

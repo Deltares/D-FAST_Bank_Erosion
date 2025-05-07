@@ -67,6 +67,7 @@ def setsize(fig: matplotlib.figure.Figure) -> None:
         Figure to a be saved.
     """
     # the size of an a3 is (16.5, 11.75)
+    # the size of an a3 is (16.5, 11.75)
     fig.set_size_inches(11.75, 8.25)  # a4
 
 

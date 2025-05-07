@@ -26,23 +26,15 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
+import math
 from typing import List, Tuple
 
+import numpy
 import numpy as np
+from shapely import line_merge
+from shapely.geometry import LineString, MultiLineString, Point, Polygon
 
 from dfastbe.bank_erosion.data_models import MeshData
-import numpy
-import math
-from shapely.geometry import (
-    LineString,
-    Point,
-    Polygon,
-    MultiLineString,
-)
-from shapely import line_merge
-
-
-
 
 
 def on_right_side(line_xy: numpy.ndarray, ref_xy: numpy.ndarray) -> bool:
@@ -72,7 +64,6 @@ def on_right_side(line_xy: numpy.ndarray, ref_xy: numpy.ndarray) -> bool:
     npnt = line_xy.shape[0]
     if ref_npnt < npnt:
         # determine the mid-point p0 of ref_xy
-        # p0 = (ref_xy[0] + ref_xy[1]) / 2
         if ref_npnt == 2:
             imin = 0
             imind = 0
