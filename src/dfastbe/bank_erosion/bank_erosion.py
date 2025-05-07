@@ -50,6 +50,8 @@ from dfastbe.bank_erosion.data_models import (
     ParametersPerBank,
     SingleErosion,
     WaterLevelData,
+    CalculationParameters,
+    LevelCalculation,
 )
 from dfastbe.bank_erosion.debugger import Debugger
 from dfastbe.bank_erosion.utils import BankLinesProcessor, intersect_line_mesh
@@ -702,20 +704,20 @@ class Erosion:
         num_levels = self.river_data.num_discharge_levels
         dvol_bank = np.zeros((num_km, 2))
         hfw_max_level = 0
-        vel_bank_level_i = []
-        water_level_level_i = []
-        chezy_level_i = []
-        ship_wave_max_level_i = []
-        ship_wave_min_level_i = []
-        vol_per_discharge_level_i = []
+        vel_bank_i = []
+        water_level_i = []
+        chezy_i = []
+        ship_wave_max_i = []
+        ship_wave_min_i = []
+        vol_per_discharge_i = []
 
         eq_erosion_dist = []
         eq_eroded_vol = []
 
-        erosion_distance_flow_level_i = []
-        erosion_distance_shipping_level_i = []
-        erosion_distance_tot_level_i = []
-        erosion_volume_tot_level_i = []
+        erosion_distance_flow_i = []
+        erosion_distance_shipping_i = []
+        erosion_distance_tot_i = []
+        erosion_volume_tot_i = []
 
         for ind, bank_i in enumerate(bank_data):
             # bank_i = 0: left bank, bank_i = 1: right bank
@@ -723,7 +725,7 @@ class Erosion:
             vel_bank = simulation_data.calculate_bank_velocity(
                 bank_i, self.river_data.vel_dx
             )
-            vel_bank_level_i.append(vel_bank)
+            vel_bank_i.append(vel_bank)
 
             if level_i == 0:
                 # determine velocity and bank height along banks ...
@@ -738,9 +740,9 @@ class Erosion:
             water_depth_fairway = simulation_data.water_depth_face[ii_face]
             hfw_max_level = max(hfw_max_level, water_depth_fairway.max())
 
-            water_level_level_i.append(simulation_data.water_level_face[ii_face])
+            water_level_i.append(simulation_data.water_level_face[ii_face])
             chez_face = simulation_data.chezy_face[ii_face]
-            chezy_level_i.append(0 * chez_face + chez_face.mean())
+            chezy_i.append(0 * chez_face + chez_face.mean())
 
             # last discharge level
             if level_i == num_levels - 1:
@@ -767,31 +769,31 @@ class Erosion:
                 ship_w_max,
                 ship_w_min,
             ) = compute_bank_erosion_dynamics(
-                vel_bank_level_i[ind],
+                vel_bank_i[ind],
                 bank_height[ind],
                 bank_i.segment_length,
-                water_level_level_i[ind],
+                water_level_i[ind],
                 fairway_data.fairway_initial_water_levels[ind],
                 discharge_level_pars.get_bank(ind),
                 self.river_data.erosion_time * self.p_discharge[level_i],
                 bank_i.fairway_distances,
                 water_depth_fairway,
-                chezy_level_i[ind],
+                chezy_i[ind],
                 erosion_inputs.get_bank(ind),
             )
-            ship_wave_max_level_i.append(ship_w_max)
-            ship_wave_min_level_i.append(ship_w_min)
+            ship_wave_max_i.append(ship_w_max)
+            ship_wave_min_i.append(ship_w_min)
 
-            erosion_distance_flow_level_i.append(erosion_distance_flow)
-            erosion_distance_shipping_level_i.append(erosion_distance_shipping)
-            erosion_distance_tot_level_i.append(erosion_distance_tot)
-            erosion_volume_tot_level_i.append(erosion_volume_tot)
+            erosion_distance_flow_i.append(erosion_distance_flow)
+            erosion_distance_shipping_i.append(erosion_distance_shipping)
+            erosion_distance_tot_i.append(erosion_distance_tot)
+            erosion_volume_tot_i.append(erosion_volume_tot)
 
             # accumulate eroded volumes per km
             dvol = get_km_eroded_volume(
                 bank_i.bank_chainage_midpoints, erosion_volume_tot, km_bin
             )
-            vol_per_discharge_level_i.append(dvol)
+            vol_per_discharge_i.append(dvol)
 
             dvol_bank[:, ind] += dvol
 
@@ -808,19 +810,14 @@ class Erosion:
                     erosion_volume,
                     bank_height,
                     num_levels,
-                    vel_bank_level_i,
-                    water_level_level_i,
-                    chezy_level_i,
+                    vel_bank_i,
+                    water_level_i,
+                    chezy_i,
                     erosion_distance_tot,
                     erosion_volume_tot,
                     erosion_distance_shipping,
                     erosion_distance_flow,
                 )
-
-        from dfastbe.bank_erosion.data_models import (
-            CalculationParameters,
-            LevelCalculation,
-        )
 
         if level_i == num_levels - 1:
             data = {
@@ -829,17 +826,18 @@ class Erosion:
             }
         else:
             data = {}
+
         data = data | {
-            "bank_velocity": vel_bank_level_i,
-            "water_level": water_level_level_i,
-            "chezy": chezy_level_i,
-            "ship_wave_max": ship_wave_max_level_i,
-            "ship_wave_min": ship_wave_min_level_i,
-            "volume_per_discharge": vol_per_discharge_level_i,
-            "erosion_distance_flow": erosion_distance_flow_level_i,
-            "erosion_distance_shipping": erosion_distance_shipping_level_i,
-            "erosion_distance_tot": erosion_distance_tot_level_i,
-            "erosion_volume_tot": erosion_volume_tot_level_i,
+            "bank_velocity": vel_bank_i,
+            "water_level": water_level_i,
+            "chezy": chezy_i,
+            "ship_wave_max": ship_wave_max_i,
+            "ship_wave_min": ship_wave_min_i,
+            "volume_per_discharge": vol_per_discharge_i,
+            "erosion_distance_flow": erosion_distance_flow_i,
+            "erosion_distance_shipping": erosion_distance_shipping_i,
+            "erosion_distance_tot": erosion_distance_tot_i,
+            "erosion_volume_tot": erosion_volume_tot_i,
         }
         level_calculation = LevelCalculation.from_column_arrays(
             data, CalculationParameters, hfw_max=hfw_max_level
