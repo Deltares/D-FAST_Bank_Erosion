@@ -705,19 +705,10 @@ class Erosion:
         dvol_bank = np.zeros((num_km, 2))
         hfw_max_level = 0
         vel_bank_i = []
-        water_level_i = []
-        chezy_i = []
-        ship_wave_max_i = []
-        ship_wave_min_i = []
-        vol_per_discharge_i = []
-
-        eq_erosion_dist = []
-        eq_eroded_vol = []
-
-        erosion_distance_flow_i = []
-        erosion_distance_shipping_i = []
-        erosion_distance_tot_i = []
-        erosion_volume_tot_i = []
+        water_level_i, chezy_i = [], []
+        ship_wave_max_i, ship_wave_min_i, vol_per_discharge_i = [], [], []
+        eq_erosion_dist, eq_eroded_vol = [], []
+        erosion_distance_flow_i, erosion_distance_shipping_i, erosion_distance_tot_i, erosion_volume_tot_i = [], [], [], []
 
         for ind, bank_i in enumerate(bank_data):
             # bank_i = 0: left bank, bank_i = 1: right bank
@@ -771,14 +762,14 @@ class Erosion:
             ) = compute_bank_erosion_dynamics(
                 vel_bank_i[ind],
                 bank_height[ind],
-                bank_i.segment_length,
                 water_level_i[ind],
+                chezy_i[ind],
+                bank_i.segment_length,
+                bank_i.fairway_distances,
                 fairway_data.fairway_initial_water_levels[ind],
                 discharge_level_pars.get_bank(ind),
                 self.river_data.erosion_time * self.p_discharge[level_i],
-                bank_i.fairway_distances,
                 water_depth_fairway,
-                chezy_i[ind],
                 erosion_inputs.get_bank(ind),
             )
             ship_wave_max_i.append(ship_w_max)

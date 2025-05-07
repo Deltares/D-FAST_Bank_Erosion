@@ -105,14 +105,14 @@ def comp_erosion_eq(
 def compute_bank_erosion_dynamics(
     velocity: np.ndarray,
     bank_height: np.ndarray,
-    segment_length: np.ndarray,
     water_level_fairway: np.ndarray,
+    chezy: np.ndarray,
+    segment_length: np.ndarray,
+    bank_fairway_dist: np.ndarray,
     water_level_fairway_ref: np.ndarray,
     discharge_level_pars: ParametersPerBank,
     time_erosion: float,
-    bank_fairway_dist: np.ndarray,
     water_depth_fairway: np.ndarray,
-    chezy: np.ndarray,
     erosion_inputs: SingleErosion,
 ) -> [
     np.ndarray,
