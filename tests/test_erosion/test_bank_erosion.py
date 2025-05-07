@@ -1,12 +1,13 @@
+from unittest.mock import MagicMock
+
 import matplotlib
 import numpy as np
 import pytest
-from unittest.mock import MagicMock
 
 from dfastbe.bank_erosion.bank_erosion import Erosion
+from dfastbe.bank_erosion.data_models import FairwayData
 from dfastbe.cmd import run
 from dfastbe.io import ConfigFile
-from dfastbe.bank_erosion.data_models import BankData, FairwayData
 
 matplotlib.use('Agg')
 
@@ -16,7 +17,7 @@ def test_bank_erosion():
     file = "erosion"
     language = "UK"
     config_file = f"tests/data/{file}/meuse_manual.cfg"
-    # run(language, "BANKLINES", config_file)
+    run(language, "BANKLINES", config_file)
     print("Banklines done")
     run(language, "BANKEROSION", config_file)
     print("Bank erosion done")
