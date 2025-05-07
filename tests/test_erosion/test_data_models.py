@@ -18,6 +18,7 @@ from dfastbe.bank_erosion.data_models import (
     SingleErosion,
     WaterLevelData,
 )
+from dfastbe.io import ConfigFile
 
 
 class TestErosionInputs:
@@ -110,7 +111,6 @@ class TestBankData:
         )
         assert bank_data.right.bank_line_coords[0, 0] == result[bank_order.index("right")]
         assert bank_data.left.bank_line_coords[0, 0] == result[bank_order.index("left")]
-
 
 
 def test_fairway_data():
