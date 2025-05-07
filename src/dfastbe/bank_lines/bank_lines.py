@@ -2,7 +2,7 @@
 
 import os
 from pathlib import Path
-from typing import List
+from typing import List, Optional, Tuple
 
 import geopandas as gpd
 import numpy as np
@@ -166,22 +166,9 @@ class BankLines:
         fig_i = 0
         bbox = df_plt.get_bbox(xy_km_numpy)
 
-        if self.plot_flags["save_plot_zoomed"]:
-            bank_crds: List[np.ndarray] = []
-            bank_km: List[np.ndarray] = []
-            for ib in range(n_search_lines):
-                bcrds_numpy = np.array(bank[ib])
-                line_geom = LineGeometry(bcrds_numpy, crs=config_file.crs)
-                km_numpy = line_geom.intersect_with_line(xy_km_numpy)
-                bank_crds.append(bcrds_numpy)
-                bank_km.append(km_numpy)
-            km_zoom, xy_zoom = get_zoom_extends(
-                km_bounds[0],
-                km_bounds[1],
-                self.plot_flags["zoom_km_step"],
-                bank_crds,
-                bank_km,
-            )
+        xy_zoom = self._get_zoom_extends(
+            bank, n_search_lines, config_file.crs, xy_km_numpy, km_bounds
+        )
 
         fig, ax = df_plt.plot_detect1(
             bbox,
@@ -307,3 +294,43 @@ class BankLines:
         merged_line = line_merge(multi_line)
 
         return gpd.GeoSeries(merged_line, crs=config_file.crs)
+
+    def _get_zoom_extends(
+        self,
+        bank: List[np.ndarray],
+        n_search_lines: int,
+        crs: str,
+        xy_km_numpy: np.ndarray,
+        km_bounds: Tuple[float, float],
+    ) -> Optional[np.ndarray]:
+        """Get zoom extents for plotting.
+
+        Args:
+            bank (List[np.ndarray]): List of bank coordinates as NumPy arrays.
+            n_search_lines (int): Number of search lines.
+            crs (str): Coordinate reference system.
+            xy_km_numpy (np.ndarray): Array of x, y coordinates in kilometers.
+            km_bounds (Tuple[float, float]): Minimum and maximum chainage bounds.
+
+        Returns:
+            Optional[np.ndarray]: Array of zoom extents in x, y space, or None if zooming is disabled.
+        """
+        if not self.plot_flags["save_plot_zoomed"]:
+            return None
+        bank_crds: List[np.ndarray] = []
+        bank_km: List[np.ndarray] = []
+        for ib in range(n_search_lines):
+            bcrds_numpy = np.array(bank[ib])
+            line_geom = LineGeometry(bcrds_numpy, crs=crs)
+            km_numpy = line_geom.intersect_with_line(xy_km_numpy)
+            bank_crds.append(bcrds_numpy)
+            bank_km.append(km_numpy)
+
+        _, xy_zoom = get_zoom_extends(
+            km_bounds[0],
+            km_bounds[1],
+            self.plot_flags["zoom_km_step"],
+            bank_crds,
+            bank_km,
+        )
+        return xy_zoom
