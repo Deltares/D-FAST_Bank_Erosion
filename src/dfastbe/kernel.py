@@ -114,14 +114,7 @@ def compute_bank_erosion_dynamics(
     time_erosion: float,
     water_depth_fairway: np.ndarray,
     erosion_inputs: SingleErosion,
-) -> [
-    np.ndarray,
-    np.ndarray,
-    np.ndarray,
-    np.ndarray,
-    np.ndarray,
-    np.ndarray,
-]:
+) -> Tuple[np.ndarray]:
     """
     Compute the bank erosion during a specific discharge level.
     
