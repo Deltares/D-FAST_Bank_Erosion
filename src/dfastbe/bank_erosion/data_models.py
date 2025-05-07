@@ -144,6 +144,8 @@ class WaterLevelData:
         velocity (List[List[np.ndarray]]): Flow velocity magnitude along the bank [m/s]
         bank_height (List[np.ndarray]): Bank height data.
         chezy (List[List[np.ndarray]]): Chezy coefficient data.
+        vol_per_discharge (List[List[np.ndarray]]):
+            Eroded volume per discharge level for each bank line.
     """
 
     hfw_max: float
@@ -153,6 +155,7 @@ class WaterLevelData:
     velocity: List[List[np.ndarray]]
     bank_height: List[np.ndarray]
     chezy: List[List[np.ndarray]]
+    vol_per_discharge: List[List[np.ndarray]]
 
 
 @dataclass
@@ -350,8 +353,6 @@ class ErosionResults:
             Total erosion distance caused by flow for each bank line.
         ship_erosion_dist (List[np.ndarray]):
             Total erosion distance caused by ship waves for each bank line.
-        vol_per_discharge (List[List[np.ndarray]]):
-            Eroded volume per discharge level for each bank line.
         eq_eroded_vol (List[np.ndarray]):
             Eroded volume at equilibrium for each bank line.
         total_eroded_vol (List[np.ndarray]):
@@ -375,7 +376,6 @@ class ErosionResults:
         ...     total_erosion_dist=[np.array([0.3, 0.4])],
         ...     flow_erosion_dist=[np.array([0.5, 0.6])],
         ...     ship_erosion_dist=[np.array([0.7, 0.8])],
-        ...     vol_per_discharge=[[np.array([0.9, 1.0])]],
         ...     eq_eroded_vol=[np.array([1.1, 1.2])],
         ...     total_eroded_vol=[np.array([1.3, 1.4])],
         ...     erosion_time=10,
@@ -384,7 +384,7 @@ class ErosionResults:
         ...     total_eroded_vol_per_km=np.array([0.5, 0.6]),
         ... )
         >>> print(erosion_results)
-        ErosionResults(eq_erosion_dist=[array([0.1, 0.2])], total_erosion_dist=[array([0.3, 0.4])], flow_erosion_dist=[array([0.5, 0.6])], ship_erosion_dist=[array([0.7, 0.8])], vol_per_discharge=[[array([0.9, 1. ])]], eq_eroded_vol=[array([1.1, 1.2])], total_eroded_vol=[array([1.3, 1.4])], erosion_time=10, avg_erosion_rate=array([0.1, 0.2]), eq_eroded_vol_per_km=array([0.3, 0.4]), total_eroded_vol_per_km=array([0.5, 0.6]))
+        ErosionResults(eq_erosion_dist=[array([0.1, 0.2])], total_erosion_dist=[array([0.3, 0.4])], flow_erosion_dist=[array([0.5, 0.6])], ship_erosion_dist=[array([0.7, 0.8])], eq_eroded_vol=[array([1.1, 1.2])], total_eroded_vol=[array([1.3, 1.4])], erosion_time=10, avg_erosion_rate=array([0.1, 0.2]), eq_eroded_vol_per_km=array([0.3, 0.4]), total_eroded_vol_per_km=array([0.5, 0.6]))
 
         ```
 
@@ -399,13 +399,12 @@ class ErosionResults:
         ...     total_erosion_dist=[np.array([0.3, 0.4])],
         ...     flow_erosion_dist=[np.array([0.5, 0.6])],
         ...     ship_erosion_dist=[np.array([0.7, 0.8])],
-        ...     vol_per_discharge=[[np.array([0.9, 1.0])]],
         ...     eq_eroded_vol=[np.array([1.1, 1.2])],
         ...     total_eroded_vol=[np.array([1.3, 1.4])],
         ...     erosion_time=10,
         ... )
         >>> print(erosion_results)
-        ErosionResults(eq_erosion_dist=[array([0.1, 0.2])], total_erosion_dist=[array([0.3, 0.4])], flow_erosion_dist=[array([0.5, 0.6])], ship_erosion_dist=[array([0.7, 0.8])], vol_per_discharge=[[array([0.9, 1. ])]], eq_eroded_vol=[array([1.1, 1.2])], total_eroded_vol=[array([1.3, 1.4])], erosion_time=10, avg_erosion_rate=array([], dtype=float64), eq_eroded_vol_per_km=array([], dtype=float64), total_eroded_vol_per_km=array([], dtype=float64))
+        ErosionResults(eq_erosion_dist=[array([0.1, 0.2])], total_erosion_dist=[array([0.3, 0.4])], flow_erosion_dist=[array([0.5, 0.6])], ship_erosion_dist=[array([0.7, 0.8])], eq_eroded_vol=[array([1.1, 1.2])], total_eroded_vol=[array([1.3, 1.4])], erosion_time=10, avg_erosion_rate=array([], dtype=float64), eq_eroded_vol_per_km=array([], dtype=float64), total_eroded_vol_per_km=array([], dtype=float64))
 
         ```
     """
@@ -414,7 +413,6 @@ class ErosionResults:
     total_erosion_dist: List[np.ndarray]
     flow_erosion_dist: List[np.ndarray]
     ship_erosion_dist: List[np.ndarray]
-    vol_per_discharge: List[List[np.ndarray]]
     eq_eroded_vol: List[np.ndarray]
     total_eroded_vol: List[np.ndarray]
     erosion_time: int
@@ -779,6 +777,16 @@ class DischargeLevels:
         """Get the attributes of the levels for both left and right bank."""
         return [self._get_attr_both_sides_level(attribute_name, level) for level in range(len(self.levels))]
 
+    # def get_water_level_data(self):
+    #     water_level_data = WaterLevelData(
+    #         hfw_max=hfw_max_level,
+    #         water_level=self.get_attr_level("water_level"),
+    #         ship_wave_max=self.get_attr_level("ship_wave_max"),
+    #         ship_wave_min=self.get_attr_level("ship_wave_min"),
+    #         velocity=self.get_attr_level("bank_velocity"),
+    #         bank_height=bank_height,
+    #         chezy=self.get_attr_level("chezy"),
+    #     )
 
 class BankLinesResultsError(Exception):
     """Custom exception for BankLine results errors."""

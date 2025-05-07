@@ -413,12 +413,7 @@ class Erosion:
         num_km = len(km_mid)
 
         # initialize arrays for erosion loop over all discharges
-        # shape is (num_levels, 2, (num_stations_per_bank))
-        # if num_levels = 13 and the num_stations_per_bank = [10, 15]
-        # then shape = (13, 2, (10, 15)) list of 13 elements, each element is a list of 2 elements
-        # first an array of 10 elements, and the second is array of 15 elements
         bank_height = []
-
         eq_erosion_dist = []
         eq_eroded_vol = []
 
@@ -444,20 +439,13 @@ class Erosion:
 
             # 2) load FM result
             log_text("-", indent="  ")
-            log_text(
-                "read_simdata", data={"file": self.sim_files[level_i]}, indent="  "
-            )
-            log_text("-", indent="  ")
-            simulation_data = ErosionSimulationData.read(
-                self.sim_files[level_i], indent="  "
-            )
-            log_text("-", indent="  ")
-
+            log_text("read_simdata", data={"file": self.sim_files[level_i]}, indent="  ")
+            simulation_data = ErosionSimulationData.read(self.sim_files[level_i], indent="  ")
             log_text("bank_erosion", indent="  ")
 
             (
                 level_calculation,
-                hfw_max_level,
+                hfw_max,
                 dvol_bank,
                 eq_erosion_dist,
                 eq_eroded_vol,
@@ -483,38 +471,35 @@ class Erosion:
                 km_mid, dvol_bank, f"{self.river_data.output_dir}/{error_vol_file}"
             )
 
+        # shape is (num_levels, 2, (num_stations_per_bank))
+        # if num_levels = 13 and the num_stations_per_bank = [10, 15]
+        # then shape = (13, 2, (10, 15)) list of 13 elements, each element is a list of 2 elements
+        # first an array of 10 elements, and the second is array of 15 elements
         discharge_levels = DischargeLevels(discharge_levels)
         flow_erosion_dist = discharge_levels.accumulate("erosion_distance_flow")
         ship_erosion_dist = discharge_levels.accumulate("erosion_distance_shipping")
         total_erosion_dist = discharge_levels.accumulate("erosion_distance_tot")
         total_eroded_vol = discharge_levels.accumulate("erosion_volume_tot")
 
-        velocity_all = discharge_levels.get_attr_level("bank_velocity")
-        water_level_all = discharge_levels.get_attr_level("water_level")
-        chezy_all = discharge_levels.get_attr_level("chezy")
-        ship_wave_max_all = discharge_levels.get_attr_level("ship_wave_max")
-        ship_wave_min_all = discharge_levels.get_attr_level("ship_wave_min")
-        vol_per_discharge_all = discharge_levels.get_attr_level("volume_per_discharge")
-
         erosion_results = ErosionResults(
-            eq_erosion_dist=eq_erosion_dist,
-            total_erosion_dist=total_erosion_dist,
+            erosion_time=self.river_data.erosion_time,
             flow_erosion_dist=flow_erosion_dist,
             ship_erosion_dist=ship_erosion_dist,
-            vol_per_discharge=vol_per_discharge_all,
-            eq_eroded_vol=eq_eroded_vol,
+            total_erosion_dist=total_erosion_dist,
             total_eroded_vol=total_eroded_vol,
-            erosion_time=self.river_data.erosion_time,
+            eq_erosion_dist=eq_erosion_dist,
+            eq_eroded_vol=eq_eroded_vol,
         )
 
         water_level_data = WaterLevelData(
-            hfw_max=hfw_max_level,
-            water_level=water_level_all,
-            ship_wave_max=ship_wave_max_all,
-            ship_wave_min=ship_wave_min_all,
-            velocity=velocity_all,
+            hfw_max=hfw_max,
             bank_height=bank_height,
-            chezy=chezy_all,
+            water_level=discharge_levels.get_attr_level("water_level"),
+            ship_wave_max=discharge_levels.get_attr_level("ship_wave_max"),
+            ship_wave_min=discharge_levels.get_attr_level("ship_wave_min"),
+            velocity=discharge_levels.get_attr_level("bank_velocity"),
+            chezy=discharge_levels.get_attr_level("chezy"),
+            vol_per_discharge=discharge_levels.get_attr_level("volume_per_discharge"),
         )
         bank_data.left.bank_line_size, bank_data.right.bank_line_size = (
             bank_data.left.segment_length,
@@ -1149,7 +1134,7 @@ class Erosion:
                 km_mid,
                 km_step,
                 "river chainage [km]",
-                erosion_results.vol_per_discharge,
+                water_level_data.vol_per_discharge,
                 "eroded volume [m^3]",
                 f"eroded volume per {km_step} chainage km ({erosion_results.erosion_time} years)",
                 "Q{iq}",
@@ -1175,7 +1160,7 @@ class Erosion:
                 km_mid,
                 km_step,
                 "river chainage [km]",
-                erosion_results.vol_per_discharge,
+                water_level_data.vol_per_discharge,
                 "eroded volume [m^3]",
                 f"eroded volume per {km_step} chainage km ({erosion_results.erosion_time} years)",
                 "Q{iq}",
@@ -1203,7 +1188,7 @@ class Erosion:
                 km_mid,
                 km_step,
                 "river chainage [km]",
-                erosion_results.vol_per_discharge,
+                water_level_data.vol_per_discharge,
                 "eroded volume [m^3]",
                 f"eroded volume per {km_step} chainage km ({erosion_results.erosion_time} years)",
                 "Bank {ib}",
