@@ -137,23 +137,7 @@ class ErosionPlotter:
 
         self._plot_water_levels_per_bank(fig_i, ax, km_zoom)
 
-        figlist, axlist = df_plt.plot6series_velocity_per_bank(
-            self.bank_data.bank_chainage_midpoints,
-            "river chainage [km]",
-            self.water_level_data.velocity,
-            "velocity at Q{iq}",
-            self.erosion_inputs.tauc,
-            self.water_level_data.chezy[0],
-            "critical velocity",
-            "velocity",
-            "velocity along bank line {ib}",
-            "[m/s]",
-        )
-        if self.plot_flags["save_plot"]:
-            for ib, fig in enumerate(figlist):
-                fig_i = self._save_plot(
-                    fig, ax, fig_i, f"velocity_bank_{ib + 1}", km_zoom, False
-                )
+        self._plot_velocity_per_bank(fig_i, ax, km_zoom)
 
         fig, ax = df_plt.plot7_banktype(
             bbox,
@@ -370,6 +354,31 @@ class ErosionPlotter:
             for ib, fig in enumerate(figlist):
                 fig_i = self._save_plot(
                     fig, ax, fig_i, f"levels_bank_{ib + 1}", km_zoom, False
+                )
+        return fig_i
+
+    def _plot_velocity_per_bank(
+        self,
+        fig_i: int,
+        ax,
+        km_zoom: List[Tuple],
+    ) -> int:
+        figlist, axlist = df_plt.plot6series_velocity_per_bank(
+            self.bank_data.bank_chainage_midpoints,
+            "river chainage [km]",
+            self.water_level_data.velocity,
+            "velocity at Q{iq}",
+            self.erosion_inputs.tauc,
+            self.water_level_data.chezy[0],
+            "critical velocity",
+            "velocity",
+            "velocity along bank line {ib}",
+            "[m/s]",
+        )
+        if self.plot_flags["save_plot"]:
+            for ib, fig in enumerate(figlist):
+                fig_i = self._save_plot(
+                    fig, ax, fig_i, f"velocity_bank_{ib + 1}", km_zoom, False
                 )
         return fig_i
 
