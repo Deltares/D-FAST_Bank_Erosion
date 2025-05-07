@@ -135,22 +135,11 @@ class ErosionPlotter:
 
         self._plot_eroded_volume_equilibrium(fig_i, km_mid, km_step, km_zoom)
 
-        self._plot_water_levels_per_bank(fig_i, ax, km_zoom)
+        self._plot_water_levels_per_bank(fig_i, km_zoom)
 
-        self._plot_velocity_per_bank(fig_i, ax, km_zoom)
+        self._plot_velocity_per_bank(fig_i, km_zoom)
 
-        fig, ax = df_plt.plot7_banktype(
-            bbox,
-            river_center_line_arr,
-            self.bank_data.bank_line_coords,
-            self.erosion_inputs.bank_type,
-            self.erosion_inputs.taucls_str,
-            X_AXIS_TITLE,
-            Y_AXIS_TITLE,
-            "bank type",
-        )
-        if self.plot_flags["save_plot"]:
-            fig_i = self._save_plot(fig, ax, fig_i, "banktype", xy_zoom, True)
+        self._plot_bank_type(fig_i, bbox, river_center_line_arr, xy_zoom)
 
         fig, ax = df_plt.plot8_eroded_distance(
             self.bank_data.bank_chainage_midpoints,
@@ -330,7 +319,6 @@ class ErosionPlotter:
     def _plot_water_levels_per_bank(
         self,
         fig_i: int,
-        ax,
         km_zoom: List[Tuple],
     ) -> int:
         figlist, axlist = df_plt.plot5series_waterlevels_per_bank(
@@ -353,14 +341,13 @@ class ErosionPlotter:
         if self.plot_flags["save_plot"]:
             for ib, fig in enumerate(figlist):
                 fig_i = self._save_plot(
-                    fig, ax, fig_i, f"levels_bank_{ib + 1}", km_zoom, False
+                    fig, axlist[ib], fig_i, f"levels_bank_{ib + 1}", km_zoom, False
                 )
         return fig_i
 
     def _plot_velocity_per_bank(
         self,
         fig_i: int,
-        ax,
         km_zoom: List[Tuple],
     ) -> int:
         figlist, axlist = df_plt.plot6series_velocity_per_bank(
@@ -378,8 +365,29 @@ class ErosionPlotter:
         if self.plot_flags["save_plot"]:
             for ib, fig in enumerate(figlist):
                 fig_i = self._save_plot(
-                    fig, ax, fig_i, f"velocity_bank_{ib + 1}", km_zoom, False
+                    fig, axlist[ib], fig_i, f"velocity_bank_{ib + 1}", km_zoom, False
                 )
+        return fig_i
+
+    def _plot_bank_type(
+        self,
+        fig_i: int,
+        bbox: Tuple[float, float, float, float],
+        river_center_line_arr: np.ndarray,
+        xy_zoom: List[Tuple],
+    ) -> int:
+        fig, ax = df_plt.plot7_banktype(
+            bbox,
+            river_center_line_arr,
+            self.bank_data.bank_line_coords,
+            self.erosion_inputs.bank_type,
+            self.erosion_inputs.taucls_str,
+            X_AXIS_TITLE,
+            Y_AXIS_TITLE,
+            "bank type",
+        )
+        if self.plot_flags["save_plot"]:
+            fig_i = self._save_plot(fig, ax, fig_i, "banktype", xy_zoom, True)
         return fig_i
 
     def _save_plot(self, fig, ax, fig_i, plot_name, zoom_coords, zoom_xy) -> int:
