@@ -704,7 +704,7 @@ class Erosion:
         num_levels = self.river_data.num_discharge_levels
         dvol_bank = np.zeros((num_km, 2))
         hfw_max_level = 0
-        vel_bank_i = []
+        bank_velocity_i = []
         water_level_i, chezy_i = [], []
         ship_wave_max_i, ship_wave_min_i, vol_per_discharge_i = [], [], []
         eq_erosion_dist, eq_eroded_vol = [], []
@@ -716,7 +716,7 @@ class Erosion:
             vel_bank = simulation_data.calculate_bank_velocity(
                 bank_i, self.river_data.vel_dx
             )
-            vel_bank_i.append(vel_bank)
+            bank_velocity_i.append(vel_bank)
 
             if level_i == 0:
                 # determine velocity and bank height along banks ...
@@ -760,7 +760,7 @@ class Erosion:
                 ship_w_max,
                 ship_w_min,
             ) = compute_bank_erosion_dynamics(
-                vel_bank_i[ind],
+                bank_velocity_i[ind],
                 bank_height[ind],
                 water_level_i[ind],
                 chezy_i[ind],
@@ -801,7 +801,7 @@ class Erosion:
                     erosion_volume,
                     bank_height,
                     num_levels,
-                    vel_bank_i,
+                    bank_velocity_i,
                     water_level_i,
                     chezy_i,
                     erosion_distance_tot,
@@ -819,7 +819,7 @@ class Erosion:
             data = {}
 
         data = data | {
-            "bank_velocity": vel_bank_i,
+            "bank_velocity": bank_velocity_i,
             "water_level": water_level_i,
             "chezy": chezy_i,
             "ship_wave_max": ship_wave_max_i,
