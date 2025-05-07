@@ -415,11 +415,8 @@ class Erosion:
         num_km = len(km_mid)
 
         # initialize arrays for erosion loop over all discharges
-        bank_height = []
-        eq_erosion_dist = []
-        eq_eroded_vol = []
+        discharge_levels, bank_height, eq_erosion_dist, eq_eroded_vol = [], [], [], []
 
-        discharge_levels = []
         log_text("total_time", data={"t": self.river_data.erosion_time})
 
         for level_i in range(num_levels):
