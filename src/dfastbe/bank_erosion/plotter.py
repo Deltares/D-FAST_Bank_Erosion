@@ -119,40 +119,29 @@ class ErosionPlotter:
 
         km_zoom, xy_zoom = self._generate_zoomed_coordinates(river_axis_km)
 
-        self._plot_water_level_data(
+        fig_i = self._plot_water_level_data(
             fig_i, bbox, river_center_line_arr, simulation_data, xy_zoom
         )
 
-        self._plot_eroded_distance(
+        fig_i = self._plot_eroded_distance(
             fig_i, bbox, river_center_line_arr, xy_line_eq_list, mesh_data, xy_zoom
         )
 
-        self._plot_eroded_volume(fig_i, km_mid, km_step, km_zoom)
+        fig_i = self._plot_eroded_volume(fig_i, km_mid, km_step, km_zoom)
 
-        self._plot_eroded_volume_per_discharge(fig_i, km_mid, km_step, km_zoom)
+        fig_i = self._plot_eroded_volume_per_discharge(fig_i, km_mid, km_step, km_zoom)
 
-        self._plot_eroded_volume_per_bank(fig_i, km_mid, km_step, km_zoom)
+        fig_i = self._plot_eroded_volume_per_bank(fig_i, km_mid, km_step, km_zoom)
 
-        self._plot_eroded_volume_equilibrium(fig_i, km_mid, km_step, km_zoom)
+        fig_i = self._plot_eroded_volume_equilibrium(fig_i, km_mid, km_step, km_zoom)
 
-        self._plot_water_levels_per_bank(fig_i, km_zoom)
+        fig_i = self._plot_water_levels_per_bank(fig_i, km_zoom)
 
-        self._plot_velocity_per_bank(fig_i, km_zoom)
+        fig_i = self._plot_velocity_per_bank(fig_i, km_zoom)
 
-        self._plot_bank_type(fig_i, bbox, river_center_line_arr, xy_zoom)
+        fig_i = self._plot_bank_type(fig_i, bbox, river_center_line_arr, xy_zoom)
 
-        fig, ax = df_plt.plot8_eroded_distance(
-            self.bank_data.bank_chainage_midpoints,
-            "river chainage [km]",
-            self.erosion_results.total_erosion_dist,
-            "Bank {ib}",
-            self.erosion_results.eq_erosion_dist,
-            "Bank {ib} (eq)",
-            "eroded distance",
-            "[m]",
-        )
-        if self.plot_flags["save_plot"]:
-            fig_i = self._save_plot(fig, ax, fig_i, "erodis", km_zoom, False)
+        fig_i = self._plot_erodis(fig_i, km_zoom)
 
         self._finalize_plots()
 
@@ -388,6 +377,21 @@ class ErosionPlotter:
         )
         if self.plot_flags["save_plot"]:
             fig_i = self._save_plot(fig, ax, fig_i, "banktype", xy_zoom, True)
+        return fig_i
+
+    def _plot_erodis(self, fig_i: int, km_zoom: List[Tuple]) -> int:
+        fig, ax = df_plt.plot8_eroded_distance(
+            self.bank_data.bank_chainage_midpoints,
+            "river chainage [km]",
+            self.erosion_results.total_erosion_dist,
+            "Bank {ib}",
+            self.erosion_results.eq_erosion_dist,
+            "Bank {ib} (eq)",
+            "eroded distance",
+            "[m]",
+        )
+        if self.plot_flags["save_plot"]:
+            fig_i = self._save_plot(fig, ax, fig_i, "erodis", km_zoom, False)
         return fig_i
 
     def _save_plot(self, fig, ax, fig_i, plot_name, zoom_coords, zoom_xy) -> int:
