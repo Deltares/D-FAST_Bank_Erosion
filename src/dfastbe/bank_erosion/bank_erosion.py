@@ -491,17 +491,8 @@ class Erosion:
                 "erosion_volume_eq", num_levels - 1
             ),
         )
+        water_level_data = discharge_levels.get_water_level_data(bank_height)
 
-        water_level_data = WaterLevelData(
-            hfw_max=discharge_levels[-1].hfw_max,
-            bank_height=bank_height,
-            water_level=discharge_levels.get_attr_level("water_level"),
-            ship_wave_max=discharge_levels.get_attr_level("ship_wave_max"),
-            ship_wave_min=discharge_levels.get_attr_level("ship_wave_min"),
-            velocity=discharge_levels.get_attr_level("bank_velocity"),
-            chezy=discharge_levels.get_attr_level("chezy"),
-            vol_per_discharge=discharge_levels.get_attr_level("volume_per_discharge"),
-        )
         bank_data.left.bank_line_size, bank_data.right.bank_line_size = (
             bank_data.left.segment_length,
             bank_data.right.segment_length,

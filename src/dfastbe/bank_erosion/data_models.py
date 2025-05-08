@@ -776,16 +776,17 @@ class DischargeLevels:
         """Get the attributes of the levels for both left and right bank."""
         return [self._get_attr_both_sides_level(attribute_name, level) for level in range(len(self.levels))]
 
-    # def get_water_level_data(self):
-    #     water_level_data = WaterLevelData(
-    #         hfw_max=hfw_max_level,
-    #         water_level=self.get_attr_level("water_level"),
-    #         ship_wave_max=self.get_attr_level("ship_wave_max"),
-    #         ship_wave_min=self.get_attr_level("ship_wave_min"),
-    #         velocity=self.get_attr_level("bank_velocity"),
-    #         bank_height=bank_height,
-    #         chezy=self.get_attr_level("chezy"),
-    #     )
+    def get_water_level_data(self, bank_height) -> WaterLevelData:
+        return WaterLevelData(
+            hfw_max=self.levels[-1].hfw_max,
+            bank_height=bank_height,
+            water_level=self.get_attr_level("water_level"),
+            ship_wave_max=self.get_attr_level("ship_wave_max"),
+            ship_wave_min=self.get_attr_level("ship_wave_min"),
+            velocity=self.get_attr_level("bank_velocity"),
+            chezy=self.get_attr_level("chezy"),
+            vol_per_discharge=self.get_attr_level("volume_per_discharge"),
+        )
 
 class BankLinesResultsError(Exception):
     """Custom exception for BankLine results errors."""
