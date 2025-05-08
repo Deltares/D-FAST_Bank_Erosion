@@ -704,7 +704,7 @@ class Erosion:
         bank_velocity_i = []
         water_level_i, chezy_i = [], []
         ship_wave_max_i, ship_wave_min_i, vol_per_discharge_i = [], [], []
-        eq_erosion_dist, eq_eroded_vol = [], []
+        erosion_dist_eq, eroded_vol_eq = [], []
         erosion_distance_flow_i, erosion_distance_shipping_i, erosion_distance_tot_i, erosion_volume_tot_i = [], [], [], []
 
         for ind, bank_i in enumerate(bank_data):
@@ -734,7 +734,7 @@ class Erosion:
 
             # last discharge level
             if level_i == num_levels - 1:
-                erosion_distance, erosion_volume = comp_erosion_eq(
+                erosion_distance_eq, erosion_volume_eq = comp_erosion_eq(
                     bank_height[ind],
                     bank_i.segment_length,
                     fairway_data.fairway_initial_water_levels[ind],
@@ -743,11 +743,11 @@ class Erosion:
                     water_depth_fairway,
                     erosion_inputs.get_bank(ind),
                 )
-                eq_erosion_dist.append(erosion_distance)
-                eq_eroded_vol.append(erosion_volume)
+                erosion_dist_eq.append(erosion_distance_eq)
+                eroded_vol_eq.append(erosion_volume_eq)
             else:
-                erosion_distance = None
-                erosion_volume = None
+                erosion_distance_eq = None
+                erosion_volume_eq = None
 
             (
                 erosion_distance_tot,
@@ -794,8 +794,8 @@ class Erosion:
                     erosion_inputs,
                     discharge_level_pars,
                     water_depth_fairway,
-                    erosion_distance,
-                    erosion_volume,
+                    erosion_distance_eq,
+                    erosion_volume_eq,
                     bank_height,
                     num_levels,
                     bank_velocity_i,
@@ -809,8 +809,8 @@ class Erosion:
 
         if level_i == num_levels - 1:
             data = {
-                "erosion_distance": eq_erosion_dist,
-                "erosion_volume": eq_eroded_vol,
+                "erosion_distance_eq": erosion_dist_eq,
+                "erosion_volume_eq": eroded_vol_eq,
             }
         else:
             data = {}
@@ -834,8 +834,8 @@ class Erosion:
             level_calculation,
             hfw_max_level,
             dvol_bank,
-            eq_erosion_dist,
-            eq_eroded_vol,
+            erosion_dist_eq,
+            eroded_vol_eq,
         )
 
     def _debug_output(

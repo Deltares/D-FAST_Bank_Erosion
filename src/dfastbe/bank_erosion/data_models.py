@@ -689,8 +689,8 @@ class CalculationParameters:
     erosion_distance_shipping: np.ndarray
     erosion_distance_tot: np.ndarray
     erosion_volume_tot: np.ndarray
-    erosion_distance: Optional[np.ndarray] = field(default=lambda : np.array([]))
-    erosion_volume: Optional[np.ndarray] = field(default=lambda : np.array([]))
+    erosion_distance_eq: Optional[np.ndarray] = field(default=lambda : np.array([]))
+    erosion_volume_eq: Optional[np.ndarray] = field(default=lambda : np.array([]))
 
 
 @dataclass
