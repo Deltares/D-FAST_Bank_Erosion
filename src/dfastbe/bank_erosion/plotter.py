@@ -307,7 +307,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         fig_i: int,
         km_zoom: List[Tuple],
     ) -> int:
-        figlist, axlist = df_plt.plot5series_waterlevels_per_bank(
+        figlist, axlist = self.plot5series_waterlevels_per_bank(
             self.bank_data.bank_chainage_midpoints,
             "river chainage [km]",
             self.water_level_data.water_level,
@@ -783,7 +783,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         ylabel_txt: str,
         title_txt: str,
         qlabel: str,
-    ) -> [Figure, Axes]:
+    ) -> Tuple[Figure, Axes]:
         """
         Create the bank erosion plot with total eroded volume subdivided per discharge level.
 
@@ -834,7 +834,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         ylabel_txt: str,
         title_txt: str,
         banklabel: str,
-    ) -> [Figure, Axes]:
+    ) -> Tuple[Figure, Axes]:
         """
         Create the bank erosion plot with total eroded volume subdivided per bank.
 
@@ -882,7 +882,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         vol_eq: np.ndarray,
         ylabel_txt: str,
         title_txt: str,
-    ) -> [Figure, Axes]:
+    ) -> Tuple[Figure, Axes]:
         """
         Create the bank erosion plot with equilibrium eroded volume.
 
@@ -921,3 +921,150 @@ class ErosionPlotter(df_plt.PlottingBase):
         ax.grid(True)
         ax.set_title(title_txt)
         return fig, ax
+
+    def plot5series_waterlevels_per_bank(
+        self,
+        bank_km_mid: List[np.ndarray],
+        chainage_txt: str,
+        waterlevel: List[List[np.ndarray]],
+        shipwavemax: List[List[np.ndarray]],
+        shipwavemin: List[List[np.ndarray]],
+        waterlevelq_txt: str,
+        avg_waterlevel_txt: str,
+        shipwave_txt: str,
+        bankheight: List[np.ndarray],
+        bankheight_txt: str,
+        bankprotect: List[np.ndarray],
+        bankprotect_txt: str,
+        elevation_txt: str,
+        title_txt: str,
+        elevation_unit: str,
+    ) -> Tuple[List[Figure], List[Axes]]:
+        """
+        Create the bank erosion plots with water levels, bank height and bank protection height along each bank.
+
+        Arguments
+        ---------
+        bank_km_mid : List[np.ndarray]
+            List of arrays containing the chainage values per bank (segment) [km].
+        chainage_txt : str
+            Label for the horizontal chainage axes.
+        waterlevel : List[List[np.ndarray]]
+            List of arrays containing the water levels per bank (point) [elevation_unit].
+        shipmwavemax : np.ndarray
+            Maximum bank level subject to ship waves [m]
+        shipwavemin : np.ndarray
+            Minimum bank level subject to ship waves [m]
+        waterlevelq_txt : str
+            Label for the water level per discharge level.
+        avg_waterlevel_txt : str
+            Label for the average water level.
+        shipwave_txt : str
+            Label for the elevation range influenced by ship waves.
+        bankheight : List[np.ndarray]
+            List of arrays containing the bank heights per bank (segment) [elevation_unit].
+        bankheight_txt : str
+            Label for the bank height.
+        bankprotect : List[np.ndarray]
+            List of arrays containing the bank protection height per bank (point) [elevation_unit].
+        bankprotect_txt : str
+            Label for the bank protection height.
+        elevation_txt : str
+            General label for elevation data.
+        title_txt : str
+            Label for the axes title.
+        elevation_unit : str
+            Unit used for all elevation data.
+
+        Results
+        -------
+        figlist : List[matplotlib.figure.Figure]
+            List of figure objects, one per bank.
+        axlist : List[matplotlib.axes.Axes]
+            List of axes objects, one per bank.
+        """
+        n_banklines = len(bank_km_mid)
+        n_levels = len(waterlevel)
+        figlist: List[Figure] = []
+        axlist: List[Axes] = []
+        clrs = self.get_colors("Blues", n_levels + 1)
+        for ib in range(n_banklines):
+            fig, ax = plt.subplots()
+            self.setsize(fig)
+            bk = bank_km_mid[ib]
+            #
+            for iq in range(n_levels):
+                # shaded range of influence for ship waves
+                ax.fill_between(
+                    bk,
+                    shipwavemin[iq][ib],
+                    shipwavemax[iq][ib],
+                    color=clrs[iq + 1],
+                    alpha=0.1,
+                )
+                ax.plot(
+                    bk,
+                    shipwavemax[iq][ib],
+                    color=clrs[iq + 1],
+                    linestyle="--",
+                    linewidth=0.5,
+                )
+                ax.plot(
+                    bk,
+                    shipwavemin[iq][ib],
+                    color=clrs[iq + 1],
+                    linestyle="--",
+                    linewidth=0.5,
+                )
+                # water level line itself
+                ax.plot(
+                    bk,
+                    waterlevel[iq][ib],
+                    color=clrs[iq + 1],
+                    label=waterlevelq_txt.format(iq=iq + 1),
+                )
+                if iq == 0:
+                    wl_avg = waterlevel[iq][ib].copy()
+                else:
+                    wl_avg = wl_avg + waterlevel[iq][ib]
+            #
+            wl_avg = wl_avg / n_levels
+            ax.plot(
+                bk,
+                wl_avg,
+                color=(0.5, 0.5, 0.5),
+                linewidth=2,
+                label=avg_waterlevel_txt,
+            )
+            ax.plot(bk, bankheight[ib], color=(0.5, 0.5, 0.5), label=bankheight_txt)
+            ymin, ymax = ax.get_ylim()
+            #
+            # bank protection is only visually included in the plot
+            # if it is in the same range as the other quantities
+            # don't stretch the vertical scale to squeeze in a very low value.
+            #
+            ax.plot(
+                bk,
+                bankprotect[ib],
+                color=(0.5, 0.5, 0.5),
+                linestyle="--",
+                label=bankprotect_txt,
+            )
+            ax.set_ylim(ymin=ymin, ymax=ymax)
+            #
+            handles, labels = ax.get_legend_handles_labels()
+            #
+            # use a slightly higher alpha for the legend to make it stand out better.
+            iq = int(n_levels / 2)
+            shaded = Patch(color=clrs[iq + 1], alpha=0.2)
+            handles = [*handles[:-3], shaded, *handles[-3:]]
+            labels = [*labels[:-3], shipwave_txt, *labels[-3:]]
+            #
+            ax.set_xlabel(chainage_txt)
+            ax.set_ylabel(elevation_txt + " " + elevation_unit)
+            ax.grid(True)
+            ax.set_title(title_txt.format(ib=ib + 1))
+            ax.legend(handles, labels, loc="upper right")
+            figlist.append(fig)
+            axlist.append(ax)
+        return figlist, axlist
