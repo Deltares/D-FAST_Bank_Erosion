@@ -39,6 +39,7 @@ from dfastbe import __version__
 from dfastbe import plotting as df_plt
 from dfastbe.bank_erosion.data_models import (
     BankData,
+    CalculationParameters,
     DischargeLevelParameters,
     DischargeLevels,
     ErosionInputs,
@@ -46,12 +47,11 @@ from dfastbe.bank_erosion.data_models import (
     ErosionRiverData,
     ErosionSimulationData,
     FairwayData,
+    LevelCalculation,
     MeshData,
     ParametersPerBank,
     SingleErosion,
     WaterLevelData,
-    CalculationParameters,
-    LevelCalculation,
 )
 from dfastbe.bank_erosion.debugger import Debugger
 from dfastbe.bank_erosion.utils import BankLinesProcessor, intersect_line_mesh
@@ -415,7 +415,7 @@ class Erosion:
         num_km = len(km_mid)
 
         # initialize arrays for erosion loop over all discharges
-        discharge_levels, bank_height, eq_erosion_dist, eq_eroded_vol = [], [], [], []
+        discharge_levels, bank_height = [], []
 
         log_text("total_time", data={"t": self.river_data.erosion_time})
 
@@ -438,8 +438,12 @@ class Erosion:
 
             # 2) load FM result
             log_text("-", indent="  ")
-            log_text("read_simdata", data={"file": self.sim_files[level_i]}, indent="  ")
-            simulation_data = ErosionSimulationData.read(self.sim_files[level_i], indent="  ")
+            log_text(
+                "read_simdata", data={"file": self.sim_files[level_i]}, indent="  "
+            )
+            simulation_data = ErosionSimulationData.read(
+                self.sim_files[level_i], indent="  "
+            )
             log_text("bank_erosion", indent="  ")
 
             (
@@ -484,8 +488,12 @@ class Erosion:
             ship_erosion_dist=ship_erosion_dist,
             total_erosion_dist=total_erosion_dist,
             total_eroded_vol=total_eroded_vol,
-            eq_erosion_dist=discharge_levels._get_attr_both_sides_level("erosion_distance_eq", num_levels-1),
-            eq_eroded_vol=discharge_levels._get_attr_both_sides_level("erosion_volume_eq", num_levels-1),
+            eq_erosion_dist=discharge_levels._get_attr_both_sides_level(
+                "erosion_distance_eq", num_levels - 1
+            ),
+            eq_eroded_vol=discharge_levels._get_attr_both_sides_level(
+                "erosion_volume_eq", num_levels - 1
+            ),
         )
 
         water_level_data = WaterLevelData(
@@ -773,10 +781,12 @@ class Erosion:
                     water_depth_fairway,
                     bank_height,
                     num_levels,
-                    parameter
+                    parameter,
                 )
 
-        level_calculation = LevelCalculation(left=par_list[0], right=par_list[1], hfw_max=hfw_max_level)
+        level_calculation = LevelCalculation(
+            left=par_list[0], right=par_list[1], hfw_max=hfw_max_level
+        )
 
         return level_calculation, hfw_max_level, dvol_bank
 
