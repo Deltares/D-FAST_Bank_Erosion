@@ -8,6 +8,7 @@ import pytest
 from shapely.geometry import LineString, MultiLineString, Polygon
 
 from dfastbe.bank_lines.bank_lines import BankLines
+from dfastbe.bank_lines.plotter import BankLinesPlotter
 from dfastbe.cmd import run
 from dfastbe.io import BaseSimulationData, ConfigFile
 
@@ -320,23 +321,27 @@ class TestBankLines:
                 "close_plot": True,
                 "zoom_km_step": 0.1,
                 "fig_dir": str(tmp_path),
-                "plot_ext": "png",
+                "plot_ext": ".png",
             }
 
-        with patch("dfastbe.plotting.plot_detect1") as mock_plot_detect1, patch(
-            "matplotlib.pyplot.show"
-        ) as mock_show, patch("matplotlib.pyplot.close") as mock_close, patch(
-            "dfastbe.plotting.zoom_xy_and_save"
+        with patch(
+            "dfastbe.bank_lines.plotter.BankLinesPlotter.plot_detect1"
+        ) as mock_plot_detect1, patch("matplotlib.pyplot.show") as mock_show, patch(
+            "matplotlib.pyplot.close"
+        ) as mock_close, patch(
+            "dfastbe.plotting.PlottingBase.zoom_xy_and_save"
         ) as mock_zoom_xy_and_save:
             mock_plot_detect1.return_value = (MagicMock(), MagicMock())
 
-            bank_lines.plot(
+            bank_lines_plotter = BankLinesPlotter(
+                False, bank_lines.plot_flags, mock_config_file, mock_simulation_data
+            )
+            bank_lines_plotter.plot(
                 xy_km_numpy,
                 n_search_lines,
                 bank,
                 km_bounds,
                 bank_areas,
-                mock_config_file,
             )
 
             mock_plot_detect1.assert_called_once_with(
@@ -344,12 +349,6 @@ class TestBankLines:
                 xy_km_numpy,
                 bank_areas,
                 bank,
-                mock_simulation_data.face_node,
-                mock_simulation_data.n_nodes,
-                mock_simulation_data.x_node,
-                mock_simulation_data.y_node,
-                mock_simulation_data.water_depth_face,
-                1.1 * mock_simulation_data.water_depth_face.max(),
                 "x-coordinate [m]",
                 "y-coordinate [m]",
                 "water depth and detected bank lines",
