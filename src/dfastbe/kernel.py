@@ -54,25 +54,25 @@ def comp_erosion_eq(
         bank_height : np.ndarray
             Array containing bank height [m]
         segment_length : np.ndarray
-            Array containing length of line segment [m]
+            Array containing length of the segment [m]
         water_level_fairway_ref : np.ndarray
             Array containing water level at fairway [m]
-        ship_velocity : np.ndarray
-            Array containing ship velocity [m/s]
-        ship_type : np.ndarray
-            Array containing ship type [-]
-        ship_draught : np.ndarray
-            Array containing ship draught [m]
-        mu_slope : np.ndarray
-            Array containing slope [-]
+        discharge_level_pars (ParametersPerBank):
+            Discharge level parameters object containing the following attributes.
+                ship_velocity : np.ndarray
+                    Array containing ship velocity [m/s]
+                ship_type : np.ndarray
+                    Array containing ship type [-]
+                ship_draught : np.ndarray
+                    Array containing ship draught [m]
+                mu_slope : np.ndarray
+                    Array containing slope [-]
         bank_fairway_dist : np.ndarray
             Array containing distance from bank to fairway [m]
         water_depth_fairway : np.ndarray
             Array containing water depth at the fairway [m]
         erosion_inputs (ErosionInputs):
             ErosionInputs object.
-        bank_index: int
-            bank_i = 0: left bank, bank_i = 1: right bank
     
     Returns:
         dn_eq : np.ndarray
