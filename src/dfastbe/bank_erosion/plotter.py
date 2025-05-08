@@ -294,14 +294,23 @@ class ErosionPlotter(df_plt.PlottingBase):
         km_step: float,
         km_zoom: List[Tuple],
     ) -> int:
-        fig, ax = self.plot3_eroded_volume_subdivided_1(
+        fig, ax = plt.subplots()
+        self.setsize(fig)
+
+        self.plot3_stacked_per_discharge(
+            ax,
             km_mid,
             km_step,
-            "river chainage [km]",
             self.erosion_results.vol_per_discharge,
-            "eroded volume [m^3]",
-            f"eroded volume per {km_step} chainage km ({self.erosion_results.erosion_time} years)",
             "Q{iq}",
+            0.8,
+        )
+        self.set_axes_properties(
+            ax,
+            "river chainage [km]",
+            "eroded volume [m^3]",
+            True,
+            f"eroded volume per {km_step} chainage km ({self.erosion_results.erosion_time} years)",
         )
         if self.plot_flags["save_plot"]:
             fig_i = self._save_plot(
@@ -316,14 +325,23 @@ class ErosionPlotter(df_plt.PlottingBase):
         km_step: float,
         km_zoom: List[Tuple],
     ) -> int:
-        fig, ax = self.plot3_eroded_volume_subdivided_2(
+        fig, ax = plt.subplots()
+        self.setsize(fig)
+
+        self.plot3_stacked_per_bank(
+            ax,
             km_mid,
             km_step,
-            "river chainage [km]",
             self.erosion_results.vol_per_discharge,
-            "eroded volume [m^3]",
-            f"eroded volume per {km_step} chainage km ({self.erosion_results.erosion_time} years)",
             "Bank {ib}",
+            0.8,
+        )
+        self.set_axes_properties(
+            ax,
+            "river chainage [km]",
+            "eroded volume [m^3]",
+            True,
+            f"eroded volume per {km_step} chainage km ({self.erosion_results.erosion_time} years)",
         )
         if self.plot_flags["save_plot"]:
             fig_i = self._save_plot(
@@ -545,49 +563,6 @@ class ErosionPlotter(df_plt.PlottingBase):
             )
         return p
 
-    def plot3_eroded_volume(
-        self,
-        km_mid: np.ndarray,
-        km_step: float,
-        chainage_txt: str,
-        erosion_volume: List[List[np.ndarray]],
-        ylabel_txt: str,
-        title_txt: str,
-        qlabel: str,
-        banklabel: str,
-    ) -> Tuple[Figure, Axes]:
-        """
-        Create the bank erosion plot with total eroded volume subdivided per discharge level.
-
-        Arguments
-        ---------
-        km_mid : np.ndarray
-            Array containing the mid points for the chainage bins.
-        km_step : float
-            Bin width.
-        chainage_txt : str
-            Label for the horizontal chainage axes.
-        erosion_volume : List[List[np.ndarray]]
-            List of nQ lists of N arrays containing the total erosion distance values
-        ylabel_txt : str
-            Label for the vertical erosion volume axes.
-        title_txt : str
-            Label for axes title.
-        qlabel : str
-            Label for discharge level.
-        banklabel : str
-            Label for bank id.
-
-        Results
-        -------
-        fig : matplotlib.figure.Figure
-            Figure object.
-        ax : matplotlib.axes.Axes
-            Axes object.
-        """
-
-        return fig, ax
-
     def _plot_stacked_bars(
         self,
         ax: Axes,
@@ -669,97 +644,6 @@ class ErosionPlotter(df_plt.PlottingBase):
             wfrac,
             is_discharge=False,
         )
-
-    def plot3_eroded_volume_subdivided_1(
-        self,
-        km_mid: np.ndarray,
-        km_step: float,
-        chainage_txt: str,
-        erosion_volume: List[List[np.ndarray]],
-        ylabel_txt: str,
-        title_txt: str,
-        qlabel: str,
-    ) -> Tuple[Figure, Axes]:
-        """
-        Create the bank erosion plot with total eroded volume subdivided per discharge level.
-
-        Arguments
-        ---------
-        km_mid : np.ndarray
-            Array containing the mid points for the chainage bins.
-        km_step : float
-            Bin width.
-        chainage_txt : str
-            Label for the horizontal chainage axes.
-        erosion_volume : List[List[np.ndarray]]
-            List of nQ lists of N arrays containing the total erosion distance values
-        ylabel_txt : str
-            Label for the vertical erosion volume axes.
-        title_txt : str
-            Label for axes title.
-        qlabel : str
-            Label for discharge level.
-
-        Results
-        -------
-        fig : matplotlib.figure.Figure
-            Figure object.
-        ax : matplotlib.axes.Axes
-            Axes object.
-        """
-        fig, ax = plt.subplots()
-        self.setsize(fig)
-        #
-        self.plot3_stacked_per_discharge(
-            ax, km_mid, km_step, erosion_volume, qlabel, 0.8
-        )
-        self.set_axes_properties(ax, chainage_txt, ylabel_txt, True, title_txt)
-        return fig, ax
-
-    def plot3_eroded_volume_subdivided_2(
-        self,
-        km_mid: np.ndarray,
-        km_step: float,
-        chainage_txt: str,
-        erosion_volume: List[List[np.ndarray]],
-        ylabel_txt: str,
-        title_txt: str,
-        banklabel: str,
-    ) -> Tuple[Figure, Axes]:
-        """
-        Create the bank erosion plot with total eroded volume subdivided per bank.
-
-        Arguments
-        ---------
-        km_mid : np.ndarray
-            Array containing the mid points for the chainage bins.
-        km_step : float
-            Bin width.
-        chainage_txt : str
-            Label for the horizontal chainage axes.
-        erosion_volume : List[List[np.ndarray]]
-            List of nQ lists of N arrays containing the total erosion distance values
-        ylabel_txt : str
-            Label for the vertical erosion volume axes.
-        title_txt : str
-            Label for axes title.
-        banklabel : str
-            Label for bank id.
-
-        Results
-        -------
-        fig : matplotlib.figure.Figure
-            Figure object.
-        ax : matplotlib.axes.Axes
-            Axes object.
-        """
-        fig, ax = plt.subplots()
-        self.setsize(fig)
-        #
-        self.plot3_stacked_per_bank(ax, km_mid, km_step, erosion_volume, banklabel, 0.8)
-
-        self.set_axes_properties(ax, chainage_txt, ylabel_txt, True, title_txt)
-        return fig, ax
 
     def plot4_eroded_volume_eq(
         self,
