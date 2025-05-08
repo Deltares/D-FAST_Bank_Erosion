@@ -377,7 +377,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         return fig_i
 
     def _plot_eroded_distance(self, fig_i: int, km_zoom: List[Tuple]) -> int:
-        fig, ax = df_plt.plot8_eroded_distance(
+        fig, ax = self.plot8_eroded_distance(
             self.bank_data.bank_chainage_midpoints,
             "river chainage [km]",
             self.erosion_results.total_erosion_dist,
@@ -1218,5 +1218,68 @@ class ErosionPlotter(df_plt.PlottingBase):
         ax.set_ylabel(ylabel_txt)
         ax.grid(True)
         ax.set_title(title_txt)
+        ax.legend(loc="upper right")
+        return fig, ax
+
+    def plot8_eroded_distance(
+        self,
+        bank_km_mid: List[np.ndarray],
+        chainage_txt: str,
+        dn_tot: List[np.ndarray],
+        dn_tot_txt: str,
+        dn_eq: List[np.ndarray],
+        dn_eq_txt: str,
+        dn_txt: str,
+        dn_unit: str,
+    ) -> Tuple[Figure, Axes]:
+        """
+        Create the bank erosion plot with total and equilibrium eroded distance.
+
+        Arguments
+        ---------
+        bank_km_mid : List[np.ndarray]
+            List of arrays containing the chainage values per bank (segment) [km].
+        chainage_txt : str
+            Label for the horizontal chainage axes.
+        dn_tot : List[np.ndarray]
+            List of arrays containing the total bank erosion distance per bank (segment) [m].
+        dn_tot_txt : str
+            Label for the total bank erosion distance.
+        dn_eq : List[np.ndarray]
+            List of arrays containing the equilibrium bank erosion distance per bank (segment) [m].
+        dn_eq_txt : str
+            Label for equilibrium bank erosion distance.
+        dn_txt : str
+            General label for bank erosion distance.
+        dn_unit: str
+            Unit used for bank erosion distance.
+
+        Results
+        -------
+        fig : matplotlib.figure.Figure
+            Figure object.
+        ax : matplotlib.axes.Axes
+            Axes object.
+        """
+        fig, ax = plt.subplots()
+        self.setsize(fig)
+        #
+        n_banklines = len(dn_tot)
+        clrs = self.get_colors("plasma", n_banklines + 1)
+        for ib in range(n_banklines):
+            bk = bank_km_mid[ib]
+            ax.plot(bk, dn_tot[ib], color=clrs[ib], label=dn_tot_txt.format(ib=ib + 1))
+            ax.plot(
+                bk,
+                dn_eq[ib],
+                linestyle=":",
+                color=clrs[ib],
+                label=dn_eq_txt.format(ib=ib + 1),
+            )
+        #
+        ax.set_xlabel(chainage_txt)
+        ax.set_ylabel(dn_txt + " " + dn_unit)
+        ax.grid(True)
+        ax.set_title(dn_txt)
         ax.legend(loc="upper right")
         return fig, ax

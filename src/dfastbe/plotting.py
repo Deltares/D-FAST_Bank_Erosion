@@ -38,69 +38,6 @@ from matplotlib.figure import Figure
 from dfastbe.io import BaseSimulationData
 
 
-def plot8_eroded_distance(
-    bank_km_mid: List[np.ndarray],
-    chainage_txt: str,
-    dn_tot: List[np.ndarray],
-    dn_tot_txt: str,
-    dn_eq: List[np.ndarray],
-    dn_eq_txt: str,
-    dn_txt: str,
-    dn_unit: str,
-) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
-    """
-    Create the bank erosion plot with total and equilibrium eroded distance.
-
-    Arguments
-    ---------
-    bank_km_mid : List[np.ndarray]
-        List of arrays containing the chainage values per bank (segment) [km].
-    chainage_txt : str
-        Label for the horizontal chainage axes.
-    dn_tot : List[np.ndarray]
-        List of arrays containing the total bank erosion distance per bank (segment) [m].
-    dn_tot_txt : str
-        Label for the total bank erosion distance.
-    dn_eq : List[np.ndarray]
-        List of arrays containing the equilibrium bank erosion distance per bank (segment) [m].
-    dn_eq_txt : str
-        Label for equilibrium bank erosion distance.
-    dn_txt : str
-        General label for bank erosion distance.
-    dn_unit: str
-        Unit used for bank erosion distance.
-
-    Results
-    -------
-    fig : matplotlib.figure.Figure
-        Figure object.
-    ax : matplotlib.axes.Axes
-        Axes object.
-    """
-    fig, ax = matplotlib.pyplot.subplots()
-    setsize(fig)
-    #
-    n_banklines = len(dn_tot)
-    clrs = get_colors("plasma", n_banklines + 1)
-    for ib in range(n_banklines):
-        bk = bank_km_mid[ib]
-        ax.plot(bk, dn_tot[ib], color=clrs[ib], label=dn_tot_txt.format(ib=ib + 1))
-        ax.plot(
-            bk,
-            dn_eq[ib],
-            linestyle=":",
-            color=clrs[ib],
-            label=dn_eq_txt.format(ib=ib + 1),
-        )
-    #
-    ax.set_xlabel(chainage_txt)
-    ax.set_ylabel(dn_txt + " " + dn_unit)
-    ax.grid(True)
-    ax.set_title(dn_txt)
-    ax.legend(loc="upper right")
-    return fig, ax
-
-
 class PlottingBase:
 
     def savefig(self, fig: Figure, filename: Union[str, Path]) -> None:
