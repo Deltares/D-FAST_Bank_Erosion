@@ -220,6 +220,46 @@ class ErosionPlotter(df_plt.PlottingBase):
             "eroded distance [m]",
             "equilibrium location",
         )
+        scale = 1000
+        fig, ax = plt.subplots()
+        self.setsize(fig)
+        ax.set_aspect(1)
+        #
+        # plot_mesh(ax, xe, ye, scale=scale)
+        self.chainage_markers(river_center_line_arr, ax, ndec=0, scale=scale)
+        dnav_max = self.erosion_results.avg_erosion_rate.max()
+
+        p = self._create_patches(
+            ax,
+            self.bank_data.bank_line_coords,
+            self.erosion_results.total_erosion_dist,
+            self.bank_data.is_right_bank,
+            dnav_max,
+            xy_line_eq_list,
+            scale,
+        )
+
+        cbar = fig.colorbar(
+            p, ax=ax, shrink=0.5, drawedges=False, label="eroded distance [m]"
+        )
+        shaded = Patch(color="gold", linewidth=0.5)
+        eqbank = Line2D([], [], color="k", linewidth=1)
+        handles = [shaded, eqbank]
+        labels = [
+            f"eroded during {self.erosion_results.erosion_time} year",
+            "equilibrium location",
+        ]
+
+        self.set_bbox(ax, bbox)
+        self.set_axes_properties(
+            ax,
+            X_AXIS_TITLE,
+            Y_AXIS_TITLE,
+            True,
+            "eroded distance and equilibrium bank location",
+            handles,
+            labels,
+        )
         if self.plot_flags["save_plot"]:
             fig_i = self._save_plot(
                 fig, ax, fig_i, "erosion_sensitivity", xy_zoom, True
@@ -502,29 +542,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         ax : matplotlib.axes.Axes
             Axes object.
         """
-        scale = 1000
-        fig, ax = plt.subplots()
-        self.setsize(fig)
-        ax.set_aspect(1)
-        #
-        # plot_mesh(ax, xe, ye, scale=scale)
-        self.chainage_markers(xykm, ax, ndec=0, scale=scale)
-        dnav_max = dnav.max()
 
-        p = self._create_patches(
-            ax, bank_crds, dn_tot, to_right, dnav_max, xy_eq, scale
-        )
-
-        cbar = fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=eroclr_txt)
-        shaded = Patch(color="gold", linewidth=0.5)
-        eqbank = Line2D([], [], color="k", linewidth=1)
-        handles = [shaded, eqbank]
-        labels = [erosion_txt, eqbank_txt]
-
-        self.set_bbox(ax, bbox)
-        self.set_axes_properties(
-            ax, xlabel_txt, ylabel_txt, True, title_txt, handles, labels
-        )
         return fig, ax
 
     def _create_patches(self, ax, bank_crds, dn_tot, to_right, dnav_max, xy_eq, scale):
