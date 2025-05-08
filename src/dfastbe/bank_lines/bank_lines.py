@@ -1,6 +1,6 @@
 """Bank line detection module."""
 
-from typing import List
+from typing import List, Tuple
 
 import geopandas as gpd
 import numpy as np

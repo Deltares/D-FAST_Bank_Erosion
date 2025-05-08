@@ -30,11 +30,11 @@ class BankLinesPlotter(PlottingBase):
 
     def _get_zoom_extends(
         self,
-        bank: List[np.ndarray],
-        n_search_lines: int,
+        bank: List[LineString],
+        num_search_lines: int,
         crs: str,
-        xy_km_numpy: np.ndarray,
-        km_bounds: Tuple[float, float],
+        station_coords: np.ndarray,
+        station_bounds: Tuple[float, float],
     ) -> Optional[np.ndarray]:
         """Get zoom extents for plotting.
 
@@ -52,16 +52,16 @@ class BankLinesPlotter(PlottingBase):
             return None
         bank_crds: List[np.ndarray] = []
         bank_km: List[np.ndarray] = []
-        for ib in range(n_search_lines):
-            bcrds_numpy = np.array(bank[ib])
+        for ib in range(num_search_lines):
+            bcrds_numpy = np.array(bank[ib].coords)
             line_geom = LineGeometry(bcrds_numpy, crs=crs)
-            km_numpy = line_geom.intersect_with_line(xy_km_numpy)
+            km_numpy = line_geom.intersect_with_line(station_coords)
             bank_crds.append(bcrds_numpy)
             bank_km.append(km_numpy)
 
         _, xy_zoom = get_zoom_extends(
-            km_bounds[0],
-            km_bounds[1],
+            station_bounds[0],
+            station_bounds[1],
             self.plot_flags["zoom_km_step"],
             bank_crds,
             bank_km,
@@ -70,25 +70,64 @@ class BankLinesPlotter(PlottingBase):
 
     def plot(
         self,
-        xy_km_numpy: np.ndarray,
-        n_search_lines: int,
-        bank: List,
-        km_bounds,
-        bank_areas,
+        station_coords: np.ndarray,
+        num_search_lines: int,
+        bank: List[LineString],
+        stations_bounds: Tuple[float, float],
+        bank_areas: List[Polygon],
     ):
-        """Plot the bank lines and the simulation data."""
+        """Plot the bank lines and the simulation data.
+
+        Args:
+            station_coords (np.ndarray):
+                Array of x and y coordinates in km.
+            num_search_lines (int):
+                Number of search lines.
+            bank (List):
+                List of bank lines.
+            stations_bounds (Tuple[float, float]):
+                Minimum and maximum km bounds.
+            bank_areas (List[Polygon]):
+                A search area corresponding to one of the bank search lines.
+            config_file (ConfigFile):
+                Configuration file object.
+
+        Examples:
+            ```python
+            >>> import matplotlib
+            >>> from dfastbe.bank_lines.bank_lines import BankLines
+            >>> matplotlib.use('Agg')
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")  # doctest: +ELLIPSIS
+            >>> bank_lines = BankLines(config_file)
+            N...e
+            >>> bank_lines.plot_flags["save_plot"] = False
+            >>> station_coords = np.array([[0, 0, 0], [1, 1, 0]])
+            >>> num_search_lines = 1
+            >>> bank = [LineString([(0, 0), (1, 1)])]
+            >>> stations_bounds = (0, 1)
+            >>> bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]
+            >>> bank_lines_plotter = BankLinesPlotter(False, bank_lines.plot_flags, config_file, bank_lines.simulation_data)
+            >>> bank_lines_plotter.plot(station_coords, num_search_lines, bank, stations_bounds, bank_areas)
+            N...s
+
+            ```
+        """
         log_text("=")
         log_text("create_figures")
         fig_i = 0
-        bbox = self.get_bbox(xy_km_numpy)
+        bbox = self.get_bbox(station_coords)
 
         xy_zoom = self._get_zoom_extends(
-            bank, n_search_lines, self.config_file.crs, xy_km_numpy, km_bounds
+            bank,
+            num_search_lines,
+            self.config_file.crs,
+            station_coords,
+            stations_bounds,
         )
 
         fig, ax = self.plot_detect1(
             bbox,
-            xy_km_numpy,
+            station_coords,
             bank_areas,
             bank,
             "x-coordinate [m]",
