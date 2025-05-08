@@ -9,12 +9,12 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from shapely import LineString, Polygon
 
-from dfastbe import plotting as df_plt
 from dfastbe.io import BaseSimulationData, ConfigFile, LineGeometry, log_text
 from dfastbe.kernel import get_zoom_extends
+from dfastbe.plotting import PlottingBase
 
 
-class BankLinesPlotter(df_plt.PlottingBase):
+class BankLinesPlotter(PlottingBase):
 
     def __init__(
         self,

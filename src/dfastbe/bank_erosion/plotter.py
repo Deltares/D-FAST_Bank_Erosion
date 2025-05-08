@@ -2,6 +2,9 @@ from typing import Any, Dict, List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
+from geopandas.geodataframe import GeoDataFrame
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
 from dfastbe import plotting as df_plt
 from dfastbe.bank_erosion.data_models import (
@@ -14,7 +17,6 @@ from dfastbe.bank_erosion.data_models import (
 )
 from dfastbe.io import log_text
 from dfastbe.kernel import get_zoom_extends
-
 
 X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
@@ -404,3 +406,77 @@ class ErosionPlotter(df_plt.PlottingBase):
             plt.close("all")
         else:
             plt.show(block=not self.gui)
+
+    def plot1_waterdepth_and_banklines(
+        self,
+        bbox: Tuple[float, float, float, float],
+        xykm: np.ndarray,
+        banklines: GeoDataFrame,
+        fn: np.ndarray,
+        nnodes: np.ndarray,
+        xn: np.ndarray,
+        yn: np.ndarray,
+        h: np.ndarray,
+        hmax: float,
+        xlabel_txt: str,
+        ylabel_txt: str,
+        title_txt: str,
+        waterdepth_txt: str,
+    ) -> Tuple[Figure, Axes]:
+        """
+        Create the bank erosion plot with water depths and initial bank lines.
+
+        bbox : Tuple[float, float, float, float]
+            Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
+        xykm : np.ndarray
+            Array containing the x, y, and chainage; unit m for x and y, km for chainage.
+        banklines : geopandas.geodataframe.GeoDataFrame
+            Pandas object containing the bank lines.
+
+        fn : np.ndarray
+            N x M array listing the nodes (max M) per face (total N) of the mesh.
+        nnodes : np.ndarray
+            Number of nodes per face (max M).
+        xn : np.ndarray
+            X-coordinates of the mesh nodes.
+        yn : np.ndarray
+            Y-coordinates of the mesh nodes.
+        h : np.ndarray
+            Array of water depth values.
+        hmax : float
+            Water depth value to be used as upper limit for coloring.
+        xlabel_txt : str
+            Label for the x-axis.
+        ylabel_txt : str
+            Label for the y-axis.
+        title_txt : str
+            Label for the axes title.
+        waterdepth_txt : str
+            Label for the color bar.
+
+        Results
+        -------
+        fig : matplotlib.figure.Figure
+            Figure object.
+        ax : matplotlib.axes.Axes
+            Axes object.
+        """
+        fig, ax = plt.subplots()
+        self.setsize(fig)
+        ax.set_aspect(1)
+        #
+        scale = 1000
+        self.chainage_markers(xykm, ax, ndec=0, scale=scale)
+        ax.plot(xykm[:, 0] / scale, xykm[:, 1] / scale, linestyle="--", color="k")
+        for bl in banklines.geometry:
+            bp = np.array(bl.coords)
+            ax.plot(bp[:, 0] / scale, bp[:, 1] / scale, color="k")
+        p = self.plot_mesh_patches(ax, fn, nnodes, xn, yn, h, 0, hmax)
+        cbar = fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=waterdepth_txt)
+        #
+        self.set_bbox(ax, bbox)
+        ax.set_xlabel(xlabel_txt)
+        ax.set_ylabel(ylabel_txt)
+        ax.grid(True)
+        ax.set_title(title_txt)
+        return fig, ax
