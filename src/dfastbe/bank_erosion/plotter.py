@@ -510,48 +510,68 @@ class ErosionPlotter(df_plt.PlottingBase):
         # plot_mesh(ax, xe, ye, scale=scale)
         self.chainage_markers(xykm, ax, ndec=0, scale=scale)
         dnav_max = dnav.max()
-        for ib in range(len(xy_eq)):
+
+        p = self._create_patches(
+            ax, bank_crds, dn_tot, to_right, dnav_max, xy_eq, scale
+        )
+
+        cbar = fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=eroclr_txt)
+        shaded = Patch(color="gold", linewidth=0.5)
+        eqbank = Line2D([], [], color="k", linewidth=1)
+        handles = [shaded, eqbank]
+        labels = [erosion_txt, eqbank_txt]
+
+        self.set_bbox(ax, bbox)
+        self.set_axes_properties(
+            ax, xlabel_txt, ylabel_txt, True, title_txt, handles, labels
+        )
+        return fig, ax
+
+    def _create_patches(self, ax, bank_crds, dn_tot, to_right, dnav_max, xy_eq, scale):
+        for i, xy_eq_part in enumerate(xy_eq):
             ax.plot(
-                xy_eq[ib][:, 0] / scale, xy_eq[ib][:, 1] / scale, linewidth=1, color="k"
+                xy_eq_part[:, 0] / scale,
+                xy_eq_part[:, 1] / scale,
+                linewidth=1,
+                color="k",
             )
-            #
-            if to_right[ib]:
-                bankc = bank_crds[ib]
-                dnc = dn_tot[ib]
+            if to_right[i]:
+                bankc = bank_crds[i]
+                dnc = dn_tot[i]
             else:
-                bankc = bank_crds[ib][::-1]
-                dnc = dn_tot[ib][::-1]
+                bankc = bank_crds[i][::-1]
+                dnc = dn_tot[i][::-1]
             nbp = len(bankc)
-            #
+
             dxy = bankc[1:] - bankc[:-1]
             ds = np.sqrt((dxy**2).sum(axis=1))
-            dxy = dxy * (dn_tot[ib] / ds).reshape((nbp - 1, 1))
-            #
+            dxy = dxy * (dn_tot[i] / ds).reshape((nbp - 1, 1))
+
             x = np.zeros(((nbp - 1) * 4,))
             x[0::4] = bankc[:-1, 0]
             x[1::4] = bankc[1:, 0]
             x[2::4] = bankc[:-1, 0] + dxy[:, 1]
             x[3::4] = bankc[1:, 0] + dxy[:, 1]
-            #
+
             y = np.zeros(((nbp - 1) * 4,))
             y[0::4] = bankc[:-1, 1]
             y[1::4] = bankc[1:, 1]
             y[2::4] = bankc[:-1, 1] - dxy[:, 0]
             y[3::4] = bankc[1:, 1] - dxy[:, 0]
-            #
+
             tfn = np.zeros(((nbp - 1) * 2, 3))
             tfn[0::2, 0] = [4 * i for i in range(nbp - 1)]
             tfn[0::2, 1] = tfn[0::2, 0] + 1
             tfn[0::2, 2] = tfn[0::2, 0] + 2
-            #
+
             tfn[1::2, 0] = tfn[0::2, 0] + 1
             tfn[1::2, 1] = tfn[0::2, 0] + 2
             tfn[1::2, 2] = tfn[0::2, 0] + 3
-            #
+
             tval = np.zeros(((nbp - 1) * 2,))
             tval[0::2] = dnc
             tval[1::2] = dnc
-            #
+
             colors = ["lawngreen", "gold", "darkorange"]
             cmap = LinearSegmentedColormap.from_list("mycmap", colors)
             p = ax.tripcolor(
@@ -565,19 +585,7 @@ class ErosionPlotter(df_plt.PlottingBase):
                 vmin=0,
                 vmax=2 * dnav_max,
             )
-        #
-        cbar = fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=eroclr_txt)
-        #
-        shaded = Patch(color="gold", linewidth=0.5)
-        eqbank = Line2D([], [], color="k", linewidth=1)
-        handles = [shaded, eqbank]
-        labels = [erosion_txt, eqbank_txt]
-        #
-        self.set_bbox(ax, bbox)
-        self.set_axes_properties(
-            ax, xlabel_txt, ylabel_txt, True, title_txt, handles, labels
-        )
-        return fig, ax
+        return p
 
     def plot3_eroded_volume(
         self,
