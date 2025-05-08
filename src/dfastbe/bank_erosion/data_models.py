@@ -679,16 +679,16 @@ class DischargeLevelParameters(BaseBank[ParametersPerBank]):
 
 @dataclass
 class CalculationParameters:
-    bank_velocity: np.ndarray
-    water_level: np.ndarray
-    chezy: np.ndarray
-    ship_wave_max: np.ndarray
-    ship_wave_min: np.ndarray
-    volume_per_discharge: np.ndarray
-    erosion_distance_flow: np.ndarray
-    erosion_distance_shipping: np.ndarray
-    erosion_distance_tot: np.ndarray
-    erosion_volume_tot: np.ndarray
+    bank_velocity: np.ndarray = field(default=lambda : np.array([]))
+    water_level: np.ndarray = field(default=lambda : np.array([]))
+    chezy: np.ndarray = field(default=lambda : np.array([]))
+    ship_wave_max: np.ndarray = field(default=lambda : np.array([]))
+    ship_wave_min: np.ndarray = field(default=lambda : np.array([]))
+    volume_per_discharge: np.ndarray = field(default=lambda : np.array([]))
+    erosion_distance_flow: np.ndarray = field(default=lambda : np.array([]))
+    erosion_distance_shipping: np.ndarray = field(default=lambda : np.array([]))
+    erosion_distance_tot: np.ndarray = field(default=lambda : np.array([]))
+    erosion_volume_tot: np.ndarray = field(default=lambda : np.array([]))
     erosion_distance_eq: Optional[np.ndarray] = field(default=lambda : np.array([]))
     erosion_volume_eq: Optional[np.ndarray] = field(default=lambda : np.array([]))
 

@@ -1,5 +1,5 @@
 from dfastbe.io import write_shp, write_csv, ConfigFile
-from dfastbe.bank_erosion.data_models import ParametersPerBank, SingleBank, SingleErosion
+from dfastbe.bank_erosion.data_models import ParametersPerBank, SingleBank, SingleErosion, FairwayData
 
 
 class Debugger:
@@ -8,9 +8,8 @@ class Debugger:
         self.river_data = river_data
 
     def debug_process_discharge_levels_1(
-        self, bank_index, single_bank: SingleBank, fairway_data, erosion_inputs: SingleErosion, discharge_level_pars:
-            ParametersPerBank,
-        water_depth_fairway, dn_eq1, dv_eq1, bank_height
+        self, bank_index: int, single_bank: SingleBank, fairway_data: FairwayData, erosion_inputs: SingleErosion,
+        discharge_level_pars: ParametersPerBank, water_depth_fairway, dn_eq1, dv_eq1, bank_height
     ):
         bank_coords = single_bank.bank_line_coords
         bank_coords_mind = (bank_coords[:-1] + bank_coords[1:]) / 2
@@ -41,9 +40,9 @@ class Debugger:
         write_csv(params, f"{str(self.river_data.output_dir)}/debug.EQ.B{bank_index + 1}.csv")
 
     def debug_process_discharge_levels_2(
-        self, bank_ind, q_level, single_bank: SingleBank, fairway_data, erosion_inputs: SingleErosion,
-        discharge_level_pars: ParametersPerBank, water_depth_fairway, velocity, bank_height, water_level, chezy,
-        dniqib, dviqib, erosion_distance_shipping, erosion_distance_flow
+        self, bank_ind: int, q_level: int, single_bank: SingleBank, fairway_data: FairwayData, erosion_inputs:
+            SingleErosion, discharge_level_pars: ParametersPerBank, water_depth_fairway, velocity, bank_height,
+            water_level, chezy, dniqib, dviqib, erosion_distance_shipping, erosion_distance_flow
     ):
         bank_coords = single_bank.bank_line_coords
         bank_coords_mind = (bank_coords[:-1] + bank_coords[1:]) / 2
@@ -55,10 +54,10 @@ class Debugger:
             "y": bank_coords_mind[:, 1],
             "iface_fw": single_bank.fairway_face_indices,
             "iface_bank": single_bank.bank_face_indices,
-            "velocity": velocity[bank_ind],
+            "velocity": velocity,
             "bank_height": bank_height[bank_ind],
             "segment_length": single_bank.segment_length,
-            "zw": water_level[bank_ind],
+            "zw": water_level,
             "zw0": fairway_data.fairway_initial_water_levels[bank_ind],
             "tauc": erosion_inputs.tauc,
             "num_ship": discharge_level_pars.num_ship,
@@ -72,7 +71,7 @@ class Debugger:
             "fairway_wave_reduction_distance": erosion_inputs.wave_fairway_distance_0,
             "fairway_wave_disappear_distance": erosion_inputs.wave_fairway_distance_1,
             "water_depth_fairway": water_depth_fairway,
-            "chez": chezy[bank_ind],
+            "chez": chezy,
             "dike_height": erosion_inputs.bank_protection_level,
             "erosion_distance": dniqib,
             "erosion_volume": dviqib,
