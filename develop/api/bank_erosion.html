@@ -3617,7 +3617,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">bank_velocity_i</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">water_level_i</span><span class="p">,</span> <span class="n">chezy_i</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
         <span class="n">ship_wave_max_i</span><span class="p">,</span> <span class="n">ship_wave_min_i</span><span class="p">,</span> <span class="n">vol_per_discharge_i</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
-        <span class="n">eq_erosion_dist</span><span class="p">,</span> <span class="n">eq_eroded_vol</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="n">erosion_dist_eq</span><span class="p">,</span> <span class="n">eroded_vol_eq</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
         <span class="n">erosion_distance_flow_i</span><span class="p">,</span> <span class="n">erosion_distance_shipping_i</span><span class="p">,</span> <span class="n">erosion_distance_tot_i</span><span class="p">,</span> <span class="n">erosion_volume_tot_i</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">bank_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bank_data</span><span class="p">):</span>
@@ -3647,7 +3647,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <span class="c1"># last discharge level</span>
             <span class="k">if</span> <span class="n">level_i</span> <span class="o">==</span> <span class="n">num_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">erosion_distance</span><span class="p">,</span> <span class="n">erosion_volume</span> <span class="o">=</span> <span class="n">comp_erosion_eq</span><span class="p">(</span>
+                <span class="n">erosion_distance_eq</span><span class="p">,</span> <span class="n">erosion_volume_eq</span> <span class="o">=</span> <span class="n">comp_erosion_eq</span><span class="p">(</span>
                     <span class="n">bank_height</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
                     <span class="n">bank_i</span><span class="o">.</span><span class="n">segment_length</span><span class="p">,</span>
                     <span class="n">fairway_data</span><span class="o">.</span><span class="n">fairway_initial_water_levels</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
@@ -3656,11 +3656,11 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                     <span class="n">water_depth_fairway</span><span class="p">,</span>
                     <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
                 <span class="p">)</span>
-                <span class="n">eq_erosion_dist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">erosion_distance</span><span class="p">)</span>
-                <span class="n">eq_eroded_vol</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">erosion_volume</span><span class="p">)</span>
+                <span class="n">erosion_dist_eq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">erosion_distance_eq</span><span class="p">)</span>
+                <span class="n">eroded_vol_eq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">erosion_volume_eq</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">erosion_distance</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">erosion_volume</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">erosion_distance_eq</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">erosion_volume_eq</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="p">(</span>
                 <span class="n">erosion_distance_tot</span><span class="p">,</span>
@@ -3707,8 +3707,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                     <span class="n">erosion_inputs</span><span class="p">,</span>
                     <span class="n">discharge_level_pars</span><span class="p">,</span>
                     <span class="n">water_depth_fairway</span><span class="p">,</span>
-                    <span class="n">erosion_distance</span><span class="p">,</span>
-                    <span class="n">erosion_volume</span><span class="p">,</span>
+                    <span class="n">erosion_distance_eq</span><span class="p">,</span>
+                    <span class="n">erosion_volume_eq</span><span class="p">,</span>
                     <span class="n">bank_height</span><span class="p">,</span>
                     <span class="n">num_levels</span><span class="p">,</span>
                     <span class="n">bank_velocity_i</span><span class="p">,</span>
@@ -3722,8 +3722,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
         <span class="k">if</span> <span class="n">level_i</span> <span class="o">==</span> <span class="n">num_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="s2">&quot;erosion_distance&quot;</span><span class="p">:</span> <span class="n">eq_erosion_dist</span><span class="p">,</span>
-                <span class="s2">&quot;erosion_volume&quot;</span><span class="p">:</span> <span class="n">eq_eroded_vol</span><span class="p">,</span>
+                <span class="s2">&quot;erosion_distance_eq&quot;</span><span class="p">:</span> <span class="n">erosion_dist_eq</span><span class="p">,</span>
+                <span class="s2">&quot;erosion_volume_eq&quot;</span><span class="p">:</span> <span class="n">eroded_vol_eq</span><span class="p">,</span>
             <span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
@@ -3747,8 +3747,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="n">level_calculation</span><span class="p">,</span>
             <span class="n">hfw_max_level</span><span class="p">,</span>
             <span class="n">dvol_bank</span><span class="p">,</span>
-            <span class="n">eq_erosion_dist</span><span class="p">,</span>
-            <span class="n">eq_eroded_vol</span><span class="p">,</span>
+            <span class="n">erosion_dist_eq</span><span class="p">,</span>
+            <span class="n">eroded_vol_eq</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_debug_output</span><span class="p">(</span>
@@ -4854,7 +4854,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
     <span class="n">bank_velocity_i</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">water_level_i</span><span class="p">,</span> <span class="n">chezy_i</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
     <span class="n">ship_wave_max_i</span><span class="p">,</span> <span class="n">ship_wave_min_i</span><span class="p">,</span> <span class="n">vol_per_discharge_i</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
-    <span class="n">eq_erosion_dist</span><span class="p">,</span> <span class="n">eq_eroded_vol</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="n">erosion_dist_eq</span><span class="p">,</span> <span class="n">eroded_vol_eq</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
     <span class="n">erosion_distance_flow_i</span><span class="p">,</span> <span class="n">erosion_distance_shipping_i</span><span class="p">,</span> <span class="n">erosion_distance_tot_i</span><span class="p">,</span> <span class="n">erosion_volume_tot_i</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">bank_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bank_data</span><span class="p">):</span>
@@ -4884,7 +4884,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
         <span class="c1"># last discharge level</span>
         <span class="k">if</span> <span class="n">level_i</span> <span class="o">==</span> <span class="n">num_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">erosion_distance</span><span class="p">,</span> <span class="n">erosion_volume</span> <span class="o">=</span> <span class="n">comp_erosion_eq</span><span class="p">(</span>
+            <span class="n">erosion_distance_eq</span><span class="p">,</span> <span class="n">erosion_volume_eq</span> <span class="o">=</span> <span class="n">comp_erosion_eq</span><span class="p">(</span>
                 <span class="n">bank_height</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
                 <span class="n">bank_i</span><span class="o">.</span><span class="n">segment_length</span><span class="p">,</span>
                 <span class="n">fairway_data</span><span class="o">.</span><span class="n">fairway_initial_water_levels</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
@@ -4893,11 +4893,11 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                 <span class="n">water_depth_fairway</span><span class="p">,</span>
                 <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
             <span class="p">)</span>
-            <span class="n">eq_erosion_dist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">erosion_distance</span><span class="p">)</span>
-            <span class="n">eq_eroded_vol</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">erosion_volume</span><span class="p">)</span>
+            <span class="n">erosion_dist_eq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">erosion_distance_eq</span><span class="p">)</span>
+            <span class="n">eroded_vol_eq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">erosion_volume_eq</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">erosion_distance</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">erosion_volume</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">erosion_distance_eq</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">erosion_volume_eq</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="p">(</span>
             <span class="n">erosion_distance_tot</span><span class="p">,</span>
@@ -4944,8 +4944,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                 <span class="n">erosion_inputs</span><span class="p">,</span>
                 <span class="n">discharge_level_pars</span><span class="p">,</span>
                 <span class="n">water_depth_fairway</span><span class="p">,</span>
-                <span class="n">erosion_distance</span><span class="p">,</span>
-                <span class="n">erosion_volume</span><span class="p">,</span>
+                <span class="n">erosion_distance_eq</span><span class="p">,</span>
+                <span class="n">erosion_volume_eq</span><span class="p">,</span>
                 <span class="n">bank_height</span><span class="p">,</span>
                 <span class="n">num_levels</span><span class="p">,</span>
                 <span class="n">bank_velocity_i</span><span class="p">,</span>
@@ -4959,8 +4959,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
     <span class="k">if</span> <span class="n">level_i</span> <span class="o">==</span> <span class="n">num_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;erosion_distance&quot;</span><span class="p">:</span> <span class="n">eq_erosion_dist</span><span class="p">,</span>
-            <span class="s2">&quot;erosion_volume&quot;</span><span class="p">:</span> <span class="n">eq_eroded_vol</span><span class="p">,</span>
+            <span class="s2">&quot;erosion_distance_eq&quot;</span><span class="p">:</span> <span class="n">erosion_dist_eq</span><span class="p">,</span>
+            <span class="s2">&quot;erosion_volume_eq&quot;</span><span class="p">:</span> <span class="n">eroded_vol_eq</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
@@ -4984,8 +4984,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">level_calculation</span><span class="p">,</span>
         <span class="n">hfw_max_level</span><span class="p">,</span>
         <span class="n">dvol_bank</span><span class="p">,</span>
-        <span class="n">eq_erosion_dist</span><span class="p">,</span>
-        <span class="n">eq_eroded_vol</span><span class="p">,</span>
+        <span class="n">erosion_dist_eq</span><span class="p">,</span>
+        <span class="n">eroded_vol_eq</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>

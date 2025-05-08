@@ -1713,7 +1713,7 @@ Array containing bank height [m]</p>
             <td>
               <div class="doc-md-description">
                 <p>np.ndarray
-Array containing length of line segment [m]</p>
+Array containing length of the segment [m]</p>
               </div>
             </td>
             <td>
@@ -1738,62 +1738,22 @@ Array containing water level at fairway [m]</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>ship_velocity</code>
+                <code>discharge_level_pars</code>
             </td>
             <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>np.ndarray
-Array containing ship velocity [m/s]</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>ship_type</code>
-            </td>
-            <td>
+                  <code><span title="dfastbe.bank_erosion.data_models.ParametersPerBank">ParametersPerBank</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>np.ndarray
-Array containing ship type [-]</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>ship_draught</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>np.ndarray
-Array containing ship draught [m]</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>mu_slope</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>np.ndarray
-Array containing slope [-]</p>
+                <p>Discharge level parameters object containing the following attributes.
+    ship_velocity : np.ndarray
+        Array containing ship velocity [m/s]
+    ship_type : np.ndarray
+        Array containing ship type [-]
+    ship_draught : np.ndarray
+        Array containing ship draught [m]
+    mu_slope : np.ndarray
+        Array containing slope [-]</p>
               </div>
             </td>
             <td>
@@ -1842,22 +1802,6 @@ Array containing water depth at the fairway [m]</p>
             <td>
               <div class="doc-md-description">
                 <p>ErosionInputs object.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>bank_index</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>int
-bank_i = 0: left bank, bank_i = 1: right bank</p>
               </div>
             </td>
             <td>
@@ -1981,25 +1925,25 @@ bank_i = 0: left bank, bank_i = 1: right bank</p>
 <span class="sd">        bank_height : np.ndarray</span>
 <span class="sd">            Array containing bank height [m]</span>
 <span class="sd">        segment_length : np.ndarray</span>
-<span class="sd">            Array containing length of line segment [m]</span>
+<span class="sd">            Array containing length of the segment [m]</span>
 <span class="sd">        water_level_fairway_ref : np.ndarray</span>
 <span class="sd">            Array containing water level at fairway [m]</span>
-<span class="sd">        ship_velocity : np.ndarray</span>
-<span class="sd">            Array containing ship velocity [m/s]</span>
-<span class="sd">        ship_type : np.ndarray</span>
-<span class="sd">            Array containing ship type [-]</span>
-<span class="sd">        ship_draught : np.ndarray</span>
-<span class="sd">            Array containing ship draught [m]</span>
-<span class="sd">        mu_slope : np.ndarray</span>
-<span class="sd">            Array containing slope [-]</span>
+<span class="sd">        discharge_level_pars (ParametersPerBank):</span>
+<span class="sd">            Discharge level parameters object containing the following attributes.</span>
+<span class="sd">                ship_velocity : np.ndarray</span>
+<span class="sd">                    Array containing ship velocity [m/s]</span>
+<span class="sd">                ship_type : np.ndarray</span>
+<span class="sd">                    Array containing ship type [-]</span>
+<span class="sd">                ship_draught : np.ndarray</span>
+<span class="sd">                    Array containing ship draught [m]</span>
+<span class="sd">                mu_slope : np.ndarray</span>
+<span class="sd">                    Array containing slope [-]</span>
 <span class="sd">        bank_fairway_dist : np.ndarray</span>
 <span class="sd">            Array containing distance from bank to fairway [m]</span>
 <span class="sd">        water_depth_fairway : np.ndarray</span>
 <span class="sd">            Array containing water depth at the fairway [m]</span>
 <span class="sd">        erosion_inputs (ErosionInputs):</span>
 <span class="sd">            ErosionInputs object.</span>
-<span class="sd">        bank_index: int</span>
-<span class="sd">            bank_i = 0: left bank, bank_i = 1: right bank</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        dn_eq : np.ndarray</span>
