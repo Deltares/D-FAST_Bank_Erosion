@@ -590,11 +590,9 @@ class ErosionPlotter(df_plt.PlottingBase):
         labels = [erosion_txt, eqbank_txt]
         #
         self.set_bbox(ax, bbox)
-        ax.set_xlabel(xlabel_txt)
-        ax.set_ylabel(ylabel_txt)
-        ax.grid(True)
-        ax.set_title(title_txt)
-        ax.legend(handles, labels, loc="upper right")
+        self.set_axes_properties(
+            ax, xlabel_txt, ylabel_txt, True, title_txt, handles, labels
+        )
         return fig, ax
 
     def plot3_eroded_volume(
@@ -645,11 +643,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         self.plot3_stacked_per_bank(
             ax, km_mid - 0.2 * km_step, km_step, erosion_volume, banklabel, 0.4
         )
-        ax.set_xlabel(chainage_txt)
-        ax.set_ylabel(ylabel_txt)
-        ax.grid(True)
-        ax.set_title(title_txt)
-        ax.legend(loc="upper right")
+        self.set_axes_properties(ax, chainage_txt, ylabel_txt, True, title_txt)
         return fig, ax
 
     def _plot_stacked_bars(
@@ -777,12 +771,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         self.plot3_stacked_per_discharge(
             ax, km_mid, km_step, erosion_volume, qlabel, 0.8
         )
-        #
-        ax.set_xlabel(chainage_txt)
-        ax.set_ylabel(ylabel_txt)
-        ax.grid(True)
-        ax.set_title(title_txt)
-        ax.legend(loc="upper right")
+        self.set_axes_properties(ax, chainage_txt, ylabel_txt, True, title_txt)
         return fig, ax
 
     def plot3_eroded_volume_subdivided_2(
@@ -826,12 +815,8 @@ class ErosionPlotter(df_plt.PlottingBase):
         self.setsize(fig)
         #
         self.plot3_stacked_per_bank(ax, km_mid, km_step, erosion_volume, banklabel, 0.8)
-        #
-        ax.set_xlabel(chainage_txt)
-        ax.set_ylabel(ylabel_txt)
-        ax.grid(True)
-        ax.set_title(title_txt)
-        ax.legend(loc="upper right")
+
+        self.set_axes_properties(ax, chainage_txt, ylabel_txt, True, title_txt)
         return fig, ax
 
     def plot4_eroded_volume_eq(
@@ -1011,20 +996,21 @@ class ErosionPlotter(df_plt.PlottingBase):
                 label=bankprotect_txt,
             )
             ax.set_ylim(ymin=ymin, ymax=ymax)
-            #
             handles, labels = ax.get_legend_handles_labels()
-            #
             # use a slightly higher alpha for the legend to make it stand out better.
             iq = int(n_levels / 2)
             shaded = Patch(color=clrs[iq + 1], alpha=0.2)
             handles = [*handles[:-3], shaded, *handles[-3:]]
             labels = [*labels[:-3], shipwave_txt, *labels[-3:]]
-            #
-            ax.set_xlabel(chainage_txt)
-            ax.set_ylabel(elevation_txt + " " + elevation_unit)
-            ax.grid(True)
-            ax.set_title(title_txt.format(ib=ib + 1))
-            ax.legend(handles, labels, loc="upper right")
+            self.set_axes_properties(
+                ax,
+                chainage_txt,
+                elevation_txt + " " + elevation_unit,
+                True,
+                title_txt.format(ib=ib + 1),
+                handles,
+                labels,
+            )
             figlist.append(fig)
             axlist.append(ax)
         return figlist, axlist
@@ -1095,11 +1081,13 @@ class ErosionPlotter(df_plt.PlottingBase):
                     label=velocq_txt.format(iq=iq + 1),
                 )
             #
-            ax.set_xlabel(chainage_txt)
-            ax.set_ylabel(ylabel_txt + " " + veloc_unit)
-            ax.grid(True)
-            ax.set_title(title_txt.format(ib=ib + 1))
-            ax.legend(loc="upper right")
+            self.set_axes_properties(
+                ax,
+                chainage_txt,
+                ylabel_txt + " " + veloc_unit,
+                True,
+                title_txt.format(ib=ib + 1),
+            )
             figlist.append(fig)
             axlist.append(ax)
         return figlist, axlist
@@ -1210,11 +1198,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         self._plot_bank_type_segments(ax, bank_crds, banktype, taucls_str, clrs, scale)
 
         self.set_bbox(ax, bbox)
-        ax.set_xlabel(xlabel_txt)
-        ax.set_ylabel(ylabel_txt)
-        ax.grid(True)
-        ax.set_title(title_txt)
-        ax.legend(loc="upper right")
+        self.set_axes_properties(ax, xlabel_txt, ylabel_txt, True, title_txt)
         return fig, ax
 
     def plot8_eroded_distance(
@@ -1273,9 +1257,5 @@ class ErosionPlotter(df_plt.PlottingBase):
                 label=dn_eq_txt.format(ib=ib + 1),
             )
         #
-        ax.set_xlabel(chainage_txt)
-        ax.set_ylabel(dn_txt + " " + dn_unit)
-        ax.grid(True)
-        ax.set_title(dn_txt)
-        ax.legend(loc="upper right")
+        self.set_axes_properties(ax, chainage_txt, dn_txt + " " + dn_unit, True, dn_txt)
         return fig, ax

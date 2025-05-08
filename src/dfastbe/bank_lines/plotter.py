@@ -221,9 +221,7 @@ class BankLinesPlotter(PlottingBase):
         labels = [bankarea_txt, bankline_txt]
         #
         self.set_bbox(ax, bbox, scale=scale)
-        ax.set_xlabel(xlabel_txt)
-        ax.set_ylabel(ylabel_txt)
-        ax.grid(True)
-        ax.set_title(title_txt)
-        ax.legend(handles, labels, loc="upper right")
+        self.set_axes_properties(
+            ax, xlabel_txt, ylabel_txt, True, title_txt, handles, labels
+        )
         return fig, ax

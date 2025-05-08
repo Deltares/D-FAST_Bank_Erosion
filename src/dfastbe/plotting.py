@@ -34,6 +34,8 @@ import matplotlib.pyplot
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 
 from dfastbe.io import BaseSimulationData
 
@@ -361,6 +363,34 @@ class PlottingBase:
         bbox = (x_min - d, y_min - d, x_max + d, y_max + d)
 
         return bbox
+
+    def set_axes_properties(
+        self,
+        ax: Axes,
+        chainage_txt: str,
+        ylabel_txt: str,
+        grid: bool,
+        title_txt: str,
+        handles: Optional[List[Any]] = None,
+        labels: Optional[List[str]] = None,
+    ) -> None:
+        """
+        Set the properties of the axes.
+
+        Args:
+            ax (Axes): The axes object to set properties for.
+            chainage_txt (str): Label for the horizontal chainage axes.
+            ylabel_txt (str): Label for the vertical axes.
+            title_txt (str): Title for the plot.
+        """
+        ax.set_xlabel(chainage_txt)
+        ax.set_ylabel(ylabel_txt)
+        ax.grid(grid)
+        ax.set_title(title_txt)
+        if handles and labels:
+            ax.legend(handles, labels, loc="upper right")
+        else:
+            ax.legend(loc="upper right")
 
     def save_plot(
         self,
