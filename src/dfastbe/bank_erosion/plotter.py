@@ -4,7 +4,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from geopandas.geodataframe import GeoDataFrame
 from matplotlib.axes import Axes
+from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.figure import Figure
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 
 from dfastbe import plotting as df_plt
 from dfastbe.bank_erosion.data_models import (
@@ -194,7 +197,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         mesh_data: MeshData,
         xy_zoom: List[Tuple],
     ) -> int:
-        fig, ax = df_plt.plot2_eroded_distance_and_equilibrium(
+        fig, ax = self.plot2_eroded_distance_and_equilibrium(
             bbox,
             river_center_line_arr,
             self.bank_data.bank_line_coords,
@@ -202,8 +205,6 @@ class ErosionPlotter(df_plt.PlottingBase):
             self.bank_data.is_right_bank,
             self.erosion_results.avg_erosion_rate,
             xy_line_eq_list,
-            mesh_data.x_edge_coords,
-            mesh_data.y_edge_coords,
             X_AXIS_TITLE,
             Y_AXIS_TITLE,
             "eroded distance and equilibrium bank location",
@@ -458,4 +459,140 @@ class ErosionPlotter(df_plt.PlottingBase):
         ax.set_ylabel(ylabel_txt)
         ax.grid(True)
         ax.set_title(title_txt)
+        return fig, ax
+
+    def plot2_eroded_distance_and_equilibrium(
+        self,
+        bbox: Tuple[float, float, float, float],
+        xykm: np.ndarray,
+        bank_crds: List[np.ndarray],
+        dn_tot: List[np.ndarray],
+        to_right: List[bool],
+        dnav: np.ndarray,
+        xy_eq: List[np.ndarray],
+        xlabel_txt: str,
+        ylabel_txt: str,
+        title_txt: str,
+        erosion_txt: str,
+        eroclr_txt: str,
+        eqbank_txt: str,
+    ) -> Tuple[Figure, Axes]:
+        """
+        Create the bank erosion plot with predicted bank line shift and equilibrium bank line.
+
+        Arguments
+        ---------
+        bbox : Tuple[float, float, float, float]
+            Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
+        xykm : np.ndarray
+            Array containing the x, y, and chainage; unit m for x and y, km for chainage.
+        bank_crds : List[np.ndarray]
+            List of N arrays containing the x- and y-coordinates of the original
+            bank lines.
+        dn_tot : List[np.ndarray]
+            List of N arrays containing the total erosion distance values.
+        to_right : List[bool]
+            List of N booleans indicating whether the bank is on the right.
+        dnav : np.ndarray
+            Array of N average erosion distance values.
+        xy_eq : List[np.ndarray]
+            List of N arrays containing the x- and y-coordinates of the equilibrium
+            bank line.
+        xlabel_txt : str
+            Label for the x-axis.
+        ylabel_txt : str
+            Label for the y-axis.
+        title_txt : str
+            Label for the axes title.
+        erosion_txt : str
+            Label for the shaded eroded area.
+        eroclr_txt : str
+            Label for the color bar.
+        eqbank_txt : str
+            Label for the equilibrium bank position.
+
+        Results
+        -------
+        fig : matplotlib.figure.Figure
+            Figure object.
+        ax : matplotlib.axes.Axes
+            Axes object.
+        """
+        scale = 1000
+        fig, ax = plt.subplots()
+        self.setsize(fig)
+        ax.set_aspect(1)
+        #
+        # plot_mesh(ax, xe, ye, scale=scale)
+        self.chainage_markers(xykm, ax, ndec=0, scale=scale)
+        dnav_max = dnav.max()
+        for ib in range(len(xy_eq)):
+            ax.plot(
+                xy_eq[ib][:, 0] / scale, xy_eq[ib][:, 1] / scale, linewidth=1, color="k"
+            )
+            #
+            if to_right[ib]:
+                bankc = bank_crds[ib]
+                dnc = dn_tot[ib]
+            else:
+                bankc = bank_crds[ib][::-1]
+                dnc = dn_tot[ib][::-1]
+            nbp = len(bankc)
+            #
+            dxy = bankc[1:] - bankc[:-1]
+            ds = np.sqrt((dxy**2).sum(axis=1))
+            dxy = dxy * (dn_tot[ib] / ds).reshape((nbp - 1, 1))
+            #
+            x = np.zeros(((nbp - 1) * 4,))
+            x[0::4] = bankc[:-1, 0]
+            x[1::4] = bankc[1:, 0]
+            x[2::4] = bankc[:-1, 0] + dxy[:, 1]
+            x[3::4] = bankc[1:, 0] + dxy[:, 1]
+            #
+            y = np.zeros(((nbp - 1) * 4,))
+            y[0::4] = bankc[:-1, 1]
+            y[1::4] = bankc[1:, 1]
+            y[2::4] = bankc[:-1, 1] - dxy[:, 0]
+            y[3::4] = bankc[1:, 1] - dxy[:, 0]
+            #
+            tfn = np.zeros(((nbp - 1) * 2, 3))
+            tfn[0::2, 0] = [4 * i for i in range(nbp - 1)]
+            tfn[0::2, 1] = tfn[0::2, 0] + 1
+            tfn[0::2, 2] = tfn[0::2, 0] + 2
+            #
+            tfn[1::2, 0] = tfn[0::2, 0] + 1
+            tfn[1::2, 1] = tfn[0::2, 0] + 2
+            tfn[1::2, 2] = tfn[0::2, 0] + 3
+            #
+            tval = np.zeros(((nbp - 1) * 2,))
+            tval[0::2] = dnc
+            tval[1::2] = dnc
+            #
+            colors = ["lawngreen", "gold", "darkorange"]
+            cmap = LinearSegmentedColormap.from_list("mycmap", colors)
+            p = ax.tripcolor(
+                x / scale,
+                y / scale,
+                tfn,
+                facecolors=tval,
+                edgecolors="face",
+                linewidth=0.5,
+                cmap=cmap,
+                vmin=0,
+                vmax=2 * dnav_max,
+            )
+        #
+        cbar = fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=eroclr_txt)
+        #
+        shaded = Patch(color="gold", linewidth=0.5)
+        eqbank = Line2D([], [], color="k", linewidth=1)
+        handles = [shaded, eqbank]
+        labels = [erosion_txt, eqbank_txt]
+        #
+        self.set_bbox(ax, bbox)
+        ax.set_xlabel(xlabel_txt)
+        ax.set_ylabel(ylabel_txt)
+        ax.grid(True)
+        ax.set_title(title_txt)
+        ax.legend(handles, labels, loc="upper right")
         return fig, ax
