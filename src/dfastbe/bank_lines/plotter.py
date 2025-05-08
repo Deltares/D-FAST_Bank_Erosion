@@ -11,10 +11,10 @@ from shapely import LineString, Polygon
 
 from dfastbe.io import BaseSimulationData, ConfigFile, LineGeometry, log_text
 from dfastbe.kernel import get_zoom_extends
-from dfastbe.plotting import PlottingBase
+from dfastbe.plotting import BasePlot
 
 
-class BankLinesPlotter(PlottingBase):
+class BankLinesPlotter(BasePlot):
 
     def __init__(
         self,

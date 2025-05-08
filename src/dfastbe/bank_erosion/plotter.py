@@ -10,7 +10,7 @@ from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
-from dfastbe import plotting as df_plt
+from dfastbe.plotting import BasePlot
 from dfastbe.bank_erosion.data_models import (
     BankData,
     ErosionInputs,
@@ -24,7 +24,7 @@ from dfastbe.kernel import g, get_zoom_extends, water_density
 
 X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
-class ErosionPlotter(df_plt.PlottingBase):
+class ErosionPlotter(BasePlot):
     """class to plot the results of the bank erosion analysis."""
 
     def __init__(
@@ -207,7 +207,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         fig, ax = plt.subplots()
         self.setsize(fig)
         ax.set_aspect(1)
-        #
+
         # plot_mesh(ax, xe, ye, scale=scale)
         self.chainage_markers(river_center_line_arr, ax, ndec=0, scale=scale)
         dnav_max = self.erosion_results.avg_erosion_rate.max()

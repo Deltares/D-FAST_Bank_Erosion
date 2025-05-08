@@ -40,7 +40,7 @@ from matplotlib.patches import Patch
 from dfastbe.io import BaseSimulationData
 
 
-class PlottingBase:
+class BasePlot:
 
     def savefig(self, fig: Figure, filename: Union[str, Path]) -> None:
         """
