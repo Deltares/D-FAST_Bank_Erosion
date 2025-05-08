@@ -561,7 +561,7 @@ class ErosionSimulationData(BaseSimulationData):
         return x1
 
     def calculate_bank_velocity(self, single_bank: SingleBank, vel_dx) -> np.ndarray:
-        from dfastbe.kernel import moving_avg
+        from dfastbe.bank_erosion.utils import moving_avg
         bank_face_indices = single_bank.bank_face_indices
         vel_bank = (
                 np.abs(
@@ -579,7 +579,7 @@ class ErosionSimulationData(BaseSimulationData):
         return vel_bank
 
     def calculate_bank_height(self, single_bank: SingleBank, zb_dx):
-        from dfastbe.kernel import moving_avg
+        from dfastbe.bank_erosion.utils import moving_avg
         bank_index = single_bank.bank_face_indices
         if self.bed_elevation_location == "node":
             zb_nodes = self.bed_elevation_values
