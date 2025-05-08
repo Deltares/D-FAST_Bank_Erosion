@@ -260,7 +260,7 @@ class ErosionPlotter(df_plt.PlottingBase):
     ) -> int:
         fig, ax = plt.subplots()
         self.setsize(fig)
-        self.plot3_stacked_per_discharge(
+        self._plot_stacked_per_discharge(
             ax,
             km_mid + 0.2 * km_step,
             km_step,
@@ -268,7 +268,7 @@ class ErosionPlotter(df_plt.PlottingBase):
             "Q{iq}",
             0.4,
         )
-        self.plot3_stacked_per_bank(
+        self._plot_stacked_per_bank(
             ax,
             km_mid - 0.2 * km_step,
             km_step,
@@ -297,7 +297,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         fig, ax = plt.subplots()
         self.setsize(fig)
 
-        self.plot3_stacked_per_discharge(
+        self._plot_stacked_per_discharge(
             ax,
             km_mid,
             km_step,
@@ -328,7 +328,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         fig, ax = plt.subplots()
         self.setsize(fig)
 
-        self.plot3_stacked_per_bank(
+        self._plot_stacked_per_bank(
             ax,
             km_mid,
             km_step,
@@ -406,18 +406,24 @@ class ErosionPlotter(df_plt.PlottingBase):
         fig_i: int,
         km_zoom: List[Tuple],
     ) -> int:
-        figlist, axlist = self.plot6series_velocity_per_bank(
-            self.bank_data.bank_chainage_midpoints,
-            "river chainage [km]",
-            self.water_level_data.velocity,
-            "velocity at Q{iq}",
-            self.erosion_inputs.tauc,
-            self.water_level_data.chezy[0],
-            "critical velocity",
-            "velocity",
-            "velocity along bank line {ib}",
-            "[m/s]",
-        )
+        n_banklines = len(self.bank_data.bank_chainage_midpoints)
+        n_levels = len(self.water_level_data.velocity)
+        figlist: List[Figure] = []
+        axlist: List[Axes] = []
+        clrs = self.get_colors("Blues", n_levels + 1)
+        for i in range(n_banklines):
+            fig, ax = self._velocity_per_bank(
+                clrs,
+                "river chainage [km]",
+                "velocity at Q{iq}",
+                "critical velocity",
+                "velocity",
+                "velocity along bank line {ib}",
+                "[m/s]",
+                i,
+            )
+            figlist.append(fig)
+            axlist.append(ax)
         if self.plot_flags["save_plot"]:
             for ib, fig in enumerate(figlist):
                 fig_i = self._save_plot(
@@ -625,7 +631,7 @@ class ErosionPlotter(df_plt.PlottingBase):
             )
             cumdv = dvq if cumdv is None else cumdv + dvq
 
-    def plot3_stacked_per_discharge(
+    def _plot_stacked_per_discharge(
         self,
         ax: Axes,
         km_mid: np.ndarray,
@@ -650,7 +656,7 @@ class ErosionPlotter(df_plt.PlottingBase):
             is_discharge=True,
         )
 
-    def plot3_stacked_per_bank(
+    def _plot_stacked_per_bank(
         self,
         ax: Axes,
         km_mid: np.ndarray,
@@ -823,82 +829,48 @@ class ErosionPlotter(df_plt.PlottingBase):
             axlist.append(ax)
         return figlist, axlist
 
-    def plot6series_velocity_per_bank(
+    def _velocity_per_bank(
         self,
-        bank_km_mid: List[np.ndarray],
+        clrs: List[str],
         chainage_txt: str,
-        veloc: List[List[np.ndarray]],
         velocq_txt: str,
-        tauc: List[np.ndarray],
-        chezy: List[np.ndarray],
         ucrit_txt: str,
         ylabel_txt: str,
         title_txt: str,
         veloc_unit: str,
-    ) -> Tuple[List[Figure], List[Axes]]:
-        """
-        Create the bank erosion plots with velocities and critical velocities along each bank.
-
-        Arguments
-        ---------
-        bank_km_mid : List[np.ndarray]
-            List of arrays containing the chainage values per bank (segment) [km].
-        chainage_txt : str
-            Label for the horizontal chainage axes.
-        veloc: List[List[np.ndarray]]
-            List of arrays containing the velocities per bank (segment) [m/s].
-        velocq_txt: str,
-            Label for the velocity per discharge level.
-        tauc: List[np.ndarray]
-            List of arrays containing the shear stresses per bank (point) [N/m2].
-        chezy: List[np.ndarray]
-            List of arrays containing the Chezy values per bank [m0.5/s].
-        ucrit_txt: str
-            Label for the critical velocity.
-        ylabel_txt: str
-            Label for the vertical (velocity) axis.
-        title_txt: str
-            Label for the axes title.
-        veloc_unit: str
-            Unit used for all velocities.
-
-        Results
-        -------
-        figlist : List[matplotlib.figure.Figure]
-            List of figure objects, one per bank.
-        axlist : List[matplotlib.axes.Axes]
-            List of axes objects, one per bank.
-        """
-        n_banklines = len(bank_km_mid)
-        n_levels = len(veloc)
-        figlist: List[Figure] = []
-        axlist: List[Axes] = []
-        clrs = self.get_colors("Blues", n_levels + 1)
-        for ib in range(n_banklines):
-            fig, ax = plt.subplots()
-            self.setsize(fig)
-            bk = bank_km_mid[ib]
-            #
-            velc = np.sqrt(tauc[ib] * chezy[ib] ** 2 / (water_density * g))
-            ax.plot(bank_km_mid[ib], velc, color="k", label=ucrit_txt)
-            for iq in range(n_levels):
-                ax.plot(
-                    bk,
-                    veloc[iq][ib],
-                    color=clrs[iq + 1],
-                    label=velocq_txt.format(iq=iq + 1),
-                )
-            #
-            self.set_axes_properties(
-                ax,
-                chainage_txt,
-                ylabel_txt + " " + veloc_unit,
-                True,
-                title_txt.format(ib=ib + 1),
+        index: int,
+    ):
+        fig, ax = plt.subplots()
+        self.setsize(fig)
+        bk = self.bank_data.bank_chainage_midpoints[index]
+        n_levels = len(self.water_level_data.velocity)
+        velc = np.sqrt(
+            self.erosion_inputs.tauc[index]
+            * self.water_level_data.chezy[0][index] ** 2
+            / (water_density * g)
+        )
+        ax.plot(
+            self.bank_data.bank_chainage_midpoints[index],
+            velc,
+            color="k",
+            label=ucrit_txt,
+        )
+        for iq in range(n_levels):
+            ax.plot(
+                bk,
+                self.water_level_data.velocity[iq][index],
+                color=clrs[iq + 1],
+                label=velocq_txt.format(iq=iq + 1),
             )
-            figlist.append(fig)
-            axlist.append(ax)
-        return figlist, axlist
+        #
+        self.set_axes_properties(
+            ax,
+            chainage_txt,
+            ylabel_txt + " " + veloc_unit,
+            True,
+            title_txt.format(ib=index + 1),
+        )
+        return fig, ax
 
     def _plot_bank_type_segments(
         self,
