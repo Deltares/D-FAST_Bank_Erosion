@@ -1,9 +1,9 @@
 from typing import List, Tuple
-from shapely.geometry import LineString, Point
-from shapely.geometry.polygon import Polygon
-from shapely.geometry import MultiLineString
-from dfastbe.io import BaseRiverData, ConfigFile, LineGeometry, log_text, BaseSimulationData
 
+from shapely.geometry import LineString, MultiLineString, Point
+from shapely.geometry.polygon import Polygon
+
+from dfastbe.io import BaseRiverData, BaseSimulationData, LineGeometry, log_text
 
 MAX_RIVER_WIDTH = 1000
 
@@ -47,7 +47,7 @@ class SearchLines:
         """
         Clip the list of lines to the envelope of a certain size surrounding a reference line.
 
-        Arg:
+        Args:
             search_lines (List[LineString]):
                 List of lines to be clipped.
             river_center_line (LineString):
@@ -56,8 +56,9 @@ class SearchLines:
                 Maximum distance away from river_profile.
 
         Returns:
-            List[LineString]: List of clipped search lines.
-            float: Maximum distance from any point within line to reference line.
+            Tuple[List[LineString], float]:
+                - List of clipped search lines.
+                - Maximum distance from any point within line to reference line.
 
         Examples:
             ```python
@@ -160,13 +161,37 @@ class BankLinesRiverData(BaseRiverData):
 
     @property
     def search_lines(self) -> SearchLines:
+        """Get search lines for bank lines.
+
+        Returns:
+            SearchLines:
+                Search lines for bank lines.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
+            >>> bank_lines_river_data = BankLinesRiverData(config_file)
+            No message found for read_chainage
+            No message found for clip_chainage
+            >>> search_lines = bank_lines_river_data.search_lines
+            No message found for read_search_line
+            No message found for read_search_line
+            >>> len(search_lines.values)
+            2
+
+            ```
+        """
         search_lines = SearchLines(self.config_file.get_search_lines(), self.river_center_line)
         search_lines.d_lines = self.config_file.get_bank_search_distances(search_lines.size)
         return search_lines
 
     def _get_bank_lines_simulation_data(self) -> Tuple[BaseSimulationData, float]:
-        """
-        read simulation data and drying flooding threshold dh0
+        """read simulation data and drying flooding threshold dh0
+
+        Returns:
+            Tuple[BaseSimulationData, float]:
+                simulation data and critical water depth (h0).
         """
         sim_file = self.config_file.get_sim_file("Detect", "")
         log_text("read_simdata", data={"file": sim_file})
@@ -180,6 +205,26 @@ class BankLinesRiverData(BaseRiverData):
         return simulation_data, h0
 
     def simulation_data(self) -> Tuple[BaseSimulationData, float]:
+        """Get simulation data and critical water depth and clip to river center line.
+
+        Returns:
+            Tuple[BaseSimulationData, float]:
+                simulation data and critical water depth (h0).
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> from unittest.mock import patch
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
+            >>> bank_lines_river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
+            N...e
+            >>> simulation_data, h0 = bank_lines_river_data.simulation_data()
+            N...e
+            >>> h0
+            0.1
+
+            ```
+        """
         simulation_data, h0 = self._get_bank_lines_simulation_data()
         # clip simulation data to boundaries ...
         log_text("clip_data")

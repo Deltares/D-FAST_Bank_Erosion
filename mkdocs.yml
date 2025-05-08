@@ -118,6 +118,7 @@ nav:
       - architecture-design/main-components.md
   - API Reference:
       - api/bank_lines.md
+      - api/bank_lines_data_models.md
       - api/bank_erosion.md
       - api/io.md
       - api/cmd.md
