@@ -34,9 +34,6 @@ import matplotlib.pyplot
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from matplotlib.lines import Line2D
-from matplotlib.patches import Patch
-
 from dfastbe.io import BaseSimulationData
 
 
