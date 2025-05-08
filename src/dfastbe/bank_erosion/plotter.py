@@ -19,7 +19,7 @@ from dfastbe.bank_erosion.data_models import (
     WaterLevelData,
 )
 from dfastbe.io import log_text
-from dfastbe.kernel import get_zoom_extends
+from dfastbe.kernel import g, get_zoom_extends, water_density
 
 X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
@@ -336,7 +336,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         fig_i: int,
         km_zoom: List[Tuple],
     ) -> int:
-        figlist, axlist = df_plt.plot6series_velocity_per_bank(
+        figlist, axlist = self.plot6series_velocity_per_bank(
             self.bank_data.bank_chainage_midpoints,
             "river chainage [km]",
             self.water_level_data.velocity,
@@ -362,7 +362,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         river_center_line_arr: np.ndarray,
         xy_zoom: List[Tuple],
     ) -> int:
-        fig, ax = df_plt.plot7_banktype(
+        fig, ax = self.plot7_banktype(
             bbox,
             river_center_line_arr,
             self.bank_data.bank_line_coords,
@@ -1068,3 +1068,155 @@ class ErosionPlotter(df_plt.PlottingBase):
             figlist.append(fig)
             axlist.append(ax)
         return figlist, axlist
+
+    def plot6series_velocity_per_bank(
+        self,
+        bank_km_mid: List[np.ndarray],
+        chainage_txt: str,
+        veloc: List[List[np.ndarray]],
+        velocq_txt: str,
+        tauc: List[np.ndarray],
+        chezy: List[np.ndarray],
+        ucrit_txt: str,
+        ylabel_txt: str,
+        title_txt: str,
+        veloc_unit: str,
+    ) -> Tuple[List[Figure], List[Axes]]:
+        """
+        Create the bank erosion plots with velocities and critical velocities along each bank.
+
+        Arguments
+        ---------
+        bank_km_mid : List[np.ndarray]
+            List of arrays containing the chainage values per bank (segment) [km].
+        chainage_txt : str
+            Label for the horizontal chainage axes.
+        veloc: List[List[np.ndarray]]
+            List of arrays containing the velocities per bank (segment) [m/s].
+        velocq_txt: str,
+            Label for the velocity per discharge level.
+        tauc: List[np.ndarray]
+            List of arrays containing the shear stresses per bank (point) [N/m2].
+        chezy: List[np.ndarray]
+            List of arrays containing the Chezy values per bank [m0.5/s].
+        ucrit_txt: str
+            Label for the critical velocity.
+        ylabel_txt: str
+            Label for the vertical (velocity) axis.
+        title_txt: str
+            Label for the axes title.
+        veloc_unit: str
+            Unit used for all velocities.
+
+        Results
+        -------
+        figlist : List[matplotlib.figure.Figure]
+            List of figure objects, one per bank.
+        axlist : List[matplotlib.axes.Axes]
+            List of axes objects, one per bank.
+        """
+        n_banklines = len(bank_km_mid)
+        n_levels = len(veloc)
+        figlist: List[Figure] = []
+        axlist: List[Axes] = []
+        clrs = self.get_colors("Blues", n_levels + 1)
+        for ib in range(n_banklines):
+            fig, ax = plt.subplots()
+            self.setsize(fig)
+            bk = bank_km_mid[ib]
+            #
+            velc = np.sqrt(tauc[ib] * chezy[ib] ** 2 / (water_density * g))
+            ax.plot(bank_km_mid[ib], velc, color="k", label=ucrit_txt)
+            for iq in range(n_levels):
+                ax.plot(
+                    bk,
+                    veloc[iq][ib],
+                    color=clrs[iq + 1],
+                    label=velocq_txt.format(iq=iq + 1),
+                )
+            #
+            ax.set_xlabel(chainage_txt)
+            ax.set_ylabel(ylabel_txt + " " + veloc_unit)
+            ax.grid(True)
+            ax.set_title(title_txt.format(ib=ib + 1))
+            ax.legend(loc="upper right")
+            figlist.append(fig)
+            axlist.append(ax)
+        return figlist, axlist
+
+    def plot7_banktype(
+        self,
+        bbox: Tuple[float, float, float, float],
+        xykm: np.ndarray,
+        bank_crds: List[np.ndarray],
+        banktype: List[np.ndarray],
+        taucls_str: List[str],
+        xlabel_txt: str,
+        ylabel_txt: str,
+        title_txt: str,
+    ) -> Tuple[Figure, Axes]:
+        """
+        Create the bank erosion plot with colour-coded bank types.
+
+        Arguments
+        ---------
+        bbox : Tuple[float, float, float, float]
+            Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
+        xykm : np.ndarray
+            Array containing the x, y, and chainage; unit m for x and y, km for chainage.
+        bank_crds : List[np.ndarray]
+            List of N arrays containing the x- and y-coordinates of the oroginal
+            bank lines.
+        banktype : List[np.ndarray]
+            List of N arrays containing the bank type values.
+        taucls_str : List[str]
+            List of strings representing the distinct bank type classes.
+        xlabel_txt : str
+            Label for the x-axis.
+        ylabel_txt : str
+            Label for the y-axis.
+        title_txt : str
+            Label for the axes title.
+
+        Results
+        -------
+        fig : matplotlib.figure.Figure
+            Figure object.
+        ax : matplotlib.axes.Axes
+            Axes object.
+        """
+        fig, ax = plt.subplots()
+        self.setsize(fig)
+        ax.set_aspect(1)
+        #
+        scale = 1000
+        self.chainage_markers(xykm, ax, ndec=0, scale=scale)
+        clrs = self.get_colors("plasma", len(taucls_str) + 1)
+        for ib in range(len(bank_crds)):
+            for ibt in range(len(taucls_str)):
+                ibtEdges = np.nonzero(banktype[ib] == ibt)[0]
+                if len(ibtEdges) > 0:
+                    nedges = len(ibtEdges)
+                    nx = max(3 * nedges - 1, 0)
+                    x = np.zeros((nx,)) + np.nan
+                    y = x.copy()
+                    x[0::3] = bank_crds[ib][ibtEdges, 0].copy() / scale
+                    y[0::3] = bank_crds[ib][ibtEdges, 1].copy() / scale
+                    x[1::3] = bank_crds[ib][ibtEdges + 1, 0].copy() / scale
+                    y[1::3] = bank_crds[ib][ibtEdges + 1, 1].copy() / scale
+                    #
+                    if ib == 0:
+                        ax.plot(x, y, color=clrs[ibt], label=taucls_str[ibt])
+                    else:
+                        ax.plot(x, y, color=clrs[ibt])
+                else:
+                    if ib == 0:
+                        ax.plot(np.nan, np.nan, color=clrs[ibt], label=taucls_str[ibt])
+        #
+        self.set_bbox(ax, bbox)
+        ax.set_xlabel(xlabel_txt)
+        ax.set_ylabel(ylabel_txt)
+        ax.grid(True)
+        ax.set_title(title_txt)
+        ax.legend(loc="upper right")
+        return fig, ax
