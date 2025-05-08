@@ -57,7 +57,6 @@ from dfastbe.kernel import (
     compute_bank_erosion_dynamics,
     get_km_bins,
     get_km_eroded_volume,
-    get_zoom_extends,
 )
 from dfastbe.support import move_line
 from dfastbe.utils import timed_logger
@@ -891,7 +890,6 @@ class Erosion:
             km_mid,
             self.river_data.output_intervals,
             self.river_center_line_arr,
-            mesh_data,
             self.simulation_data,
         )
         log_text("end_bankerosion")

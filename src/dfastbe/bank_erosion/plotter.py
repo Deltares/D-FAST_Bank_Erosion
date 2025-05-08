@@ -94,7 +94,6 @@ class ErosionPlotter(df_plt.PlottingBase):
         km_mid,
         km_step,
         river_center_line_arr: np.ndarray,
-        mesh_data: MeshData,
         simulation_data: ErosionSimulationData,
     ):
         """Plot all the results of the bank erosion analysis.
@@ -129,7 +128,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         )
 
         fig_i = self._plot_erosion_sensitivity(
-            fig_i, bbox, river_center_line_arr, xy_line_eq_list, mesh_data, xy_zoom
+            fig_i, bbox, river_center_line_arr, xy_line_eq_list, xy_zoom
         )
 
         fig_i = self._plot_eroded_volume(fig_i, km_mid, km_step, km_zoom)
@@ -181,7 +180,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         #
         scale = 1000
         plot = self._plot_base_water_level(
-            ax, river_center_line_arr, self.bank_data.bank_lines, simulation_data, scale
+            ax, river_center_line_arr, simulation_data, scale
         )
         cbar = fig.colorbar(
             plot, ax=ax, shrink=0.5, drawedges=False, label="water depth [m]"
@@ -202,7 +201,6 @@ class ErosionPlotter(df_plt.PlottingBase):
         bbox: Tuple[float, float, float, float],
         river_center_line_arr: np.ndarray,
         xy_line_eq_list: List,
-        mesh_data: MeshData,
         xy_zoom: List[Tuple],
     ) -> int:
         scale = 1000
@@ -378,17 +376,11 @@ class ErosionPlotter(df_plt.PlottingBase):
         km_zoom: List[Tuple],
     ) -> int:
         figlist, axlist = self.plot5series_waterlevels_per_bank(
-            self.bank_data.bank_chainage_midpoints,
             "river chainage [km]",
-            self.water_level_data.water_level,
-            self.water_level_data.ship_wave_max,
-            self.water_level_data.ship_wave_min,
             "water level at Q{iq}",
             "average water level",
             "wave influenced range",
-            self.water_level_data.bank_height,
             "level of bank",
-            self.erosion_inputs.bank_protection_level,
             "bank protection level",
             "elevation",
             "(water)levels along bank line {ib}",
@@ -509,7 +501,6 @@ class ErosionPlotter(df_plt.PlottingBase):
         self,
         ax: Axes,
         river_center_line_arr: np.ndarray,
-        bank_lines: GeoDataFrame,
         simulation_data: ErosionSimulationData,
         scale: float,
     ) -> PolyCollection:
@@ -532,7 +523,7 @@ class ErosionPlotter(df_plt.PlottingBase):
             color="k",
         )
 
-        for bl in bank_lines.geometry:
+        for bl in self.bank_data.bank_lines.geometry:
             bp = np.array(bl.coords)
             ax.plot(bp[:, 0] / scale, bp[:, 1] / scale, color="k")
 
@@ -683,17 +674,11 @@ class ErosionPlotter(df_plt.PlottingBase):
 
     def plot5series_waterlevels_per_bank(
         self,
-        bank_km_mid: List[np.ndarray],
         chainage_txt: str,
-        waterlevel: List[List[np.ndarray]],
-        shipwavemax: List[List[np.ndarray]],
-        shipwavemin: List[List[np.ndarray]],
         waterlevelq_txt: str,
         avg_waterlevel_txt: str,
         shipwave_txt: str,
-        bankheight: List[np.ndarray],
         bankheight_txt: str,
-        bankprotect: List[np.ndarray],
         bankprotect_txt: str,
         elevation_txt: str,
         title_txt: str,
@@ -742,35 +727,35 @@ class ErosionPlotter(df_plt.PlottingBase):
         axlist : List[matplotlib.axes.Axes]
             List of axes objects, one per bank.
         """
-        n_banklines = len(bank_km_mid)
-        n_levels = len(waterlevel)
+        n_banklines = len(self.bank_data.bank_chainage_midpoints)
+        n_levels = len(self.water_level_data.water_level)
         figlist: List[Figure] = []
         axlist: List[Axes] = []
         clrs = self.get_colors("Blues", n_levels + 1)
         for ib in range(n_banklines):
             fig, ax = plt.subplots()
             self.setsize(fig)
-            bk = bank_km_mid[ib]
+            bk = self.bank_data.bank_chainage_midpoints[ib]
             #
             for iq in range(n_levels):
                 # shaded range of influence for ship waves
                 ax.fill_between(
                     bk,
-                    shipwavemin[iq][ib],
-                    shipwavemax[iq][ib],
+                    self.water_level_data.ship_wave_min[iq][ib],
+                    self.water_level_data.ship_wave_max[iq][ib],
                     color=clrs[iq + 1],
                     alpha=0.1,
                 )
                 ax.plot(
                     bk,
-                    shipwavemax[iq][ib],
+                    self.water_level_data.ship_wave_max[iq][ib],
                     color=clrs[iq + 1],
                     linestyle="--",
                     linewidth=0.5,
                 )
                 ax.plot(
                     bk,
-                    shipwavemin[iq][ib],
+                    self.water_level_data.ship_wave_min[iq][ib],
                     color=clrs[iq + 1],
                     linestyle="--",
                     linewidth=0.5,
@@ -778,14 +763,14 @@ class ErosionPlotter(df_plt.PlottingBase):
                 # water level line itself
                 ax.plot(
                     bk,
-                    waterlevel[iq][ib],
+                    self.water_level_data.water_level[iq][ib],
                     color=clrs[iq + 1],
                     label=waterlevelq_txt.format(iq=iq + 1),
                 )
                 if iq == 0:
-                    wl_avg = waterlevel[iq][ib].copy()
+                    wl_avg = self.water_level_data.water_level[iq][ib].copy()
                 else:
-                    wl_avg = wl_avg + waterlevel[iq][ib]
+                    wl_avg = wl_avg + self.water_level_data.water_level[iq][ib]
             #
             wl_avg = wl_avg / n_levels
             ax.plot(
@@ -795,7 +780,12 @@ class ErosionPlotter(df_plt.PlottingBase):
                 linewidth=2,
                 label=avg_waterlevel_txt,
             )
-            ax.plot(bk, bankheight[ib], color=(0.5, 0.5, 0.5), label=bankheight_txt)
+            ax.plot(
+                bk,
+                self.water_level_data.bank_height[ib],
+                color=(0.5, 0.5, 0.5),
+                label=bankheight_txt,
+            )
             ymin, ymax = ax.get_ylim()
             #
             # bank protection is only visually included in the plot
@@ -804,7 +794,7 @@ class ErosionPlotter(df_plt.PlottingBase):
             #
             ax.plot(
                 bk,
-                bankprotect[ib],
+                self.erosion_inputs.bank_protection_level[ib],
                 color=(0.5, 0.5, 0.5),
                 linestyle="--",
                 label=bankprotect_txt,
