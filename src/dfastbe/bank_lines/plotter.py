@@ -8,7 +8,7 @@ from dfastbe.io import BaseSimulationData, ConfigFile, LineGeometry, log_text
 from dfastbe.kernel import get_zoom_extends
 
 
-class BankLinesPlotter:
+class BankLinesPlotter(df_plt.PlottingBase):
 
     def __init__(
         self,
@@ -74,7 +74,7 @@ class BankLinesPlotter:
         log_text("=")
         log_text("create_figures")
         fig_i = 0
-        bbox = df_plt.get_bbox(xy_km_numpy)
+        bbox = self.get_bbox(xy_km_numpy)
 
         xy_zoom = self._get_zoom_extends(
             bank, n_search_lines, self.config_file.crs, xy_km_numpy, km_bounds
@@ -100,7 +100,7 @@ class BankLinesPlotter:
             self.config_file,
         )
         if self.plot_flags["save_plot"]:
-            fig_i = df_plt.save_plot(
+            fig_i = self.save_plot(
                 fig, ax, fig_i, "banklinedetection", xy_zoom, self.plot_flags, True
             )
 

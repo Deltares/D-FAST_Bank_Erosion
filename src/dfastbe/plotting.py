@@ -39,197 +39,6 @@ from dfastbe.io import ConfigFile
 from dfastbe.kernel import g, water_density
 
 
-def savefig(fig: matplotlib.figure.Figure, filename: Union[str, Path]) -> None:
-    """
-    Save a single figure to file.
-    
-    Arguments
-    ---------
-    fig : matplotlib.figure.Figure
-        Figure to a be saved.
-    filename : str
-        Name of the file to be written.
-    """
-    print("saving figure {file}".format(file=filename))
-    matplotlib.pyplot.show(block=False)
-    fig.savefig(filename, dpi=300)
-
-
-def setsize(fig: matplotlib.figure.Figure) -> None:
-    """
-    Set the size of a figure.
-    
-    Currently the size is hardcoded, but functionality may be extended in the
-    future.
-    
-    Arguments
-    ---------
-    fig : matplotlib.figure.Figure
-        Figure to a be saved.
-    """
-    # the size of an a3 is (16.5, 11.75)
-    # the size of an a3 is (16.5, 11.75)
-    fig.set_size_inches(11.75, 8.25)  # a4
-
-
-def set_bbox(
-    ax: matplotlib.axes.Axes,
-    bbox: Tuple[float, float, float, float],
-    scale: float = 1000,
-) -> None:
-    """
-    Specify the bounding limits of an axes object.
-    
-    Arguments
-    ---------
-    ax : matplotlib.axes.Axes
-        Axes object to be adjusted. 
-    bbox : Tuple[float, float, float, float]
-        Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
-    scale: float
-        Indicates whether the axes are in m (1) or km (1000).
-    """
-    ax.set_xlim(xmin=bbox[0] / scale, xmax=bbox[2] / scale)
-    ax.set_ylim(ymin=bbox[1] / scale, ymax=bbox[3] / scale)
-
-
-def chainage_markers(
-    xykm: np.ndarray, ax: matplotlib.axes.Axes, ndec: int = 1, scale: float = 1000
-) -> None:
-    """
-    Add markers indicating the river chainage to a plot.
-
-    Arguments
-    ---------
-    xykm : np.ndarray
-        Array containing the x, y, and chainage; unit m for x and y, km for chainage.
-    ax : matplotlib.axes.Axes
-        Axes object in which to add the markers.
-    ndec : int
-        Number of decimals used for marks.
-    scale: float
-        Indicates whether the axes are in m (1) or km (1000).
-    """
-    step = 10 ** (-ndec)
-    labelstr = " {:." + str(ndec) + "f}"
-    km_rescaled = xykm[:, 2] / step
-    mask = np.isclose(np.round(km_rescaled), km_rescaled)
-    ax.plot(
-        xykm[mask, 0] / scale,
-        xykm[mask, 1] / scale,
-        linestyle="None",
-        marker="+",
-        color="k",
-    )
-    for i in np.nonzero(mask)[0]:
-        ax.text(
-            xykm[i, 0] / scale,
-            xykm[i, 1] / scale,
-            labelstr.format(xykm[i, 2]),
-            fontsize="x-small",
-            clip_on=True,
-        )
-
-
-def plot_mesh(
-    ax: matplotlib.axes.Axes, xe: np.ndarray, ye: np.ndarray, scale: float = 1000
-) -> None:
-    """
-    Add a mesh to a plot.
-
-    Arguments
-    ---------
-    ax : matplotlib.axes.Axes
-        Axes object in which to add the mesh.
-    xe : np.ndarray
-        M x 2 array of begin/end x-coordinates of mesh edges.
-    ye : np.ndarray
-        M x 2 array of begin/end y-coordinates of mesh edges.
-    scale : float
-        Indicates whether the axes are in m (1) or km (1000).
-    """
-    xe1 = xe[:, (0, 1, 1)] / scale
-    xe1[:, 2] = np.nan
-    xev = xe1.reshape((xe1.size,))
-
-    ye1 = ye[:, (0, 1, 1)] / scale
-    ye1[:, 2] = np.nan
-    yev = ye1.reshape((ye1.size,))
-
-    # to avoid OverflowError: In draw_path: Exceeded cell block limit
-    # plot the data in chunks ...
-    for i in range(0, len(xev), 3000):
-        ax.plot(
-            xev[i : i + 3000], yev[i : i + 3000], color=(0.5, 0.5, 0.5), linewidth=0.25
-        )
-
-
-def plot_mesh_patches(
-    ax: matplotlib.axes.Axes,
-    fn: np.ndarray,
-    nnodes: np.ndarray,
-    xn: np.ndarray,
-    yn: np.ndarray,
-    val: np.ndarray,
-    minval: Optional[float] = None,
-    maxval: Optional[float] = None,
-    scale: float = 1000,
-) -> matplotlib.collections.PolyCollection:
-    """
-    Add a collection of patches to the plot one for every face of the mesh.
-
-    Arguments
-    ---------
-    ax : matplotlib.axes.Axes
-        Axes object in which to add the mesh.
-    fn : np.ndarray
-        N x M array listing the nodes (max M) per face (total N) of the mesh.
-    nnodes : np.ndarray
-        Number of nodes per face (max M).
-    xn : np.ndarray
-        X-coordinates of the mesh nodes.
-    yn : np.ndarray
-        Y-coordinates of the mesh nodes.
-    val : np.ndarray
-        Array of length N containing the value per face.
-    minval : Optional[float]
-        Lower limit for the color scale.
-    maxval : Optional[float]
-        Upper limit for the color scale.
-    scale : float
-        Indicates whether the axes are in m (1) or km (1000).
-
-    Returns
-    -------
-    p : matplotlib.collections.PolyCollection
-        Patches object.
-    """
-    tfn_list = []
-    tval_list = []
-    for n in range(3, max(nnodes) + 1):
-        mask = nnodes >= n
-        fn_masked = fn[mask, :]
-        tfn_list.append(fn_masked[:, (0, n - 2, n - 1)])
-        tval_list.append(val[mask])
-    tfn = np.concatenate(tfn_list, axis=0)
-    tval = np.concatenate(tval_list, axis=0)
-    # cmap = matplotlib.pyplot.get_cmap('Spectral')
-    if minval is None:
-        minval = np.min(tval)
-    if maxval is None:
-        maxval = np.max(tval)
-    p = ax.tripcolor(
-        xn / scale,
-        yn / scale,
-        tfn,
-        facecolors=tval,
-        cmap="Spectral",
-        vmin=minval,
-        vmax=maxval,
-    )
-    return p
-
-
 def plot_detect1(
     bbox: Tuple[float, float, float, float],
     xykm: np.ndarray,
@@ -1222,158 +1031,364 @@ def plot8_eroded_distance(
     return fig, ax
 
 
-def get_colors(cmap_name: str, n: int) -> List[Tuple[float, float, float]]:
-    """
-    Obtain N colors from the specified colormap.
-    
-    Arguments
-    ---------
-    cmap_name : str
-        Name of the color map.
-    n : int
-        Number of colors to be returned.
-    
-    Returns
-    -------
-    clrcyc : List[Tuple[float, float, float]]
-        List of colour tuplets.
-    """
-    cmap = matplotlib.cm.get_cmap(cmap_name)
-    clrs = [cmap(i / (n - 1)) for i in range(n)]
-    return clrs
+class PlottingBase:
+    def savefig(
+        self, fig: matplotlib.figure.Figure, filename: Union[str, Path]
+    ) -> None:
+        """
+        Save a single figure to file.
 
+        Arguments
+        ---------
+        fig : matplotlib.figure.Figure
+            Figure to a be saved.
+        filename : str
+            Name of the file to be written.
+        """
+        print("saving figure {file}".format(file=filename))
+        matplotlib.pyplot.show(block=False)
+        fig.savefig(filename, dpi=300)
 
-def zoom_x_and_save(
-    fig: matplotlib.figure.Figure,
-    ax: matplotlib.axes.Axes,
-    figbase: Path,
-    plot_ext: str,
-    xzoom: List[Tuple[float, float]],
-) -> None:
-    """
-    Zoom in on subregions of the x-axis and save the figure.
+    def setsize(self, fig: matplotlib.figure.Figure) -> None:
+        """
+        Set the size of a figure.
 
-    Arguments
-    ---------
-    fig : matplotlib.figure.Figure
-        Figure to be processed.
-    ax : matplotlib.axes.Axes
-        Axes to be processed.
-    fig_base : str
-        Base name of the figure to be saved.
-    plot_ext : str
-        File extension of the figure to be saved.
-    xzoom : List[list[float,float]]
-        Values at which to split the x-axis.
-    """
-    xmin, xmax = ax.get_xlim()
-    for ix, zoom in enumerate(xzoom):
-        ax.set_xlim(xmin=zoom[0], xmax=zoom[1])
-        figfile = figbase.with_name(f"{figbase.stem}.sub{str(ix + 1)}{plot_ext}")
-        savefig(fig, figfile)
-    ax.set_xlim(xmin=xmin, xmax=xmax)
+        Currently the size is hardcoded, but functionality may be extended in the
+        future.
 
+        Arguments
+        ---------
+        fig : matplotlib.figure.Figure
+            Figure to a be saved.
+        """
+        # the size of an a3 is (16.5, 11.75)
+        # the size of an a3 is (16.5, 11.75)
+        fig.set_size_inches(11.75, 8.25)  # a4
 
-def zoom_xy_and_save(
-    fig: matplotlib.figure.Figure,
-    ax: matplotlib.axes.Axes,
-    figbase: Path,
-    plot_ext: str,
-    xyzoom: List[Tuple[float, float, float, float]],
-    scale: float = 1000,
-) -> None:
-    """
-    Zoom in on subregions in x,y-space and save the figure.
+    def set_bbox(
+        self,
+        ax: matplotlib.axes.Axes,
+        bbox: Tuple[float, float, float, float],
+        scale: float = 1000,
+    ) -> None:
+        """
+        Specify the bounding limits of an axes object.
 
-    Arguments
-    ---------
-    fig : matplotlib.figure.Figure
-        Figure to be processed.
-    ax : matplotlib.axes.Axes
-        Axes to be processed.
-    fig_base : str
-        Base name of the figure to be saved.
-    plot_ext : str
-        File extension of the figure to be saved.
-    xyzoom : List[List[float, float, float, float]]
-        List of xmin, xmax, ymin, ymax values to zoom into.
-    scale: float
-        Indicates whether the axes are in m (1) or km (1000).
-    """
-    xmin, xmax = ax.get_xlim()
-    ymin, ymax = ax.get_ylim()
+        Arguments
+        ---------
+        ax : matplotlib.axes.Axes
+            Axes object to be adjusted.
+        bbox : Tuple[float, float, float, float]
+            Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
+        scale: float
+            Indicates whether the axes are in m (1) or km (1000).
+        """
+        ax.set_xlim(xmin=bbox[0] / scale, xmax=bbox[2] / scale)
+        ax.set_ylim(ymin=bbox[1] / scale, ymax=bbox[3] / scale)
 
-    dx_zoom = 0
-    xy_ratio = (ymax - ymin) / (xmax - xmin)
-    for zoom in xyzoom:
-        xmin0 = zoom[0]
-        xmax0 = zoom[1]
-        ymin0 = zoom[2]
-        ymax0 = zoom[3]
-        dx = xmax0 - xmin0
-        dy = ymax0 - ymin0
-        if dy < xy_ratio * dx:
-            # x range limiting
-            dx_zoom = max(dx_zoom, dx)
-        else:
-            # y range limiting
-            dx_zoom = max(dx_zoom, dy / xy_ratio)
-    dy_zoom = dx_zoom * xy_ratio
+    def chainage_markers(
+        self,
+        xykm: np.ndarray,
+        ax: matplotlib.axes.Axes,
+        ndec: int = 1,
+        scale: float = 1000,
+    ) -> None:
+        """
+        Add markers indicating the river chainage to a plot.
 
-    for ix, zoom in enumerate(xyzoom):
-        x0 = (zoom[0] + zoom[1]) / 2
-        y0 = (zoom[2] + zoom[3]) / 2
-        ax.set_xlim(xmin=(x0 - dx_zoom/2) / scale, xmax=(x0 + dx_zoom/2) / scale)
-        ax.set_ylim(ymin=(y0 - dy_zoom/2) / scale, ymax=(y0 + dy_zoom/2) / scale)
-        figfile = figbase.with_name(f"{figbase.stem}.sub{str(ix + 1)}{plot_ext}")
-        savefig(fig, figfile)
+        Arguments
+        ---------
+        xykm : np.ndarray
+            Array containing the x, y, and chainage; unit m for x and y, km for chainage.
+        ax : matplotlib.axes.Axes
+            Axes object in which to add the markers.
+        ndec : int
+            Number of decimals used for marks.
+        scale: float
+            Indicates whether the axes are in m (1) or km (1000).
+        """
+        step = 10 ** (-ndec)
+        labelstr = " {:." + str(ndec) + "f}"
+        km_rescaled = xykm[:, 2] / step
+        mask = np.isclose(np.round(km_rescaled), km_rescaled)
+        ax.plot(
+            xykm[mask, 0] / scale,
+            xykm[mask, 1] / scale,
+            linestyle="None",
+            marker="+",
+            color="k",
+        )
+        for i in np.nonzero(mask)[0]:
+            ax.text(
+                xykm[i, 0] / scale,
+                xykm[i, 1] / scale,
+                labelstr.format(xykm[i, 2]),
+                fontsize="x-small",
+                clip_on=True,
+            )
 
-    ax.set_xlim(xmin=xmin, xmax=xmax)
-    ax.set_ylim(ymin=ymin, ymax=ymax)
+    def plot_mesh(
+        self,
+        ax: matplotlib.axes.Axes,
+        xe: np.ndarray,
+        ye: np.ndarray,
+        scale: float = 1000,
+    ) -> None:
+        """
+        Add a mesh to a plot.
 
+        Arguments
+        ---------
+        ax : matplotlib.axes.Axes
+            Axes object in which to add the mesh.
+        xe : np.ndarray
+            M x 2 array of begin/end x-coordinates of mesh edges.
+        ye : np.ndarray
+            M x 2 array of begin/end y-coordinates of mesh edges.
+        scale : float
+            Indicates whether the axes are in m (1) or km (1000).
+        """
+        xe1 = xe[:, (0, 1, 1)] / scale
+        xe1[:, 2] = np.nan
+        xev = xe1.reshape((xe1.size,))
 
-def get_bbox(
-    coords: np.ndarray, buffer: float = 0.1
-) -> Tuple[float, float, float, float]:
-    """
-    Derive the bounding box from a line.
-    Args:
-        coords (np.ndarray):
-            An N x M array containing x- and y-coordinates as first two M entries
-        buffer : float
-            Buffer fraction surrounding the tight bounding box
-    Returns:
-        bbox (Tuple[float, float, float, float]):
-            Tuple bounding box consisting of [min x, min y, max x, max y)
-    """
-    x = coords[:, 0]
-    y = coords[:, 1]
-    x_min = x.min()
-    y_min = y.min()
-    x_max = x.max()
-    y_max = y.max()
-    d = buffer * max(x_max - x_min, y_max - y_min)
-    bbox = (x_min - d, y_min - d, x_max + d, y_max + d)
+        ye1 = ye[:, (0, 1, 1)] / scale
+        ye1[:, 2] = np.nan
+        yev = ye1.reshape((ye1.size,))
 
-    return bbox
+        # to avoid OverflowError: In draw_path: Exceeded cell block limit
+        # plot the data in chunks ...
+        for i in range(0, len(xev), 3000):
+            ax.plot(
+                xev[i : i + 3000],
+                yev[i : i + 3000],
+                color=(0.5, 0.5, 0.5),
+                linewidth=0.25,
+            )
 
+    def plot_mesh_patches(
+        self,
+        ax: matplotlib.axes.Axes,
+        fn: np.ndarray,
+        nnodes: np.ndarray,
+        xn: np.ndarray,
+        yn: np.ndarray,
+        val: np.ndarray,
+        minval: Optional[float] = None,
+        maxval: Optional[float] = None,
+        scale: float = 1000,
+    ) -> matplotlib.collections.PolyCollection:
+        """
+        Add a collection of patches to the plot one for every face of the mesh.
 
-def save_plot(
-    fig: matplotlib.figure.Figure,
-    ax: matplotlib.axes.Axes,
-    figure_index: int,
-    plot_name: str,
-    zoom_coords: Optional[List[Tuple[float, float, float, float]]],
-    plot_flags: Dict[str, Any],
-    zoom_xy: bool,
-) -> int:
-    """Save the plot to a file."""
-    figure_index += 1
-    fig_base = Path(plot_flags['fig_dir']) / f"{figure_index}_{plot_name}"
-    if plot_flags["save_plot_zoomed"] and zoom_xy:
-        zoom_xy_and_save(fig, ax, fig_base, plot_flags["plot_ext"], zoom_coords)
-    elif plot_flags["save_plot_zoomed"]:
-        zoom_x_and_save(fig, ax, fig_base, plot_flags["plot_ext"], zoom_coords)
-    fig_path = fig_base.with_suffix(plot_flags["plot_ext"])
-    savefig(fig, fig_path)
-    return figure_index
+        Arguments
+        ---------
+        ax : matplotlib.axes.Axes
+            Axes object in which to add the mesh.
+        fn : np.ndarray
+            N x M array listing the nodes (max M) per face (total N) of the mesh.
+        nnodes : np.ndarray
+            Number of nodes per face (max M).
+        xn : np.ndarray
+            X-coordinates of the mesh nodes.
+        yn : np.ndarray
+            Y-coordinates of the mesh nodes.
+        val : np.ndarray
+            Array of length N containing the value per face.
+        minval : Optional[float]
+            Lower limit for the color scale.
+        maxval : Optional[float]
+            Upper limit for the color scale.
+        scale : float
+            Indicates whether the axes are in m (1) or km (1000).
+
+        Returns
+        -------
+        p : matplotlib.collections.PolyCollection
+            Patches object.
+        """
+        tfn_list = []
+        tval_list = []
+        for n in range(3, max(nnodes) + 1):
+            mask = nnodes >= n
+            fn_masked = fn[mask, :]
+            tfn_list.append(fn_masked[:, (0, n - 2, n - 1)])
+            tval_list.append(val[mask])
+        tfn = np.concatenate(tfn_list, axis=0)
+        tval = np.concatenate(tval_list, axis=0)
+        # cmap = matplotlib.pyplot.get_cmap('Spectral')
+        if minval is None:
+            minval = np.min(tval)
+        if maxval is None:
+            maxval = np.max(tval)
+        p = ax.tripcolor(
+            xn / scale,
+            yn / scale,
+            tfn,
+            facecolors=tval,
+            cmap="Spectral",
+            vmin=minval,
+            vmax=maxval,
+        )
+        return p
+
+    def get_colors(self, cmap_name: str, n: int) -> List[Tuple[float, float, float]]:
+        """
+        Obtain N colors from the specified colormap.
+
+        Arguments
+        ---------
+        cmap_name : str
+            Name of the color map.
+        n : int
+            Number of colors to be returned.
+
+        Returns
+        -------
+        clrcyc : List[Tuple[float, float, float]]
+            List of colour tuplets.
+        """
+        cmap = matplotlib.cm.get_cmap(cmap_name)
+        clrs = [cmap(i / (n - 1)) for i in range(n)]
+        return clrs
+
+    def zoom_x_and_save(
+        self,
+        fig: matplotlib.figure.Figure,
+        ax: matplotlib.axes.Axes,
+        figbase: Path,
+        plot_ext: str,
+        xzoom: List[Tuple[float, float]],
+    ) -> None:
+        """
+        Zoom in on subregions of the x-axis and save the figure.
+
+        Arguments
+        ---------
+        fig : matplotlib.figure.Figure
+            Figure to be processed.
+        ax : matplotlib.axes.Axes
+            Axes to be processed.
+        fig_base : str
+            Base name of the figure to be saved.
+        plot_ext : str
+            File extension of the figure to be saved.
+        xzoom : List[list[float,float]]
+            Values at which to split the x-axis.
+        """
+        xmin, xmax = ax.get_xlim()
+        for ix, zoom in enumerate(xzoom):
+            ax.set_xlim(xmin=zoom[0], xmax=zoom[1])
+            figfile = figbase.with_name(f"{figbase.stem}.sub{str(ix + 1)}{plot_ext}")
+            savefig(fig, figfile)
+        ax.set_xlim(xmin=xmin, xmax=xmax)
+
+    def zoom_xy_and_save(
+        self,
+        fig: matplotlib.figure.Figure,
+        ax: matplotlib.axes.Axes,
+        figbase: Path,
+        plot_ext: str,
+        xyzoom: List[Tuple[float, float, float, float]],
+        scale: float = 1000,
+    ) -> None:
+        """
+        Zoom in on subregions in x,y-space and save the figure.
+
+        Arguments
+        ---------
+        fig : matplotlib.figure.Figure
+            Figure to be processed.
+        ax : matplotlib.axes.Axes
+            Axes to be processed.
+        fig_base : str
+            Base name of the figure to be saved.
+        plot_ext : str
+            File extension of the figure to be saved.
+        xyzoom : List[List[float, float, float, float]]
+            List of xmin, xmax, ymin, ymax values to zoom into.
+        scale: float
+            Indicates whether the axes are in m (1) or km (1000).
+        """
+        xmin, xmax = ax.get_xlim()
+        ymin, ymax = ax.get_ylim()
+
+        dx_zoom = 0
+        xy_ratio = (ymax - ymin) / (xmax - xmin)
+        for zoom in xyzoom:
+            xmin0 = zoom[0]
+            xmax0 = zoom[1]
+            ymin0 = zoom[2]
+            ymax0 = zoom[3]
+            dx = xmax0 - xmin0
+            dy = ymax0 - ymin0
+            if dy < xy_ratio * dx:
+                # x range limiting
+                dx_zoom = max(dx_zoom, dx)
+            else:
+                # y range limiting
+                dx_zoom = max(dx_zoom, dy / xy_ratio)
+        dy_zoom = dx_zoom * xy_ratio
+
+        for ix, zoom in enumerate(xyzoom):
+            x0 = (zoom[0] + zoom[1]) / 2
+            y0 = (zoom[2] + zoom[3]) / 2
+            ax.set_xlim(
+                xmin=(x0 - dx_zoom / 2) / scale, xmax=(x0 + dx_zoom / 2) / scale
+            )
+            ax.set_ylim(
+                ymin=(y0 - dy_zoom / 2) / scale, ymax=(y0 + dy_zoom / 2) / scale
+            )
+            figfile = figbase.with_name(f"{figbase.stem}.sub{str(ix + 1)}{plot_ext}")
+            savefig(fig, figfile)
+
+        ax.set_xlim(xmin=xmin, xmax=xmax)
+        ax.set_ylim(ymin=ymin, ymax=ymax)
+
+    def get_bbox(
+        self, coords: np.ndarray, buffer: float = 0.1
+    ) -> Tuple[float, float, float, float]:
+        """
+        Derive the bounding box from a line.
+        Args:
+            coords (np.ndarray):
+                An N x M array containing x- and y-coordinates as first two M entries
+            buffer : float
+                Buffer fraction surrounding the tight bounding box
+        Returns:
+            bbox (Tuple[float, float, float, float]):
+                Tuple bounding box consisting of [min x, min y, max x, max y)
+        """
+        x = coords[:, 0]
+        y = coords[:, 1]
+        x_min = x.min()
+        y_min = y.min()
+        x_max = x.max()
+        y_max = y.max()
+        d = buffer * max(x_max - x_min, y_max - y_min)
+        bbox = (x_min - d, y_min - d, x_max + d, y_max + d)
+
+        return bbox
+
+    def save_plot(
+        self,
+        fig: matplotlib.figure.Figure,
+        ax: matplotlib.axes.Axes,
+        figure_index: int,
+        plot_name: str,
+        zoom_coords: Optional[List[Tuple[float, float, float, float]]],
+        plot_flags: Dict[str, Any],
+        zoom_xy: bool,
+    ) -> int:
+        """Save the plot to a file."""
+        figure_index += 1
+        fig_base = Path(plot_flags['fig_dir']) / f"{figure_index}_{plot_name}"
+        if plot_flags["save_plot_zoomed"] and zoom_xy:
+            self.zoom_xy_and_save(
+                fig, ax, fig_base, plot_flags["plot_ext"], zoom_coords
+            )
+        elif plot_flags["save_plot_zoomed"]:
+            self.zoom_x_and_save(fig, ax, fig_base, plot_flags["plot_ext"], zoom_coords)
+        fig_path = fig_base.with_suffix(plot_flags["plot_ext"])
+        savefig(fig, fig_path)
+        return figure_index

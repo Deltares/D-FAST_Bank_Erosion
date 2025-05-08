@@ -15,9 +15,10 @@ from dfastbe.bank_erosion.data_models import (
 from dfastbe.io import log_text
 from dfastbe.kernel import get_zoom_extends
 
+
 X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
-class ErosionPlotter:
+class ErosionPlotter(df_plt.PlottingBase):
     """class to plot the results of the bank erosion analysis."""
 
     def __init__(
@@ -113,7 +114,7 @@ class ErosionPlotter:
         log_text("=")
         log_text("create_figures")
         fig_i = 0
-        bbox = ErosionPlotter.get_bbox(river_center_line_arr)
+        bbox = self.get_bbox(river_center_line_arr)
 
         km_zoom, xy_zoom = self._generate_zoomed_coordinates(river_axis_km)
 
@@ -394,7 +395,7 @@ class ErosionPlotter:
 
     def _save_plot(self, fig, ax, fig_i, plot_name, zoom_coords, zoom_xy) -> int:
         """Save the plot to a file."""
-        return df_plt.save_plot(
+        return self.save_plot(
             fig, ax, fig_i, plot_name, zoom_coords, self.plot_flags, zoom_xy
         )
 
@@ -403,22 +404,3 @@ class ErosionPlotter:
             plt.close("all")
         else:
             plt.show(block=not self.gui)
-
-    @staticmethod
-    def get_bbox(
-        coords: np.ndarray, buffer: float = 0.1
-    ) -> Tuple[float, float, float, float]:
-        """
-        Derive the bounding box from a line.
-
-        Args:
-            coords (np.ndarray):
-                An N x M array containing x- and y-coordinates as first two M entries
-            buffer : float
-                Buffer fraction surrounding the tight bounding box
-
-        Returns:
-            bbox (Tuple[float, float, float, float]):
-                Tuple bounding box consisting of [min x, min y, max x, max y)
-        """
-        return df_plt.get_bbox(coords, buffer)
