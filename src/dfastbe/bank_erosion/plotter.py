@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from geopandas.geodataframe import GeoDataFrame
 from matplotlib.axes import Axes
+from matplotlib.collections import PolyCollection
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
@@ -174,16 +175,23 @@ class ErosionPlotter(df_plt.PlottingBase):
         xy_zoom: List[Tuple],
     ) -> int:
         """Plot the water level data."""
-        fig, ax = self.plot1_waterdepth_and_banklines(
-            bbox,
-            river_center_line_arr,
-            self.bank_data.bank_lines,
-            X_AXIS_TITLE,
-            Y_AXIS_TITLE,
-            "water depth and initial bank lines",
-            "water depth [m]",
-            simulation_data,
+        fig, ax = plt.subplots()
+        self.setsize(fig)
+        ax.set_aspect(1)
+        #
+        scale = 1000
+        plot = self._plot_base_water_level(
+            ax, river_center_line_arr, self.bank_data.bank_lines, simulation_data, scale
         )
+        cbar = fig.colorbar(
+            plot, ax=ax, shrink=0.5, drawedges=False, label="water depth [m]"
+        )
+        #
+        self.set_bbox(ax, bbox)
+        ax.set_xlabel(X_AXIS_TITLE)
+        ax.set_ylabel(Y_AXIS_TITLE)
+        ax.grid(True)
+        ax.set_title("water depth and initial bank lines")
         if self.plot_flags["save_plot"]:
             fig_i = self._save_plot(fig, ax, fig_i, "banklines", xy_zoom, True)
         return fig_i
@@ -403,63 +411,39 @@ class ErosionPlotter(df_plt.PlottingBase):
         else:
             plt.show(block=not self.gui)
 
-    def plot1_waterdepth_and_banklines(
+    def _plot_base_water_level(
         self,
-        bbox: Tuple[float, float, float, float],
-        xykm: np.ndarray,
-        banklines: GeoDataFrame,
-        xlabel_txt: str,
-        ylabel_txt: str,
-        title_txt: str,
-        waterdepth_txt: str,
+        ax: Axes,
+        river_center_line_arr: np.ndarray,
+        bank_lines: GeoDataFrame,
         simulation_data: ErosionSimulationData,
-    ) -> Tuple[Figure, Axes]:
+        scale: float,
+    ) -> PolyCollection:
         """
-        Create the bank erosion plot with water depths and initial bank lines.
+        Helper function to plot the base water level data, including the river centerline,
+        bank lines, and mesh patches.
 
-        bbox : Tuple[float, float, float, float]
-            Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
-        xykm : np.ndarray
-            Array containing the x, y, and chainage; unit m for x and y, km for chainage.
-        banklines : geopandas.geodataframe.GeoDataFrame
-            Pandas object containing the bank lines.
-        xlabel_txt : str
-            Label for the x-axis.
-        ylabel_txt : str
-            Label for the y-axis.
-        title_txt : str
-            Label for the axes title.
-        waterdepth_txt : str
-            Label for the color bar.
-
-        Results
-        -------
-        fig : matplotlib.figure.Figure
-            Figure object.
-        ax : matplotlib.axes.Axes
-            Axes object.
+        Args:
+            ax (Axes): The axes object to plot on.
+            river_center_line_arr (np.ndarray): Array of river centerline coordinates.
+            bank_lines (GeoDataFrame): GeoDataFrame containing bank line geometries.
+            simulation_data (ErosionSimulationData): Simulation data for water depth.
+            scale (float): Scaling factor for coordinates.
         """
-        fig, ax = plt.subplots()
-        self.setsize(fig)
-        ax.set_aspect(1)
-        #
-        scale = 1000
-        self.chainage_markers(xykm, ax, ndec=0, scale=scale)
-        ax.plot(xykm[:, 0] / scale, xykm[:, 1] / scale, linestyle="--", color="k")
-        for bl in banklines.geometry:
+        self.chainage_markers(river_center_line_arr, ax, ndec=0, scale=scale)
+        ax.plot(
+            river_center_line_arr[:, 0] / scale,
+            river_center_line_arr[:, 1] / scale,
+            linestyle="--",
+            color="k",
+        )
+
+        for bl in bank_lines.geometry:
             bp = np.array(bl.coords)
             ax.plot(bp[:, 0] / scale, bp[:, 1] / scale, color="k")
 
         maximum_water_depth = 1.1 * self.water_level_data.hfw_max
-        p = self.plot_mesh_patches(ax, simulation_data, 0, maximum_water_depth)
-        cbar = fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=waterdepth_txt)
-        #
-        self.set_bbox(ax, bbox)
-        ax.set_xlabel(xlabel_txt)
-        ax.set_ylabel(ylabel_txt)
-        ax.grid(True)
-        ax.set_title(title_txt)
-        return fig, ax
+        return self.plot_mesh_patches(ax, simulation_data, 0, maximum_water_depth)
 
     def plot2_eroded_distance_and_equilibrium(
         self,
