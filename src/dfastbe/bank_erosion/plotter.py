@@ -171,20 +171,15 @@ class ErosionPlotter(df_plt.PlottingBase):
         xy_zoom: List[Tuple],
     ) -> int:
         """Plot the water level data."""
-        fig, ax = df_plt.plot1_waterdepth_and_banklines(
+        fig, ax = self.plot1_waterdepth_and_banklines(
             bbox,
             river_center_line_arr,
             self.bank_data.bank_lines,
-            simulation_data.face_node,
-            simulation_data.n_nodes,
-            simulation_data.x_node,
-            simulation_data.y_node,
-            simulation_data.water_depth_face,
-            1.1 * self.water_level_data.hfw_max,
             X_AXIS_TITLE,
             Y_AXIS_TITLE,
             "water depth and initial bank lines",
             "water depth [m]",
+            simulation_data,
         )
         if self.plot_flags["save_plot"]:
             fig_i = self._save_plot(fig, ax, fig_i, "banklines", xy_zoom, True)
@@ -412,16 +407,11 @@ class ErosionPlotter(df_plt.PlottingBase):
         bbox: Tuple[float, float, float, float],
         xykm: np.ndarray,
         banklines: GeoDataFrame,
-        fn: np.ndarray,
-        nnodes: np.ndarray,
-        xn: np.ndarray,
-        yn: np.ndarray,
-        h: np.ndarray,
-        hmax: float,
         xlabel_txt: str,
         ylabel_txt: str,
         title_txt: str,
         waterdepth_txt: str,
+        simulation_data: ErosionSimulationData,
     ) -> Tuple[Figure, Axes]:
         """
         Create the bank erosion plot with water depths and initial bank lines.
@@ -432,19 +422,6 @@ class ErosionPlotter(df_plt.PlottingBase):
             Array containing the x, y, and chainage; unit m for x and y, km for chainage.
         banklines : geopandas.geodataframe.GeoDataFrame
             Pandas object containing the bank lines.
-
-        fn : np.ndarray
-            N x M array listing the nodes (max M) per face (total N) of the mesh.
-        nnodes : np.ndarray
-            Number of nodes per face (max M).
-        xn : np.ndarray
-            X-coordinates of the mesh nodes.
-        yn : np.ndarray
-            Y-coordinates of the mesh nodes.
-        h : np.ndarray
-            Array of water depth values.
-        hmax : float
-            Water depth value to be used as upper limit for coloring.
         xlabel_txt : str
             Label for the x-axis.
         ylabel_txt : str
@@ -471,7 +448,18 @@ class ErosionPlotter(df_plt.PlottingBase):
         for bl in banklines.geometry:
             bp = np.array(bl.coords)
             ax.plot(bp[:, 0] / scale, bp[:, 1] / scale, color="k")
-        p = self.plot_mesh_patches(ax, fn, nnodes, xn, yn, h, 0, hmax)
+
+        maximum_water_depth = 1.1 * simulation_data.water_depth_face.max()
+        p = self.plot_mesh_patches(
+            ax,
+            simulation_data.face_node,
+            simulation_data.n_nodes,
+            simulation_data.x_node,
+            simulation_data.y_node,
+            simulation_data.water_depth_face,
+            0,
+            maximum_water_depth,
+        )
         cbar = fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=waterdepth_txt)
         #
         self.set_bbox(ax, bbox)
