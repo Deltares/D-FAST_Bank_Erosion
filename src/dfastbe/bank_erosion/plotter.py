@@ -356,14 +356,18 @@ class ErosionPlotter(df_plt.PlottingBase):
         km_step: float,
         km_zoom: List[Tuple],
     ) -> int:
-        fig, ax = self.plot4_eroded_volume_eq(
-            km_mid,
-            km_step,
-            "river chainage [km]",
-            self.erosion_results.eq_eroded_vol_per_km,
-            "eroded volume [m^3]",
-            f"eroded volume per {km_step} chainage km (equilibrium)",
-        )
+        fig, ax = plt.subplots()
+        self.setsize(fig)
+
+        tvol = np.zeros(km_mid.shape)
+        for i in range(len(km_mid)):
+            tvol[i] = self.erosion_results.eq_eroded_vol_per_km[i].sum()
+        ax.bar(km_mid, tvol, width=0.8 * km_step)
+
+        ax.set_xlabel("river chainage [km]")
+        ax.set_ylabel("eroded volume [m^3]")
+        ax.grid(True)
+        ax.set_title(f"eroded volume per {km_step} chainage km (equilibrium)")
         if self.plot_flags["save_plot"]:
             fig_i = self._save_plot(fig, ax, fig_i, "eroded_volume_eq", km_zoom, False)
         return fig_i
@@ -644,54 +648,6 @@ class ErosionPlotter(df_plt.PlottingBase):
             wfrac,
             is_discharge=False,
         )
-
-    def plot4_eroded_volume_eq(
-        self,
-        km_mid: np.ndarray,
-        km_step: float,
-        chainage_txt: str,
-        vol_eq: np.ndarray,
-        ylabel_txt: str,
-        title_txt: str,
-    ) -> Tuple[Figure, Axes]:
-        """
-        Create the bank erosion plot with equilibrium eroded volume.
-
-        Arguments
-        ---------
-        km_mid : np.ndarray
-            Array containing the mid points for the chainage bins.
-        km_step : float
-            Bin width.
-        chainage_txt : str
-            Label for the horizontal chainage axes.
-        vol_eq : np.ndarray
-            Array containing the equilibrium eroded volume per bin.
-        ylabel_txt : str
-            Label for the vertical erosion volume axes.
-        title_txt : str
-            Label for axes title.
-
-        Results
-        -------
-        fig : matplotlib.figure.Figure
-            Figure object.
-        ax : matplotlib.axes.Axes
-            Axes object.
-        """
-        fig, ax = plt.subplots()
-        self.setsize(fig)
-        #
-        tvol = np.zeros(km_mid.shape)
-        for i in range(len(km_mid)):
-            tvol[i] = vol_eq[i].sum()
-        ax.bar(km_mid, tvol, width=0.8 * km_step)
-        #
-        ax.set_xlabel(chainage_txt)
-        ax.set_ylabel(ylabel_txt)
-        ax.grid(True)
-        ax.set_title(title_txt)
-        return fig, ax
 
     def plot5series_waterlevels_per_bank(
         self,
