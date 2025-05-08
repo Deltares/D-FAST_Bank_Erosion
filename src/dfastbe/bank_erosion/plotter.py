@@ -432,16 +432,24 @@ class ErosionPlotter(df_plt.PlottingBase):
         river_center_line_arr: np.ndarray,
         xy_zoom: List[Tuple],
     ) -> int:
-        fig, ax = self.plot7_banktype(
-            bbox,
-            river_center_line_arr,
+        fig, ax = plt.subplots()
+        self.setsize(fig)
+        ax.set_aspect(1)
+
+        scale = 1000
+        self.chainage_markers(river_center_line_arr, ax, ndec=0, scale=scale)
+        clrs = self.get_colors("plasma", len(self.erosion_inputs.taucls_str) + 1)
+        self._plot_bank_type_segments(
+            ax,
             self.bank_data.bank_line_coords,
             self.erosion_inputs.bank_type,
             self.erosion_inputs.taucls_str,
-            X_AXIS_TITLE,
-            Y_AXIS_TITLE,
-            "bank type",
+            clrs,
+            scale,
         )
+
+        self.set_bbox(ax, bbox)
+        self.set_axes_properties(ax, X_AXIS_TITLE, Y_AXIS_TITLE, True, "bank type")
         if self.plot_flags["save_plot"]:
             fig_i = self._save_plot(fig, ax, fig_i, "banktype", xy_zoom, True)
         return fig_i
@@ -946,98 +954,3 @@ class ErosionPlotter(df_plt.PlottingBase):
         x[1::3] = bank_coords[edges + 1, 0] / scale
         y[1::3] = bank_coords[edges + 1, 1] / scale
         return x, y
-
-    def plot7_banktype(
-        self,
-        bbox: Tuple[float, float, float, float],
-        xykm: np.ndarray,
-        bank_crds: List[np.ndarray],
-        banktype: List[np.ndarray],
-        taucls_str: List[str],
-        xlabel_txt: str,
-        ylabel_txt: str,
-        title_txt: str,
-    ) -> Tuple[Figure, Axes]:
-        """
-        Create the bank erosion plot with colour-coded bank types.
-
-        Arguments
-        ---------
-        bbox : Tuple[float, float, float, float]
-            Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
-        xykm : np.ndarray
-            Array containing the x, y, and chainage; unit m for x and y, km for chainage.
-        bank_crds : List[np.ndarray]
-            List of N arrays containing the x- and y-coordinates of the oroginal
-            bank lines.
-        banktype : List[np.ndarray]
-            List of N arrays containing the bank type values.
-        taucls_str : List[str]
-            List of strings representing the distinct bank type classes.
-        xlabel_txt : str
-            Label for the x-axis.
-        ylabel_txt : str
-            Label for the y-axis.
-        title_txt : str
-            Label for the axes title.
-
-        Results
-        -------
-        fig : matplotlib.figure.Figure
-            Figure object.
-        ax : matplotlib.axes.Axes
-            Axes object.
-        """
-        fig, ax = plt.subplots()
-        self.setsize(fig)
-        ax.set_aspect(1)
-
-        scale = 1000
-        self.chainage_markers(xykm, ax, ndec=0, scale=scale)
-        clrs = self.get_colors("plasma", len(taucls_str) + 1)
-        self._plot_bank_type_segments(ax, bank_crds, banktype, taucls_str, clrs, scale)
-
-        self.set_bbox(ax, bbox)
-        self.set_axes_properties(ax, xlabel_txt, ylabel_txt, True, title_txt)
-        return fig, ax
-
-    def plot8_eroded_distance(
-        self,
-        bank_km_mid: List[np.ndarray],
-        chainage_txt: str,
-        dn_tot: List[np.ndarray],
-        dn_tot_txt: str,
-        dn_eq: List[np.ndarray],
-        dn_eq_txt: str,
-        dn_txt: str,
-        dn_unit: str,
-    ) -> Tuple[Figure, Axes]:
-        """
-        Create the bank erosion plot with total and equilibrium eroded distance.
-
-        Arguments
-        ---------
-        bank_km_mid : List[np.ndarray]
-            List of arrays containing the chainage values per bank (segment) [km].
-        chainage_txt : str
-            Label for the horizontal chainage axes.
-        dn_tot : List[np.ndarray]
-            List of arrays containing the total bank erosion distance per bank (segment) [m].
-        dn_tot_txt : str
-            Label for the total bank erosion distance.
-        dn_eq : List[np.ndarray]
-            List of arrays containing the equilibrium bank erosion distance per bank (segment) [m].
-        dn_eq_txt : str
-            Label for equilibrium bank erosion distance.
-        dn_txt : str
-            General label for bank erosion distance.
-        dn_unit: str
-            Unit used for bank erosion distance.
-
-        Results
-        -------
-        fig : matplotlib.figure.Figure
-            Figure object.
-        ax : matplotlib.axes.Axes
-            Axes object.
-        """
