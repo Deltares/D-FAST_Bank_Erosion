@@ -827,12 +827,7 @@ class Erosion:
             water_depth_fairway,
             parameter.bank_velocity,
             bank_height,
-            parameter.water_level,
-            parameter.chezy,
-            parameter.erosion_distance_tot,
-            parameter.erosion_volume_tot,
-            parameter.erosion_distance_shipping,
-            parameter.erosion_distance_flow,
+            parameter,
         )
 
     def run(self) -> None:
