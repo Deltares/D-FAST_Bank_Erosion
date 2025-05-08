@@ -1104,6 +1104,61 @@ class ErosionPlotter(df_plt.PlottingBase):
             axlist.append(ax)
         return figlist, axlist
 
+    def _plot_bank_type_segments(
+        self,
+        ax: Axes,
+        bank_crds: List[np.ndarray],
+        banktype: List[np.ndarray],
+        taucls_str: List[str],
+        clrs: List[str],
+        scale: float,
+    ) -> None:
+        """
+        Helper method to plot bank type segments.
+
+        Args:
+            ax (Axes): The axes object to plot on.
+            bank_crds (List[np.ndarray]): List of bank coordinates.
+            banktype (List[np.ndarray]): List of bank type values.
+            taucls_str (List[str]): List of bank type labels.
+            clrs (List[str]): List of colors for each bank type.
+            scale (float): Scaling factor for coordinates.
+        """
+        for ib, bank_coords in enumerate(bank_crds):
+            for ibt, tau_label in enumerate(taucls_str):
+                ibt_edges = np.nonzero(banktype[ib] == ibt)[0]
+                if len(ibt_edges) > 0:
+                    x, y = self._generate_segment_coordinates(
+                        bank_coords, ibt_edges, scale
+                    )
+                    ax.plot(x, y, color=clrs[ibt], label=tau_label if ib == 0 else None)
+                elif ib == 0:
+                    ax.plot(np.nan, np.nan, color=clrs[ibt], label=tau_label)
+
+    def _generate_segment_coordinates(
+        self, bank_coords: np.ndarray, edges: np.ndarray, scale: float
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Generate x and y coordinates for bank type segments.
+
+        Args:
+            bank_coords (np.ndarray): Array of bank coordinates.
+            edges (np.ndarray): Indices of edges for the bank type.
+            scale (float): Scaling factor for coordinates.
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray]: x and y coordinates for the segments.
+        """
+        nedges = len(edges)
+        nx = max(3 * nedges - 1, 0)
+        x = np.full(nx, np.nan)
+        y = np.full(nx, np.nan)
+        x[0::3] = bank_coords[edges, 0] / scale
+        y[0::3] = bank_coords[edges, 1] / scale
+        x[1::3] = bank_coords[edges + 1, 0] / scale
+        y[1::3] = bank_coords[edges + 1, 1] / scale
+        return x, y
+
     def plot7_banktype(
         self,
         bbox: Tuple[float, float, float, float],
@@ -1148,31 +1203,12 @@ class ErosionPlotter(df_plt.PlottingBase):
         fig, ax = plt.subplots()
         self.setsize(fig)
         ax.set_aspect(1)
-        #
+
         scale = 1000
         self.chainage_markers(xykm, ax, ndec=0, scale=scale)
         clrs = self.get_colors("plasma", len(taucls_str) + 1)
-        for ib in range(len(bank_crds)):
-            for ibt in range(len(taucls_str)):
-                ibtEdges = np.nonzero(banktype[ib] == ibt)[0]
-                if len(ibtEdges) > 0:
-                    nedges = len(ibtEdges)
-                    nx = max(3 * nedges - 1, 0)
-                    x = np.zeros((nx,)) + np.nan
-                    y = x.copy()
-                    x[0::3] = bank_crds[ib][ibtEdges, 0].copy() / scale
-                    y[0::3] = bank_crds[ib][ibtEdges, 1].copy() / scale
-                    x[1::3] = bank_crds[ib][ibtEdges + 1, 0].copy() / scale
-                    y[1::3] = bank_crds[ib][ibtEdges + 1, 1].copy() / scale
-                    #
-                    if ib == 0:
-                        ax.plot(x, y, color=clrs[ibt], label=taucls_str[ibt])
-                    else:
-                        ax.plot(x, y, color=clrs[ibt])
-                else:
-                    if ib == 0:
-                        ax.plot(np.nan, np.nan, color=clrs[ibt], label=taucls_str[ibt])
-        #
+        self._plot_bank_type_segments(ax, bank_crds, banktype, taucls_str, clrs, scale)
+
         self.set_bbox(ax, bbox)
         ax.set_xlabel(xlabel_txt)
         ax.set_ylabel(ylabel_txt)
