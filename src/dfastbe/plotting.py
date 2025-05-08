@@ -27,7 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 from pathlib import Path
-from typing import List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import geopandas
 import matplotlib
@@ -1358,14 +1358,22 @@ def get_bbox(
     return bbox
 
 
-def save_plot(fig, ax, fig_i, plot_name, zoom_coords, plot_flags, zoom_xy) -> int:
+def save_plot(
+    fig: matplotlib.figure.Figure,
+    ax: matplotlib.axes.Axes,
+    figure_index: int,
+    plot_name: str,
+    zoom_coords: Optional[List[Tuple[float, float, float, float]]],
+    plot_flags: Dict[str, Any],
+    zoom_xy: bool,
+) -> int:
     """Save the plot to a file."""
-    fig_i += 1
-    fig_base = Path(plot_flags['fig_dir']) / f"{fig_i}_{plot_name}"
+    figure_index += 1
+    fig_base = Path(plot_flags['fig_dir']) / f"{figure_index}_{plot_name}"
     if plot_flags["save_plot_zoomed"] and zoom_xy:
         zoom_xy_and_save(fig, ax, fig_base, plot_flags["plot_ext"], zoom_coords)
     elif plot_flags["save_plot_zoomed"]:
         zoom_x_and_save(fig, ax, fig_base, plot_flags["plot_ext"], zoom_coords)
     fig_path = fig_base.with_suffix(plot_flags["plot_ext"])
     savefig(fig, fig_path)
-    return fig_i
+    return figure_index

@@ -1,20 +1,18 @@
 """Bank line detection module."""
 
-from typing import List, Optional, Tuple
+from typing import List
 
 import geopandas as gpd
 import numpy as np
 from geopandas.geoseries import GeoSeries
-from matplotlib import pyplot as plt
 from shapely import line_merge, union_all
 from shapely.geometry import MultiLineString
 from shapely.geometry.polygon import Polygon
 
 from dfastbe import __version__
-from dfastbe import plotting as df_plt
 from dfastbe.bank_lines.data_models import BankLinesRiverData
-from dfastbe.io import BaseSimulationData, ConfigFile, LineGeometry, log_text
-from dfastbe.kernel import get_zoom_extends
+from dfastbe.bank_lines.plotter import BankLinesPlotter
+from dfastbe.io import BaseSimulationData, ConfigFile, log_text
 from dfastbe.support import (
     on_right_side,
     poly_to_line,
@@ -116,13 +114,15 @@ class BankLines:
         self.save(bank, banklines, clipped_banklines, bank_areas, config_file)
 
         if self.plot_flags["plot_data"]:
-            self.plot(
+            bank_lines_plotter = BankLinesPlotter(
+                self.gui, self.plot_flags, config_file, self.simulation_data
+            )
+            bank_lines_plotter.plot(
                 center_line_arr,
                 self.search_lines.size,
                 bank,
                 station_bounds,
                 bank_areas,
-                config_file,
             )
 
         log_text("end_banklines")
@@ -148,54 +148,6 @@ class BankLines:
         clipped_banklines = banklines.intersection(bank_area)[0]
 
         return clipped_banklines
-
-    def plot(
-        self,
-        xy_km_numpy: np.ndarray,
-        n_search_lines: int,
-        bank: List,
-        km_bounds,
-        bank_areas,
-        config_file: ConfigFile,
-    ):
-        """Plot the bank lines and the simulation data."""
-        log_text("=")
-        log_text("create_figures")
-        fig_i = 0
-        bbox = df_plt.get_bbox(xy_km_numpy)
-
-        xy_zoom = self._get_zoom_extends(
-            bank, n_search_lines, config_file.crs, xy_km_numpy, km_bounds
-        )
-
-        fig, ax = df_plt.plot_detect1(
-            bbox,
-            xy_km_numpy,
-            bank_areas,
-            bank,
-            self.simulation_data.face_node,
-            self.simulation_data.n_nodes,
-            self.simulation_data.x_node,
-            self.simulation_data.y_node,
-            self.simulation_data.water_depth_face,
-            1.1 * self.simulation_data.water_depth_face.max(),
-            "x-coordinate [m]",
-            "y-coordinate [m]",
-            "water depth and detected bank lines",
-            "water depth [m]",
-            "bank search area",
-            "detected bank line",
-            config_file,
-        )
-        if self.plot_flags["save_plot"]:
-            fig_i = df_plt.save_plot(
-                fig, ax, fig_i, "banklinedetection", xy_zoom, self.plot_flags, True
-            )
-
-        if self.plot_flags["close_plot"]:
-            plt.close("all")
-        else:
-            plt.show(block=not self.gui)
 
     def save(
         self, bank, banklines, clipped_banklines, bank_areas, config_file: ConfigFile
@@ -292,43 +244,3 @@ class BankLines:
         merged_line = line_merge(multi_line)
 
         return gpd.GeoSeries(merged_line, crs=config_file.crs)
-
-    def _get_zoom_extends(
-        self,
-        bank: List[np.ndarray],
-        n_search_lines: int,
-        crs: str,
-        xy_km_numpy: np.ndarray,
-        km_bounds: Tuple[float, float],
-    ) -> Optional[np.ndarray]:
-        """Get zoom extents for plotting.
-
-        Args:
-            bank (List[np.ndarray]): List of bank coordinates as NumPy arrays.
-            n_search_lines (int): Number of search lines.
-            crs (str): Coordinate reference system.
-            xy_km_numpy (np.ndarray): Array of x, y coordinates in kilometers.
-            km_bounds (Tuple[float, float]): Minimum and maximum chainage bounds.
-
-        Returns:
-            Optional[np.ndarray]: Array of zoom extents in x, y space, or None if zooming is disabled.
-        """
-        if not self.plot_flags["save_plot_zoomed"]:
-            return None
-        bank_crds: List[np.ndarray] = []
-        bank_km: List[np.ndarray] = []
-        for ib in range(n_search_lines):
-            bcrds_numpy = np.array(bank[ib])
-            line_geom = LineGeometry(bcrds_numpy, crs=crs)
-            km_numpy = line_geom.intersect_with_line(xy_km_numpy)
-            bank_crds.append(bcrds_numpy)
-            bank_km.append(km_numpy)
-
-        _, xy_zoom = get_zoom_extends(
-            km_bounds[0],
-            km_bounds[1],
-            self.plot_flags["zoom_km_step"],
-            bank_crds,
-            bank_km,
-        )
-        return xy_zoom
