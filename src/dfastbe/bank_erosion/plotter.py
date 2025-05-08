@@ -205,21 +205,6 @@ class ErosionPlotter(df_plt.PlottingBase):
         mesh_data: MeshData,
         xy_zoom: List[Tuple],
     ) -> int:
-        fig, ax = self.plot2_eroded_distance_and_equilibrium(
-            bbox,
-            river_center_line_arr,
-            self.bank_data.bank_line_coords,
-            self.erosion_results.total_erosion_dist,
-            self.bank_data.is_right_bank,
-            self.erosion_results.avg_erosion_rate,
-            xy_line_eq_list,
-            X_AXIS_TITLE,
-            Y_AXIS_TITLE,
-            "eroded distance and equilibrium bank location",
-            f"eroded during {self.erosion_results.erosion_time} year",
-            "eroded distance [m]",
-            "equilibrium location",
-        )
         scale = 1000
         fig, ax = plt.subplots()
         self.setsize(fig)
@@ -273,15 +258,30 @@ class ErosionPlotter(df_plt.PlottingBase):
         km_step: float,
         km_zoom: List[Tuple],
     ) -> int:
-        fig, ax = self.plot3_eroded_volume(
-            km_mid,
+        fig, ax = plt.subplots()
+        self.setsize(fig)
+        self.plot3_stacked_per_discharge(
+            ax,
+            km_mid + 0.2 * km_step,
             km_step,
-            "river chainage [km]",
             self.erosion_results.vol_per_discharge,
-            "eroded volume [m^3]",
-            f"eroded volume per {km_step} chainage km ({self.erosion_results.erosion_time} years)",
             "Q{iq}",
+            0.4,
+        )
+        self.plot3_stacked_per_bank(
+            ax,
+            km_mid - 0.2 * km_step,
+            km_step,
+            self.erosion_results.vol_per_discharge,
             "Bank {ib}",
+            0.4,
+        )
+        self.set_axes_properties(
+            ax,
+            "river chainage [km]",
+            "eroded volume [m^3]",
+            True,
+            f"eroded volume per {km_step} chainage km ({self.erosion_results.erosion_time} years)",
         )
         if self.plot_flags["save_plot"]:
             fig_i = self._save_plot(fig, ax, fig_i, "eroded_volume", km_zoom, False)
@@ -485,66 +485,6 @@ class ErosionPlotter(df_plt.PlottingBase):
         maximum_water_depth = 1.1 * self.water_level_data.hfw_max
         return self.plot_mesh_patches(ax, simulation_data, 0, maximum_water_depth)
 
-    def plot2_eroded_distance_and_equilibrium(
-        self,
-        bbox: Tuple[float, float, float, float],
-        xykm: np.ndarray,
-        bank_crds: List[np.ndarray],
-        dn_tot: List[np.ndarray],
-        to_right: List[bool],
-        dnav: np.ndarray,
-        xy_eq: List[np.ndarray],
-        xlabel_txt: str,
-        ylabel_txt: str,
-        title_txt: str,
-        erosion_txt: str,
-        eroclr_txt: str,
-        eqbank_txt: str,
-    ) -> Tuple[Figure, Axes]:
-        """
-        Create the bank erosion plot with predicted bank line shift and equilibrium bank line.
-
-        Arguments
-        ---------
-        bbox : Tuple[float, float, float, float]
-            Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
-        xykm : np.ndarray
-            Array containing the x, y, and chainage; unit m for x and y, km for chainage.
-        bank_crds : List[np.ndarray]
-            List of N arrays containing the x- and y-coordinates of the original
-            bank lines.
-        dn_tot : List[np.ndarray]
-            List of N arrays containing the total erosion distance values.
-        to_right : List[bool]
-            List of N booleans indicating whether the bank is on the right.
-        dnav : np.ndarray
-            Array of N average erosion distance values.
-        xy_eq : List[np.ndarray]
-            List of N arrays containing the x- and y-coordinates of the equilibrium
-            bank line.
-        xlabel_txt : str
-            Label for the x-axis.
-        ylabel_txt : str
-            Label for the y-axis.
-        title_txt : str
-            Label for the axes title.
-        erosion_txt : str
-            Label for the shaded eroded area.
-        eroclr_txt : str
-            Label for the color bar.
-        eqbank_txt : str
-            Label for the equilibrium bank position.
-
-        Results
-        -------
-        fig : matplotlib.figure.Figure
-            Figure object.
-        ax : matplotlib.axes.Axes
-            Axes object.
-        """
-
-        return fig, ax
-
     def _create_patches(self, ax, bank_crds, dn_tot, to_right, dnav_max, xy_eq, scale):
         for i, xy_eq_part in enumerate(xy_eq):
             ax.plot(
@@ -645,15 +585,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         ax : matplotlib.axes.Axes
             Axes object.
         """
-        fig, ax = plt.subplots()
-        self.setsize(fig)
-        self.plot3_stacked_per_discharge(
-            ax, km_mid + 0.2 * km_step, km_step, erosion_volume, qlabel, 0.4
-        )
-        self.plot3_stacked_per_bank(
-            ax, km_mid - 0.2 * km_step, km_step, erosion_volume, banklabel, 0.4
-        )
-        self.set_axes_properties(ax, chainage_txt, ylabel_txt, True, title_txt)
+
         return fig, ax
 
     def _plot_stacked_bars(
