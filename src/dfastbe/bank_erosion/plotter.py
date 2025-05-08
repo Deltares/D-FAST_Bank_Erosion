@@ -607,7 +607,7 @@ class ErosionPlotter(df_plt.PlottingBase):
         title_txt: str,
         qlabel: str,
         banklabel: str,
-    ) -> [Figure, Axes]:
+    ) -> Tuple[Figure, Axes]:
         """
         Create the bank erosion plot with total eroded volume subdivided per discharge level.
 
@@ -652,6 +652,38 @@ class ErosionPlotter(df_plt.PlottingBase):
         ax.legend(loc="upper right")
         return fig, ax
 
+    def _plot_stacked_bars(
+        self,
+        ax: Axes,
+        km_mid: np.ndarray,
+        km_step: float,
+        erosion_volume: List[List[np.ndarray]],
+        labels: List[str],
+        colors: List[str],
+        wfrac: float,
+        is_discharge: bool = True,
+    ) -> None:
+        """Generalized helper function to plot stacked bars for erosion volume."""
+        n_levels = len(erosion_volume) if is_discharge else len(erosion_volume[0])
+        cumdv = None
+
+        for i in range(n_levels):
+            dvq = (
+                sum(erosion_volume[i])
+                if is_discharge
+                else sum(erosion_volume[j][i] for j in range(len(erosion_volume)))
+            )
+
+            ax.bar(
+                km_mid,
+                dvq,
+                width=wfrac * km_step,
+                bottom=cumdv,
+                color=colors[i],
+                label=labels[i],
+            )
+            cumdv = dvq if cumdv is None else cumdv + dvq
+
     def plot3_stacked_per_discharge(
         self,
         ax: Axes,
@@ -663,55 +695,19 @@ class ErosionPlotter(df_plt.PlottingBase):
     ) -> None:
         """
         Add a stacked plot of bank erosion with total eroded volume subdivided per discharge level to the selected axes.
-
-        Arguments
-        ---------
-        fig : matplotlib.figure.Figure
-            Figure object.
-        ax : matplotlib.axes.Axes
-            Axes object.
-        km_mid : np.ndarray
-            Array containing the mid points for the chainage bins.
-        km_step : float
-            Bin width.
-        erosion_volume : List[List[np.ndarray]]
-            List of nQ lists of N arrays containing the total erosion distance values
-        qlabel : str
-            Label for discharge level.
-        wfrac : float
-            Width fraction for the stacked column.
-
-        Results
-        -------
-        None
         """
-        n_levels = len(erosion_volume)
-        clrs = self.get_colors("Blues", n_levels + 1)
-        for iq in range(n_levels):
-            for ib in range(len(erosion_volume[iq])):
-                if ib == 0:
-                    dvq = erosion_volume[iq][ib].copy()
-                else:
-                    dvq = dvq + erosion_volume[iq][ib]
-            if iq == 0:
-                ax.bar(
-                    km_mid,
-                    dvq,
-                    width=wfrac * km_step,
-                    color=clrs[iq + 1],
-                    label=qlabel.format(iq=iq + 1),
-                )
-                cumdv = dvq
-            else:
-                ax.bar(
-                    km_mid,
-                    dvq,
-                    width=wfrac * km_step,
-                    bottom=cumdv,
-                    color=clrs[iq + 1],
-                    label=qlabel.format(iq=iq + 1),
-                )
-                cumdv = cumdv + dvq
+        labels = [qlabel.format(iq=iq + 1) for iq in range(len(erosion_volume))]
+        colors = self.get_colors("Blues", len(erosion_volume) + 1)[1:]
+        self._plot_stacked_bars(
+            ax,
+            km_mid,
+            km_step,
+            erosion_volume,
+            labels,
+            colors,
+            wfrac,
+            is_discharge=True,
+        )
 
     def plot3_stacked_per_bank(
         self,
@@ -724,55 +720,19 @@ class ErosionPlotter(df_plt.PlottingBase):
     ) -> None:
         """
         Add a stacked plot of bank erosion with total eroded volume subdivided per bank to the selected axes.
-
-        Arguments
-        ---------
-        fig : matplotlib.figure.Figure
-            Figure object.
-        ax : matplotlib.axes.Axes
-            Axes object.
-        km_mid : np.ndarray
-            Array containing the mid points for the chainage bins.
-        km_step : float
-            Bin width.
-        erosion_volume : List[List[np.ndarray]]
-            List of nQ lists of N arrays containing the total erosion distance values
-        banklabel : str
-            Label for bank id.
-        wfrac : float
-            Width fraction for the stacked column.
-
-        Results
-        -------
-        None
         """
-        n_banklines = len(erosion_volume[0])
-        clrs = self.get_colors("plasma", n_banklines + 1)
-        for ib in range(n_banklines):
-            for iq in range(len(erosion_volume)):
-                if iq == 0:
-                    dvq = erosion_volume[iq][ib].copy()
-                else:
-                    dvq = dvq + erosion_volume[iq][ib]
-            if ib == 0:
-                ax.bar(
-                    km_mid,
-                    dvq,
-                    width=wfrac * km_step,
-                    color=clrs[ib],
-                    label=banklabel.format(ib=ib + 1),
-                )
-                cumdv = dvq
-            else:
-                ax.bar(
-                    km_mid,
-                    dvq,
-                    width=wfrac * km_step,
-                    bottom=cumdv,
-                    color=clrs[ib],
-                    label=banklabel.format(ib=ib + 1),
-                )
-                cumdv = cumdv + dvq
+        labels = [banklabel.format(ib=ib + 1) for ib in range(len(erosion_volume[0]))]
+        colors = self.get_colors("plasma", len(erosion_volume[0]) + 1)[:-1]
+        self._plot_stacked_bars(
+            ax,
+            km_mid,
+            km_step,
+            erosion_volume,
+            labels,
+            colors,
+            wfrac,
+            is_discharge=False,
+        )
 
     def plot3_eroded_volume_subdivided_1(
         self,
