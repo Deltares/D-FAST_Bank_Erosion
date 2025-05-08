@@ -446,11 +446,7 @@ class Erosion:
             )
             log_text("bank_erosion", indent="  ")
 
-            (
-                level_calculation,
-                hfw_max,
-                dvol_bank,
-            ) = self.compute_erosion_per_level(
+            level_calculation, dvol_bank = self.compute_erosion_per_level(
                 level_i,
                 bank_data,
                 simulation_data,
@@ -497,7 +493,7 @@ class Erosion:
         )
 
         water_level_data = WaterLevelData(
-            hfw_max=hfw_max,
+            hfw_max=discharge_levels[-1].hfw_max,
             bank_height=bank_height,
             water_level=discharge_levels.get_attr_level("water_level"),
             ship_wave_max=discharge_levels.get_attr_level("ship_wave_max"),
@@ -712,19 +708,14 @@ class Erosion:
             parameter = CalculationParameters()
             # bank_i = 0: left bank, bank_i = 1: right bank
             # calculate velocity along banks ...
-            vel_bank = simulation_data.calculate_bank_velocity(
+            parameter.bank_velocity = simulation_data.calculate_bank_velocity(
                 bank_i, self.river_data.vel_dx
             )
-            # bank_velocity_i.append(vel_bank)
-            parameter.bank_velocity = vel_bank
 
             if level_i == 0:
                 # determine velocity and bank height along banks ...
                 # bank height = maximum bed elevation per cell
-                zb_bank = simulation_data.calculate_bank_height(
-                    bank_i, self.river_data.zb_dx
-                )
-                bank_height.append(zb_bank)
+                bank_height.append(simulation_data.calculate_bank_height(bank_i, self.river_data.zb_dx))
 
             # get water depth along the fair-way
             ii_face = bank_i.fairway_face_indices
@@ -762,13 +753,13 @@ class Erosion:
             )
 
             # accumulate eroded volumes per km
-            dvol = get_km_eroded_volume(
+            volume_per_discharge = get_km_eroded_volume(
                 bank_i.bank_chainage_midpoints, parameter.erosion_volume_tot, km_bin
             )
-            # vol_per_discharge_i.append(dvol)
-            parameter.volume_per_discharge = dvol
+            parameter.volume_per_discharge = volume_per_discharge
             par_list.append(parameter)
-            dvol_bank[:, ind] += dvol
+
+            dvol_bank[:, ind] += volume_per_discharge
 
             if self.river_data.debug:
                 self._debug_output(
@@ -788,7 +779,7 @@ class Erosion:
             left=par_list[0], right=par_list[1], hfw_max=hfw_max_level
         )
 
-        return level_calculation, hfw_max_level, dvol_bank
+        return level_calculation, dvol_bank
 
     def _debug_output(
         self,
