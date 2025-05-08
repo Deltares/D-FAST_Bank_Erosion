@@ -447,15 +447,33 @@ class ErosionPlotter(df_plt.PlottingBase):
         return fig_i
 
     def _plot_eroded_distance(self, fig_i: int, km_zoom: List[Tuple]) -> int:
-        fig, ax = self.plot8_eroded_distance(
-            self.bank_data.bank_chainage_midpoints,
+        fig, ax = plt.subplots()
+        self.setsize(fig)
+        #
+        n_banklines = len(self.erosion_results.total_erosion_dist)
+        clrs = self.get_colors("plasma", n_banklines + 1)
+        for ib in range(n_banklines):
+            bk = self.bank_data.bank_chainage_midpoints[ib]
+            ax.plot(
+                bk,
+                self.erosion_results.total_erosion_dist[ib],
+                color=clrs[ib],
+                label=f"Bank {ib + 1}",
+            )
+            ax.plot(
+                bk,
+                self.erosion_results.eq_erosion_dist[ib],
+                linestyle=":",
+                color=clrs[ib],
+                label=f"Bank {ib + 1} (eq)",
+            )
+        #
+        self.set_axes_properties(
+            ax,
             "river chainage [km]",
-            self.erosion_results.total_erosion_dist,
-            "Bank {ib}",
-            self.erosion_results.eq_erosion_dist,
-            "Bank {ib} (eq)",
+            "eroded distance [m]",
+            True,
             "eroded distance",
-            "[m]",
         )
         if self.plot_flags["save_plot"]:
             fig_i = self._save_plot(fig, ax, fig_i, "erodis", km_zoom, False)
@@ -1023,21 +1041,3 @@ class ErosionPlotter(df_plt.PlottingBase):
         ax : matplotlib.axes.Axes
             Axes object.
         """
-        fig, ax = plt.subplots()
-        self.setsize(fig)
-        #
-        n_banklines = len(dn_tot)
-        clrs = self.get_colors("plasma", n_banklines + 1)
-        for ib in range(n_banklines):
-            bk = bank_km_mid[ib]
-            ax.plot(bk, dn_tot[ib], color=clrs[ib], label=dn_tot_txt.format(ib=ib + 1))
-            ax.plot(
-                bk,
-                dn_eq[ib],
-                linestyle=":",
-                color=clrs[ib],
-                label=dn_eq_txt.format(ib=ib + 1),
-            )
-        #
-        self.set_axes_properties(ax, chainage_txt, dn_txt + " " + dn_unit, True, dn_txt)
-        return fig, ax
