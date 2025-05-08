@@ -437,7 +437,6 @@ class ErosionResults:
 
 class ErosionSimulationData(BaseSimulationData):
 
-
     def compute_mesh_topology(self) -> MeshData:
         """Derive secondary topology arrays from the face-node connectivity of the mesh.
 

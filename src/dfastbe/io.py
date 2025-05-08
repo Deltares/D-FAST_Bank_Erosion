@@ -184,7 +184,7 @@ class BaseSimulationData:
                     dry_wet_threshold = 0.1
                 else:
                     dry_wet_threshold = 0.01
-            except:
+            except AttributeError:
                 dry_wet_threshold = 0.01
 
         elif name.startswith("SDS"):
@@ -1437,7 +1437,7 @@ class LineGeometry:
 
     @property
     def data(self) -> Dict[str, np.ndarray]:
-        """anny data assined to the line using the `add_data` method."""
+        """any data assigned to the line using the `add_data` method."""
         return self._data
 
     def as_array(self) -> np.ndarray:
@@ -1620,7 +1620,8 @@ class LineGeometry:
             float: Interpolation factor.
             Tuple[float, float, float]: Interpolated point.
         """
-        alpha = (station_bound - line_string_coords[index - 1][2]) / (line_string_coords[index][2] - line_string_coords[index - 1][2]
+        alpha = (station_bound - line_string_coords[index - 1][2]) / (
+                line_string_coords[index][2] - line_string_coords[index - 1][2]
         )
         interpolated_point = tuple(
             prev_coord + alpha * (next_coord - prev_coord)

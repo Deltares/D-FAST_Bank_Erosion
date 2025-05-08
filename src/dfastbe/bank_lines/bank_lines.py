@@ -6,7 +6,7 @@ import geopandas as gpd
 import numpy as np
 from geopandas.geoseries import GeoSeries
 from shapely import line_merge, union_all
-from shapely.geometry import MultiLineString
+from shapely.geometry import LineString, MultiLineString
 from shapely.geometry.polygon import Polygon
 
 from dfastbe import __version__
@@ -39,6 +39,18 @@ class BankLines:
                 Analysis configuration settings.
             gui : bool
                 Flag indicating whether this routine is called from the GUI.
+
+        Examples:
+            ```python
+            >>> from unittest.mock import patch
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
+            >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS
+            N...e
+            >>> isinstance(bank_lines, BankLines)
+            True
+
+            ```
         """
         # the root_dir is used to get the FigureDir in the `_get_plotting_flags`
         self.root_dir = config_file.root_dir
@@ -51,20 +63,47 @@ class BankLines:
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)
         self.river_data = BankLinesRiverData(config_file)
         self.search_lines = self.river_data.search_lines
-        self.simulation_data, self.h0 = self.river_data.simulation_data()
+        self.simulation_data, self.critical_water_depth = (
+            self.river_data.simulation_data()
+        )
 
     @property
     def config_file(self) -> ConfigFile:
-        """Configuration file object."""
+        """ConfigFile: object containing the configuration file."""
         return self._config_file
 
     @property
     def max_river_width(self) -> int:
-        """Maximum river width in meters."""
+        """int: Maximum river width in meters."""
         return MAX_RIVER_WIDTH
 
     def detect(self) -> None:
-        """Run the bank line detection analysis for a specified configuration."""
+        """Run the bank line detection analysis for a specified configuration.
+
+        This method performs bank line detection using the provided configuration file.
+        It generates shapefiles that can be opened with GeoPandas or QGIS, and also
+        creates a plot of the detected bank lines along with the simulation data.
+
+        Examples:
+            ```python
+            >>> import matplotlib
+            >>> matplotlib.use('Agg')
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
+            >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS
+            N...e
+            >>> bank_lines.detect()
+               0...-
+
+            ```
+            In the BankDir directory specified in the .cfg, the following files are created:
+            - "raw_detected_bankline_fragments.shp"
+            - "bank_areas.shp"
+            - "bankline_fragments_per_bank_area.shp"
+            - "bankfile.shp"
+            In the FigureDir directory specified in the .cfg, the following files are created:
+            - "1_banklinedetection.png"
+        """
         config_file = self.config_file
         river_data = self.river_data
         timed_logger("-- start analysis --")
@@ -85,33 +124,31 @@ class BankLines:
         center_line_arr = river_center_line.as_array()
         stations_coords = center_line_arr[:, :2]
 
-        # convert search lines to bank polygons
         bank_areas: List[Polygon] = self.search_lines.to_polygons()
 
-        # determine whether search lines are located on the left or right
         to_right = [True] * self.search_lines.size
         for ib in range(self.search_lines.size):
             to_right[ib] = on_right_side(
                 np.array(self.search_lines.values[ib].coords), stations_coords
             )
 
-        # derive bank lines (get_banklines)
         log_text("identify_banklines")
-        banklines = self.detect_bank_lines(self.simulation_data, self.h0, config_file)
+        banklines = self.detect_bank_lines(
+            self.simulation_data, self.critical_water_depth, config_file
+        )
 
         # clip the set of detected bank lines to the bank areas
         log_text("simplify_banklines")
         bank = [None] * self.search_lines.size
-        clipped_banklines = [None] * self.search_lines.size
+        masked_bank_lines = [None] * self.search_lines.size
         for ib, bank_area in enumerate(bank_areas):
             log_text("bank_lines", data={"ib": ib + 1})
-            clipped_banklines[ib] = self.mask(banklines, bank_area)
+            masked_bank_lines[ib] = self.mask(banklines, bank_area)
             bank[ib] = sort_connect_bank_lines(
-                clipped_banklines[ib], river_center_line_values, to_right[ib]
+                masked_bank_lines[ib], river_center_line_values, to_right[ib]
             )
 
-        # save bank_file
-        self.save(bank, banklines, clipped_banklines, bank_areas, config_file)
+        self.save(bank, banklines, masked_bank_lines, bank_areas, config_file)
 
         if self.plot_flags["plot_data"]:
             bank_lines_plotter = BankLinesPlotter(
@@ -139,26 +176,75 @@ class BankLines:
             bank_area (Polygon):
                 A search area corresponding to one of the bank search lines.
 
-        Returns
-        -------
-        clipped_banklines : MultiLineString
-            Un-ordered set of bank line segments, clipped to bank area.
+        Returns:
+            MultiLineString: Un-ordered set of bank line segments, clipped to bank area.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
+            >>> river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
+            N...e
+            >>> bank_lines = BankLines(config_file)
+            N...e
+            >>> simulation_data, critical_water_depth = river_data.simulation_data()
+            N...e
+            >>> banklines = bank_lines.detect_bank_lines(simulation_data, critical_water_depth, config_file)
+            P...)
+            >>> bank_area = bank_lines.search_lines.to_polygons()[0]
+            >>> bank_lines.mask(banklines, bank_area)
+            <MULTILINESTRING ((207830.389 392063.658, 2078...>
+
+            ```
         """
         # intersection returns one MultiLineString object
-        clipped_banklines = banklines.intersection(bank_area)[0]
+        masked_bank_lines = banklines.intersection(bank_area)[0]
 
-        return clipped_banklines
+        return masked_bank_lines
 
     def save(
-        self, bank, banklines, clipped_banklines, bank_areas, config_file: ConfigFile
+        self,
+        bank: List[LineString],
+        banklines: GeoSeries,
+        masked_bank_lines: List[MultiLineString],
+        bank_areas: List[Polygon],
+        config_file: ConfigFile,
     ):
-        """Save result files."""
+        """Save results to files.
+
+        Args:
+            bank (List[LineString]):
+                List of bank lines.
+            banklines (GeoSeries):
+                Un-ordered set of bank line segments.
+            masked_bank_lines (List[MultiLineString]):
+                Un-ordered set of bank line segments, clipped to bank area.
+            bank_areas (List[Polygon]):
+                A search area corresponding to one of the bank search lines.
+            config_file (ConfigFile):
+                Configuration file object.
+
+        Examples:
+            ```python
+            >>> from dfastbe.io import ConfigFile
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")  # doctest: +ELLIPSIS
+            >>> bank_lines = BankLines(config_file)
+            N...e
+            >>> bank = [LineString([(0, 0), (1, 1)])]
+            >>> banklines = gpd.GeoSeries([LineString([(0, 0), (1, 1)])])
+            >>> masked_bank_lines = [MultiLineString([LineString([(0, 0), (1, 1)])])]
+            >>> bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]
+            >>> bank_lines.save(bank, banklines, masked_bank_lines, bank_areas, config_file)
+            No message found for save_banklines
+
+            ```
+        """
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
         bank_file = self.bank_output_dir / f"{bank_name}.shp"
         log_text("save_banklines", data={"file": bank_file})
         gpd.GeoSeries(bank, crs=config_file.crs).to_file(bank_file)
 
-        gpd.GeoSeries(clipped_banklines, crs=config_file.crs).to_file(
+        gpd.GeoSeries(masked_bank_lines, crs=config_file.crs).to_file(
             self.bank_output_dir / f"{BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE}{EXTENSION}"
         )
         banklines.to_file(
@@ -170,77 +256,166 @@ class BankLines:
 
     @staticmethod
     def detect_bank_lines(
-        simulation_data: BaseSimulationData, h0: float, config_file: ConfigFile
+        simulation_data: BaseSimulationData,
+        critical_water_depth: float,
+        config_file: ConfigFile,
     ) -> gpd.GeoSeries:
-        """
-        Detect all possible bank line segments based on simulation data.
+        """Detect all possible bank line segments based on simulation data.
 
-        Use a critical water depth h0 as a water depth threshold for dry/wet boundary.
+        Use a critical water depth critical_water_depth as a water depth threshold for dry/wet boundary.
 
         Args:
             simulation_data (BaseSimulationData):
                 Simulation data: mesh, bed levels, water levels, velocities, etc.
-            h0 (float):
+            critical_water_depth (float):
                 Critical water depth for determining the banks.
 
         Returns:
             geopandas.GeoSeries:
                 The collection of all detected bank segments in the remaining model area.
+
+        Examples:
+            ```python
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
+            >>> river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
+            N...e
+            >>> simulation_data, critical_water_depth = river_data.simulation_data()
+            N...e
+            >>> BankLines.detect_bank_lines(simulation_data, critical_water_depth, config_file)
+            P...
+            0    MULTILINESTRING ((207927.151 391960.747, 20792...
+            dtype: geometry
+
+            ```
         """
-        fnc = simulation_data.face_node
-        n_nodes = simulation_data.n_nodes
-        max_nnodes = fnc.shape[1]
-        x_node = simulation_data.x_node[fnc]
-        y_node = simulation_data.y_node[fnc]
-        bank_height = simulation_data.bed_elevation_values[fnc]
-        zw = simulation_data.water_level_face
+        h_node = BankLines._calculate_water_depth(simulation_data)
 
-        nnodes_total = len(simulation_data.x_node)
-        try:
-            mask = ~fnc.mask
-            non_masked = sum(mask.reshape(fnc.size))
-            f_nc_m = fnc[mask]
-            zwm = np.repeat(zw, max_nnodes)[mask]
-        except:
-            mask = np.repeat(True, fnc.size)
-            non_masked = fnc.size
-            f_nc_m = fnc.reshape(non_masked)
-            zwm = np.repeat(zw, max_nnodes).reshape(non_masked)
+        wet_node = h_node > critical_water_depth
+        num_wet_arr = wet_node.sum(axis=1)
 
-        zw_node = np.bincount(f_nc_m, weights=zwm, minlength=nnodes_total)
-        n_val = np.bincount(f_nc_m, weights=np.ones(non_masked), minlength=nnodes_total)
-        zw_node = zw_node / np.maximum(n_val, 1)
-        zw_node[n_val == 0] = simulation_data.bed_elevation_values[n_val == 0]
-
-        h_node = zw_node[fnc] - bank_height
-        wet_node = h_node > h0
-        n_wet_arr = wet_node.sum(axis=1)
-        mask = n_wet_arr.mask.size > 1
-
-        n_faces = len(fnc)
-        lines = [None] * n_faces
-        frac = 0
-        for i in range(n_faces):
-            if i >= frac * (n_faces - 1) / 10:
-                print(int(frac * 10))
-                frac = frac + 1
-            nnodes = n_nodes[i]
-            n_wet = n_wet_arr[i]
-            if (mask and n_wet.mask) or n_wet == 0 or n_wet == nnodes:
-                # all dry or all wet
-                pass
-            else:
-                # some nodes dry and some nodes wet: determine the line
-                if nnodes == 3:
-                    lines[i] = tri_to_line(
-                        x_node[i], y_node[i], wet_node[i], h_node[i], h0
-                    )
-                else:
-                    lines[i] = poly_to_line(
-                        nnodes, x_node[i], y_node[i], wet_node[i], h_node[i], h0
-                    )
-        lines = [line for line in lines if line is not None and not line.is_empty]
+        lines = BankLines._generate_bank_lines(
+            simulation_data, wet_node, num_wet_arr, h_node, critical_water_depth
+        )
         multi_line = union_all(lines)
         merged_line = line_merge(multi_line)
 
         return gpd.GeoSeries(merged_line, crs=config_file.crs)
+
+    @staticmethod
+    def _calculate_water_depth(
+        simulation_data: BaseSimulationData,
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """Calculate the water depth at each node in the simulation data.
+
+        This method computes the water depth for each node by considering the
+        water levels at the faces and the bed elevation values.
+
+        Args:
+            simulation_data (BaseSimulationData):
+                Simulation data containing face-node relationships, water levels,
+                and bed elevation values.
+
+        Returns:
+            np.ndarray:
+                An array representing the water depth at each node.
+        """
+        face_node = simulation_data.face_node
+        max_num_nodes = simulation_data.face_node.shape[1]
+        num_nodes_total = len(simulation_data.x_node)
+
+        if hasattr(face_node, "mask"):
+            mask = ~face_node.mask
+            non_masked = sum(mask.reshape(face_node.size))
+            f_nc_m = face_node[mask]
+            zwm = np.repeat(simulation_data.water_level_face, max_num_nodes)[
+                mask.flatten()
+            ]
+        else:
+            mask = np.repeat(True, face_node.size)
+            non_masked = face_node.size
+            f_nc_m = face_node.reshape(non_masked)
+            zwm = np.repeat(simulation_data.water_level_face, max_num_nodes).reshape(
+                non_masked
+            )
+
+        zw_node = np.bincount(f_nc_m, weights=zwm, minlength=num_nodes_total)
+        num_val = np.bincount(
+            f_nc_m, weights=np.ones(non_masked), minlength=num_nodes_total
+        )
+        zw_node = zw_node / np.maximum(num_val, 1)
+        zw_node[num_val == 0] = simulation_data.bed_elevation_values[num_val == 0]
+        h_node = zw_node[face_node] - simulation_data.bed_elevation_values[face_node]
+        return h_node
+
+    @staticmethod
+    def _generate_bank_lines(
+        simulation_data: BaseSimulationData,
+        wet_node: np.ndarray,
+        num_wet_arr: np.ndarray,
+        h_node: np.ndarray,
+        critical_water_depth: float,
+    ) -> List[LineString]:
+        """Detect bank lines based on wet/dry nodes.
+
+        Args:
+            simulation_data (BaseSimulationData):
+                Simulation data: mesh, bed levels, water levels, velocities, etc.
+            wet_node (np.ndarray):
+                Wet/dry boolean array for each face node.
+            num_wet_arr (np.ndarray):
+                Number of wet nodes for each face.
+            h_node (np.ndarray):
+                Water depth at each node.
+            critical_water_depth (float):
+                Critical water depth for determining the banks.
+
+        Returns:
+            List[LineString or MultiLineString]:
+                List of detected bank lines.
+        """
+        num_faces = len(simulation_data.face_node)
+        x_node = simulation_data.x_node[simulation_data.face_node]
+        y_node = simulation_data.y_node[simulation_data.face_node]
+        mask = num_wet_arr.mask.size > 1
+        lines = []
+
+        for i in range(num_faces):
+            BankLines._progress_bar(i, num_faces)
+
+            n_wet = num_wet_arr[i]
+            n_node = simulation_data.n_nodes[i]
+            if (mask and n_wet.mask) or n_wet == 0 or n_wet == n_node:
+                continue
+
+            if n_node == 3:
+                line = tri_to_line(
+                    x_node[i], y_node[i], wet_node[i], h_node[i], critical_water_depth
+                )
+            else:
+                line = poly_to_line(
+                    n_node,
+                    x_node[i],
+                    y_node[i],
+                    wet_node[i],
+                    h_node[i],
+                    critical_water_depth,
+                )
+
+            if line is not None:
+                lines.append(line)
+
+        return lines
+
+    @staticmethod
+    def _progress_bar(current: int, total: int) -> None:
+        """Print progress bar.
+
+        Args:
+            current (int): Current iteration.
+            total (int): Total iterations.
+        """
+        if current % 100 == 0:
+            percent = (current / total) * 100
+            print(f"Progress: {percent:.2f}% ({current}/{total})", end="\r")
+        if current == total - 1:
+            print("Progress: 100.00% (100%)")
