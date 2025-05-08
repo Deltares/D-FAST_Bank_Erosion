@@ -1,8 +1,10 @@
 from typing import List
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch
 from shapely.geometry import LineString, MultiLineString, Polygon
-from dfastbe.bank_lines.data_models import SearchLines, BankLinesRiverData
+
+from dfastbe.bank_lines.data_models import BankLinesRiverData, SearchLines
 
 
 class TestSearchLines:
@@ -67,3 +69,59 @@ class TestSearchLines:
         assert isinstance(polygons[1], Polygon)
         assert polygons[0].buffer(-1.0).is_empty
         assert polygons[1].buffer(-2.0).is_empty
+
+
+class TestBankLinesRiverData:
+    @pytest.fixture
+    def mock_config_file(self):
+        """Fixture to create a mock ConfigFile object."""
+        mock_config = MagicMock()
+        mock_config.get_search_lines.return_value = [
+            LineString([(0, 0), (1, 1)]),
+            LineString([(2, 2), (3, 3)]),
+        ]
+        mock_config.get_bank_search_distances.return_value = [10, 20]
+        mock_config.get_sim_file.return_value = "mock_sim_file"
+        mock_config.get_float.return_value = 0.5
+        return mock_config
+
+    @pytest.fixture
+    def mock_simulation_data(self):
+        """Fixture to create a mock BaseSimulationData object."""
+        mock_sim_data = MagicMock()
+        mock_sim_data.dry_wet_threshold = 0.3
+        return mock_sim_data
+
+    @patch("dfastbe.bank_lines.data_models.BaseSimulationData.read")
+    def test_get_bank_lines_simulation_data(
+        self, mock_read, mock_config_file, mock_simulation_data
+    ):
+        """Test the _get_bank_lines_simulation_data method."""
+        mock_read.return_value = mock_simulation_data
+
+        with patch("dfastbe.io.LineGeometry"):
+            river_data = BankLinesRiverData(mock_config_file)
+            simulation_data, h0 = river_data._get_bank_lines_simulation_data()
+
+        mock_read.assert_called_once_with("mock_sim_file")
+        assert simulation_data == mock_simulation_data
+        assert h0 == 0.8  # 0.5 (critical water depth) + 0.3 (dry_wet_threshold)
+
+    @patch("dfastbe.bank_lines.data_models.BaseSimulationData.read")
+    def test_simulation_data(self, mock_read, mock_config_file, mock_simulation_data):
+        """Test the simulation_data method."""
+        mock_read.return_value = mock_simulation_data
+
+        with patch("dfastbe.io.LineGeometry") as mock_line_geometry, patch.object(
+            BankLinesRiverData, "search_lines"
+        ) as mock_search_lines:
+            river_data = BankLinesRiverData(mock_config_file)
+            mock_search_lines.max_distance = 50
+            simulation_data, h0 = river_data.simulation_data()
+
+            mock_read.assert_called_once_with("mock_sim_file")
+            simulation_data.clip.assert_called_once_with(
+                river_data.river_center_line.values, 50
+            )
+            assert simulation_data == mock_simulation_data
+            assert h0 == 0.8
