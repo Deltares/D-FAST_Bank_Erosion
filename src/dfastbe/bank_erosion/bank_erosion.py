@@ -39,7 +39,7 @@ from dfastbe import __version__
 from dfastbe import plotting as df_plt
 from dfastbe.bank_erosion.data_models import (
     BankData,
-    CalculationParameters,
+    DischargeCalculationParameters,
     DischargeLevelParameters,
     DischargeLevels,
     ErosionInputs,
@@ -47,7 +47,7 @@ from dfastbe.bank_erosion.data_models import (
     ErosionRiverData,
     ErosionSimulationData,
     FairwayData,
-    LevelCalculation,
+    CalculationLevel,
     MeshData,
     ParametersPerBank,
     SingleErosion,
@@ -61,12 +61,12 @@ from dfastbe.io import (
     log_text,
     write_km_eroded_volumes,
 )
-from dfastbe.kernel import (
+from dfastbe.kernel import get_zoom_extends
+from dfastbe.bank_erosion.utils import (
     comp_erosion_eq,
     compute_bank_erosion_dynamics,
     get_km_bins,
     get_km_eroded_volume,
-    get_zoom_extends,
 )
 from dfastbe.support import move_line
 from dfastbe.utils import timed_logger
@@ -696,7 +696,7 @@ class Erosion:
         hfw_max_level = 0
         par_list = []
         for ind, bank_i in enumerate(bank_data):
-            parameter = CalculationParameters()
+            parameter = DischargeCalculationParameters()
             # bank_i = 0: left bank, bank_i = 1: right bank
             # calculate velocity along banks ...
             parameter.bank_velocity = simulation_data.calculate_bank_velocity(
@@ -766,7 +766,7 @@ class Erosion:
                     parameter,
                 )
 
-        level_calculation = LevelCalculation(
+        level_calculation = CalculationLevel(
             left=par_list[0], right=par_list[1], hfw_max=hfw_max_level
         )
 
@@ -782,8 +782,8 @@ class Erosion:
         discharge_level_pars,
         water_depth_fairway,
         bank_height,
-        num_levels,
-        parameter: CalculationParameters,
+        num_levels: int,
+        parameter: DischargeCalculationParameters,
     ):
         if level_i == num_levels - 1:
             # EQ debug

@@ -678,7 +678,7 @@ class DischargeLevelParameters(BaseBank[ParametersPerBank]):
 
 
 @dataclass
-class CalculationParameters:
+class DischargeCalculationParameters:
     bank_velocity: np.ndarray = field(default=lambda : np.array([]))
     water_level: np.ndarray = field(default=lambda : np.array([]))
     chezy: np.ndarray = field(default=lambda : np.array([]))
@@ -694,14 +694,14 @@ class CalculationParameters:
 
 
 @dataclass
-class LevelCalculation(BaseBank[CalculationParameters]):
+class CalculationLevel(BaseBank[DischargeCalculationParameters]):
     hfw_max: float = field(default=0.0)
 
     @classmethod
     def from_column_arrays(
-        cls, data: dict, bank_cls: Type["CalculationParameters"], hfw_max: float,
+        cls, data: dict, bank_cls: Type["DischargeCalculationParameters"], hfw_max: float,
         bank_order: Tuple[str, str] = ("left", "right")
-    ) -> "LevelCalculation":
+    ) -> "CalculationLevel":
         # Only include fields that belong to the bank-specific data
         # base_fields = {k: v for k, v in data.items() if k != "id"}
         base = BaseBank.from_column_arrays(data, bank_cls, bank_order=bank_order)
@@ -713,19 +713,18 @@ class LevelCalculation(BaseBank[CalculationParameters]):
             hfw_max=hfw_max,
         )
 
-
 class DischargeLevels:
 
-    def __init__(self, levels: List[LevelCalculation]):
+    def __init__(self, levels: List[CalculationLevel]):
         self.levels = levels
 
-    def __getitem__(self, index: int) -> LevelCalculation:
+    def __getitem__(self, index: int) -> CalculationLevel:
         return self.levels[index]
 
     def __len__(self) -> int:
         return len(self.levels)
 
-    def append(self, level_calc: LevelCalculation):
+    def append(self, level_calc: CalculationLevel):
         self.levels.append(level_calc)
 
     def get_max_hfw_level(self) -> float:

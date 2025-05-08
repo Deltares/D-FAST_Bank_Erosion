@@ -1,5 +1,5 @@
 from dfastbe.io import write_shp, write_csv, ConfigFile
-from dfastbe.bank_erosion.data_models import ParametersPerBank, SingleBank, SingleErosion, FairwayData, CalculationParameters
+from dfastbe.bank_erosion.data_models import ParametersPerBank, SingleBank, SingleErosion, FairwayData, DischargeCalculationParameters
 
 
 class Debugger:
@@ -42,7 +42,7 @@ class Debugger:
     def debug_process_discharge_levels_2(
         self, bank_ind: int, q_level: int, single_bank: SingleBank, fairway_data: FairwayData, erosion_inputs:
             SingleErosion, discharge_level_pars: ParametersPerBank, water_depth_fairway, velocity, bank_height,
-            parameter: CalculationParameters,
+            parameter: DischargeCalculationParameters,
     ):
         bank_coords = single_bank.bank_line_coords
         bank_coords_mind = (bank_coords[:-1] + bank_coords[1:]) / 2
