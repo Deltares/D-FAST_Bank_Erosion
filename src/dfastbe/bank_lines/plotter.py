@@ -1,7 +1,13 @@
 from typing import List, Optional, Tuple
 
+import geopandas as gpd
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
+from shapely import LineString, Polygon
 
 from dfastbe import plotting as df_plt
 from dfastbe.io import BaseSimulationData, ConfigFile, LineGeometry, log_text
@@ -80,17 +86,11 @@ class BankLinesPlotter(df_plt.PlottingBase):
             bank, n_search_lines, self.config_file.crs, xy_km_numpy, km_bounds
         )
 
-        fig, ax = df_plt.plot_detect1(
+        fig, ax = self.plot_detect1(
             bbox,
             xy_km_numpy,
             bank_areas,
             bank,
-            self.simulation_data.face_node,
-            self.simulation_data.n_nodes,
-            self.simulation_data.x_node,
-            self.simulation_data.y_node,
-            self.simulation_data.water_depth_face,
-            1.1 * self.simulation_data.water_depth_face.max(),
             "x-coordinate [m]",
             "y-coordinate [m]",
             "water depth and detected bank lines",
@@ -108,3 +108,91 @@ class BankLinesPlotter(df_plt.PlottingBase):
             plt.close("all")
         else:
             plt.show(block=not self.gui)
+
+    def plot_detect1(
+        self,
+        bbox: Tuple[float, float, float, float],
+        xykm: np.ndarray,
+        bankareas: List[Polygon],
+        bank: List[LineString],
+        xlabel_txt: str,
+        ylabel_txt: str,
+        title_txt: str,
+        waterdepth_txt: str,
+        bankarea_txt: str,
+        bankline_txt: str,
+        config_file: ConfigFile,
+    ) -> Tuple[Figure, Axes]:
+        """
+        Create the bank line detection plot.
+
+        The figure contains a map of the water depth, the chainage, and detected
+        bank lines.
+
+        Arguments
+        ---------
+        bbox : Tuple[float, float, float, float]
+            Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
+        xykm : np.ndarray
+            Array containing the x, y, and chainage; unit m for x and y, km for chainage.
+        bankareas : List[Polygon]
+            List of bank polygons.
+        bank : List[LineString]
+            List of bank lines.
+        xlabel_txt : str
+            Label for the x-axis.
+        ylabel_txt : str
+            Label for the y-axis.
+        title_txt : str
+            Label for the axes title.
+        waterdepth_txt : str
+            Label for the color bar.
+        bankarea_txt : str
+            Label for the bank search areas.
+        bankline_txt : str
+            Label for the identified bank lines.
+
+        Returns
+        -------
+        fig : matplotlib.figure.Figure:
+            Figure object.
+        ax : matplotlib.axes.Axes
+            Axes object.
+        """
+        fig, ax = plt.subplots()
+        self.setsize(fig)
+        ax.set_aspect(1)
+        #
+        scale = 1  # using scale 1 here because of the geopandas plot commands
+        maximum_water_depth = 1.1 * self.simulation_data.water_depth_face.max()
+        self.chainage_markers(xykm, ax, ndec=0, scale=scale)
+        p = self.plot_mesh_patches(
+            ax,
+            self.simulation_data.face_node,
+            self.simulation_data.n_nodes,
+            self.simulation_data.x_node,
+            self.simulation_data.y_node,
+            self.simulation_data.water_depth_face,
+            0,
+            maximum_water_depth,
+            scale=scale,
+        )
+        for b, bankarea in enumerate(bankareas):
+            gpd.GeoSeries(bankarea, crs=config_file.crs).plot(
+                ax=ax, alpha=0.2, color="k"
+            )
+            gpd.GeoSeries(bank[b], crs=config_file.crs).plot(ax=ax, color="r")
+        fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=waterdepth_txt)
+        #
+        shaded = Patch(color="k", alpha=0.2)
+        bankln = Line2D([], [], color="r")
+        handles = [shaded, bankln]
+        labels = [bankarea_txt, bankline_txt]
+        #
+        self.set_bbox(ax, bbox, scale=scale)
+        ax.set_xlabel(xlabel_txt)
+        ax.set_ylabel(ylabel_txt)
+        ax.grid(True)
+        ax.set_title(title_txt)
+        ax.legend(handles, labels, loc="upper right")
+        return fig, ax

@@ -33,105 +33,10 @@ import geopandas
 import matplotlib
 import matplotlib.pyplot
 import numpy as np
-from shapely.geometry import LineString, Polygon
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
-from dfastbe.io import ConfigFile
 from dfastbe.kernel import g, water_density
-
-
-def plot_detect1(
-    bbox: Tuple[float, float, float, float],
-    xykm: np.ndarray,
-    bankareas: List[Polygon],
-    bank: List[LineString],
-    fn: np.ndarray,
-    nnodes: np.ndarray,
-    xn: np.ndarray,
-    yn: np.ndarray,
-    h: np.ndarray,
-    hmax: float,
-    xlabel_txt: str,
-    ylabel_txt: str,
-    title_txt: str,
-    waterdepth_txt: str,
-    bankarea_txt: str,
-    bankline_txt: str,
-    config_file: ConfigFile,
-) -> [matplotlib.figure.Figure, matplotlib.axes.Axes]:
-    """
-    Create the bank line detection plot.
-
-    The figure contains a map of the water depth, the chainage, and detected
-    bank lines.
-
-    Arguments
-    ---------
-    bbox : Tuple[float, float, float, float]
-        Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
-    xykm : np.ndarray
-        Array containing the x, y, and chainage; unit m for x and y, km for chainage.
-    bankareas : List[Polygon]
-        List of bank polygons.
-    bank : List[LineString]
-        List of bank lines.
-    fn : np.ndarray
-        N x M array listing the nodes (max M) per face (total N) of the mesh.
-    nnodes : np.ndarray
-        Number of nodes per face (max M).
-    xn : np.ndarray
-        X-coordinates of the mesh nodes.
-    yn : np.ndarray
-        Y-coordinates of the mesh nodes.
-    h : np.ndarray
-        Array of water depth values.
-    hmax : float
-        Water depth value to be used as upper limit for coloring.
-    xlabel_txt : str
-        Label for the x-axis.
-    ylabel_txt : str
-        Label for the y-axis.
-    title_txt : str
-        Label for the axes title.
-    waterdepth_txt : str
-        Label for the color bar.
-    bankarea_txt : str
-        Label for the bank search areas.
-    bankline_txt : str
-        Label for the identified bank lines.
-
-    Returns
-    -------
-    fig : matplotlib.figure.Figure:
-        Figure object.
-    ax : matplotlib.axes.Axes
-        Axes object.
-    """
-    fig, ax = matplotlib.pyplot.subplots()
-    setsize(fig)
-    ax.set_aspect(1)
-    #
-    scale = 1 # using scale 1 here because of the geopandas plot commands
-    chainage_markers(xykm, ax, ndec=0, scale=scale)
-    p = plot_mesh_patches(ax, fn, nnodes, xn, yn, h, 0, hmax, scale=scale)
-    for b, bankarea in enumerate(bankareas):
-        geopandas.GeoSeries(bankarea, crs=config_file.crs).plot(
-            ax=ax, alpha=0.2, color="k"
-        )
-        geopandas.GeoSeries(bank[b], crs=config_file.crs).plot(ax=ax, color="r")
-    cbar = fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=waterdepth_txt)
-    #
-    shaded = matplotlib.patches.Patch(color="k", alpha=0.2)
-    bankln = matplotlib.lines.Line2D([], [], color="r")
-    handles = [shaded, bankln]
-    labels = [bankarea_txt, bankline_txt]
-    #
-    set_bbox(ax, bbox, scale=scale)
-    ax.set_xlabel(xlabel_txt)
-    ax.set_ylabel(ylabel_txt)
-    ax.grid(True)
-    ax.set_title(title_txt)
-    ax.legend(handles, labels, loc="upper right")
-    return fig, ax
 
 
 def plot1_waterdepth_and_banklines(
@@ -1032,9 +937,8 @@ def plot8_eroded_distance(
 
 
 class PlottingBase:
-    def savefig(
-        self, fig: matplotlib.figure.Figure, filename: Union[str, Path]
-    ) -> None:
+
+    def savefig(self, fig: Figure, filename: Union[str, Path]) -> None:
         """
         Save a single figure to file.
 
@@ -1049,7 +953,7 @@ class PlottingBase:
         matplotlib.pyplot.show(block=False)
         fig.savefig(filename, dpi=300)
 
-    def setsize(self, fig: matplotlib.figure.Figure) -> None:
+    def setsize(self, fig: Figure) -> None:
         """
         Set the size of a figure.
 
@@ -1067,7 +971,7 @@ class PlottingBase:
 
     def set_bbox(
         self,
-        ax: matplotlib.axes.Axes,
+        ax: Axes,
         bbox: Tuple[float, float, float, float],
         scale: float = 1000,
     ) -> None:
@@ -1089,7 +993,7 @@ class PlottingBase:
     def chainage_markers(
         self,
         xykm: np.ndarray,
-        ax: matplotlib.axes.Axes,
+        ax: Axes,
         ndec: int = 1,
         scale: float = 1000,
     ) -> None:
@@ -1129,7 +1033,7 @@ class PlottingBase:
 
     def plot_mesh(
         self,
-        ax: matplotlib.axes.Axes,
+        ax: Axes,
         xe: np.ndarray,
         ye: np.ndarray,
         scale: float = 1000,
@@ -1168,7 +1072,7 @@ class PlottingBase:
 
     def plot_mesh_patches(
         self,
-        ax: matplotlib.axes.Axes,
+        ax: Axes,
         fn: np.ndarray,
         nnodes: np.ndarray,
         xn: np.ndarray,
@@ -1254,8 +1158,8 @@ class PlottingBase:
 
     def zoom_x_and_save(
         self,
-        fig: matplotlib.figure.Figure,
-        ax: matplotlib.axes.Axes,
+        fig: Figure,
+        ax: Axes,
         figbase: Path,
         plot_ext: str,
         xzoom: List[Tuple[float, float]],
@@ -1280,13 +1184,13 @@ class PlottingBase:
         for ix, zoom in enumerate(xzoom):
             ax.set_xlim(xmin=zoom[0], xmax=zoom[1])
             figfile = figbase.with_name(f"{figbase.stem}.sub{str(ix + 1)}{plot_ext}")
-            savefig(fig, figfile)
+            self.savefig(fig, figfile)
         ax.set_xlim(xmin=xmin, xmax=xmax)
 
     def zoom_xy_and_save(
         self,
-        fig: matplotlib.figure.Figure,
-        ax: matplotlib.axes.Axes,
+        fig: Figure,
+        ax: Axes,
         figbase: Path,
         plot_ext: str,
         xyzoom: List[Tuple[float, float, float, float]],
@@ -1340,7 +1244,7 @@ class PlottingBase:
                 ymin=(y0 - dy_zoom / 2) / scale, ymax=(y0 + dy_zoom / 2) / scale
             )
             figfile = figbase.with_name(f"{figbase.stem}.sub{str(ix + 1)}{plot_ext}")
-            savefig(fig, figfile)
+            self.savefig(fig, figfile)
 
         ax.set_xlim(xmin=xmin, xmax=xmax)
         ax.set_ylim(ymin=ymin, ymax=ymax)
@@ -1372,8 +1276,8 @@ class PlottingBase:
 
     def save_plot(
         self,
-        fig: matplotlib.figure.Figure,
-        ax: matplotlib.axes.Axes,
+        fig: Figure,
+        ax: Axes,
         figure_index: int,
         plot_name: str,
         zoom_coords: Optional[List[Tuple[float, float, float, float]]],
@@ -1390,5 +1294,5 @@ class PlottingBase:
         elif plot_flags["save_plot_zoomed"]:
             self.zoom_x_and_save(fig, ax, fig_base, plot_flags["plot_ext"], zoom_coords)
         fig_path = fig_base.with_suffix(plot_flags["plot_ext"])
-        savefig(fig, fig_path)
+        self.savefig(fig, fig_path)
         return figure_index
