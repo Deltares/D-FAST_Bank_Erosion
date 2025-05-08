@@ -167,15 +167,7 @@ class BankLinesPlotter(PlottingBase):
         maximum_water_depth = 1.1 * self.simulation_data.water_depth_face.max()
         self.chainage_markers(xykm, ax, ndec=0, scale=scale)
         p = self.plot_mesh_patches(
-            ax,
-            self.simulation_data.face_node,
-            self.simulation_data.n_nodes,
-            self.simulation_data.x_node,
-            self.simulation_data.y_node,
-            self.simulation_data.water_depth_face,
-            0,
-            maximum_water_depth,
-            scale=scale,
+            ax, self.simulation_data, 0, maximum_water_depth, scale=scale
         )
         for b, bankarea in enumerate(bankareas):
             gpd.GeoSeries(bankarea, crs=config_file.crs).plot(

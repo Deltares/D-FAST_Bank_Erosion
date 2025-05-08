@@ -449,17 +449,8 @@ class ErosionPlotter(df_plt.PlottingBase):
             bp = np.array(bl.coords)
             ax.plot(bp[:, 0] / scale, bp[:, 1] / scale, color="k")
 
-        maximum_water_depth = 1.1 * simulation_data.water_depth_face.max()
-        p = self.plot_mesh_patches(
-            ax,
-            simulation_data.face_node,
-            simulation_data.n_nodes,
-            simulation_data.x_node,
-            simulation_data.y_node,
-            simulation_data.water_depth_face,
-            0,
-            maximum_water_depth,
-        )
+        maximum_water_depth = 1.1 * self.water_level_data.hfw_max
+        p = self.plot_mesh_patches(ax, simulation_data, 0, maximum_water_depth)
         cbar = fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=waterdepth_txt)
         #
         self.set_bbox(ax, bbox)

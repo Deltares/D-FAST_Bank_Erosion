@@ -36,6 +36,7 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
+from dfastbe.io import BaseSimulationData
 from dfastbe.kernel import g, water_density
 
 
@@ -999,11 +1000,7 @@ class PlottingBase:
     def plot_mesh_patches(
         self,
         ax: Axes,
-        fn: np.ndarray,
-        nnodes: np.ndarray,
-        xn: np.ndarray,
-        yn: np.ndarray,
-        val: np.ndarray,
+        simulation_data: BaseSimulationData,
         minval: Optional[float] = None,
         maxval: Optional[float] = None,
         scale: float = 1000,
@@ -1015,16 +1012,6 @@ class PlottingBase:
         ---------
         ax : matplotlib.axes.Axes
             Axes object in which to add the mesh.
-        fn : np.ndarray
-            N x M array listing the nodes (max M) per face (total N) of the mesh.
-        nnodes : np.ndarray
-            Number of nodes per face (max M).
-        xn : np.ndarray
-            X-coordinates of the mesh nodes.
-        yn : np.ndarray
-            Y-coordinates of the mesh nodes.
-        val : np.ndarray
-            Array of length N containing the value per face.
         minval : Optional[float]
             Lower limit for the color scale.
         maxval : Optional[float]
@@ -1039,11 +1026,11 @@ class PlottingBase:
         """
         tfn_list = []
         tval_list = []
-        for n in range(3, max(nnodes) + 1):
-            mask = nnodes >= n
-            fn_masked = fn[mask, :]
+        for n in range(3, max(simulation_data.n_nodes) + 1):
+            mask = simulation_data.n_nodes >= n
+            fn_masked = simulation_data.face_node[mask, :]
             tfn_list.append(fn_masked[:, (0, n - 2, n - 1)])
-            tval_list.append(val[mask])
+            tval_list.append(simulation_data.water_depth_face[mask])
         tfn = np.concatenate(tfn_list, axis=0)
         tval = np.concatenate(tval_list, axis=0)
         # cmap = matplotlib.pyplot.get_cmap('Spectral')
@@ -1052,8 +1039,8 @@ class PlottingBase:
         if maxval is None:
             maxval = np.max(tval)
         p = ax.tripcolor(
-            xn / scale,
-            yn / scale,
+            simulation_data.x_node / scale,
+            simulation_data.y_node / scale,
             tfn,
             facecolors=tval,
             cmap="Spectral",
