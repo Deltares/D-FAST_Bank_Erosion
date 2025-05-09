@@ -4,7 +4,10 @@ from dfastbe.bank_erosion.data_models import ParametersPerBank, SingleBank, Sing
 
 
 class Debugger:
+    """Class to handle debugging and output of bank erosion calculations."""
+
     def __init__(self, config_file: ConfigFile, river_data):
+        """Debugger constructor."""
         self.config_file = config_file
         self.river_data = river_data
 
