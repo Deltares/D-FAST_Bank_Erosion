@@ -91,7 +91,7 @@ class Erosion:
             self.river_data.num_discharge_levels
         )
         self.bl_processor = BankLinesProcessor(self.river_data)
-        self.debugger = Debugger(config_file.src, self.river_data.output_dir)
+        self.debugger = Debugger(config_file.crs, self.river_data.output_dir)
 
     @property
     def config_file(self) -> ConfigFile:
