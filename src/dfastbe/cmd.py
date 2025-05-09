@@ -29,7 +29,7 @@ from pathlib import Path
 from dfastbe.io import ConfigFile, load_program_texts
 from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_lines.bank_lines import BankLines
-from dfastbe.gui import main
+from dfastbe.gui.gui import main
 from dfastbe import __file__
 R_DIR = Path(__file__).resolve().parent
 
