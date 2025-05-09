@@ -29,7 +29,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from configparser import ConfigParser
 from configparser import Error as ConfigparserError
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple
 
 import geopandas as gpd
 import netCDF4
@@ -300,14 +300,14 @@ class ConfigFile:
     settings and supports upgrading older configuration formats.
     """
 
-    def __init__(self, config: ConfigParser, path: Union[Path, str] = None):
+    def __init__(self, config: ConfigParser, path: Path | str = None):
         """
         Initialize the ConfigFile object.
 
         Args:
             config (ConfigParser):
                 Settings for the D-FAST Bank Erosion analysis.
-            path (Union[Path, str]):
+            path (Path | str):
                 Path to the configuration file.
 
         Examples:
@@ -364,14 +364,14 @@ class ConfigFile:
         self._root_dir = value
 
     @classmethod
-    def read(cls, path: Union[str, Path]) -> "ConfigFile":
+    def read(cls, path: str | Path) -> "ConfigFile":
         """Read a configParser object (configuration file).
 
         Reads the config file using the standard `configparser`. Falls back to a
         dedicated reader compatible with old waqbank files.
 
         Args:
-            path (Union[str, Path]): Path to the configuration file.
+            path (str | Path): Path to the configuration file.
 
         Returns:
             ConfigFile: Settings for the D-FAST Bank Erosion analysis.
@@ -901,7 +901,7 @@ class ConfigFile:
                 Name of the keyword from which to read.
             num_stations_per_bank (List[int]):
                 Number of stations (points) For each bank (bank chainage locations).
-            default (Optional[Union[float, List[np.ndarray]]]):
+            default (Optional[float | List[np.ndarray]]):
                 Optional default value or default parameter field; default None.
             ext (str):
                 File name extension; default empty string.
@@ -992,7 +992,7 @@ class ConfigFile:
 
     def process_parameter(
         self,
-        value: Union[str, float],
+        value: str | float,
         key: str,
         num_stations_per_bank: List[int],
         use_default: bool = False,
@@ -1005,7 +1005,7 @@ class ConfigFile:
         """Process a parameter value into arrays for each bank.
 
         Args:
-            value (Union[str, float]): The parameter value or filename.
+            value (str | float): The parameter value or filename.
             key (str): Name of the parameter for error messages.
             num_stations_per_bank (List[int]): Number of stations for each bank.
             use_default (bool): Flag indicating whether to use the default value; default False.
@@ -1397,7 +1397,7 @@ class ConfigFile:
 class LineGeometry:
     """Center line class."""
 
-    def __init__(self, line: Union[LineString, np.ndarray], mask: Tuple[float, float] = None, crs: str = None):
+    def __init__(self, line: LineString | np.ndarray, mask: Tuple[float, float] = None, crs: str = None):
         """Geometry Line initialization.
 
         Args:
@@ -1779,6 +1779,7 @@ class BaseRiverData:
         return get_bbox(coords, buffer)
 
     def get_erosion_sim_data(self, num_discharge_levels: int) -> Tuple[List[str], List[float]]:
+        """Get the erosion simulation data from the configuration file."""
         # get pdischarges
         sim_files = []
         p_discharge = []
@@ -1789,6 +1790,7 @@ class BaseRiverData:
                 self.config_file.get_float("Erosion", f"PDischarge{iq_str}")
             )
         return sim_files, p_discharge
+
 
 def get_bbox(
         coords: np.ndarray, buffer: float = 0.1
@@ -1817,7 +1819,8 @@ def get_bbox(
 
     return bbox
 
-def load_program_texts(file_name: Union[str, Path]) -> None:
+
+def load_program_texts(file_name: str | Path) -> None:
     """Load texts from a configuration file, and store globally for access.
 
     This routine reads the text file "file_name", and detects the keywords

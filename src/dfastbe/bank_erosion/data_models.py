@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Iterator, List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type, Optional, Union
+from typing import Iterator, List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type, Optional
 import numpy as np
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString, Point
@@ -243,7 +243,7 @@ class SingleBank:
         """
         return np.diff(self.bank_line_coords[:, 1])
 
-    def get_mid_points(self, as_geo_series: bool = False, crs: str = None) -> Union[GeoSeries, np.ndarray]:
+    def get_mid_points(self, as_geo_series: bool = False, crs: str = None) -> GeoSeries | np.ndarray:
         """Band line midpoints.
 
         Args:
@@ -750,7 +750,7 @@ class DischargeLevels:
     def __iter__(self):
         return iter(self.levels)
 
-    def accumulate(self, attribute_name: str, bank_side: Union[str, List[str]] = None) -> List[np.ndarray]:
+    def accumulate(self, attribute_name: str, bank_side: str | List[str] = None) -> List[np.ndarray]:
         if bank_side is None:
             bank_side = ["left", "right"]
         elif isinstance(bank_side, str):
