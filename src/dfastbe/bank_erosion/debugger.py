@@ -1,6 +1,13 @@
-"""Bank Erosion Debugger"""
-from dfastbe.io import write_shp, write_csv, ConfigFile
-from dfastbe.bank_erosion.data_models import ParametersPerBank, SingleBank, SingleErosion, FairwayData, DischargeCalculationParameters
+"""Bank Erosion Debugger."""
+
+from dfastbe.bank_erosion.data_models import (
+    DischargeCalculationParameters,
+    FairwayData,
+    ParametersPerBank,
+    SingleBank,
+    SingleErosion,
+)
+from dfastbe.io import write_csv, write_shp
 
 
 class Debugger:
@@ -12,8 +19,16 @@ class Debugger:
         self.output_dir = output_dir
 
     def last_discharge_level(
-        self, bank_index: int, single_bank: SingleBank, fairway_data: FairwayData, erosion_inputs: SingleErosion,
-        discharge_level_pars: ParametersPerBank, water_depth_fairway, dn_eq1, dv_eq1, bank_height
+        self,
+        bank_index: int,
+        single_bank: SingleBank,
+        fairway_data: FairwayData,
+        erosion_inputs: SingleErosion,
+        discharge_level_pars: ParametersPerBank,
+        water_depth_fairway,
+        dn_eq1,
+        dv_eq1,
+        bank_height,
     ):
         """Write the last discharge level to a shapefile and CSV file."""
         bank_coords_mind = single_bank.get_mid_points()
@@ -48,9 +63,17 @@ class Debugger:
         write_csv(params, f"{str(self.output_dir)}/debug.EQ.B{bank_index + 1}.csv")
 
     def middle_levels(
-        self, bank_ind: int, q_level: int, single_bank: SingleBank, fairway_data: FairwayData, erosion_inputs:
-            SingleErosion, discharge_level_pars: ParametersPerBank, water_depth_fairway, velocity, bank_height,
-            parameter: DischargeCalculationParameters,
+        self,
+        bank_ind: int,
+        q_level: int,
+        single_bank: SingleBank,
+        fairway_data: FairwayData,
+        erosion_inputs: SingleErosion,
+        discharge_level_pars: ParametersPerBank,
+        water_depth_fairway,
+        velocity,
+        bank_height,
+        parameter: DischargeCalculationParameters,
     ):
         """Write the middle levels to a shapefile and CSV file."""
         bank_coords_mind = single_bank.get_mid_points()
