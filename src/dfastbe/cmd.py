@@ -26,12 +26,15 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 from pathlib import Path
-from dfastbe.io import ConfigFile, load_program_texts
+from dfastbe.io.logger import load_program_texts
+from dfastbe.io.config import ConfigFile
 from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_lines.bank_lines import BankLines
-from dfastbe.gui import main
+from dfastbe.gui.gui import main
 from dfastbe import __file__
 R_DIR = Path(__file__).resolve().parent
+LOG_DATA_DIR = R_DIR / "io/log_data"
+
 
 def run(
     language: str = "UK",
@@ -78,7 +81,7 @@ def run(
         ```
     """
     language = language.upper()
-    load_program_texts( R_DIR / f"messages.{language}.ini")
+    load_program_texts( LOG_DATA_DIR / f"messages.{language}.ini")
     run_mode = run_mode.upper()
 
     if run_mode == "GUI":
