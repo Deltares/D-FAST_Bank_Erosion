@@ -4,7 +4,7 @@ from typing import Dict
 
 import numpy as np
 from geopandas import GeoSeries
-
+from geopandas.geodataframe import GeoDataFrame
 from dfastbe.bank_erosion.data_models import (
     DischargeCalculationParameters,
     FairwayData,
@@ -12,7 +12,6 @@ from dfastbe.bank_erosion.data_models import (
     SingleBank,
     SingleErosion,
 )
-from dfastbe.io.config import write_csv, write_shp
 
 
 class Debugger:
@@ -117,5 +116,54 @@ class Debugger:
         """Write the data to a shapefile and CSV file."""
         csv_path = f"{path}.csv"
         shp_path = f"{path}.shp"
-        write_shp(coords, data, shp_path)
-        write_csv(data, csv_path)
+        _write_shp(coords, data, shp_path)
+        _write_csv(data, csv_path)
+
+
+def _write_shp(geom: GeoSeries, data: Dict[str, np.ndarray], filename: str) -> None:
+    """Write a shape file.
+
+    Write a shape file for a given GeoSeries and dictionary of np arrays.
+    The GeoSeries and all np should have equal length.
+
+    Arguments
+    ---------
+    geom : geopandas.geoseries.GeoSeries
+        geopandas GeoSeries containing k geometries.
+    data : Dict[str, np.ndarray]
+        Dictionary of quantities to be written, each np array should have length k.
+    filename : str
+        Name of the file to be written.
+
+    Returns
+    -------
+    None
+    """
+    GeoDataFrame(data, geometry=geom).to_file(filename)
+
+
+def _write_csv(data: Dict[str, np.ndarray], filename: str) -> None:
+    """
+    Write a data to csv file.
+
+    Arguments
+    ---------
+    data : Dict[str, np.ndarray]
+        Value(s) to be written.
+    filename : str
+        Name of the file to be written.
+
+    Returns
+    -------
+    None
+    """
+    keys = [key for key in data.keys()]
+    header = ""
+    for i in range(len(keys)):
+        if i < len(keys) - 1:
+            header = header + '"' + keys[i] + '", '
+        else:
+            header = header + '"' + keys[i] + '"'
+
+    data = np.column_stack([array for array in data.values()])
+    np.savetxt(filename, data, delimiter=", ", header=header, comments="")

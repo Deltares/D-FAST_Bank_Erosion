@@ -1233,55 +1233,6 @@ def get_filename(key: str) -> str:
     return filename
 
 
-def write_shp(geom: GeoSeries, data: Dict[str, np.ndarray], filename: str) -> None:
-    """Write a shape file.
-
-    Write a shape file for a given GeoSeries and dictionary of np arrays.
-    The GeoSeries and all np should have equal length.
-
-    Arguments
-    ---------
-    geom : geopandas.geoseries.GeoSeries
-        geopandas GeoSeries containing k geometries.
-    data : Dict[str, np.ndarray]
-        Dictionary of quantities to be written, each np array should have length k.
-    filename : str
-        Name of the file to be written.
-
-    Returns
-    -------
-    None
-    """
-    GeoDataFrame(data, geometry=geom).to_file(filename)
-
-
-def write_csv(data: Dict[str, np.ndarray], filename: str) -> None:
-    """
-    Write a data to csv file.
-
-    Arguments
-    ---------
-    data : Dict[str, np.ndarray]
-        Value(s) to be written.
-    filename : str
-        Name of the file to be written.
-
-    Returns
-    -------
-    None
-    """
-    keys = [key for key in data.keys()]
-    header = ""
-    for i in range(len(keys)):
-        if i < len(keys) - 1:
-            header = header + '"' + keys[i] + '", '
-        else:
-            header = header + '"' + keys[i] + '"'
-
-    data = np.column_stack([array for array in data.values()])
-    np.savetxt(filename, data, delimiter=", ", header=header, comments="")
-
-
 def write_km_eroded_volumes(stations: np.ndarray, volume: np.ndarray, file_name: str) -> None:
     """
     Write a text file with eroded volume data binned per kilometre.
