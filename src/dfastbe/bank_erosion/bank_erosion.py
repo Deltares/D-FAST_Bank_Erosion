@@ -836,7 +836,7 @@ class Erosion:
             river_axis.data["stations"].max(),
             self.river_data.output_intervals,
         )
-        km_mid = get_km_bins(km_bin, type=3)  # get mid-points
+        km_mid = get_km_bins(km_bin, station_type="mid")  # get mid-points
 
         fairway_data = self._get_fairway_data(river_axis, mesh_data)
 

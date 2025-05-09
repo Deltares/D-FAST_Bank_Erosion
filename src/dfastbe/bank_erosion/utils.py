@@ -915,56 +915,53 @@ def comp_hw_ship_at_bank(
 
 
 def get_km_bins(
-    km_bin: Tuple[float, float, float], type: int = 2, adjust: bool = False
+    km_bin: Tuple[float, float, float], station_type: str = "upper", adjust: bool = False
 ) -> np.ndarray:
     """
     Get an array of representative chainage values.
 
-    Arguments
-    ---------
-    km_bin : Tuple[float, float, float]
-        Tuple containing (start, end, step) for the chainage bins
-    type : int
-        Type of characteristic chainage values returned
-            0: all bounds (N+1 values)
-            1: lower bounds (N values)
-            2: upper bounds (N values) - default
-            3: mid points (N values)
-    adjust : bool
-        Flag indicating whether the step size should be adjusted to include an integer number of steps
+    Args:
+        km_bin (Tuple[float, float, float]):
+            Tuple containing (start, end, step) for the chainage bins
+        station_type (str, default="upper"):
+            Type of characteristic chainage values returned
+                all: all bounds (N+1 values)
+                lower: lower bounds (N values)
+                upper: upper bounds (N values)
+                mid: mid-points (N values)
+        adjust (bool):
+            Flag indicating whether the step size should be adjusted to include an integer number of steps
 
-    Returns
-    -------
-    km : np.ndarray
-        Array containing the chainage bin upper bounds
+    Returns:
+        km (np.ndarray):
+            Array containing the chainage bin upper bounds
     """
-    km_step = km_bin[2]
-    nbins = int(math.ceil((km_bin[1] - km_bin[0]) / km_step))
+    stations_step = km_bin[2]
+    num_bins = int(math.ceil((km_bin[1] - km_bin[0]) / stations_step))
 
     lb = 0
-    ub = nbins + 1
+    ub = num_bins + 1
     dx = 0.0
 
     if adjust:
-        km_step = (km_bin[1] - km_bin[0]) / nbins
+        stations_step = (km_bin[1] - km_bin[0]) / num_bins
 
-    if type == 0:
-        # all bounds
+    if station_type == "all":
         pass
-    elif type == 1:
+    elif station_type == "lower":
         # lower bounds
         ub = ub - 1
-    elif type == 2:
+    elif station_type == "upper":
         # upper bounds
         lb = lb + 1
-    elif type == 3:
+    elif station_type == "mid":
         # midpoint values
         ub = ub - 1
         dx = km_bin[2] / 2
 
-    km = km_bin[0] + dx + np.arange(lb, ub) * km_step
+    stations = km_bin[0] + dx + np.arange(lb, ub) * stations_step
 
-    return km
+    return stations
 
 
 def get_km_eroded_volume(
