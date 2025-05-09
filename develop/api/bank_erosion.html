@@ -2925,7 +2925,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">num_discharge_levels</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bl_processor</span> <span class="o">=</span> <span class="n">BankLinesProcessor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span> <span class="o">=</span> <span class="n">Debugger</span><span class="p">(</span><span class="n">config_file</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span> <span class="o">=</span> <span class="n">Debugger</span><span class="p">(</span><span class="n">config_file</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConfigFile</span><span class="p">:</span>
@@ -3670,7 +3670,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="n">river_axis</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;stations&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_intervals</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">km_mid</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># get mid-points</span>
+        <span class="n">km_mid</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">,</span> <span class="n">station_type</span><span class="o">=</span><span class="s2">&quot;mid&quot;</span><span class="p">)</span>  <span class="c1"># get mid-points</span>
 
         <span class="n">fairway_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fairway_data</span><span class="p">(</span><span class="n">river_axis</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">)</span>
 
@@ -4181,7 +4181,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">num_discharge_levels</span>
     <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">bl_processor</span> <span class="o">=</span> <span class="n">BankLinesProcessor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span> <span class="o">=</span> <span class="n">Debugger</span><span class="p">(</span><span class="n">config_file</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span> <span class="o">=</span> <span class="n">Debugger</span><span class="p">(</span><span class="n">config_file</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4957,7 +4957,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">river_axis</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;stations&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_intervals</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">km_mid</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># get mid-points</span>
+    <span class="n">km_mid</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">,</span> <span class="n">station_type</span><span class="o">=</span><span class="s2">&quot;mid&quot;</span><span class="p">)</span>  <span class="c1"># get mid-points</span>
 
     <span class="n">fairway_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fairway_data</span><span class="p">(</span><span class="n">river_axis</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">)</span>
 
