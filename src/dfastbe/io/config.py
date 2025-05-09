@@ -29,7 +29,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from configparser import ConfigParser
 from configparser import Error as ConfigparserError
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -40,6 +40,8 @@ from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
 from dfastbe.io.file_utils import absolute_path, relative_path
 from dfastbe.io.logger import log_text
+
+__all__ = ["ConfigFile", "get_bbox", "ConfigFileError", "SimulationFilesError"]
 
 
 class ConfigFile:
