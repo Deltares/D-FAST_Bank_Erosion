@@ -19,7 +19,7 @@ from dfastbe.bank_erosion.data_models import (
     MeshData,
     WaterLevelData,
 )
-from dfastbe.io import log_text
+from dfastbe.io.logger import log_text
 from dfastbe.bank_erosion.utils import g, water_density
 from dfastbe.kernel import get_zoom_extends
 

@@ -13,21 +13,11 @@ import pytest
 from geopandas import GeoDataFrame
 from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry import LineString
+from dfastbe.io.data_models import LineGeometry, BaseSimulationData, BaseRiverData, _read_fm_map
+from dfastbe.io.file_utils import absolute_path, relative_path
+from dfastbe.io.logger import get_text, load_program_texts, log_text
+from dfastbe.io.config import SimulationFilesError, ConfigFile
 
-from dfastbe.io import (
-    LineGeometry,
-    BaseSimulationData,
-    SimulationFilesError,
-    ConfigFile,
-    BaseRiverData,
-    absolute_path,
-    get_filename,
-    get_text,
-    load_program_texts,
-    log_text,
-    _read_fm_map,
-    relative_path,
-)
 
 
 filename = "tests/data/files/e02_f001_c011_simplechannel_map.nc"
@@ -67,7 +57,7 @@ class TestSimulationData:
         mock_velocity_y_face = np.array([0.4, 0.5, 0.6])
         mock_chezy_face = np.array([30.0, 40.0, 50.0])
 
-        with patch("dfastbe.io._read_fm_map") as mock_read_fm_map, patch(
+        with patch("dfastbe.io.data_models._read_fm_map") as mock_read_fm_map, patch(
             "netCDF4.Dataset"
         ) as mock_dataset:
             mock_read_fm_map.side_effect = [
@@ -253,13 +243,6 @@ class TestLogText:
         all_lines = open(filename, "r").read().splitlines()
         strref = ['The measure is located on reach ABC']
         assert all_lines == strref
-
-
-def test_get_filename_01():
-    """
-    Testing get_filename wrapper for get_text.
-    """
-    assert get_filename("report.out") == "report.txt"
 
 
 class TestGetText:
@@ -676,7 +659,7 @@ class TestConfigFile:
         config.read_dict(path_dict)
         config_file = ConfigFile(config, cwd / "test.cfg")
 
-        with patch("dfastbe.io.Path.cwd", return_value=str(cwd)):
+        with patch("dfastbe.io.config.Path.cwd", return_value=str(cwd)):
             rootdir = config_file.make_paths_absolute()
 
         assert rootdir == cwd

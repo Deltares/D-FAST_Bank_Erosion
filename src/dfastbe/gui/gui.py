@@ -32,7 +32,9 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import PyQt5.QtGui
 
-from dfastbe.io import get_text, absolute_path, ConfigFile
+from dfastbe.io.file_utils import absolute_path
+from dfastbe.io.logger import get_text
+from dfastbe.io.config import ConfigFile
 import pathlib
 from pathlib import Path
 import sys
@@ -46,13 +48,12 @@ from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.bank_erosion.bank_erosion import Erosion
 
 USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
-
-
 DialogObject = Dict[str, PyQt5.QtCore.QObject]
 
 dialog: DialogObject
 
 r_dir = Path(__file__).resolve().parent
+ICONS_DIR = "gui/icons"
 
 def gui_text(key: str, prefix: str = "gui_", dict: Dict[str, Any] = {}):
     """
@@ -703,7 +704,7 @@ def openFileLayout(key, enabled=True) -> PyQt5.QtWidgets.QWidget:
     dialog[key] = myWidget
     gridly.addWidget(myWidget, 0, 0)
 
-    openFile = QtWidgets.QPushButton(getIcon("open.png"), "")
+    openFile = QtWidgets.QPushButton(getIcon(f"{ICONS_DIR}/open.png"), "")
     openFile.clicked.connect(partial(selectFile, key))
     openFile.setEnabled(enabled)
     dialog[key + "File"] = openFile
@@ -742,18 +743,18 @@ def addRemoveEditLayout(
     buttonBarLayout.setContentsMargins(0, 0, 0, 0)
     gridly.addWidget(buttonBar, 0, 1)
 
-    addBtn = QtWidgets.QPushButton(getIcon("add.png"), "")
+    addBtn = QtWidgets.QPushButton(getIcon(f"{ICONS_DIR}/add.png"), "")
     addBtn.clicked.connect(partial(addAnItem, key))
     dialog[key + "Add"] = addBtn
     buttonBarLayout.addWidget(addBtn)
 
-    editBtn = QtWidgets.QPushButton(getIcon("edit.png"), "")
+    editBtn = QtWidgets.QPushButton(getIcon(f"{ICONS_DIR}/edit.png"), "")
     editBtn.clicked.connect(partial(editAnItem, key))
     editBtn.setEnabled(False)
     dialog[key + "Edit"] = editBtn
     buttonBarLayout.addWidget(editBtn)
 
-    delBtn = QtWidgets.QPushButton(getIcon("remove.png"), "")
+    delBtn = QtWidgets.QPushButton(getIcon(f"{ICONS_DIR}/remove.png"), "")
     delBtn.clicked.connect(partial(removeAnItem, key))
     delBtn.setEnabled(False)
     dialog[key + "Remove"] = delBtn

@@ -34,7 +34,7 @@ import matplotlib.pyplot
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from dfastbe.io import BaseSimulationData
+from dfastbe.io.data_models import BaseSimulationData
 
 
 class BasePlot:

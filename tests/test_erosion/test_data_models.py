@@ -18,7 +18,7 @@ from dfastbe.bank_erosion.data_models import (
     SingleErosion,
     WaterLevelData,
 )
-from dfastbe.io import ConfigFile
+from dfastbe.io.config import ConfigFile
 
 
 class TestErosionInputs:
@@ -238,7 +238,7 @@ class TestSimulationData:
         )
 
     @patch("dfastbe.bank_lines.data_models.BankLinesRiverData")
-    @patch("dfastbe.io.LineGeometry")
+    @patch("dfastbe.io.data_models.LineGeometry")
     def test_simulation_data(self, mock_center_line, mock_simulation_data):
         """Test the simulation_data method of the BaseRiverData class with a mocked SimulationData."""
         # Mock the SimulationData instance
@@ -292,7 +292,7 @@ class TestErosionRiverData:
         river_data = ErosionRiverData(config_file)
         return river_data
 
-    @patch("dfastbe.io.XYCModel.read")
+    @patch("dfastbe.io.config.XYCModel.read")
     def test_read_river_axis(self, mock_read, river_data):
         """Test the read_river_axis method by mocking XYCModel.read."""
         mock_river_axis = LineString([(0, 0), (1, 1), (2, 2)])

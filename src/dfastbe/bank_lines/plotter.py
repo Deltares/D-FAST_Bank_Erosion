@@ -9,7 +9,9 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from shapely import LineString, Polygon
 
-from dfastbe.io import BaseSimulationData, ConfigFile, LineGeometry, log_text
+from dfastbe.io.config import ConfigFile
+from dfastbe.io.logger import log_text
+from dfastbe.io.data_models import BaseSimulationData, LineGeometry
 from dfastbe.kernel import get_zoom_extends
 from dfastbe.plotting import BasePlot
 

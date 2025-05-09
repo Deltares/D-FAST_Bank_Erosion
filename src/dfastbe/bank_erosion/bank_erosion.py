@@ -54,18 +54,15 @@ from dfastbe.bank_erosion.data_models import (
 from dfastbe.bank_erosion.debugger import Debugger
 from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.utils import BankLinesProcessor, intersect_line_mesh
-from dfastbe.io import (
-    ConfigFile,
-    LineGeometry,
-    log_text,
-    write_km_eroded_volumes,
-)
-from dfastbe.kernel import get_zoom_extends
+from dfastbe.io.config import ConfigFile
+from dfastbe.io.logger import log_text
+from dfastbe.io.data_models import LineGeometry
 from dfastbe.bank_erosion.utils import (
     comp_erosion_eq,
     compute_bank_erosion_dynamics,
     get_km_bins,
     get_km_eroded_volume,
+    write_km_eroded_volumes
 )
 from dfastbe.support import move_line
 from dfastbe.utils import timed_logger
@@ -186,6 +183,7 @@ class Erosion:
             river_axis_km = river_axis_km[i2 : i1 + 1][::-1]
             river_axis_numpy = river_axis_numpy[i2 : i1 + 1][::-1]
 
+        # river_axis = LineString(river_axis_numpy)
         river_axis = LineGeometry(river_axis_numpy, crs=self.config_file.crs)
         river_axis.add_data(data={"stations": river_axis_km})
         return river_axis

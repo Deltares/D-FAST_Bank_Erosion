@@ -9,7 +9,9 @@ from geopandas import GeoDataFrame
 from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString, Point
 
-from dfastbe.io import BaseRiverData, BaseSimulationData, ConfigFile, log_text
+from dfastbe.io.data_models import BaseRiverData, BaseSimulationData
+from dfastbe.io.logger import log_text
+from dfastbe.io.config import ConfigFile
 
 GenericType = TypeVar("GenericType")
 
