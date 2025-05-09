@@ -3,7 +3,7 @@ from typing import List, Tuple
 from shapely.geometry import LineString, MultiLineString, Point
 from shapely.geometry.polygon import Polygon
 
-from dfastbe.io import BaseRiverData, BaseSimulationData, LineGeometry, log_text
+from dfastbe.io.io import BaseRiverData, BaseSimulationData, LineGeometry, log_text
 
 MAX_RIVER_WIDTH = 1000
 
@@ -169,7 +169,7 @@ class BankLinesRiverData(BaseRiverData):
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.io import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
             >>> bank_lines_river_data = BankLinesRiverData(config_file)
             No message found for read_chainage
@@ -213,7 +213,7 @@ class BankLinesRiverData(BaseRiverData):
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.io import ConfigFile
             >>> from unittest.mock import patch
             >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
             >>> bank_lines_river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS

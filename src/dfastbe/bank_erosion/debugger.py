@@ -12,7 +12,7 @@ from dfastbe.bank_erosion.data_models import (
     SingleBank,
     SingleErosion,
 )
-from dfastbe.io import write_csv, write_shp
+from dfastbe.io.io import write_csv, write_shp
 
 
 class Debugger:

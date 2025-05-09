@@ -40,7 +40,7 @@ class TestSearchLines:
         search_lines.d_lines = lines
         assert search_lines.d_lines == lines
 
-    @patch("dfastbe.io.LineGeometry")
+    @patch("dfastbe.io.io.LineGeometry")
     def test_searchlines_with_center_line(self, mock_center_line, lines):
         mask = LineString([(0, 0), (2, 2)])
         mock_center_line.values = mask
@@ -99,7 +99,7 @@ class TestBankLinesRiverData:
         """Test the _get_bank_lines_simulation_data method."""
         mock_read.return_value = mock_simulation_data
 
-        with patch("dfastbe.io.LineGeometry"):
+        with patch("dfastbe.io.io.LineGeometry"):
             river_data = BankLinesRiverData(mock_config_file)
             simulation_data, h0 = river_data._get_bank_lines_simulation_data()
 
@@ -112,7 +112,7 @@ class TestBankLinesRiverData:
         """Test the simulation_data method."""
         mock_read.return_value = mock_simulation_data
 
-        with patch("dfastbe.io.LineGeometry") as mock_line_geometry, patch.object(
+        with patch("dfastbe.io.io.LineGeometry") as mock_line_geometry, patch.object(
             BankLinesRiverData, "search_lines"
         ) as mock_search_lines:
             river_data = BankLinesRiverData(mock_config_file)

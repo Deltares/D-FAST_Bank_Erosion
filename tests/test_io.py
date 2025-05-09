@@ -14,7 +14,7 @@ from geopandas import GeoDataFrame
 from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry import LineString
 
-from dfastbe.io import (
+from dfastbe.io.io import (
     LineGeometry,
     BaseSimulationData,
     SimulationFilesError,
@@ -67,7 +67,7 @@ class TestSimulationData:
         mock_velocity_y_face = np.array([0.4, 0.5, 0.6])
         mock_chezy_face = np.array([30.0, 40.0, 50.0])
 
-        with patch("dfastbe.io._read_fm_map") as mock_read_fm_map, patch(
+        with patch("dfastbe.io.io._read_fm_map") as mock_read_fm_map, patch(
             "netCDF4.Dataset"
         ) as mock_dataset:
             mock_read_fm_map.side_effect = [
@@ -676,7 +676,7 @@ class TestConfigFile:
         config.read_dict(path_dict)
         config_file = ConfigFile(config, cwd / "test.cfg")
 
-        with patch("dfastbe.io.Path.cwd", return_value=str(cwd)):
+        with patch("dfastbe.io.io.Path.cwd", return_value=str(cwd)):
             rootdir = config_file.make_paths_absolute()
 
         assert rootdir == cwd

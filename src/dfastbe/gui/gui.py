@@ -32,7 +32,7 @@ from PyQt5 import QtWidgets
 from PyQt5 import QtCore
 import PyQt5.QtGui
 
-from dfastbe.io import get_text, absolute_path, ConfigFile
+from dfastbe.io.io import get_text, absolute_path, ConfigFile
 import pathlib
 from pathlib import Path
 import sys

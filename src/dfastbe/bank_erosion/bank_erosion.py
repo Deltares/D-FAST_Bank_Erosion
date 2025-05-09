@@ -55,7 +55,7 @@ from dfastbe.bank_erosion.data_models import (
 )
 from dfastbe.bank_erosion.debugger import Debugger
 from dfastbe.bank_erosion.utils import BankLinesProcessor, intersect_line_mesh
-from dfastbe.io import (
+from dfastbe.io.io import (
     ConfigFile,
     LineGeometry,
     log_text,
