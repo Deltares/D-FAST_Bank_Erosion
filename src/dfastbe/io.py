@@ -2092,27 +2092,27 @@ def write_csv(data: Dict[str, np.ndarray], filename: str) -> None:
     np.savetxt(filename, data, delimiter=", ", header=header, comments="")
 
 
-def write_km_eroded_volumes(km: np.ndarray, vol: np.ndarray, filename: str) -> None:
+def write_km_eroded_volumes(stations: np.ndarray, volume: np.ndarray, file_name: str) -> None:
     """
     Write a text file with eroded volume data binned per kilometre.
 
     Arguments
     ---------
-    km :
+    stations :
         Array containing chainage values.
-    vol :
+    volume :
         Array containing erosion volume values.
-    filename : str
+    file_name : str
         Name of the file to be written.
 
     Returns
     -------
     None
     """
-    with open(filename, "w") as erofile:
-        for i in range(len(km)):
-            valstr = "\t".join(["{:.2f}".format(x) for x in vol[i, :]])
-            erofile.write("{:.2f}\t".format(km[i]) + valstr + "\n")
+    with open(file_name, "w") as file:
+        for i in range(len(stations)):
+            str_value = "\t".join(["{:.2f}".format(x) for x in volume[i, :]])
+            file.write("{:.2f}\t".format(stations[i]) + str_value + "\n")
 
 
 def _move_parameter_location(

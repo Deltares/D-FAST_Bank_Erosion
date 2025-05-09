@@ -329,7 +329,7 @@ class TestBankLines:
         ) as mock_plot_detect1, patch("matplotlib.pyplot.show") as mock_show, patch(
             "matplotlib.pyplot.close"
         ) as mock_close, patch(
-            "dfastbe.plotting.PlottingBase.zoom_xy_and_save"
+            "dfastbe.plotting.BasePlot.zoom_xy_and_save"
         ) as mock_zoom_xy_and_save:
             mock_plot_detect1.return_value = (MagicMock(), MagicMock())
 

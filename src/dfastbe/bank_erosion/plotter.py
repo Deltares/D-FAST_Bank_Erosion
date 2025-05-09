@@ -20,7 +20,8 @@ from dfastbe.bank_erosion.data_models import (
     WaterLevelData,
 )
 from dfastbe.io import log_text
-from dfastbe.kernel import g, get_zoom_extends, water_density
+from dfastbe.bank_erosion.utils import g, water_density
+from dfastbe.kernel import get_zoom_extends
 
 X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
@@ -262,7 +263,7 @@ class ErosionPlotter(BasePlot):
             ax,
             km_mid + 0.2 * km_step,
             km_step,
-            self.erosion_results.vol_per_discharge,
+            self.water_level_data.vol_per_discharge,
             "Q{iq}",
             0.4,
         )
@@ -270,7 +271,7 @@ class ErosionPlotter(BasePlot):
             ax,
             km_mid - 0.2 * km_step,
             km_step,
-            self.erosion_results.vol_per_discharge,
+            self.water_level_data.vol_per_discharge,
             "Bank {ib}",
             0.4,
         )
@@ -299,7 +300,7 @@ class ErosionPlotter(BasePlot):
             ax,
             km_mid,
             km_step,
-            self.erosion_results.vol_per_discharge,
+            self.water_level_data.vol_per_discharge,
             "Q{iq}",
             0.8,
         )
@@ -330,7 +331,7 @@ class ErosionPlotter(BasePlot):
             ax,
             km_mid,
             km_step,
-            self.erosion_results.vol_per_discharge,
+            self.water_level_data.vol_per_discharge,
             "Bank {ib}",
             0.8,
         )

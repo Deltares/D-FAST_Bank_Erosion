@@ -114,6 +114,7 @@ nav:
           - guides/pre-commit-hooks.md
           - guides/doctest.md
           - guides/testing.md
+          - guides/teamcity-ci.md
   - Architecture Design:
       - architecture-design/main-components.md
   - API Reference:

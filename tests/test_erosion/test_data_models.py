@@ -60,6 +60,7 @@ def test_water_level_data():
         velocity=[[np.array([0.1, 0.2])]],
         bank_height=[np.array([3.0, 4.0])],
         chezy=[[np.array([30.0, 40.0])]],
+        vol_per_discharge=[[np.array([0.9, 1.0])]],
     )
     assert water_level_data.hfw_max == pytest.approx(5.0)
     assert water_level_data.water_level[0][0][1] == pytest.approx(2.0)
@@ -132,7 +133,6 @@ def test_erosion_results():
         total_erosion_dist=[np.array([0.3, 0.4])],
         flow_erosion_dist=[np.array([0.5, 0.6])],
         ship_erosion_dist=[np.array([0.7, 0.8])],
-        vol_per_discharge=[[np.array([0.9, 1.0])]],
         eq_eroded_vol=[np.array([1.1, 1.2])],
         total_eroded_vol=[np.array([1.3, 1.4])],
         erosion_time=10,
