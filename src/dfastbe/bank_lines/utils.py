@@ -3,6 +3,8 @@ from shapely.geometry import LineString, MultiLineString, Point
 from shapely import line_merge
 from dfastbe.support import on_right_side
 
+__all__ = ["sort_connect_bank_lines", "poly_to_line", "tri_to_line"]
+
 
 def sort_connect_bank_lines(
     banklines: MultiLineString,
