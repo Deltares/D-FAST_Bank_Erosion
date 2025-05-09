@@ -175,7 +175,6 @@ class Erosion:
             river_axis_km = river_axis_km[i2 : i1 + 1][::-1]
             river_axis_numpy = river_axis_numpy[i2 : i1 + 1][::-1]
 
-        # river_axis = LineString(river_axis_numpy)
         river_axis = LineGeometry(river_axis_numpy, crs=self.config_file.crs)
         river_axis.add_data(data={"stations": river_axis_km})
         return river_axis
