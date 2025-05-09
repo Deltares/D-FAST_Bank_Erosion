@@ -25,6 +25,8 @@ from dfastbe.utils import get_zoom_extends
 
 X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
+
+
 class ErosionPlotter(BasePlot):
     """class to plot the results of the bank erosion analysis."""
 
@@ -176,7 +178,7 @@ class ErosionPlotter(BasePlot):
     ) -> int:
         """Plot the water level data."""
         fig, ax = plt.subplots()
-        self.setsize(fig)
+        self.set_size(fig)
         ax.set_aspect(1)
         #
         scale = 1000
@@ -206,11 +208,11 @@ class ErosionPlotter(BasePlot):
     ) -> int:
         scale = 1000
         fig, ax = plt.subplots()
-        self.setsize(fig)
+        self.set_size(fig)
         ax.set_aspect(1)
 
         # plot_mesh(ax, xe, ye, scale=scale)
-        self.chainage_markers(river_center_line_arr, ax, ndec=0, scale=scale)
+        self.stations_marker(river_center_line_arr, ax, float_format=0, scale=scale)
         dnav_max = self.erosion_results.avg_erosion_rate.max()
 
         p = self._create_patches(
@@ -258,7 +260,7 @@ class ErosionPlotter(BasePlot):
         km_zoom: List[Tuple],
     ) -> int:
         fig, ax = plt.subplots()
-        self.setsize(fig)
+        self.set_size(fig)
         self._plot_stacked_per_discharge(
             ax,
             km_mid + 0.2 * km_step,
@@ -294,7 +296,7 @@ class ErosionPlotter(BasePlot):
         km_zoom: List[Tuple],
     ) -> int:
         fig, ax = plt.subplots()
-        self.setsize(fig)
+        self.set_size(fig)
 
         self._plot_stacked_per_discharge(
             ax,
@@ -325,7 +327,7 @@ class ErosionPlotter(BasePlot):
         km_zoom: List[Tuple],
     ) -> int:
         fig, ax = plt.subplots()
-        self.setsize(fig)
+        self.set_size(fig)
 
         self._plot_stacked_per_bank(
             ax,
@@ -356,7 +358,7 @@ class ErosionPlotter(BasePlot):
         km_zoom: List[Tuple],
     ) -> int:
         fig, ax = plt.subplots()
-        self.setsize(fig)
+        self.set_size(fig)
 
         tvol = np.zeros(km_mid.shape)
         for i in range(len(km_mid)):
@@ -432,11 +434,11 @@ class ErosionPlotter(BasePlot):
         xy_zoom: List[Tuple],
     ) -> int:
         fig, ax = plt.subplots()
-        self.setsize(fig)
+        self.set_size(fig)
         ax.set_aspect(1)
 
         scale = 1000
-        self.chainage_markers(river_center_line_arr, ax, ndec=0, scale=scale)
+        self.stations_marker(river_center_line_arr, ax, float_format=0, scale=scale)
         clrs = self.get_colors("plasma", len(self.erosion_inputs.taucls_str) + 1)
         self._plot_bank_type_segments(
             ax,
@@ -455,7 +457,7 @@ class ErosionPlotter(BasePlot):
 
     def _plot_eroded_distance(self, fig_i: int, km_zoom: List[Tuple]) -> int:
         fig, ax = plt.subplots()
-        self.setsize(fig)
+        self.set_size(fig)
         #
         n_banklines = len(self.erosion_results.total_erosion_dist)
         clrs = self.get_colors("plasma", n_banklines + 1)
@@ -516,7 +518,7 @@ class ErosionPlotter(BasePlot):
             simulation_data (ErosionSimulationData): Simulation data for water depth.
             scale (float): Scaling factor for coordinates.
         """
-        self.chainage_markers(river_center_line_arr, ax, ndec=0, scale=scale)
+        self.stations_marker(river_center_line_arr, ax, float_format=0, scale=scale)
         ax.plot(
             river_center_line_arr[:, 0] / scale,
             river_center_line_arr[:, 1] / scale,
@@ -735,7 +737,7 @@ class ErosionPlotter(BasePlot):
         clrs = self.get_colors("Blues", n_levels + 1)
         for ib in range(n_banklines):
             fig, ax = plt.subplots()
-            self.setsize(fig)
+            self.set_size(fig)
             bk = self.bank_data.bank_chainage_midpoints[ib]
             #
             for iq in range(n_levels):
@@ -832,7 +834,7 @@ class ErosionPlotter(BasePlot):
         index: int,
     ):
         fig, ax = plt.subplots()
-        self.setsize(fig)
+        self.set_size(fig)
         bk = self.bank_data.bank_chainage_midpoints[index]
         n_levels = len(self.water_level_data.velocity)
         velc = np.sqrt(

@@ -201,12 +201,12 @@ class BankLinesPlotter(BasePlot):
             Axes object.
         """
         fig, ax = plt.subplots()
-        self.setsize(fig)
+        self.set_size(fig)
         ax.set_aspect(1)
         #
         scale = 1  # using scale 1 here because of the geopandas plot commands
         maximum_water_depth = 1.1 * self.simulation_data.water_depth_face.max()
-        self.chainage_markers(xykm, ax, ndec=0, scale=scale)
+        self.stations_marker(xykm, ax, float_format=0, scale=scale)
         p = self.plot_mesh_patches(
             ax, self.simulation_data, 0, maximum_water_depth, scale=scale
         )

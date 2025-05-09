@@ -39,14 +39,14 @@ from dfastbe.io.data_models import BaseSimulationData
 
 class BasePlot:
 
-    def savefig(self, fig: Figure, filename: Union[str, Path]) -> None:
+    def save_fig(self, fig: Figure, filename: Union[str, Path]) -> None:
         """
         Save a single figure to file.
 
         Arguments
         ---------
         fig : matplotlib.figure.Figure
-            Figure to a be saved.
+            Figure to be saved.
         filename : str
             Name of the file to be written.
         """
@@ -54,17 +54,17 @@ class BasePlot:
         matplotlib.pyplot.show(block=False)
         fig.savefig(filename, dpi=300)
 
-    def setsize(self, fig: Figure) -> None:
+    def set_size(self, fig: Figure) -> None:
         """
         Set the size of a figure.
 
-        Currently the size is hardcoded, but functionality may be extended in the
+        Currently, the size is hardcoded, but functionality may be extended in the
         future.
 
         Arguments
         ---------
         fig : matplotlib.figure.Figure
-            Figure to a be saved.
+            Figure to be saved.
         """
         # the size of an a3 is (16.5, 11.75)
         # the size of an a3 is (16.5, 11.75)
@@ -91,11 +91,11 @@ class BasePlot:
         ax.set_xlim(xmin=bbox[0] / scale, xmax=bbox[2] / scale)
         ax.set_ylim(ymin=bbox[1] / scale, ymax=bbox[3] / scale)
 
-    def chainage_markers(
+    def stations_marker(
         self,
         xykm: np.ndarray,
         ax: Axes,
-        ndec: int = 1,
+        float_format: int = 1,
         scale: float = 1000,
     ) -> None:
         """
@@ -107,13 +107,13 @@ class BasePlot:
             Array containing the x, y, and chainage; unit m for x and y, km for chainage.
         ax : matplotlib.axes.Axes
             Axes object in which to add the markers.
-        ndec : int
+        float_format : int
             Number of decimals used for marks.
         scale: float
             Indicates whether the axes are in m (1) or km (1000).
         """
-        step = 10 ** (-ndec)
-        labelstr = " {:." + str(ndec) + "f}"
+        step = 10 ** (-float_format)
+        label_str = " {:." + str(float_format) + "f}"
         km_rescaled = xykm[:, 2] / step
         mask = np.isclose(np.round(km_rescaled), km_rescaled)
         ax.plot(
@@ -127,7 +127,7 @@ class BasePlot:
             ax.text(
                 xykm[i, 0] / scale,
                 xykm[i, 1] / scale,
-                labelstr.format(xykm[i, 2]),
+                label_str.format(xykm[i, 2]),
                 fontsize="x-small",
                 clip_on=True,
             )
@@ -271,14 +271,14 @@ class BasePlot:
         for ix, zoom in enumerate(xzoom):
             ax.set_xlim(xmin=zoom[0], xmax=zoom[1])
             figfile = figbase.with_name(f"{figbase.stem}.sub{str(ix + 1)}{plot_ext}")
-            self.savefig(fig, figfile)
+            self.save_fig(fig, figfile)
         ax.set_xlim(xmin=xmin, xmax=xmax)
 
     def zoom_xy_and_save(
         self,
         fig: Figure,
         ax: Axes,
-        figbase: Path,
+        fig_base: Path,
         plot_ext: str,
         xyzoom: List[Tuple[float, float, float, float]],
         scale: float = 1000,
@@ -330,8 +330,8 @@ class BasePlot:
             ax.set_ylim(
                 ymin=(y0 - dy_zoom / 2) / scale, ymax=(y0 + dy_zoom / 2) / scale
             )
-            figfile = figbase.with_name(f"{figbase.stem}.sub{str(ix + 1)}{plot_ext}")
-            self.savefig(fig, figfile)
+            figfile = fig_base.with_name(f"{fig_base.stem}.sub{str(ix + 1)}{plot_ext}")
+            self.save_fig(fig, figfile)
 
         ax.set_xlim(xmin=xmin, xmax=xmax)
         ax.set_ylim(ymin=ymin, ymax=ymax)
@@ -409,5 +409,5 @@ class BasePlot:
         elif plot_flags["save_plot_zoomed"]:
             self.zoom_x_and_save(fig, ax, fig_base, plot_flags["plot_ext"], zoom_coords)
         fig_path = fig_base.with_suffix(plot_flags["plot_ext"])
-        self.savefig(fig, fig_path)
+        self.save_fig(fig, fig_path)
         return figure_index
