@@ -43,14 +43,14 @@ START /B /WAIT python -m nuitka ^
  --file-description="A Python tool to perform a bank erosion analysis based on a number of D-Flow FM simulations." ^
  --trademarks="All indications and logos of, and references to, \"D-FAST\", \"D-FAST Bank Erosion\" and \"D-FAST BE\" are registered trademarks of Stichting Deltares, and remain the property of Stichting Deltares. All rights reserved." ^
  --copyright="Copyright (C) 2025 Stichting Deltares." ^
- --windows-icon-from-ico=src/dfastbe/D-FASTBE.png ^
+ --windows-icon-from-ico=src/dfastbe/gui/icons/D-FASTBE.png ^
  --include-data-files=src/dfastbe/messages.NL.ini=dfastbe/messages.NL.ini ^
  --include-data-files=src/dfastbe/messages.UK.ini=dfastbe/messages.UK.ini ^
- --include-data-files=src/dfastbe/D-FASTBE.png=dfastbe/D-FASTBE.png ^
- --include-data-files=src/dfastbe/open.png=dfastbe/open.png ^
- --include-data-files=src/dfastbe/add.png=dfastbe/add.png ^
- --include-data-files=src/dfastbe/edit.png=dfastbe/edit.png ^
- --include-data-files=src/dfastbe/remove.png=dfastbe/remove.png ^
+ --include-data-files=src/dfastbe/gui/icons/D-FASTBE.png=dfastbe/D-FASTBE.png ^
+ --include-data-files=src/dfastbe/gui/icons/open.png=dfastbe/open.png ^
+ --include-data-files=src/dfastbe/gui/icons/add.png=dfastbe/add.png ^
+ --include-data-files=src/dfastbe/gui/icons/edit.png=dfastbe/edit.png ^
+ --include-data-files=src/dfastbe/gui/icons/remove.png=dfastbe/remove.png ^
  --include-data-files=LICENSE.md=LICENSE.md ^
  --include-data-files=docs/dfastbe_usermanual.pdf=dfastbe/dfastbe_usermanual.pdf ^
  --include-data-files=docs/dfastbe_techref.pdf=dfastbe/dfastbe_techref.pdf ^
