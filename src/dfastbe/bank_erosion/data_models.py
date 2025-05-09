@@ -243,13 +243,24 @@ class SingleBank:
         """
         return np.diff(self.bank_line_coords[:, 1])
 
-    def get_mid_points(self, crs) -> GeoSeries:
+    def get_mid_points(self, as_geo_series: bool = False, crs: str = None) -> Union[GeoSeries, np.ndarray]:
+        """Band line midpoints.
+
+        Args:
+            as_geo_series (bool):
+                bool indicating if the output should be a GeoSeries or not.
+            crs (str):
+                coordinate reference system.
+        Returns:
+            the midpoints of the bank line coordinates as a GeoSeries or numpy array.
+        """
         bank_coords = self.bank_line_coords
         bank_coords_mind = (bank_coords[:-1] + bank_coords[1:]) / 2
 
-        bank_coords_points = [Point(xy) for xy in bank_coords_mind]
-        geo_series = GeoSeries(bank_coords_points, crs=crs)
-        return geo_series
+        if as_geo_series:
+            bank_coords_mind = [Point(xy) for xy in bank_coords_mind]
+            bank_coords_mind = GeoSeries(bank_coords_mind, crs=crs)
+        return bank_coords_mind
 
 @dataclass
 class BankData(BaseBank[SingleBank]):

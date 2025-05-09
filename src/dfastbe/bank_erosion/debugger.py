@@ -16,9 +16,7 @@ class Debugger:
         discharge_level_pars: ParametersPerBank, water_depth_fairway, dn_eq1, dv_eq1, bank_height
     ):
         """Write the last discharge level to a shapefile and CSV file."""
-        bank_coords = single_bank.bank_line_coords
-        bank_coords_mind = (bank_coords[:-1] + bank_coords[1:]) / 2
-        bank_coords_geo = single_bank.get_mid_points(self.config_file.crs)
+        bank_coords_mind = single_bank.get_mid_points()
         params = {
             "chainage": single_bank.bank_chainage_midpoints,
             "x": bank_coords_mind[:, 0],
@@ -41,8 +39,13 @@ class Debugger:
             "erosion_volume": dv_eq1,
         }
 
-        write_shp(bank_coords_geo, params, f"{str(self.river_data.output_dir)}/debug.EQ.B{bank_index + 1}.shp")
-        write_csv(params, f"{str(self.river_data.output_dir)}/debug.EQ.B{bank_index + 1}.csv")
+        bank_coords_geo = single_bank.get_mid_points(as_geo_series=True, crs=self.crs)
+        write_shp(
+            bank_coords_geo,
+            params,
+            f"{str(self.output_dir)}/debug.EQ.B{bank_index + 1}.shp",
+        )
+        write_csv(params, f"{str(self.output_dir)}/debug.EQ.B{bank_index + 1}.csv")
 
     def middle_levels(
         self, bank_ind: int, q_level: int, single_bank: SingleBank, fairway_data: FairwayData, erosion_inputs:
@@ -50,10 +53,7 @@ class Debugger:
             parameter: DischargeCalculationParameters,
     ):
         """Write the middle levels to a shapefile and CSV file."""
-        bank_coords = single_bank.bank_line_coords
-        bank_coords_mind = (bank_coords[:-1] + bank_coords[1:]) / 2
-
-        bank_coords_geo = single_bank.get_mid_points(self.config_file.crs)
+        bank_coords_mind = single_bank.get_mid_points()
         params = {
             "chainage": single_bank.bank_chainage_midpoints,
             "x": bank_coords_mind[:, 0],
@@ -84,5 +84,12 @@ class Debugger:
             "erosion_distance_shipping": parameter.erosion_distance_shipping,
             "erosion_distance_flow": parameter.erosion_distance_flow,
         }
-        write_shp(bank_coords_geo, params, f"{str(self.river_data.output_dir)}/debug.Q{q_level + 1}.B{bank_ind + 1}.shp")
-        write_csv(params, f"{str(self.river_data.output_dir)}/debug.Q{q_level + 1}.B{bank_ind + 1}.csv")
+        bank_coords_geo = single_bank.get_mid_points(as_geo_series=True, crs=self.crs)
+        write_shp(
+            bank_coords_geo,
+            params,
+            f"{str(self.output_dir)}/debug.Q{q_level + 1}.B{bank_ind + 1}.shp",
+        )
+        write_csv(
+            params, f"{str(self.output_dir)}/debug.Q{q_level + 1}.B{bank_ind + 1}.csv"
+        )
