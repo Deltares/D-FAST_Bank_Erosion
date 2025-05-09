@@ -1262,6 +1262,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#dfastbe.io.BaseRiverData.get_erosion_sim_data" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_erosion_sim_data
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2055,6 +2064,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#dfastbe.io.BaseRiverData.get_erosion_sim_data" class="md-nav__link">
+    <span class="md-ellipsis">
+      get_erosion_sim_data
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2723,7 +2741,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">1788</span>
 <span class="normal">1789</span>
 <span class="normal">1790</span>
-<span class="normal">1791</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BaseRiverData</span><span class="p">:</span>
+<span class="normal">1791</span>
+<span class="normal">1792</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BaseRiverData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;River data class.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">):</span>
@@ -2779,6 +2798,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="k">return</span> <span class="n">get_bbox</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_erosion_sim_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_discharge_levels</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the erosion simulation data from the configuration file.&quot;&quot;&quot;</span>
         <span class="c1"># get pdischarges</span>
         <span class="n">sim_files</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">p_discharge</span> <span class="o">=</span> <span class="p">[]</span>
@@ -3074,6 +3094,50 @@ Buffer fraction surrounding the tight bounding box</p>
 <span class="sd">            Tuple bounding box consisting of [min x, min y, max x, max y)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">get_bbox</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="dfastbe.io.BaseRiverData.get_erosion_sim_data" class="doc doc-heading"><a href="#dfastbe.io.BaseRiverData.get_erosion_sim_data" class="toclink">
+            <code class="highlight language-python"><span class="n">get_erosion_sim_data</span><span class="p">(</span><span class="n">num_discharge_levels</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span></code>
+
+</a><a href="#dfastbe.io.BaseRiverData.get_erosion_sim_data" class="headerlink" title="Permanent link">#</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Get the erosion simulation data from the configuration file.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>src/dfastbe/io.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1781</span>
+<span class="normal">1782</span>
+<span class="normal">1783</span>
+<span class="normal">1784</span>
+<span class="normal">1785</span>
+<span class="normal">1786</span>
+<span class="normal">1787</span>
+<span class="normal">1788</span>
+<span class="normal">1789</span>
+<span class="normal">1790</span>
+<span class="normal">1791</span>
+<span class="normal">1792</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_erosion_sim_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_discharge_levels</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the erosion simulation data from the configuration file.&quot;&quot;&quot;</span>
+    <span class="c1"># get pdischarges</span>
+    <span class="n">sim_files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">p_discharge</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">iq</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_discharge_levels</span><span class="p">):</span>
+        <span class="n">iq_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">iq</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">sim_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_sim_file</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="n">iq_str</span><span class="p">))</span>
+        <span class="n">p_discharge</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;PDischarge</span><span class="si">{</span><span class="n">iq_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">sim_files</span><span class="p">,</span> <span class="n">p_discharge</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5499,14 +5563,14 @@ settings and supports upgrading older configuration formats.</p>
 <span class="sd">    settings and supports upgrading older configuration formats.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ConfigParser</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ConfigParser</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the ConfigFile object.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            config (ConfigParser):</span>
 <span class="sd">                Settings for the D-FAST Bank Erosion analysis.</span>
-<span class="sd">            path (Union[Path, str]):</span>
+<span class="sd">            path (Path | str):</span>
 <span class="sd">                Path to the configuration file.</span>
 
 <span class="sd">        Examples:</span>
@@ -5563,14 +5627,14 @@ settings and supports upgrading older configuration formats.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">_root_dir</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;ConfigFile&quot;</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ConfigFile&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Read a configParser object (configuration file).</span>
 
 <span class="sd">        Reads the config file using the standard `configparser`. Falls back to a</span>
 <span class="sd">        dedicated reader compatible with old waqbank files.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            path (Union[str, Path]): Path to the configuration file.</span>
+<span class="sd">            path (str | Path): Path to the configuration file.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            ConfigFile: Settings for the D-FAST Bank Erosion analysis.</span>
@@ -6100,7 +6164,7 @@ settings and supports upgrading older configuration formats.</p>
 <span class="sd">                Name of the keyword from which to read.</span>
 <span class="sd">            num_stations_per_bank (List[int]):</span>
 <span class="sd">                Number of stations (points) For each bank (bank chainage locations).</span>
-<span class="sd">            default (Optional[Union[float, List[np.ndarray]]]):</span>
+<span class="sd">            default (Optional[float | List[np.ndarray]]):</span>
 <span class="sd">                Optional default value or default parameter field; default None.</span>
 <span class="sd">            ext (str):</span>
 <span class="sd">                File name extension; default empty string.</span>
@@ -6191,7 +6255,7 @@ settings and supports upgrading older configuration formats.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">process_parameter</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+        <span class="n">value</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
         <span class="n">use_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -6204,7 +6268,7 @@ settings and supports upgrading older configuration formats.</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process a parameter value into arrays for each bank.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            value (Union[str, float]): The parameter value or filename.</span>
+<span class="sd">            value (str | float): The parameter value or filename.</span>
 <span class="sd">            key (str): Name of the parameter for error messages.</span>
 <span class="sd">            num_stations_per_bank (List[int]): Number of stations for each bank.</span>
 <span class="sd">            use_default (bool): Flag indicating whether to use the default value; default False.</span>
@@ -6676,7 +6740,7 @@ settings and supports upgrading older configuration formats.</p>
 
 
 <h4 id="dfastbe.io.ConfigFile.__init__" class="doc doc-heading"><a href="#dfastbe.io.ConfigFile.__init__" class="toclink">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigParser</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigParser</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
 
 </a><a href="#dfastbe.io.ConfigFile.__init__" class="headerlink" title="Permanent link">#</a></h4>
 
@@ -6718,7 +6782,7 @@ settings and supports upgrading older configuration formats.</p>
                 <code>path</code>
             </td>
             <td>
-                  <code><span title="typing.Union">Union</span>[<span title="pathlib.Path">Path</span>, <span title="str">str</span>]</code>
+                  <code><span title="pathlib.Path">Path</span> | <span title="str">str</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6784,14 +6848,14 @@ Writing a configuration file:
 <span class="normal">334</span>
 <span class="normal">335</span>
 <span class="normal">336</span>
-<span class="normal">337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ConfigParser</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="normal">337</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">ConfigParser</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize the ConfigFile object.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        config (ConfigParser):</span>
 <span class="sd">            Settings for the D-FAST Bank Erosion analysis.</span>
-<span class="sd">        path (Union[Path, str]):</span>
+<span class="sd">        path (Path | str):</span>
 <span class="sd">            Path to the configuration file.</span>
 
 <span class="sd">    Examples:</span>
@@ -8019,7 +8083,7 @@ directory will be returned.</p>
                 <code>default</code>
             </td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="typing.Union">Union</span>[<span title="float">float</span>, <span title="typing.List">List</span>[<span title="numpy.ndarray">ndarray</span>]]]</code>
+                  <code><span title="typing.Optional">Optional</span>[<span title="float">float</span> | <span title="typing.List">List</span>[<span title="numpy.ndarray">ndarray</span>]]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8255,7 +8319,7 @@ For each bank a parameter value per bank point (bank chainage location).</p>
 <span class="sd">            Name of the keyword from which to read.</span>
 <span class="sd">        num_stations_per_bank (List[int]):</span>
 <span class="sd">            Number of stations (points) For each bank (bank chainage locations).</span>
-<span class="sd">        default (Optional[Union[float, List[np.ndarray]]]):</span>
+<span class="sd">        default (Optional[float | List[np.ndarray]]):</span>
 <span class="sd">            Optional default value or default parameter field; default None.</span>
 <span class="sd">        ext (str):</span>
 <span class="sd">            File name extension; default empty string.</span>
@@ -9438,7 +9502,7 @@ If not, try to convert to a relative path.</p>
 
 
 <h4 id="dfastbe.io.ConfigFile.process_parameter" class="doc doc-heading"><a href="#dfastbe.io.ConfigFile.process_parameter" class="toclink">
-            <code class="highlight language-python"><span class="n">process_parameter</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">use_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">positive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">valid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">onefile</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">process_parameter</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">use_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">positive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">valid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">onefile</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.io.ConfigFile.process_parameter" class="headerlink" title="Permanent link">#</a></h4>
 
@@ -9464,7 +9528,7 @@ If not, try to convert to a relative path.</p>
                 <code>value</code>
             </td>
             <td>
-                  <code><span title="typing.Union">Union</span>[<span title="str">str</span>, <span title="float">float</span>]</code>
+                  <code><span title="str">str</span> | <span title="float">float</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9703,7 +9767,7 @@ One file should be used for all bank lines (True) or one file per bank line (Fal
 <span class="normal">1061</span>
 <span class="normal">1062</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">process_parameter</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">value</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
     <span class="n">use_default</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -9716,7 +9780,7 @@ One file should be used for all bank lines (True) or one file per bank line (Fal
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Process a parameter value into arrays for each bank.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        value (Union[str, float]): The parameter value or filename.</span>
+<span class="sd">        value (str | float): The parameter value or filename.</span>
 <span class="sd">        key (str): Name of the parameter for error messages.</span>
 <span class="sd">        num_stations_per_bank (List[int]): Number of stations for each bank.</span>
 <span class="sd">        use_default (bool): Flag indicating whether to use the default value; default False.</span>
@@ -9781,7 +9845,7 @@ One file should be used for all bank lines (True) or one file per bank line (Fal
 
 
 <h4 id="dfastbe.io.ConfigFile.read" class="doc doc-heading"><a href="#dfastbe.io.ConfigFile.read" class="toclink">
-            <code class="highlight language-python"><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ConfigFile</span></code>
+            <code class="highlight language-python"><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConfigFile</span></code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
@@ -9813,7 +9877,7 @@ dedicated reader compatible with old waqbank files.</p>
                 <code>path</code>
             </td>
             <td>
-                  <code><span title="typing.Union">Union</span>[<span title="str">str</span>, <span title="pathlib.Path">Path</span>]</code>
+                  <code><span title="str">str</span> | <span title="pathlib.Path">Path</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9931,14 +9995,14 @@ dedicated reader compatible with old waqbank files.</p>
 <span class="normal">402</span>
 <span class="normal">403</span>
 <span class="normal">404</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;ConfigFile&quot;</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ConfigFile&quot;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read a configParser object (configuration file).</span>
 
 <span class="sd">    Reads the config file using the standard `configparser`. Falls back to a</span>
 <span class="sd">    dedicated reader compatible with old waqbank files.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        path (Union[str, Path]): Path to the configuration file.</span>
+<span class="sd">        path (str | Path): Path to the configuration file.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        ConfigFile: Settings for the D-FAST Bank Erosion analysis.</span>
@@ -10977,10 +11041,10 @@ and adds an empty line before the start of a new block.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2289</span>
-<span class="normal">2290</span>
-<span class="normal">2291</span>
-<span class="normal">2292</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConfigFileError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2292</span>
+<span class="normal">2293</span>
+<span class="normal">2294</span>
+<span class="normal">2295</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConfigFileError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom exception for configuration file errors.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span>
@@ -11343,7 +11407,7 @@ and adds an empty line before the start of a new block.</p>
 <span class="normal">1723</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">LineGeometry</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Center line class.&quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">LineString</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">mask</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="n">LineString</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Geometry Line initialization.</span>
 
 <span class="sd">        Args:</span>
@@ -11707,7 +11771,7 @@ and adds an empty line before the start of a new block.</p>
 
 
 <h4 id="dfastbe.io.LineGeometry.__init__" class="doc doc-heading"><a href="#dfastbe.io.LineGeometry.__init__" class="toclink">
-            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">LineString</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">mask</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="n">LineString</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
 
 </a><a href="#dfastbe.io.LineGeometry.__init__" class="headerlink" title="Permanent link">#</a></h4>
 
@@ -11829,7 +11893,7 @@ and adds an empty line before the start of a new block.</p>
 <span class="normal">1433</span>
 <span class="normal">1434</span>
 <span class="normal">1435</span>
-<span class="normal">1436</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">LineString</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">mask</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="normal">1436</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="n">LineString</span> <span class="o">|</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Geometry Line initialization.</span>
 
 <span class="sd">    Args:</span>
@@ -12556,10 +12620,10 @@ Dictionary of quantities to be written, each np array should have length k.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2295</span>
-<span class="normal">2296</span>
-<span class="normal">2297</span>
-<span class="normal">2298</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SimulationFilesError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2298</span>
+<span class="normal">2299</span>
+<span class="normal">2300</span>
+<span class="normal">2301</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SimulationFilesError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom exception for configuration file errors.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span>
@@ -12656,10 +12720,7 @@ Dictionary of quantities to be written, each np array should have length k.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2045</span>
-<span class="normal">2046</span>
-<span class="normal">2047</span>
-<span class="normal">2048</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2048</span>
 <span class="normal">2049</span>
 <span class="normal">2050</span>
 <span class="normal">2051</span>
@@ -12676,7 +12737,10 @@ Dictionary of quantities to be written, each np array should have length k.</p>
 <span class="normal">2062</span>
 <span class="normal">2063</span>
 <span class="normal">2064</span>
-<span class="normal">2065</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">absolute_path</span><span class="p">(</span><span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">2065</span>
+<span class="normal">2066</span>
+<span class="normal">2067</span>
+<span class="normal">2068</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">absolute_path</span><span class="p">(</span><span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert a relative path to an absolute path.</span>
 
@@ -12788,9 +12852,7 @@ Buffer fraction surrounding the tight bounding box</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1793</span>
-<span class="normal">1794</span>
-<span class="normal">1795</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1795</span>
 <span class="normal">1796</span>
 <span class="normal">1797</span>
 <span class="normal">1798</span>
@@ -12813,7 +12875,9 @@ Buffer fraction surrounding the tight bounding box</p>
 <span class="normal">1815</span>
 <span class="normal">1816</span>
 <span class="normal">1817</span>
-<span class="normal">1818</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bbox</span><span class="p">(</span>
+<span class="normal">1818</span>
+<span class="normal">1819</span>
+<span class="normal">1820</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bbox</span><span class="p">(</span>
         <span class="n">coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -12868,10 +12932,7 @@ which will be added to the key by this routine.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1894</span>
-<span class="normal">1895</span>
-<span class="normal">1896</span>
-<span class="normal">1897</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1897</span>
 <span class="normal">1898</span>
 <span class="normal">1899</span>
 <span class="normal">1900</span>
@@ -12886,7 +12947,10 @@ which will be added to the key by this routine.</p>
 <span class="normal">1909</span>
 <span class="normal">1910</span>
 <span class="normal">1911</span>
-<span class="normal">1912</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_filename</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">1912</span>
+<span class="normal">1913</span>
+<span class="normal">1914</span>
+<span class="normal">1915</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_filename</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Query the global dictionary of texts for a file name.</span>
 
@@ -12937,10 +13001,7 @@ include the key, a default string is returned.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1915</span>
-<span class="normal">1916</span>
-<span class="normal">1917</span>
-<span class="normal">1918</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1918</span>
 <span class="normal">1919</span>
 <span class="normal">1920</span>
 <span class="normal">1921</span>
@@ -12964,7 +13025,10 @@ include the key, a default string is returned.</p>
 <span class="normal">1939</span>
 <span class="normal">1940</span>
 <span class="normal">1941</span>
-<span class="normal">1942</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_text</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="normal">1942</span>
+<span class="normal">1943</span>
+<span class="normal">1944</span>
+<span class="normal">1945</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_text</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Query the global dictionary of texts via a string key.</span>
 
@@ -13002,7 +13066,7 @@ include the key, a default string is returned.</p>
 
 
 <h3 id="dfastbe.io.load_program_texts" class="doc doc-heading"><a href="#dfastbe.io.load_program_texts" class="toclink">
-            <code class="highlight language-python"><span class="n">load_program_texts</span><span class="p">(</span><span class="n">file_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+            <code class="highlight language-python"><span class="n">load_program_texts</span><span class="p">(</span><span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 </a><a href="#dfastbe.io.load_program_texts" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -13020,10 +13084,7 @@ routine "get_text". These routines are used to implement multi-language support.
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1820</span>
-<span class="normal">1821</span>
-<span class="normal">1822</span>
-<span class="normal">1823</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1823</span>
 <span class="normal">1824</span>
 <span class="normal">1825</span>
 <span class="normal">1826</span>
@@ -13054,7 +13115,10 @@ routine "get_text". These routines are used to implement multi-language support.
 <span class="normal">1851</span>
 <span class="normal">1852</span>
 <span class="normal">1853</span>
-<span class="normal">1854</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_program_texts</span><span class="p">(</span><span class="n">file_name</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1854</span>
+<span class="normal">1855</span>
+<span class="normal">1856</span>
+<span class="normal">1857</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">load_program_texts</span><span class="p">(</span><span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Load texts from a configuration file, and store globally for access.</span>
 
 <span class="sd">    This routine reads the text file &quot;file_name&quot;, and detects the keywords</span>
@@ -13123,10 +13187,7 @@ indent : str
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1857</span>
-<span class="normal">1858</span>
-<span class="normal">1859</span>
-<span class="normal">1860</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1860</span>
 <span class="normal">1861</span>
 <span class="normal">1862</span>
 <span class="normal">1863</span>
@@ -13157,7 +13218,10 @@ indent : str
 <span class="normal">1888</span>
 <span class="normal">1889</span>
 <span class="normal">1890</span>
-<span class="normal">1891</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">log_text</span><span class="p">(</span>
+<span class="normal">1891</span>
+<span class="normal">1892</span>
+<span class="normal">1893</span>
+<span class="normal">1894</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">log_text</span><span class="p">(</span>
     <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">file</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TextIO</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
@@ -13283,10 +13347,7 @@ indent : str
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2068</span>
-<span class="normal">2069</span>
-<span class="normal">2070</span>
-<span class="normal">2071</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2071</span>
 <span class="normal">2072</span>
 <span class="normal">2073</span>
 <span class="normal">2074</span>
@@ -13303,7 +13364,10 @@ indent : str
 <span class="normal">2085</span>
 <span class="normal">2086</span>
 <span class="normal">2087</span>
-<span class="normal">2088</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">relative_path</span><span class="p">(</span><span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="normal">2088</span>
+<span class="normal">2089</span>
+<span class="normal">2090</span>
+<span class="normal">2091</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">relative_path</span><span class="p">(</span><span class="n">rootdir</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Convert an absolute path to a relative path.</span>
 
@@ -13352,10 +13416,7 @@ filename : str
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2113</span>
-<span class="normal">2114</span>
-<span class="normal">2115</span>
-<span class="normal">2116</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2116</span>
 <span class="normal">2117</span>
 <span class="normal">2118</span>
 <span class="normal">2119</span>
@@ -13376,7 +13437,10 @@ filename : str
 <span class="normal">2134</span>
 <span class="normal">2135</span>
 <span class="normal">2136</span>
-<span class="normal">2137</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_csv</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2137</span>
+<span class="normal">2138</span>
+<span class="normal">2139</span>
+<span class="normal">2140</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_csv</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Write a data to csv file.</span>
 
@@ -13431,10 +13495,7 @@ file_name : str
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2140</span>
-<span class="normal">2141</span>
-<span class="normal">2142</span>
-<span class="normal">2143</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2143</span>
 <span class="normal">2144</span>
 <span class="normal">2145</span>
 <span class="normal">2146</span>
@@ -13451,7 +13512,10 @@ file_name : str
 <span class="normal">2157</span>
 <span class="normal">2158</span>
 <span class="normal">2159</span>
-<span class="normal">2160</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_km_eroded_volumes</span><span class="p">(</span><span class="n">stations</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">volume</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2160</span>
+<span class="normal">2161</span>
+<span class="normal">2162</span>
+<span class="normal">2163</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_km_eroded_volumes</span><span class="p">(</span><span class="n">stations</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">volume</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Write a text file with eroded volume data binned per kilometre.</span>
 
@@ -13504,10 +13568,7 @@ filename : str
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2091</span>
-<span class="normal">2092</span>
-<span class="normal">2093</span>
-<span class="normal">2094</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2094</span>
 <span class="normal">2095</span>
 <span class="normal">2096</span>
 <span class="normal">2097</span>
@@ -13523,7 +13584,10 @@ filename : str
 <span class="normal">2107</span>
 <span class="normal">2108</span>
 <span class="normal">2109</span>
-<span class="normal">2110</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_shp</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeoSeries</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">2110</span>
+<span class="normal">2111</span>
+<span class="normal">2112</span>
+<span class="normal">2113</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">write_shp</span><span class="p">(</span><span class="n">geom</span><span class="p">:</span> <span class="n">GeoSeries</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Write a shape file.</span>
 
 <span class="sd">    Write a shape file for a given GeoSeries and dictionary of np arrays.</span>
