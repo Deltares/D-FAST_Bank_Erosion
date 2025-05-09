@@ -1206,6 +1206,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#dfastbe.bank_erosion.bank_erosion.Erosion.compute_erosion_per_level" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_erosion_per_level
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters" class="md-nav__link">
     <span class="md-ellipsis">
       get_ship_parameters
@@ -1554,6 +1563,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#dfastbe.bank_erosion.bank_erosion.Erosion.compute_erosion_per_level" class="md-nav__link">
+    <span class="md-ellipsis">
+      compute_erosion_per_level
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters" class="md-nav__link">
     <span class="md-ellipsis">
       get_ship_parameters
@@ -1697,10 +1715,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/bank_erosion.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  75</span>
-<span class="normal">  76</span>
-<span class="normal">  77</span>
-<span class="normal">  78</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  78</span>
 <span class="normal">  79</span>
 <span class="normal">  80</span>
 <span class="normal">  81</span>
@@ -2894,12 +2909,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">1269</span>
 <span class="normal">1270</span>
 <span class="normal">1271</span>
-<span class="normal">1272</span>
-<span class="normal">1273</span>
-<span class="normal">1274</span>
-<span class="normal">1275</span>
-<span class="normal">1276</span>
-<span class="normal">1277</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Erosion</span><span class="p">:</span>
+<span class="normal">1272</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Erosion</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to handle the bank erosion calculations.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
@@ -2915,14 +2925,16 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">num_discharge_levels</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bl_processor</span> <span class="o">=</span> <span class="n">BankLinesProcessor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span> <span class="o">=</span> <span class="n">Debugger</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span> <span class="o">=</span> <span class="n">Debugger</span><span class="p">(</span><span class="n">config_file</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConfigFile</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Configuration file object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_config_file</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_ship_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_ship_parameters</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get ship parameters from the configuration file.&quot;&quot;&quot;</span>
         <span class="n">ship_relative_velocity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
             <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;VShip&quot;</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">onefile</span><span class="o">=</span><span class="kc">True</span>
@@ -3219,7 +3231,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="n">bank_protection_level</span><span class="o">=</span><span class="n">dike_height</span><span class="p">,</span>
             <span class="n">tauc</span><span class="o">=</span><span class="n">tauc</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="n">ErosionInputs</span><span class="o">.</span><span class="n">from_column_arrays</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">SingleErosion</span><span class="p">,</span> <span class="n">shipping_data</span><span class="o">=</span><span class="n">shipping_data</span><span class="p">,</span> <span class="n">bank_type</span><span class="o">=</span><span class="n">bank_type</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ErosionInputs</span><span class="o">.</span><span class="n">from_column_arrays</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span> <span class="n">SingleErosion</span><span class="p">,</span> <span class="n">shipping_data</span><span class="o">=</span><span class="n">shipping_data</span><span class="p">,</span> <span class="n">bank_type</span><span class="o">=</span><span class="n">bank_type</span>
+        <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_discharge_levels</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -3233,28 +3247,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
         <span class="n">num_levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">num_discharge_levels</span>
         <span class="n">num_km</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">km_mid</span><span class="p">)</span>
-        <span class="n">num_bank</span> <span class="o">=</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span>
+
         <span class="c1"># initialize arrays for erosion loop over all discharges</span>
-        <span class="c1"># shape is (num_levels, 2, (num_stations_per_bank))</span>
-        <span class="c1"># if num_levels = 13 and the num_stations_per_bank = [10, 15]</span>
-        <span class="c1"># then shape = (13, 2, (10, 15)) list of 13 elements, each element is a list of 2 elements</span>
-        <span class="c1"># first an array of 10 elements, and the second is array of 15 elements</span>
-        <span class="n">velocity_all</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">water_level_all</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">chezy_all</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">vol_per_discharge_all</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">ship_wave_max_all</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">ship_wave_min_all</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="n">num_stations</span> <span class="o">=</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">num_stations_per_bank</span>
-        <span class="n">bank_height</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">flow_erosion_dist</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_stations</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_stations</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
-        <span class="n">ship_erosion_dist</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_stations</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_stations</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
-        <span class="n">total_erosion_dist</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_stations</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_stations</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
-        <span class="n">total_eroded_vol</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_stations</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">num_stations</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
-
-        <span class="n">eq_erosion_dist</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">eq_eroded_vol</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">discharge_levels</span><span class="p">,</span> <span class="n">bank_height</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
 
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;total_time&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">erosion_time</span><span class="p">})</span>
 
@@ -3280,156 +3275,24 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="n">log_text</span><span class="p">(</span>
                 <span class="s2">&quot;read_simdata&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_files</span><span class="p">[</span><span class="n">level_i</span><span class="p">]},</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span>
             <span class="p">)</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
             <span class="n">simulation_data</span> <span class="o">=</span> <span class="n">ErosionSimulationData</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">sim_files</span><span class="p">[</span><span class="n">level_i</span><span class="p">],</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span>
             <span class="p">)</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
-
             <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_erosion&quot;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
 
-            <span class="n">velocity_all</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-            <span class="n">water_level_all</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-            <span class="n">chezy_all</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="n">level_calculation</span><span class="p">,</span> <span class="n">dvol_bank</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compute_erosion_per_level</span><span class="p">(</span>
+                <span class="n">level_i</span><span class="p">,</span>
+                <span class="n">bank_data</span><span class="p">,</span>
+                <span class="n">simulation_data</span><span class="p">,</span>
+                <span class="n">fairway_data</span><span class="p">,</span>
+                <span class="n">discharge_level_pars</span><span class="p">,</span>
+                <span class="n">erosion_inputs</span><span class="p">,</span>
+                <span class="n">km_bin</span><span class="p">,</span>
+                <span class="n">num_km</span><span class="p">,</span>
+                <span class="n">bank_height</span><span class="p">,</span>
+            <span class="p">)</span>
 
-            <span class="n">ship_wave_max_all</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-            <span class="n">ship_wave_min_all</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-            <span class="n">vol_per_discharge_all</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
-
-            <span class="n">dvol_bank</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_km</span><span class="p">,</span> <span class="n">num_bank</span><span class="p">))</span>
-
-            <span class="n">hfw_max_level</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">vel_bank_level_i</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">water_level_level_i</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">chezy_level_i</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">ship_wave_max_level_i</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">ship_wave_min_level_i</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">vol_per_discharge_level_i</span> <span class="o">=</span> <span class="p">[]</span>
-
-            <span class="n">erosion_distance_flow_level_i</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">erosion_distance_shipping_level_i</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">erosion_distance_tot_level_i</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">erosion_volume_tot_level_i</span> <span class="o">=</span> <span class="p">[]</span>
-
-            <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">bank_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bank_data</span><span class="p">):</span>
-                <span class="c1"># bank_i = 0: left bank, bank_i = 1: right bank</span>
-                <span class="c1"># calculate velocity along banks ...</span>
-                <span class="n">vel_bank</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">calculate_bank_velocity</span><span class="p">(</span>
-                    <span class="n">bank_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">vel_dx</span>
-                <span class="p">)</span>
-                <span class="n">vel_bank_level_i</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vel_bank</span><span class="p">)</span>
-
-                <span class="k">if</span> <span class="n">level_i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="c1"># determine velocity and bank height along banks ...</span>
-                    <span class="c1"># bank height = maximum bed elevation per cell</span>
-                    <span class="n">zb_bank</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">calculate_bank_height</span><span class="p">(</span>
-                        <span class="n">bank_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">zb_dx</span>
-                    <span class="p">)</span>
-                    <span class="n">bank_height</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">zb_bank</span><span class="p">)</span>
-
-                <span class="c1"># get water depth along the fair-way</span>
-                <span class="n">ii_face</span> <span class="o">=</span> <span class="n">bank_i</span><span class="o">.</span><span class="n">fairway_face_indices</span>
-                <span class="n">water_depth_fairway</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">water_depth_face</span><span class="p">[</span><span class="n">ii_face</span><span class="p">]</span>
-                <span class="n">hfw_max_level</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">hfw_max_level</span><span class="p">,</span> <span class="n">water_depth_fairway</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-
-                <span class="n">water_level_level_i</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">simulation_data</span><span class="o">.</span><span class="n">water_level_face</span><span class="p">[</span><span class="n">ii_face</span><span class="p">]</span>
-                <span class="p">)</span>
-                <span class="n">chez_face</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">chezy_face</span><span class="p">[</span><span class="n">ii_face</span><span class="p">]</span>
-                <span class="n">chezy_level_i</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span> <span class="o">*</span> <span class="n">chez_face</span> <span class="o">+</span> <span class="n">chez_face</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
-
-                <span class="c1"># last discharge level</span>
-                <span class="k">if</span> <span class="n">level_i</span> <span class="o">==</span> <span class="n">num_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">erosion_distance</span><span class="p">,</span> <span class="n">erosion_volume</span> <span class="o">=</span> <span class="n">comp_erosion_eq</span><span class="p">(</span>
-                        <span class="n">bank_height</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
-                        <span class="n">bank_i</span><span class="o">.</span><span class="n">segment_length</span><span class="p">,</span>
-                        <span class="n">fairway_data</span><span class="o">.</span><span class="n">fairway_initial_water_levels</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
-                        <span class="n">discharge_level_pars</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
-                        <span class="n">bank_i</span><span class="o">.</span><span class="n">fairway_distances</span><span class="p">,</span>
-                        <span class="n">water_depth_fairway</span><span class="p">,</span>
-                        <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
-                    <span class="p">)</span>
-                    <span class="n">eq_erosion_dist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">erosion_distance</span><span class="p">)</span>
-                    <span class="n">eq_eroded_vol</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">erosion_volume</span><span class="p">)</span>
-
-                <span class="p">(</span>
-                    <span class="n">erosion_distance_tot</span><span class="p">,</span>
-                    <span class="n">erosion_volume_tot</span><span class="p">,</span>
-                    <span class="n">erosion_distance_shipping</span><span class="p">,</span>
-                    <span class="n">erosion_distance_flow</span><span class="p">,</span>
-                    <span class="n">ship_w_max</span><span class="p">,</span>
-                    <span class="n">ship_w_min</span><span class="p">,</span>
-                <span class="p">)</span> <span class="o">=</span> <span class="n">compute_bank_erosion_dynamics</span><span class="p">(</span>
-                    <span class="n">vel_bank_level_i</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
-                    <span class="n">bank_height</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
-                    <span class="n">bank_i</span><span class="o">.</span><span class="n">segment_length</span><span class="p">,</span>
-                    <span class="n">water_level_level_i</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
-                    <span class="n">fairway_data</span><span class="o">.</span><span class="n">fairway_initial_water_levels</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
-                    <span class="n">discharge_level_pars</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">erosion_time</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_discharge</span><span class="p">[</span><span class="n">level_i</span><span class="p">],</span>
-                    <span class="n">bank_i</span><span class="o">.</span><span class="n">fairway_distances</span><span class="p">,</span>
-                    <span class="n">water_depth_fairway</span><span class="p">,</span>
-                    <span class="n">chezy_level_i</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
-                    <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
-                <span class="p">)</span>
-                <span class="n">ship_wave_max_level_i</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ship_w_max</span><span class="p">)</span>
-                <span class="n">ship_wave_min_level_i</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ship_w_min</span><span class="p">)</span>
-                <span class="n">erosion_distance_flow_level_i</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">erosion_distance_flow</span><span class="p">)</span>
-                <span class="n">erosion_distance_shipping_level_i</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">erosion_distance_shipping</span><span class="p">)</span>
-                <span class="n">erosion_distance_tot_level_i</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">erosion_distance_tot</span><span class="p">)</span>
-                <span class="n">erosion_volume_tot_level_i</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">erosion_volume_tot</span><span class="p">)</span>
-
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">level_i</span> <span class="o">==</span> <span class="n">num_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-                        <span class="c1"># EQ debug</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span><span class="o">.</span><span class="n">debug_process_discharge_levels_1</span><span class="p">(</span>
-                            <span class="n">ind</span><span class="p">,</span>
-                            <span class="n">bank_data</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
-                            <span class="n">fairway_data</span><span class="p">,</span>
-                            <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
-                            <span class="n">discharge_level_pars</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
-                            <span class="n">water_depth_fairway</span><span class="p">,</span>
-                            <span class="n">erosion_distance</span><span class="p">,</span>
-                            <span class="n">erosion_volume</span><span class="p">,</span>
-                            <span class="n">bank_height</span><span class="p">,</span>
-                        <span class="p">)</span>
-                    <span class="c1"># Q-specific debug</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span><span class="o">.</span><span class="n">debug_process_discharge_levels_2</span><span class="p">(</span>
-                        <span class="n">ind</span><span class="p">,</span>
-                        <span class="n">level_i</span><span class="p">,</span>
-                        <span class="n">bank_data</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
-                        <span class="n">fairway_data</span><span class="p">,</span>
-                        <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
-                        <span class="n">discharge_level_pars</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
-                        <span class="n">water_depth_fairway</span><span class="p">,</span>
-                        <span class="n">vel_bank_level_i</span><span class="p">,</span>
-                        <span class="n">bank_height</span><span class="p">,</span>
-                        <span class="n">water_level_level_i</span><span class="p">,</span>
-                        <span class="n">chezy_level_i</span><span class="p">,</span>
-                        <span class="n">erosion_distance_tot</span><span class="p">,</span>
-                        <span class="n">erosion_volume_tot</span><span class="p">,</span>
-                        <span class="n">erosion_distance_shipping</span><span class="p">,</span>
-                        <span class="n">erosion_distance_flow</span><span class="p">,</span>
-                    <span class="p">)</span>
-
-                <span class="c1"># accumulate eroded volumes per km</span>
-                <span class="n">dvol</span> <span class="o">=</span> <span class="n">get_km_eroded_volume</span><span class="p">(</span>
-                    <span class="n">bank_i</span><span class="o">.</span><span class="n">bank_chainage_midpoints</span><span class="p">,</span> <span class="n">erosion_volume_tot</span><span class="p">,</span> <span class="n">km_bin</span>
-                <span class="p">)</span>
-                <span class="n">vol_per_discharge_level_i</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dvol</span><span class="p">)</span>
-                <span class="n">dvol_bank</span><span class="p">[:,</span> <span class="n">ind</span><span class="p">]</span> <span class="o">+=</span> <span class="n">dvol</span>
-
-            <span class="n">flow_erosion_dist</span> <span class="o">=</span> <span class="p">[</span><span class="n">old</span> <span class="o">+</span> <span class="n">new</span> <span class="k">for</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">erosion_distance_flow_level_i</span><span class="p">,</span> <span class="n">flow_erosion_dist</span><span class="p">)]</span>
-            <span class="n">ship_erosion_dist</span> <span class="o">=</span> <span class="p">[</span><span class="n">old</span> <span class="o">+</span> <span class="n">new</span> <span class="k">for</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">erosion_distance_shipping_level_i</span><span class="p">,</span><span class="n">ship_erosion_dist</span><span class="p">)]</span>
-            <span class="n">total_erosion_dist</span> <span class="o">=</span> <span class="p">[</span><span class="n">old</span> <span class="o">+</span> <span class="n">new</span> <span class="k">for</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">erosion_distance_tot_level_i</span><span class="p">,</span><span class="n">total_erosion_dist</span><span class="p">)]</span>
-            <span class="n">total_eroded_vol</span> <span class="o">=</span> <span class="p">[</span><span class="n">old</span> <span class="o">+</span> <span class="n">new</span> <span class="k">for</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">erosion_volume_tot_level_i</span><span class="p">,</span><span class="n">total_eroded_vol</span><span class="p">)]</span>
-
-            <span class="n">velocity_all</span><span class="p">[</span><span class="n">level_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">vel_bank_level_i</span>
-            <span class="n">water_level_all</span><span class="p">[</span><span class="n">level_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">water_level_level_i</span>
-            <span class="n">chezy_all</span><span class="p">[</span><span class="n">level_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">chezy_level_i</span>
-            <span class="n">ship_wave_max_all</span><span class="p">[</span><span class="n">level_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ship_wave_max_level_i</span>
-            <span class="n">ship_wave_min_all</span><span class="p">[</span><span class="n">level_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">ship_wave_min_level_i</span>
-            <span class="n">vol_per_discharge_all</span><span class="p">[</span><span class="n">level_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">vol_per_discharge_level_i</span>
+            <span class="n">discharge_levels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">level_calculation</span><span class="p">)</span>
 
             <span class="n">error_vol_file</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span>
                 <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;EroVol</span><span class="si">{</span><span class="n">level_i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;erovolQ</span><span class="si">{</span><span class="n">level_i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.evo&quot;</span>
@@ -3439,26 +3302,31 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                 <span class="n">km_mid</span><span class="p">,</span> <span class="n">dvol_bank</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">error_vol_file</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
+        <span class="c1"># shape is (num_levels, 2, (num_stations_per_bank))</span>
+        <span class="c1"># if num_levels = 13 and the num_stations_per_bank = [10, 15]</span>
+        <span class="c1"># then shape = (13, 2, (10, 15)) list of 13 elements, each element is a list of 2 elements</span>
+        <span class="c1"># first an array of 10 elements, and the second is array of 15 elements</span>
+        <span class="n">discharge_levels</span> <span class="o">=</span> <span class="n">DischargeLevels</span><span class="p">(</span><span class="n">discharge_levels</span><span class="p">)</span>
+        <span class="n">flow_erosion_dist</span> <span class="o">=</span> <span class="n">discharge_levels</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="s2">&quot;erosion_distance_flow&quot;</span><span class="p">)</span>
+        <span class="n">ship_erosion_dist</span> <span class="o">=</span> <span class="n">discharge_levels</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="s2">&quot;erosion_distance_shipping&quot;</span><span class="p">)</span>
+        <span class="n">total_erosion_dist</span> <span class="o">=</span> <span class="n">discharge_levels</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="s2">&quot;erosion_distance_tot&quot;</span><span class="p">)</span>
+        <span class="n">total_eroded_vol</span> <span class="o">=</span> <span class="n">discharge_levels</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="s2">&quot;erosion_volume_tot&quot;</span><span class="p">)</span>
+
         <span class="n">erosion_results</span> <span class="o">=</span> <span class="n">ErosionResults</span><span class="p">(</span>
-            <span class="n">eq_erosion_dist</span><span class="o">=</span><span class="n">eq_erosion_dist</span><span class="p">,</span>
-            <span class="n">total_erosion_dist</span><span class="o">=</span><span class="n">total_erosion_dist</span><span class="p">,</span>
+            <span class="n">erosion_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">erosion_time</span><span class="p">,</span>
             <span class="n">flow_erosion_dist</span><span class="o">=</span><span class="n">flow_erosion_dist</span><span class="p">,</span>
             <span class="n">ship_erosion_dist</span><span class="o">=</span><span class="n">ship_erosion_dist</span><span class="p">,</span>
-            <span class="n">vol_per_discharge</span><span class="o">=</span><span class="n">vol_per_discharge_all</span><span class="p">,</span>
-            <span class="n">eq_eroded_vol</span><span class="o">=</span><span class="n">eq_eroded_vol</span><span class="p">,</span>
+            <span class="n">total_erosion_dist</span><span class="o">=</span><span class="n">total_erosion_dist</span><span class="p">,</span>
             <span class="n">total_eroded_vol</span><span class="o">=</span><span class="n">total_eroded_vol</span><span class="p">,</span>
-            <span class="n">erosion_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">erosion_time</span><span class="p">,</span>
+            <span class="n">eq_erosion_dist</span><span class="o">=</span><span class="n">discharge_levels</span><span class="o">.</span><span class="n">_get_attr_both_sides_level</span><span class="p">(</span>
+                <span class="s2">&quot;erosion_distance_eq&quot;</span><span class="p">,</span> <span class="n">num_levels</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="p">),</span>
+            <span class="n">eq_eroded_vol</span><span class="o">=</span><span class="n">discharge_levels</span><span class="o">.</span><span class="n">_get_attr_both_sides_level</span><span class="p">(</span>
+                <span class="s2">&quot;erosion_volume_eq&quot;</span><span class="p">,</span> <span class="n">num_levels</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="p">),</span>
         <span class="p">)</span>
+        <span class="n">water_level_data</span> <span class="o">=</span> <span class="n">discharge_levels</span><span class="o">.</span><span class="n">get_water_level_data</span><span class="p">(</span><span class="n">bank_height</span><span class="p">)</span>
 
-        <span class="n">water_level_data</span> <span class="o">=</span> <span class="n">WaterLevelData</span><span class="p">(</span>
-            <span class="n">hfw_max</span><span class="o">=</span><span class="n">hfw_max_level</span><span class="p">,</span>
-            <span class="n">water_level</span><span class="o">=</span><span class="n">water_level_all</span><span class="p">,</span>
-            <span class="n">ship_wave_max</span><span class="o">=</span><span class="n">ship_wave_max_all</span><span class="p">,</span>
-            <span class="n">ship_wave_min</span><span class="o">=</span><span class="n">ship_wave_min_all</span><span class="p">,</span>
-            <span class="n">velocity</span><span class="o">=</span><span class="n">velocity_all</span><span class="p">,</span>
-            <span class="n">bank_height</span><span class="o">=</span><span class="n">bank_height</span><span class="p">,</span>
-            <span class="n">chezy</span><span class="o">=</span><span class="n">chezy_all</span><span class="p">,</span>
-        <span class="p">)</span>
         <span class="n">bank_data</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">bank_line_size</span><span class="p">,</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">bank_line_size</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">bank_data</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">segment_length</span><span class="p">,</span>
             <span class="n">bank_data</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">segment_length</span><span class="p">,</span>
@@ -3644,6 +3512,140 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="n">ParametersPerBank</span><span class="p">,</span>
         <span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_erosion_per_level</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">level_i</span><span class="p">,</span>
+        <span class="n">bank_data</span><span class="p">,</span>
+        <span class="n">simulation_data</span><span class="p">,</span>
+        <span class="n">fairway_data</span><span class="p">,</span>
+        <span class="n">discharge_level_pars</span><span class="p">,</span>
+        <span class="n">erosion_inputs</span><span class="p">,</span>
+        <span class="n">km_bin</span><span class="p">,</span>
+        <span class="n">num_km</span><span class="p">,</span>
+        <span class="n">bank_height</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the bank erosion for a given level.&quot;&quot;&quot;</span>
+        <span class="n">num_levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">num_discharge_levels</span>
+        <span class="n">dvol_bank</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_km</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">hfw_max_level</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">par_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">bank_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bank_data</span><span class="p">):</span>
+            <span class="n">parameter</span> <span class="o">=</span> <span class="n">DischargeCalculationParameters</span><span class="p">()</span>
+            <span class="c1"># bank_i = 0: left bank, bank_i = 1: right bank</span>
+            <span class="c1"># calculate velocity along banks ...</span>
+            <span class="n">parameter</span><span class="o">.</span><span class="n">bank_velocity</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">calculate_bank_velocity</span><span class="p">(</span>
+                <span class="n">bank_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">vel_dx</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">level_i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># determine velocity and bank height along banks ...</span>
+                <span class="c1"># bank height = maximum bed elevation per cell</span>
+                <span class="n">bank_height</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">calculate_bank_height</span><span class="p">(</span><span class="n">bank_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">zb_dx</span><span class="p">))</span>
+
+            <span class="c1"># get water depth along the fair-way</span>
+            <span class="n">ii_face</span> <span class="o">=</span> <span class="n">bank_i</span><span class="o">.</span><span class="n">fairway_face_indices</span>
+            <span class="n">water_depth_fairway</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">water_depth_face</span><span class="p">[</span><span class="n">ii_face</span><span class="p">]</span>
+            <span class="n">hfw_max_level</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">hfw_max_level</span><span class="p">,</span> <span class="n">water_depth_fairway</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+            <span class="n">parameter</span><span class="o">.</span><span class="n">water_level</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">water_level_face</span><span class="p">[</span><span class="n">ii_face</span><span class="p">]</span>
+            <span class="n">chez_face</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">chezy_face</span><span class="p">[</span><span class="n">ii_face</span><span class="p">]</span>
+            <span class="n">parameter</span><span class="o">.</span><span class="n">chezy</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">chez_face</span> <span class="o">+</span> <span class="n">chez_face</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+            <span class="c1"># last discharge level</span>
+            <span class="k">if</span> <span class="n">level_i</span> <span class="o">==</span> <span class="n">num_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">erosion_distance_eq</span><span class="p">,</span> <span class="n">erosion_volume_eq</span> <span class="o">=</span> <span class="n">comp_erosion_eq</span><span class="p">(</span>
+                    <span class="n">bank_height</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+                    <span class="n">bank_i</span><span class="o">.</span><span class="n">segment_length</span><span class="p">,</span>
+                    <span class="n">fairway_data</span><span class="o">.</span><span class="n">fairway_initial_water_levels</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+                    <span class="n">discharge_level_pars</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+                    <span class="n">bank_i</span><span class="o">.</span><span class="n">fairway_distances</span><span class="p">,</span>
+                    <span class="n">water_depth_fairway</span><span class="p">,</span>
+                    <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+                <span class="p">)</span>
+                <span class="n">parameter</span><span class="o">.</span><span class="n">erosion_distance_eq</span> <span class="o">=</span> <span class="n">erosion_distance_eq</span>
+                <span class="n">parameter</span><span class="o">.</span><span class="n">erosion_volume_eq</span> <span class="o">=</span> <span class="n">erosion_volume_eq</span>
+
+            <span class="n">parameter</span> <span class="o">=</span> <span class="n">compute_bank_erosion_dynamics</span><span class="p">(</span>
+                <span class="n">parameter</span><span class="p">,</span>
+                <span class="n">bank_height</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+                <span class="n">bank_i</span><span class="o">.</span><span class="n">segment_length</span><span class="p">,</span>
+                <span class="n">bank_i</span><span class="o">.</span><span class="n">fairway_distances</span><span class="p">,</span>
+                <span class="n">fairway_data</span><span class="o">.</span><span class="n">fairway_initial_water_levels</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+                <span class="n">discharge_level_pars</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">erosion_time</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_discharge</span><span class="p">[</span><span class="n">level_i</span><span class="p">],</span>
+                <span class="n">water_depth_fairway</span><span class="p">,</span>
+                <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+            <span class="p">)</span>
+
+            <span class="c1"># accumulate eroded volumes per km</span>
+            <span class="n">volume_per_discharge</span> <span class="o">=</span> <span class="n">get_km_eroded_volume</span><span class="p">(</span>
+                <span class="n">bank_i</span><span class="o">.</span><span class="n">bank_chainage_midpoints</span><span class="p">,</span> <span class="n">parameter</span><span class="o">.</span><span class="n">erosion_volume_tot</span><span class="p">,</span> <span class="n">km_bin</span>
+            <span class="p">)</span>
+            <span class="n">parameter</span><span class="o">.</span><span class="n">volume_per_discharge</span> <span class="o">=</span> <span class="n">volume_per_discharge</span>
+            <span class="n">par_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
+
+            <span class="n">dvol_bank</span><span class="p">[:,</span> <span class="n">ind</span><span class="p">]</span> <span class="o">+=</span> <span class="n">volume_per_discharge</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_debug_output</span><span class="p">(</span>
+                    <span class="n">level_i</span><span class="p">,</span>
+                    <span class="n">ind</span><span class="p">,</span>
+                    <span class="n">bank_data</span><span class="p">,</span>
+                    <span class="n">fairway_data</span><span class="p">,</span>
+                    <span class="n">erosion_inputs</span><span class="p">,</span>
+                    <span class="n">discharge_level_pars</span><span class="p">,</span>
+                    <span class="n">water_depth_fairway</span><span class="p">,</span>
+                    <span class="n">bank_height</span><span class="p">,</span>
+                    <span class="n">num_levels</span><span class="p">,</span>
+                    <span class="n">parameter</span><span class="p">,</span>
+                <span class="p">)</span>
+
+        <span class="n">level_calculation</span> <span class="o">=</span> <span class="n">CalculationLevel</span><span class="p">(</span>
+            <span class="n">left</span><span class="o">=</span><span class="n">par_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="n">par_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">hfw_max</span><span class="o">=</span><span class="n">hfw_max_level</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">level_calculation</span><span class="p">,</span> <span class="n">dvol_bank</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_debug_output</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">level_i</span><span class="p">,</span>
+        <span class="n">ind</span><span class="p">,</span>
+        <span class="n">bank_data</span><span class="p">,</span>
+        <span class="n">fairway_data</span><span class="p">,</span>
+        <span class="n">erosion_inputs</span><span class="p">,</span>
+        <span class="n">discharge_level_pars</span><span class="p">,</span>
+        <span class="n">water_depth_fairway</span><span class="p">,</span>
+        <span class="n">bank_height</span><span class="p">,</span>
+        <span class="n">num_levels</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">parameter</span><span class="p">:</span> <span class="n">DischargeCalculationParameters</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">level_i</span> <span class="o">==</span> <span class="n">num_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># EQ debug</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span><span class="o">.</span><span class="n">last_discharge_level</span><span class="p">(</span>
+                <span class="n">ind</span><span class="p">,</span>
+                <span class="n">bank_data</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+                <span class="n">fairway_data</span><span class="p">,</span>
+                <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+                <span class="n">discharge_level_pars</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+                <span class="n">water_depth_fairway</span><span class="p">,</span>
+                <span class="n">parameter</span><span class="o">.</span><span class="n">erosion_distance_eq</span><span class="p">,</span>
+                <span class="n">parameter</span><span class="o">.</span><span class="n">erosion_volume_eq</span><span class="p">,</span>
+                <span class="n">bank_height</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="c1"># Q-specific debug</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span><span class="o">.</span><span class="n">middle_levels</span><span class="p">(</span>
+            <span class="n">ind</span><span class="p">,</span>
+            <span class="n">level_i</span><span class="p">,</span>
+            <span class="n">bank_data</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+            <span class="n">fairway_data</span><span class="p">,</span>
+            <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+            <span class="n">discharge_level_pars</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+            <span class="n">water_depth_fairway</span><span class="p">,</span>
+            <span class="n">parameter</span><span class="o">.</span><span class="n">bank_velocity</span><span class="p">,</span>
+            <span class="n">bank_height</span><span class="p">,</span>
+            <span class="n">parameter</span><span class="p">,</span>
+        <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the bank erosion analysis for a specified configuration.&quot;&quot;&quot;</span>
         <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- start analysis --&quot;</span><span class="p">)</span>
@@ -3668,7 +3670,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="n">river_axis</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;stations&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_intervals</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">km_mid</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># get mid-points</span>
+        <span class="n">km_mid</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">,</span> <span class="n">station_type</span><span class="o">=</span><span class="s2">&quot;mid&quot;</span><span class="p">)</span>  <span class="c1"># get mid-points</span>
 
         <span class="n">fairway_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fairway_data</span><span class="p">(</span><span class="n">river_axis</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">)</span>
 
@@ -3680,7 +3682,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="n">bank_data</span><span class="p">,</span> <span class="n">fairway_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span>
         <span class="p">)</span>
 
-        <span class="n">num_stations_per_bank</span> <span class="o">=</span> <span class="p">[</span><span class="n">bank_data</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">length</span><span class="p">]</span>
+        <span class="n">num_stations_per_bank</span> <span class="o">=</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">num_stations_per_bank</span>
         <span class="n">erosion_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_initial_conditions</span><span class="p">(</span>
             <span class="n">config_file</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">,</span> <span class="n">fairway_data</span>
         <span class="p">)</span>
@@ -3873,7 +3875,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                 <span class="n">km_mid</span><span class="p">,</span>
                 <span class="n">km_step</span><span class="p">,</span>
                 <span class="s2">&quot;river chainage [km]&quot;</span><span class="p">,</span>
-                <span class="n">erosion_results</span><span class="o">.</span><span class="n">vol_per_discharge</span><span class="p">,</span>
+                <span class="n">water_level_data</span><span class="o">.</span><span class="n">vol_per_discharge</span><span class="p">,</span>
                 <span class="s2">&quot;eroded volume [m^3]&quot;</span><span class="p">,</span>
                 <span class="sa">f</span><span class="s2">&quot;eroded volume per </span><span class="si">{</span><span class="n">km_step</span><span class="si">}</span><span class="s2"> chainage km (</span><span class="si">{</span><span class="n">erosion_results</span><span class="o">.</span><span class="n">erosion_time</span><span class="si">}</span><span class="s2"> years)&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;Q</span><span class="si">{iq}</span><span class="s2">&quot;</span><span class="p">,</span>
@@ -3899,7 +3901,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                 <span class="n">km_mid</span><span class="p">,</span>
                 <span class="n">km_step</span><span class="p">,</span>
                 <span class="s2">&quot;river chainage [km]&quot;</span><span class="p">,</span>
-                <span class="n">erosion_results</span><span class="o">.</span><span class="n">vol_per_discharge</span><span class="p">,</span>
+                <span class="n">water_level_data</span><span class="o">.</span><span class="n">vol_per_discharge</span><span class="p">,</span>
                 <span class="s2">&quot;eroded volume [m^3]&quot;</span><span class="p">,</span>
                 <span class="sa">f</span><span class="s2">&quot;eroded volume per </span><span class="si">{</span><span class="n">km_step</span><span class="si">}</span><span class="s2"> chainage km (</span><span class="si">{</span><span class="n">erosion_results</span><span class="o">.</span><span class="n">erosion_time</span><span class="si">}</span><span class="s2"> years)&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;Q</span><span class="si">{iq}</span><span class="s2">&quot;</span><span class="p">,</span>
@@ -3927,7 +3929,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                 <span class="n">km_mid</span><span class="p">,</span>
                 <span class="n">km_step</span><span class="p">,</span>
                 <span class="s2">&quot;river chainage [km]&quot;</span><span class="p">,</span>
-                <span class="n">erosion_results</span><span class="o">.</span><span class="n">vol_per_discharge</span><span class="p">,</span>
+                <span class="n">water_level_data</span><span class="o">.</span><span class="n">vol_per_discharge</span><span class="p">,</span>
                 <span class="s2">&quot;eroded volume [m^3]&quot;</span><span class="p">,</span>
                 <span class="sa">f</span><span class="s2">&quot;eroded volume per </span><span class="si">{</span><span class="n">km_step</span><span class="si">}</span><span class="s2"> chainage km (</span><span class="si">{</span><span class="n">erosion_results</span><span class="o">.</span><span class="n">erosion_time</span><span class="si">}</span><span class="s2"> years)&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;Bank </span><span class="si">{ib}</span><span class="s2">&quot;</span><span class="p">,</span>
@@ -4153,10 +4155,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/bank_erosion.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">81</span>
 <span class="normal">82</span>
 <span class="normal">83</span>
 <span class="normal">84</span>
@@ -4166,7 +4165,10 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">88</span>
 <span class="normal">89</span>
 <span class="normal">90</span>
-<span class="normal">91</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the Erosion class.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">root_dir</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">root_dir</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_config_file</span> <span class="o">=</span> <span class="n">config_file</span>
@@ -4179,7 +4181,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">num_discharge_levels</span>
     <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">bl_processor</span> <span class="o">=</span> <span class="n">BankLinesProcessor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span> <span class="o">=</span> <span class="n">Debugger</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span> <span class="o">=</span> <span class="n">Debugger</span><span class="p">(</span><span class="n">config_file</span><span class="o">.</span><span class="n">crs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -4298,12 +4300,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/bank_erosion.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">214</span>
-<span class="normal">215</span>
-<span class="normal">216</span>
-<span class="normal">217</span>
-<span class="normal">218</span>
-<span class="normal">219</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
 <span class="normal">220</span>
 <span class="normal">221</span>
 <span class="normal">222</span>
@@ -4400,7 +4397,12 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">313</span>
 <span class="normal">314</span>
 <span class="normal">315</span>
-<span class="normal">316</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_fairway_bank_line_distance</span><span class="p">(</span>
+<span class="normal">316</span>
+<span class="normal">317</span>
+<span class="normal">318</span>
+<span class="normal">319</span>
+<span class="normal">320</span>
+<span class="normal">321</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_fairway_bank_line_distance</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">bank_data</span><span class="p">:</span> <span class="n">BankData</span><span class="p">,</span>
     <span class="n">fairway_data</span><span class="p">:</span> <span class="n">FairwayData</span><span class="p">,</span>
@@ -4512,6 +4514,212 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <div class="doc doc-object doc-function">
 
 
+<h4 id="dfastbe.bank_erosion.bank_erosion.Erosion.compute_erosion_per_level" class="doc doc-heading"><a href="#dfastbe.bank_erosion.bank_erosion.Erosion.compute_erosion_per_level" class="toclink">
+            <code class="highlight language-python"><span class="n">compute_erosion_per_level</span><span class="p">(</span><span class="n">level_i</span><span class="p">,</span> <span class="n">bank_data</span><span class="p">,</span> <span class="n">simulation_data</span><span class="p">,</span> <span class="n">fairway_data</span><span class="p">,</span> <span class="n">discharge_level_pars</span><span class="p">,</span> <span class="n">erosion_inputs</span><span class="p">,</span> <span class="n">km_bin</span><span class="p">,</span> <span class="n">num_km</span><span class="p">,</span> <span class="n">bank_height</span><span class="p">)</span></code>
+
+</a><a href="#dfastbe.bank_erosion.bank_erosion.Erosion.compute_erosion_per_level" class="headerlink" title="Permanent link">#</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Compute the bank erosion for a given level.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>src/dfastbe/bank_erosion/bank_erosion.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">681</span>
+<span class="normal">682</span>
+<span class="normal">683</span>
+<span class="normal">684</span>
+<span class="normal">685</span>
+<span class="normal">686</span>
+<span class="normal">687</span>
+<span class="normal">688</span>
+<span class="normal">689</span>
+<span class="normal">690</span>
+<span class="normal">691</span>
+<span class="normal">692</span>
+<span class="normal">693</span>
+<span class="normal">694</span>
+<span class="normal">695</span>
+<span class="normal">696</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span>
+<span class="normal">700</span>
+<span class="normal">701</span>
+<span class="normal">702</span>
+<span class="normal">703</span>
+<span class="normal">704</span>
+<span class="normal">705</span>
+<span class="normal">706</span>
+<span class="normal">707</span>
+<span class="normal">708</span>
+<span class="normal">709</span>
+<span class="normal">710</span>
+<span class="normal">711</span>
+<span class="normal">712</span>
+<span class="normal">713</span>
+<span class="normal">714</span>
+<span class="normal">715</span>
+<span class="normal">716</span>
+<span class="normal">717</span>
+<span class="normal">718</span>
+<span class="normal">719</span>
+<span class="normal">720</span>
+<span class="normal">721</span>
+<span class="normal">722</span>
+<span class="normal">723</span>
+<span class="normal">724</span>
+<span class="normal">725</span>
+<span class="normal">726</span>
+<span class="normal">727</span>
+<span class="normal">728</span>
+<span class="normal">729</span>
+<span class="normal">730</span>
+<span class="normal">731</span>
+<span class="normal">732</span>
+<span class="normal">733</span>
+<span class="normal">734</span>
+<span class="normal">735</span>
+<span class="normal">736</span>
+<span class="normal">737</span>
+<span class="normal">738</span>
+<span class="normal">739</span>
+<span class="normal">740</span>
+<span class="normal">741</span>
+<span class="normal">742</span>
+<span class="normal">743</span>
+<span class="normal">744</span>
+<span class="normal">745</span>
+<span class="normal">746</span>
+<span class="normal">747</span>
+<span class="normal">748</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span>
+<span class="normal">753</span>
+<span class="normal">754</span>
+<span class="normal">755</span>
+<span class="normal">756</span>
+<span class="normal">757</span>
+<span class="normal">758</span>
+<span class="normal">759</span>
+<span class="normal">760</span>
+<span class="normal">761</span>
+<span class="normal">762</span>
+<span class="normal">763</span>
+<span class="normal">764</span>
+<span class="normal">765</span>
+<span class="normal">766</span>
+<span class="normal">767</span>
+<span class="normal">768</span>
+<span class="normal">769</span>
+<span class="normal">770</span>
+<span class="normal">771</span>
+<span class="normal">772</span>
+<span class="normal">773</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">compute_erosion_per_level</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">level_i</span><span class="p">,</span>
+    <span class="n">bank_data</span><span class="p">,</span>
+    <span class="n">simulation_data</span><span class="p">,</span>
+    <span class="n">fairway_data</span><span class="p">,</span>
+    <span class="n">discharge_level_pars</span><span class="p">,</span>
+    <span class="n">erosion_inputs</span><span class="p">,</span>
+    <span class="n">km_bin</span><span class="p">,</span>
+    <span class="n">num_km</span><span class="p">,</span>
+    <span class="n">bank_height</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute the bank erosion for a given level.&quot;&quot;&quot;</span>
+    <span class="n">num_levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">num_discharge_levels</span>
+    <span class="n">dvol_bank</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_km</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">hfw_max_level</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">par_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">bank_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bank_data</span><span class="p">):</span>
+        <span class="n">parameter</span> <span class="o">=</span> <span class="n">DischargeCalculationParameters</span><span class="p">()</span>
+        <span class="c1"># bank_i = 0: left bank, bank_i = 1: right bank</span>
+        <span class="c1"># calculate velocity along banks ...</span>
+        <span class="n">parameter</span><span class="o">.</span><span class="n">bank_velocity</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">calculate_bank_velocity</span><span class="p">(</span>
+            <span class="n">bank_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">vel_dx</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">level_i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># determine velocity and bank height along banks ...</span>
+            <span class="c1"># bank height = maximum bed elevation per cell</span>
+            <span class="n">bank_height</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">calculate_bank_height</span><span class="p">(</span><span class="n">bank_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">zb_dx</span><span class="p">))</span>
+
+        <span class="c1"># get water depth along the fair-way</span>
+        <span class="n">ii_face</span> <span class="o">=</span> <span class="n">bank_i</span><span class="o">.</span><span class="n">fairway_face_indices</span>
+        <span class="n">water_depth_fairway</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">water_depth_face</span><span class="p">[</span><span class="n">ii_face</span><span class="p">]</span>
+        <span class="n">hfw_max_level</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">hfw_max_level</span><span class="p">,</span> <span class="n">water_depth_fairway</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+
+        <span class="n">parameter</span><span class="o">.</span><span class="n">water_level</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">water_level_face</span><span class="p">[</span><span class="n">ii_face</span><span class="p">]</span>
+        <span class="n">chez_face</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">chezy_face</span><span class="p">[</span><span class="n">ii_face</span><span class="p">]</span>
+        <span class="n">parameter</span><span class="o">.</span><span class="n">chezy</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">chez_face</span> <span class="o">+</span> <span class="n">chez_face</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+        <span class="c1"># last discharge level</span>
+        <span class="k">if</span> <span class="n">level_i</span> <span class="o">==</span> <span class="n">num_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">erosion_distance_eq</span><span class="p">,</span> <span class="n">erosion_volume_eq</span> <span class="o">=</span> <span class="n">comp_erosion_eq</span><span class="p">(</span>
+                <span class="n">bank_height</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+                <span class="n">bank_i</span><span class="o">.</span><span class="n">segment_length</span><span class="p">,</span>
+                <span class="n">fairway_data</span><span class="o">.</span><span class="n">fairway_initial_water_levels</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+                <span class="n">discharge_level_pars</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+                <span class="n">bank_i</span><span class="o">.</span><span class="n">fairway_distances</span><span class="p">,</span>
+                <span class="n">water_depth_fairway</span><span class="p">,</span>
+                <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="n">parameter</span><span class="o">.</span><span class="n">erosion_distance_eq</span> <span class="o">=</span> <span class="n">erosion_distance_eq</span>
+            <span class="n">parameter</span><span class="o">.</span><span class="n">erosion_volume_eq</span> <span class="o">=</span> <span class="n">erosion_volume_eq</span>
+
+        <span class="n">parameter</span> <span class="o">=</span> <span class="n">compute_bank_erosion_dynamics</span><span class="p">(</span>
+            <span class="n">parameter</span><span class="p">,</span>
+            <span class="n">bank_height</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+            <span class="n">bank_i</span><span class="o">.</span><span class="n">segment_length</span><span class="p">,</span>
+            <span class="n">bank_i</span><span class="o">.</span><span class="n">fairway_distances</span><span class="p">,</span>
+            <span class="n">fairway_data</span><span class="o">.</span><span class="n">fairway_initial_water_levels</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span>
+            <span class="n">discharge_level_pars</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">erosion_time</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">p_discharge</span><span class="p">[</span><span class="n">level_i</span><span class="p">],</span>
+            <span class="n">water_depth_fairway</span><span class="p">,</span>
+            <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># accumulate eroded volumes per km</span>
+        <span class="n">volume_per_discharge</span> <span class="o">=</span> <span class="n">get_km_eroded_volume</span><span class="p">(</span>
+            <span class="n">bank_i</span><span class="o">.</span><span class="n">bank_chainage_midpoints</span><span class="p">,</span> <span class="n">parameter</span><span class="o">.</span><span class="n">erosion_volume_tot</span><span class="p">,</span> <span class="n">km_bin</span>
+        <span class="p">)</span>
+        <span class="n">parameter</span><span class="o">.</span><span class="n">volume_per_discharge</span> <span class="o">=</span> <span class="n">volume_per_discharge</span>
+        <span class="n">par_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
+
+        <span class="n">dvol_bank</span><span class="p">[:,</span> <span class="n">ind</span><span class="p">]</span> <span class="o">+=</span> <span class="n">volume_per_discharge</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug_output</span><span class="p">(</span>
+                <span class="n">level_i</span><span class="p">,</span>
+                <span class="n">ind</span><span class="p">,</span>
+                <span class="n">bank_data</span><span class="p">,</span>
+                <span class="n">fairway_data</span><span class="p">,</span>
+                <span class="n">erosion_inputs</span><span class="p">,</span>
+                <span class="n">discharge_level_pars</span><span class="p">,</span>
+                <span class="n">water_depth_fairway</span><span class="p">,</span>
+                <span class="n">bank_height</span><span class="p">,</span>
+                <span class="n">num_levels</span><span class="p">,</span>
+                <span class="n">parameter</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="n">level_calculation</span> <span class="o">=</span> <span class="n">CalculationLevel</span><span class="p">(</span>
+        <span class="n">left</span><span class="o">=</span><span class="n">par_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="n">par_list</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">hfw_max</span><span class="o">=</span><span class="n">hfw_max_level</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">level_calculation</span><span class="p">,</span> <span class="n">dvol_bank</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
 <h4 id="dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters" class="doc doc-heading"><a href="#dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters" class="toclink">
             <code class="highlight language-python"><span class="n">get_ship_parameters</span><span class="p">(</span><span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span></code>
 
@@ -4524,10 +4732,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/bank_erosion.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 98</span>
-<span class="normal"> 99</span>
-<span class="normal">100</span>
-<span class="normal">101</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">101</span>
 <span class="normal">102</span>
 <span class="normal">103</span>
 <span class="normal">104</span>
@@ -4572,7 +4777,14 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">143</span>
 <span class="normal">144</span>
 <span class="normal">145</span>
-<span class="normal">146</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_ship_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_ship_parameters</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get ship parameters from the configuration file.&quot;&quot;&quot;</span>
     <span class="n">ship_relative_velocity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span>
         <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;VShip&quot;</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">onefile</span><span class="o">=</span><span class="kc">True</span>
@@ -4642,7 +4854,12 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/bank_erosion.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">820</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">815</span>
+<span class="normal">816</span>
+<span class="normal">817</span>
+<span class="normal">818</span>
+<span class="normal">819</span>
+<span class="normal">820</span>
 <span class="normal">821</span>
 <span class="normal">822</span>
 <span class="normal">823</span>
@@ -4716,12 +4933,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">891</span>
 <span class="normal">892</span>
 <span class="normal">893</span>
-<span class="normal">894</span>
-<span class="normal">895</span>
-<span class="normal">896</span>
-<span class="normal">897</span>
-<span class="normal">898</span>
-<span class="normal">899</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">894</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the bank erosion analysis for a specified configuration.&quot;&quot;&quot;</span>
     <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- start analysis --&quot;</span><span class="p">)</span>
     <span class="n">log_text</span><span class="p">(</span>
@@ -4745,7 +4957,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">river_axis</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s2">&quot;stations&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_intervals</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="n">km_mid</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>  <span class="c1"># get mid-points</span>
+    <span class="n">km_mid</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">,</span> <span class="n">station_type</span><span class="o">=</span><span class="s2">&quot;mid&quot;</span><span class="p">)</span>  <span class="c1"># get mid-points</span>
 
     <span class="n">fairway_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_fairway_data</span><span class="p">(</span><span class="n">river_axis</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">)</span>
 
@@ -4757,7 +4969,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">bank_data</span><span class="p">,</span> <span class="n">fairway_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span>
     <span class="p">)</span>
 
-    <span class="n">num_stations_per_bank</span> <span class="o">=</span> <span class="p">[</span><span class="n">bank_data</span><span class="o">.</span><span class="n">left</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">right</span><span class="o">.</span><span class="n">length</span><span class="p">]</span>
+    <span class="n">num_stations_per_bank</span> <span class="o">=</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">num_stations_per_bank</span>
     <span class="n">erosion_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_initial_conditions</span><span class="p">(</span>
         <span class="n">config_file</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">,</span> <span class="n">fairway_data</span>
     <span class="p">)</span>
@@ -4831,17 +5043,17 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/bank_erosion.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1280</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1275</span>
+<span class="normal">1276</span>
+<span class="normal">1277</span>
+<span class="normal">1278</span>
+<span class="normal">1279</span>
+<span class="normal">1280</span>
 <span class="normal">1281</span>
 <span class="normal">1282</span>
 <span class="normal">1283</span>
 <span class="normal">1284</span>
-<span class="normal">1285</span>
-<span class="normal">1286</span>
-<span class="normal">1287</span>
-<span class="normal">1288</span>
-<span class="normal">1289</span>
-<span class="normal">1290</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_alpha</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ind_1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ind_2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bp</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
+<span class="normal">1285</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_alpha</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ind_1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ind_2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bp</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the alpha value for the bank erosion model.&quot;&quot;&quot;</span>
     <span class="n">alpha</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">ind_1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">coords</span><span class="p">[</span><span class="n">ind_2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">bp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">coords</span><span class="p">[</span><span class="n">ind_2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
