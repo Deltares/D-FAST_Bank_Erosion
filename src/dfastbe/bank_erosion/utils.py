@@ -16,7 +16,8 @@ from dfastbe.bank_erosion.data_models import (
     SingleBank,
     SingleErosion,
 )
-from dfastbe.io.io import LineGeometry, log_text
+from dfastbe.io.io import log_text
+from dfastbe.io.data_models import LineGeometry
 from dfastbe.support import enlarge, get_slices, get_slices_core, on_right_side
 
 EPS = sys.float_info.epsilon

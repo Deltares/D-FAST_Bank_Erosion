@@ -3,7 +3,8 @@ from typing import List, Tuple
 from shapely.geometry import LineString, MultiLineString, Point
 from shapely.geometry.polygon import Polygon
 
-from dfastbe.io.io import BaseRiverData, BaseSimulationData, LineGeometry, log_text
+from dfastbe.io.io import log_text
+from dfastbe.io.data_models import BaseRiverData, BaseSimulationData, LineGeometry
 
 MAX_RIVER_WIDTH = 1000
 

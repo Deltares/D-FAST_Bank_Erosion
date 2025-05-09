@@ -9,7 +9,8 @@ from shapely.geometry import LineString, MultiLineString, Polygon
 
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.cmd import run
-from dfastbe.io.io import BaseSimulationData, ConfigFile
+from dfastbe.io.data_models import BaseSimulationData
+from dfastbe.io.io import ConfigFile
 
 matplotlib.use('Agg')
 
