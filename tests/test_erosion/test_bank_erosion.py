@@ -134,3 +134,28 @@ class TestErosion:
             for arr, n in zip(value, num_stations_per_bank):
                 assert isinstance(arr, np.ndarray)
                 assert len(arr) == n
+
+    def test_process_river_axis_by_center_line(self, mock_erosion):
+        """Test the _process_river_axis_by_center_line method."""
+        mock_center_line = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
+        mock_erosion.river_center_line_arr = mock_center_line
+
+        with patch(
+            "dfastbe.bank_erosion.bank_erosion.LineGeometry"
+        ) as mock_line_geometry:
+            mock_line_geometry.return_value = MagicMock()
+            mock_line_geometry.return_value.as_array.return_value = np.array(
+                [
+                    [118594.085937, 414471.53125],
+                    [118608.34068032, 414475.92354911],
+                    [118622.59542364, 414480.31584821],
+                    [118636.85016696, 414484.70814732],
+                    [118651.10491029, 414489.10044643],
+                ]
+            )
+            mock_line_geometry.return_value.intersect_with_line.return_value = np.array(
+                [128.0, 128.0, 128.0, 128.0, 128.0]
+            )
+            river_axis = mock_erosion._process_river_axis_by_center_line()
+
+        river_axis.add_data.assert_called_with(data={"stations": np.array([128.0])})
