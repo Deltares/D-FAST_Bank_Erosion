@@ -25,6 +25,8 @@ BANK_AREAS_FILE = "bank_areas"
 BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE = "bankline_fragments_per_bank_area"
 EXTENSION = ".shp"
 
+__all__ = ["BankLines"]
+
 
 class BankLines:
     """Bank line detection class."""
