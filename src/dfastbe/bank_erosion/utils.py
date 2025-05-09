@@ -949,13 +949,10 @@ def get_km_bins(
     if station_type == "all":
         pass
     elif station_type == "lower":
-        # lower bounds
         ub = ub - 1
     elif station_type == "upper":
-        # upper bounds
         lb = lb + 1
     elif station_type == "mid":
-        # midpoint values
         ub = ub - 1
         dx = km_bin[2] / 2
 
