@@ -743,7 +743,7 @@ class DischargeLevels:
         if bank_side is None:
             bank_side = ["left", "right"]
         elif isinstance(bank_side, str):
-                bank_side = [bank_side]
+            bank_side = [bank_side]
 
         if not all(side in ["left", "right"] for side in bank_side):
             raise ValueError("bank_side must be 'left', 'right', or a list of these.")
