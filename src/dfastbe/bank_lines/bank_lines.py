@@ -21,7 +21,7 @@ from dfastbe.support import (
     sort_connect_bank_lines,
     tri_to_line,
 )
-from dfastbe.utils import timed_logger
+from dfastbe.io.logger import timed_logger
 
 MAX_RIVER_WIDTH = 1000
 RAW_DETECTED_BANKLINE_FRAGMENTS_FILE = "raw_detected_bankline_fragments"
