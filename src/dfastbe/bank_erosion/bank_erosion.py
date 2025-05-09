@@ -787,7 +787,7 @@ class Erosion:
     ):
         if level_i == num_levels - 1:
             # EQ debug
-            self.debugger.debug_process_discharge_levels_1(
+            self.debugger.last_discharge_level(
                 ind,
                 bank_data.get_bank(ind),
                 fairway_data,
@@ -799,7 +799,7 @@ class Erosion:
                 bank_height,
             )
             # Q-specific debug
-        self.debugger.debug_process_discharge_levels_2(
+        self.debugger.middle_levels(
             ind,
             level_i,
             bank_data.get_bank(ind),

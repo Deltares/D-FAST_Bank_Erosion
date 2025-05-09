@@ -1,3 +1,4 @@
+"""Bank Erosion Debugger"""
 from dfastbe.io import write_shp, write_csv, ConfigFile
 from dfastbe.bank_erosion.data_models import ParametersPerBank, SingleBank, SingleErosion, FairwayData, DischargeCalculationParameters
 
@@ -7,7 +8,7 @@ class Debugger:
         self.config_file = config_file
         self.river_data = river_data
 
-    def debug_process_discharge_levels_1(
+    def last_discharge_level(
         self, bank_index: int, single_bank: SingleBank, fairway_data: FairwayData, erosion_inputs: SingleErosion,
         discharge_level_pars: ParametersPerBank, water_depth_fairway, dn_eq1, dv_eq1, bank_height
     ):
@@ -39,7 +40,7 @@ class Debugger:
         write_shp(bank_coords_geo, params, f"{str(self.river_data.output_dir)}/debug.EQ.B{bank_index + 1}.shp")
         write_csv(params, f"{str(self.river_data.output_dir)}/debug.EQ.B{bank_index + 1}.csv")
 
-    def debug_process_discharge_levels_2(
+    def middle_levels(
         self, bank_ind: int, q_level: int, single_bank: SingleBank, fairway_data: FairwayData, erosion_inputs:
             SingleErosion, discharge_level_pars: ParametersPerBank, water_depth_fairway, velocity, bank_height,
             parameter: DischargeCalculationParameters,
