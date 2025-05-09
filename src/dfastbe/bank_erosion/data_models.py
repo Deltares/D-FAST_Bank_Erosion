@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Iterator, List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type, Optional
+from typing import Iterator, List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type, Optional, Union
 import numpy as np
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString, Point
@@ -144,6 +144,8 @@ class WaterLevelData:
         velocity (List[List[np.ndarray]]): Flow velocity magnitude along the bank [m/s]
         bank_height (List[np.ndarray]): Bank height data.
         chezy (List[List[np.ndarray]]): Chezy coefficient data.
+        vol_per_discharge (List[List[np.ndarray]]):
+            Eroded volume per discharge level for each bank line.
     """
 
     hfw_max: float
@@ -153,6 +155,7 @@ class WaterLevelData:
     velocity: List[List[np.ndarray]]
     bank_height: List[np.ndarray]
     chezy: List[List[np.ndarray]]
+    vol_per_discharge: List[List[np.ndarray]]
 
 
 @dataclass
@@ -240,13 +243,24 @@ class SingleBank:
         """
         return np.diff(self.bank_line_coords[:, 1])
 
-    def get_mid_points(self, crs) -> GeoSeries:
+    def get_mid_points(self, as_geo_series: bool = False, crs: str = None) -> Union[GeoSeries, np.ndarray]:
+        """Band line midpoints.
+
+        Args:
+            as_geo_series (bool):
+                bool indicating if the output should be a GeoSeries or not.
+            crs (str):
+                coordinate reference system.
+        Returns:
+            the midpoints of the bank line coordinates as a GeoSeries or numpy array.
+        """
         bank_coords = self.bank_line_coords
         bank_coords_mind = (bank_coords[:-1] + bank_coords[1:]) / 2
 
-        bank_coords_points = [Point(xy) for xy in bank_coords_mind]
-        geo_series = GeoSeries(bank_coords_points, crs=crs)
-        return geo_series
+        if as_geo_series:
+            bank_coords_mind = [Point(xy) for xy in bank_coords_mind]
+            bank_coords_mind = GeoSeries(bank_coords_mind, crs=crs)
+        return bank_coords_mind
 
 @dataclass
 class BankData(BaseBank[SingleBank]):
@@ -350,8 +364,6 @@ class ErosionResults:
             Total erosion distance caused by flow for each bank line.
         ship_erosion_dist (List[np.ndarray]):
             Total erosion distance caused by ship waves for each bank line.
-        vol_per_discharge (List[List[np.ndarray]]):
-            Eroded volume per discharge level for each bank line.
         eq_eroded_vol (List[np.ndarray]):
             Eroded volume at equilibrium for each bank line.
         total_eroded_vol (List[np.ndarray]):
@@ -375,7 +387,6 @@ class ErosionResults:
         ...     total_erosion_dist=[np.array([0.3, 0.4])],
         ...     flow_erosion_dist=[np.array([0.5, 0.6])],
         ...     ship_erosion_dist=[np.array([0.7, 0.8])],
-        ...     vol_per_discharge=[[np.array([0.9, 1.0])]],
         ...     eq_eroded_vol=[np.array([1.1, 1.2])],
         ...     total_eroded_vol=[np.array([1.3, 1.4])],
         ...     erosion_time=10,
@@ -384,7 +395,7 @@ class ErosionResults:
         ...     total_eroded_vol_per_km=np.array([0.5, 0.6]),
         ... )
         >>> print(erosion_results)
-        ErosionResults(eq_erosion_dist=[array([0.1, 0.2])], total_erosion_dist=[array([0.3, 0.4])], flow_erosion_dist=[array([0.5, 0.6])], ship_erosion_dist=[array([0.7, 0.8])], vol_per_discharge=[[array([0.9, 1. ])]], eq_eroded_vol=[array([1.1, 1.2])], total_eroded_vol=[array([1.3, 1.4])], erosion_time=10, avg_erosion_rate=array([0.1, 0.2]), eq_eroded_vol_per_km=array([0.3, 0.4]), total_eroded_vol_per_km=array([0.5, 0.6]))
+        ErosionResults(eq_erosion_dist=[array([0.1, 0.2])], total_erosion_dist=[array([0.3, 0.4])], flow_erosion_dist=[array([0.5, 0.6])], ship_erosion_dist=[array([0.7, 0.8])], eq_eroded_vol=[array([1.1, 1.2])], total_eroded_vol=[array([1.3, 1.4])], erosion_time=10, avg_erosion_rate=array([0.1, 0.2]), eq_eroded_vol_per_km=array([0.3, 0.4]), total_eroded_vol_per_km=array([0.5, 0.6]))
 
         ```
 
@@ -399,13 +410,12 @@ class ErosionResults:
         ...     total_erosion_dist=[np.array([0.3, 0.4])],
         ...     flow_erosion_dist=[np.array([0.5, 0.6])],
         ...     ship_erosion_dist=[np.array([0.7, 0.8])],
-        ...     vol_per_discharge=[[np.array([0.9, 1.0])]],
         ...     eq_eroded_vol=[np.array([1.1, 1.2])],
         ...     total_eroded_vol=[np.array([1.3, 1.4])],
         ...     erosion_time=10,
         ... )
         >>> print(erosion_results)
-        ErosionResults(eq_erosion_dist=[array([0.1, 0.2])], total_erosion_dist=[array([0.3, 0.4])], flow_erosion_dist=[array([0.5, 0.6])], ship_erosion_dist=[array([0.7, 0.8])], vol_per_discharge=[[array([0.9, 1. ])]], eq_eroded_vol=[array([1.1, 1.2])], total_eroded_vol=[array([1.3, 1.4])], erosion_time=10, avg_erosion_rate=array([], dtype=float64), eq_eroded_vol_per_km=array([], dtype=float64), total_eroded_vol_per_km=array([], dtype=float64))
+        ErosionResults(eq_erosion_dist=[array([0.1, 0.2])], total_erosion_dist=[array([0.3, 0.4])], flow_erosion_dist=[array([0.5, 0.6])], ship_erosion_dist=[array([0.7, 0.8])], eq_eroded_vol=[array([1.1, 1.2])], total_eroded_vol=[array([1.3, 1.4])], erosion_time=10, avg_erosion_rate=array([], dtype=float64), eq_eroded_vol_per_km=array([], dtype=float64), total_eroded_vol_per_km=array([], dtype=float64))
 
         ```
     """
@@ -414,7 +424,6 @@ class ErosionResults:
     total_erosion_dist: List[np.ndarray]
     flow_erosion_dist: List[np.ndarray]
     ship_erosion_dist: List[np.ndarray]
-    vol_per_discharge: List[List[np.ndarray]]
     eq_eroded_vol: List[np.ndarray]
     total_eroded_vol: List[np.ndarray]
     erosion_time: int
@@ -563,7 +572,7 @@ class ErosionSimulationData(BaseSimulationData):
         return x1
 
     def calculate_bank_velocity(self, single_bank: SingleBank, vel_dx) -> np.ndarray:
-        from dfastbe.kernel import moving_avg
+        from dfastbe.bank_erosion.utils import moving_avg
         bank_face_indices = single_bank.bank_face_indices
         vel_bank = (
                 np.abs(
@@ -581,7 +590,7 @@ class ErosionSimulationData(BaseSimulationData):
         return vel_bank
 
     def calculate_bank_height(self, single_bank: SingleBank, zb_dx):
-        from dfastbe.kernel import moving_avg
+        from dfastbe.bank_erosion.utils import moving_avg
         bank_index = single_bank.bank_face_indices
         if self.bed_elevation_location == "node":
             zb_nodes = self.bed_elevation_values
@@ -678,6 +687,116 @@ class ParametersPerBank:
 class DischargeLevelParameters(BaseBank[ParametersPerBank]):
     pass
 
+
+@dataclass
+class DischargeCalculationParameters:
+    bank_velocity: np.ndarray = field(default=lambda : np.array([]))
+    water_level: np.ndarray = field(default=lambda : np.array([]))
+    chezy: np.ndarray = field(default=lambda : np.array([]))
+    ship_wave_max: np.ndarray = field(default=lambda : np.array([]))
+    ship_wave_min: np.ndarray = field(default=lambda : np.array([]))
+    volume_per_discharge: np.ndarray = field(default=lambda : np.array([]))
+    erosion_distance_flow: np.ndarray = field(default=lambda : np.array([]))
+    erosion_distance_shipping: np.ndarray = field(default=lambda : np.array([]))
+    erosion_distance_tot: np.ndarray = field(default=lambda : np.array([]))
+    erosion_volume_tot: np.ndarray = field(default=lambda : np.array([]))
+    erosion_distance_eq: Optional[np.ndarray] = field(default=lambda : np.array([]))
+    erosion_volume_eq: Optional[np.ndarray] = field(default=lambda : np.array([]))
+
+
+@dataclass
+class CalculationLevel(BaseBank[DischargeCalculationParameters]):
+    hfw_max: float = field(default=0.0)
+
+    @classmethod
+    def from_column_arrays(
+        cls, data: dict, bank_cls: Type["DischargeCalculationParameters"], hfw_max: float,
+        bank_order: Tuple[str, str] = ("left", "right")
+    ) -> "CalculationLevel":
+        # Only include fields that belong to the bank-specific data
+        # base_fields = {k: v for k, v in data.items() if k != "id"}
+        base = BaseBank.from_column_arrays(data, bank_cls, bank_order=bank_order)
+
+        return cls(
+            id=base.id,
+            left=base.left,
+            right=base.right,
+            hfw_max=hfw_max,
+        )
+
+class DischargeLevels:
+
+    def __init__(self, levels: List[CalculationLevel]):
+        self.levels = levels
+
+    def __getitem__(self, index: int) -> CalculationLevel:
+        return self.levels[index]
+
+    def __len__(self) -> int:
+        return len(self.levels)
+
+    def append(self, level_calc: CalculationLevel):
+        self.levels.append(level_calc)
+
+    def get_max_hfw_level(self) -> float:
+        return max(level.hfw_max for level in self.levels)
+
+    def total_erosion_volume(self) -> float:
+        return sum(
+            np.sum(level.left.erosion_volume_tot) + np.sum(level.right.erosion_volume_tot)
+            for level in self.levels
+        )
+
+    def __iter__(self):
+        return iter(self.levels)
+
+    def accumulate(self, attribute_name: str, bank_side: Union[str, List[str]] = None) -> List[np.ndarray]:
+        if bank_side is None:
+            bank_side = ["left", "right"]
+        elif isinstance(bank_side, str):
+            bank_side = [bank_side]
+
+        if not all(side in ["left", "right"] for side in bank_side):
+            raise ValueError("bank_side must be 'left', 'right', or a list of these.")
+
+        total = [
+            self._accumulate_attribute_side(attribute_name, side) for side in bank_side
+        ]
+        return total
+
+    def _accumulate_attribute_side(self, attribute_name: str, bank_side: str) -> np.ndarray:
+        for i, level in enumerate(self.levels):
+            bank = getattr(level, bank_side)
+            attr = getattr(bank, attribute_name, None)
+            if attr is None:
+                raise AttributeError(f"{attribute_name} not found in {bank_side} bank of level with id={level.id}")
+            if i == 0:
+                total = attr
+            else:
+                total += attr
+        return total
+
+    def _get_attr_both_sides_level(self, attribute_name: str, level) -> List[np.ndarray]:
+        """Get the attributes of the levels for both left and right bank."""
+        sides = [getattr(self.levels[level], side) for side in ["left", "right"]]
+        attr = [getattr(side, attribute_name, None) for side in sides]
+        return attr
+
+    def get_attr_level(self, attribute_name: str) -> List[List[np.ndarray]]:
+        """Get the attributes of the levels for both left and right bank."""
+        return [self._get_attr_both_sides_level(attribute_name, level) for level in range(len(self.levels))]
+
+    def get_water_level_data(self, bank_height) -> WaterLevelData:
+        return WaterLevelData(
+            hfw_max=self.levels[-1].hfw_max,
+            bank_height=bank_height,
+            water_level=self.get_attr_level("water_level"),
+            ship_wave_max=self.get_attr_level("ship_wave_max"),
+            ship_wave_min=self.get_attr_level("ship_wave_min"),
+            velocity=self.get_attr_level("bank_velocity"),
+            chezy=self.get_attr_level("chezy"),
+            vol_per_discharge=self.get_attr_level("volume_per_discharge"),
+        )
 
 class BankLinesResultsError(Exception):
     """Custom exception for BankLine results errors."""

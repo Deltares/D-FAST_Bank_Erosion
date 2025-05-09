@@ -1,6 +1,7 @@
 from typing import Tuple
 import time
 
+
 def timed_logger(label: str) -> None:
     """
     Write a message with time information.
@@ -44,4 +45,3 @@ def _timer() -> Tuple[str, str]:
         FIRST_TIME = new_time
     LAST_TIME = new_time
     return time_str, diff_str
-
