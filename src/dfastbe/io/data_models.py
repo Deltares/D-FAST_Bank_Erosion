@@ -277,7 +277,7 @@ class LineGeometry:
         return alpha, interpolated_point
 
     def intersect_with_line(
-            self, reference_line_with_stations: np.ndarray
+        self, reference_line_with_stations: np.ndarray
     ) -> np.ndarray:
         """
         Project chainage(stations) values from a reference line onto a target line by spatial proximity and interpolation.
@@ -287,7 +287,7 @@ class LineGeometry:
         The chainage values are giving along a line L1 (xykm_numpy). For each node
         of the line L2 (line_xy) on which we would like to know the chainage, first
         the closest node (discrete set of nodes) on L1 is determined and
-        subsequently the exact chainage isobtained by determining the closest point
+        subsequently the exact chainage is obtained by determining the closest point
         (continuous line) on L1 for which the chainage is determined using by means
         of interpolation.
 
