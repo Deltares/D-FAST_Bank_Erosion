@@ -12,6 +12,7 @@ class Debugger:
         self, bank_index: int, single_bank: SingleBank, fairway_data: FairwayData, erosion_inputs: SingleErosion,
         discharge_level_pars: ParametersPerBank, water_depth_fairway, dn_eq1, dv_eq1, bank_height
     ):
+        """Write the last discharge level to a shapefile and CSV file."""
         bank_coords = single_bank.bank_line_coords
         bank_coords_mind = (bank_coords[:-1] + bank_coords[1:]) / 2
         bank_coords_geo = single_bank.get_mid_points(self.config_file.crs)
@@ -45,6 +46,7 @@ class Debugger:
             SingleErosion, discharge_level_pars: ParametersPerBank, water_depth_fairway, velocity, bank_height,
             parameter: DischargeCalculationParameters,
     ):
+        """Write the middle levels to a shapefile and CSV file."""
         bank_coords = single_bank.bank_line_coords
         bank_coords_mind = (bank_coords[:-1] + bank_coords[1:]) / 2
 
