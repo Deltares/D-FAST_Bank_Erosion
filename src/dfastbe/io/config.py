@@ -790,7 +790,7 @@ class ConfigFile:
         except (ValueError, TypeError):
             if onefile:
                 log_text("read_param", data={"param": key, "file": value})
-                km_thr, val = _get_stations(value, key, positive, valid)
+                km_thr, val = _get_stations(value, key, positive)
 
             for ib, num_stations in enumerate(num_stations_per_bank):
                 if not onefile:
@@ -799,7 +799,7 @@ class ConfigFile:
                         "read_param_one_bank",
                         data={"param": key, "i": ib + 1, "file": filename_i},
                     )
-                    km_thr, val = _get_stations(filename_i, key, positive, valid)
+                    km_thr, val = _get_stations(filename_i, key, positive)
 
                 if km_thr is None:
                     parameter_values[ib] = np.zeros(num_stations) + val[0]
@@ -1211,29 +1211,6 @@ def load_program_texts(file_name: Union[str, Path]) -> None:
     PROGTEXTS = data
 
 
-def write_km_eroded_volumes(stations: np.ndarray, volume: np.ndarray, file_name: str) -> None:
-    """
-    Write a text file with eroded volume data binned per kilometre.
-
-    Arguments
-    ---------
-    stations :
-        Array containing chainage values.
-    volume :
-        Array containing erosion volume values.
-    file_name : str
-        Name of the file to be written.
-
-    Returns
-    -------
-    None
-    """
-    with open(file_name, "w") as file:
-        for i in range(len(stations)):
-            str_value = "\t".join(["{:.2f}".format(x) for x in volume[i, :]])
-            file.write("{:.2f}\t".format(stations[i]) + str_value + "\n")
-
-
 def _move_parameter_location(
     config: ConfigParser,
     group1: str,
@@ -1299,7 +1276,7 @@ def _sim2nc(oldfile: str) -> str:
     return nc_file
 
 
-def _get_stations(filename: str, key: str, positive: bool, valid: Optional[List[float]]):
+def _get_stations(filename: str, key: str, positive: bool):
     """
     Read a parameter file, check its contents and return arrays of chainages and values.
 
@@ -1328,14 +1305,13 @@ def _get_stations(filename: str, key: str, positive: bool, valid: Optional[List[
     val : np.ndarray
         Array containing the values.
     """
-    # print("Trying to read: ",filename)
     points = pd.read_csv(
         filename,
         names=["Chainage", "Val"],
         skipinitialspace=True,
         delim_whitespace=True,
     )
-    # nPnts = len(P.Chainage)
+
     km = points.Chainage.to_numpy()
     val = points.Val.to_numpy()
 

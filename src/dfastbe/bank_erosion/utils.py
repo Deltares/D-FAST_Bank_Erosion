@@ -1056,3 +1056,26 @@ def moving_avg(xi: np.ndarray, yi: np.ndarray, dx: float) -> np.ndarray:
         return yo
     else:
         return yo[::-1]
+
+
+def write_km_eroded_volumes(stations: np.ndarray, volume: np.ndarray, file_name: str) -> None:
+    """
+    Write a text file with eroded volume data binned per kilometre.
+
+    Arguments
+    ---------
+    stations :
+        Array containing chainage values.
+    volume :
+        Array containing erosion volume values.
+    file_name : str
+        Name of the file to be written.
+
+    Returns
+    -------
+    None
+    """
+    with open(file_name, "w") as file:
+        for i in range(len(stations)):
+            str_value = "\t".join(["{:.2f}".format(x) for x in volume[i, :]])
+            file.write("{:.2f}\t".format(stations[i]) + str_value + "\n")
