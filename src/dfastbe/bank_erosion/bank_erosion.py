@@ -64,7 +64,7 @@ from dfastbe.bank_erosion.utils import (
     get_km_eroded_volume,
     write_km_eroded_volumes
 )
-from dfastbe.support import move_line
+from dfastbe.bank_erosion.utils import move_line
 from dfastbe.io.logger import timed_logger
 
 X_AXIS_TITLE = "x-coordinate [km]"

@@ -18,7 +18,7 @@ from dfastbe.bank_erosion.data_models import (
 )
 from dfastbe.io.logger import log_text
 from dfastbe.io.data_models import LineGeometry
-from dfastbe.support import on_right_side
+from dfastbe.utils import on_right_side
 
 EPS = sys.float_info.epsilon
 water_density = 1000  # density of water [kg/m3]
@@ -1302,3 +1302,389 @@ def enlarge(
     elif len(new_shape)==2:
         new_array[:old_shape[0], :old_shape[1]] = old_array
     return new_array
+
+
+def move_line(
+    xylines: np.ndarray, erosion_distance: np.ndarray, right_bank: bool
+) -> np.ndarray:
+    """
+    Shift a line of a variable distance sideways (positive shift away from centre line).
+
+    Chainage must be increasing along all lines. For a bank on the right side a
+    positive shift will move the line to the right. For a bank on the left side
+    a positive shift will move the line to the left.
+
+    Arguments
+    ---------
+    xylines : np.ndarray
+        Nx2 array containing the x- and y-coordinates of the line to be moved.
+    erosion_distance : np.ndarray
+        Distance over which to move the line sideways. A positive shift is
+        defined towards the right for the right bank, and towards the left for
+        the left bank.
+    right_bank : bool
+        Flag indicating whether line is on the right (or not).
+
+    Returns
+    -------
+    xylines_new : umpy.ndarray
+        Nx2 array containing the x- and y-coordinates of the moved line.
+    """
+    if right_bank:
+        xylines_new = _move_line_right(xylines, erosion_distance)
+    else:
+        xylines_rev = xylines[::-1, :]
+        dn_rev = erosion_distance[::-1]
+        xylines_new_rev = _move_line_right(xylines_rev, dn_rev)
+        xylines_new = xylines_new_rev[::-1, :]
+    return xylines_new
+
+
+def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.ndarray:
+    """
+    Shift a line of a variable distance sideways (positive shift to the right).
+
+    Arguments
+    ---------
+    xylines : np.ndarray
+        Nx2 array containing the x- and y-coordinates of the line to be moved.
+    dn0 : np.ndarray
+        Distance over which to move the line sideways. A positive shift is
+        defined towards the right when looking along the line.
+
+    Returns
+    -------
+    xylines_new : umpy.ndarray
+        Nx2 array containing the x- and y-coordinates of the moved line.
+    """
+    nsegments = len(erosion_distance)
+    colvec = (nsegments, 1)
+
+    # determine segment angle
+    dxy = xylines[1:, :] - xylines[:-1, :]
+    theta = np.arctan2(dxy[:, 1], dxy[:, 0])
+
+    # determine shift vector nxy for each segment
+    ds = np.sqrt((dxy ** 2).sum(axis=1))
+    nxy = dxy[:, ::-1] * [1, -1] * (erosion_distance / ds).reshape(colvec)
+
+    xylines_new = np.zeros((100, 2))
+    xylines_new[0] = xylines[0] + nxy[0]
+    ixy, xylines_new = _add_point(0, xylines_new, xylines[1] + nxy[0])
+    ixy, xylines_new = _add_point(ixy, xylines_new, xylines[1])
+
+    verbose = False
+    prec = 0.000001
+    ixy1: int
+    for iseg in range(1, nsegments):
+        dtheta = theta[iseg] - theta[iseg - 1]
+        if dtheta > math.pi:
+            dtheta = dtheta - 2 * math.pi
+        if verbose:
+            print("{}: current length of new bankline is {}".format(iseg, ixy))
+            print(
+                "{}: segment starting at {} to be shifted by {}".format(
+                    iseg, xylines[iseg], erosion_distance[iseg]
+                )
+            )
+            print("{}: change in direction quantified as {}".format(iseg, dtheta))
+
+        # create a polyline for the outline of the new segment
+        if erosion_distance[iseg] < prec:
+            # no erosion, so just a linear extension
+            if verbose:
+                print("{}: no shifting, just linear extension".format(iseg))
+            poly = np.row_stack([xylines[iseg + 1], xylines[iseg],])
+        elif dtheta <= 0:
+            # right bend
+            if -0.001 * math.pi < dtheta:
+                # almost straight
+                if verbose:
+                    print("{}: slight bend to right".format(iseg))
+                if erosion_distance[iseg] > erosion_distance[iseg]:
+                    poly = np.row_stack(
+                        [
+                            xylines[iseg + 1],
+                            xylines[iseg + 1] + nxy[iseg],
+                            xylines[iseg] + nxy[iseg],
+                            xylines[iseg] + nxy[iseg - 1],
+                            xylines[iseg - 1],
+                            ]
+                    )
+                else:
+                    poly = np.row_stack(
+                        [
+                            xylines[iseg + 1],
+                            xylines[iseg + 1] + nxy[iseg],
+                            xylines[iseg] + nxy[iseg],
+                            xylines[iseg - 1],
+                            ]
+                    )
+            else:
+                # more significant bend
+                if verbose:
+                    print("{}: bend to right".format(iseg))
+                poly = np.row_stack(
+                    [
+                        xylines[iseg + 1],
+                        xylines[iseg + 1] + nxy[iseg],
+                        xylines[iseg] + nxy[iseg],
+                        xylines[iseg],
+                        ]
+                )
+        elif erosion_distance[iseg - 1] < prec:
+            # left bend: previous segment isn't eroded, so nothing to connect to
+            if verbose:
+                print("{}: bend to left".format(iseg))
+            poly = np.row_stack(
+                [
+                    xylines[iseg + 1],
+                    xylines[iseg + 1] + nxy[iseg],
+                    xylines[iseg] + nxy[iseg],
+                    xylines[iseg],
+                    ]
+            )
+        else:
+            # left bend: connect it to the previous segment to avoid non eroded wedges
+            if verbose:
+                print("{}: bend to left".format(iseg))
+            poly = np.row_stack(
+                [
+                    xylines[iseg + 1],
+                    xylines[iseg + 1] + nxy[iseg],
+                    xylines[iseg] + nxy[iseg],
+                    xylines[iseg] + nxy[iseg - 1],
+                    xylines[iseg - 1],
+                    ]
+            )
+
+        nedges = poly.shape[0] - 1
+
+        # make a temporary copy of the last 20 nodes of the already shifted bankline
+        if ixy > 20:
+            X0 = xylines_new[(ixy - 20) : ixy, 0].copy()
+            Y0 = xylines_new[(ixy - 20) : ixy, 1].copy()
+            X1 = xylines_new[(ixy - 19) : (ixy + 1), 0].copy()
+            Y1 = xylines_new[(ixy - 19) : (ixy + 1), 1].copy()
+            ixy0 = ixy - 20
+        else:
+            X0 = xylines_new[:ixy, 0].copy()
+            Y0 = xylines_new[:ixy, 1].copy()
+            X1 = xylines_new[1 : ixy + 1, 0].copy()
+            Y1 = xylines_new[1 : ixy + 1, 1].copy()
+            ixy0 = 0
+
+        a = []
+        b = []
+        slices = []
+        n = []
+        # for each edge of the new polyline collect all intersections with the
+        # already shifted bankline ...
+        for i in range(nedges):
+            if (poly[i + 1] == poly[i]).all():
+                # polyline segment has no actual length, so skip it
+                pass
+            else:
+                # check for intersection
+                a2, b2, slices2 = _get_slices_ab(
+                    X0,
+                    Y0,
+                    X1,
+                    Y1,
+                    poly[i, 0],
+                    poly[i, 1],
+                    poly[i + 1, 0],
+                    poly[i + 1, 1],
+                    0,
+                    True,
+                )
+                # exclude the intersection if it's only at the very last point
+                # of the last segment
+                if i == nedges - 1:
+                    keep_mask = a2 < 1 - prec
+                    a2 = a2[keep_mask]
+                    b2 = b2[keep_mask]
+                    slices2 = slices2[keep_mask]
+                a.append(a2)
+                b.append(b2)
+                slices.append(slices2)
+                n.append(slices2 * 0 + i)
+
+        s = np.concatenate(slices)
+        if verbose:
+            print("{}: {} intersections detected".format(iseg, len(s)))
+        if len(s) == 0:
+            # no intersections found
+            if dtheta < 0:
+                # right bend (not straight)
+                if erosion_distance[iseg] > 0:
+                    cross = (xylines_new[ixy, 0] - xylines_new[ixy - 1, 0]) * nxy[
+                        iseg, 1
+                    ] - (xylines_new[ixy, 1] - xylines_new[ixy - 1, 1]) * nxy[iseg, 0]
+                else:
+                    cross = (xylines_new[ixy, 0] - xylines_new[ixy - 1, 0]) * dxy[
+                        iseg, 1
+                    ] - (xylines_new[ixy, 1] - xylines_new[ixy - 1, 1]) * dxy[iseg, 0]
+                if cross <= 0.0:
+                    # extended path turns right ... always add
+                    pass
+                else:
+                    # extended path turns left
+                    # we can probably ignore it, let's do so...
+                    # the only exception would be an eroded patch encompassing
+                    # all of the eroded bank line
+                    if verbose:
+                        print("{}: ignoring segment".format(iseg))
+                    continue
+            else:
+                # left bend or straight: always add ... just the rectangle of eroded material
+                pass
+            ixy1 = ixy
+            for n2 in range(min(nedges, 2), -1, -1):
+                if verbose:
+                    print("  adding point {}".format(poly[n2]))
+                ixy1, xylines_new = _add_point(ixy1, xylines_new, poly[n2])
+            ixy = ixy1
+
+        else:
+            # one or more intersections found
+            a = np.concatenate(a)
+            b = np.concatenate(b)
+            n = np.concatenate(n)
+
+            # sort the intersections by distance along the already shifted bank line
+            d = s + a
+            sorted = np.argsort(d)
+            s = s[sorted] + ixy0
+            a = a[sorted]
+            b = b[sorted]
+            d = d[sorted]
+            n = n[sorted]
+
+            ixy1 = s[0]
+            if verbose:
+                print("{}: continuing new path at point {}".format(iseg, ixy1))
+            xytmp = xylines_new[ixy1 : ixy + 1].copy()
+            ixytmp = ixy1
+
+            inside = False
+            s_last = s[0]
+            n_last = nedges
+            for i in range(len(s)):
+                if verbose:
+                    print(
+                        "- intersection {}: new polyline edge {} crosses segment {} at {}".format(
+                            i, n[i], s[i], a[i]
+                        )
+                    )
+                if i == 0 or n[i] != nedges - 1:
+                    if inside:
+                        if verbose:
+                            print("  existing line is inside the new polygon")
+                        for n2 in range(n_last, n[i], -1):
+                            if verbose:
+                                print("  adding new point {}".format(poly[n2]))
+                            ixy1, xylines_new = _add_point(ixy1, xylines_new, poly[n2])
+                    else:
+                        if verbose:
+                            print("  existing line is outside the new polygon")
+                        for s2 in range(s_last, s[i]):
+                            if verbose:
+                                print(
+                                    "  re-adding old point {}".format(
+                                        xytmp[s2 - ixytmp + 1]
+                                    )
+                                )
+                            ixy1, xylines_new = _add_point(
+                                ixy1, xylines_new, xytmp[s2 - ixytmp + 1]
+                            )
+                    pnt_intersect = poly[n[i]] + b[i] * (poly[n[i] + 1] - poly[n[i]])
+                    if verbose:
+                        print("  adding intersection point {}".format(pnt_intersect))
+                    ixy1, xylines_new = _add_point(ixy1, xylines_new, pnt_intersect, )
+                    n_last = n[i]
+                    s_last = s[i]
+                    if a[i] < prec:
+                        dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
+                        dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
+                        s2 = s[i] - ixy0
+                        dBy = Y1[s2] - Y0[s2]
+                        dBx = X1[s2] - X0[s2]
+                        inside = dPy * dBx - dPx * dBy > 0
+                    elif a[i] > 1 - prec:
+                        dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
+                        dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
+                        s2 = s[i] - ixy0 + 1
+                        if s2 > len(X0) - 1:
+                            inside = True
+                        else:
+                            dBy = Y1[s2] - Y0[s2]
+                            dBx = X1[s2] - X0[s2]
+                            inside = dPy * dBx - dPx * dBy > 0
+                    else:
+                        # line segment slices the edge somewhere in the middle
+                        inside = not inside
+                    if verbose:
+                        if inside:
+                            print("  existing line continues inside")
+                        else:
+                            print("  existing line continues outside")
+
+            if verbose:
+                print("- wrapping up after last intersection")
+            if inside:
+                if verbose:
+                    print("  existing line is inside the new polygon")
+                for n2 in range(n_last, -1, -1):
+                    if verbose:
+                        print("  adding new point {}".format(poly[n2]))
+                    ixy1, xylines_new = _add_point(ixy1, xylines_new, poly[n2])
+            else:
+                if verbose:
+                    print("  existing line is inside the new polygon")
+                for s2 in range(s_last, len(xytmp) + ixytmp - 1):
+                    if verbose:
+                        print("  re-adding old point {}".format(xytmp[s2 - ixytmp + 1]))
+                    ixy1, xylines_new = _add_point(
+                        ixy1, xylines_new, xytmp[s2 - ixytmp + 1]
+                    )
+            ixy = ixy1
+        # if iseg == isegstop:
+        #     break
+    xylines_new = xylines_new[:ixy, :]
+
+    return xylines_new
+
+
+def _add_point(
+    ixy1: int, xy_in: np.ndarray, point: np.ndarray
+) -> Tuple[int, np.ndarray]:
+    """
+    Add the x,y-coordinates of a point to an array of x,y-coordinates if it differs from the last point.
+
+    Arguments
+    ---------
+    ixy1 : int
+        Index of last point in xy_in array
+    xy_in : np.ndarray
+        N x 2 array containing the x- and y-coordinates of points (partially filled)
+    point : np.ndarray
+        1 x 2 array containing the x- and y-coordinates of one point
+
+    Results
+    -------
+    ixy1 : int
+        Index of the new point in the xy_out array
+    xy_out : np.ndarray
+        Possibly extended copy of xy_in that includes the coordinates of point at ixy1
+    """
+    if (xy_in[ixy1] - point != 0).any():
+        ixy1 = ixy1 + 1
+        if ixy1 >= len(xy_in):
+            xy_out = enlarge(xy_in, (2 * ixy1, 2))
+        else:
+            xy_out = xy_in
+        xy_out[ixy1] = point
+    else:
+        xy_out = xy_in
+    return ixy1, xy_out
