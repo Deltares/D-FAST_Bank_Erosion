@@ -159,3 +159,25 @@ class TestErosion:
             river_axis = mock_erosion._process_river_axis_by_center_line()
 
         river_axis.add_data.assert_called_with(data={"stations": np.array([128.0])})
+
+    def test_get_fairway_data(self, mock_erosion):
+        mock_erosion.river_data.debug = False
+        with patch(
+            "dfastbe.bank_erosion.bank_erosion.FairwayData"
+        ) as fairway_mock, patch(
+            "dfastbe.bank_erosion.bank_erosion.intersect_line_mesh"
+        ) as line_mock:
+            fairway_intersection_coords = np.array(
+                [
+                    [209186.621094, 389659.99609375],
+                    [209187.69800938, 389665.38986148],
+                    [209189.26657398, 389673.24607124],
+                    [209189.367188, 389673.75],
+                    [209192.19921925, 389687.4921875],
+                ]
+            )
+            fairway_face_indices = np.array([59166, 59167, 62557, 62557, 62557])
+            line_mock.return_value = (fairway_intersection_coords, fairway_face_indices)
+            fairway_data = mock_erosion._get_fairway_data(MagicMock(), MagicMock())
+        assert fairway_data.face_indices.equals(fairway_face_indices)
+        assert fairway_data.intersection_coords.equals(fairway_intersection_coords)
