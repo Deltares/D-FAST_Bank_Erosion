@@ -13,6 +13,8 @@ from dfastbe.bank_erosion.data_models import (
     SingleErosion,
 )
 
+__all__ = ["Debugger"]
+
 
 class Debugger:
     """Class to handle debugging and output of bank erosion calculations."""
