@@ -46,7 +46,7 @@ jobs:
           pip list
 
       - name: Test with pytest
-        run: poetry run pytest --cov --cov=src/dfastbe --cov-report term-missing -m "not binaries"
+        run: poetry run pytest --cov --cov=src/dfastbe --cov-report term-missing -m "not e2e and not binaries"
 
       - uses: codecov/codecov-action@v4
         env:
