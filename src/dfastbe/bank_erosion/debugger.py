@@ -1,5 +1,10 @@
 """Bank Erosion Debugger."""
 
+from typing import Dict
+
+import numpy as np
+from geopandas import GeoSeries
+
 from dfastbe.bank_erosion.data_models import (
     DischargeCalculationParameters,
     FairwayData,
@@ -54,13 +59,9 @@ class Debugger:
             "erosion_volume": dv_eq1,
         }
 
+        path = f"{str(self.output_dir)}/debug.EQ.B{bank_index + 1}"
         bank_coords_geo = single_bank.get_mid_points(as_geo_series=True, crs=self.crs)
-        write_shp(
-            bank_coords_geo,
-            params,
-            f"{str(self.output_dir)}/debug.EQ.B{bank_index + 1}.shp",
-        )
-        write_csv(params, f"{str(self.output_dir)}/debug.EQ.B{bank_index + 1}.csv")
+        self._write_data(bank_coords_geo, params, path)
 
     def middle_levels(
         self,
@@ -107,12 +108,14 @@ class Debugger:
             "erosion_distance_shipping": parameter.erosion_distance_shipping,
             "erosion_distance_flow": parameter.erosion_distance_flow,
         }
+        path = f"{str(self.output_dir)}/debug.Q{q_level + 1}.B{bank_ind + 1}"
         bank_coords_geo = single_bank.get_mid_points(as_geo_series=True, crs=self.crs)
-        write_shp(
-            bank_coords_geo,
-            params,
-            f"{str(self.output_dir)}/debug.Q{q_level + 1}.B{bank_ind + 1}.shp",
-        )
-        write_csv(
-            params, f"{str(self.output_dir)}/debug.Q{q_level + 1}.B{bank_ind + 1}.csv"
-        )
+        self._write_data(bank_coords_geo, params, path)
+
+    @staticmethod
+    def _write_data(coords: GeoSeries, data: Dict[str, np.ndarray], path: str):
+        """Write the data to a shapefile and CSV file."""
+        csv_path = f"{path}.csv"
+        shp_path = f"{path}.shp"
+        write_shp(coords, data, shp_path)
+        write_csv(data, csv_path)
