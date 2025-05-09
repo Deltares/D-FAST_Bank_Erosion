@@ -33,7 +33,7 @@ from shapely.geometry import LineString, Point
 from shapely import prepare
 from geopandas.geodataframe import GeoDataFrame
 from dfastbe.io.logger import log_text
-from dfastbe.io.config import SimulationFilesError, ConfigFile, get_bbox
+from dfastbe.io.config import SimulationFilesError, ConfigFile #, get_bbox
 
 
 __all__ = ["BaseSimulationData", "BaseRiverData", "LineGeometry"]
@@ -650,24 +650,24 @@ class BaseRiverData:
         """Tuple: the lower and upper bounds of the river center line."""
         return self._station_bounds
 
-    @staticmethod
-    def get_bbox(
-            coords: np.ndarray, buffer: float = 0.1
-    ) -> Tuple[float, float, float, float]:
-        """
-        Derive the bounding box from an array of coordinates.
-
-        Args:
-            coords (np.ndarray):
-                An N x M array containing x- and y-coordinates as first two M entries
-            buffer : float
-                Buffer fraction surrounding the tight bounding box
-
-        Returns:
-            bbox (Tuple[float, float, float, float]):
-                Tuple bounding box consisting of [min x, min y, max x, max y)
-        """
-        return get_bbox(coords, buffer)
+    # @staticmethod
+    # def get_bbox(
+    #     coords: np.ndarray, buffer: float = 0.1
+    # ) -> Tuple[float, float, float, float]:
+    #     """
+    #     Derive the bounding box from an array of coordinates.
+    #
+    #     Args:
+    #         coords (np.ndarray):
+    #             An N x M array containing x- and y-coordinates as first two M entries
+    #         buffer : float
+    #             Buffer fraction surrounding the tight bounding box
+    #
+    #     Returns:
+    #         bbox (Tuple[float, float, float, float]):
+    #             Tuple bounding box consisting of [min x, min y, max x, max y)
+    #     """
+    #     return get_bbox(coords, buffer)
 
     def get_erosion_sim_data(self, num_discharge_levels: int) -> Tuple[List[str], List[float]]:
         # get pdischarges

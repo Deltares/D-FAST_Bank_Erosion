@@ -41,7 +41,7 @@ from shapely.geometry import LineString
 from dfastbe.io.file_utils import absolute_path, relative_path
 from dfastbe.io.logger import log_text
 
-__all__ = ["ConfigFile", "get_bbox", "ConfigFileError", "SimulationFilesError"]
+__all__ = ["ConfigFile", "ConfigFileError", "SimulationFilesError"]
 
 
 class ConfigFile:
@@ -1147,32 +1147,6 @@ class ConfigFile:
         return output_dir
 
 
-def get_bbox(
-        coords: np.ndarray, buffer: float = 0.1
-) -> Tuple[float, float, float, float]:
-    """
-    Derive the bounding box from a line.
-
-    Args:
-        coords (np.ndarray):
-            An N x M array containing x- and y-coordinates as first two M entries
-        buffer : float
-            Buffer fraction surrounding the tight bounding box
-
-    Returns:
-        bbox (Tuple[float, float, float, float]):
-            Tuple bounding box consisting of [min x, min y, max x, max y)
-    """
-    x = coords[:, 0]
-    y = coords[:, 1]
-    x_min = x.min()
-    y_min = y.min()
-    x_max = x.max()
-    y_max = y.max()
-    d = buffer * max(x_max - x_min, y_max - y_min)
-    bbox = (x_min - d, y_min - d, x_max + d, y_max + d)
-
-    return bbox
 
 
 def _move_parameter_location(
