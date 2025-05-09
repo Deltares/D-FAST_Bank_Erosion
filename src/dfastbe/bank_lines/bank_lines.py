@@ -15,7 +15,7 @@ from dfastbe import __version__
 from dfastbe import plotting as df_plt
 from dfastbe.bank_lines.data_models import BankLinesRiverData
 from dfastbe.io.data_models import BaseSimulationData, LineGeometry
-from dfastbe.io.io import ConfigFile, get_bbox, log_text
+from dfastbe.io.config import ConfigFile, get_bbox, log_text
 from dfastbe.kernel import get_zoom_extends
 from dfastbe.support import (
     on_right_side,
@@ -47,7 +47,7 @@ class BankLines:
         Examples:
             ```python
             >>> from unittest.mock import patch
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
             >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS
             N...e
@@ -92,7 +92,7 @@ class BankLines:
             ```python
             >>> import matplotlib
             >>> matplotlib.use('Agg')
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
             >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS
             N...e
@@ -183,7 +183,7 @@ class BankLines:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
             >>> river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
             N...e
@@ -329,7 +329,7 @@ class BankLines:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")  # doctest: +ELLIPSIS
             >>> bank_lines = BankLines(config_file)
             N...e

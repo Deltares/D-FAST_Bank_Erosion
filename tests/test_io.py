@@ -15,7 +15,7 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry import LineString
 from dfastbe.io.data_models import LineGeometry, BaseSimulationData, BaseRiverData, _read_fm_map
 from dfastbe.io.file_utils import absolute_path, relative_path
-from dfastbe.io.io import (
+from dfastbe.io.config import (
     SimulationFilesError,
     ConfigFile,
     get_filename,
@@ -671,7 +671,7 @@ class TestConfigFile:
         config.read_dict(path_dict)
         config_file = ConfigFile(config, cwd / "test.cfg")
 
-        with patch("dfastbe.io.io.Path.cwd", return_value=str(cwd)):
+        with patch("dfastbe.io.config.Path.cwd", return_value=str(cwd)):
             rootdir = config_file.make_paths_absolute()
 
         assert rootdir == cwd

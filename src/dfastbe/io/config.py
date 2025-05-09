@@ -66,7 +66,7 @@ class ConfigFile:
             Reading a configuration file:
                 ```python
                 >>> import tempfile
-                >>> from dfastbe.io.io import ConfigFile
+                >>> from dfastbe.io.config import ConfigFile
                 >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
                 >>> print(config_file.config["General"]["Version"])
                 1.0
@@ -74,7 +74,7 @@ class ConfigFile:
                 ```
             Writing a configuration file:
                 ```python
-                >>> from dfastbe.io.io import ConfigFile
+                >>> from dfastbe.io.config import ConfigFile
                 >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
                 >>> with tempfile.TemporaryDirectory() as tmpdirname:
                 ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
@@ -135,7 +135,7 @@ class ConfigFile:
         Examples:
             Read a config file:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
 
             ```
@@ -189,7 +189,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> result = config_file._upgrade(config_file.config)
             >>> isinstance(result, ConfigParser)
@@ -325,7 +325,7 @@ class ConfigFile:
         Examples:
             ```python
             >>> import tempfile
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> with tempfile.TemporaryDirectory() as tmpdirname:
             ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
@@ -380,7 +380,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> result = config_file.get_str("General", "BankDir")
             >>> expected = Path("tests/data/erosion/output/banklines").resolve()
@@ -421,7 +421,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.get_bool("General", "Plotting")
             True
@@ -473,7 +473,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.get_float("General", "ZoomStepKM")
             1.0
@@ -521,7 +521,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.get_int("Detect", "NBank")
             2
@@ -556,7 +556,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> result = config_file.get_sim_file("Erosion", "1")
             >>> expected = Path("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc").resolve()
@@ -576,7 +576,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.get_start_end_stations()
             (123.0, 128.0)
@@ -678,7 +678,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5, 6, 7])]
             >>> num_stations_per_bank = [len(bank) for bank in bank_km]
@@ -824,7 +824,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.get_bank_search_distances(2)
             [50.0, 50.0]
@@ -859,7 +859,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.get_range("General", "Boundaries")
             (123.0, 128.0)
@@ -908,7 +908,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.resolve("tests/data/erosion")
 
@@ -967,7 +967,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.relative_to("testing/data/erosion")
 
@@ -1032,7 +1032,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.resolve_parameter("General", "RiverKM", "tests/data/erosion")
 
@@ -1058,7 +1058,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.parameter_relative_to("General", "RiverKM", "tests/data/erosion")
 

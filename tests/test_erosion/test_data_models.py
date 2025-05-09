@@ -4,7 +4,7 @@ import numpy as np
 from unittest.mock import patch, MagicMock
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
-from dfastbe.io.io import ConfigFile
+from dfastbe.io.config import ConfigFile
 from dfastbe.bank_erosion.data_models import (
     ErosionRiverData,
     ErosionInputs,
@@ -237,7 +237,7 @@ class TestSimulationData:
         )
 
     # @patch("dfastbe.bank_lines.data_models.BankLinesRiverData")
-    # @patch("dfastbe.io.io.LineGeometry")
+    # @patch("dfastbe.io.config.LineGeometry")
     # def test_simulation_data(
     #     self, mock_center_line, mock_simulation_data
     # ):
@@ -281,7 +281,7 @@ class TestErosionRiverData:
         river_data = ErosionRiverData(config_file)
         return river_data
 
-    @patch("dfastbe.io.io.XYCModel.read")
+    @patch("dfastbe.io.config.XYCModel.read")
     def test_read_river_axis(self, mock_read, river_data):
         """Test the read_river_axis method by mocking XYCModel.read."""
         mock_river_axis = LineString([(0, 0), (1, 1), (2, 2)])
