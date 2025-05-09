@@ -1211,28 +1211,6 @@ def load_program_texts(file_name: Union[str, Path]) -> None:
     PROGTEXTS = data
 
 
-
-def get_filename(key: str) -> str:
-    """
-    Query the global dictionary of texts for a file name.
-
-    The file name entries in the global dictionary have a prefix "filename_"
-    which will be added to the key by this routine.
-
-    Arguments
-    ---------
-    key : str
-        The key string used to query the dictionary.
-
-    Results
-    -------
-    filename : str
-        File name.
-    """
-    filename = get_text("filename_" + key)[0]
-    return filename
-
-
 def write_km_eroded_volumes(stations: np.ndarray, volume: np.ndarray, file_name: str) -> None:
     """
     Write a text file with eroded volume data binned per kilometre.

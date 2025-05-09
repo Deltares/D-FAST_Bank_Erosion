@@ -18,7 +18,6 @@ from dfastbe.io.file_utils import absolute_path, relative_path
 from dfastbe.io.config import (
     SimulationFilesError,
     ConfigFile,
-    get_filename,
     get_text,
     load_program_texts,
     log_text
@@ -248,13 +247,6 @@ class TestLogText:
         all_lines = open(filename, "r").read().splitlines()
         strref = ['The measure is located on reach ABC']
         assert all_lines == strref
-
-
-def test_get_filename_01():
-    """
-    Testing get_filename wrapper for get_text.
-    """
-    assert get_filename("report.out") == "report.txt"
 
 
 class TestGetText:
