@@ -46,8 +46,6 @@ from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.bank_erosion.bank_erosion import Erosion
 
 USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
-
-
 DialogObject = Dict[str, PyQt5.QtCore.QObject]
 
 dialog: DialogObject
