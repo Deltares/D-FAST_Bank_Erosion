@@ -6,10 +6,10 @@ from dfastbe.bank_erosion.data_models import ParametersPerBank, SingleBank, Sing
 class Debugger:
     """Class to handle debugging and output of bank erosion calculations."""
 
-    def __init__(self, config_file: ConfigFile, river_data):
+    def __init__(self, crs: str, output_dir: str):
         """Debugger constructor."""
-        self.config_file = config_file
-        self.river_data = river_data
+        self.crs = crs
+        self.output_dir = output_dir
 
     def last_discharge_level(
         self, bank_index: int, single_bank: SingleBank, fairway_data: FairwayData, erosion_inputs: SingleErosion,
