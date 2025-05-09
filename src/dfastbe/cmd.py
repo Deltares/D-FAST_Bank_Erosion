@@ -26,7 +26,8 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 from pathlib import Path
-from dfastbe.io.config import ConfigFile, load_program_texts
+from dfastbe.io.logger import load_program_texts
+from dfastbe.io.config import ConfigFile
 from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.gui.gui import main

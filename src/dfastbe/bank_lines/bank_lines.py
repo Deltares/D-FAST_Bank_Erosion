@@ -15,7 +15,8 @@ from dfastbe import __version__
 from dfastbe import plotting as df_plt
 from dfastbe.bank_lines.data_models import BankLinesRiverData
 from dfastbe.io.data_models import BaseSimulationData, LineGeometry
-from dfastbe.io.config import ConfigFile, get_bbox, log_text
+from dfastbe.io.config import ConfigFile, get_bbox
+from dfastbe.io.logger import log_text
 from dfastbe.kernel import get_zoom_extends
 from dfastbe.support import (
     on_right_side,

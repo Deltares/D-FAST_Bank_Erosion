@@ -16,7 +16,7 @@ from dfastbe.bank_erosion.data_models import (
     SingleBank,
     SingleErosion,
 )
-from dfastbe.io.config import log_text
+from dfastbe.io.logger import log_text
 from dfastbe.io.data_models import LineGeometry
 from dfastbe.support import enlarge, get_slices, get_slices_core, on_right_side
 

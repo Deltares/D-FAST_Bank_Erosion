@@ -33,7 +33,8 @@ from PyQt5 import QtCore
 import PyQt5.QtGui
 
 from dfastbe.io.file_utils import absolute_path
-from dfastbe.io.config import get_text, ConfigFile
+from dfastbe.io.logger import get_text
+from dfastbe.io.config import ConfigFile
 import pathlib
 from pathlib import Path
 import sys

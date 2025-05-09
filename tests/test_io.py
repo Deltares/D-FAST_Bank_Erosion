@@ -15,13 +15,9 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry import LineString
 from dfastbe.io.data_models import LineGeometry, BaseSimulationData, BaseRiverData, _read_fm_map
 from dfastbe.io.file_utils import absolute_path, relative_path
-from dfastbe.io.config import (
-    SimulationFilesError,
-    ConfigFile,
-    get_text,
-    load_program_texts,
-    log_text
-)
+from dfastbe.io.logger import get_text, load_program_texts, log_text
+from dfastbe.io.config import SimulationFilesError, ConfigFile
+
 
 
 filename = "tests/data/files/e02_f001_c011_simplechannel_map.nc"

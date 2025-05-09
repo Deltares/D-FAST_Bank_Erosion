@@ -5,7 +5,8 @@ import netCDF4
 from shapely.geometry import LineString, Point
 from shapely import prepare
 from geopandas.geodataframe import GeoDataFrame
-from dfastbe.io.config import SimulationFilesError, ConfigFile, get_bbox, log_text
+from dfastbe.io.logger import log_text
+from dfastbe.io.config import SimulationFilesError, ConfigFile, get_bbox
 
 
 __all__ = ["BaseSimulationData", "BaseRiverData", "LineGeometry"]
