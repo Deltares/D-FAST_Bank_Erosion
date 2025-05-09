@@ -15,12 +15,8 @@ from dfastbe.bank_lines.plotter import BankLinesPlotter
 from dfastbe.io.data_models import BaseSimulationData
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.logger import log_text
-from dfastbe.support import (
-    on_right_side,
-    poly_to_line,
-    sort_connect_bank_lines,
-    tri_to_line,
-)
+from dfastbe.bank_lines.utils import sort_connect_bank_lines, poly_to_line, tri_to_line
+from dfastbe.support import on_right_side
 from dfastbe.io.logger import timed_logger
 
 MAX_RIVER_WIDTH = 1000
