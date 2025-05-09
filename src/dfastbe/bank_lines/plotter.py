@@ -12,7 +12,7 @@ from shapely import LineString, Polygon
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.logger import log_text
 from dfastbe.io.data_models import BaseSimulationData, LineGeometry
-from dfastbe.kernel import get_zoom_extends
+from dfastbe.utils import get_zoom_extends
 from dfastbe.plotting import BasePlot
 
 

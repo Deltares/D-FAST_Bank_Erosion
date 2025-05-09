@@ -21,7 +21,7 @@ from dfastbe.bank_erosion.data_models import (
 )
 from dfastbe.io.logger import log_text
 from dfastbe.bank_erosion.utils import g, water_density
-from dfastbe.kernel import get_zoom_extends
+from dfastbe.utils import get_zoom_extends
 
 X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
