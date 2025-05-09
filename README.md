@@ -1,5 +1,13 @@
 # D-FAST Bank Erosion
 
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Deltares_D-FAST_Bank_Erosion&metric=alert_status)](https://sonarcloud.io/dashboard?id=Deltares_D-FAST_Bank_Erosion)
+
+[![ci](https://github.com/Deltares/D-FAST_Bank_Erosion/actions/workflows/ci.yml/badge.svg)](https://github.com/Deltares/D-FAST_Bank_Erosion/actions/workflows/ci.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Deltares_D-FAST_Bank_Erosion&metric=alert_status)](https://sonarcloud.io/dashboard?id=Deltares_D-FAST_Bank_Erosion)
+[![codecov](https://img.shields.io/codecov/c/github/deltares/D-FAST_Bank_Erosion.svg?style=flat-square)](https://app.codecov.io/gh/deltares/D-FAST_Bank_Erosion?displayType=list)
+
+
 This is one of the [Deltares](https://www.deltares.nl) Fluvial Assessment Tools to be used in conjunction with D-Flow FM.
 The purpose of this particular tool is
 * to compute local bank erosion sensitivity, and
