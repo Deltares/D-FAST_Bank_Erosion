@@ -2925,7 +2925,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">num_discharge_levels</span>
         <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bl_processor</span> <span class="o">=</span> <span class="n">BankLinesProcessor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span> <span class="o">=</span> <span class="n">Debugger</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span> <span class="o">=</span> <span class="n">Debugger</span><span class="p">(</span><span class="n">config_file</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">config_file</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConfigFile</span><span class="p">:</span>
@@ -3621,7 +3621,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">level_i</span> <span class="o">==</span> <span class="n">num_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
             <span class="c1"># EQ debug</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span><span class="o">.</span><span class="n">debug_process_discharge_levels_1</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span><span class="o">.</span><span class="n">last_discharge_level</span><span class="p">(</span>
                 <span class="n">ind</span><span class="p">,</span>
                 <span class="n">bank_data</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
                 <span class="n">fairway_data</span><span class="p">,</span>
@@ -3633,7 +3633,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                 <span class="n">bank_height</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="c1"># Q-specific debug</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span><span class="o">.</span><span class="n">debug_process_discharge_levels_2</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span><span class="o">.</span><span class="n">middle_levels</span><span class="p">(</span>
             <span class="n">ind</span><span class="p">,</span>
             <span class="n">level_i</span><span class="p">,</span>
             <span class="n">bank_data</span><span class="o">.</span><span class="n">get_bank</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span>
@@ -4181,7 +4181,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">num_discharge_levels</span>
     <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">bl_processor</span> <span class="o">=</span> <span class="n">BankLinesProcessor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span> <span class="o">=</span> <span class="n">Debugger</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">debugger</span> <span class="o">=</span> <span class="n">Debugger</span><span class="p">(</span><span class="n">config_file</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
