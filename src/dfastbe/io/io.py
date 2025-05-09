@@ -38,11 +38,10 @@ from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
+from dfastbe.io.file_utils import absolute_path, relative_path
+
 
 PROGTEXTS: Dict[str, List[str]]
-
-
-
 
 
 class ConfigFile:
@@ -1232,52 +1231,6 @@ def get_filename(key: str) -> str:
     """
     filename = get_text("filename_" + key)[0]
     return filename
-
-
-def absolute_path(rootdir: str, path: str) -> str:
-    """
-    Convert a relative path to an absolute path.
-
-    Args:
-        rootdir (str): Any relative paths should be given relative to this location.
-        path (str): A relative or absolute location.
-
-    Returns:
-        str: An absolute location.
-    """
-    if not path:
-        return path
-    root_path = Path(rootdir).resolve()
-    target_path = Path(path)
-
-    if target_path.is_absolute():
-        return str(target_path)
-
-    resolved_path = (root_path / target_path).resolve()
-    return str(resolved_path)
-
-
-def relative_path(rootdir: str, file: str) -> str:
-    """
-    Convert an absolute path to a relative path.
-
-    Args:
-        rootdir (str): Any relative paths will be given relative to this location.
-        file (str): An absolute location.
-
-    Returns:
-        str: A relative location if possible, otherwise the absolute location.
-    """
-    if not file:
-        return file
-
-    root_path = Path(rootdir).resolve()
-    file_path = Path(file).resolve()
-
-    try:
-        return str(file_path.relative_to(root_path))
-    except ValueError:
-        return str(file_path)
 
 
 def write_shp(geom: GeoSeries, data: Dict[str, np.ndarray], filename: str) -> None:

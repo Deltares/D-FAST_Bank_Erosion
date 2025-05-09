@@ -14,14 +14,13 @@ from geopandas import GeoDataFrame
 from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry import LineString
 from dfastbe.io.data_models import LineGeometry, BaseSimulationData, BaseRiverData, _read_fm_map
+from dfastbe.io.file_utils import absolute_path, relative_path
 from dfastbe.io.io import (
     SimulationFilesError,
     ConfigFile,
-    absolute_path,
     get_filename,
     get_text,
     load_program_texts,
-    relative_path,
     log_text
 )
 
