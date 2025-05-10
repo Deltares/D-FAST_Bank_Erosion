@@ -124,14 +124,13 @@ class BankLines:
         station_bounds = river_center_line.station_bounds
         river_center_line_values = river_center_line.values
         center_line_arr = river_center_line.as_array()
-        stations_coords = center_line_arr[:, :2]
 
         bank_areas: List[Polygon] = self.search_lines.to_polygons()
 
         to_right = [True] * self.search_lines.size
         for ib in range(self.search_lines.size):
             to_right[ib] = on_right_side(
-                np.array(self.search_lines.values[ib].coords), stations_coords
+                np.array(self.search_lines.values[ib].coords), center_line_arr[:, :2]
             )
 
         log_text("identify_banklines")
