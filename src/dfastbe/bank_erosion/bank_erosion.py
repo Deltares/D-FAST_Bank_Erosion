@@ -63,7 +63,8 @@ from dfastbe.bank_erosion.utils import (
     compute_bank_erosion_dynamics,
     get_km_bins,
     get_km_eroded_volume,
-    move_line
+    move_line,
+    calculate_alpha
 )
 from dfastbe.io.logger import timed_logger
 
@@ -1265,16 +1266,3 @@ class Erosion:
                 plt.close("all")
             else:
                 plt.show(block=not self.gui)
-
-
-def calculate_alpha(coords: np.ndarray, ind_1: int, ind_2: int, bp: Tuple[int, Any]):
-    """Calculate the alpha value for the bank erosion model."""
-    alpha = (
-        (coords[ind_1, 0] - coords[ind_2, 0]) * (bp[0] - coords[ind_2, 0])
-        + (coords[ind_1, 1] - coords[ind_2, 1]) * (bp[1] - coords[ind_2, 1])
-    ) / (
-        (coords[ind_1, 0] - coords[ind_2, 0]) ** 2
-        + (coords[ind_1, 1] - coords[ind_2, 1]) ** 2
-    )
-
-    return alpha

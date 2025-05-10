@@ -2,7 +2,7 @@
 
 import math
 import sys
-from typing import Tuple
+from typing import Tuple, Any
 
 import numpy as np
 
@@ -951,3 +951,16 @@ def _add_point(
     else:
         xy_out = xy_in
     return ixy1, xy_out
+
+
+def calculate_alpha(coords: np.ndarray, ind_1: int, ind_2: int, bp: Tuple[int, Any]):
+    """Calculate the alpha value for the bank erosion model."""
+    alpha = (
+                    (coords[ind_1, 0] - coords[ind_2, 0]) * (bp[0] - coords[ind_2, 0])
+                    + (coords[ind_1, 1] - coords[ind_2, 1]) * (bp[1] - coords[ind_2, 1])
+            ) / (
+                    (coords[ind_1, 0] - coords[ind_2, 0]) ** 2
+                    + (coords[ind_1, 1] - coords[ind_2, 1]) ** 2
+            )
+
+    return alpha
