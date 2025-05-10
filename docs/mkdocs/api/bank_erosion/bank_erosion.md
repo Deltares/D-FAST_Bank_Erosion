@@ -12,34 +12,35 @@ The Bank Erosion module consists of the following components:
 
 ### Main Classes
 
-::: dfastbe.bank_erosion.bank_erosion
+:::: dfastbe.bank_erosion.bank_erosion
 
 ### Mesh Processing
 
-::: dfastbe.bank_erosion.mesh_processor
+:::: dfastbe.bank_erosion.mesh_processor
+
+For more details, see [Bank Erosion Mesh Processor](mesh_processor.md).
 
 ### Debugging Utilities
 
-::: dfastbe.bank_erosion.debugger
+:::: dfastbe.bank_erosion.debugger
+
+For more details, see [Bank Erosion Debugger](debugger.md).
 
 ### Data Models
 
 The Bank Erosion module uses several data models to represent inputs, calculation parameters, and results:
 
-- **ErosionRiverData**: Represents river data for erosion calculations
-- **ErosionSimulationData**: Represents simulation data for erosion calculations
-- **BankData**: Represents bank data for erosion calculations
-- **SingleCalculation**: Represents parameters for discharge calculations
-- **LevelParameters**: Represents parameters for discharge levels
-- **DischargeLevels**: Represents discharge levels for erosion calculations
-- **ErosionInputs**: Represents inputs for erosion calculations
-- **ErosionResults**: Represents results of erosion calculations
-- **FairwayData**: Represents fairway data for erosion calculations
-- **CalculationLevel**: Represents a calculation level for erosion calculations
-- **MeshData**: Represents mesh data for erosion calculations
-- **SingleParameters**: Represents parameters for each bank
-- **SingleErosion**: Represents a single erosion calculation
-- **WaterLevelData**: Represents water level data for erosion calculations
+#### Calculation Data Models
+
+:::: dfastbe.bank_erosion.data_models.calculation
+
+For more details, see [Bank Erosion Calculation Data Models](data_models/calculation.md).
+
+#### Input Data Models
+
+:::: dfastbe.bank_erosion.data_models.inputs
+
+For more details, see [Bank Erosion Input Data Models](data_models/inputs.md).
 
 ## Workflow
 

@@ -124,6 +124,11 @@ nav:
           - api/bank_lines/data_models.md
       - Bank Erosion Module:
           - api/bank_erosion/bank_erosion.md
+          - api/bank_erosion/mesh_processor.md
+          - api/bank_erosion/debugger.md
+          - Data Models:
+              - api/bank_erosion/data_models/calculation.md
+              - api/bank_erosion/data_models/inputs.md
       - api/io.md
       - api/cmd.md
       - api/utils.md
