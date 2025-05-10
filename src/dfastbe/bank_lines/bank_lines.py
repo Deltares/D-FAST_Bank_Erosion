@@ -17,20 +17,17 @@ from dfastbe.bank_lines.data_models import BankLinesRiverData
 from dfastbe.io.data_models import BaseSimulationData, LineGeometry
 from dfastbe.io.config import ConfigFile, get_bbox
 from dfastbe.io.logger import log_text
-from dfastbe.kernel import get_zoom_extends
-from dfastbe.support import (
-    on_right_side,
-    poly_to_line,
-    sort_connect_bank_lines,
-    tri_to_line,
-)
-from dfastbe.utils import timed_logger
+from dfastbe.bank_lines.utils import sort_connect_bank_lines, poly_to_line, tri_to_line
+from dfastbe.utils import on_right_side, get_zoom_extends
+from dfastbe.io.logger import timed_logger
 
 MAX_RIVER_WIDTH = 1000
 RAW_DETECTED_BANKLINE_FRAGMENTS_FILE = "raw_detected_bankline_fragments"
 BANK_AREAS_FILE = "bank_areas"
 BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE = "bankline_fragments_per_bank_area"
 EXTENSION = ".shp"
+
+__all__ = ["BankLines"]
 
 
 class BankLines:

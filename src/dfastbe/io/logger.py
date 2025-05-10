@@ -25,13 +25,16 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-from typing import Union, List, Dict, Optional, TextIO, Any
+from typing import List, Dict, Optional, TextIO, Any, Tuple
 from pathlib import Path
+import time
 
 PROGTEXTS: Dict[str, List[str]]
 
+__all__ = ["load_program_texts", "get_text", "log_text", "timed_logger"]
 
-def load_program_texts(file_name: Union[str, Path]) -> None:
+
+def load_program_texts(file_name: str | Path) -> None:
     """Load texts from a configuration file, and store globally for access.
 
     This routine reads the text file "file_name", and detects the keywords
@@ -91,9 +94,9 @@ def get_text(key: str) -> List[str]:
 
     global PROGTEXTS
 
-    try:
+    if key in PROGTEXTS.keys():
         str_value = PROGTEXTS[key]
-    except:
+    else:
         str_value = ["No message found for " + key]
     return str_value
 
@@ -133,3 +136,47 @@ def log_text(
             else:
                 file.write(indent + sexp + "\n")
 
+
+def timed_logger(label: str) -> None:
+    """
+    Write a message with time information.
+
+    Arguments
+    ---------
+    label : str
+        Message string.
+    """
+    time, diff = _timer()
+    print(time + diff + label)
+
+
+def _timer() -> Tuple[str, str]:
+    """
+    Return text string representation of time since previous call.
+
+    The routine uses the global variable LAST_TIME to store the time of the
+    previous call.
+
+    Arguments
+    ---------
+    None
+
+    Returns
+    -------
+    time_str : str
+        String representing duration since first call.
+    diff_str : str
+        String representing duration since previous call.
+    """
+    global FIRST_TIME
+    global LAST_TIME
+    new_time = time.time()
+    if "LAST_TIME" in globals():
+        time_str = "{:6.2f} ".format(new_time - FIRST_TIME)
+        diff_str = "{:6.2f} ".format(new_time - LAST_TIME)
+    else:
+        time_str = "   0.00"
+        diff_str = "       "
+        FIRST_TIME = new_time
+    LAST_TIME = new_time
+    return time_str, diff_str

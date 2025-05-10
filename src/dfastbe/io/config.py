@@ -1148,7 +1148,7 @@ class ConfigFile:
 
 
 def get_bbox(
-        coords: np.ndarray, buffer: float = 0.1
+    coords: np.ndarray, buffer: float = 0.1
 ) -> Tuple[float, float, float, float]:
     """
     Derive the bounding box from a line.

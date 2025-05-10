@@ -58,15 +58,15 @@ from dfastbe.bank_erosion.utils import BankLinesProcessor, intersect_line_mesh, 
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.logger import log_text
 from dfastbe.io.data_models import LineGeometry
-from dfastbe.kernel import get_zoom_extends
+from dfastbe.utils import get_zoom_extends
 from dfastbe.bank_erosion.utils import (
     comp_erosion_eq,
     compute_bank_erosion_dynamics,
     get_km_bins,
     get_km_eroded_volume,
+    move_line
 )
-from dfastbe.support import move_line
-from dfastbe.utils import timed_logger
+from dfastbe.io.logger import timed_logger
 
 X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
