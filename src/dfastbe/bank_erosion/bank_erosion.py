@@ -197,7 +197,6 @@ class Erosion:
         # map km to fairway points, further using axis
         log_text("chainage_to_fairway")
         # intersect fairway and mesh
-        # log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
         fairway_intersection_coords, fairway_face_indices = intersect_line_mesh(
             river_axis.as_array(), mesh_data
         )
