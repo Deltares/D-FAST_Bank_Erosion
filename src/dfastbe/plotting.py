@@ -35,7 +35,7 @@ import geopandas
 import numpy
 
 from dfastbe.io.config import ConfigFile
-from dfastbe.bank_erosion.utils import water_density, g
+from dfastbe.bank_erosion.utils import WATER_DENSITY, g
 
 def savefig(fig: matplotlib.figure.Figure, filename: str) -> None:
     """
@@ -1060,7 +1060,7 @@ def plot6series_velocity_per_bank(
         setsize(fig)
         bk = bank_km_mid[ib]
         #
-        velc = numpy.sqrt(tauc[ib] * chezy[ib] ** 2 / (water_density * g))
+        velc = numpy.sqrt(tauc[ib] * chezy[ib] ** 2 / (WATER_DENSITY * g))
         ax.plot(bank_km_mid[ib], velc, color="k", label=ucrit_txt)
         for iq in range(n_levels):
             ax.plot(

@@ -376,19 +376,19 @@ class BaseSimulationData:
     """
 
     def __init__(
-            self,
-            x_node: np.ndarray,
-            y_node: np.ndarray,
-            n_nodes: np.ndarray,
-            face_node: np.ma.masked_array,
-            bed_elevation_location: np.ndarray,
-            bed_elevation_values: np.ndarray,
-            water_level_face: np.ndarray,
-            water_depth_face: np.ndarray,
-            velocity_x_face: np.ndarray,
-            velocity_y_face: np.ndarray,
-            chezy_face: np.ndarray,
-            dry_wet_threshold: float,
+        self,
+        x_node: np.ndarray,
+        y_node: np.ndarray,
+        n_nodes: np.ndarray,
+        face_node: np.ma.masked_array,
+        bed_elevation_location: np.ndarray,
+        bed_elevation_values: np.ndarray,
+        water_level_face: np.ndarray,
+        water_depth_face: np.ndarray,
+        velocity_x_face: np.ndarray,
+        velocity_y_face: np.ndarray,
+        chezy_face: np.ndarray,
+        dry_wet_threshold: float,
     ):
         """
         Initialize the SimulationData object.

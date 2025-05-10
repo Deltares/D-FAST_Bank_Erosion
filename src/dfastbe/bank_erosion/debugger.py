@@ -5,7 +5,7 @@ from typing import Dict
 import numpy as np
 from geopandas import GeoSeries
 from geopandas.geodataframe import GeoDataFrame
-from dfastbe.bank_erosion.data_models import (
+from dfastbe.bank_erosion.data_models.calculation import (
     DischargeCalculationParameters,
     FairwayData,
     ParametersPerBank,

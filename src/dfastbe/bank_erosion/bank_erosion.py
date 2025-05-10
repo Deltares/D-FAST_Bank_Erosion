@@ -37,15 +37,14 @@ from shapely.geometry import LineString
 
 from dfastbe import __version__
 from dfastbe import plotting as df_plt
-from dfastbe.bank_erosion.data_models import (
+from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData, ErosionSimulationData
+from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     DischargeCalculationParameters,
     DischargeLevelParameters,
     DischargeLevels,
     ErosionInputs,
     ErosionResults,
-    ErosionRiverData,
-    ErosionSimulationData,
     FairwayData,
     CalculationLevel,
     MeshData,
@@ -58,15 +57,16 @@ from dfastbe.bank_erosion.utils import BankLinesProcessor, intersect_line_mesh, 
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.logger import log_text
 from dfastbe.io.data_models import LineGeometry
-from dfastbe.kernel import get_zoom_extends
+from dfastbe.utils import get_zoom_extends
 from dfastbe.bank_erosion.utils import (
     comp_erosion_eq,
     compute_bank_erosion_dynamics,
     get_km_bins,
     get_km_eroded_volume,
+    move_line,
+    calculate_alpha
 )
-from dfastbe.support import move_line
-from dfastbe.utils import timed_logger
+from dfastbe.io.logger import timed_logger
 
 X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
@@ -197,7 +197,6 @@ class Erosion:
         # map km to fairway points, further using axis
         log_text("chainage_to_fairway")
         # intersect fairway and mesh
-        # log_text("intersect_fairway_mesh", data={"n": len(fairway_numpy)})
         fairway_intersection_coords, fairway_face_indices = intersect_line_mesh(
             river_axis.as_array(), mesh_data
         )
@@ -1267,16 +1266,3 @@ class Erosion:
                 plt.close("all")
             else:
                 plt.show(block=not self.gui)
-
-
-def calculate_alpha(coords: np.ndarray, ind_1: int, ind_2: int, bp: Tuple[int, Any]):
-    """Calculate the alpha value for the bank erosion model."""
-    alpha = (
-        (coords[ind_1, 0] - coords[ind_2, 0]) * (bp[0] - coords[ind_2, 0])
-        + (coords[ind_1, 1] - coords[ind_2, 1]) * (bp[1] - coords[ind_2, 1])
-    ) / (
-        (coords[ind_1, 0] - coords[ind_2, 0]) ** 2
-        + (coords[ind_1, 1] - coords[ind_2, 1]) ** 2
-    )
-
-    return alpha

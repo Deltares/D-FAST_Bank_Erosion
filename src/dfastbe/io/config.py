@@ -107,7 +107,7 @@ class ConfigFile:
         return self.get_bool("General", "DebugOutput", False)
 
     @property
-    def root_dir(self) -> Path:
+    def root_dir(self) -> Path | str:
         """Path: Get the root directory of the configuration file."""
         return self._root_dir
 
@@ -595,14 +595,14 @@ class ConfigFile:
         """
         # read guiding bank line
         n_bank = self.get_int("Detect", "NBank")
-        line = [None] * n_bank
+        line = []
         for b in range(n_bank):
             bankfile = self.config["Detect"][f"Line{b + 1}"]
             log_text("read_search_line", data={"nr": b + 1, "file": bankfile})
-            line[b] = XYCModel.read(bankfile)
+            line.append(XYCModel.read(bankfile))
         return line
 
-    def read_bank_lines(self, bank_dir: str) -> List[np.ndarray]:
+    def read_bank_lines(self, bank_dir: str) -> List[np.ndarray] | GeoDataFrame:
         """Get the bank lines from the detection step.
 
         Args:
@@ -773,8 +773,7 @@ class ConfigFile:
             List[np.ndarray]: Parameter values for each bank.
         """
         # if val is value then use that value globally
-        num_banks = len(num_stations_per_bank)
-        parameter_values = [None] * num_banks
+        parameter_values = []
         try:
             if use_default:
                 if isinstance(default, list):
@@ -785,7 +784,7 @@ class ConfigFile:
                 self.validate_parameter_value(real_val, key, positive, valid)
 
             for ib, num_stations in enumerate(num_stations_per_bank):
-                parameter_values[ib] = np.zeros(num_stations) + real_val
+                parameter_values.append(np.zeros(num_stations) + real_val)
 
         except (ValueError, TypeError):
             if onefile:
@@ -802,14 +801,13 @@ class ConfigFile:
                     km_thr, val = _get_stations(filename_i, key, positive)
 
                 if km_thr is None:
-                    parameter_values[ib] = np.zeros(num_stations) + val[0]
+                    parameter_values.append(np.zeros(num_stations) + val[0])
                 else:
                     idx = np.zeros(num_stations, dtype=int)
 
                     for thr in km_thr:
                         idx[num_stations >= thr] += 1
-                    parameter_values[ib] = val[idx]
-                # print("Min/max of data: ", parfield[ib].min(), parfield[ib].max())
+                    parameter_values.append(val[idx])
 
         return parameter_values
 
@@ -1072,7 +1070,7 @@ class ConfigFile:
             except ValueError:
                 self.config[group][key] = relative_path(rootdir, val_str)
 
-    def get_plotting_flags(self, root_dir: str) -> Dict[str, bool]:
+    def get_plotting_flags(self, root_dir: Path | str) -> Dict[str, bool]:
         """Get the plotting flags from the configuration file.
 
         Returns:
@@ -1148,7 +1146,7 @@ class ConfigFile:
 
 
 def get_bbox(
-        coords: np.ndarray, buffer: float = 0.1
+    coords: np.ndarray, buffer: float = 0.1
 ) -> Tuple[float, float, float, float]:
     """
     Derive the bounding box from a line.
@@ -1252,8 +1250,6 @@ def _get_stations(filename: str, key: str, positive: bool):
         Name of the quantity that we're reading.
     positive : bool
         Flag specifying whether all values are accepted (if False), or only positive values (if True).
-    valid : Optional[List[float]]
-        Optional list of valid values.
 
     Raises
     ------

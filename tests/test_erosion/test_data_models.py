@@ -5,15 +5,14 @@ from unittest.mock import patch, MagicMock
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
 from dfastbe.io.config import ConfigFile
-from dfastbe.bank_erosion.data_models import (
-    ErosionRiverData,
+from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData, ErosionSimulationData
+from dfastbe.bank_erosion.data_models.calculation import (
     ErosionInputs,
     WaterLevelData,
     MeshData,
     BankData,
     FairwayData,
     ErosionResults,
-    ErosionSimulationData,
     SingleBank,
     SingleErosion
 )
