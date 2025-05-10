@@ -1072,7 +1072,7 @@ class ConfigFile:
             except ValueError:
                 self.config[group][key] = relative_path(rootdir, val_str)
 
-    def get_plotting_flags(self, root_dir: str) -> Dict[str, bool]:
+    def get_plotting_flags(self, root_dir: Path | str) -> Dict[str, bool]:
         """Get the plotting flags from the configuration file.
 
         Returns:
