@@ -206,7 +206,7 @@ class ErosionRiverData(BaseRiverData):
         self.erosion_time = self.config_file.get_int("Erosion", "TErosion", positive=True)
 
     def simulation_data(self) -> ErosionSimulationData:
-
+        """Simulation Data."""
         ref_level = self.config_file.get_int("Erosion", "RefLevel") - 1
         # read simulation data (get_sim_data)
         sim_file = self.config_file.get_sim_file("Erosion", str(ref_level + 1))
@@ -246,6 +246,7 @@ class ErosionRiverData(BaseRiverData):
         log_text("read_river_axis", data={"file": river_axis_file})
         river_axis = XYCModel.read(river_axis_file)
         return river_axis
+
 
 class BankLinesResultsError(Exception):
     """Custom exception for BankLine results errors."""

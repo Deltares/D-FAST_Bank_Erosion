@@ -9,6 +9,7 @@ from geopandas.geoseries import GeoSeries
 
 GenericType = TypeVar("GenericType")
 
+
 @dataclass
 class BaseBank(Generic[GenericType]):
     left: GenericType
@@ -127,6 +128,7 @@ class ErosionInputs(BaseBank[SingleErosion]):
     def tauc(self) -> List[np.ndarray]:
         """Get the critical bank shear stress values."""
         return [self.left.tauc, self.right.tauc]
+
 
 @dataclass
 class WaterLevelData:
@@ -257,6 +259,7 @@ class SingleBank:
             bank_coords_mind = [Point(xy) for xy in bank_coords_mind]
             bank_coords_mind = GeoSeries(bank_coords_mind, crs=crs)
         return bank_coords_mind
+
 
 @dataclass
 class BankData(BaseBank[SingleBank]):
@@ -481,6 +484,7 @@ class CalculationLevel(BaseBank[DischargeCalculationParameters]):
             right=base.right,
             hfw_max=hfw_max,
         )
+
 
 class DischargeLevels:
 
