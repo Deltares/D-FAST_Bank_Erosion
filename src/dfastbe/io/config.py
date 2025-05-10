@@ -1250,8 +1250,6 @@ def _get_stations(filename: str, key: str, positive: bool):
         Name of the quantity that we're reading.
     positive : bool
         Flag specifying whether all values are accepted (if False), or only positive values (if True).
-    valid : Optional[List[float]]
-        Optional list of valid values.
 
     Raises
     ------
