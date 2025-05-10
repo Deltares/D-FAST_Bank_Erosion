@@ -367,6 +367,7 @@ class LineGeometry:
             projected_stations[i] = station
         return projected_stations
 
+
 class BaseSimulationData:
     """Class to hold simulation data.
 
@@ -614,6 +615,7 @@ class BaseSimulationData:
         self.velocity_y_face = self.velocity_y_face[keep_face]
         self.chezy_face = self.chezy_face[keep_face]
 
+
 class BaseRiverData:
     """River data class."""
 
@@ -652,7 +654,7 @@ class BaseRiverData:
 
     @staticmethod
     def get_bbox(
-            coords: np.ndarray, buffer: float = 0.1
+        coords: np.ndarray, buffer: float = 0.1
     ) -> Tuple[float, float, float, float]:
         """
         Derive the bounding box from an array of coordinates.

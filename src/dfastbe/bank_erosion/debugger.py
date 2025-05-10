@@ -6,9 +6,9 @@ import numpy as np
 from geopandas import GeoSeries
 from geopandas.geodataframe import GeoDataFrame
 from dfastbe.bank_erosion.data_models.calculation import (
-    DischargeCalculationParameters,
+    SingleCalculation,
     FairwayData,
-    ParametersPerBank,
+    SingleParameters,
     SingleBank,
     SingleErosion,
 )
@@ -30,7 +30,7 @@ class Debugger:
         single_bank: SingleBank,
         fairway_data: FairwayData,
         erosion_inputs: SingleErosion,
-        discharge_level_pars: ParametersPerBank,
+        discharge_level_pars: SingleParameters,
         water_depth_fairway,
         dn_eq1,
         dv_eq1,
@@ -71,11 +71,11 @@ class Debugger:
         single_bank: SingleBank,
         fairway_data: FairwayData,
         erosion_inputs: SingleErosion,
-        discharge_level_pars: ParametersPerBank,
+        discharge_level_pars: SingleParameters,
         water_depth_fairway,
         velocity,
         bank_height,
-        parameter: DischargeCalculationParameters,
+        parameter: SingleCalculation,
     ):
         """Write the middle levels to a shapefile and CSV file."""
         bank_coords_mind = single_bank.get_mid_points()

@@ -9,9 +9,9 @@ import numpy as np
 from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
-    DischargeCalculationParameters,
+    SingleCalculation,
     MeshData,
-    ParametersPerBank,
+    SingleParameters,
     SingleBank,
     SingleErosion,
 )
@@ -108,7 +108,7 @@ def comp_erosion_eq(
     bank_height: np.ndarray,
     segment_length: np.ndarray,
     water_level_fairway_ref: np.ndarray,
-    discharge_level_pars: ParametersPerBank,
+    discharge_level_pars: SingleParameters,
     bank_fairway_dist: np.ndarray,
     water_depth_fairway: np.ndarray,
     erosion_inputs: SingleErosion,
@@ -123,7 +123,7 @@ def comp_erosion_eq(
             Array containing length of the segment [m]
         water_level_fairway_ref : np.ndarray
             Array containing water level at fairway [m]
-        discharge_level_pars (ParametersPerBank):
+        discharge_level_pars (SingleParameters):
             Discharge level parameters object containing the following attributes.
                 ship_velocity : np.ndarray
                     Array containing ship velocity [m/s]
@@ -171,21 +171,21 @@ def comp_erosion_eq(
 
 
 def compute_bank_erosion_dynamics(
-    parameters: DischargeCalculationParameters,
+    parameters: SingleCalculation,
     bank_height: np.ndarray,
     segment_length: np.ndarray,
     bank_fairway_dist: np.ndarray,
     water_level_fairway_ref: np.ndarray,
-    discharge_level_pars: ParametersPerBank,
+    discharge_level_pars: SingleParameters,
     time_erosion: float,
     water_depth_fairway: np.ndarray,
     erosion_inputs: SingleErosion,
-) -> DischargeCalculationParameters:
+) -> SingleCalculation:
     """
     Compute the bank erosion during a specific discharge level.
 
     Args:
-        parameters (DischargeCalculationParameters):
+        parameters (SingleCalculation):
             velocity : np.ndarray
                 Array containing flow velocity magnitude [m/s]
             water_level_fairway : np.ndarray
@@ -200,7 +200,7 @@ def compute_bank_erosion_dynamics(
             Array containing reference water levels at fairway [m]
         tauc : np.ndarray
             Array containing critical shear stress [N/m2]
-        discharge_level_pars: DischargeLevelParameters,
+        discharge_level_pars: LevelParameters,
             num_ship : np.ndarray
                 Array containing number of ships [-]
             ship_velocity : np.ndarray

@@ -40,15 +40,15 @@ from dfastbe import plotting as df_plt
 from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData, ErosionSimulationData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
-    DischargeCalculationParameters,
-    DischargeLevelParameters,
+    SingleCalculation,
+    LevelParameters,
     DischargeLevels,
     ErosionInputs,
     ErosionResults,
     FairwayData,
     CalculationLevel,
     MeshData,
-    ParametersPerBank,
+    SingleParameters,
     SingleErosion,
     WaterLevelData,
 )
@@ -593,7 +593,7 @@ class Erosion:
         level_i: int,
         shipping_data: Dict[str, List[np.ndarray]],
         num_stations_per_bank: List[int],
-    ) -> DischargeLevelParameters:
+    ) -> LevelParameters:
         """Read Discharge level parameters.
 
         Read all discharge-specific input arrays for level *iq*.
@@ -658,7 +658,7 @@ class Erosion:
             mu_slope.append(mus)
             mu_reed.append(8.5e-4 * pr**0.8)  # empirical damping coefficient
 
-        return DischargeLevelParameters.from_column_arrays(
+        return LevelParameters.from_column_arrays(
             {
                 "id": level_i,
                 "ship_velocity": ship_velocity,
@@ -671,7 +671,7 @@ class Erosion:
                 "mu_slope": mu_slope,
                 "mu_reed": mu_reed,
             },
-            ParametersPerBank,
+            SingleParameters,
         )
 
     def compute_erosion_per_level(
@@ -692,7 +692,7 @@ class Erosion:
         hfw_max_level = 0
         par_list = []
         for ind, bank_i in enumerate(bank_data):
-            parameter = DischargeCalculationParameters()
+            parameter = SingleCalculation()
             # bank_i = 0: left bank, bank_i = 1: right bank
             # calculate velocity along banks ...
             parameter.bank_velocity = simulation_data.calculate_bank_velocity(
@@ -779,7 +779,7 @@ class Erosion:
         water_depth_fairway,
         bank_height,
         num_levels: int,
-        parameter: DischargeCalculationParameters,
+        parameter: SingleCalculation,
     ):
         if level_i == num_levels - 1:
             # EQ debug

@@ -1,4 +1,0 @@
-# kernel
-
-## kernel
-::: dfastbe.kernel
