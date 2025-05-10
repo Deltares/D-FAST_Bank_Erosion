@@ -3,7 +3,7 @@ from typing import Tuple, List
 import numpy as np
 import math
 from shapely.geometry import LineString, Point, Polygon
-from dfastbe.bank_erosion.data_models import MeshData
+from dfastbe.bank_erosion.data_models.calculation import MeshData
 
 __all__ = ["get_slices_ab", "enlarge", "intersect_line_mesh"]
 

@@ -6,10 +6,10 @@ from typing import Tuple
 
 import numpy as np
 
-from dfastbe.bank_erosion.data_models import (
+from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData
+from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     DischargeCalculationParameters,
-    ErosionRiverData,
     MeshData,
     ParametersPerBank,
     SingleBank,

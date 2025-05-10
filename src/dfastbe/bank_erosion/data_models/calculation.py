@@ -376,7 +376,7 @@ class ErosionResults:
     Examples:
         - You can create an instance of the ErosionResults class as follows:
         ```python
-        >>> from dfastbe.bank_erosion.data_models import ErosionResults
+        >>> from dfastbe.bank_erosion.data_models.calculation import ErosionResults
         >>> import numpy as np
         >>> erosion_results = ErosionResults(
         ...     eq_erosion_dist=[np.array([0.1, 0.2])],
@@ -399,7 +399,7 @@ class ErosionResults:
         can be set to empty arrays if not needed.
 
         ```python
-        >>> from dfastbe.bank_erosion.data_models import ErosionResults
+        >>> from dfastbe.bank_erosion.data_models.calculation import ErosionResults
         >>> import numpy as np
         >>> erosion_results = ErosionResults(
         ...     eq_erosion_dist=[np.array([0.1, 0.2])],

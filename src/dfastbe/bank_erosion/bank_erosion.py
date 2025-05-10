@@ -37,15 +37,14 @@ from shapely.geometry import LineString
 
 from dfastbe import __version__
 from dfastbe import plotting as df_plt
-from dfastbe.bank_erosion.data_models import (
+from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData, ErosionSimulationData
+from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     DischargeCalculationParameters,
     DischargeLevelParameters,
     DischargeLevels,
     ErosionInputs,
     ErosionResults,
-    ErosionRiverData,
-    ErosionSimulationData,
     FairwayData,
     CalculationLevel,
     MeshData,
