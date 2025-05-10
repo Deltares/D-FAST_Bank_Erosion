@@ -432,7 +432,7 @@ class ErosionResults:
 
 
 @dataclass
-class ParametersPerBank:
+class SingleParameters:
     ship_velocity: float
     num_ship: float
     num_waves_per_ship: float
@@ -445,12 +445,12 @@ class ParametersPerBank:
 
 
 @dataclass
-class DischargeLevelParameters(BaseBank[ParametersPerBank]):
+class LevelParameters(BaseBank[SingleParameters]):
     pass
 
 
 @dataclass
-class DischargeCalculationParameters:
+class SingleCalculation:
     bank_velocity: np.ndarray = field(default=lambda : np.array([]))
     water_level: np.ndarray = field(default=lambda : np.array([]))
     chezy: np.ndarray = field(default=lambda : np.array([]))
@@ -466,12 +466,12 @@ class DischargeCalculationParameters:
 
 
 @dataclass
-class CalculationLevel(BaseBank[DischargeCalculationParameters]):
+class CalculationLevel(BaseBank[SingleCalculation]):
     hfw_max: float = field(default=0.0)
 
     @classmethod
     def from_column_arrays(
-        cls, data: dict, bank_cls: Type["DischargeCalculationParameters"], hfw_max: float,
+        cls, data: dict, bank_cls: Type["SingleCalculation"], hfw_max: float,
         bank_order: Tuple[str, str] = ("left", "right")
     ) -> "CalculationLevel":
         # Only include fields that belong to the bank-specific data
