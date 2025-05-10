@@ -103,9 +103,9 @@ class SearchLines:
 
     @staticmethod
     def _select_closest_part(
-            search_lines_segments: MultiLineString,
-            reference_line: LineString,
-            max_river_width: float,
+        search_lines_segments: MultiLineString,
+        reference_line: LineString,
+        max_river_width: float,
     ) -> LineString:
         """Select the closest part of a MultiLineString to the reference line.
 
