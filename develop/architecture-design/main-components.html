@@ -16,7 +16,7 @@
         <link rel="prev" href="../guides/teamcity-ci.html">
       
       
-        <link rel="next" href="../api/bank_lines.html">
+        <link rel="next" href="class-diagram.html">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -311,8 +311,15 @@
   
     
     
+      
+  
+  
+  
+  
+    
+    
       <li class="md-tabs__item">
-        <a href="../api/bank_lines.html" class="md-tabs__link">
+        <a href="../api/bank_lines/bank_lines.html" class="md-tabs__link">
           
   
   
@@ -322,6 +329,9 @@
 
         </a>
       </li>
+    
+  
+
     
   
 
@@ -944,6 +954,8 @@
       
         
       
+        
+      
     
     
     
@@ -1040,18 +1052,162 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#repository-structure" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      repository structure
+      Overview
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#workflow-and-how-modules-interact" class="md-nav__link">
+  <a href="#repository-structure" class="md-nav__link">
     <span class="md-ellipsis">
-      Workflow and how modules interact:
+      Repository Structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#component-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Component Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Component Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Components
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      Module Details
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Module Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bank-erosion-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bank Erosion Module
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bank-lines-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bank Lines Module
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#io-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      I/O Module
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gui-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      GUI Module
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Flow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#process-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Process Workflows
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Process Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bank-line-detection-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bank Line Detection Workflow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bank-erosion-calculation-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bank Erosion Calculation Workflow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extensibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extensibility
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conclusion
     </span>
   </a>
   
@@ -1061,6 +1217,29 @@
   
 </nav>
       
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="class-diagram.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Class Diagram for Existing D-FAST Bank Erosion Code
+    
+  </span>
+  
+
+      </a>
     </li>
   
 
@@ -1081,8 +1260,6 @@
   
     
     
-      
-        
       
         
       
@@ -1138,13 +1315,62 @@
   
   
   
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_1" id="__nav_4_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Bank Line Module
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_1">
+            <span class="md-nav__icon md-icon"></span>
+            Bank Line Module
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../api/bank_lines.html" class="md-nav__link">
+      <a href="../api/bank_lines/bank_lines.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    bank_lines
+    Bank Lines Module
     
   </span>
   
@@ -1162,17 +1388,25 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/bank_lines_data_models.html" class="md-nav__link">
+      <a href="../api/bank_lines/data_models.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    bank_lines_data_models
+    Bank Lines Data Models
     
   </span>
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1184,18 +1418,73 @@
   
   
   
+    
+    
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2" id="__nav_4_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Bank Erosion Module
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2">
+            <span class="md-nav__icon md-icon"></span>
+            Bank Erosion Module
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../api/bank_erosion.html" class="md-nav__link">
+      <a href="../api/bank_erosion/bank_erosion.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    bank_erosion
+    Bank Erosion Module
     
   </span>
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1213,7 +1502,7 @@
   
   
   <span class="md-ellipsis">
-    IO
+    I/O Module
     
   </span>
   
@@ -1236,7 +1525,7 @@
   
   
   <span class="md-ellipsis">
-    cmd
+    Command Module
     
   </span>
   
@@ -1254,12 +1543,12 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/kernel.html" class="md-nav__link">
+      <a href="../api/utils.html" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
-    kernel
+    Utilities Module
     
   </span>
   
@@ -1282,7 +1571,7 @@
   
   
   <span class="md-ellipsis">
-    plotting
+    Plotting Module
     
   </span>
   
@@ -1448,18 +1737,162 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#repository-structure" class="md-nav__link">
+  <a href="#overview" class="md-nav__link">
     <span class="md-ellipsis">
-      repository structure
+      Overview
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#workflow-and-how-modules-interact" class="md-nav__link">
+  <a href="#repository-structure" class="md-nav__link">
     <span class="md-ellipsis">
-      Workflow and how modules interact:
+      Repository Structure
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#component-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Component Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Component Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#core-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      Core Components
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#module-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      Module Details
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Module Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bank-erosion-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bank Erosion Module
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bank-lines-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bank Lines Module
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#io-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      I/O Module
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gui-module" class="md-nav__link">
+    <span class="md-ellipsis">
+      GUI Module
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#data-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data Flow
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#process-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Process Workflows
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Process Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bank-line-detection-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bank Line Detection Workflow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bank-erosion-calculation-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Bank Erosion Calculation Workflow
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Configuration
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extensibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      Extensibility
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#conclusion" class="md-nav__link">
+    <span class="md-ellipsis">
+      Conclusion
     </span>
   </a>
   
@@ -1498,143 +1931,250 @@
 
 
 <h1 id="d-fast-bank-erosion-architecture-and-design"><a class="toclink" href="#d-fast-bank-erosion-architecture-and-design">D-FAST Bank Erosion Architecture and Design</a><a class="headerlink" href="#d-fast-bank-erosion-architecture-and-design" title="Permanent link">#</a></h1>
-<h2 id="repository-structure"><a class="toclink" href="#repository-structure">repository structure</a><a class="headerlink" href="#repository-structure" title="Permanent link">#</a></h2>
+<p>This document provides a comprehensive overview of the D-FAST Bank Erosion software architecture, including its components, their relationships, and data flow.</p>
+<h2 id="overview"><a class="toclink" href="#overview">Overview</a><a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
+<p>D-FAST Bank Erosion is a tool developed by Deltares to compute local bank erosion sensitivity and estimate the amount of bank material that will be eroded. It works in conjunction with D-Flow FM (Flexible Mesh) and requires users to run steady-state hydrodynamic simulations for different discharges.</p>
+<p>The software has three main operational modes:
+1. <strong>BANKLINES</strong>: Detects bank lines from hydrodynamic simulation results
+2. <strong>BANKEROSION</strong>: Calculates bank erosion based on detected bank lines and hydrodynamic data
+3. <strong>GUI</strong>: Provides a graphical user interface for configuring and running the above processes</p>
+<h2 id="repository-structure"><a class="toclink" href="#repository-structure">Repository Structure</a><a class="headerlink" href="#repository-structure" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code>D-FAST_Bank_Erosion/
-├───.github
-│   ├───ISSUE_TEMPLATE
-│   └───workflows
-├───docs
-│   ├───end-user-docs
-│   │   ├───chapters
-│   │   ├───cover
-│   │   └───figures
-│   └───mkdocs
-│       ├───api
-│       ├───gui
-│       └───guides
-├───examples
-│   └───data
-├───src
-│   └───dfastbe
-│       │   add.png
-│       │   bank_erosion.py
-│       │   bank_lines.py
-│       │   cmd.py
-│       │   D-FASTBE.png
-│       │   edit.png
-│       │   gui.py
-│       │   io.py
-│       │   io.py~
-│       │   kernel.py
-│       │   messages.NL.ini
-│       │   messages.UK.ini
-│       │   open.png
-│       │   plotting.py
-│       │   remove.png
-│       │   src.pyproj
-│       │   support.py
-│       │   utils.py
-│       │   __init__.py
-│       └───__main__.py
-├───tests
-├───tests-dist
-├── README.md
-├── pyproject.toml
-└── license.md
+├───docs                      # Documentation
+│   ├───end-user-docs         # End-user documentation (LaTeX)
+│   └───mkdocs                # MkDocs documentation (Markdown)
+│       ├───api               # API reference documentation
+│       ├───architecture-design # Architecture documentation
+│       ├───gui               # GUI documentation
+│       └───guides            # User and developer guides
+├───examples                  # Example data and configurations
+├───src                       # Source code
+│   └───dfastbe               # Main package
+│       ├───bank_erosion      # Bank erosion calculation modules
+│       │   └───data_models   # Data models for bank erosion
+│       ├───bank_lines        # Bank line detection modules
+│       ├───gui               # GUI modules and resources
+│       │   └───icons         # GUI icons
+│       ├───io                # Input/output handling modules
+│       │   └───log_data      # Logging data and resources
+│       ├───__main__.py       # Entry point for CLI
+│       ├───cmd.py            # Command processing
+│       ├───plotting.py       # Plotting utilities
+│       └───utils.py          # General utilities
+├───tests                     # Test suite
+└───pyproject.toml            # Project configuration
 </code></pre></div>
-<h2 id="workflow-and-how-modules-interact"><a class="toclink" href="#workflow-and-how-modules-interact">Workflow and how modules interact:</a><a class="headerlink" href="#workflow-and-how-modules-interact" title="Permanent link">#</a></h2>
-<pre class="mermaid"><code>flowchart TD
-    subgraph CLI
-        main["__main__.py"]
-    end
-
-    subgraph GUI
-        gui["gui.py"]
-    end
-
-    subgraph Core
-        cmd["cmd.py"]
-        bank_erosion["bank_erosion.py"]
-        bank_lines["bank_lines.py"]
-        kernel["kernel.py"]
-    end
-
-    subgraph Data
-        io["io.py"]
-        support["support.py"]
-        utils["utils.py"]
-    end
-
-    subgraph Plotting
-        plotting["plotting.py"]
-    end
-
-    main --&gt; cmd
-    cmd --&gt;|parses config| io
-    cmd --&gt;|calculate erosion| bank_erosion
-    cmd --&gt;|starts analysis/Detect banks| bank_lines
-    gui --&gt; cmd
-    gui --&gt; bank_erosion
-    gui --&gt; io
-    bank_erosion --&gt; kernel
-    bank_erosion --&gt; io
-    bank_erosion --&gt; support
-    bank_erosion --&gt; plotting
-    bank_erosion --&gt; utils
-
-    kernel --&gt; support
-    kernel --&gt; utils
-
-    bank_lines --&gt; support
-    bank_lines --&gt; utils
-    bank_lines --&gt; io
-    bank_lines --&gt; plotting
-    bank_lines --&gt; kernel
-    bank_lines --&gt; utils
-
-    plotting --&gt; io
-    plotting --&gt; support
-    plotting --&gt; utils
-</code></pre>
+<h2 id="component-architecture"><a class="toclink" href="#component-architecture">Component Architecture</a><a class="headerlink" href="#component-architecture" title="Permanent link">#</a></h2>
+<p>The D-FAST Bank Erosion software is organized into several key components, each with specific responsibilities:</p>
+<h3 id="core-components"><a class="toclink" href="#core-components">Core Components</a><a class="headerlink" href="#core-components" title="Permanent link">#</a></h3>
 <pre class="mermaid"><code>graph TD
     subgraph Presentation_Layer
-        GUI[gui.py]
-        CLI[cmd.py &amp; __main__.py]
+        GUI["GUI (gui.py)"]
+        CLI["CLI (__main__.py, cmd.py)"]
     end
 
-    subgraph Application_Layer
-        AppLogic[bank_erosion.py]
+    subgraph Domain_Layer
+        BankErosion["Bank Erosion (bank_erosion/)"]
+        BankLines["Bank Lines (bank_lines/)"]
     end
 
-    subgraph Domain_Logic_Layer
-        Kernel[kernel.py]
-        BankDetection[bank_lines.py]
+    subgraph Data_Layer
+        IO["I/O (io/)"]
+        Utils["Utilities (utils.py)"]
+        Plotting["Plotting (plotting.py)"]
     end
 
-    subgraph Data_Access_Layer
-        IO[io.py]
-        Support[support.py]
-        Utils[utils.py]
+    CLI --&gt; cmd
+    GUI --&gt; cmd
+
+    cmd --&gt; BankErosion
+    cmd --&gt; BankLines
+
+    BankErosion --&gt; IO
+    BankErosion --&gt; Utils
+    BankErosion --&gt; Plotting
+
+    BankLines --&gt; IO
+    BankLines --&gt; Utils
+    BankLines --&gt; Plotting
+
+    classDef core fill:#f9f,stroke:#333,stroke-width:2px
+    classDef domain fill:#bbf,stroke:#333,stroke-width:2px
+    classDef data fill:#bfb,stroke:#333,stroke-width:2px
+
+    class GUI,CLI core
+    class BankErosion,BankLines domain
+    class IO,Utils,Plotting data</code></pre>
+<ol>
+<li><strong>Presentation Layer</strong></li>
+<li><strong>GUI</strong>: Provides a graphical user interface for configuring and running bank line detection and erosion calculations</li>
+<li>
+<p><strong>CLI</strong>: Provides a command-line interface for running the software in batch mode</p>
+</li>
+<li>
+<p><strong>Domain Layer</strong></p>
+</li>
+<li><strong>Bank Erosion</strong>: Handles the calculation of bank erosion based on hydrodynamic data and detected bank lines</li>
+<li>
+<p><strong>Bank Lines</strong>: Handles the detection of bank lines from hydrodynamic simulation results</p>
+</li>
+<li>
+<p><strong>Data Layer</strong></p>
+</li>
+<li><strong>I/O</strong>: Handles input/output operations, including reading configuration files and writing results</li>
+<li><strong>Utilities</strong>: Provides general utility functions used across the application</li>
+<li><strong>Plotting</strong>: Handles the generation of plots and visualizations</li>
+</ol>
+<h2 id="module-details"><a class="toclink" href="#module-details">Module Details</a><a class="headerlink" href="#module-details" title="Permanent link">#</a></h2>
+<h3 id="bank-erosion-module"><a class="toclink" href="#bank-erosion-module">Bank Erosion Module</a><a class="headerlink" href="#bank-erosion-module" title="Permanent link">#</a></h3>
+<p>The Bank Erosion module (<code>bank_erosion/</code>) is responsible for calculating bank erosion based on hydrodynamic data and detected bank lines. It includes:</p>
+<ul>
+<li><strong>bank_erosion.py</strong>: Main class for bank erosion calculations</li>
+<li><strong>mesh_processor.py</strong>: Processes mesh data from hydrodynamic simulations</li>
+<li><strong>debugger.py</strong>: Provides debugging utilities</li>
+<li><strong>utils.py</strong>: Utility functions specific to bank erosion</li>
+<li><strong>data_models/</strong>: Data models for bank erosion inputs, calculations, and results</li>
+</ul>
+<h3 id="bank-lines-module"><a class="toclink" href="#bank-lines-module">Bank Lines Module</a><a class="headerlink" href="#bank-lines-module" title="Permanent link">#</a></h3>
+<p>The Bank Lines module (<code>bank_lines/</code>) is responsible for detecting bank lines from hydrodynamic simulation results. It includes:</p>
+<ul>
+<li><strong>bank_lines.py</strong>: Main class for bank line detection</li>
+<li><strong>data_models.py</strong>: Data models for bank line detection</li>
+<li><strong>utils.py</strong>: Utility functions specific to bank line detection</li>
+</ul>
+<h3 id="io-module"><a class="toclink" href="#io-module">I/O Module</a><a class="headerlink" href="#io-module" title="Permanent link">#</a></h3>
+<p>The I/O module (<code>io/</code>) handles input/output operations, including:</p>
+<ul>
+<li><strong>config.py</strong>: Handles configuration file parsing and management</li>
+<li><strong>data_models.py</strong>: Data models for I/O operations</li>
+<li><strong>file_utils.py</strong>: Utility functions for file operations</li>
+<li><strong>logger.py</strong>: Handles logging functionality</li>
+<li><strong>log_data/</strong>: Logging data and resources, including language files</li>
+</ul>
+<h3 id="gui-module"><a class="toclink" href="#gui-module">GUI Module</a><a class="headerlink" href="#gui-module" title="Permanent link">#</a></h3>
+<p>The GUI module (<code>gui/</code>) provides a graphical user interface for the application:</p>
+<ul>
+<li><strong>gui.py</strong>: Main GUI implementation</li>
+<li><strong>icons/</strong>: GUI icons and resources</li>
+</ul>
+<h2 id="data-flow"><a class="toclink" href="#data-flow">Data Flow</a><a class="headerlink" href="#data-flow" title="Permanent link">#</a></h2>
+<p>The following diagram illustrates the data flow through the D-FAST Bank Erosion software:</p>
+<pre class="mermaid"><code>flowchart TD
+    subgraph Input
+        config["Configuration File"]
+        hydro["Hydrodynamic Simulation Results"]
     end
 
-    subgraph Config_Layer
-        ConfigManager["ConfigFile / RiverData"]
+    subgraph Processing
+        config_parser["Configuration Parser"]
+        banklines_detector["Bank Lines Detector"]
+        erosion_calculator["Erosion Calculator"]
     end
 
-    CLI --&gt; AppLogic
-    GUI --&gt; AppLogic
+    subgraph Output
+        banklines_output["Bank Lines Output"]
+        erosion_output["Erosion Output"]
+        plots["Plots and Visualizations"]
+    end
 
-    AppLogic --&gt; Kernel
-    AppLogic --&gt; BankDetection
-    AppLogic --&gt; IO
-    AppLogic --&gt; Utils
-    AppLogic --&gt; Support
-    AppLogic --&gt; ConfigManager
+    config --&gt; config_parser
+    hydro --&gt; config_parser
 
-    Kernel --&gt; Support
-    BankDetection --&gt; Support
-    BankDetection --&gt; Utils
-    IO --&gt; ConfigManager</code></pre>
+    config_parser --&gt; banklines_detector
+    banklines_detector --&gt; banklines_output
+    banklines_output --&gt; erosion_calculator
+
+    config_parser --&gt; erosion_calculator
+    erosion_calculator --&gt; erosion_output
+    erosion_calculator --&gt; plots
+
+    style Input fill:#f9f9f9,stroke:#333,stroke-width:1px
+    style Processing fill:#e6f3ff,stroke:#333,stroke-width:1px
+    style Output fill:#f0fff0,stroke:#333,stroke-width:1px</code></pre>
+<ol>
+<li><strong>Input</strong>:</li>
+<li>Configuration file specifying parameters for bank line detection and erosion calculation</li>
+<li>
+<p>Hydrodynamic simulation results from D-Flow FM</p>
+</li>
+<li>
+<p><strong>Processing</strong>:</p>
+</li>
+<li>Configuration parser reads and validates the configuration file</li>
+<li>Bank lines detector processes hydrodynamic data to detect bank lines</li>
+<li>
+<p>Erosion calculator computes bank erosion based on detected bank lines and hydrodynamic data</p>
+</li>
+<li>
+<p><strong>Output</strong>:</p>
+</li>
+<li>Bank lines output (shapefiles)</li>
+<li>Erosion output (shapefiles, CSV files)</li>
+<li>Plots and visualizations</li>
+</ol>
+<h2 id="process-workflows"><a class="toclink" href="#process-workflows">Process Workflows</a><a class="headerlink" href="#process-workflows" title="Permanent link">#</a></h2>
+<h3 id="bank-line-detection-workflow"><a class="toclink" href="#bank-line-detection-workflow">Bank Line Detection Workflow</a><a class="headerlink" href="#bank-line-detection-workflow" title="Permanent link">#</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant User
+    participant CLI/GUI
+    participant Config
+    participant BankLines
+    participant IO
+    participant Plotting
+
+    User-&gt;&gt;CLI/GUI: Run BANKLINES mode
+    CLI/GUI-&gt;&gt;Config: Load configuration
+    Config-&gt;&gt;BankLines: Initialize with config
+    BankLines-&gt;&gt;IO: Load hydrodynamic data
+    BankLines-&gt;&gt;BankLines: Calculate water depth
+    BankLines-&gt;&gt;BankLines: Generate bank lines
+    BankLines-&gt;&gt;BankLines: Mask bank lines
+    BankLines-&gt;&gt;IO: Save bank lines
+    BankLines-&gt;&gt;Plotting: Generate plots
+    Plotting-&gt;&gt;User: Display/save plots</code></pre>
+<h3 id="bank-erosion-calculation-workflow"><a class="toclink" href="#bank-erosion-calculation-workflow">Bank Erosion Calculation Workflow</a><a class="headerlink" href="#bank-erosion-calculation-workflow" title="Permanent link">#</a></h3>
+<pre class="mermaid"><code>sequenceDiagram
+    participant User
+    participant CLI/GUI
+    participant Config
+    participant Erosion
+    participant BankLines
+    participant IO
+    participant Plotting
+
+    User-&gt;&gt;CLI/GUI: Run BANKEROSION mode
+    CLI/GUI-&gt;&gt;Config: Load configuration
+    Config-&gt;&gt;Erosion: Initialize with config
+    Erosion-&gt;&gt;IO: Load bank lines
+    Erosion-&gt;&gt;IO: Load hydrodynamic data
+    Erosion-&gt;&gt;Erosion: Process river axis
+    Erosion-&gt;&gt;Erosion: Get fairway data
+    Erosion-&gt;&gt;Erosion: Calculate bank-fairway distance
+    Erosion-&gt;&gt;Erosion: Prepare initial conditions
+    Erosion-&gt;&gt;Erosion: Process discharge levels
+    Erosion-&gt;&gt;Erosion: Compute erosion per level
+    Erosion-&gt;&gt;Erosion: Post-process results
+    Erosion-&gt;&gt;IO: Write output files
+    Erosion-&gt;&gt;Plotting: Generate plots
+    Plotting-&gt;&gt;User: Display/save plots</code></pre>
+<h2 id="configuration"><a class="toclink" href="#configuration">Configuration</a><a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
+<p>The D-FAST Bank Erosion software is configured using a configuration file (typically with a .cfg extension). The configuration file specifies:</p>
+<ul>
+<li>Input and output directories</li>
+<li>Hydrodynamic simulation parameters</li>
+<li>Bank line detection parameters</li>
+<li>Erosion calculation parameters</li>
+</ul>
+<p>The configuration file is parsed by the <code>ConfigFile</code> class in the <code>io.config</code> module.</p>
+<h2 id="extensibility"><a class="toclink" href="#extensibility">Extensibility</a><a class="headerlink" href="#extensibility" title="Permanent link">#</a></h2>
+<p>The modular architecture of D-FAST Bank Erosion allows for easy extension and modification:</p>
+<ul>
+<li>New hydrodynamic data formats can be supported by extending the I/O module</li>
+<li>Additional erosion calculation methods can be implemented in the Bank Erosion module</li>
+<li>New visualization types can be added to the Plotting module</li>
+</ul>
+<h2 id="conclusion"><a class="toclink" href="#conclusion">Conclusion</a><a class="headerlink" href="#conclusion" title="Permanent link">#</a></h2>
+<p>The D-FAST Bank Erosion software has a well-structured architecture that separates concerns into distinct modules. The modular design allows for easy maintenance, extension, and testing of the software.</p>
 
 
 
@@ -1687,13 +2227,13 @@
         
         
           
-          <a href="../api/bank_lines.html" class="md-footer__link md-footer__link--next" aria-label="Next: bank_lines">
+          <a href="class-diagram.html" class="md-footer__link md-footer__link--next" aria-label="Next: Class Diagram for Existing D-FAST Bank Erosion Code">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                bank_lines
+                Class Diagram for Existing D-FAST Bank Erosion Code
               </div>
             </div>
             <div class="md-footer__button md-icon">
