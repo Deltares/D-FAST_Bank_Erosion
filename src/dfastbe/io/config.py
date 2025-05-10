@@ -107,7 +107,7 @@ class ConfigFile:
         return self.get_bool("General", "DebugOutput", False)
 
     @property
-    def root_dir(self) -> Path:
+    def root_dir(self) -> Path | str:
         """Path: Get the root directory of the configuration file."""
         return self._root_dir
 
@@ -595,14 +595,14 @@ class ConfigFile:
         """
         # read guiding bank line
         n_bank = self.get_int("Detect", "NBank")
-        line = [None] * n_bank
+        line = []
         for b in range(n_bank):
             bankfile = self.config["Detect"][f"Line{b + 1}"]
             log_text("read_search_line", data={"nr": b + 1, "file": bankfile})
-            line[b] = XYCModel.read(bankfile)
+            line.append(XYCModel.read(bankfile))
         return line
 
-    def read_bank_lines(self, bank_dir: str) -> List[np.ndarray]:
+    def read_bank_lines(self, bank_dir: str) -> List[np.ndarray] | GeoDataFrame:
         """Get the bank lines from the detection step.
 
         Args:
