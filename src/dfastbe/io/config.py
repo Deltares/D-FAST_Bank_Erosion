@@ -801,13 +801,13 @@ class ConfigFile:
                     km_thr, val = _get_stations(filename_i, key, positive)
 
                 if km_thr is None:
-                    parameter_values[ib] = np.zeros(num_stations) + val[0]
+                    parameter_values.append(np.zeros(num_stations) + val[0])
                 else:
                     idx = np.zeros(num_stations, dtype=int)
 
                     for thr in km_thr:
                         idx[num_stations >= thr] += 1
-                    parameter_values[ib] = val[idx]
+                    parameter_values.append(val[idx])
 
         return parameter_values
 
