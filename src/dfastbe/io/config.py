@@ -773,8 +773,7 @@ class ConfigFile:
             List[np.ndarray]: Parameter values for each bank.
         """
         # if val is value then use that value globally
-        num_banks = len(num_stations_per_bank)
-        parameter_values = [None] * num_banks
+        parameter_values = []
         try:
             if use_default:
                 if isinstance(default, list):
@@ -785,7 +784,7 @@ class ConfigFile:
                 self.validate_parameter_value(real_val, key, positive, valid)
 
             for ib, num_stations in enumerate(num_stations_per_bank):
-                parameter_values[ib] = np.zeros(num_stations) + real_val
+                parameter_values.append(np.zeros(num_stations) + real_val)
 
         except (ValueError, TypeError):
             if onefile:
@@ -809,7 +808,6 @@ class ConfigFile:
                     for thr in km_thr:
                         idx[num_stations >= thr] += 1
                     parameter_values[ib] = val[idx]
-                # print("Min/max of data: ", parfield[ib].min(), parfield[ib].max())
 
         return parameter_values
 
