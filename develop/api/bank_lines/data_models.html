@@ -1400,6 +1400,16 @@
       
         
       
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
     
     
     
@@ -1457,6 +1467,201 @@
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bank_erosion/erosion_calculation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Erosion Calculation Process
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bank_erosion/erosion_calculator.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bank Erosion Calculator
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bank_erosion/mesh_processor.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bank Erosion Mesh Processor
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bank_erosion/debugger.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bank Erosion Debugger
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_2_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_2_6" id="__nav_4_2_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Data Models
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_4_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_2_6">
+            <span class="md-nav__icon md-icon"></span>
+            Data Models
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bank_erosion/data_models/calculation.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bank Erosion Calculation Data Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../bank_erosion/data_models/inputs.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Bank Erosion Input Data Models
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1884,6 +2089,80 @@
 <p>The Bank Lines Data Models module provides data structures for representing bank lines and related data in the D-FAST Bank Erosion software.</p>
 <h2 id="overview"><a class="toclink" href="#overview">Overview</a><a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
 <p>The Bank Lines Data Models module contains classes that represent various aspects of bank lines, such as river data, simulation data, and bank line geometry. These data models are used by the Bank Lines module to process and analyze bank lines.</p>
+<pre class="mermaid"><code>classDiagram
+    %% Main Classes
+
+    %% Data Models - Bank Lines
+    class BankLinesRiverData {
+        -ConfigFile config_file
+        -LineString river_center_line
+        -Tuple station_bounds
+        +search_lines()
+        -_get_bank_lines_simulation_data()
+        +simulation_data()
+    }
+
+    class SearchLines {
+        +List lines
+        +LineGeometry mask
+        +__init__(List, LineGeometry)
+        +mask(List, LineString, float)
+        -_select_closest_part(MultiLineString, LineString, float)
+        +to_polygons()
+    }
+
+    %% Data Models - IO
+    class LineGeometry {
+        +LineString line
+        +dict data
+        +__init__(LineString, Tuple, str)
+        +as_array()
+        +add_data(Dict)
+        +to_file(str, Dict)
+        +mask(LineString, Tuple)
+        -_find_mask_index(float, array)
+        -_handle_bound(int, float, bool, array)
+        -_interpolate_point(int, float, array)
+        +intersect_with_line(array)
+    }
+
+    class BaseSimulationData {
+        +array x_node
+        +array y_node
+        +array n_nodes
+        +array face_node
+        +array bed_elevation_location
+        +array bed_elevation_values
+        +array water_level_face
+        +array water_depth_face
+        +array velocity_x_face
+        +array velocity_y_face
+        +array chezy_face
+        +float dry_wet_threshold
+        +__init__(array, array, array, array, array, array, array, array, array, array, array, float)
+        +read(str, str)
+        +clip(LineString, float)
+    }
+
+    class BaseRiverData {
+        -ConfigFile config_file
+        -LineString river_center_line
+        -Tuple station_bounds
+        +__init__(ConfigFile)
+        +get_bbox(array, float)
+        +get_erosion_sim_data(int)
+    }
+
+    SearchLines --&gt; LineGeometry : uses
+
+    BankLinesRiverData --|&gt; BaseRiverData : inherits
+    BankLinesRiverData --&gt; ConfigFile : uses
+    BankLinesRiverData --&gt; SearchLines : uses
+    BankLinesRiverData --&gt; BaseSimulationData : uses
+
+    BaseRiverData --&gt; ConfigFile : uses
+    BaseRiverData --&gt; LineGeometry : uses
+</code></pre>
 <h2 id="components"><a class="toclink" href="#components">Components</a><a class="headerlink" href="#components" title="Permanent link">#</a></h2>
 <p>The Bank Lines Data Models module consists of the following components:</p>
 <h3 id="data-models"><a class="toclink" href="#data-models">Data Models</a><a class="headerlink" href="#data-models" title="Permanent link">#</a></h3>
