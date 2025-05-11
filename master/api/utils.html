@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://deltares.github.io/D-FAST_Bank_Erosion/master/api/cmd.html">
+        <link rel="canonical" href="https://deltares.github.io/D-FAST_Bank_Erosion/master/api/utils.html">
       
       
-        <link rel="prev" href="io.html">
+        <link rel="prev" href="cmd.html">
       
       
-        <link rel="next" href="utils.html">
+        <link rel="next" href="plotting.html">
       
       
       <link rel="icon" href="../assets/images/favicon.png">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Command Module - D-FAST Bank Erosion</title>
+        <title>Utilities Module - D-FAST Bank Erosion</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#command-module" class="md-skip">
+        <a href="#utilities-module" class="md-skip">
           Skip to content
         </a>
       
@@ -118,7 +118,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Command Module
+              Utilities Module
             
           </span>
         </div>
@@ -1526,6 +1526,29 @@
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="cmd.html" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Command Module
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1543,7 +1566,7 @@
   
   
   <span class="md-ellipsis">
-    Command Module
+    Utilities Module
     
   </span>
   
@@ -1551,12 +1574,12 @@
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <a href="cmd.html" class="md-nav__link md-nav__link--active">
+      <a href="utils.html" class="md-nav__link md-nav__link--active">
         
   
   
   <span class="md-ellipsis">
-    Command Module
+    Utilities Module
     
   </span>
   
@@ -1598,9 +1621,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#run-function" class="md-nav__link">
+  <a href="#general-utilities" class="md-nav__link">
     <span class="md-ellipsis">
-      Run Function
+      General Utilities
     </span>
   </a>
   
@@ -1612,19 +1635,28 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#dfastbe.cmd" class="md-nav__link">
+  <a href="#dfastbe.utils" class="md-nav__link">
     <span class="md-ellipsis">
-      cmd
+      utils
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="cmd">
+    <nav class="md-nav" aria-label="utils">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#dfastbe.cmd.run" class="md-nav__link">
+  <a href="#dfastbe.utils.get_zoom_extends" class="md-nav__link">
     <span class="md-ellipsis">
-      run
+      get_zoom_extends
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dfastbe.utils.on_right_side" class="md-nav__link">
+    <span class="md-ellipsis">
+      on_right_side
     </span>
   </a>
   
@@ -1632,24 +1664,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#operational-modes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Operational Modes
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#workflow" class="md-nav__link">
-    <span class="md-ellipsis">
-      Workflow
-    </span>
-  </a>
   
 </li>
       
@@ -1666,29 +1680,6 @@
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="utils.html" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    Utilities Module
-    
-  </span>
-  
-
-      </a>
     </li>
   
 
@@ -1891,9 +1882,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#run-function" class="md-nav__link">
+  <a href="#general-utilities" class="md-nav__link">
     <span class="md-ellipsis">
-      Run Function
+      General Utilities
     </span>
   </a>
   
@@ -1905,19 +1896,28 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#dfastbe.cmd" class="md-nav__link">
+  <a href="#dfastbe.utils" class="md-nav__link">
     <span class="md-ellipsis">
-      cmd
+      utils
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="cmd">
+    <nav class="md-nav" aria-label="utils">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#dfastbe.cmd.run" class="md-nav__link">
+  <a href="#dfastbe.utils.get_zoom_extends" class="md-nav__link">
     <span class="md-ellipsis">
-      run
+      get_zoom_extends
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dfastbe.utils.on_right_side" class="md-nav__link">
+    <span class="md-ellipsis">
+      on_right_side
     </span>
   </a>
   
@@ -1925,24 +1925,6 @@
         
       </ul>
     </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#operational-modes" class="md-nav__link">
-    <span class="md-ellipsis">
-      Operational Modes
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#workflow" class="md-nav__link">
-    <span class="md-ellipsis">
-      Workflow
-    </span>
-  </a>
   
 </li>
       
@@ -1971,7 +1953,7 @@
 
 
   
-    <a href="https://github.com/Deltares/D-FAST_Bank_Erosion/edit/master/docs/api/cmd.md" title="Edit this page" class="md-content__button md-icon">
+    <a href="https://github.com/Deltares/D-FAST_Bank_Erosion/edit/master/docs/api/utils.md" title="Edit this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M10 20H6V4h7v5h5v3.1l2-2V8l-6-6H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h4zm10.2-7c.1 0 .3.1.4.2l1.3 1.3c.2.2.2.6 0 .8l-1 1-2.1-2.1 1-1c.1-.1.2-.2.4-.2m0 3.9L14.1 23H12v-2.1l6.1-6.1z"/></svg>
     </a>
@@ -1980,31 +1962,31 @@
     
       
     
-    <a href="https://github.com/Deltares/D-FAST_Bank_Erosion/raw/master/docs/api/cmd.md" title="View source of this page" class="md-content__button md-icon">
+    <a href="https://github.com/Deltares/D-FAST_Bank_Erosion/raw/master/docs/api/utils.md" title="View source of this page" class="md-content__button md-icon">
       
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 18c.56 0 1 .44 1 1s-.44 1-1 1-1-.44-1-1 .44-1 1-1m0-3c-2.73 0-5.06 1.66-6 4 .94 2.34 3.27 4 6 4s5.06-1.66 6-4c-.94-2.34-3.27-4-6-4m0 6.5a2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 1 2.5-2.5 2.5 2.5 0 0 1 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5M9.27 20H6V4h7v5h5v4.07c.7.08 1.36.25 2 .49V8l-6-6H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h4.5a8.2 8.2 0 0 1-1.23-2"/></svg>
     </a>
   
 
 
-<h1 id="command-module"><a class="toclink" href="#command-module">Command Module</a><a class="headerlink" href="#command-module" title="Permanent link">#</a></h1>
-<p>The Command module serves as the main entry point for the D-FAST Bank Erosion software, handling command-line arguments and orchestrating the execution of the different operational modes.</p>
+<h1 id="utilities-module"><a class="toclink" href="#utilities-module">Utilities Module</a><a class="headerlink" href="#utilities-module" title="Permanent link">#</a></h1>
+<p>The Utilities module provides general utility functions used across the D-FAST Bank Erosion software. These functions support various operations in the Bank Lines and Bank Erosion modules.</p>
 <h2 id="overview"><a class="toclink" href="#overview">Overview</a><a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
-<p>The Command module provides the interface between the user (via command-line or GUI) and the core functionality of the D-FAST Bank Erosion software. It parses command-line arguments, initializes the appropriate language settings, and launches the requested operational mode (BANKLINES, BANKEROSION, or GUI).</p>
+<p>The Utilities module contains a collection of helper functions that are used by multiple components of the D-FAST Bank Erosion software. These functions handle common tasks such as geometric operations, data processing, and visualization support.</p>
 <h2 id="components"><a class="toclink" href="#components">Components</a><a class="headerlink" href="#components" title="Permanent link">#</a></h2>
-<p>The Command module consists of the following components:</p>
-<h3 id="run-function"><a class="toclink" href="#run-function">Run Function</a><a class="headerlink" href="#run-function" title="Permanent link">#</a></h3>
+<p>The Utilities module consists of the following components:</p>
+<h3 id="general-utilities"><a class="toclink" href="#general-utilities">General Utilities</a><a class="headerlink" href="#general-utilities" title="Permanent link">#</a></h3>
 
 
 <div class="doc doc-object doc-module">
 
 
 
-<h2 id="dfastbe.cmd" class="doc doc-heading"><a href="#dfastbe.cmd" class="toclink">
-            <code>dfastbe.cmd</code>
+<h2 id="dfastbe.utils" class="doc doc-heading"><a href="#dfastbe.utils" class="toclink">
+            <code>dfastbe.utils</code>
 
 
-</a><a href="#dfastbe.cmd" class="headerlink" title="Permanent link">#</a></h2>
+</a><a href="#dfastbe.utils" class="headerlink" title="Permanent link">#</a></h2>
 
     <div class="doc doc-contents first">
 
@@ -2048,18 +2030,15 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <div class="doc doc-object doc-function">
 
 
-<h3 id="dfastbe.cmd.run" class="doc doc-heading"><a href="#dfastbe.cmd.run" class="toclink">
-            <code class="highlight language-python"><span class="n">run</span><span class="p">(</span><span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;UK&#39;</span><span class="p">,</span> <span class="n">run_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;GUI&#39;</span><span class="p">,</span> <span class="n">configfile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;dfastbe.cfg&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+<h3 id="dfastbe.utils.get_zoom_extends" class="doc doc-heading"><a href="#dfastbe.utils.get_zoom_extends" class="toclink">
+            <code class="highlight language-python"><span class="n">get_zoom_extends</span><span class="p">(</span><span class="n">km_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">km_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">zoom_km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">bank_crds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">bank_km</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span></code>
 
-</a><a href="#dfastbe.cmd.run" class="headerlink" title="Permanent link">#</a></h3>
+</a><a href="#dfastbe.utils.get_zoom_extends" class="headerlink" title="Permanent link">#</a></h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>Initializes the language file and starts the chosen run mode.</p>
-<p>This function loads the appropriate language file and executes one of the
-available modes: 'BANKLINES', 'BANKEROSION', or 'GUI'. The default configuration
-file is <code>dfastbe.cfg</code>.</p>
+        <p>Zoom.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -2075,99 +2054,129 @@ file is <code>dfastbe.cfg</code>.</p>
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>language</code>
+                <code>km_min</code>
             </td>
             <td>
-                  <code><span title="str">str</span></code>
+                  <code><span title="float">float</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Display language code. Acceptable values are 'NL' (Dutch) or 'UK' (English).
-Defaults to 'UK'.</p>
+                <p>Minimum value for the chainage range of interest.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;UK&#39;</code>
+                <em>required</em>
             </td>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>run_mode</code>
+                <code>km_max</code>
             </td>
             <td>
-                  <code><span title="str">str</span></code>
+                  <code><span title="float">float</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Mode in which the program should run. Available options:</p>
-<ul>
-<li>'BANKLINES': Runs the bank lines processing.</li>
-<li>'BANKEROSION': Runs the bank erosion processing.</li>
-<li>'GUI': Launches the graphical user interface.</li>
-</ul>
-<p>Defaults to 'GUI'.</p>
+                <p>Maximum value for the chainage range of interest.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;GUI&#39;</code>
+                <em>required</em>
             </td>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>configfile</code>
+                <code>zoom_km_step</code>
             </td>
             <td>
-                  <code><span title="str">str</span></code>
+                  <code><span title="float">float</span></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>Path to the configuration file. Defaults to 'dfastbe.cfg'.</p>
+                <p>Preferred chainage length of zoom box.</p>
               </div>
             </td>
             <td>
-                  <code>&#39;dfastbe.cfg&#39;</code>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>bank_crds</code>
+            </td>
+            <td>
+                  <code><span title="typing.List">List</span>[<span title="numpy.ndarray">ndarray</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of N x 2 np arrays of coordinates per bank.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>bank_km</code>
+            </td>
+            <td>
+                  <code><span title="typing.List">List</span>[<span title="numpy.ndarray">ndarray</span>]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>List of N np arrays of chainage values per bank.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
             </td>
           </tr>
       </tbody>
     </table>
 
 
-<p><span class="doc-section-title">Raises:</span></p>
+    <p><span class="doc-section-title">Returns:</span></p>
     <table>
       <thead>
         <tr>
-          <th>Type</th>
+<th>Name</th>          <th>Type</th>
           <th>Description</th>
         </tr>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
+<td><code>station_zoom</code></td>            <td>
+                  <code><span title="typing.List">List</span>[<span title="typing.Tuple">Tuple</span>[<span title="float">float</span>, <span title="float">float</span>]]</code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>If an invalid <code>run_mode</code> is provided. The valid options are
-'BANKLINES', 'BANKEROSION', or 'GUI'.</p>
+                <p>Zoom ranges for plots with chainage along x-axis.</p>
+              </div>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+<td><code>coords_zoom</code></td>            <td>
+                  <code><span title="typing.List">List</span>[<span title="typing.Tuple">Tuple</span>[<span title="float">float</span>, <span title="float">float</span>, <span title="float">float</span>, <span title="float">float</span>]]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Zoom ranges for xy-plots.</p>
               </div>
             </td>
           </tr>
       </tbody>
     </table>
 
-
-<details class="example" open>
-  <summary>Example</summary>
-  <p>Running the program with Dutch language and bank erosion mode:</p>
-<div class="highlight"><pre><span></span><code><span class="n">run</span><span class="p">(</span><span class="n">language</span><span class="o">=</span><span class="s2">&quot;NL&quot;</span><span class="p">,</span> <span class="n">run_mode</span><span class="o">=</span><span class="s2">&quot;BANKEROSION&quot;</span><span class="p">,</span> <span class="n">configfile</span><span class="o">=</span><span class="s2">&quot;custom_config.cfg&quot;</span><span class="p">)</span>
-</code></pre></div>
-<p>Running the program in default mode (GUI) with the English language:</p>
-<div class="highlight"><pre><span></span><code><span class="n">run</span><span class="p">()</span>
-</code></pre></div>
-</details>
             <details class="quote">
-              <summary>Source code in <code>src/dfastbe/cmd.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">39</span>
+              <summary>Source code in <code>src/dfastbe/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
 <span class="normal">40</span>
 <span class="normal">41</span>
 <span class="normal">42</span>
@@ -2218,76 +2227,327 @@ Defaults to 'UK'.</p>
 <span class="normal">87</span>
 <span class="normal">88</span>
 <span class="normal">89</span>
-<span class="normal">90</span>
-<span class="normal">91</span>
-<span class="normal">92</span>
-<span class="normal">93</span>
-<span class="normal">94</span>
-<span class="normal">95</span>
-<span class="normal">96</span>
-<span class="normal">97</span>
-<span class="normal">98</span>
-<span class="normal">99</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span>
-    <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;UK&quot;</span><span class="p">,</span>
-    <span class="n">run_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;GUI&quot;</span><span class="p">,</span>
-    <span class="n">configfile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dfastbe.cfg&quot;</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Initializes the language file and starts the chosen run mode.</span>
-
-<span class="sd">    This function loads the appropriate language file and executes one of the</span>
-<span class="sd">    available modes: &#39;BANKLINES&#39;, &#39;BANKEROSION&#39;, or &#39;GUI&#39;. The default configuration</span>
-<span class="sd">    file is `dfastbe.cfg`.</span>
+<span class="normal">90</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_zoom_extends</span><span class="p">(</span>
+    <span class="n">km_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">km_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">zoom_km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">bank_crds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+    <span class="n">bank_km</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Zoom.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        language (str, optional):</span>
-<span class="sd">            Display language code. Acceptable values are &#39;NL&#39; (Dutch) or &#39;UK&#39; (English).</span>
-<span class="sd">            Defaults to &#39;UK&#39;.</span>
-<span class="sd">        run_mode (str, optional):</span>
-<span class="sd">            Mode in which the program should run. Available options:</span>
+<span class="sd">        km_min (float):</span>
+<span class="sd">            Minimum value for the chainage range of interest.</span>
+<span class="sd">        km_max (float):</span>
+<span class="sd">            Maximum value for the chainage range of interest.</span>
+<span class="sd">        zoom_km_step (float):</span>
+<span class="sd">            Preferred chainage length of zoom box.</span>
+<span class="sd">        bank_crds (List[np.ndarray]):</span>
+<span class="sd">            List of N x 2 np arrays of coordinates per bank.</span>
+<span class="sd">        bank_km (List[np.ndarray]):</span>
+<span class="sd">            List of N np arrays of chainage values per bank.</span>
 
-<span class="sd">            - &#39;BANKLINES&#39;: Runs the bank lines processing.</span>
-<span class="sd">            - &#39;BANKEROSION&#39;: Runs the bank erosion processing.</span>
-<span class="sd">            - &#39;GUI&#39;: Launches the graphical user interface.</span>
-
-<span class="sd">            Defaults to &#39;GUI&#39;.</span>
-<span class="sd">        configfile (str, optional):</span>
-<span class="sd">            Path to the configuration file. Defaults to &#39;dfastbe.cfg&#39;.</span>
-
-<span class="sd">    Raises:</span>
-<span class="sd">        Exception: If an invalid `run_mode` is provided. The valid options are</span>
-<span class="sd">            &#39;BANKLINES&#39;, &#39;BANKEROSION&#39;, or &#39;GUI&#39;.</span>
-
-<span class="sd">    Example:</span>
-<span class="sd">        Running the program with Dutch language and bank erosion mode:</span>
-
-<span class="sd">        ```python</span>
-<span class="sd">        run(language=&quot;NL&quot;, run_mode=&quot;BANKEROSION&quot;, configfile=&quot;custom_config.cfg&quot;)</span>
-<span class="sd">        ```</span>
-
-<span class="sd">        Running the program in default mode (GUI) with the English language:</span>
-
-<span class="sd">        ```python</span>
-<span class="sd">        run()</span>
-<span class="sd">        ```</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        station_zoom (List[Tuple[float, float]]):</span>
+<span class="sd">            Zoom ranges for plots with chainage along x-axis.</span>
+<span class="sd">        coords_zoom (List[Tuple[float, float, float, float]]):</span>
+<span class="sd">            Zoom ranges for xy-plots.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">language</span> <span class="o">=</span> <span class="n">language</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-    <span class="n">load_program_texts</span><span class="p">(</span> <span class="n">LOG_DATA_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;messages.</span><span class="si">{</span><span class="n">language</span><span class="si">}</span><span class="s2">.ini&quot;</span><span class="p">)</span>
-    <span class="n">run_mode</span> <span class="o">=</span> <span class="n">run_mode</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.bank_erosion.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_km_bins</span>
 
-    <span class="k">if</span> <span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;GUI&quot;</span><span class="p">:</span>
-        <span class="n">main</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span>
+    <span class="n">zoom_km_bin</span> <span class="o">=</span> <span class="p">(</span><span class="n">km_min</span><span class="p">,</span> <span class="n">km_max</span><span class="p">,</span> <span class="n">zoom_km_step</span><span class="p">)</span>
+    <span class="n">zoom_km_bnd</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">zoom_km_bin</span><span class="p">,</span> <span class="n">station_type</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">zoom_km_step</span>
 
-        <span class="k">if</span> <span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;BANKLINES&quot;</span><span class="p">:</span>
-            <span class="n">bank_lines</span> <span class="o">=</span> <span class="n">BankLines</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
-            <span class="n">bank_lines</span><span class="o">.</span><span class="n">detect</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;BANKEROSION&quot;</span><span class="p">:</span>
-            <span class="n">erosion</span> <span class="o">=</span> <span class="n">Erosion</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
-            <span class="n">erosion</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+    <span class="n">station_zoom</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">coords_zoom</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">inf</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">zoom_km_bnd</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">km_min</span> <span class="o">=</span> <span class="n">zoom_km_bnd</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="n">eps</span>
+        <span class="n">km_max</span> <span class="o">=</span> <span class="n">zoom_km_bnd</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">eps</span>
+        <span class="n">station_zoom</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">km_min</span><span class="p">,</span> <span class="n">km_max</span><span class="p">))</span>
+
+        <span class="n">x_min</span> <span class="o">=</span> <span class="n">inf</span>
+        <span class="n">x_max</span> <span class="o">=</span> <span class="o">-</span><span class="n">inf</span>
+        <span class="n">y_min</span> <span class="o">=</span> <span class="n">inf</span>
+        <span class="n">y_max</span> <span class="o">=</span> <span class="o">-</span><span class="n">inf</span>
+        <span class="k">for</span> <span class="n">ib</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bank_km</span><span class="p">)):</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">bank_km</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">km_min</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">bank_km</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">km_max</span><span class="p">)</span>
+            <span class="n">range_crds</span> <span class="o">=</span> <span class="n">bank_crds</span><span class="p">[</span><span class="n">ib</span><span class="p">][</span><span class="n">ind</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">range_crds</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">range_crds</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">x_min</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+                <span class="n">x_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+                <span class="n">y_min</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">y_min</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+                <span class="n">y_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">y_max</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+        <span class="n">coords_zoom</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">station_zoom</span><span class="p">,</span> <span class="n">coords_zoom</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h3 id="dfastbe.utils.on_right_side" class="doc doc-heading"><a href="#dfastbe.utils.on_right_side" class="toclink">
+            <code class="highlight language-python"><span class="n">on_right_side</span><span class="p">(</span><span class="n">line_xy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ref_xy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span></code>
+
+</a><a href="#dfastbe.utils.on_right_side" class="headerlink" title="Permanent link">#</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Determine whether line_xy is to the left or right of ref_xy.</p>
+<p>Left and right are relative to the path along ref_xy from the first to the
+last node. It is assumed that line_xy can be uniquely identified as on the
+left or right side of ref_xy, i.e., the lines may not cross each other or
+themselves. Also, line_xy should be alongside ref_xy and not "before" or
+"after" ref_xy. The typical use case is to relate a bank line line_xy to a
+center line ref_xy.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>line_xy</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>np.ndarray
+Array containing the x,y coordinates of a line.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>ref_xy</code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>np.ndarray
+Array containing the x,y,chainage data.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>right_side</code></td>            <td>
+                  <code><span title="bool">bool</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>bool
+Flag indicating whether the line is on the right side.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+            <details class="quote">
+              <summary>Source code in <code>src/dfastbe/utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">on_right_side</span><span class="p">(</span><span class="n">line_xy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ref_xy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine whether line_xy is to the left or right of ref_xy.</span>
+
+<span class="sd">    Left and right are relative to the path along ref_xy from the first to the</span>
+<span class="sd">    last node. It is assumed that line_xy can be uniquely identified as on the</span>
+<span class="sd">    left or right side of ref_xy, i.e., the lines may not cross each other or</span>
+<span class="sd">    themselves. Also, line_xy should be alongside ref_xy and not &quot;before&quot; or</span>
+<span class="sd">    &quot;after&quot; ref_xy. The typical use case is to relate a bank line line_xy to a</span>
+<span class="sd">    center line ref_xy.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        line_xy : np.ndarray</span>
+<span class="sd">            Array containing the x,y coordinates of a line.</span>
+<span class="sd">        ref_xy : np.ndarray</span>
+<span class="sd">            Array containing the x,y,chainage data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        right_side : bool</span>
+<span class="sd">            Flag indicating whether the line is on the right side.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># determine the reference point based on the line with the fewest points</span>
+    <span class="n">ref_npnt</span> <span class="o">=</span> <span class="n">ref_xy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">npnt</span> <span class="o">=</span> <span class="n">line_xy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">ref_npnt</span> <span class="o">&lt;</span> <span class="n">npnt</span><span class="p">:</span>
+        <span class="c1"># determine the mid-point p0 of ref_xy</span>
+        <span class="k">if</span> <span class="n">ref_npnt</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">imin</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">imind</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">iminu</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">p0</span> <span class="o">=</span> <span class="p">(</span><span class="n">ref_xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">ref_xy</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid run mode </span><span class="si">{</span><span class="n">run_mode</span><span class="si">}</span><span class="s2"> specified. Should read &#39;BANKLINES&#39;, &#39;BANKEROSION&#39; or &#39;GUI&#39;.&quot;</span><span class="p">)</span>
+            <span class="n">imin</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ref_npnt</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">imind</span> <span class="o">=</span> <span class="n">imin</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="n">iminu</span> <span class="o">=</span> <span class="n">imin</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">p0</span> <span class="o">=</span> <span class="n">ref_xy</span><span class="p">[</span><span class="n">imin</span><span class="p">]</span>
+
+        <span class="c1"># find the node on line_xy closest to p0</span>
+        <span class="n">hpnt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(((</span><span class="n">p0</span> <span class="o">-</span> <span class="n">line_xy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">hpxy</span> <span class="o">=</span> <span class="n">line_xy</span><span class="p">[</span><span class="n">hpnt</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># determine the mid-point hpxy of line_xy</span>
+        <span class="n">hpnt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">npnt</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">hpxy</span> <span class="o">=</span> <span class="n">line_xy</span><span class="p">[</span><span class="n">hpnt</span><span class="p">]</span>
+
+        <span class="c1"># find the node on ref_xy closest to hpxy</span>
+        <span class="n">imin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(((</span><span class="n">hpxy</span> <span class="o">-</span> <span class="n">ref_xy</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">imind</span> <span class="o">=</span> <span class="n">imin</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">iminu</span> <span class="o">=</span> <span class="n">imin</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">p0</span> <span class="o">=</span> <span class="n">ref_xy</span><span class="p">[</span><span class="n">imin</span><span class="p">]</span>
+
+    <span class="c1"># direction to the midpoint of line_xy</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">hpxy</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">hpxy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">p0</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># direction from which ref_xy comes</span>
+    <span class="k">if</span> <span class="n">ref_xy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;One point is not a reference line.&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">imin</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">phi1</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">ref_xy</span><span class="p">[</span><span class="n">imind</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ref_xy</span><span class="p">[</span><span class="n">imind</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">p0</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="c1"># direction to which ref_xy goes</span>
+        <span class="k">if</span> <span class="n">imin</span> <span class="o">&lt;</span> <span class="n">ref_xy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">phi2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">ref_xy</span><span class="p">[</span><span class="n">iminu</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ref_xy</span><span class="p">[</span><span class="n">iminu</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">p0</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">phi2</span> <span class="o">=</span> <span class="o">-</span><span class="n">phi1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># direction to which ref_xy goes</span>
+        <span class="n">phi2</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">ref_xy</span><span class="p">[</span><span class="n">iminu</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">p0</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ref_xy</span><span class="p">[</span><span class="n">iminu</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">p0</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">phi1</span> <span class="o">=</span> <span class="o">-</span><span class="n">phi2</span>
+
+    <span class="c1"># adjust the directions of ref_xy such that both are larger than the</span>
+    <span class="c1"># angle of the direction towards the midpoint of line_xy</span>
+    <span class="k">if</span> <span class="n">phi1</span> <span class="o">&lt;</span> <span class="n">theta</span><span class="p">:</span>
+        <span class="n">phi1</span> <span class="o">=</span> <span class="n">phi1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
+    <span class="k">if</span> <span class="n">phi2</span> <span class="o">&lt;</span> <span class="n">theta</span><span class="p">:</span>
+        <span class="n">phi2</span> <span class="o">=</span> <span class="n">phi2</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span>
+
+    <span class="c1"># theta points to the right relative to a line coming from phi1 and going</span>
+    <span class="c1"># to phi2 if we encounter the to direction phi2 before the from direction</span>
+    <span class="c1"># phi1 when searching from theta in counter clockwise direction.</span>
+    <span class="n">right_side</span> <span class="o">=</span> <span class="n">phi2</span> <span class="o">&lt;</span> <span class="n">phi1</span>
+
+    <span class="k">return</span> <span class="n">right_side</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -2300,35 +2560,20 @@ Defaults to 'UK'.</p>
 
     </div>
 
-</div><p>The <code>run</code> function is the main entry point for the D-FAST Bank Erosion software. It initializes the language settings and launches the requested operational mode.</p>
-<h2 id="operational-modes"><a class="toclink" href="#operational-modes">Operational Modes</a><a class="headerlink" href="#operational-modes" title="Permanent link">#</a></h2>
-<p>The D-FAST Bank Erosion software supports three operational modes:</p>
-<ol>
-<li><strong>BANKLINES</strong>: Detects bank lines from hydrodynamic simulation results</li>
-<li><strong>BANKEROSION</strong>: Calculates bank erosion based on detected bank lines and hydrodynamic data</li>
-<li><strong>GUI</strong>: Provides a graphical user interface for configuring and running the above processes</li>
-</ol>
-<h2 id="workflow"><a class="toclink" href="#workflow">Workflow</a><a class="headerlink" href="#workflow" title="Permanent link">#</a></h2>
-<p>The typical workflow for using the Command module is:</p>
-<ol>
-<li>Call the <code>run</code> function with the desired language, run mode, and configuration file</li>
-<li>The <code>run</code> function initializes the language settings</li>
-<li>Depending on the run mode, the <code>run</code> function:</li>
-<li>Launches the GUI</li>
-<li>Runs bank line detection</li>
-<li>Runs bank erosion calculation</li>
-</ol>
+</div><p>The general utilities component provides functions for various common tasks, such as:</p>
+<ul>
+<li>Geometric operations (e.g., checking if a point is on the right side of a line)</li>
+<li>Visualization support (e.g., getting zoom extents for plots)</li>
+<li>Data processing (e.g., interpolation, filtering)</li>
+</ul>
 <h2 id="usage-example"><a class="toclink" href="#usage-example">Usage Example</a><a class="headerlink" href="#usage-example" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.cmd</span><span class="w"> </span><span class="kn">import</span> <span class="n">run</span>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_zoom_extends</span><span class="p">,</span> <span class="n">on_right_side</span>
 
-<span class="c1"># Run in GUI mode with English language</span>
-<span class="n">run</span><span class="p">(</span><span class="n">language</span><span class="o">=</span><span class="s2">&quot;UK&quot;</span><span class="p">,</span> <span class="n">run_mode</span><span class="o">=</span><span class="s2">&quot;GUI&quot;</span><span class="p">,</span> <span class="n">configfile</span><span class="o">=</span><span class="s2">&quot;config.cfg&quot;</span><span class="p">)</span>
+<span class="c1"># Check if a point is on the right side of a line</span>
+<span class="n">is_on_right</span> <span class="o">=</span> <span class="n">on_right_side</span><span class="p">(</span><span class="n">line_start</span><span class="p">,</span> <span class="n">line_end</span><span class="p">,</span> <span class="n">point</span><span class="p">)</span>
 
-<span class="c1"># Run bank line detection with Dutch language</span>
-<span class="n">run</span><span class="p">(</span><span class="n">language</span><span class="o">=</span><span class="s2">&quot;NL&quot;</span><span class="p">,</span> <span class="n">run_mode</span><span class="o">=</span><span class="s2">&quot;BANKLINES&quot;</span><span class="p">,</span> <span class="n">configfile</span><span class="o">=</span><span class="s2">&quot;config.cfg&quot;</span><span class="p">)</span>
-
-<span class="c1"># Run bank erosion calculation with English language</span>
-<span class="n">run</span><span class="p">(</span><span class="n">language</span><span class="o">=</span><span class="s2">&quot;UK&quot;</span><span class="p">,</span> <span class="n">run_mode</span><span class="o">=</span><span class="s2">&quot;BANKEROSION&quot;</span><span class="p">,</span> <span class="n">configfile</span><span class="o">=</span><span class="s2">&quot;config.cfg&quot;</span><span class="p">)</span>
+<span class="c1"># Get zoom extents for plotting</span>
+<span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="n">y_min</span><span class="p">,</span> <span class="n">y_max</span> <span class="o">=</span> <span class="n">get_zoom_extends</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">margin</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 </code></pre></div>
 <p>For more details on the specific functions, refer to the API reference below.</p>
 
@@ -2366,7 +2611,7 @@ Defaults to 'UK'.</p>
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="io.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: I/O Module">
+          <a href="cmd.html" class="md-footer__link md-footer__link--prev" aria-label="Previous: Command Module">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -2376,20 +2621,20 @@ Defaults to 'UK'.</p>
                 Previous
               </span>
               <div class="md-ellipsis">
-                I/O Module
+                Command Module
               </div>
             </div>
           </a>
         
         
           
-          <a href="utils.html" class="md-footer__link md-footer__link--next" aria-label="Next: Utilities Module">
+          <a href="plotting.html" class="md-footer__link md-footer__link--next" aria-label="Next: Plotting Module">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Utilities Module
+                Plotting Module
               </div>
             </div>
             <div class="md-footer__button md-icon">
