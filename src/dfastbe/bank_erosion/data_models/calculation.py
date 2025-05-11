@@ -151,7 +151,6 @@ class WaterLevelData:
     ship_wave_max: List[List[np.ndarray]]
     ship_wave_min: List[List[np.ndarray]]
     velocity: List[List[np.ndarray]]
-    bank_height: List[np.ndarray]
     chezy: List[List[np.ndarray]]
     vol_per_discharge: List[List[np.ndarray]]
 
@@ -209,6 +208,9 @@ class SingleBank:
     dx: np.ndarray = field(init=False)
     dy: np.ndarray = field(init=False)
     length: int = field(init=False)
+
+    # bank height is calculated at the first discharge level only.
+    height: Optional[np.ndarray] = field(default=lambda : np.array([]))
 
     def __post_init__(self):
         """Post-initialization to ensure bank_line_coords is a list of numpy arrays."""
@@ -331,6 +333,11 @@ class BankData(BaseBank[SingleBank]):
         """Get the number of stations per bank."""
         return [self.left.length, self.right.length]
 
+    @property
+    def height(self) -> List[np.ndarray]:
+        """Get the bank height."""
+        return [self.left.height, self.right.height]
+
 
 @dataclass
 class FairwayData:
@@ -432,7 +439,7 @@ class ErosionResults:
 
 
 @dataclass
-class ParametersPerBank:
+class SingleParameters:
     ship_velocity: float
     num_ship: float
     num_waves_per_ship: float
@@ -445,14 +452,15 @@ class ParametersPerBank:
 
 
 @dataclass
-class DischargeLevelParameters(BaseBank[ParametersPerBank]):
+class SingleLevelParameters(BaseBank[SingleParameters]):
     pass
 
 
 @dataclass
-class DischargeCalculationParameters:
+class SingleCalculation:
     bank_velocity: np.ndarray = field(default=lambda : np.array([]))
     water_level: np.ndarray = field(default=lambda : np.array([]))
+    water_depth: np.ndarray = field(default=lambda : np.array([]))
     chezy: np.ndarray = field(default=lambda : np.array([]))
     ship_wave_max: np.ndarray = field(default=lambda : np.array([]))
     ship_wave_min: np.ndarray = field(default=lambda : np.array([]))
@@ -461,21 +469,21 @@ class DischargeCalculationParameters:
     erosion_distance_shipping: np.ndarray = field(default=lambda : np.array([]))
     erosion_distance_tot: np.ndarray = field(default=lambda : np.array([]))
     erosion_volume_tot: np.ndarray = field(default=lambda : np.array([]))
+    # the erosion distance and erosion volume at equilibrium is calculated at the last discharge level only.
     erosion_distance_eq: Optional[np.ndarray] = field(default=lambda : np.array([]))
     erosion_volume_eq: Optional[np.ndarray] = field(default=lambda : np.array([]))
 
 
 @dataclass
-class CalculationLevel(BaseBank[DischargeCalculationParameters]):
+class SingleDischargeLevel(BaseBank[SingleCalculation]):
     hfw_max: float = field(default=0.0)
 
     @classmethod
     def from_column_arrays(
-        cls, data: dict, bank_cls: Type["DischargeCalculationParameters"], hfw_max: float,
+        cls, data: dict, bank_cls: Type["SingleCalculation"], hfw_max: float,
         bank_order: Tuple[str, str] = ("left", "right")
-    ) -> "CalculationLevel":
+    ) -> "SingleDischargeLevel":
         # Only include fields that belong to the bank-specific data
-        # base_fields = {k: v for k, v in data.items() if k != "id"}
         base = BaseBank.from_column_arrays(data, bank_cls, bank_order=bank_order)
 
         return cls(
@@ -488,16 +496,16 @@ class CalculationLevel(BaseBank[DischargeCalculationParameters]):
 
 class DischargeLevels:
 
-    def __init__(self, levels: List[CalculationLevel]):
+    def __init__(self, levels: List[SingleDischargeLevel]):
         self.levels = levels
 
-    def __getitem__(self, index: int) -> CalculationLevel:
+    def __getitem__(self, index: int) -> SingleDischargeLevel:
         return self.levels[index]
 
     def __len__(self) -> int:
         return len(self.levels)
 
-    def append(self, level_calc: CalculationLevel):
+    def append(self, level_calc: SingleDischargeLevel):
         self.levels.append(level_calc)
 
     def get_max_hfw_level(self) -> float:
@@ -548,10 +556,9 @@ class DischargeLevels:
         """Get the attributes of the levels for both left and right bank."""
         return [self._get_attr_both_sides_level(attribute_name, level) for level in range(len(self.levels))]
 
-    def get_water_level_data(self, bank_height) -> WaterLevelData:
+    def get_water_level_data(self) -> WaterLevelData:
         return WaterLevelData(
             hfw_max=self.levels[-1].hfw_max,
-            bank_height=bank_height,
             water_level=self.get_attr_level("water_level"),
             ship_wave_max=self.get_attr_level("ship_wave_max"),
             ship_wave_min=self.get_attr_level("ship_wave_min"),

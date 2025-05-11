@@ -167,6 +167,7 @@ class ErosionSimulationData(BaseSimulationData):
         return vel_bank
 
     def calculate_bank_height(self, single_bank: SingleBank, zb_dx):
+        # bank height = maximum bed elevation per cell
         from dfastbe.bank_erosion.utils import moving_avg
         bank_index = single_bank.bank_face_indices
         if self.bed_elevation_location == "node":
@@ -185,6 +186,22 @@ class ErosionSimulationData(BaseSimulationData):
 
         return zb_bank
 
+    def get_fairway_data(self, fairway_face_indices):
+        # get fairway face indices
+        fairway_face_indices = fairway_face_indices
+
+        # get water depth along the fair-way
+        water_depth_fairway = self.water_depth_face[fairway_face_indices]
+        water_level = self.water_level_face[fairway_face_indices]
+        chez_face = self.chezy_face[fairway_face_indices]
+        chezy = 0 * chez_face + chez_face.mean()
+
+        data = {
+            "water_depth": water_depth_fairway,
+            "water_level": water_level,
+            "chezy": chezy,
+        }
+        return data
 
 class ErosionRiverData(BaseRiverData):
 

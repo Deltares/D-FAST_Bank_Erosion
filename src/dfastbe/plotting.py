@@ -35,7 +35,7 @@ import geopandas
 import numpy
 
 from dfastbe.io.config import ConfigFile
-from dfastbe.bank_erosion.utils import WATER_DENSITY, g
+from dfastbe.bank_erosion.erosion_calculator import WATER_DENSITY, g
 
 def savefig(fig: matplotlib.figure.Figure, filename: str) -> None:
     """

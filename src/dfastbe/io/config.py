@@ -38,6 +38,7 @@ from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
+
 from dfastbe.io.file_utils import absolute_path, relative_path
 from dfastbe.io.logger import log_text
 
@@ -104,6 +105,7 @@ class ConfigFile:
 
     @property
     def debug(self) -> bool:
+        """bool: Get the debug flag."""
         return self.get_bool("General", "DebugOutput", False)
 
     @property
@@ -733,13 +735,9 @@ class ConfigFile:
             float: The validated parameter value.
         """
         if positive and value < 0:
-            raise ValueError(
-                f'Value of "{key}" should be positive, not {value}.'
-            )
+            raise ValueError(f'Value of "{key}" should be positive, not {value}.')
         if valid is not None and valid.count(value) == 0:
-            raise ValueError(
-                f'Value of "{key}" should be in {valid}, not {value}.'
-            )
+            raise ValueError(f'Value of "{key}" should be in {valid}, not {value}.')
         return value
 
     def process_parameter(
@@ -748,26 +746,35 @@ class ConfigFile:
         key: str,
         num_stations_per_bank: List[int],
         use_default: bool = False,
-        default=None,
+        default: Any = None,
         ext: str = "",
         positive: bool = False,
         valid: Optional[List[float]] = None,
         onefile: bool = False,
     ) -> List[np.ndarray]:
-        """Process a parameter value into arrays for each bank.
+        """
+        Process a parameter value into arrays for each bank.
 
         Args:
-            value (Union[str, float]): The parameter value or filename.
-            key (str): Name of the parameter for error messages.
-            num_stations_per_bank (List[int]): Number of stations for each bank.
-            use_default (bool): Flag indicating whether to use the default value; default False.
-            default: Default value to use if use_default is True; default None.
-            ext (str): File name extension; default empty string.
-            positive (bool): Flag specifying whether all values are accepted (if False),
-                or only positive values (if True); default False.
-            valid (Optional[List[float]]): Optional list of valid values; default None.
-            onefile (bool): Flag indicating whether parameters are read from one file.
-                One file should be used for all bank lines (True) or one file per bank line (False; default).
+            value (Union[str, float]):
+                The parameter value or a path to a file.
+            key (str):
+                Name of the parameter for error messages.
+            num_stations_per_bank (List[int]):
+                Number of stations for each bank.
+            use_default (bool):
+                Whether to use the default value.
+            default (Optional[float], default=None):
+                Default value used if `use_default` is True.
+            ext (str, default=''):
+                File name extension.
+            positive (bool, default=False):
+                If True, only positive values are allowed.
+            valid (Optional[List[float]], default=None):
+                List of valid values.
+            onefile (bool, default=False):
+                If True, parameters are read from a single file for all banks;
+                otherwise, one file per bank.
 
         Returns:
             List[np.ndarray]: Parameter values for each bank.
@@ -783,7 +790,7 @@ class ConfigFile:
                 real_val = float(value)
                 self.validate_parameter_value(real_val, key, positive, valid)
 
-            for ib, num_stations in enumerate(num_stations_per_bank):
+            for num_stations in num_stations_per_bank:
                 parameter_values.append(np.zeros(num_stations) + real_val)
 
         except (ValueError, TypeError):
