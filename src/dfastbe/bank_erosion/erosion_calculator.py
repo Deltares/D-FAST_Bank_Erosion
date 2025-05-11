@@ -111,7 +111,7 @@ class ErosionCalculator:
                 Array containing reference water levels at fairway [m]
             tauc : np.ndarray
                 Array containing critical shear stress [N/m2]
-            discharge_level_pars: LevelParameters,
+            discharge_level_pars: SingleLevelParameters,
                 num_ship : np.ndarray
                     Array containing number of ships [-]
                 ship_velocity : np.ndarray

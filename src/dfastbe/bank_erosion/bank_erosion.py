@@ -41,12 +41,12 @@ from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData, ErosionSim
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     SingleCalculation,
-    LevelParameters,
+    SingleLevelParameters,
     DischargeLevels,
     ErosionInputs,
     ErosionResults,
     FairwayData,
-    CalculationLevel,
+    SingleDischargeLevel,
     MeshData,
     SingleParameters,
     SingleErosion,
@@ -428,7 +428,7 @@ class Erosion:
             log_text("read_q_params", indent="  ")
             # 1) read level-specific parameters
             # read ship_velocity, num_ship, nwave, draught, ship_type, slope, reed, fairway_depth, ... (level specific values)
-            discharge_level_pars = self._read_discharge_parameters(
+            level_parameters = self._read_discharge_parameters(
                 level_i, erosion_inputs.shipping_data, bank_data.num_stations_per_bank
             )
 
@@ -442,19 +442,19 @@ class Erosion:
             )
             log_text("bank_erosion", indent="  ")
 
-            level_calculation, dvol_bank = self.compute_erosion_per_level(
+            single_level, dvol_bank = self.compute_erosion_per_level(
                 level_i,
                 bank_data,
                 simulation_data,
                 fairway_data,
-                discharge_level_pars,
+                level_parameters,
                 erosion_inputs,
                 km_bin,
                 num_km,
                 bank_height,
             )
 
-            discharge_levels.append(level_calculation)
+            discharge_levels.append(single_level)
 
             error_vol_file = config_file.get_str(
                 "Erosion", f"EroVol{level_i + 1}", default=f"erovolQ{level_i + 1}.evo"
@@ -593,7 +593,7 @@ class Erosion:
         level_i: int,
         shipping_data: Dict[str, List[np.ndarray]],
         num_stations_per_bank: List[int],
-    ) -> LevelParameters:
+    ) -> SingleLevelParameters:
         """Read Discharge level parameters.
 
         Read all discharge-specific input arrays for level *iq*.
@@ -658,7 +658,7 @@ class Erosion:
             mu_slope.append(mus)
             mu_reed.append(8.5e-4 * pr**0.8)  # empirical damping coefficient
 
-        return LevelParameters.from_column_arrays(
+        return SingleLevelParameters.from_column_arrays(
             {
                 "id": level_i,
                 "ship_velocity": ship_velocity,
@@ -680,22 +680,22 @@ class Erosion:
         bank_data,
         simulation_data,
         fairway_data,
-        discharge_level_pars,
+        single_parameters,
         erosion_inputs,
         km_bin,
         num_km,
         bank_height,
-    ):
+    ) -> Tuple[SingleDischargeLevel, np.ndarray]:
         """Compute the bank erosion for a given level."""
         num_levels = self.river_data.num_discharge_levels
         dvol_bank = np.zeros((num_km, 2))
         hfw_max_level = 0
         par_list = []
         for ind, bank_i in enumerate(bank_data):
-            parameter = SingleCalculation()
+            single_calculation = SingleCalculation()
             # bank_i = 0: left bank, bank_i = 1: right bank
             # calculate velocity along banks ...
-            parameter.bank_velocity = simulation_data.calculate_bank_velocity(
+            single_calculation.bank_velocity = simulation_data.calculate_bank_velocity(
                 bank_i, self.river_data.vel_dx
             )
 
@@ -709,9 +709,9 @@ class Erosion:
             water_depth_fairway = simulation_data.water_depth_face[ii_face]
             hfw_max_level = max(hfw_max_level, water_depth_fairway.max())
 
-            parameter.water_level = simulation_data.water_level_face[ii_face]
+            single_calculation.water_level = simulation_data.water_level_face[ii_face]
             chez_face = simulation_data.chezy_face[ii_face]
-            parameter.chezy = 0 * chez_face + chez_face.mean()
+            single_calculation.chezy = 0 * chez_face + chez_face.mean()
 
             # last discharge level
             if level_i == num_levels - 1:
@@ -719,21 +719,21 @@ class Erosion:
                     bank_height[ind],
                     bank_i.segment_length,
                     fairway_data.fairway_initial_water_levels[ind],
-                    discharge_level_pars.get_bank(ind),
+                    single_parameters.get_bank(ind),
                     bank_i.fairway_distances,
                     water_depth_fairway,
                     erosion_inputs.get_bank(ind),
                 )
-                parameter.erosion_distance_eq = erosion_distance_eq
-                parameter.erosion_volume_eq = erosion_volume_eq
+                single_calculation.erosion_distance_eq = erosion_distance_eq
+                single_calculation.erosion_volume_eq = erosion_volume_eq
 
-            parameter = self.erosion_calculator.compute_bank_erosion_dynamics(
-                parameter,
+            single_calculation = self.erosion_calculator.compute_bank_erosion_dynamics(
+                single_calculation,
                 bank_height[ind],
                 bank_i.segment_length,
                 bank_i.fairway_distances,
                 fairway_data.fairway_initial_water_levels[ind],
-                discharge_level_pars.get_bank(ind),
+                single_parameters.get_bank(ind),
                 self.river_data.erosion_time * self.p_discharge[level_i],
                 water_depth_fairway,
                 erosion_inputs.get_bank(ind),
@@ -741,10 +741,10 @@ class Erosion:
 
             # accumulate eroded volumes per km
             volume_per_discharge = get_km_eroded_volume(
-                bank_i.bank_chainage_midpoints, parameter.erosion_volume_tot, km_bin
+                bank_i.bank_chainage_midpoints, single_calculation.erosion_volume_tot, km_bin
             )
-            parameter.volume_per_discharge = volume_per_discharge
-            par_list.append(parameter)
+            single_calculation.volume_per_discharge = volume_per_discharge
+            par_list.append(single_calculation)
 
             dvol_bank[:, ind] += volume_per_discharge
 
@@ -755,14 +755,14 @@ class Erosion:
                     bank_data,
                     fairway_data,
                     erosion_inputs,
-                    discharge_level_pars,
+                    single_parameters,
                     water_depth_fairway,
                     bank_height,
                     num_levels,
-                    parameter,
+                    single_calculation,
                 )
 
-        level_calculation = CalculationLevel(
+        level_calculation = SingleDischargeLevel(
             left=par_list[0], right=par_list[1], hfw_max=hfw_max_level
         )
 

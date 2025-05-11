@@ -445,7 +445,7 @@ class SingleParameters:
 
 
 @dataclass
-class LevelParameters(BaseBank[SingleParameters]):
+class SingleLevelParameters(BaseBank[SingleParameters]):
     pass
 
 
@@ -466,16 +466,15 @@ class SingleCalculation:
 
 
 @dataclass
-class CalculationLevel(BaseBank[SingleCalculation]):
+class SingleDischargeLevel(BaseBank[SingleCalculation]):
     hfw_max: float = field(default=0.0)
 
     @classmethod
     def from_column_arrays(
         cls, data: dict, bank_cls: Type["SingleCalculation"], hfw_max: float,
         bank_order: Tuple[str, str] = ("left", "right")
-    ) -> "CalculationLevel":
+    ) -> "SingleDischargeLevel":
         # Only include fields that belong to the bank-specific data
-        # base_fields = {k: v for k, v in data.items() if k != "id"}
         base = BaseBank.from_column_arrays(data, bank_cls, bank_order=bank_order)
 
         return cls(
@@ -488,16 +487,16 @@ class CalculationLevel(BaseBank[SingleCalculation]):
 
 class DischargeLevels:
 
-    def __init__(self, levels: List[CalculationLevel]):
+    def __init__(self, levels: List[SingleDischargeLevel]):
         self.levels = levels
 
-    def __getitem__(self, index: int) -> CalculationLevel:
+    def __getitem__(self, index: int) -> SingleDischargeLevel:
         return self.levels[index]
 
     def __len__(self) -> int:
         return len(self.levels)
 
-    def append(self, level_calc: CalculationLevel):
+    def append(self, level_calc: SingleDischargeLevel):
         self.levels.append(level_calc)
 
     def get_max_hfw_level(self) -> float:

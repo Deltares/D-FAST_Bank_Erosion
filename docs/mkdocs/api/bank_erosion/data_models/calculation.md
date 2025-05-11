@@ -26,9 +26,9 @@ The data models component provides classes for representing various types of dat
 - **FairwayData**: Represents fairway data for erosion calculations
 - **ErosionResults**: Represents results of erosion calculations
 - **SingleParameters**: Represents parameters for each bank
-- **LevelParameters**: Represents parameters for discharge levels
+- **SingleLevelParameters**: Represents parameters for discharge levels
 - **SingleCalculation**: Represents parameters for discharge calculations
-- **CalculationLevel**: Represents a calculation level for erosion calculations
+- **SingleDischargeLevel**: Represents a calculation level for erosion calculations
 - **DischargeLevels**: Represents discharge levels for erosion calculations
 
 ## Usage Example

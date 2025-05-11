@@ -35,7 +35,7 @@ classDiagram
         -_prepare_initial_conditions(ConfigFile, List, FairwayData)
         -_process_discharge_levels(array, tuple, ConfigFile, ErosionInputs, BankData, FairwayData)
         -_postprocess_erosion_results(tuple, array, BankData, ErosionResults)
-        +compute_erosion_per_level(int, BankData, ErosionSimulationData, FairwayData, LevelParameters, ErosionInputs, tuple, int, array)
+        +compute_erosion_per_level(int, BankData, ErosionSimulationData, FairwayData, SingleLevelParameters, ErosionInputs, tuple, int, array)
         -_write_bankline_shapefiles(list, list, ConfigFile)
         -_write_volume_outputs(ErosionResults, array)
         -_generate_plots(array, ErosionSimulationData, list, array, float, ErosionInputs, WaterLevelData, MeshData, BankData, ErosionResults)
@@ -197,7 +197,7 @@ classDiagram
         +__init__(List)
         +__getitem__(int)
         +__len__()
-        +append(CalculationLevel)
+        +append(SingleDischargeLevel)
         +get_max_hfw_level()
         +total_erosion_volume()
         +__iter__()
@@ -208,7 +208,7 @@ classDiagram
         +get_water_level_data(array)
     }
 
-    class CalculationLevel {
+    class SingleDischargeLevel {
         +List banks
         +from_column_arrays(dict, Type, float, Tuple)
     }
@@ -225,7 +225,7 @@ classDiagram
         +array eq_eroded_vol
     }
 
-    class LevelParameters {
+    class SingleLevelParameters {
         +List banks
     }
 
@@ -308,8 +308,8 @@ classDiagram
     Erosion --> WaterLevelData : uses
     Erosion --> MeshData : uses
     Erosion --> SingleCalculation : uses
-    Erosion --> LevelParameters : uses
-    Erosion --> CalculationLevel : uses
+    Erosion --> SingleLevelParameters : uses
+    Erosion --> SingleDischargeLevel : uses
     Erosion --> SingleParameters : uses
     Erosion --> SingleErosion : uses
     Erosion --> Debugger : uses
@@ -341,15 +341,15 @@ classDiagram
     BankData --|> BaseBank : inherits
     BankData --|> BaseBank : inherits
     ErosionInputs --|> BaseBank : inherits
-    CalculationLevel --|> BaseBank : inherits
-    LevelParameters --|> BaseBank : inherits
+    SingleDischargeLevel --|> BaseBank : inherits
+    SingleLevelParameters --|> BaseBank : inherits
 
     %% Containment relationships
     BankData --> SingleBank : contains
     ErosionInputs --> SingleErosion : contains
-    CalculationLevel --> SingleCalculation : contains
-    LevelParameters --> SingleParameters : contains
-    DischargeLevels --> CalculationLevel : contains
+    SingleDischargeLevel --> SingleCalculation : contains
+    SingleLevelParameters --> SingleParameters : contains
+    DischargeLevels --> SingleDischargeLevel : contains
 
     BaseRiverData --> ConfigFile : uses
     BaseRiverData --> LineGeometry : uses
@@ -505,10 +505,10 @@ classDiagram
 #### DischargeLevels
 - **Responsibility**: Represents discharge levels for erosion calculations
 - **Key Properties**:
-  - `levels`: List of CalculationLevel objects
-- **Dependencies**: CalculationLevel
+  - `levels`: List of SingleDischargeLevel objects
+- **Dependencies**: SingleDischargeLevel
 
-#### CalculationLevel
+#### SingleDischargeLevel
 - **Responsibility**: Represents a calculation level for erosion calculations
 - **Key Properties**:
   - `left`: Left bank calculation parameters (SingleCalculation)
@@ -523,7 +523,7 @@ classDiagram
   - Various arrays storing discharge-related data
 - **Dependencies**: None
 
-#### LevelParameters
+#### SingleLevelParameters
 - **Responsibility**: Represents parameters for discharge levels
 - **Key Properties**:
   - `left`: Left bank parameters (SingleParameters)
