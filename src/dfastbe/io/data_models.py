@@ -292,8 +292,6 @@ class LineGeometry:
         of interpolation.
 
         Args:
-            target_line_coords (np.ndarray):
-                Nx2 array of x, y coordinates for the target line.
             reference_line_with_stations (np.ndarray):
                 Mx3 array with x, y, and chainage values for the reference line.
 
@@ -447,24 +445,18 @@ class BaseSimulationData:
                 String to use for each line as indentation (default empty).
 
         Raises:
-            SimulationFilesError
+            SimulationFilesError:
                 If the file is not recognized as a D-Flow FM map-file.
 
         Returns:
-            BaseSimulationData: Dictionary containing the data read from the simulation output file.
-            float: Threshold depth for detecting drying and flooding.
+            BaseSimulationData (Tuple[BaseSimulationData, float]):
+                Dictionary containing the data read from the simulation output file.
 
         Examples:
             ```python
             >>> from dfastbe.io.data_models import BaseSimulationData
-            >>> sim_data = BaseSimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
-            No message found for read_grid
-            No message found for read_bathymetry
-            No message found for read_water_level
-            No message found for read_water_depth
-            No message found for read_velocity
-            No message found for read_chezy
-            No message found for read_drywet
+            >>> sim_data = BaseSimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc") # doctest: +ELLIPSIS
+            No message ... read_drywet
             >>> print(sim_data.x_node[0:3])
             [194949.796875 194966.515625 194982.8125  ]
 
