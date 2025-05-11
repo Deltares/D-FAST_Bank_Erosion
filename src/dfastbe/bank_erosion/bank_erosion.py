@@ -58,9 +58,8 @@ from dfastbe.io.config import ConfigFile
 from dfastbe.io.logger import log_text
 from dfastbe.io.data_models import LineGeometry
 from dfastbe.utils import get_zoom_extends
+from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.bank_erosion.utils import (
-    comp_erosion_eq,
-    compute_bank_erosion_dynamics,
     get_km_bins,
     get_km_eroded_volume,
     move_line,
@@ -89,6 +88,7 @@ class Erosion:
         )
         self.bl_processor = BankLinesProcessor(self.river_data)
         self.debugger = Debugger(config_file.crs, self.river_data.output_dir)
+        self.erosion_calculator = ErosionCalculator()
 
     @property
     def config_file(self) -> ConfigFile:
@@ -715,7 +715,7 @@ class Erosion:
 
             # last discharge level
             if level_i == num_levels - 1:
-                erosion_distance_eq, erosion_volume_eq = comp_erosion_eq(
+                erosion_distance_eq, erosion_volume_eq = self.erosion_calculator.comp_erosion_eq(
                     bank_height[ind],
                     bank_i.segment_length,
                     fairway_data.fairway_initial_water_levels[ind],
@@ -727,7 +727,7 @@ class Erosion:
                 parameter.erosion_distance_eq = erosion_distance_eq
                 parameter.erosion_volume_eq = erosion_volume_eq
 
-            parameter = compute_bank_erosion_dynamics(
+            parameter = self.erosion_calculator.compute_bank_erosion_dynamics(
                 parameter,
                 bank_height[ind],
                 bank_i.segment_length,
