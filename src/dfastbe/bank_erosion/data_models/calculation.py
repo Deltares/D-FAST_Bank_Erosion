@@ -453,6 +453,7 @@ class SingleLevelParameters(BaseBank[SingleParameters]):
 class SingleCalculation:
     bank_velocity: np.ndarray = field(default=lambda : np.array([]))
     water_level: np.ndarray = field(default=lambda : np.array([]))
+    water_depth: np.ndarray = field(default=lambda : np.array([]))
     chezy: np.ndarray = field(default=lambda : np.array([]))
     ship_wave_max: np.ndarray = field(default=lambda : np.array([]))
     ship_wave_min: np.ndarray = field(default=lambda : np.array([]))

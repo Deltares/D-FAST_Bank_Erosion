@@ -82,21 +82,20 @@ class ErosionCalculator:
 
     @staticmethod
     def compute_bank_erosion_dynamics(
-        parameters: SingleCalculation,
+        single_calculation: SingleCalculation,
         bank_height: np.ndarray,
         segment_length: np.ndarray,
         bank_fairway_dist: np.ndarray,
         water_level_fairway_ref: np.ndarray,
         discharge_level_pars: SingleParameters,
         time_erosion: float,
-        water_depth_fairway: np.ndarray,
         erosion_inputs: SingleErosion,
     ) -> SingleCalculation:
         """
         Compute the bank erosion during a specific discharge level.
 
         Args:
-            parameters (SingleCalculation):
+            single_calculation (SingleCalculation):
                 velocity : np.ndarray
                     Array containing flow velocity magnitude [m/s]
                 water_level_fairway : np.ndarray
@@ -161,14 +160,14 @@ class ErosionCalculator:
                 * discharge_level_pars.num_ship
                 * discharge_level_pars.num_waves_per_ship
         )
-        vel = parameters.bank_velocity
+        vel = single_calculation.bank_velocity
 
         # the ship induced wave height at the beginning of the foreshore
         wave_height = ErosionCalculator.comp_hw_ship_at_bank(
             bank_fairway_dist,
             erosion_inputs.wave_fairway_distance_0,
             erosion_inputs.wave_fairway_distance_1,
-            water_depth_fairway,
+            single_calculation.water_depth,
             discharge_level_pars.ship_type,
             discharge_level_pars.ship_draught,
             discharge_level_pars.ship_velocity,
@@ -181,7 +180,7 @@ class ErosionCalculator:
 
         # critical velocity
         critical_velocity = np.sqrt(
-            erosion_inputs.tauc / WATER_DENSITY * parameters.chezy**2 / g
+            erosion_inputs.tauc / WATER_DENSITY * single_calculation.chezy ** 2 / g
         )
 
         # strength
@@ -191,26 +190,26 @@ class ErosionCalculator:
         # mu_tot = (mu_slope / H0) + mu_reed
         # water level along bank line
         ho_line_ship = np.minimum(
-            parameters.water_level - erosion_inputs.bank_protection_level, 2 * wave_height
+            single_calculation.water_level - erosion_inputs.bank_protection_level, 2 * wave_height
         )
         ho_line_flow = np.minimum(
-            parameters.water_level - erosion_inputs.bank_protection_level,
-            water_depth_fairway,
+            single_calculation.water_level - erosion_inputs.bank_protection_level,
+            single_calculation.water_depth,
             )
-        h_line_ship = np.maximum(bank_height - parameters.water_level + ho_line_ship, 0)
-        h_line_flow = np.maximum(bank_height - parameters.water_level + ho_line_flow, 0)
+        h_line_ship = np.maximum(bank_height - single_calculation.water_level + ho_line_ship, 0)
+        h_line_flow = np.maximum(bank_height - single_calculation.water_level + ho_line_flow, 0)
 
         # compute displacement due to flow
         crit_ratio = np.ones(critical_velocity.shape)
         mask = (vel > critical_velocity) & (
-                parameters.water_level > erosion_inputs.bank_protection_level
+                single_calculation.water_level > erosion_inputs.bank_protection_level
         )
         crit_ratio[mask] = (vel[mask] / critical_velocity[mask]) ** 2
         erosion_distance_flow = erosion_coef * (crit_ratio - 1) * time_erosion * sec_year
 
         # compute displacement due to ship waves
-        ship_wave_max = parameters.water_level + 0.5 * wave_height
-        ship_wave_min = parameters.water_level - 2 * wave_height
+        ship_wave_max = single_calculation.water_level + 0.5 * wave_height
+        ship_wave_min = single_calculation.water_level - 2 * wave_height
         mask = (ship_wave_min < water_level_fairway_ref) & (
                 water_level_fairway_ref < ship_wave_max
         )
@@ -221,14 +220,14 @@ class ErosionCalculator:
 
         # compute erosion volume
         mask = (h_line_ship > 0) & (
-                parameters.water_level > erosion_inputs.bank_protection_level
+                single_calculation.water_level > erosion_inputs.bank_protection_level
         )
         dv_ship = erosion_distance_shipping * segment_length * h_line_ship
         dv_ship[~mask] = 0.0
         erosion_distance_shipping[~mask] = 0.0
 
         mask = (h_line_flow > 0) & (
-                parameters.water_level > erosion_inputs.bank_protection_level
+                single_calculation.water_level > erosion_inputs.bank_protection_level
         )
         dv_flow = erosion_distance_flow * segment_length * h_line_flow
         dv_flow[~mask] = 0.0
@@ -236,13 +235,13 @@ class ErosionCalculator:
 
         erosion_distance = erosion_distance_shipping + erosion_distance_flow
         erosion_volume = dv_ship + dv_flow
-        parameters.erosion_volume_tot = erosion_volume
-        parameters.erosion_distance_tot = erosion_distance
-        parameters.erosion_distance_shipping = erosion_distance_shipping
-        parameters.erosion_distance_flow = erosion_distance_flow
-        parameters.ship_wave_max = ship_wave_max
-        parameters.ship_wave_min = ship_wave_min
-        return parameters
+        single_calculation.erosion_volume_tot = erosion_volume
+        single_calculation.erosion_distance_tot = erosion_distance
+        single_calculation.erosion_distance_shipping = erosion_distance_shipping
+        single_calculation.erosion_distance_flow = erosion_distance_flow
+        single_calculation.ship_wave_max = ship_wave_max
+        single_calculation.ship_wave_min = ship_wave_min
+        return single_calculation
 
     @staticmethod
     def comp_hw_ship_at_bank(
