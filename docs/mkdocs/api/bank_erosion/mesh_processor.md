@@ -12,7 +12,7 @@ The Bank Erosion Mesh Processor module consists of the following components:
 
 ### Mesh Processing Functions
 
-:::: dfastbe.bank_erosion.mesh_processor
+::: dfastbe.bank_erosion.mesh_processor
 
 The mesh processing component provides functions for processing mesh data, such as:
 

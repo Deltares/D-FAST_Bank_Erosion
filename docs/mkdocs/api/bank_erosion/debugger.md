@@ -12,7 +12,7 @@ The Bank Erosion Debugger module consists of the following components:
 
 ### Debugger Class
 
-:::: dfastbe.bank_erosion.debugger
+::: dfastbe.bank_erosion.debugger
 
 The Debugger class provides methods for writing debug information about bank erosion calculations, such as:
 

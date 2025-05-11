@@ -12,7 +12,7 @@ The Bank Erosion Calculation Data Models module consists of the following compon
 
 ### Data Models
 
-:::: dfastbe.bank_erosion.data_models.calculation
+::: dfastbe.bank_erosion.data_models.calculation
 
 The data models component provides classes for representing various types of data related to bank erosion calculations, such as:
 

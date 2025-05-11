@@ -12,7 +12,7 @@ The Bank Erosion Input Data Models module consists of the following components:
 
 ### Data Models
 
-:::: dfastbe.bank_erosion.data_models.inputs
+::: dfastbe.bank_erosion.data_models.inputs
 
 The data models component provides classes for representing various types of input data related to bank erosion, such as:
 

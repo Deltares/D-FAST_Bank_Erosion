@@ -12,17 +12,17 @@ The Bank Erosion module consists of the following components:
 
 ### Main Classes
 
-:::: dfastbe.bank_erosion.bank_erosion
+::: dfastbe.bank_erosion.bank_erosion
 
 ### Mesh Processing
 
-:::: dfastbe.bank_erosion.mesh_processor
+::: dfastbe.bank_erosion.mesh_processor
 
 For more details, see [Bank Erosion Mesh Processor](mesh_processor.md).
 
 ### Debugging Utilities
 
-:::: dfastbe.bank_erosion.debugger
+::: dfastbe.bank_erosion.debugger
 
 For more details, see [Bank Erosion Debugger](debugger.md).
 
@@ -32,13 +32,13 @@ The Bank Erosion module uses several data models to represent inputs, calculatio
 
 #### Calculation Data Models
 
-:::: dfastbe.bank_erosion.data_models.calculation
+::: dfastbe.bank_erosion.data_models.calculation
 
 For more details, see [Bank Erosion Calculation Data Models](data_models/calculation.md).
 
 #### Input Data Models
 
-:::: dfastbe.bank_erosion.data_models.inputs
+::: dfastbe.bank_erosion.data_models.inputs
 
 For more details, see [Bank Erosion Input Data Models](data_models/inputs.md).
 

@@ -12,7 +12,7 @@ The Bank Erosion Calculator module consists of the following components:
 
 ### ErosionCalculator Class
 
-:::: dfastbe.bank_erosion.erosion_calculator
+::: dfastbe.bank_erosion.erosion_calculator
 
 The ErosionCalculator class provides methods for calculating bank erosion, such as:
 
