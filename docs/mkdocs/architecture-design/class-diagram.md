@@ -26,6 +26,7 @@ classDiagram
         -Path output_dir
         -bool debug
         -dict plot_flags
+        -ErosionCalculator erosion_calculator
         +__init__(ConfigFile, bool)
         +run()
         -_process_river_axis_by_center_line()
@@ -38,6 +39,12 @@ classDiagram
         -_write_bankline_shapefiles(list, list, ConfigFile)
         -_write_volume_outputs(ErosionResults, array)
         -_generate_plots(array, ErosionSimulationData, list, array, float, ErosionInputs, WaterLevelData, MeshData, BankData, ErosionResults)
+    }
+
+    class ErosionCalculator {
+        +comp_erosion_eq(array, array, array, SingleParameters, array, array, SingleErosion)
+        +compute_bank_erosion_dynamics(SingleCalculation, array, array, array, array, SingleParameters, float, array, SingleErosion)
+        +comp_hw_ship_at_bank(array, array, array, array, array, array, array)
     }
 
     class BankLines {
@@ -308,13 +315,14 @@ classDiagram
     Erosion --> Debugger : uses
     Erosion --> BankLinesProcessor : uses
     Erosion --> LineGeometry : uses
+    Erosion --> ErosionCalculator : uses
 
     BankLines --> ConfigFile : uses
     BankLines --> BankLinesRiverData : uses
     BankLines --> SearchLines : uses
     BankLines --> LineGeometry : uses
     BankLines --> BaseSimulationData : uses
-    
+
     SearchLines --> LineGeometry : uses
 
     ErosionRiverData --|> BaseRiverData : inherits
@@ -472,6 +480,14 @@ classDiagram
 - **Key Methods**:
   - `intersect_with_mesh()`: Intersects bank lines with a mesh and returns bank data
 - **Dependencies**: ErosionRiverData, LineGeometry
+
+#### ErosionCalculator
+- **Responsibility**: Performs erosion calculations for bank erosion
+- **Key Methods**:
+  - `comp_erosion_eq()`: Computes the equilibrium bank erosion distance and volume
+  - `compute_bank_erosion_dynamics()`: Computes the bank erosion during a specific discharge level
+  - `comp_hw_ship_at_bank()`: Computes wave heights at bank due to passing ships
+- **Dependencies**: None
 
 #### WaterLevelData
 - **Responsibility**: Represents water level data for erosion calculations

@@ -107,6 +107,7 @@ graph TD
 The Bank Erosion module (`bank_erosion/`) is responsible for calculating bank erosion based on hydrodynamic data and detected bank lines. It includes:
 
 - **bank_erosion.py**: Main class for bank erosion calculations
+- **erosion_calculator.py**: Encapsulates core erosion calculation algorithms
 - **mesh_processor.py**: Processes mesh data from hydrodynamic simulations
 - **debugger.py**: Provides debugging utilities
 - **utils.py**: Utility functions specific to bank erosion
