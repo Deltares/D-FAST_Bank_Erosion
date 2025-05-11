@@ -68,9 +68,10 @@ flowchart TD
     B --> C[Calculate bank velocity]
     C --> D{Is first level?}
     D -- Yes --> E[Calculate bank height]
-    D -- No --> F[Get water depth along fairway]
+    D -- No --> F[Get fairway data]
     E --> F
-    F --> G{Is last level?}
+    F --> F1[Extract water level, chezy, and water depth]
+    F1 --> G{Is last level?}
     G -- Yes --> H[Calculate equilibrium erosion]
     G -- No --> I[Calculate bank erosion dynamics]
     H --> I
@@ -98,8 +99,10 @@ flowchart TD
 4. **Calculate bank height** (only for the first level):
    - Determine the maximum bed elevation per cell along the bank
 
-5. **Get water depth along the fairway**:
-   - Extract water depth values from the simulation data
+5. **Get fairway data**:
+   - Get fairway face indices from the bank
+   - Retrieve fairway data (water level, chezy, water depth) in a single call
+   - Extract and assign the values to the SingleCalculation object
    - Update the maximum water depth if necessary
 
 6. **Calculate equilibrium erosion** (only for the last level):
@@ -150,11 +153,9 @@ sequenceDiagram
             SimulationData-->>Erosion: bank_height
         end
 
-        Erosion->>SimulationData: get water_depth_face[ii_face]
-        SimulationData-->>Erosion: water_depth_fairway
-        Erosion->>SimulationData: get water_level_face[ii_face]
-        SimulationData-->>Erosion: water_level
-        Erosion->>SingleCalculation: set water_level
+        Erosion->>SimulationData: get_fairway_data(fairway_face_indices)
+        SimulationData-->>Erosion: data (containing water_level, chezy, water_depth)
+        Erosion->>SingleCalculation: set water_level, chezy, water_depth from data
 
         alt is last level
             Erosion->>ErosionCalculator: comp_erosion_eq(...)
@@ -196,7 +197,8 @@ flowchart LR
     subgraph Processing
         G[Calculate bank velocity]
         H[Calculate bank height]
-        I[Get water depth]
+        I1[Get fairway data]
+        I2[Extract water level, chezy, water depth]
         J[Calculate equilibrium erosion]
         K[Calculate bank erosion dynamics]
         L[Accumulate eroded volumes]
@@ -210,18 +212,19 @@ flowchart LR
     A --> G
     B --> G
     B --> H
-    B --> I
-    A --> I
+    B --> I1
+    A --> I1
+    I1 --> I2
 
     C --> J
     D --> J
     E --> J
     A --> J
-    I --> J
+    I2 --> J
 
     G --> K
     H --> K
-    I --> K
+    I2 --> K
     C --> K
     D --> K
     E --> K
