@@ -167,6 +167,7 @@ class ErosionSimulationData(BaseSimulationData):
         return vel_bank
 
     def calculate_bank_height(self, single_bank: SingleBank, zb_dx):
+        # bank height = maximum bed elevation per cell
         from dfastbe.bank_erosion.utils import moving_avg
         bank_index = single_bank.bank_face_indices
         if self.bed_elevation_location == "node":

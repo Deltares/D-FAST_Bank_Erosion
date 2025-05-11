@@ -55,13 +55,11 @@ def test_water_level_data():
         ship_wave_max=[[np.array([0.5, 1.0])]],
         ship_wave_min=[[np.array([0.2, 0.4])]],
         velocity=[[np.array([0.1, 0.2])]],
-        bank_height=[np.array([3.0, 4.0])],
         chezy=[[np.array([30.0, 40.0])]],
         vol_per_discharge=[[np.array([0.9, 1.0])]],
     )
     assert water_level_data.hfw_max == pytest.approx(5.0)
     assert water_level_data.water_level[0][0][1] == pytest.approx(2.0)
-    assert water_level_data.bank_height[0][1] == pytest.approx(4.0)
 
 
 def test_mesh_data():

@@ -151,7 +151,6 @@ class WaterLevelData:
     ship_wave_max: List[List[np.ndarray]]
     ship_wave_min: List[List[np.ndarray]]
     velocity: List[List[np.ndarray]]
-    bank_height: List[np.ndarray]
     chezy: List[List[np.ndarray]]
     vol_per_discharge: List[List[np.ndarray]]
 
@@ -209,6 +208,9 @@ class SingleBank:
     dx: np.ndarray = field(init=False)
     dy: np.ndarray = field(init=False)
     length: int = field(init=False)
+
+    # bank height is calculated at the first discharge level only.
+    height: Optional[np.ndarray] = field(default=lambda : np.array([]))
 
     def __post_init__(self):
         """Post-initialization to ensure bank_line_coords is a list of numpy arrays."""
@@ -330,6 +332,11 @@ class BankData(BaseBank[SingleBank]):
     def num_stations_per_bank(self) -> List[int]:
         """Get the number of stations per bank."""
         return [self.left.length, self.right.length]
+
+    @property
+    def height(self) -> List[np.ndarray]:
+        """Get the bank height."""
+        return [self.left.height, self.right.height]
 
 
 @dataclass
@@ -462,6 +469,7 @@ class SingleCalculation:
     erosion_distance_shipping: np.ndarray = field(default=lambda : np.array([]))
     erosion_distance_tot: np.ndarray = field(default=lambda : np.array([]))
     erosion_volume_tot: np.ndarray = field(default=lambda : np.array([]))
+    # the erosion distance and erosion volume at equilibrium is calculated at the last discharge level only.
     erosion_distance_eq: Optional[np.ndarray] = field(default=lambda : np.array([]))
     erosion_volume_eq: Optional[np.ndarray] = field(default=lambda : np.array([]))
 
@@ -548,10 +556,9 @@ class DischargeLevels:
         """Get the attributes of the levels for both left and right bank."""
         return [self._get_attr_both_sides_level(attribute_name, level) for level in range(len(self.levels))]
 
-    def get_water_level_data(self, bank_height) -> WaterLevelData:
+    def get_water_level_data(self) -> WaterLevelData:
         return WaterLevelData(
             hfw_max=self.levels[-1].hfw_max,
-            bank_height=bank_height,
             water_level=self.get_attr_level("water_level"),
             ship_wave_max=self.get_attr_level("ship_wave_max"),
             ship_wave_min=self.get_attr_level("ship_wave_min"),

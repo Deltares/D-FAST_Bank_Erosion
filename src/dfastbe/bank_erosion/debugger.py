@@ -32,7 +32,6 @@ class Debugger:
         erosion_inputs: SingleErosion,
         single_parameters: SingleParameters,
         single_calculation: SingleCalculation,
-        bank_height,
     ):
         """Write the last discharge level to a shapefile and CSV file."""
         bank_coords_mind = single_bank.get_mid_points()
@@ -42,7 +41,7 @@ class Debugger:
             "y": bank_coords_mind[:, 1],
             "iface_fw": single_bank.fairway_face_indices,
             "iface_bank": single_bank.bank_face_indices,
-            "bank_height": bank_height[bank_index],
+            "bank_height": single_bank.height,
             "segment_length": single_bank.segment_length,
             "zw0": fairway_data.fairway_initial_water_levels[bank_index],
             "ship_velocity": single_parameters.ship_velocity,
@@ -70,7 +69,6 @@ class Debugger:
         fairway_data: FairwayData,
         erosion_inputs: SingleErosion,
         single_parameters: SingleParameters,
-        bank_height,
         single_calculation: SingleCalculation,
     ):
         """Write the middle levels to a shapefile and CSV file."""
@@ -82,7 +80,7 @@ class Debugger:
             "iface_fw": single_bank.fairway_face_indices,
             "iface_bank": single_bank.bank_face_indices,
             "velocity": single_calculation.bank_velocity,
-            "bank_height": bank_height[bank_ind],
+            "bank_height": single_bank.height,
             "segment_length": single_bank.segment_length,
             "zw": single_calculation.water_level,
             "zw0": fairway_data.fairway_initial_water_levels[bank_ind],
