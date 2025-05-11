@@ -34,6 +34,7 @@ from dfastbe.bank_erosion.debugger import Debugger
 from dfastbe.io.config import ConfigFile
 from dfastbe.bank_erosion.bank_erosion import Erosion
 
+
 # Load configuration file
 config_file = ConfigFile.read("config.cfg")
 
@@ -49,10 +50,8 @@ debugger.last_discharge_level(
     single_bank=bank_data.left,
     fairway_data=fairway_data,
     erosion_inputs=erosion_inputs.left,
-    discharge_level_pars=level_parameters.left,
-    water_depth_fairway=water_depth_fairway,
-    dn_eq1=dn_eq1,
-    dv_eq1=dv_eq1,
+    single_parameters=level_parameters.left,
+    single_calculation=single_calculation,
     bank_height=bank_height
 )
 ```

@@ -788,12 +788,10 @@ class Erosion:
                 fairway_data,
                 erosion_inputs.get_bank(ind),
                 discharge_level_pars.get_bank(ind),
-                single_calculation.water_depth,
-                single_calculation.erosion_distance_eq,
-                single_calculation.erosion_volume_eq,
+                single_calculation,
                 bank_height,
             )
-            # Q-specific debug
+        # Q-specific debug
         self.debugger.middle_levels(
             ind,
             level_i,
@@ -801,7 +799,6 @@ class Erosion:
             fairway_data,
             erosion_inputs.get_bank(ind),
             discharge_level_pars.get_bank(ind),
-            single_calculation.bank_velocity,
             bank_height,
             single_calculation,
         )
