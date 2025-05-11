@@ -226,11 +226,13 @@ class Erosion:
             simulation_data (ErosionSimulationData):
 
         Returns:
-            The method updates the following attributes in the `bank_data` instance
-                - fairway_face_indices
-                - fairway_distances
-            and the following attributes in the `fairway_data` instance
-                - fairway_initial_water_levels
+            FairwayData:
+                The method updates the following attributes in the `bank_data` instance
+                    - fairway_face_indices
+                    - fairway_distances
+            BankData:
+                the following attributes in the `fairway_data` instance
+                    - fairway_initial_water_levels
         """
         # distance fairway-bankline (bank-fairway)
         log_text("bank_distance_fairway")
