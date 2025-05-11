@@ -6,6 +6,83 @@ The Bank Lines Data Models module provides data structures for representing bank
 
 The Bank Lines Data Models module contains classes that represent various aspects of bank lines, such as river data, simulation data, and bank line geometry. These data models are used by the Bank Lines module to process and analyze bank lines.
 
+```mermaid
+classDiagram
+    %% Main Classes
+
+    %% Data Models - Bank Lines
+    class BankLinesRiverData {
+        -ConfigFile config_file
+        -LineString river_center_line
+        -Tuple station_bounds
+        +search_lines()
+        -_get_bank_lines_simulation_data()
+        +simulation_data()
+    }
+
+    class SearchLines {
+        +List lines
+        +LineGeometry mask
+        +__init__(List, LineGeometry)
+        +mask(List, LineString, float)
+        -_select_closest_part(MultiLineString, LineString, float)
+        +to_polygons()
+    }
+
+    %% Data Models - IO
+    class LineGeometry {
+        +LineString line
+        +dict data
+        +__init__(LineString, Tuple, str)
+        +as_array()
+        +add_data(Dict)
+        +to_file(str, Dict)
+        +mask(LineString, Tuple)
+        -_find_mask_index(float, array)
+        -_handle_bound(int, float, bool, array)
+        -_interpolate_point(int, float, array)
+        +intersect_with_line(array)
+    }
+
+    class BaseSimulationData {
+        +array x_node
+        +array y_node
+        +array n_nodes
+        +array face_node
+        +array bed_elevation_location
+        +array bed_elevation_values
+        +array water_level_face
+        +array water_depth_face
+        +array velocity_x_face
+        +array velocity_y_face
+        +array chezy_face
+        +float dry_wet_threshold
+        +__init__(array, array, array, array, array, array, array, array, array, array, array, float)
+        +read(str, str)
+        +clip(LineString, float)
+    }
+
+    class BaseRiverData {
+        -ConfigFile config_file
+        -LineString river_center_line
+        -Tuple station_bounds
+        +__init__(ConfigFile)
+        +get_bbox(array, float)
+        +get_erosion_sim_data(int)
+    }
+
+    SearchLines --> LineGeometry : uses
+
+    BankLinesRiverData --|> BaseRiverData : inherits
+    BankLinesRiverData --> ConfigFile : uses
+    BankLinesRiverData --> SearchLines : uses
+    BankLinesRiverData --> BaseSimulationData : uses
+
+    BaseRiverData --> ConfigFile : uses
+    BaseRiverData --> LineGeometry : uses
+    
+```
+
 ## Components
 
 The Bank Lines Data Models module consists of the following components:
