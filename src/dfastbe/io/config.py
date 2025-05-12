@@ -29,267 +29,20 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from configparser import ConfigParser
 from configparser import Error as ConfigparserError
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, TextIO, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import geopandas as gpd
-import netCDF4
 import numpy as np
 import pandas as pd
 from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
-from shapely import prepare
-from shapely.geometry import LineString, Point
+from shapely.geometry import LineString
 
-PROGTEXTS: Dict[str, List[str]]
+from dfastbe.io.file_utils import absolute_path, relative_path
+from dfastbe.io.logger import log_text
 
-
-class BaseSimulationData:
-    """Class to hold simulation data.
-
-    This class contains the simulation data read from a UGRID netCDF file.
-    It includes methods to read the data from the file and clip the simulation
-    mesh to a specified area of interest.
-    """
-
-    def __init__(
-        self,
-        x_node: np.ndarray,
-        y_node: np.ndarray,
-        n_nodes: np.ndarray,
-        face_node: np.ma.masked_array,
-        bed_elevation_location: np.ndarray,
-        bed_elevation_values: np.ndarray,
-        water_level_face: np.ndarray,
-        water_depth_face: np.ndarray,
-        velocity_x_face: np.ndarray,
-        velocity_y_face: np.ndarray,
-        chezy_face: np.ndarray,
-        dry_wet_threshold: float,
-    ):
-        """
-        Initialize the SimulationData object.
-
-        Args:
-        x_node (np.ndarray):
-            X-coordinates of the nodes.
-        y_node (np.ndarray):
-            Y-coordinates of the nodes.
-        n_nodes (np.ndarray):
-            Number of nodes in each face.
-        face_node (np.ma.masked_array):
-            Face-node connectivity array.
-        bed_elevation_location (np.ndarray):
-            Determines whether the bed elevation is associated with nodes
-            or faces in the computational mesh.
-        bed_elevation_values (np.ndarray):
-            Bed elevation values for each node in the simulation data.
-        water_level_face (np.ndarray):
-            Water levels at the faces.
-        water_depth_face (np.ndarray):
-            Water depths at the faces.
-        velocity_x_face (np.ndarray):
-            X-component of the velocity at the faces.
-        velocity_y_face (np.ndarray):
-            Y-component of the velocity at the faces.
-        chezy_face (np.ndarray):
-            Chezy roughness values at the faces.
-        dry_wet_threshold (float):
-            Threshold depth for detecting drying and flooding.
-        """
-        self.x_node = x_node
-        self.y_node = y_node
-        self.n_nodes = n_nodes
-        self.face_node = face_node
-        self.bed_elevation_location = bed_elevation_location
-        self.bed_elevation_values = bed_elevation_values
-        self.water_level_face = water_level_face
-        self.water_depth_face = water_depth_face
-        self.velocity_x_face = velocity_x_face
-        self.velocity_y_face = velocity_y_face
-        self.chezy_face = chezy_face
-        self.dry_wet_threshold = dry_wet_threshold
-
-    @classmethod
-    def read(cls, file_name: str, indent: str = "") -> "BaseSimulationData":
-        """Read a default set of quantities from a UGRID netCDF file.
-
-        Supported files are coming from D-Flow FM (or similar).
-
-        Args:
-            file_name (str):
-                Name of the simulation output file to be read.
-            indent (str):
-                String to use for each line as indentation (default empty).
-
-        Raises:
-            SimulationFilesError
-                If the file is not recognized as a D-Flow FM map-file.
-
-        Returns:
-            BaseSimulationData: Dictionary containing the data read from the simulation output file.
-            float: Threshold depth for detecting drying and flooding.
-
-        Examples:
-            ```python
-            >>> from dfastbe.io import BaseSimulationData
-            >>> sim_data = BaseSimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
-            No message found for read_grid
-            No message found for read_bathymetry
-            No message found for read_water_level
-            No message found for read_water_depth
-            No message found for read_velocity
-            No message found for read_chezy
-            No message found for read_drywet
-            >>> print(sim_data.x_node[0:3])
-            [194949.796875 194966.515625 194982.8125  ]
-
-            ```
-        """
-        name = Path(file_name).name
-        if name.endswith("map.nc"):
-            log_text("read_grid", indent=indent)
-            x_node = _read_fm_map(file_name, "x", location="node")
-            y_node = _read_fm_map(file_name, "y", location="node")
-            f_nc = _read_fm_map(file_name, "face_node_connectivity")
-            if f_nc.mask.shape == ():
-                # all faces have the same number of nodes
-                n_nodes = np.ones(f_nc.data.shape[0], dtype=int) * f_nc.data.shape[1]
-            else:
-                # varying number of nodes
-                n_nodes = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
-            f_nc.data[f_nc.mask] = 0
-
-            face_node = f_nc
-            log_text("read_bathymetry", indent=indent)
-            bed_elevation_location = "node"
-            bed_elevation_values = _read_fm_map(file_name, "altitude", location="node")
-            log_text("read_water_level", indent=indent)
-            water_level_face = _read_fm_map(file_name, "Water level")
-            log_text("read_water_depth", indent=indent)
-            water_depth_face = np.maximum(
-                _read_fm_map(file_name, "sea_floor_depth_below_sea_surface"), 0.0
-            )
-            log_text("read_velocity", indent=indent)
-            velocity_x_face = _read_fm_map(file_name, "sea_water_x_velocity")
-            velocity_y_face = _read_fm_map(file_name, "sea_water_y_velocity")
-            log_text("read_chezy", indent=indent)
-            chezy_face = _read_fm_map(file_name, "Chezy roughness")
-
-            log_text("read_drywet", indent=indent)
-            root_group = netCDF4.Dataset(file_name)
-            try:
-                file_source = root_group.converted_from
-                if file_source == "SIMONA":
-                    dry_wet_threshold = 0.1
-                else:
-                    dry_wet_threshold = 0.01
-            except AttributeError:
-                dry_wet_threshold = 0.01
-
-        elif name.startswith("SDS"):
-            raise SimulationFilesError(
-                f"WAQUA output files not yet supported. Unable to process {name}"
-            )
-        elif name.startswith("trim"):
-            raise SimulationFilesError(
-                f"Delft3D map files not yet supported. Unable to process {name}"
-            )
-        else:
-            raise SimulationFilesError(f"Unable to determine file type for {name}")
-
-        return cls(
-            x_node=x_node,
-            y_node=y_node,
-            n_nodes=n_nodes,
-            face_node=face_node,
-            bed_elevation_location=bed_elevation_location,
-            bed_elevation_values=bed_elevation_values,
-            water_level_face=water_level_face,
-            water_depth_face=water_depth_face,
-            velocity_x_face=velocity_x_face,
-            velocity_y_face=velocity_y_face,
-            chezy_face=chezy_face,
-            dry_wet_threshold=dry_wet_threshold,
-        )
-
-    def clip(self, river_center_line: LineString, max_distance: float):
-        """Clip the simulation mesh.
-
-        Clipping data to the area of interest,
-        that is sufficiently close to the reference line.
-
-        Args:
-            river_center_line (np.ndarray):
-                Reference line.
-            max_distance (float):
-                Maximum distance between the reference line and a point in the area of
-                interest defined based on the search lines for the banks and the search
-                distance.
-
-        Notes:
-            The function uses the Shapely library to create a buffer around the river
-            profile and checks if the nodes are within that buffer. If they are not,
-            they are removed from the simulation data.
-
-        Examples:
-            ```python
-            >>> from dfastbe.io import BaseSimulationData
-            >>> sim_data = BaseSimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
-            No message found for read_grid
-            No message found for read_bathymetry
-            No message found for read_water_level
-            No message found for read_water_depth
-            No message found for read_velocity
-            No message found for read_chezy
-            No message found for read_drywet
-            >>> river_center_line = LineString([
-            ...     [194949.796875, 361366.90625],
-            ...     [194966.515625, 361399.46875],
-            ...     [194982.8125, 361431.03125]
-            ... ])
-            >>> max_distance = 10.0
-            >>> sim_data.clip(river_center_line, max_distance)
-            >>> print(sim_data.x_node)
-            [194949.796875 194966.515625 194982.8125  ]
-
-            ```
-        """
-        xy_buffer = river_center_line.buffer(max_distance + max_distance)
-        bbox = xy_buffer.envelope.exterior
-        x_min = bbox.coords[0][0]
-        x_max = bbox.coords[1][0]
-        y_min = bbox.coords[0][1]
-        y_max = bbox.coords[2][1]
-
-        prepare(xy_buffer)
-        x = self.x_node
-        y = self.y_node
-        nnodes = x.shape
-        keep = (x > x_min) & (x < x_max) & (y > y_min) & (y < y_max)
-        for i in range(x.size):
-            if keep[i] and not xy_buffer.contains(Point((x[i], y[i]))):
-                keep[i] = False
-
-        fnc = self.face_node
-        keep_face = keep[fnc].all(axis=1)
-        renum = np.zeros(nnodes, dtype=int)
-        renum[keep] = range(sum(keep))
-        self.face_node = renum[fnc[keep_face]]
-
-        self.x_node = x[keep]
-        self.y_node = y[keep]
-        if self.bed_elevation_location == "node":
-            self.bed_elevation_values = self.bed_elevation_values[keep]
-        else:
-            self.bed_elevation_values = self.bed_elevation_values[keep_face]
-
-        self.n_nodes = self.n_nodes[keep_face]
-        self.water_level_face = self.water_level_face[keep_face]
-        self.water_depth_face = self.water_depth_face[keep_face]
-        self.velocity_x_face = self.velocity_x_face[keep_face]
-        self.velocity_y_face = self.velocity_y_face[keep_face]
-        self.chezy_face = self.chezy_face[keep_face]
+__all__ = ["ConfigFile", "get_bbox", "ConfigFileError", "SimulationFilesError"]
 
 
 class ConfigFile:
@@ -314,7 +67,7 @@ class ConfigFile:
             Reading a configuration file:
                 ```python
                 >>> import tempfile
-                >>> from dfastbe.io import ConfigFile
+                >>> from dfastbe.io.config import ConfigFile
                 >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
                 >>> print(config_file.config["General"]["Version"])
                 1.0
@@ -322,7 +75,7 @@ class ConfigFile:
                 ```
             Writing a configuration file:
                 ```python
-                >>> from dfastbe.io import ConfigFile
+                >>> from dfastbe.io.config import ConfigFile
                 >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
                 >>> with tempfile.TemporaryDirectory() as tmpdirname:
                 ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
@@ -352,10 +105,11 @@ class ConfigFile:
 
     @property
     def debug(self) -> bool:
+        """bool: Get the debug flag."""
         return self.get_bool("General", "DebugOutput", False)
 
     @property
-    def root_dir(self) -> Path:
+    def root_dir(self) -> Path | str:
         """Path: Get the root directory of the configuration file."""
         return self._root_dir
 
@@ -383,7 +137,7 @@ class ConfigFile:
         Examples:
             Read a config file:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
 
             ```
@@ -437,7 +191,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> result = config_file._upgrade(config_file.config)
             >>> isinstance(result, ConfigParser)
@@ -573,7 +327,7 @@ class ConfigFile:
         Examples:
             ```python
             >>> import tempfile
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> with tempfile.TemporaryDirectory() as tmpdirname:
             ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
@@ -628,7 +382,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> result = config_file.get_str("General", "BankDir")
             >>> expected = Path("tests/data/erosion/output/banklines").resolve()
@@ -669,7 +423,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.get_bool("General", "Plotting")
             True
@@ -721,7 +475,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.get_float("General", "ZoomStepKM")
             1.0
@@ -769,7 +523,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.get_int("Detect", "NBank")
             2
@@ -804,7 +558,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> result = config_file.get_sim_file("Erosion", "1")
             >>> expected = Path("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc").resolve()
@@ -824,7 +578,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.get_start_end_stations()
             (123.0, 128.0)
@@ -843,14 +597,14 @@ class ConfigFile:
         """
         # read guiding bank line
         n_bank = self.get_int("Detect", "NBank")
-        line = [None] * n_bank
+        line = []
         for b in range(n_bank):
             bankfile = self.config["Detect"][f"Line{b + 1}"]
             log_text("read_search_line", data={"nr": b + 1, "file": bankfile})
-            line[b] = XYCModel.read(bankfile)
+            line.append(XYCModel.read(bankfile))
         return line
 
-    def read_bank_lines(self, bank_dir: str) -> List[np.ndarray]:
+    def read_bank_lines(self, bank_dir: str) -> List[np.ndarray] | GeoDataFrame:
         """Get the bank lines from the detection step.
 
         Args:
@@ -926,7 +680,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5, 6, 7])]
             >>> num_stations_per_bank = [len(bank) for bank in bank_km]
@@ -981,13 +735,9 @@ class ConfigFile:
             float: The validated parameter value.
         """
         if positive and value < 0:
-            raise ValueError(
-                f'Value of "{key}" should be positive, not {value}.'
-            )
+            raise ValueError(f'Value of "{key}" should be positive, not {value}.')
         if valid is not None and valid.count(value) == 0:
-            raise ValueError(
-                f'Value of "{key}" should be in {valid}, not {value}.'
-            )
+            raise ValueError(f'Value of "{key}" should be in {valid}, not {value}.')
         return value
 
     def process_parameter(
@@ -996,33 +746,41 @@ class ConfigFile:
         key: str,
         num_stations_per_bank: List[int],
         use_default: bool = False,
-        default=None,
+        default: Any = None,
         ext: str = "",
         positive: bool = False,
         valid: Optional[List[float]] = None,
         onefile: bool = False,
     ) -> List[np.ndarray]:
-        """Process a parameter value into arrays for each bank.
+        """
+        Process a parameter value into arrays for each bank.
 
         Args:
-            value (Union[str, float]): The parameter value or filename.
-            key (str): Name of the parameter for error messages.
-            num_stations_per_bank (List[int]): Number of stations for each bank.
-            use_default (bool): Flag indicating whether to use the default value; default False.
-            default: Default value to use if use_default is True; default None.
-            ext (str): File name extension; default empty string.
-            positive (bool): Flag specifying whether all values are accepted (if False),
-                or only positive values (if True); default False.
-            valid (Optional[List[float]]): Optional list of valid values; default None.
-            onefile (bool): Flag indicating whether parameters are read from one file.
-                One file should be used for all bank lines (True) or one file per bank line (False; default).
+            value (Union[str, float]):
+                The parameter value or a path to a file.
+            key (str):
+                Name of the parameter for error messages.
+            num_stations_per_bank (List[int]):
+                Number of stations for each bank.
+            use_default (bool):
+                Whether to use the default value.
+            default (Optional[float], default=None):
+                Default value used if `use_default` is True.
+            ext (str, default=''):
+                File name extension.
+            positive (bool, default=False):
+                If True, only positive values are allowed.
+            valid (Optional[List[float]], default=None):
+                List of valid values.
+            onefile (bool, default=False):
+                If True, parameters are read from a single file for all banks;
+                otherwise, one file per bank.
 
         Returns:
             List[np.ndarray]: Parameter values for each bank.
         """
         # if val is value then use that value globally
-        num_banks = len(num_stations_per_bank)
-        parameter_values = [None] * num_banks
+        parameter_values = []
         try:
             if use_default:
                 if isinstance(default, list):
@@ -1032,13 +790,13 @@ class ConfigFile:
                 real_val = float(value)
                 self.validate_parameter_value(real_val, key, positive, valid)
 
-            for ib, num_stations in enumerate(num_stations_per_bank):
-                parameter_values[ib] = np.zeros(num_stations) + real_val
+            for num_stations in num_stations_per_bank:
+                parameter_values.append(np.zeros(num_stations) + real_val)
 
         except (ValueError, TypeError):
             if onefile:
                 log_text("read_param", data={"param": key, "file": value})
-                km_thr, val = _get_stations(value, key, positive, valid)
+                km_thr, val = _get_stations(value, key, positive)
 
             for ib, num_stations in enumerate(num_stations_per_bank):
                 if not onefile:
@@ -1047,17 +805,16 @@ class ConfigFile:
                         "read_param_one_bank",
                         data={"param": key, "i": ib + 1, "file": filename_i},
                     )
-                    km_thr, val = _get_stations(filename_i, key, positive, valid)
+                    km_thr, val = _get_stations(filename_i, key, positive)
 
                 if km_thr is None:
-                    parameter_values[ib] = np.zeros(num_stations) + val[0]
+                    parameter_values.append(np.zeros(num_stations) + val[0])
                 else:
                     idx = np.zeros(num_stations, dtype=int)
 
                     for thr in km_thr:
                         idx[num_stations >= thr] += 1
-                    parameter_values[ib] = val[idx]
-                # print("Min/max of data: ", parfield[ib].min(), parfield[ib].max())
+                    parameter_values.append(val[idx])
 
         return parameter_values
 
@@ -1072,7 +829,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.get_bank_search_distances(2)
             [50.0, 50.0]
@@ -1107,7 +864,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.get_range("General", "Boundaries")
             (123.0, 128.0)
@@ -1156,7 +913,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.resolve("tests/data/erosion")
 
@@ -1215,7 +972,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.relative_to("testing/data/erosion")
 
@@ -1280,7 +1037,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.resolve_parameter("General", "RiverKM", "tests/data/erosion")
 
@@ -1306,7 +1063,7 @@ class ConfigFile:
 
         Examples:
             ```python
-            >>> from dfastbe.io import ConfigFile
+            >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
             >>> config_file.parameter_relative_to("General", "RiverKM", "tests/data/erosion")
 
@@ -1320,7 +1077,7 @@ class ConfigFile:
             except ValueError:
                 self.config[group][key] = relative_path(rootdir, val_str)
 
-    def get_plotting_flags(self, root_dir: str) -> Dict[str, bool]:
+    def get_plotting_flags(self, root_dir: Path | str) -> Dict[str, bool]:
         """Get the plotting flags from the configuration file.
 
         Returns:
@@ -1394,404 +1151,9 @@ class ConfigFile:
 
         return output_dir
 
-class LineGeometry:
-    """Center line class."""
-
-    def __init__(self, line: Union[LineString, np.ndarray], mask: Tuple[float, float] = None, crs: str = None):
-        """Geometry Line initialization.
-
-        Args:
-            line (LineString):
-                River center line as a linestring.
-            mask (Tuple[float, float], optional):
-                Lower and upper limit for the chainage. Defaults to None.
-            crs (str, Optional):
-                the coordinate reference system number as a string.
-
-        Examples:
-            ```python
-            >>> line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])
-            >>> mask = (0.5, 1.5)
-            >>> center_line = LineGeometry(line_string, mask)
-            No message found for clip_chainage
-            >>> np.array(center_line.values.coords)
-            array([[0.5, 0.5, 0.5],
-                   [1. , 1. , 1. ],
-                   [1.5, 1.5, 1.5]])
-
-            ```
-        """
-        self.station_bounds = mask
-        self.crs = crs
-        self._data = {}
-        if isinstance(line, np.ndarray):
-            line = LineString(line)
-        if mask is None:
-            self.values = line
-        else:
-            self.values: LineString = self.mask(line, mask)
-
-            log_text(
-                "clip_chainage", data={"low": self.station_bounds[0], "high": self.station_bounds[1]}
-            )
-
-    @property
-    def data(self) -> Dict[str, np.ndarray]:
-        """any data assigned to the line using the `add_data` method."""
-        return self._data
-
-    def as_array(self) -> np.ndarray:
-        return np.array(self.values.coords)
-
-    def add_data(self, data: Dict[str, np.ndarray]) -> None:
-        """
-        Add data to the LineGeometry object.
-
-        Args:
-            data (Dict[str, np.ndarray]):
-                Dictionary of quantities to be added, each np array should have length k.
-        """
-        self._data = self.data | data
-
-    def to_file(
-        self, file_name: str, data: Dict[str, np.ndarray] = None,
-    ) -> None:
-        """
-        Write a shape point file with x, y, and values.
-
-        Args:
-            file_name : str
-                Name of the file to be written.
-            data : Dict[str, np.ndarray]
-                Dictionary of quantities to be written, each np array should have length k.
-        """
-        xy = self.as_array()
-        geom = [Point(xy_i) for xy_i in xy]
-        if data is None:
-            data = self.data
-        else:
-            data = data | self.data
-        GeoDataFrame(data, geometry=geom, crs=self.crs).to_file(file_name)
-
-    @staticmethod
-    def mask(line_string: LineString, bounds: Tuple[float, float]) -> LineString:
-        """Clip a LineGeometry to the relevant reach.
-
-        Args:
-            line_string (LineString):
-                river center line as a linestring.
-            bounds (Tuple[float, float]):
-                Lower and upper limit for the chainage.
-
-        Returns:
-            LineString: Clipped river chainage line.
-
-        Examples:
-            ```python
-            >>> line_string = LineString([(0, 0, 0), (1, 1, 1), (2, 2, 2)])
-            >>> bounds = (0.5, 1.5)
-            >>> center_line = LineGeometry.mask(line_string, bounds)
-            >>> np.array(center_line.coords)
-            array([[0.5, 0.5, 0.5],
-                   [1. , 1. , 1. ],
-                   [1.5, 1.5, 1.5]])
-
-            ```
-        """
-        line_string_coords = line_string.coords
-        start_index = LineGeometry._find_mask_index(bounds[0], line_string_coords)
-        end_index = LineGeometry._find_mask_index(bounds[1], line_string_coords)
-        lower_bound_point, start_index = LineGeometry._handle_bound(
-            start_index, bounds[0], True, line_string_coords
-        )
-        upper_bound_point, end_index = LineGeometry._handle_bound(
-            end_index, bounds[1], False, line_string_coords
-        )
-
-        if lower_bound_point is None and upper_bound_point is None:
-            return line_string
-        elif lower_bound_point is None:
-            return LineString(line_string_coords[: end_index + 1] + [upper_bound_point])
-        elif upper_bound_point is None:
-            return LineString([lower_bound_point] + line_string_coords[start_index:])
-        else:
-            return LineString(
-                [lower_bound_point]
-                + line_string_coords[start_index:end_index]
-                + [upper_bound_point]
-            )
-
-    @staticmethod
-    def _find_mask_index(
-        station_bound: float, line_string_coords: np.ndarray
-    ) -> Optional[int]:
-        """Find the start and end indices for clipping the chainage line.
-
-        Args:
-            station_bound (float):
-                Station bound for clipping.
-            line_string_coords (np.ndarray):
-                Coordinates of the line string.
-
-        Returns:
-            Optional[int]: index for clipping.
-        """
-        mask_index = next(
-            (
-                index
-                for index, coord in enumerate(line_string_coords)
-                if coord[2] >= station_bound
-            ),
-            None,
-        )
-        return mask_index
-
-    @staticmethod
-    def _handle_bound(
-        index: Optional[int],
-        station_bound: float,
-        is_lower: bool,
-        line_string_coords: np.ndarray,
-    ) -> Tuple[Optional[Tuple[float, float, float]], Optional[int]]:
-        """Handle the clipping of the stations line for a given bound.
-
-        Args:
-            index (Optional[int]):
-                Index for clipping (start or end).
-            station_bound (float):
-                Station bound for clipping.
-            is_lower (bool):
-                True if handling the lower bound, False for the upper bound.
-            line_string_coords (np.ndarray):
-                Coordinates of the line string.
-
-        Returns:
-            Tuple[Optional[Tuple[float, float, float]], Optional[int]]:
-                Adjusted bound point and updated index.
-        """
-        if index is None:
-            bound_type = "Lower" if is_lower else "Upper"
-            end_station = line_string_coords[-1][2]
-            if is_lower or (station_bound - end_station > 0.1):
-                raise ValueError(
-                    f"{bound_type} chainage bound {station_bound} "
-                    f"is larger than the maximum chainage {end_station} available"
-                )
-            return None, index
-
-        if index == 0:
-            bound_type = "Lower" if is_lower else "Upper"
-            start_station = line_string_coords[0][2]
-            if not is_lower or (start_station - station_bound > 0.1):
-                raise ValueError(
-                    f"{bound_type} chainage bound {station_bound} "
-                    f"is smaller than the minimum chainage {start_station} available"
-                )
-            return None, index
-
-        # Interpolate the point
-        alpha, interpolated_point = LineGeometry._interpolate_point(
-            index, station_bound, line_string_coords
-        )
-
-        # Adjust the index based on the interpolation factor
-        if is_lower and alpha > 0.9:
-            index += 1
-        elif not is_lower and alpha < 0.1:
-            index -= 1
-
-        return interpolated_point, index
-
-    @staticmethod
-    def _interpolate_point(
-        index: int, station_bound: float, line_string_coords: np.ndarray
-    ) -> Tuple[float, Tuple[float, float, float]]:
-        """Interpolate a point between two coordinates.
-
-        Args:
-            index (int):
-                Index of the coordinate to interpolate.
-            station_bound (float):
-                Station bound for interpolation.
-            line_string_coords (np.ndarray):
-                Coordinates of the line string.
-
-        Returns:
-            float: Interpolation factor.
-            Tuple[float, float, float]: Interpolated point.
-        """
-        alpha = (station_bound - line_string_coords[index - 1][2]) / (
-                line_string_coords[index][2] - line_string_coords[index - 1][2]
-        )
-        interpolated_point = tuple(
-            prev_coord + alpha * (next_coord - prev_coord)
-            for prev_coord, next_coord in zip(
-                line_string_coords[index - 1], line_string_coords[index]
-            )
-        )
-        return alpha, interpolated_point
-
-    def intersect_with_line(
-        self, reference_line_with_stations: np.ndarray
-    ) -> np.ndarray:
-        """
-        Project chainage(stations) values from a reference line onto a target line by spatial proximity and interpolation.
-
-        Project chainage values from source line L1 onto another line L2.
-
-        The chainage values are giving along a line L1 (xykm_numpy). For each node
-        of the line L2 (line_xy) on which we would like to know the chainage, first
-        the closest node (discrete set of nodes) on L1 is determined and
-        subsequently the exact chainage isobtained by determining the closest point
-        (continuous line) on L1 for which the chainage is determined using by means
-        of interpolation.
-
-        Args:
-            target_line_coords (np.ndarray):
-                Nx2 array of x, y coordinates for the target line.
-            reference_line_with_stations (np.ndarray):
-                Mx3 array with x, y, and chainage values for the reference line.
-
-        Returns:
-            line_km : np.ndarray
-                Array containing the chainage for every coordinate specified in line_xy.
-        """
-        coords = self.as_array()
-        # pre-allocates the array for the mapped chainage values
-        projected_stations = np.zeros(coords.shape[0])
-
-        # get an array with only the x,y coordinates of line L1
-        ref_coords = reference_line_with_stations[:, :2]
-        last_index = reference_line_with_stations.shape[0] - 1
-
-        # for each node rp on line L2 get the chainage ...
-        for i, station_i in enumerate(coords):
-            # find the node on L1 closest to rp
-            # get the distance to all the nodes on the reference line, and find the closest one
-            closest_ind = np.argmin(((station_i - ref_coords) ** 2).sum(axis=1))
-            closest_coords = ref_coords[closest_ind]
-
-            # determine the distance between that node and rp
-            squared_distance = ((station_i - closest_coords) ** 2).sum()
-
-            # chainage value of that node
-            station = reference_line_with_stations[closest_ind, 2]
-
-            # if we didn't get the first node
-            if closest_ind > 0:
-                # project rp onto the line segment before this node
-                closest_coord_minus_1 = ref_coords[closest_ind - 1]
-                alpha = (
-                                (closest_coord_minus_1[0] - closest_coords[0]) * (station_i[0] - closest_coords[0])
-                                + (closest_coord_minus_1[1] - closest_coords[1]) * (station_i[1] - closest_coords[1])
-                        ) / ((closest_coord_minus_1[0] - closest_coords[0]) ** 2 + (closest_coord_minus_1[1] - closest_coords[1]) ** 2)
-                # if there is a closest point not coinciding with the nodes ...
-                if 0 < alpha < 1:
-                    dist2link = (station_i[0] - closest_coords[0] - alpha * (closest_coord_minus_1[0] - closest_coords[0])) ** 2 + (
-                            station_i[1] - closest_coords[1] - alpha * (closest_coord_minus_1[1] - closest_coords[1])
-                    ) ** 2
-                    # if it's actually closer than the node ...
-                    if dist2link < squared_distance:
-                        # update the closest point information
-                        squared_distance = dist2link
-                        station = reference_line_with_stations[closest_ind, 2] + alpha * (
-                                reference_line_with_stations[closest_ind - 1, 2] - reference_line_with_stations[closest_ind, 2]
-                        )
-
-            # if we didn't get the last node
-            if closest_ind < last_index:
-                # project rp onto the line segment after this node
-                closest_coord_minus_1 = ref_coords[closest_ind + 1]
-                alpha = (
-                                (closest_coord_minus_1[0] - closest_coords[0]) * (station_i[0] - closest_coords[0])
-                                + (closest_coord_minus_1[1] - closest_coords[1]) * (station_i[1] - closest_coords[1])
-                        ) / ((closest_coord_minus_1[0] - closest_coords[0]) ** 2 + (closest_coord_minus_1[1] - closest_coords[1]) ** 2)
-                # if there is a closest point not coinciding with the nodes ...
-                if alpha > 0 and alpha < 1:
-                    dist2link = (station_i[0] - closest_coords[0] - alpha * (closest_coord_minus_1[0] - closest_coords[0])) ** 2 + (
-                            station_i[1] - closest_coords[1] - alpha * (closest_coord_minus_1[1] - closest_coords[1])
-                    ) ** 2
-                    # if it's actually closer than the previous value ...
-                    if dist2link < squared_distance:
-                        # update the closest point information
-                        # squared_distance = dist2link
-                        station = reference_line_with_stations[closest_ind, 2] + alpha * (
-                                reference_line_with_stations[closest_ind + 1, 2] - reference_line_with_stations[closest_ind, 2]
-                        )
-            # store the chainage value, loop ... and return
-            projected_stations[i] = station
-        return projected_stations
-
-
-class BaseRiverData:
-    """River data class."""
-
-    def __init__(self, config_file: ConfigFile):
-        """River Data initialization.
-
-        Args:
-            config_file : ConfigFile
-                Configuration file with settings for the analysis.
-
-        Examples:
-            ```python
-            >>> from dfastbe.io import ConfigFile, BaseRiverData
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
-            >>> river_data = BaseRiverData(config_file)
-            No message found for read_chainage
-            No message found for clip_chainage
-
-            ```
-        """
-        self.config_file = config_file
-        center_line = config_file.get_river_center_line()
-        bounds = config_file.get_start_end_stations()
-        self._river_center_line = LineGeometry(center_line, bounds, crs=config_file.crs)
-        self._station_bounds: Tuple = config_file.get_start_end_stations()
-
-    @property
-    def river_center_line(self) -> LineGeometry:
-        """LineGeometry: the clipped river center line."""
-        return self._river_center_line
-
-    @property
-    def station_bounds(self) -> Tuple[float, float]:
-        """Tuple: the lower and upper bounds of the river center line."""
-        return self._station_bounds
-
-    @staticmethod
-    def get_bbox(
-        coords: np.ndarray, buffer: float = 0.1
-    ) -> Tuple[float, float, float, float]:
-        """
-        Derive the bounding box from an array of coordinates.
-
-        Args:
-            coords (np.ndarray):
-                An N x M array containing x- and y-coordinates as first two M entries
-            buffer : float
-                Buffer fraction surrounding the tight bounding box
-
-        Returns:
-            bbox (Tuple[float, float, float, float]):
-                Tuple bounding box consisting of [min x, min y, max x, max y)
-        """
-        return get_bbox(coords, buffer)
-
-    def get_erosion_sim_data(self, num_discharge_levels: int) -> Tuple[List[str], List[float]]:
-        # get pdischarges
-        sim_files = []
-        p_discharge = []
-        for iq in range(num_discharge_levels):
-            iq_str = str(iq + 1)
-            sim_files.append(self.config_file.get_sim_file("Erosion", iq_str))
-            p_discharge.append(
-                self.config_file.get_float("Erosion", f"PDischarge{iq_str}")
-            )
-        return sim_files, p_discharge
 
 def get_bbox(
-        coords: np.ndarray, buffer: float = 0.1
+    coords: np.ndarray, buffer: float = 0.1
 ) -> Tuple[float, float, float, float]:
     """
     Derive the bounding box from a line.
@@ -1816,348 +1178,6 @@ def get_bbox(
     bbox = (x_min - d, y_min - d, x_max + d, y_max + d)
 
     return bbox
-
-def load_program_texts(file_name: Union[str, Path]) -> None:
-    """Load texts from a configuration file, and store globally for access.
-
-    This routine reads the text file "file_name", and detects the keywords
-    indicated by lines starting with [ and ending with ]. The content is
-    placed in a global dictionary PROGTEXTS which may be queried using the
-    routine "get_text". These routines are used to implement multi-language support.
-
-    Arguments
-    ---------
-    file_name : str
-        The name of the file to be read and parsed.
-    """
-    global PROGTEXTS
-
-    all_lines = open(file_name, "r").read().splitlines()
-    data: Dict[str, List[str]] = {}
-    text: List[str] = []
-    key = None
-    for line in all_lines:
-        r_line = line.strip()
-        if r_line.startswith("[") and r_line.endswith("]"):
-            if key is not None:
-                data[key] = text
-            key = r_line[1:-1]
-            text = []
-        else:
-            text.append(line)
-    if key in data.keys():
-        raise ValueError(f"Duplicate entry for {key} in {file_name}.")
-
-    if key is not None:
-        data[key] = text
-
-    PROGTEXTS = data
-
-
-def log_text(
-    key: str,
-    file: Optional[TextIO] = None,
-    data: Dict[str, Any] = {},
-    repeat: int = 1,
-    indent: str = "",
-) -> None:
-    """
-    Write a text to standard out or file.
-
-    Arguments
-    ---------
-    key : str
-        The key for the text to show to the user.
-    file : Optional[TextIO]
-        The file to write to (None for writing to standard out).
-    data : Dict[str, Any]
-        A dictionary used for placeholder expansions (default empty).
-    repeat : int
-        The number of times that the same text should be repeated (default 1).
-    indent : str
-        String to use for each line as indentation (default empty).
-
-    Returns
-    -------
-    None
-    """
-    str_value = get_text(key)
-    for _ in range(repeat):
-        for s in str_value:
-            sexp = s.format(**data)
-            if file is None:
-                print(indent + sexp)
-            else:
-                file.write(indent + sexp + "\n")
-
-
-def get_filename(key: str) -> str:
-    """
-    Query the global dictionary of texts for a file name.
-
-    The file name entries in the global dictionary have a prefix "filename_"
-    which will be added to the key by this routine.
-
-    Arguments
-    ---------
-    key : str
-        The key string used to query the dictionary.
-
-    Results
-    -------
-    filename : str
-        File name.
-    """
-    filename = get_text("filename_" + key)[0]
-    return filename
-
-
-def get_text(key: str) -> List[str]:
-    """
-    Query the global dictionary of texts via a string key.
-
-    Query the global dictionary PROGTEXTS by means of a string key and return
-    the list of strings contained in the dictionary. If the dictionary doesn't
-    include the key, a default string is returned.
-
-    Parameters
-    ----------
-    key : str
-        The key string used to query the dictionary.
-
-    Returns
-    -------
-    text : List[str]
-        The list of strings returned contain the text stored in the dictionary
-        for the key. If the key isn't available in the dictionary, the routine
-        returns the default string "No message found for <key>"
-    """
-
-    global PROGTEXTS
-
-    try:
-        str_value = PROGTEXTS[key]
-    except:
-        str_value = ["No message found for " + key]
-    return str_value
-
-
-def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndarray:
-    """
-    Read the last time step of any quantity defined at faces from a D-Flow FM map-file.
-
-    Arguments
-    ---------
-    filename : str
-        Name of the D-Flow FM map.nc file to read the data.
-    varname : str
-        Name of the netCDF variable to be read.
-    location : str
-        Name of the stagger location at which the data should be located
-        (default is "face")
-
-    Raises
-    ------
-    Exception
-        If the data file doesn't include a 2D mesh.
-        If it cannot uniquely identify the variable to be read.
-
-    Returns
-    -------
-    data
-        Data of the requested variable (for the last time step only if the variable is
-        time dependent).
-    """
-    # open file
-    rootgrp = netCDF4.Dataset(filename)
-
-    # locate 2d mesh variable
-    mesh2d = rootgrp.get_variables_by_attributes(
-        cf_role="mesh_topology", topology_dimension=2
-    )
-    if len(mesh2d) != 1:
-        raise Exception(
-            "Currently only one 2D mesh supported ... this file contains {} 2D meshes.".format(
-                len(mesh2d)
-            )
-        )
-    meshname = mesh2d[0].name
-
-    # define a default start_index
-    start_index = 0
-
-    # locate the requested variable ... start with some special cases
-    if varname == "x":
-        # the x-coordinate or longitude
-        crdnames = mesh2d[0].getncattr(location + "_coordinates").split()
-        for n in crdnames:
-            stdname = rootgrp.variables[n].standard_name
-            if stdname == "projection_x_coordinate" or stdname == "longitude":
-                var = rootgrp.variables[n]
-                break
-
-    elif varname == "y":
-        # the y-coordinate or latitude
-        crdnames = mesh2d[0].getncattr(location + "_coordinates").split()
-        for n in crdnames:
-            stdname = rootgrp.variables[n].standard_name
-            if stdname == "projection_y_coordinate" or stdname == "latitude":
-                var = rootgrp.variables[n]
-                break
-
-    elif varname.endswith("connectivity"):
-        # a mesh connectivity variable with corrected index
-        varname = mesh2d[0].getncattr(varname)
-        var = rootgrp.variables[varname]
-        if "start_index" in var.ncattrs():
-            start_index = var.getncattr("start_index")
-
-    else:
-        # find any other variable by standard_name or long_name
-        var = rootgrp.get_variables_by_attributes(
-            standard_name=varname, mesh=meshname, location=location
-        )
-        if len(var) == 0:
-            var = rootgrp.get_variables_by_attributes(
-                long_name=varname, mesh=meshname, location=location
-            )
-        if len(var) != 1:
-            raise Exception(
-                'Expected one variable for "{}", but obtained {}.'.format(
-                    varname, len(var)
-                )
-            )
-        var = var[0]
-
-    # read data checking for time dimension
-    if var.get_dims()[0].isunlimited():
-        # assume that time dimension is unlimited and is the first dimension
-        # slice to obtain last time step
-        data = var[-1, :]
-    else:
-        data = var[...] - start_index
-
-    rootgrp.close()
-
-    return data
-
-
-def absolute_path(rootdir: str, path: str) -> str:
-    """
-    Convert a relative path to an absolute path.
-
-    Args:
-        rootdir (str): Any relative paths should be given relative to this location.
-        path (str): A relative or absolute location.
-
-    Returns:
-        str: An absolute location.
-    """
-    if not path:
-        return path
-    root_path = Path(rootdir).resolve()
-    target_path = Path(path)
-
-    if target_path.is_absolute():
-        return str(target_path)
-
-    resolved_path = (root_path / target_path).resolve()
-    return str(resolved_path)
-
-
-def relative_path(rootdir: str, file: str) -> str:
-    """
-    Convert an absolute path to a relative path.
-
-    Args:
-        rootdir (str): Any relative paths will be given relative to this location.
-        file (str): An absolute location.
-
-    Returns:
-        str: A relative location if possible, otherwise the absolute location.
-    """
-    if not file:
-        return file
-
-    root_path = Path(rootdir).resolve()
-    file_path = Path(file).resolve()
-
-    try:
-        return str(file_path.relative_to(root_path))
-    except ValueError:
-        return str(file_path)
-
-
-def write_shp(geom: GeoSeries, data: Dict[str, np.ndarray], filename: str) -> None:
-    """Write a shape file.
-
-    Write a shape file for a given GeoSeries and dictionary of np arrays.
-    The GeoSeries and all np should have equal length.
-
-    Arguments
-    ---------
-    geom : geopandas.geoseries.GeoSeries
-        geopandas GeoSeries containing k geometries.
-    data : Dict[str, np.ndarray]
-        Dictionary of quantities to be written, each np array should have length k.
-    filename : str
-        Name of the file to be written.
-
-    Returns
-    -------
-    None
-    """
-    GeoDataFrame(data, geometry=geom).to_file(filename)
-
-
-def write_csv(data: Dict[str, np.ndarray], filename: str) -> None:
-    """
-    Write a data to csv file.
-
-    Arguments
-    ---------
-    data : Dict[str, np.ndarray]
-        Value(s) to be written.
-    filename : str
-        Name of the file to be written.
-
-    Returns
-    -------
-    None
-    """
-    keys = [key for key in data.keys()]
-    header = ""
-    for i in range(len(keys)):
-        if i < len(keys) - 1:
-            header = header + '"' + keys[i] + '", '
-        else:
-            header = header + '"' + keys[i] + '"'
-
-    data = np.column_stack([array for array in data.values()])
-    np.savetxt(filename, data, delimiter=", ", header=header, comments="")
-
-
-def write_km_eroded_volumes(stations: np.ndarray, volume: np.ndarray, file_name: str) -> None:
-    """
-    Write a text file with eroded volume data binned per kilometre.
-
-    Arguments
-    ---------
-    stations :
-        Array containing chainage values.
-    volume :
-        Array containing erosion volume values.
-    file_name : str
-        Name of the file to be written.
-
-    Returns
-    -------
-    None
-    """
-    with open(file_name, "w") as file:
-        for i in range(len(stations)):
-            str_value = "\t".join(["{:.2f}".format(x) for x in volume[i, :]])
-            file.write("{:.2f}\t".format(stations[i]) + str_value + "\n")
 
 
 def _move_parameter_location(
@@ -2225,7 +1245,7 @@ def _sim2nc(oldfile: str) -> str:
     return nc_file
 
 
-def _get_stations(filename: str, key: str, positive: bool, valid: Optional[List[float]]):
+def _get_stations(filename: str, key: str, positive: bool):
     """
     Read a parameter file, check its contents and return arrays of chainages and values.
 
@@ -2237,8 +1257,6 @@ def _get_stations(filename: str, key: str, positive: bool, valid: Optional[List[
         Name of the quantity that we're reading.
     positive : bool
         Flag specifying whether all values are accepted (if False), or only positive values (if True).
-    valid : Optional[List[float]]
-        Optional list of valid values.
 
     Raises
     ------
@@ -2254,14 +1272,13 @@ def _get_stations(filename: str, key: str, positive: bool, valid: Optional[List[
     val : np.ndarray
         Array containing the values.
     """
-    # print("Trying to read: ",filename)
     points = pd.read_csv(
         filename,
         names=["Chainage", "Val"],
         skipinitialspace=True,
         delim_whitespace=True,
     )
-    # nPnts = len(P.Chainage)
+
     km = points.Chainage.to_numpy()
     val = points.Val.to_numpy()
 

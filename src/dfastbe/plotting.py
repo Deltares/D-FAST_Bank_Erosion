@@ -26,16 +26,17 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
-from shapely.geometry import LineString, Polygon
+import geopandas
 import matplotlib
 import matplotlib.pyplot
-import geopandas
 import numpy
+from shapely.geometry import LineString, Polygon
 
-from dfastbe.io import ConfigFile
-from dfastbe.bank_erosion.utils import water_density, g
+from dfastbe.bank_erosion.erosion_calculator import WATER_DENSITY, g
+from dfastbe.io.config import ConfigFile
+
 
 def savefig(fig: matplotlib.figure.Figure, filename: str) -> None:
     """
@@ -1060,7 +1061,7 @@ def plot6series_velocity_per_bank(
         setsize(fig)
         bk = bank_km_mid[ib]
         #
-        velc = numpy.sqrt(tauc[ib] * chezy[ib] ** 2 / (water_density * g))
+        velc = numpy.sqrt(tauc[ib] * chezy[ib] ** 2 / (WATER_DENSITY * g))
         ax.plot(bank_km_mid[ib], velc, color="k", label=ucrit_txt)
         for iq in range(n_levels):
             ax.plot(
