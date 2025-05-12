@@ -1,10 +1,11 @@
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import matplotlib
 import numpy as np
 import pytest
 
-from dfastbe.bank_erosion.bank_erosion import Erosion
+from dfastbe.bank_erosion.bank_erosion import Erosion, calculate_alpha
 from dfastbe.bank_erosion.data_models import BankData, FairwayData, SingleBank
 from dfastbe.cmd import run
 from dfastbe.io import ConfigFile
@@ -81,7 +82,7 @@ class TestErosion:
             erosion_instance = Erosion(MagicMock())
 
             # Mock attributes that would normally be initialized in __init__
-            erosion_instance.root_dir = "mock_root_dir"
+            erosion_instance.root_dir = Path("mock_root_dir")
             erosion_instance._config_file = MagicMock()
             erosion_instance.gui = False
             erosion_instance.river_data = MagicMock()
@@ -258,3 +259,25 @@ class TestErosion:
             )
 
         assert mock_fairway_data.fairway_initial_water_levels == []
+
+
+def test_calculate_alpha():
+    """Test the calculate_alpha method."""
+    # Mock the bank data and fairway data
+
+    coords = np.array(
+        [
+            [209186.621094, 389659.99609375],
+            [209187.69800938, 389665.38986148],
+            [209189.26657398, 389673.24607124],
+            [209189.367188, 389673.75],
+            [209192.19921925, 389687.4921875],
+        ]
+    )
+    ind_1 = 1
+    ind_2 = 0
+    bp = np.array([209118.40334772525, 389682.4659760762])
+    alpha = calculate_alpha(coords, ind_1, ind_2, bp)
+
+    # Assert the result
+    assert alpha == pytest.approx(1.5778075234167066)
