@@ -166,11 +166,11 @@ class TestErosion:
         mock_erosion.river_data.debug = True
         mock_erosion._config_file = mock_config_file
         with patch(
-            "dfastbe.bank_erosion.bank_erosion.FairwayData"
+            "dfastbe.bank_erosion.data_models.calculation.FairwayData"
         ) as fairway_mock, patch(
             "dfastbe.bank_erosion.bank_erosion.intersect_line_mesh"
         ) as line_mock, patch(
-            "dfastbe.io.GeoDataFrame"
+            "dfastbe.io.data_models.GeoDataFrame"
         ) as gdf_mock:
             fairway_intersection_coords = np.array(
                 [
@@ -257,7 +257,7 @@ class TestErosion:
             ]
         )
 
-        with patch("dfastbe.io.GeoDataFrame") as gdf_mock:
+        with patch("dfastbe.io.data_models.GeoDataFrame") as gdf_mock:
             mock_erosion.calculate_fairway_bank_line_distance(
                 mock_bank_data, mock_fairway_data, mock_simulation_data
             )
