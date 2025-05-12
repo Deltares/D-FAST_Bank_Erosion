@@ -2,23 +2,27 @@
 
 import math
 import sys
-from typing import Tuple, Any
+from typing import Any, Tuple
 
 import numpy as np
 
-from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
-    SingleCalculation,
     MeshData,
-    SingleParameters,
     SingleBank,
+    SingleCalculation,
     SingleErosion,
+    SingleParameters,
 )
-from dfastbe.io.logger import log_text
+from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData
+from dfastbe.bank_erosion.mesh_processor import (
+    enlarge,
+    get_slices_ab,
+    intersect_line_mesh,
+)
 from dfastbe.io.data_models import LineGeometry
+from dfastbe.io.logger import log_text
 from dfastbe.utils import on_right_side
-from dfastbe.bank_erosion.mesh_processor import intersect_line_mesh, enlarge, get_slices_ab
 
 
 class BankLinesProcessor:

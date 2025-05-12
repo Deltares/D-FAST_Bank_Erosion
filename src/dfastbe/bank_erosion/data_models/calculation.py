@@ -1,11 +1,23 @@
 """Erosion-related data structures."""
 from dataclasses import dataclass, field
-from typing import Iterator, List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type, Optional, Union
+from typing import (
+    Any,
+    ClassVar,
+    Dict,
+    Generic,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
+
 import numpy as np
 from geopandas import GeoDataFrame
-from shapely.geometry import Point
 from geopandas.geoseries import GeoSeries
-
+from shapely.geometry import Point
 
 GenericType = TypeVar("GenericType")
 

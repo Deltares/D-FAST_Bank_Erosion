@@ -25,9 +25,10 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-from typing import List, Tuple
-import numpy as np
 import math
+from typing import List, Tuple
+
+import numpy as np
 
 
 def get_zoom_extends(
