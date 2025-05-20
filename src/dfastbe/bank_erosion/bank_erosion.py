@@ -1261,3 +1261,6 @@ class Erosion:
                 plt.close("all")
             else:
                 plt.show(block=not self.gui)
+
+
+
