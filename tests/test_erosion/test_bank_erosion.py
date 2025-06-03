@@ -318,25 +318,30 @@ class TestErosion:
         ) as mock_write_km_eroded_volumes, patch(
             "dfastbe.bank_erosion.bank_erosion.DischargeLevels"
         ) as mock_discharge_levels:
-            mock_discharge_levels.accumulate.side_effect = [
-                [
-                    np.array([7.06542424e-02, 6.75617155e-02, 7.01268742e-02]),
-                    np.array([0.10222567, 0.10100284, 0.09953936]),
-                ],
-                [
-                    np.array([0.02990375, 0.02993445, 0.02986104]),
-                    np.array([0.15359159, 0.15620181, 0.15601963]),
-                ],
-                [
-                    np.array([1.00557989e-01, 9.74961629e-02, 9.99879152e-02]),
-                    np.array([0.25581725, 0.25720465, 0.25555899]),
-                ],
-                [
-                    np.ma.array(data=[2.52356124e00, 1.00578263e01, 1.35324671e01]),
-                    np.ma.array(data=[5.56431863e00, 1.27198016e01, 1.34650868e01]),
-                ],
+            flow_erosion_dist = [
+                np.array([7.06542424e-02, 6.75617155e-02, 7.01268742e-02]),
+                np.array([0.10222567, 0.10100284, 0.09953936]),
             ]
-            mock_discharge_levels.get_attr_both_sides_level.side_effect = [
+            ship_erosion_dist = [
+                np.array([0.02990375, 0.02993445, 0.02986104]),
+                np.array([0.15359159, 0.15620181, 0.15601963]),
+            ]
+            total_erosion_dist = [
+                np.array([1.00557989e-01, 9.74961629e-02, 9.99879152e-02]),
+                np.array([0.25581725, 0.25720465, 0.25555899]),
+            ]
+            total_eroded_vol = [
+                np.ma.array(data=[2.52356124e00, 1.00578263e01, 1.35324671e01]),
+                np.ma.array(data=[5.56431863e00, 1.27198016e01, 1.34650868e01]),
+            ]
+            discharge_levels_instance = mock_discharge_levels.return_value
+            discharge_levels_instance.accumulate.side_effect = [
+                flow_erosion_dist,
+                ship_erosion_dist,
+                total_erosion_dist,
+                total_eroded_vol,
+            ]
+            discharge_levels_instance.get_attr_both_sides_level.side_effect = [
                 [
                     np.ma.array(data=[9.304824589232581, 9.272062777155057]),
                     np.ma.array(data=[8.946751000892306, 8.986074721759323]),
@@ -352,13 +357,16 @@ class TestErosion:
             mock_calculate_bank_height.return_value = MagicMock()
             mock_compute_erosion.return_value = (MagicMock(), MagicMock())
 
-            result = mock_erosion._process_discharge_levels(
+            water_level_data, erosion_results = mock_erosion._process_discharge_levels(
                 km_mid, km_bin, config_file, erosion_inputs, bank_data, fairway_data
             )
 
-        assert isinstance(result, tuple)
-        assert isinstance(result[0], MagicMock)  # WaterLevelData
-        assert isinstance(result[1], ErosionResults)  # ErosionResults
+        assert isinstance(water_level_data, MagicMock)  # WaterLevelData
+        assert isinstance(erosion_results, ErosionResults)  # ErosionResults
+        assert np.allclose(erosion_results.flow_erosion_dist, flow_erosion_dist)
+        assert np.allclose(erosion_results.ship_erosion_dist, ship_erosion_dist)
+        assert np.allclose(erosion_results.total_erosion_dist, total_erosion_dist)
+        assert np.allclose(erosion_results.total_eroded_vol, total_eroded_vol)
 
 
 def test_calculate_alpha():
