@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Dict
 from unittest.mock import MagicMock, patch
 
 import matplotlib
@@ -31,18 +32,22 @@ def test_bank_erosion():
 class TestErosion:
 
     @pytest.fixture
-    def config_file(self) -> ConfigFile:
-        """Fixture to create a mock config file."""
-        return ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+    def shipping_data(self) -> Dict[str, list]:
+        """Fixture to create mock shipping data."""
+        return {
+            "vship0": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
+            "Nship0": [
+                np.array([20912, 20912, 20912]),
+                np.array([20912, 20912, 20912]),
+            ],
+            "nwave0": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
+            "Tship0": [np.array([1.2, 1.2, 1.2]), np.array([1.2, 1.2, 1.2])],
+            "ship0": [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])],
+            "parslope0": [np.array([20.0, 20.0, 20.0]), np.array([20.0, 20.0, 20.0])],
+            "parreed0": [np.array([0.0, 0.0, 0.0]), np.array([0.0, 0.0, 0.0])],
+        }
 
-    @pytest.fixture
-    def erosion_instance(self, config_file) -> Erosion:
-        """Fixture to create an instance of the Erosion class."""
-        return Erosion(config_file)
-
-    def test_prepare_initial_conditions(
-        self, erosion_instance: Erosion, config_file: ConfigFile
-    ):
+    def test_prepare_initial_conditions(self, mock_erosion: Erosion, shipping_data):
         """Test the _prepare_initial_conditions method."""
         num_stations_per_bank = [3, 3]
         mock_fairway_data = MagicMock(spec=FairwayData)
@@ -55,10 +60,23 @@ class TestErosion:
             "moderate/bad clay",
             "sand",
         )
+        config_file = MagicMock(spec=ConfigFile)
+        config_file.get_parameter.side_effect = [
+            [np.array([150.0, 150.0, 150.0]), np.array([150.0, 150.0, 150.0])],
+            [np.array([110.0, 110.0, 110.0]), np.array([110.0, 110.0, 110.0])],
+            [np.array([1.0, 1.0, 1.0]), np.array([0.18, 0.18, 0.18])],
+            [np.array([-13.0, -13.0, -13.0]), np.array([-13.0, -13.0, -13.0])],
+        ]
 
-        erosion_inputs = erosion_instance._prepare_initial_conditions(
-            config_file, num_stations_per_bank, mock_fairway_data
-        )
+        config_file.get_bool.return_value = False
+
+        with patch(
+            "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters"
+        ) as mock_get_ship_params:
+            mock_get_ship_params.return_value = shipping_data
+            erosion_inputs = mock_erosion._prepare_initial_conditions(
+                config_file, num_stations_per_bank, mock_fairway_data
+            )
 
         assert np.array_equal(
             erosion_inputs.shipping_data["vship0"][0], np.array([5.0, 5.0, 5.0])
