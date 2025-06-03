@@ -10,6 +10,7 @@ import dfastbe.io.logger
 from dfastbe.bank_erosion.bank_erosion import Erosion, calculate_alpha
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
+    ErosionResults,
     FairwayData,
     SingleBank,
 )
@@ -292,6 +293,72 @@ class TestErosion:
             )
 
         assert mock_fairway_data.fairway_initial_water_levels == []
+
+    def test_process_discharge_levels(self, mock_erosion, mock_debug):
+        km_bin = np.array([123.0, 128.0, 0.1])
+        km_mid = np.array(
+            [123.05, 123.15, 123.25, 123.35, 123.45, 123.55, 123.65, 123.75]
+        )
+        config_file = MagicMock()
+        erosion_inputs = MagicMock()
+        bank_data = MagicMock()
+        fairway_data = MagicMock()
+        mock_erosion.river_data.erosion_time = 1
+
+        with patch(
+            "dfastbe.bank_erosion.bank_erosion.Erosion._read_discharge_parameters"
+        ) as mock_read_discharge_parameters, patch(
+            "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.read"
+        ) as mock_read_data, patch(
+            "dfastbe.bank_erosion.bank_erosion.Erosion._calculate_bank_height"
+        ) as mock_calculate_bank_height, patch(
+            "dfastbe.bank_erosion.bank_erosion.Erosion.compute_erosion_per_level"
+        ) as mock_compute_erosion, patch(
+            "dfastbe.bank_erosion.bank_erosion.write_km_eroded_volumes"
+        ) as mock_write_km_eroded_volumes, patch(
+            "dfastbe.bank_erosion.bank_erosion.DischargeLevels"
+        ) as mock_discharge_levels:
+            mock_discharge_levels.accumulate.side_effect = [
+                [
+                    np.array([7.06542424e-02, 6.75617155e-02, 7.01268742e-02]),
+                    np.array([0.10222567, 0.10100284, 0.09953936]),
+                ],
+                [
+                    np.array([0.02990375, 0.02993445, 0.02986104]),
+                    np.array([0.15359159, 0.15620181, 0.15601963]),
+                ],
+                [
+                    np.array([1.00557989e-01, 9.74961629e-02, 9.99879152e-02]),
+                    np.array([0.25581725, 0.25720465, 0.25555899]),
+                ],
+                [
+                    np.ma.array(data=[2.52356124e00, 1.00578263e01, 1.35324671e01]),
+                    np.ma.array(data=[5.56431863e00, 1.27198016e01, 1.34650868e01]),
+                ],
+            ]
+            mock_discharge_levels.get_attr_both_sides_level.side_effect = [
+                [
+                    np.ma.array(data=[9.304824589232581, 9.272062777155057]),
+                    np.ma.array(data=[8.946751000892306, 8.986074721759323]),
+                ],
+                [
+                    np.ma.array(data=[78.08261970217333, 328.12862224567755]),
+                    np.ma.array(data=[115.70074874647455, 268.66556572232156]),
+                ],
+            ]
+            mock_discharge_levels.get_water_level_data.return_value = MagicMock()
+            mock_read_discharge_parameters.return_value = MagicMock()
+            mock_read_data.return_value = MagicMock()
+            mock_calculate_bank_height.return_value = MagicMock()
+            mock_compute_erosion.return_value = (MagicMock(), MagicMock())
+
+            result = mock_erosion._process_discharge_levels(
+                km_mid, km_bin, config_file, erosion_inputs, bank_data, fairway_data
+            )
+
+        assert isinstance(result, tuple)
+        assert isinstance(result[0], MagicMock)  # WaterLevelData
+        assert isinstance(result[1], ErosionResults)  # ErosionResults
 
 
 def test_calculate_alpha():
