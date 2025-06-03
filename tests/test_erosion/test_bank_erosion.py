@@ -6,6 +6,7 @@ import matplotlib
 import numpy as np
 import pytest
 
+import dfastbe.io.logger
 from dfastbe.bank_erosion.bank_erosion import Erosion, calculate_alpha
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
@@ -47,11 +48,80 @@ class TestErosion:
             "parreed0": [np.array([0.0, 0.0, 0.0]), np.array([0.0, 0.0, 0.0])],
         }
 
+    @pytest.fixture
+    def mock_erosion(self):
+        """Fixture to patch and mock the __init__ method of the Erosion class."""
+        with patch(
+            "dfastbe.bank_erosion.bank_erosion.Erosion.__init__", return_value=None
+        ):
+            # Create an instance of Erosion with the patched __init__
+            erosion_instance = Erosion(MagicMock())
+
+            # Mock attributes that would normally be initialized in __init__
+            erosion_instance.root_dir = Path("mock_root_dir")
+            erosion_instance._config_file = MagicMock()
+            erosion_instance.gui = False
+            erosion_instance.river_data = MagicMock()
+            erosion_instance.river_center_line_arr = MagicMock()
+            erosion_instance.simulation_data = MagicMock()
+            erosion_instance.sim_files = MagicMock()
+            erosion_instance.p_discharge = MagicMock()
+            erosion_instance.bl_processor = MagicMock()
+            erosion_instance.debugger = MagicMock()
+
+            yield erosion_instance
+
+    @pytest.fixture
+    def mock_config_file(self):
+        """Fixture to create a mock ConfigFile."""
+        mock_config = MagicMock(spec=ConfigFile)
+        mock_config.get_parameter.side_effect = (
+            lambda section, key, num_stations, **kwargs: [
+                np.array([1.0] * n) for n in num_stations
+            ]
+        )
+        mock_config.crs = "EPSG:28992"
+        return mock_config
+
+    @pytest.fixture
+    def mock_debug(self):
+        with patch.object(dfastbe.io.logger, "PROGTEXTS", {}, create=True):
+            yield
+
+    def test_get_ship_parameters(self, mock_erosion, mock_config_file):
+        """Test the get_ship_parameters method."""
+        num_stations_per_bank = [10, 15]
+        mock_erosion._config_file = mock_config_file
+
+        ship_parameters = mock_erosion.get_ship_parameters(num_stations_per_bank)
+
+        expected_keys = [
+            "vship0",
+            "Nship0",
+            "nwave0",
+            "Tship0",
+            "ship0",
+            "parslope0",
+            "parreed0",
+        ]
+        assert isinstance(ship_parameters, dict)
+        assert set(ship_parameters.keys()) == set(expected_keys)
+
+        for key, value in ship_parameters.items():
+            assert isinstance(value, list)
+            assert len(value) == len(num_stations_per_bank)
+            for arr, n in zip(value, num_stations_per_bank):
+                assert isinstance(arr, np.ndarray)
+                assert len(arr) == n
+
     def test_prepare_initial_conditions(self, mock_erosion: Erosion, shipping_data):
         """Test the _prepare_initial_conditions method."""
         num_stations_per_bank = [3, 3]
         mock_fairway_data = MagicMock(spec=FairwayData)
-        mock_fairway_data.fairway_initial_water_levels = [np.array([10, 20, 30]), np.array([10, 20, 30])]
+        mock_fairway_data.fairway_initial_water_levels = [
+            np.array([10, 20, 30]),
+            np.array([10, 20, 30]),
+        ]
         taucls = np.array([1, 1, 1])
         taucls_str = (
             "protected",
@@ -94,67 +164,6 @@ class TestErosion:
         assert erosion_inputs.taucls_str == taucls_str
         assert len(erosion_inputs.bank_type) == 4
 
-    @pytest.fixture
-    def mock_erosion(self):
-        """Fixture to patch and mock the __init__ method of the Erosion class."""
-        with patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion.__init__", return_value=None
-        ):
-            # Create an instance of Erosion with the patched __init__
-            erosion_instance = Erosion(MagicMock())
-
-            # Mock attributes that would normally be initialized in __init__
-            erosion_instance.root_dir = Path("mock_root_dir")
-            erosion_instance._config_file = MagicMock()
-            erosion_instance.gui = False
-            erosion_instance.river_data = MagicMock()
-            erosion_instance.river_center_line_arr = MagicMock()
-            erosion_instance.simulation_data = MagicMock()
-            erosion_instance.sim_files = MagicMock()
-            erosion_instance.p_discharge = MagicMock()
-            erosion_instance.bl_processor = MagicMock()
-            erosion_instance.debugger = MagicMock()
-
-            yield erosion_instance
-
-    @pytest.fixture
-    def mock_config_file(self):
-        """Fixture to create a mock ConfigFile."""
-        mock_config = MagicMock(spec=ConfigFile)
-        mock_config.get_parameter.side_effect = (
-            lambda section, key, num_stations, **kwargs: [
-                np.array([1.0] * n) for n in num_stations
-            ]
-        )
-        mock_config.crs = "EPSG:28992"
-        return mock_config
-
-    def test_get_ship_parameters(self, mock_erosion, mock_config_file):
-        """Test the get_ship_parameters method."""
-        num_stations_per_bank = [10, 15]
-        mock_erosion._config_file = mock_config_file
-
-        ship_parameters = mock_erosion.get_ship_parameters(num_stations_per_bank)
-
-        expected_keys = [
-            "vship0",
-            "Nship0",
-            "nwave0",
-            "Tship0",
-            "ship0",
-            "parslope0",
-            "parreed0",
-        ]
-        assert isinstance(ship_parameters, dict)
-        assert set(ship_parameters.keys()) == set(expected_keys)
-
-        for key, value in ship_parameters.items():
-            assert isinstance(value, list)
-            assert len(value) == len(num_stations_per_bank)
-            for arr, n in zip(value, num_stations_per_bank):
-                assert isinstance(arr, np.ndarray)
-                assert len(arr) == n
-
     def test_process_river_axis_by_center_line(self, mock_erosion):
         """Test the _process_river_axis_by_center_line method."""
         mock_center_line = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
@@ -180,7 +189,7 @@ class TestErosion:
 
         river_axis.add_data.assert_called_with(data={"stations": np.array([128.0])})
 
-    def test_get_fairway_data(self, mock_erosion, mock_config_file):
+    def test_get_fairway_data(self, mock_erosion, mock_config_file, mock_debug):
         mock_erosion.river_data.debug = True
         mock_erosion._config_file = mock_config_file
         with patch(
@@ -205,8 +214,10 @@ class TestErosion:
             line_mock.return_value = (fairway_intersection_coords, fairway_face_indices)
             fairway_data = mock_erosion._get_fairway_data(MagicMock(), MagicMock())
             gdf_mock.return_value.to_file.assert_called_once()
-        assert fairway_data.face_indices.equals(fairway_face_indices)
-        assert fairway_data.intersection_coords.equals(fairway_intersection_coords)
+        assert np.allclose(fairway_data.fairway_face_indices, fairway_face_indices)
+        assert np.allclose(
+            fairway_data.intersection_coords, fairway_intersection_coords
+        )
 
     def test_calculate_fairway_bank_line_distance(self, mock_erosion, mock_config_file):
         """Test the calculate_fairway_bank_line_distance method."""
