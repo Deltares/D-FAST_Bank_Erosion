@@ -288,7 +288,7 @@ class TestErosion:
             ]
         )
 
-        with patch("dfastbe.io.data_models.GeoDataFrame") as gdf_mock:
+        with patch("dfastbe.io.data_models.GeoDataFrame"):
             mock_erosion.calculate_fairway_bank_line_distance(
                 mock_bank_data, mock_fairway_data, mock_simulation_data
             )
