@@ -13,6 +13,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
     ErosionResults,
     FairwayData,
     SingleBank,
+    SingleLevelParameters,
 )
 from dfastbe.cmd import run
 from dfastbe.io.config import ConfigFile
@@ -165,7 +166,7 @@ class TestErosion:
         assert erosion_inputs.taucls_str == taucls_str
         assert len(erosion_inputs.bank_type) == 4
 
-    def test_process_river_axis_by_center_line(self, mock_erosion):
+    def test_process_river_axis_by_center_line(self, mock_erosion, mock_debug):
         """Test the _process_river_axis_by_center_line method."""
         mock_center_line = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
         mock_erosion.river_center_line_arr = mock_center_line
@@ -220,7 +221,9 @@ class TestErosion:
             fairway_data.intersection_coords, fairway_intersection_coords
         )
 
-    def test_calculate_fairway_bank_line_distance(self, mock_erosion, mock_config_file):
+    def test_calculate_fairway_bank_line_distance(
+        self, mock_erosion, mock_config_file, mock_debug
+    ):
         """Test the calculate_fairway_bank_line_distance method."""
         mock_erosion._config_file = mock_config_file
         mock_bank_data = MagicMock()
@@ -361,12 +364,40 @@ class TestErosion:
                 km_mid, km_bin, config_file, erosion_inputs, bank_data, fairway_data
             )
 
+            assert mock_write_km_eroded_volumes.called
+
         assert isinstance(water_level_data, MagicMock)  # WaterLevelData
         assert isinstance(erosion_results, ErosionResults)  # ErosionResults
         assert np.allclose(erosion_results.flow_erosion_dist, flow_erosion_dist)
         assert np.allclose(erosion_results.ship_erosion_dist, ship_erosion_dist)
         assert np.allclose(erosion_results.total_erosion_dist, total_erosion_dist)
         assert np.allclose(erosion_results.total_eroded_vol, total_eroded_vol)
+
+    def test_read_discharge_parameters(self, mock_erosion, shipping_data):
+        with patch(
+            "dfastbe.bank_erosion.bank_erosion.Erosion._get_param"
+        ) as mock_get_param:
+            mock_get_param.side_effect = [
+                shipping_data["vship0"],
+                shipping_data["Nship0"],
+                shipping_data["nwave0"],
+                shipping_data["Tship0"],
+                shipping_data["ship0"],
+                shipping_data["parslope0"],
+                shipping_data["parreed0"],
+            ]
+            discharge_parameters = mock_erosion._read_discharge_parameters(
+                1, shipping_data, 13
+            )
+        assert isinstance(discharge_parameters, SingleLevelParameters)
+        assert discharge_parameters.id == 1
+        assert np.allclose(
+            discharge_parameters.left.ship_velocity, shipping_data["vship0"]
+        )
+        assert np.allclose(discharge_parameters.left.num_ship, shipping_data["Nship0"])
+        assert np.allclose(
+            discharge_parameters.left.num_waves_per_ship, shipping_data["nwave0"]
+        )
 
 
 def test_calculate_alpha():
