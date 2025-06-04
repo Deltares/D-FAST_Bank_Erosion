@@ -10,9 +10,11 @@ import dfastbe.io.logger
 from dfastbe.bank_erosion.bank_erosion import Erosion, calculate_alpha
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
+    ErosionInputs,
     ErosionResults,
     FairwayData,
     SingleBank,
+    SingleDischargeLevel,
     SingleLevelParameters,
 )
 from dfastbe.cmd import run
@@ -70,6 +72,7 @@ class TestErosion:
             erosion_instance.p_discharge = MagicMock()
             erosion_instance.bl_processor = MagicMock()
             erosion_instance.debugger = MagicMock()
+            erosion_instance.erosion_calculator = MagicMock()
 
             yield erosion_instance
 
@@ -398,6 +401,46 @@ class TestErosion:
         assert np.allclose(
             discharge_parameters.left.num_waves_per_ship, shipping_data["nwave0"]
         )
+
+    def test_compute_erosion_per_level(self, mock_erosion, mock_debug):
+        """Test the compute_erosion_per_level method."""
+        mock_erosion.river_data.num_discharge_levels = 2
+        bank_data = MagicMock(spec=BankData)
+        bank_data.__iter__.return_value = [MagicMock(), MagicMock()]
+        simulation_data = MagicMock()
+        simulation_data.calculate_bank_velocity.return_value = np.array(
+            [0.036150366339510215, 0.035504928556677105, 0.04197925796741744]
+        )
+        simulation_data.get_fairway_data.return_value = {
+            "water_depth": np.ma.array(data=[5.55804443, 5.47807884, 5.47807884]),
+            "water_level": np.ma.array(data=[11.10304451, 11.10307884, 11.10307884]),
+            "chezy": np.ma.array(data=[79.57007898, 79.57007898, 79.57007898]),
+        }
+        fairway_data = MagicMock(spec=FairwayData)
+        fairway_data.fairway_initial_water_levels = [
+            np.array([10.0, 10.3, 10.4]),
+            np.array([10.2, 10.7, 10.3]),
+        ]
+        single_parameters = MagicMock(spec=SingleLevelParameters)
+        erosion_inputs = MagicMock(spec=ErosionInputs)
+        km_bin = np.array([123.0, 128.0, 0.1])
+        with patch(
+            "dfastbe.bank_erosion.bank_erosion.get_km_eroded_volume"
+        ) as mock_get_km_eroded_volume:
+            mock_get_km_eroded_volume.return_value = np.array([0.0] * 50)
+            level_calculation, dvol_bank = mock_erosion.compute_erosion_per_level(
+                0,
+                bank_data,
+                simulation_data,
+                fairway_data,
+                single_parameters,
+                erosion_inputs,
+                km_bin,
+                50,
+            )
+        assert isinstance(level_calculation, SingleDischargeLevel)
+        assert level_calculation.hfw_max == pytest.approx(5.55804443)
+        assert np.allclose(dvol_bank, np.array([[0.0] * 2] * 50))
 
 
 def test_calculate_alpha():
