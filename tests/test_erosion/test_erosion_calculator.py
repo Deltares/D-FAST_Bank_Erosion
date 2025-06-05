@@ -13,8 +13,8 @@ from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 
 class TestErosionCalculator:
     @pytest.fixture
-    def single_parameters(self) -> SingleParameters:
-        single_parameters= MagicMock(spec=SingleParameters)
+    def single_parameters(self) -> MagicMock:
+        single_parameters = MagicMock(spec=SingleParameters)
         single_parameters.ship_velocity = np.array([5.0, 5.0, 5.0])
         single_parameters.num_ship= np.array([15613, 15613, 15613])
         single_parameters.num_waves_per_ship= np.array([5.0, 5.0, 5.0])
@@ -24,7 +24,7 @@ class TestErosionCalculator:
         return single_parameters
 
     @pytest.fixture
-    def single_calculation(self) -> SingleCalculation:
+    def single_calculation(self) -> MagicMock:
         single_calculation = MagicMock(spec=SingleCalculation)
         single_calculation.bank_velocity = np.array([0.1, 0.1, 0.1])
         single_calculation.water_level = np.array([1.0, 1.0, 1.0])
@@ -33,7 +33,7 @@ class TestErosionCalculator:
         return single_calculation
 
     @pytest.fixture
-    def erosion_inputs(self) -> SingleErosion:
+    def erosion_inputs(self) -> MagicMock:
         erosion_inputs = MagicMock(spec=SingleErosion)
         erosion_inputs.wave_fairway_distance_0 = np.array([150.0, 150.0, 150.0])
         erosion_inputs.wave_fairway_distance_1 = np.array([110.0, 110.0, 110.0])
