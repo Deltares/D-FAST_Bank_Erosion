@@ -61,7 +61,12 @@ class TestErosionCalculator:
             ),
         }
 
-    def test_comp_erosion_eq(self, single_parameters, erosion_inputs, shared_input):
+    def test_comp_erosion_eq(
+        self,
+        single_parameters: SingleParameters,
+        erosion_inputs: SingleErosion,
+        shared_input: dict,
+    ):
         eq_erosion_distance, eq_erosion_volume = (
             ErosionCalculator.comp_erosion_eq(
                 bank_height=shared_input["bank_height"],
@@ -82,7 +87,11 @@ class TestErosionCalculator:
         )
 
     def test_compute_bank_erosion_dynamics(
-        self, single_calculation, single_parameters, erosion_inputs, shared_input
+        self,
+        single_calculation: SingleCalculation,
+        single_parameters: SingleParameters,
+        erosion_inputs: SingleErosion,
+        shared_input: dict,
     ):
         single_calculation = ErosionCalculator.compute_bank_erosion_dynamics(
             single_calculation=single_calculation,
@@ -117,3 +126,22 @@ class TestErosionCalculator:
             single_calculation.ship_wave_min,
             np.array([0.56151398, 0.5653226, 0.56585589]),
         )
+
+    def test_comp_hw_ship_at_bank(
+        self,
+        shared_input: dict,
+        single_parameters: SingleParameters,
+        erosion_inputs: SingleErosion,
+    ):
+
+        h0 = ErosionCalculator.comp_hw_ship_at_bank(
+            shared_input["bank_fairway_dist"],
+            erosion_inputs.wave_fairway_distance_0,
+            erosion_inputs.wave_fairway_distance_1,
+            shared_input["water_depth_fairway"],
+            single_parameters.ship_type,
+            single_parameters.ship_draught,
+            single_parameters.ship_velocity,
+        )
+
+        assert np.allclose(h0, np.array([0.11631031, 0.11590078, 0.11575859]))
