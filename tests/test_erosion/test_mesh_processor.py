@@ -120,9 +120,15 @@ class TestMeshProcessor:
         return mesh_data
 
     @pytest.mark.parametrize(
-        "line,expected_idx",
+        "line,expected_coords,expected_idx",
         [
             (
+                np.array(
+                    [
+                        [209266.44709443, 389650.16238121],
+                        [209266.44709443, 389651.16238121],
+                    ]
+                ),
                 np.array(
                     [
                         [209266.44709443, 389650.16238121],
@@ -138,9 +144,22 @@ class TestMeshProcessor:
                         [209269.67183787, 389664.217019],
                     ]
                 ),
+                np.array(
+                    [
+                        [209266.44709443, 389650.16238121],
+                        [209269.67183787, 389664.217019],
+                    ]
+                ),
                 [0],
             ),
             (
+                np.array(
+                    [
+                        [209266.44709443, 389650.16238121],
+                        [209269.67183787, 389664.217019],
+                        [209271.7614607, 389674.70572161],
+                    ]
+                ),
                 np.array(
                     [
                         [209266.44709443, 389650.16238121],
@@ -159,19 +178,71 @@ class TestMeshProcessor:
                         [209278.48314731, 389704.10923615],
                     ]
                 ),
+                np.array(
+                    [
+                        [209266.44709443, 389650.16238121],
+                        [209269.67183787, 389664.217019],
+                        [209271.7614607, 389674.70572161],
+                        [209278.48314731, 389704.10923615],
+                    ]
+                ),
                 [0, 1, 2],
             ),
-            (np.array([[100, 100], [120, 120]]), [-1]),
+            (
+                np.array(
+                    [
+                        [209266.44709443, 389650.16238121],
+                        [209260.0, 389660.0],
+                        [209271.7614607, 389674.70572161],
+                    ]
+                ),
+                np.array(
+                    [
+                        [209266.44709443, 389650.16238121],
+                        [209260.0, 389660.0],
+                        [209263.2979992, 389664.1235914],
+                        [209271.7614607, 389674.70572161],
+                    ]
+                ),
+                [0, 0, 1],
+            ),
+            (
+                np.array(
+                    [
+                        [209266.44709443, 389650.16238121],
+                        [209260.0, 389660.0],
+                        [209261.0, 389660.0],
+                        [209271.7614607, 389674.70572161],
+                    ]
+                ),
+                np.array(
+                    [
+                        [209266.44709443, 389650.16238121],
+                        [209260.0, 389660.0],
+                        [209261.0, 389660.0],
+                        [209264.02539435, 389664.13425354],
+                        [209271.7614607, 389674.70572161],
+                    ]
+                ),
+                [0, 0, 0, 1],
+            ),
+            (
+                np.array([[100, 100], [120, 120]]),
+                np.array([[100, 100], [120, 120]]),
+                [-1],
+            ),
         ],
         ids=[
             "Within one quad",
             "Match one quad",
             "Match two quads",
             "Match three quads",
+            "Match two quads, outside one",
+            "Match two quads, outside two",
             "Outside mesh",
         ],
     )
-    def test_intersect_line_mesh(self, mesh_data, line, expected_idx):
+    def test_intersect_line_mesh(self, mesh_data, line, expected_coords, expected_idx):
         crds, idx = intersect_line_mesh(line, mesh_data)
-        assert np.allclose(crds, line)
+        assert np.allclose(crds, expected_coords)
         assert np.array_equal(idx, expected_idx)
