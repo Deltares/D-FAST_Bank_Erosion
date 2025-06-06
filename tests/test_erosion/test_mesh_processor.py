@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from dfastbe.bank_erosion.mesh_processor import intersect_line_mesh
+from dfastbe.bank_erosion.mesh_processor import enlarge, intersect_line_mesh
 
 
 class TestMeshProcessor:
@@ -246,3 +246,25 @@ class TestMeshProcessor:
         crds, idx = intersect_line_mesh(line, mesh_data)
         assert np.allclose(crds, expected_coords)
         assert np.array_equal(idx, expected_idx)
+
+    @pytest.mark.parametrize(
+        "line,shape,expected_enlarged_line",
+        [
+            (
+                np.array([[2.2, 4.3], [3.2, 4.3]]),
+                (2, 4),
+                np.array([[2.2, 4.3, 0, 0], [3.2, 4.3, 0, 0]]),
+            ),
+            (
+                np.array([[2.4, 4.1], [2.4, 3.6]]),
+                (4, 2),
+                np.array([[2.4, 4.1], [2.4, 3.6], [0, 0], [0, 0]]),
+            ),
+            (np.array([1, 3]), (4,), np.array([1, 3, 0, 0])),
+        ],
+        ids=["Enlarge to (2, 4)", "Enlarge to (4, 2)", "Enlarge to (4,)"],
+    )
+    def test_enlarge(self, line, shape, expected_enlarged_line):
+        # Test with a line that intersects the mesh
+        enlarged_line = enlarge(line, shape)
+        assert np.allclose(enlarged_line, expected_enlarged_line)
