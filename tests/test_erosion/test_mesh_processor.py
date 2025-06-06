@@ -301,3 +301,12 @@ class TestMeshProcessor:
         assert np.allclose(b, np.array([0.6845984]))
         assert np.array_equal(edges, np.array([2]))
         assert np.array_equal(nodes, np.array([-1]))
+
+    def test_get_slices_core(self, mesh_data):
+        edges = np.array([5, 6, 7, 2])
+        bpj = np.array([209266.44709443, 389670.16238121])
+        bpj1 = np.array([209266.44709443, 389651.16238121])
+        b, edges, nodes = _get_slices_core(edges, mesh_data, bpj1, bpj, 0.0)
+        assert np.allclose(b, np.array([0.71466942]))
+        assert np.allclose(edges, np.array([0.6845984]))
+        assert np.array_equal(nodes, np.array([2]))
