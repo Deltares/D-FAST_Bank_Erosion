@@ -3,7 +3,11 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from dfastbe.bank_erosion.mesh_processor import enlarge, intersect_line_mesh
+from dfastbe.bank_erosion.mesh_processor import (
+    enlarge,
+    get_slices_ab,
+    intersect_line_mesh,
+)
 
 
 class TestMeshProcessor:
@@ -268,3 +272,20 @@ class TestMeshProcessor:
         # Test with a line that intersects the mesh
         enlarged_line = enlarge(line, shape)
         assert np.allclose(enlarged_line, expected_enlarged_line)
+
+    def test_get_slices_ab(self):
+        X0 = np.ma.array([209171.296875, 209171.296875, 209171.484375, 209188.1875])
+        Y0 = np.ma.array([389625.15625, 389625.15625, 389665.5625, 389624.96875])
+        X1 = np.ma.array([209188.1875, 209171.484375, 209189.09375, 209189.09375])
+        Y1 = np.ma.array([389624.96875, 389665.5625, 389665.375, 389665.375])
+        xi0 = 209186.621094
+        xi1 = 209189.367188
+        yi0 = 389659.99609375
+        yi1 = 389673.75
+        a, b, slices = get_slices_ab(X0, Y0, X1, Y1, xi0, yi0, xi1, yi1, 0)
+        expected_a = np.ma.array([0.9207387758922553])
+        expected_b = np.ma.array([0.3921626068608838])
+        expected_slices = np.array([2])
+        assert np.allclose(a, expected_a)
+        assert np.allclose(b, expected_b)
+        assert np.array_equal(slices, expected_slices)
