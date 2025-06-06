@@ -18,7 +18,6 @@ class TestMeshProcessor:
     def mesh_data(self) -> MagicMock:
         """Fixture to provide a mock mesh data object."""
         mesh_data = MagicMock()
-        # Define two adjacent square faces (quads) with 4 nodes each, sharing an edge
         mesh_data.x_face_coords = np.array(
             [
                 [209253.125, 209252.734375, 209271.921875, 209273.3125],
