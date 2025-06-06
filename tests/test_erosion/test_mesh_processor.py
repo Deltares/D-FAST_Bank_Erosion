@@ -4,6 +4,8 @@ import numpy as np
 import pytest
 
 from dfastbe.bank_erosion.mesh_processor import (
+    _get_slices,
+    _get_slices_core,
     enlarge,
     get_slices_ab,
     intersect_line_mesh,
@@ -289,3 +291,13 @@ class TestMeshProcessor:
         assert np.allclose(a, expected_a)
         assert np.allclose(b, expected_b)
         assert np.array_equal(slices, expected_slices)
+
+    def test_get_slices(self, mesh_data):
+        index = 1
+        prev_b = 0.0
+        bpj = np.array([209266.44709443, 389670.16238121])
+        bpj1 = np.array([209266.44709443, 389651.16238121])
+        b, edges, nodes = _get_slices(index, prev_b, bpj, bpj1, mesh_data)
+        assert np.allclose(b, np.array([0.6845984]))
+        assert np.array_equal(edges, np.array([2]))
+        assert np.array_equal(nodes, np.array([-1]))
