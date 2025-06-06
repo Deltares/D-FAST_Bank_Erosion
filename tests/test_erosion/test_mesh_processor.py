@@ -164,10 +164,10 @@ class TestMeshProcessor:
             (np.array([[100, 100], [120, 120]]), [-1]),
         ],
         ids=[
-            "Within one square",
-            "Match one square",
-            "Match two squares",
-            "Match three squares",
+            "Within one quad",
+            "Match one quad",
+            "Match two quads",
+            "Match three quads",
             "Outside mesh",
         ],
     )
