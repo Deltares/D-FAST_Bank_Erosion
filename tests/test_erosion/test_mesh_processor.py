@@ -148,12 +148,24 @@ class TestMeshProcessor:
                 ),
                 [0, 1],
             ),
+            (
+                np.array(
+                    [
+                        [209266.44709443, 389650.16238121],
+                        [209269.67183787, 389664.217019],
+                        [209271.7614607, 389674.70572161],
+                        [209278.48314731, 389704.10923615],
+                    ]
+                ),
+                [0, 1, 2],
+            ),
             (np.array([[100, 100], [120, 120]]), [-1]),
         ],
         ids=[
-            "One square",
-            "Two squares",
-            "Three squares",
+            "Within one square",
+            "Match one square",
+            "Match two squares",
+            "Match three squares",
             "Outside mesh",
         ],
     )
