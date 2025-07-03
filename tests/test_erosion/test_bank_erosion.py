@@ -93,7 +93,7 @@ class TestErosion:
         with patch.object(dfastbe.io.logger, "PROGTEXTS", {}, create=True):
             yield
 
-    def test_get_ship_parameters(self, mock_erosion, mock_config_file):
+    def test_get_ship_parameters(self, mock_erosion: Erosion, mock_config_file):
         """Test the get_ship_parameters method."""
         num_stations_per_bank = [10, 15]
         mock_erosion._config_file = mock_config_file
@@ -144,13 +144,14 @@ class TestErosion:
         ]
 
         config_file.get_bool.return_value = False
+        mock_erosion._config_file = config_file
 
         with patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters"
         ) as mock_get_ship_params:
             mock_get_ship_params.return_value = shipping_data
             erosion_inputs = mock_erosion._prepare_initial_conditions(
-                config_file, num_stations_per_bank, mock_fairway_data
+                num_stations_per_bank, mock_fairway_data
             )
 
         assert np.array_equal(
@@ -169,7 +170,7 @@ class TestErosion:
         assert erosion_inputs.taucls_str == taucls_str
         assert len(erosion_inputs.bank_type) == 4
 
-    def test_process_river_axis_by_center_line(self, mock_erosion, mock_debug):
+    def test_process_river_axis_by_center_line(self, mock_erosion: Erosion, mock_debug):
         """Test the _process_river_axis_by_center_line method."""
         mock_center_line = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
         mock_erosion.river_center_line_arr = mock_center_line
@@ -194,7 +195,9 @@ class TestErosion:
 
         river_axis.add_data.assert_called_with(data={"stations": np.array([128.0])})
 
-    def test_get_fairway_data(self, mock_erosion, mock_config_file, mock_debug):
+    def test_get_fairway_data(
+        self, mock_erosion: Erosion, mock_config_file, mock_debug
+    ):
         mock_erosion.river_data.debug = True
         mock_erosion._config_file = mock_config_file
         with patch("dfastbe.bank_erosion.data_models.calculation.FairwayData"), patch(
@@ -221,7 +224,7 @@ class TestErosion:
         )
 
     def test_calculate_fairway_bank_line_distance(
-        self, mock_erosion, mock_config_file, mock_debug
+        self, mock_erosion: Erosion, mock_config_file, mock_debug
     ):
         """Test the calculate_fairway_bank_line_distance method."""
         mock_erosion._config_file = mock_config_file
@@ -295,12 +298,11 @@ class TestErosion:
 
         assert mock_fairway_data.fairway_initial_water_levels == []
 
-    def test_process_discharge_levels(self, mock_erosion, mock_debug):
+    def test_process_discharge_levels(self, mock_erosion: Erosion, mock_debug):
         km_bin = np.array([123.0, 128.0, 0.1])
         km_mid = np.array(
             [123.05, 123.15, 123.25, 123.35, 123.45, 123.55, 123.65, 123.75]
         )
-        config_file = MagicMock()
         erosion_inputs = MagicMock()
         bank_data = MagicMock()
         fairway_data = MagicMock()
@@ -359,7 +361,7 @@ class TestErosion:
             mock_compute_erosion.return_value = (MagicMock(), MagicMock())
 
             water_level_data, erosion_results = mock_erosion._process_discharge_levels(
-                km_mid, km_bin, config_file, erosion_inputs, bank_data, fairway_data
+                km_mid, km_bin, erosion_inputs, bank_data, fairway_data
             )
 
             assert mock_write_km_eroded_volumes.called
@@ -371,7 +373,7 @@ class TestErosion:
         assert np.allclose(erosion_results.total_erosion_dist, total_erosion_dist)
         assert np.allclose(erosion_results.total_eroded_vol, total_eroded_vol)
 
-    def test_read_discharge_parameters(self, mock_erosion, shipping_data):
+    def test_read_discharge_parameters(self, mock_erosion: Erosion, shipping_data):
         with patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion._get_param"
         ) as mock_get_param:
@@ -397,7 +399,7 @@ class TestErosion:
             discharge_parameters.left.num_waves_per_ship, shipping_data["nwave0"]
         )
 
-    def test_compute_erosion_per_level(self, mock_erosion, mock_debug):
+    def test_compute_erosion_per_level(self, mock_erosion: Erosion, mock_debug):
         """Test the compute_erosion_per_level method."""
         mock_erosion.river_data.num_discharge_levels = 2
         bank_data = MagicMock(spec=BankData)
@@ -436,6 +438,10 @@ class TestErosion:
         assert isinstance(level_calculation, SingleDischargeLevel)
         assert level_calculation.hfw_max == pytest.approx(5.55804443)
         assert np.allclose(dvol_bank, np.array([[0.0] * 2] * 50))
+
+    def test_run(self, mock_erosion: Erosion, mock_debug):
+        """Test the run method."""
+        mock_erosion.run()
 
 
 def test_calculate_alpha():
