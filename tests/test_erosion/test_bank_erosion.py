@@ -223,21 +223,8 @@ class TestErosion:
             fairway_data.intersection_coords, fairway_intersection_coords
         )
 
-    def test_calculate_fairway_bank_line_distance(
-        self, mock_erosion: Erosion, mock_config_file, mock_debug
-    ):
-        """Test the calculate_fairway_bank_line_distance method."""
-        mock_erosion._config_file = mock_config_file
-        mock_fairway_data = MagicMock()
-        mock_fairway_data.intersection_coords = np.array(
-            [
-                [209186.621094, 389659.99609375],
-                [209187.69800938, 389665.38986148],
-                [209189.26657398, 389673.24607124],
-                [209189.367188, 389673.75],
-            ]
-        )
-        mock_fairway_data.face_indices = np.array([59166, 59167, 62557])
+    @pytest.fixture
+    def mock_bank_data(self):
         mock_left_bank = MagicMock(spec=SingleBank)
         mock_left_bank.is_right_bank = False
         mock_left_bank.bank_line_coords = np.array(
@@ -255,6 +242,7 @@ class TestErosion:
                 123.03520808078332,
             ]
         )
+        mock_left_bank.fairway_face_indices = np.array([1, 2, 0])
 
         mock_right_bank = MagicMock(spec=SingleBank)
         mock_right_bank.is_right_bank = True
@@ -273,14 +261,37 @@ class TestErosion:
                 123.04044936886122,
             ]
         )
+        mock_right_bank.fairway_face_indices = np.array([3, 4, 5])
 
         mock_bank_data = MagicMock(spec=BankData)
         mock_bank_data.left = mock_left_bank
         mock_bank_data.right = mock_right_bank
-        mock_bank_data.__iter__.return_value = iter([mock_left_bank, mock_right_bank])
+        mock_bank_data.__iter__.side_effect = lambda: iter(
+            [mock_left_bank, mock_right_bank]
+        )
+        return mock_bank_data
+
+    def test_calculate_fairway_bank_line_distance(
+        self, mock_erosion: Erosion, mock_config_file, mock_bank_data, mock_debug
+    ):
+        """Test the calculate_fairway_bank_line_distance method."""
+        mock_erosion._config_file = mock_config_file
+        mock_fairway_data = MagicMock()
+        mock_fairway_data.intersection_coords = np.array(
+            [
+                [209186.621094, 389659.99609375],
+                [209187.69800938, 389665.38986148],
+                [209189.26657398, 389673.24607124],
+                [209189.367188, 389673.75],
+                [209192.19921925, 389687.4921875],
+                [209195.0312505, 389701.234375],
+                [209195.96700092, 389705.77502325],
+            ]
+        )
+        mock_fairway_data.fairway_face_indices = np.array([0, 1, 2, 3, 4, 5])
 
         mock_simulation_data = MagicMock()
-        mock_simulation_data.fairway_face_indices = np.array(
+        mock_simulation_data.water_level_face = np.array(
             [
                 23.954999923706055,
                 21.69499969482422,
@@ -296,7 +307,15 @@ class TestErosion:
                 mock_bank_data, mock_fairway_data, mock_simulation_data
             )
 
-        assert mock_fairway_data.fairway_initial_water_levels == []
+        assert np.allclose(
+            mock_fairway_data.fairway_initial_water_levels,
+            np.array(
+                [
+                    [21.69499969, 21.80999947, 21.54500008],
+                    [21.69499969, 21.80999947, 21.80999947],
+                ]
+            ),
+        )
 
     def test_process_discharge_levels(self, mock_erosion: Erosion, mock_debug):
         km_bin = np.array([123.0, 128.0, 0.1])
@@ -441,6 +460,7 @@ class TestErosion:
 
     def test_run(self, mock_erosion: Erosion, mock_debug):
         """Test the run method."""
+        km_mid = [123.05, 123.14999999999999, 123.25, 123.35, 123.45]
         mock_erosion.run()
 
 
