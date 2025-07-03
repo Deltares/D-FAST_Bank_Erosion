@@ -324,12 +324,11 @@ class Erosion:
 
     def _prepare_initial_conditions(
         self,
-        config_file: ConfigFile,
         num_stations_per_bank: List[int],
         fairway_data: FairwayData,
     ) -> ErosionInputs:
         # wave reduction s0, s1
-        wave_fairway_distance_0 = config_file.get_parameter(
+        wave_fairway_distance_0 = self.config_file.get_parameter(
             "Erosion",
             "Wave0",
             num_stations_per_bank,
@@ -337,7 +336,7 @@ class Erosion:
             positive=True,
             onefile=True,
         )
-        wave_fairway_distance_1 = config_file.get_parameter(
+        wave_fairway_distance_1 = self.config_file.get_parameter(
             "Erosion",
             "Wave1",
             num_stations_per_bank,
@@ -351,9 +350,9 @@ class Erosion:
         shipping_data = self.get_ship_parameters(num_stations_per_bank)
 
         # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
-        classes = config_file.get_bool("Erosion", "Classes")
+        classes = self.config_file.get_bool("Erosion", "Classes")
         if classes:
-            bank_type = config_file.get_parameter(
+            bank_type = self.config_file.get_parameter(
                 "Erosion",
                 "BankType",
                 num_stations_per_bank,
@@ -364,7 +363,7 @@ class Erosion:
             for bank in bank_type:
                 tauc.append(ErosionInputs.taucls[bank])
         else:
-            tauc = config_file.get_parameter(
+            tauc = self.config_file.get_parameter(
                 "Erosion",
                 "BankType",
                 num_stations_per_bank,
@@ -381,7 +380,7 @@ class Erosion:
 
         # read bank protection level dike_height
         zss_miss = -1000
-        dike_height = config_file.get_parameter(
+        dike_height = self.config_file.get_parameter(
             "Erosion",
             "ProtectionLevel",
             num_stations_per_bank,
@@ -414,7 +413,6 @@ class Erosion:
         self,
         km_mid,
         km_bin,
-        config_file: ConfigFile,
         erosion_inputs: ErosionInputs,
         bank_data: BankData,
         fairway_data: FairwayData,
@@ -471,7 +469,7 @@ class Erosion:
 
             discharge_levels.append(single_level)
 
-            error_vol_file = config_file.get_str(
+            error_vol_file = self.config_file.get_str(
                 "Erosion", f"EroVol{level_i + 1}", default=f"erovolQ{level_i + 1}.evo"
             )
             log_text("save_error_vol", data={"file": error_vol_file}, indent="  ")
@@ -819,7 +817,6 @@ class Erosion:
             },
         )
         log_text("-")
-        config_file = self.config_file
 
         log_text("derive_topology")
 
@@ -845,14 +842,13 @@ class Erosion:
         )
 
         erosion_inputs = self._prepare_initial_conditions(
-            config_file, bank_data.num_stations_per_bank, fairway_data
+            bank_data.num_stations_per_bank, fairway_data
         )
 
         # initialize arrays for erosion loop over all discharges
         water_level_data, erosion_results = self._process_discharge_levels(
             km_mid,
             km_bin,
-            config_file,
             erosion_inputs,
             bank_data,
             fairway_data,
@@ -867,9 +863,7 @@ class Erosion:
             )
         )
 
-        self._write_bankline_shapefiles(
-            bankline_new_list, bankline_eq_list, config_file
-        )
+        self._write_bankline_shapefiles(bankline_new_list, bankline_eq_list)
         self._write_volume_outputs(erosion_results, km_mid)
 
         # create various plots
@@ -888,10 +882,8 @@ class Erosion:
         log_text("end_bankerosion")
         timed_logger("-- end analysis --")
 
-    def _write_bankline_shapefiles(
-        self, bankline_new_list, bankline_eq_list, config_file: ConfigFile
-    ):
-        bankline_new_series = GeoSeries(bankline_new_list, crs=config_file.crs)
+    def _write_bankline_shapefiles(self, bankline_new_list, bankline_eq_list):
+        bankline_new_series = GeoSeries(bankline_new_list, crs=self.config_file.crs)
         bank_lines_new = GeoDataFrame(geometry=bankline_new_series)
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
 
@@ -899,7 +891,7 @@ class Erosion:
         log_text("save_banklines", data={"file": str(bank_file)})
         bank_lines_new.to_file(bank_file)
 
-        bankline_eq_series = GeoSeries(bankline_eq_list, crs=config_file.crs)
+        bankline_eq_series = GeoSeries(bankline_eq_list, crs=self.config_file.crs)
         banklines_eq = GeoDataFrame(geometry=bankline_eq_series)
 
         bank_file = self.river_data.output_dir / f"{bank_name}_eq.shp"
