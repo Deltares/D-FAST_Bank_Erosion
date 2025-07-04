@@ -33,7 +33,7 @@ from shapely.geometry import LineString, Point
 from shapely import prepare
 from geopandas.geodataframe import GeoDataFrame
 from dfastbe.io.logger import log_text
-from dfastbe.io.config import SimulationFilesError, ConfigFile #, get_bbox
+from dfastbe.io.config import SimulationFilesError, ConfigFile, get_bbox
 
 
 __all__ = ["BaseSimulationData", "BaseRiverData", "LineGeometry"]
@@ -296,8 +296,8 @@ class LineGeometry:
                 Mx3 array with x, y, and chainage values for the reference line.
 
         Returns:
-            line_km : np.ndarray
-                Array containing the chainage for every coordinate specified in line_xy.
+            line_km (np.ndarray):
+                1D Array containing the chainage(stations in km) for every coordinate specified in line_xy.
         """
         coords = self.as_array()
         # pre-allocates the array for the mapped chainage values
@@ -365,6 +365,31 @@ class LineGeometry:
             projected_stations[i] = station
         return projected_stations
 
+    def get_bbox(
+        self, buffer: float = 0.1
+    ) -> Tuple[float, float, float, float]:
+        """
+        Derive the bounding box from a line.
+
+        Args:
+            buffer : float
+                Buffer fraction surrounding the tight bounding box
+
+        Returns:
+            bbox (Tuple[float, float, float, float]):
+                bounding box consisting of [min x, min y, max x, max y)
+        """
+        coords = self.as_array()
+        x = coords[:, 0]
+        y = coords[:, 1]
+        x_min = x.min()
+        y_min = y.min()
+        x_max = x.max()
+        y_max = y.max()
+        d = buffer * max(x_max - x_min, y_max - y_min)
+        bbox = (x_min - d, y_min - d, x_max + d, y_max + d)
+
+        return bbox
 
 class BaseSimulationData:
     """Class to hold simulation data.
@@ -615,7 +640,7 @@ class BaseRiverData:
         """River Data initialization.
 
         Args:
-            config_file : ConfigFile
+            config_file (ConfigFile):
                 Configuration file with settings for the analysis.
 
         Examples:

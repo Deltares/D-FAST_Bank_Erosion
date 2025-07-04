@@ -16,10 +16,10 @@ from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     ErosionInputs,
     ErosionResults,
-    MeshData,
     WaterLevelData,
 )
 from dfastbe.io.logger import log_text
+from dfastbe.io.config import get_bbox
 from dfastbe.bank_erosion.erosion_calculator import WATER_DENSITY, g
 from dfastbe.utils import get_zoom_extends
 
@@ -112,8 +112,6 @@ class ErosionPlotter(BasePlot):
                 The step size for the analysis.
             river_center_line_arr (np.ndarray):
                 The river center line coordinates.
-            mesh_data (MeshData):
-                The mesh data used in the analysis.
             simulation_data (ErosionSimulationData):
                 The simulation data used in the analysis.
         """
@@ -122,7 +120,7 @@ class ErosionPlotter(BasePlot):
         log_text("=")
         log_text("create_figures")
         fig_i = 0
-        bbox = self.get_bbox(river_center_line_arr)
+        bbox = get_bbox(river_center_line_arr)
 
         km_zoom, xy_zoom = self._generate_zoomed_coordinates(river_axis_km)
 
