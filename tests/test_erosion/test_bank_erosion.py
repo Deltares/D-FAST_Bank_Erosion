@@ -314,20 +314,6 @@ class TestErosion:
             SingleParameters,
         )
 
-    @pytest.fixture
-    def mock_erosion_inputs(self, shipping_data):
-        bank_protection_level = [
-            np.array([-13., -13., -13., -13., -13., -13., -13., -13., -13.]), np.array([-13., -13., -13., -13., -13., -13., -13., -13., -13.])]
-        bank_type = [
-            np.array([3., 3., 3., 3., 3., 3., 3., 3., 3.]), np.array([4., 4., 4., 4., 4., 4., 4., 4., 4.]), None, None]
-        id = None
-        shipping_data = shipping_data
-        tauc = [
-            np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]),
-            np.array([0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18]),
-        ]
-        taucls = np.array([1.0e20, 9.5e01, 3.0e00, 9.5e-01, 1.5e-01])
-
     def test_calculate_fairway_bank_line_distance(
         self,
         mock_erosion: Erosion,
@@ -550,7 +536,10 @@ class TestErosion:
         ), patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion._read_discharge_parameters",
             return_value=mock_single_level_parameters,
-        ):
+        ), patch(
+            "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.read"
+        ) as mock_read_data:
+            mock_read_data.return_value = MagicMock()
             mock_erosion.run()
 
 
