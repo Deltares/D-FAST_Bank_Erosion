@@ -221,8 +221,6 @@ def enlarge(
         equal to that of the old array.
     """
     old_shape = old_array.shape
-    print("old: ", old_shape)
-    print("new: ", new_shape)
     new_array = np.zeros(new_shape, dtype=old_array.dtype)
     if len(new_shape)==1:
         new_array[:old_shape[0]] = old_array
