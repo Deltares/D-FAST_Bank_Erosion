@@ -1659,7 +1659,8 @@ def menu_save_configuration() -> None:
         rootdir = os.path.dirname(filename)
         config_file = ConfigFile(config)
         config_file.relative_to(rootdir)
-        config.write(filename)
+        with open(filename, 'w') as configfile:
+            config.write(configfile)
 
 
 def get_configuration() -> configparser.ConfigParser:
