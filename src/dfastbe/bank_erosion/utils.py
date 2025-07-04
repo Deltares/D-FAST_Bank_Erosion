@@ -173,12 +173,17 @@ def get_km_eroded_volume(
         np.int64
     )
     dvol_temp = np.bincount(bin_idx, weights=erosion_volume)
-    length = int((km_bin[1] - km_bin[0]) / km_bin[2])
-    if len(dvol_temp) == length:
+
+    km_mid = get_km_bins(km_bin, station_type="mid")
+    num_km = len(km_mid)
+
+    if len(dvol_temp) == num_km:
         dvol = dvol_temp
-    else:
-        dvol = np.zeros((length,))
+    elif len(dvol_temp) < num_km:
+        dvol = np.zeros((num_km,))
         dvol[: len(dvol_temp)] = dvol_temp
+    else: # len(dvol_temp) > num_km:
+        dvol = dvol_temp[:num_km]
     return dvol
 
 
