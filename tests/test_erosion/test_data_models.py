@@ -5,7 +5,6 @@ import numpy as np
 import pytest
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
-from dfastbe.io.config import ConfigFile
 from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData, ErosionSimulationData
 from dfastbe.bank_erosion.data_models.calculation import (
     ErosionInputs,
