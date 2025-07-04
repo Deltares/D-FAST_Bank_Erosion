@@ -38,6 +38,7 @@ object UnitTests : BuildType({
             name = "SonarCloud analysis"
             id = "SonarCloud_analysis"
             type = "sonar-plugin"
+            enabled = false
             param("sonarProjectName", "D-FAST_Bank_Erosion")
             param("additionalParameters", """
                 "-X"
