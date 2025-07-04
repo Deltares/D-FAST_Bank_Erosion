@@ -92,6 +92,7 @@ def run(
         if run_mode == "BANKLINES":
             bank_lines = BankLines(config_file)
             bank_lines.detect()
+            bank_lines.plot()
         elif run_mode == "BANKEROSION":
             erosion = Erosion(config_file)
             erosion.run()

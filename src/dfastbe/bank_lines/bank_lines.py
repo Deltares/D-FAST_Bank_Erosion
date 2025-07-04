@@ -1,6 +1,6 @@
 """Bank line detection module."""
 
-from typing import List, Tuple
+from typing import List, Tuple, Dict, Any
 
 import geopandas as gpd
 import numpy as np
@@ -66,6 +66,10 @@ class BankLines:
         self.simulation_data, self.critical_water_depth = (
             self.river_data.simulation_data()
         )
+        if self.plot_flags["plot_data"]:
+            self.plotter = self.get_plotter()
+
+        self._results = None
 
     @property
     def config_file(self) -> ConfigFile:
@@ -76,6 +80,22 @@ class BankLines:
     def max_river_width(self) -> int:
         """int: Maximum river width in meters."""
         return MAX_RIVER_WIDTH
+
+    def get_plotter(self) -> BankLinesPlotter:
+        return BankLinesPlotter(
+            self.gui, self.plot_flags, self.config_file.crs, self.simulation_data, self.river_data.river_center_line,
+            self.river_data.river_center_line.station_bounds,
+        )
+
+    @property
+    def results(self) -> Dict[str, Any]:
+        """dict: Results of the bank line detection analysis."""
+        return self._results
+
+    @results.setter
+    def results(self, value: Dict[str, Any]):
+        """Set the results of the bank line detection analysis."""
+        self._results = value
 
     def detect(self) -> None:
         """Run the bank line detection analysis for a specified configuration.
@@ -104,8 +124,6 @@ class BankLines:
             In the FigureDir directory specified in the .cfg, the following files are created:
             - "1_banklinedetection.png"
         """
-        config_file = self.config_file
-        river_data = self.river_data
         timed_logger("-- start analysis --")
 
         log_text(
@@ -118,8 +136,7 @@ class BankLines:
         log_text("-")
 
         # clip the chainage path to the range of chainages of interest
-        river_center_line = river_data.river_center_line
-        station_bounds = river_center_line.station_bounds
+        river_center_line = self.river_data.river_center_line
         river_center_line_values = river_center_line.values
         center_line_arr = river_center_line.as_array()
 
@@ -133,7 +150,7 @@ class BankLines:
 
         log_text("identify_banklines")
         banklines = self.detect_bank_lines(
-            self.simulation_data, self.critical_water_depth, config_file
+            self.simulation_data, self.critical_water_depth, self.config_file
         )
 
         # clip the set of detected bank lines to the bank areas
@@ -145,17 +162,14 @@ class BankLines:
             masked_bank_lines.append(self.mask(banklines, bank_area))
             bank.append(sort_connect_bank_lines(masked_bank_lines[ib], river_center_line_values, to_right[ib]))
 
-        self.save(bank, banklines, masked_bank_lines, bank_areas, config_file)
+        self.save(bank, banklines, masked_bank_lines, bank_areas, self.config_file)
 
-        if self.plot_flags["plot_data"]:
-            bank_lines_plotter = BankLinesPlotter(
-                self.gui, self.plot_flags, config_file.crs, self.simulation_data, river_center_line, station_bounds,
-            )
-            bank_lines_plotter.plot(
-                self.search_lines.size,
-                bank,
-                bank_areas,
-            )
+        self.results = {
+            "bank": bank,
+            "banklines": banklines,
+            "masked_bank_lines": masked_bank_lines,
+            "bank_areas": bank_areas,
+        }
 
         log_text("end_banklines")
         timed_logger("-- stop analysis --")
@@ -196,6 +210,14 @@ class BankLines:
         masked_bank_lines = banklines.intersection(bank_area)[0]
 
         return masked_bank_lines
+
+    def plot(self):
+        if self.plot_flags["plot_data"]:
+            self.plotter.plot(
+                self.search_lines.size,
+                self.results["bank"],
+                self.results["bank_areas"],
+            )
 
     def save(
         self,

@@ -132,6 +132,7 @@ class TestBankLines:
         ) as mock_sort:
             mock_sort.return_value = [LineString([(0, 0), (1, 1)])]
             bank_lines.detect()
+            bank_lines.plot()
 
         bank_lines.detect_bank_lines.assert_called_once_with(
             bank_lines.simulation_data,
@@ -344,8 +345,6 @@ class TestBankLines:
             )
 
             mock_plot_detect1.assert_called_once_with(
-                # (-0.1, -0.1, 1.1, 1.1),  # bbox
-                # xy_km_numpy,
                 bank_areas,
                 bank,
                 "x-coordinate [m]",

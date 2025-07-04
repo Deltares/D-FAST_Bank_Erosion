@@ -1216,6 +1216,7 @@ def run_detection() -> None:
     try:
         bank_line = BankLines(config_file, gui=True)
         bank_line.detect()
+        bank_line.plot()
     except Exception as Ex:
         msg = str(Ex)
     dialog["application"].restoreOverrideCursor()

@@ -181,6 +181,9 @@ bank_lines = BankLines(config_file)
 
 # Run bank line detection
 bank_lines.detect()
+
+# plot results
+bank_lines.plot()
 ```
 
 For more details on the specific methods and classes, refer to the API reference below.
