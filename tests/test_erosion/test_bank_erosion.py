@@ -16,6 +16,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
     SingleBank,
     SingleDischargeLevel,
     SingleLevelParameters,
+    SingleParameters,
 )
 from dfastbe.cmd import run
 from dfastbe.io.config import ConfigFile
@@ -147,9 +148,9 @@ class TestErosion:
         mock_erosion._config_file = config_file
 
         with patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters"
-        ) as mock_get_ship_params:
-            mock_get_ship_params.return_value = shipping_data
+            "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters",
+            return_value=shipping_data,
+        ):
             erosion_inputs = mock_erosion._prepare_initial_conditions(
                 num_stations_per_bank, mock_fairway_data
             )
@@ -225,70 +226,118 @@ class TestErosion:
 
     @pytest.fixture
     def mock_bank_data(self):
-        mock_left_bank = MagicMock(spec=SingleBank)
-        mock_left_bank.is_right_bank = False
-        mock_left_bank.bank_line_coords = np.array(
-            [
-                [209117.80853726, 389680.26397752],
-                [209118.99815819, 389684.66797463],
-                [209118.7134304, 389703.72840232],
-                [209127.20673008, 389727.17509686],
-            ]
+        mock_left_bank = SingleBank(
+            is_right_bank=False,
+            bank_line_coords=np.array(
+                [
+                    [209117.80853726, 389680.26397752],
+                    [209118.99815819, 389684.66797463],
+                    [209118.7134304, 389703.72840232],
+                    [209127.20673008, 389727.17509686],
+                ]
+            ),
+            bank_face_indices=np.array([0, 1, 2]),
+            bank_chainage_midpoints=np.array(
+                [
+                    123.00166634401488,
+                    123.01335778611656,
+                    123.03520808078332,
+                ]
+            ),
+            fairway_face_indices=np.array([1, 2, 0]),
         )
-        mock_left_bank.bank_chainage_midpoints = np.array(
-            [
-                123.00166634401488,
-                123.01335778611656,
-                123.03520808078332,
-            ]
-        )
-        mock_left_bank.fairway_face_indices = np.array([1, 2, 0])
 
-        mock_right_bank = MagicMock(spec=SingleBank)
-        mock_right_bank.is_right_bank = True
-        mock_right_bank.bank_line_coords = np.array(
-            [
-                [209266.44709443, 389650.16238121],
-                [209267.30013864, 389654.45330198],
-                [209269.67183787, 389664.217019],
-                [209271.7614607, 389674.70572161],
-            ]
+        mock_right_bank = SingleBank(
+            is_right_bank=True,
+            bank_line_coords=np.array(
+                [
+                    [209266.44709443, 389650.16238121],
+                    [209267.30013864, 389654.45330198],
+                    [209269.67183787, 389664.217019],
+                    [209271.7614607, 389674.70572161],
+                ]
+            ),
+            bank_face_indices=np.array([3, 4, 5]),
+            bank_chainage_midpoints=np.array(
+                [
+                    123.00943873095339,
+                    123.01990543424606,
+                    123.04044936886122,
+                ]
+            ),
+            fairway_face_indices=np.array([3, 4, 5]),
         )
-        mock_right_bank.bank_chainage_midpoints = np.array(
-            [
-                123.00943873095339,
-                123.01990543424606,
-                123.04044936886122,
-            ]
-        )
-        mock_right_bank.fairway_face_indices = np.array([3, 4, 5])
 
-        mock_bank_data = MagicMock(spec=BankData)
-        mock_bank_data.left = mock_left_bank
-        mock_bank_data.right = mock_right_bank
-        mock_bank_data.__iter__.side_effect = lambda: iter(
-            [mock_left_bank, mock_right_bank]
-        )
+        mock_bank_data = BankData(left=mock_left_bank, right=mock_right_bank)
         return mock_bank_data
 
+    @pytest.fixture
+    def mock_fairway_data(self):
+        """Fixture to create a mock FairwayData."""
+        mock_fairway_data = FairwayData(
+            intersection_coords=np.array(
+                [
+                    [209186.621094, 389659.99609375],
+                    [209187.69800938, 389665.38986148],
+                    [209189.26657398, 389673.24607124],
+                    [209189.367188, 389673.75],
+                    [209192.19921925, 389687.4921875],
+                    [209195.0312505, 389701.234375],
+                    [209195.96700092, 389705.77502325],
+                ]
+            ),
+            fairway_face_indices=np.array([0, 1, 2, 3, 4, 5]),
+        )
+        return mock_fairway_data
+
+    @pytest.fixture
+    def mock_single_level_parameters(self):
+        return SingleLevelParameters.from_column_arrays(
+            {
+                "id": 0,
+                "ship_velocity": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
+                "num_ship": [
+                    np.array([15613, 15613, 15613]),
+                    np.array([15613, 15613, 15613]),
+                ],
+                "num_waves_per_ship": [
+                    np.array([5.0, 5.0, 5.0]),
+                    np.array([5.0, 5.0, 5.0]),
+                ],
+                "ship_draught": [np.array([1.2, 1.2, 1.2]), np.array([1.2, 1.2, 1.2])],
+                "ship_type": [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])],
+                "par_slope": [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])],
+                "par_reed": [np.array([0.0, 0.0, 0.0]), np.array([0.0, 0.0, 0.0])],
+                "mu_slope": [np.array([0.5, 0.5, 0.5]), np.array([0.5, 0.5, 0.5])],
+                "mu_reed": [np.array([0.0, 0.0, 0.0]), np.array([0.0, 0.0, 0.0])],
+            },
+            SingleParameters,
+        )
+
+    @pytest.fixture
+    def mock_erosion_inputs(self, shipping_data):
+        bank_protection_level = [
+            np.array([-13., -13., -13., -13., -13., -13., -13., -13., -13.]), np.array([-13., -13., -13., -13., -13., -13., -13., -13., -13.])]
+        bank_type = [
+            np.array([3., 3., 3., 3., 3., 3., 3., 3., 3.]), np.array([4., 4., 4., 4., 4., 4., 4., 4., 4.]), None, None]
+        id = None
+        shipping_data = shipping_data
+        tauc = [
+            np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]),
+            np.array([0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18, 0.18]),
+        ]
+        taucls = np.array([1.0e20, 9.5e01, 3.0e00, 9.5e-01, 1.5e-01])
+
     def test_calculate_fairway_bank_line_distance(
-        self, mock_erosion: Erosion, mock_config_file, mock_bank_data, mock_debug
+        self,
+        mock_erosion: Erosion,
+        mock_config_file,
+        mock_bank_data,
+        mock_fairway_data,
+        mock_debug,
     ):
         """Test the calculate_fairway_bank_line_distance method."""
         mock_erosion._config_file = mock_config_file
-        mock_fairway_data = MagicMock()
-        mock_fairway_data.intersection_coords = np.array(
-            [
-                [209186.621094, 389659.99609375],
-                [209187.69800938, 389665.38986148],
-                [209189.26657398, 389673.24607124],
-                [209189.367188, 389673.75],
-                [209192.19921925, 389687.4921875],
-                [209195.0312505, 389701.234375],
-                [209195.96700092, 389705.77502325],
-            ]
-        )
-        mock_fairway_data.fairway_face_indices = np.array([0, 1, 2, 3, 4, 5])
 
         mock_simulation_data = MagicMock()
         mock_simulation_data.water_level_face = np.array(
@@ -458,10 +507,51 @@ class TestErosion:
         assert level_calculation.hfw_max == pytest.approx(5.55804443)
         assert np.allclose(dvol_bank, np.array([[0.0] * 2] * 50))
 
-    def test_run(self, mock_erosion: Erosion, mock_debug):
+    def test_run(
+        self,
+        mock_erosion: Erosion,
+        mock_fairway_data,
+        mock_bank_data,
+        shipping_data,
+        mock_single_level_parameters,
+        mock_debug,
+    ):
         """Test the run method."""
-        km_mid = [123.05, 123.14999999999999, 123.25, 123.35, 123.45]
-        mock_erosion.run()
+        mock_km_mid = MagicMock()
+        mock_km_mid.return_value = [123.05, 123.14999999999999, 123.25, 123.35, 123.45]
+        mock_erosion.bl_processor.intersect_with_mesh.return_value = mock_bank_data
+        mock_erosion.simulation_data.water_level_face = np.array(
+            [
+                23.954999923706055,
+                21.69499969482422,
+                21.69499969482422,
+                21.809999465942383,
+                21.545000076293945,
+                21.134998321533203,
+            ]
+        )
+        mock_erosion.config_file.get_parameter.side_effect = [
+            [np.array([150.0, 150.0, 150.0]), np.array([150.0, 150.0, 150.0])],
+            [np.array([110.0, 110.0, 110.0]), np.array([110.0, 110.0, 110.0])],
+            [np.array([1.0, 1.0, 1.0]), np.array([0.18, 0.18, 0.18])],
+            [np.array([-13.0, -13.0, -13.0]), np.array([-13.0, -13.0, -13.0])],
+        ]
+        mock_erosion.config_file.get_bool.return_value = False
+        with patch(
+            "dfastbe.bank_erosion.bank_erosion.Erosion._get_fairway_data",
+            return_value=mock_fairway_data,
+        ), patch("dfastbe.bank_erosion.bank_erosion.get_km_bins", mock_km_mid), patch(
+            "dfastbe.bank_erosion.bank_erosion.Erosion._process_river_axis_by_center_line"
+        ), patch(
+            "dfastbe.io.data_models.GeoDataFrame"
+        ), patch(
+            "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters",
+            return_value=shipping_data,
+        ), patch(
+            "dfastbe.bank_erosion.bank_erosion.Erosion._read_discharge_parameters",
+            return_value=mock_single_level_parameters,
+        ):
+            mock_erosion.run()
 
 
 def test_calculate_alpha():
