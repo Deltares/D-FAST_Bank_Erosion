@@ -1,11 +1,13 @@
 """Erosion-related data structures."""
 import os
+from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Iterator, List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type, Optional, Union
 import numpy as np
 from pathlib import Path
 from dfastio.xyc.models import XYCModel
 from geopandas import GeoDataFrame
+from shapely.geometry import Point
 from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString, Point
 
@@ -13,7 +15,9 @@ from dfastbe.io.data_models import BaseRiverData, BaseSimulationData
 from dfastbe.io.logger import log_text
 from dfastbe.io.config import ConfigFile
 
+
 GenericType = TypeVar("GenericType")
+
 
 @dataclass
 class BaseBank(Generic[GenericType]):
@@ -134,6 +138,7 @@ class ErosionInputs(BaseBank[SingleErosion]):
         """Get the critical bank shear stress values."""
         return [self.left.tauc, self.right.tauc]
 
+
 @dataclass
 class WaterLevelData:
     """Class to hold water level data.
@@ -155,7 +160,6 @@ class WaterLevelData:
     ship_wave_max: List[List[np.ndarray]]
     ship_wave_min: List[List[np.ndarray]]
     velocity: List[List[np.ndarray]]
-    bank_height: List[np.ndarray]
     chezy: List[List[np.ndarray]]
     vol_per_discharge: List[List[np.ndarray]]
 
@@ -214,6 +218,9 @@ class SingleBank:
     dy: np.ndarray = field(init=False)
     length: int = field(init=False)
 
+    # bank height is calculated at the first discharge level only.
+    height: Optional[np.ndarray] = field(default=lambda : np.array([]))
+
     def __post_init__(self):
         """Post-initialization to ensure bank_line_coords is a list of numpy arrays."""
         self.segment_length = self._segment_length()
@@ -263,6 +270,7 @@ class SingleBank:
             bank_coords_mind = [Point(xy) for xy in bank_coords_mind]
             bank_coords_mind = GeoSeries(bank_coords_mind, crs=crs)
         return bank_coords_mind
+
 
 @dataclass
 class BankData(BaseBank[SingleBank]):
@@ -334,6 +342,11 @@ class BankData(BaseBank[SingleBank]):
         """Get the number of stations per bank."""
         return [self.left.length, self.right.length]
 
+    @property
+    def height(self) -> List[np.ndarray]:
+        """Get the bank height."""
+        return [self.left.height, self.right.height]
+
 
 @dataclass
 class FairwayData:
@@ -382,7 +395,7 @@ class ErosionResults:
     Examples:
         - You can create an instance of the ErosionResults class as follows:
         ```python
-        >>> from dfastbe.bank_erosion.data_models import ErosionResults
+        >>> from dfastbe.bank_erosion.data_models.calculation import ErosionResults
         >>> import numpy as np
         >>> erosion_results = ErosionResults(
         ...     eq_erosion_dist=[np.array([0.1, 0.2])],
@@ -405,7 +418,7 @@ class ErosionResults:
         can be set to empty arrays if not needed.
 
         ```python
-        >>> from dfastbe.bank_erosion.data_models import ErosionResults
+        >>> from dfastbe.bank_erosion.data_models.calculation import ErosionResults
         >>> import numpy as np
         >>> erosion_results = ErosionResults(
         ...     eq_erosion_dist=[np.array([0.1, 0.2])],
@@ -434,246 +447,8 @@ class ErosionResults:
     total_eroded_vol_per_km: np.ndarray = field(default_factory=lambda : np.empty(0))
 
 
-class ErosionSimulationData(BaseSimulationData):
-
-    def compute_mesh_topology(self) -> MeshData:
-        """Derive secondary topology arrays from the face-node connectivity of the mesh.
-
-        This function computes the edge-node, edge-face, and face-edge connectivity arrays,
-        as well as the boundary edges of the mesh, based on the face-node connectivity provided
-        in the simulation data.
-
-        Returns:
-            MeshData: a dataclass containing the following attributes:
-                - `x_face_coords`: x-coordinates of face nodes
-                - `y_face_coords`: y-coordinates of face nodes
-                - `x_edge_coords`: x-coordinates of edge nodes
-                - `y_edge_coords`: y-coordinates of edge nodes
-                - `face_node`: the node indices for each of the mesh faces.
-                - `n_nodes`: number of nodes per face
-                - `edge_node`: the node indices for each of the mesh edges.
-                - `edge_face_connectivity`: the face indices for each of the mesh edge
-                - `face_edge_connectivity`: the edge indices for each of the mesh face
-                - `boundary_edge_nrs`: indices of boundary edges
-
-        Raises:
-            KeyError:
-                If required keys (e.g., `face_node`, `nnodes`, `x_node`, `y_node`) are missing from the `sim` object.
-
-        Notes:
-            - The function identifies unique edges by sorting and comparing node indices.
-            - Boundary edges are identified as edges that belong to only one face.
-            - The function assumes that the mesh is well-formed, with consistent face-node connectivity.
-        """
-
-        # get a sorted list of edge node connections (shared edges occur twice)
-        # face_nr contains the face index to which the edge belongs
-        n_faces = self.face_node.shape[0]
-        n_edges = sum(self.n_nodes)
-        edge_node = np.zeros((n_edges, 2), dtype=int)
-        face_nr = np.zeros((n_edges,), dtype=int)
-        i = 0
-        for face_i in range(n_faces):
-            num_edges = self.n_nodes[face_i]  # note: nEdges = nNodes
-            for edge_i in range(num_edges):
-                if edge_i == 0:
-                    edge_node[i, 1] = self.face_node[face_i, num_edges - 1]
-                else:
-                    edge_node[i, 1] = self.face_node[face_i, edge_i - 1]
-                edge_node[i, 0] = self.face_node[face_i, edge_i]
-                face_nr[i] = face_i
-                i = i + 1
-        edge_node.sort(axis=1)
-        i2 = np.argsort(edge_node[:, 1], kind="stable")
-        i1 = np.argsort(edge_node[i2, 0], kind="stable")
-        i12 = i2[i1]
-        edge_node = edge_node[i12, :]
-        face_nr = face_nr[i12]
-
-        # detect which edges are equal to the previous edge, and get a list of all unique edges
-        numpy_true = np.array([True])
-        equal_to_previous = np.concatenate(
-            (~numpy_true, (np.diff(edge_node, axis=0) == 0).all(axis=1))
-        )
-        unique_edge = ~equal_to_previous
-        n_unique_edges = np.sum(unique_edge)
-        # reduce the edge node connections to only the unique edges
-        edge_node = edge_node[unique_edge, :]
-
-        # number the edges
-        edge_nr = np.zeros(n_edges, dtype=int)
-        edge_nr[unique_edge] = np.arange(n_unique_edges, dtype=int)
-        edge_nr[equal_to_previous] = edge_nr[
-            np.concatenate((equal_to_previous[1:], equal_to_previous[:1]))
-        ]
-
-        # if two consecutive edges are unique, the first one occurs only once and represents a boundary edge
-        is_boundary_edge = unique_edge & np.concatenate((unique_edge[1:], numpy_true))
-        boundary_edge_nrs = edge_nr[is_boundary_edge]
-
-        # go back to the original face order
-        edge_nr_in_face_order = np.zeros(n_edges, dtype=int)
-        edge_nr_in_face_order[i12] = edge_nr
-        # create the face edge connectivity array
-        face_edge_connectivity = np.zeros(self.face_node.shape, dtype=int)
-
-        i = 0
-        for face_i in range(n_faces):
-            num_edges = self.n_nodes[face_i]  # note: num_edges = n_nodes
-            for edge_i in range(num_edges):
-                face_edge_connectivity[face_i, edge_i] = edge_nr_in_face_order[i]
-                i = i + 1
-
-        # determine the edge face connectivity
-        edge_face = -np.ones((n_unique_edges, 2), dtype=int)
-        edge_face[edge_nr[unique_edge], 0] = face_nr[unique_edge]
-        edge_face[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
-
-        x_face_coords = self.apply_masked_indexing(
-            self.x_node, self.face_node
-        )
-        y_face_coords = self.apply_masked_indexing(
-            self.y_node, self.face_node
-        )
-        x_edge_coords = self.x_node[edge_node]
-        y_edge_coords = self.y_node[edge_node]
-
-        return MeshData(
-            x_face_coords=x_face_coords,
-            y_face_coords=y_face_coords,
-            x_edge_coords=x_edge_coords,
-            y_edge_coords=y_edge_coords,
-            face_node=self.face_node,
-            n_nodes=self.n_nodes,
-            edge_node=edge_node,
-            edge_face_connectivity=edge_face,
-            face_edge_connectivity=face_edge_connectivity,
-            boundary_edge_nrs=boundary_edge_nrs,
-        )
-
-    @staticmethod
-    def apply_masked_indexing(
-        x0: np.array, idx: np.ma.masked_array
-    ) -> np.ma.masked_array:
-        """
-        Index one array by another transferring the mask.
-
-        Args:
-            x0 : np.ndarray
-                A linear array.
-            idx : np.ma.masked_array
-                An index array with possibly masked indices.
-
-        returns:
-            x1: np.ma.masked_array
-                An array with same shape as idx, with mask.
-        """
-        idx_safe = idx.copy()
-        idx_safe.data[np.ma.getmask(idx)] = 0
-        x1 = np.ma.masked_where(np.ma.getmask(idx), x0[idx_safe])
-        return x1
-
-    def calculate_bank_velocity(self, single_bank: SingleBank, vel_dx) -> np.ndarray:
-        from dfastbe.bank_erosion.utils import moving_avg
-        bank_face_indices = single_bank.bank_face_indices
-        vel_bank = (
-                np.abs(
-                    self.velocity_x_face[bank_face_indices] * single_bank.dx
-                    + self.velocity_y_face[bank_face_indices] * single_bank.dy
-                )
-                / single_bank.segment_length
-        )
-
-        if vel_dx > 0.0:
-            vel_bank = moving_avg(
-                single_bank.bank_chainage_midpoints, vel_bank, vel_dx
-            )
-
-        return vel_bank
-
-    def calculate_bank_height(self, single_bank: SingleBank, zb_dx):
-        from dfastbe.bank_erosion.utils import moving_avg
-        bank_index = single_bank.bank_face_indices
-        if self.bed_elevation_location == "node":
-            zb_nodes = self.bed_elevation_values
-            zb_all = self.apply_masked_indexing(
-                zb_nodes, self.face_node[bank_index, :]
-            )
-            zb_bank = zb_all.max(axis=1)
-            if zb_dx > 0.0:
-                zb_bank = moving_avg(
-                    single_bank.bank_chainage_midpoints, zb_bank, zb_dx,
-                )
-        else:
-            # don't know ... need to check neighbouring cells ...
-            zb_bank = None
-
-        return zb_bank
-
-class ErosionRiverData(BaseRiverData):
-
-    def __init__(self, config_file: ConfigFile):
-        super().__init__(config_file)
-        self.bank_dir = self._get_bank_line_dir()
-        self.output_dir = config_file.get_output_dir("erosion")
-        self.debug = config_file.debug
-        # set plotting flags
-        self.plot_flags = config_file.get_plotting_flags(config_file.root_dir)
-        # get filter settings for bank levels and flow velocities along banks
-        self.zb_dx = config_file.get_float("Erosion", "BedFilterDist", 0.0, positive=True)
-        self.vel_dx = config_file.get_float("Erosion", "VelFilterDist", 0.0, positive=True)
-        log_text("get_levels")
-        self.num_discharge_levels = config_file.get_int("Erosion", "NLevel")
-        self.output_intervals = config_file.get_float("Erosion", "OutputInterval", 1.0)
-        self.bank_lines = config_file.read_bank_lines(str(self.bank_dir))
-        self.river_axis = self._read_river_axis()
-        self.erosion_time = self.config_file.get_int("Erosion", "TErosion", positive=True)
-
-    def simulation_data(self) -> ErosionSimulationData:
-
-        ref_level = self.config_file.get_int("Erosion", "RefLevel") - 1
-        # read simulation data (get_sim_data)
-        sim_file = self.config_file.get_sim_file("Erosion", str(ref_level + 1))
-        log_text("-")
-        log_text("read_simdata", data={"file": sim_file})
-        log_text("-")
-        simulation_data = ErosionSimulationData.read(sim_file)
-
-        return simulation_data
-
-    def _get_bank_output_dir(self) -> Path:
-        bank_output_dir = self.config_file.get_str("General", "BankDir")
-        log_text("bank_dir_out", data={"dir": bank_output_dir})
-        if os.path.exists(bank_output_dir):
-            log_text("overwrite_dir", data={"dir": bank_output_dir})
-        else:
-            os.makedirs(bank_output_dir)
-
-        return Path(bank_output_dir)
-
-    def _get_bank_line_dir(self) -> Path:
-        bank_dir = self.config_file.get_str("General", "BankDir")
-        log_text("bank_dir_in", data={"dir": bank_dir})
-        bank_dir = Path(bank_dir)
-        if not bank_dir.exists():
-            log_text("missing_dir", data={"dir": bank_dir})
-            raise BankLinesResultsError(
-                f"Required bank line directory:{bank_dir} does not exist. please use the banklines command to run the "
-                "bankline detection tool first it."
-            )
-        else:
-            return bank_dir
-
-    def _read_river_axis(self) -> LineString:
-        """Get the river axis from the analysis settings."""
-        river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
-        log_text("read_river_axis", data={"file": river_axis_file})
-        river_axis = XYCModel.read(river_axis_file)
-        return river_axis
-
-
 @dataclass
-class ParametersPerBank:
+class SingleParameters:
     ship_velocity: float
     num_ship: float
     num_waves_per_ship: float
@@ -686,14 +461,15 @@ class ParametersPerBank:
 
 
 @dataclass
-class DischargeLevelParameters(BaseBank[ParametersPerBank]):
+class SingleLevelParameters(BaseBank[SingleParameters]):
     pass
 
 
 @dataclass
-class DischargeCalculationParameters:
+class SingleCalculation:
     bank_velocity: np.ndarray = field(default=lambda : np.array([]))
     water_level: np.ndarray = field(default=lambda : np.array([]))
+    water_depth: np.ndarray = field(default=lambda : np.array([]))
     chezy: np.ndarray = field(default=lambda : np.array([]))
     ship_wave_max: np.ndarray = field(default=lambda : np.array([]))
     ship_wave_min: np.ndarray = field(default=lambda : np.array([]))
@@ -702,21 +478,21 @@ class DischargeCalculationParameters:
     erosion_distance_shipping: np.ndarray = field(default=lambda : np.array([]))
     erosion_distance_tot: np.ndarray = field(default=lambda : np.array([]))
     erosion_volume_tot: np.ndarray = field(default=lambda : np.array([]))
+    # the erosion distance and erosion volume at equilibrium is calculated at the last discharge level only.
     erosion_distance_eq: Optional[np.ndarray] = field(default=lambda : np.array([]))
     erosion_volume_eq: Optional[np.ndarray] = field(default=lambda : np.array([]))
 
 
 @dataclass
-class CalculationLevel(BaseBank[DischargeCalculationParameters]):
+class SingleDischargeLevel(BaseBank[SingleCalculation]):
     hfw_max: float = field(default=0.0)
 
     @classmethod
     def from_column_arrays(
-        cls, data: dict, bank_cls: Type["DischargeCalculationParameters"], hfw_max: float,
+        cls, data: dict, bank_cls: Type["SingleCalculation"], hfw_max: float,
         bank_order: Tuple[str, str] = ("left", "right")
-    ) -> "CalculationLevel":
+    ) -> "SingleDischargeLevel":
         # Only include fields that belong to the bank-specific data
-        # base_fields = {k: v for k, v in data.items() if k != "id"}
         base = BaseBank.from_column_arrays(data, bank_cls, bank_order=bank_order)
 
         return cls(
@@ -726,18 +502,19 @@ class CalculationLevel(BaseBank[DischargeCalculationParameters]):
             hfw_max=hfw_max,
         )
 
+
 class DischargeLevels:
 
-    def __init__(self, levels: List[CalculationLevel]):
+    def __init__(self, levels: List[SingleDischargeLevel]):
         self.levels = levels
 
-    def __getitem__(self, index: int) -> CalculationLevel:
+    def __getitem__(self, index: int) -> SingleDischargeLevel:
         return self.levels[index]
 
     def __len__(self) -> int:
         return len(self.levels)
 
-    def append(self, level_calc: CalculationLevel):
+    def append(self, level_calc: SingleDischargeLevel):
         self.levels.append(level_calc)
 
     def get_max_hfw_level(self) -> float:
@@ -788,10 +565,9 @@ class DischargeLevels:
         """Get the attributes of the levels for both left and right bank."""
         return [self._get_attr_both_sides_level(attribute_name, level) for level in range(len(self.levels))]
 
-    def get_water_level_data(self, bank_height) -> WaterLevelData:
+    def get_water_level_data(self) -> WaterLevelData:
         return WaterLevelData(
             hfw_max=self.levels[-1].hfw_max,
-            bank_height=bank_height,
             water_level=self.get_attr_level("water_level"),
             ship_wave_max=self.get_attr_level("ship_wave_max"),
             ship_wave_min=self.get_attr_level("ship_wave_min"),
@@ -799,8 +575,3 @@ class DischargeLevels:
             chezy=self.get_attr_level("chezy"),
             vol_per_discharge=self.get_attr_level("volume_per_discharge"),
         )
-
-class BankLinesResultsError(Exception):
-    """Custom exception for BankLine results errors."""
-
-    pass

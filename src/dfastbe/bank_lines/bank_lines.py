@@ -122,14 +122,13 @@ class BankLines:
         station_bounds = river_center_line.station_bounds
         river_center_line_values = river_center_line.values
         center_line_arr = river_center_line.as_array()
-        stations_coords = center_line_arr[:, :2]
 
         bank_areas: List[Polygon] = self.search_lines.to_polygons()
 
         to_right = [True] * self.search_lines.size
         for ib in range(self.search_lines.size):
             to_right[ib] = on_right_side(
-                np.array(self.search_lines.values[ib].coords), stations_coords
+                np.array(self.search_lines.values[ib].coords), center_line_arr[:, :2]
             )
 
         log_text("identify_banklines")
@@ -139,14 +138,12 @@ class BankLines:
 
         # clip the set of detected bank lines to the bank areas
         log_text("simplify_banklines")
-        bank = [None] * self.search_lines.size
-        masked_bank_lines = [None] * self.search_lines.size
+        bank = []
+        masked_bank_lines = []
         for ib, bank_area in enumerate(bank_areas):
             log_text("bank_lines", data={"ib": ib + 1})
-            masked_bank_lines[ib] = self.mask(banklines, bank_area)
-            bank[ib] = sort_connect_bank_lines(
-                masked_bank_lines[ib], river_center_line_values, to_right[ib]
-            )
+            masked_bank_lines.append(self.mask(banklines, bank_area))
+            bank.append(sort_connect_bank_lines(masked_bank_lines[ib], river_center_line_values, to_right[ib]))
 
         self.save(bank, banklines, masked_bank_lines, bank_areas, config_file)
 
@@ -331,7 +328,6 @@ class BankLines:
                 mask.flatten()
             ]
         else:
-            mask = np.repeat(True, face_node.size)
             non_masked = face_node.size
             f_nc_m = face_node.reshape(non_masked)
             zwm = np.repeat(simulation_data.water_level_face, max_num_nodes).reshape(

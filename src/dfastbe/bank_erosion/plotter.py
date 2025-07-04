@@ -11,16 +11,16 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
 from dfastbe.plotting import BasePlot
-from dfastbe.bank_erosion.data_models import (
+from dfastbe.bank_erosion.data_models.inputs import ErosionSimulationData
+from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     ErosionInputs,
     ErosionResults,
-    ErosionSimulationData,
     MeshData,
     WaterLevelData,
 )
 from dfastbe.io.logger import log_text
-from dfastbe.bank_erosion.utils import g, water_density
+from dfastbe.bank_erosion.erosion_calculator import WATER_DENSITY, g
 from dfastbe.utils import get_zoom_extends
 
 X_AXIS_TITLE = "x-coordinate [km]"
@@ -785,7 +785,7 @@ class ErosionPlotter(BasePlot):
             )
             ax.plot(
                 bk,
-                self.water_level_data.bank_height[ib],
+                self.bank_data.height[ib],
                 color=(0.5, 0.5, 0.5),
                 label=bankheight_txt,
             )
@@ -840,7 +840,7 @@ class ErosionPlotter(BasePlot):
         velc = np.sqrt(
             self.erosion_inputs.tauc[index]
             * self.water_level_data.chezy[0][index] ** 2
-            / (water_density * g)
+            / (WATER_DENSITY * g)
         )
         ax.plot(
             self.bank_data.bank_chainage_midpoints[index],

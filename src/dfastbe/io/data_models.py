@@ -292,8 +292,6 @@ class LineGeometry:
         of interpolation.
 
         Args:
-            target_line_coords (np.ndarray):
-                Nx2 array of x, y coordinates for the target line.
             reference_line_with_stations (np.ndarray):
                 Mx3 array with x, y, and chainage values for the reference line.
 
@@ -367,6 +365,7 @@ class LineGeometry:
             projected_stations[i] = station
         return projected_stations
 
+
 class BaseSimulationData:
     """Class to hold simulation data.
 
@@ -376,19 +375,19 @@ class BaseSimulationData:
     """
 
     def __init__(
-            self,
-            x_node: np.ndarray,
-            y_node: np.ndarray,
-            n_nodes: np.ndarray,
-            face_node: np.ma.masked_array,
-            bed_elevation_location: np.ndarray,
-            bed_elevation_values: np.ndarray,
-            water_level_face: np.ndarray,
-            water_depth_face: np.ndarray,
-            velocity_x_face: np.ndarray,
-            velocity_y_face: np.ndarray,
-            chezy_face: np.ndarray,
-            dry_wet_threshold: float,
+        self,
+        x_node: np.ndarray,
+        y_node: np.ndarray,
+        n_nodes: np.ndarray,
+        face_node: np.ma.masked_array,
+        bed_elevation_location: np.ndarray,
+        bed_elevation_values: np.ndarray,
+        water_level_face: np.ndarray,
+        water_depth_face: np.ndarray,
+        velocity_x_face: np.ndarray,
+        velocity_y_face: np.ndarray,
+        chezy_face: np.ndarray,
+        dry_wet_threshold: float,
     ):
         """
         Initialize the SimulationData object.
@@ -446,24 +445,18 @@ class BaseSimulationData:
                 String to use for each line as indentation (default empty).
 
         Raises:
-            SimulationFilesError
+            SimulationFilesError:
                 If the file is not recognized as a D-Flow FM map-file.
 
         Returns:
-            BaseSimulationData: Dictionary containing the data read from the simulation output file.
-            float: Threshold depth for detecting drying and flooding.
+            BaseSimulationData (Tuple[BaseSimulationData, float]):
+                Dictionary containing the data read from the simulation output file.
 
         Examples:
             ```python
             >>> from dfastbe.io.data_models import BaseSimulationData
-            >>> sim_data = BaseSimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc")
-            No message found for read_grid
-            No message found for read_bathymetry
-            No message found for read_water_level
-            No message found for read_water_depth
-            No message found for read_velocity
-            No message found for read_chezy
-            No message found for read_drywet
+            >>> sim_data = BaseSimulationData.read("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc") # doctest: +ELLIPSIS
+            No message ... read_drywet
             >>> print(sim_data.x_node[0:3])
             [194949.796875 194966.515625 194982.8125  ]
 
@@ -614,6 +607,7 @@ class BaseSimulationData:
         self.velocity_y_face = self.velocity_y_face[keep_face]
         self.chezy_face = self.chezy_face[keep_face]
 
+
 class BaseRiverData:
     """River data class."""
 
@@ -650,24 +644,24 @@ class BaseRiverData:
         """Tuple: the lower and upper bounds of the river center line."""
         return self._station_bounds
 
-    # @staticmethod
-    # def get_bbox(
-    #     coords: np.ndarray, buffer: float = 0.1
-    # ) -> Tuple[float, float, float, float]:
-    #     """
-    #     Derive the bounding box from an array of coordinates.
-    #
-    #     Args:
-    #         coords (np.ndarray):
-    #             An N x M array containing x- and y-coordinates as first two M entries
-    #         buffer : float
-    #             Buffer fraction surrounding the tight bounding box
-    #
-    #     Returns:
-    #         bbox (Tuple[float, float, float, float]):
-    #             Tuple bounding box consisting of [min x, min y, max x, max y)
-    #     """
-    #     return get_bbox(coords, buffer)
+    @staticmethod
+    def get_bbox(
+        coords: np.ndarray, buffer: float = 0.1
+    ) -> Tuple[float, float, float, float]:
+        """
+        Derive the bounding box from an array of coordinates.
+
+        Args:
+            coords (np.ndarray):
+                An N x M array containing x- and y-coordinates as first two M entries
+            buffer : float
+                Buffer fraction surrounding the tight bounding box
+
+        Returns:
+            bbox (Tuple[float, float, float, float]):
+                Tuple bounding box consisting of [min x, min y, max x, max y)
+        """
+        return get_bbox(coords, buffer)
 
     def get_erosion_sim_data(self, num_discharge_levels: int) -> Tuple[List[str], List[float]]:
         # get pdischarges
@@ -716,9 +710,7 @@ def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndar
     )
     if len(mesh2d) != 1:
         raise Exception(
-            "Currently only one 2D mesh supported ... this file contains {} 2D meshes.".format(
-                len(mesh2d)
-            )
+            f"Currently only one 2D mesh supported ... this file contains {len(mesh2d)} 2D meshes."
         )
     meshname = mesh2d[0].name
 
@@ -762,9 +754,7 @@ def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndar
             )
         if len(var) != 1:
             raise Exception(
-                'Expected one variable for "{}", but obtained {}.'.format(
-                    varname, len(var)
-                )
+                f'Expected one variable for "{varname}", but obtained {len(var)}.'
             )
         var = var[0]
 

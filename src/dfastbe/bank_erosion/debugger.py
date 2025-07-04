@@ -5,10 +5,10 @@ from typing import Dict
 import numpy as np
 from geopandas import GeoSeries
 from geopandas.geodataframe import GeoDataFrame
-from dfastbe.bank_erosion.data_models import (
-    DischargeCalculationParameters,
+from dfastbe.bank_erosion.data_models.calculation import (
+    SingleCalculation,
     FairwayData,
-    ParametersPerBank,
+    SingleParameters,
     SingleBank,
     SingleErosion,
 )
@@ -30,11 +30,8 @@ class Debugger:
         single_bank: SingleBank,
         fairway_data: FairwayData,
         erosion_inputs: SingleErosion,
-        discharge_level_pars: ParametersPerBank,
-        water_depth_fairway,
-        dn_eq1,
-        dv_eq1,
-        bank_height,
+        single_parameters: SingleParameters,
+        single_calculation: SingleCalculation,
     ):
         """Write the last discharge level to a shapefile and CSV file."""
         bank_coords_mind = single_bank.get_mid_points()
@@ -44,20 +41,20 @@ class Debugger:
             "y": bank_coords_mind[:, 1],
             "iface_fw": single_bank.fairway_face_indices,
             "iface_bank": single_bank.bank_face_indices,
-            "bank_height": bank_height[bank_index],
+            "bank_height": single_bank.height,
             "segment_length": single_bank.segment_length,
             "zw0": fairway_data.fairway_initial_water_levels[bank_index],
-            "ship_velocity": discharge_level_pars.ship_velocity,
-            "ship_type": discharge_level_pars.ship_type,
-            "draught": discharge_level_pars.ship_draught,
-            "mu_slp": discharge_level_pars.mu_slope,
+            "ship_velocity": single_parameters.ship_velocity,
+            "ship_type": single_parameters.ship_type,
+            "draught": single_parameters.ship_draught,
+            "mu_slp": single_parameters.mu_slope,
             "bank_fairway_dist": single_bank.fairway_distances,
             "fairway_wave_reduction_distance": erosion_inputs.wave_fairway_distance_0,
             "fairway_wave_disappear_distance": erosion_inputs.wave_fairway_distance_1,
-            "water_depth_fairway": water_depth_fairway,
+            "water_depth_fairway": single_calculation.water_depth,
             "dike_height": erosion_inputs.bank_protection_level,
-            "erosion_distance": dn_eq1,
-            "erosion_volume": dv_eq1,
+            "erosion_distance": single_calculation.erosion_distance_eq,
+            "erosion_volume": single_calculation.erosion_volume_eq,
         }
 
         path = f"{str(self.output_dir)}/debug.EQ.B{bank_index + 1}"
@@ -71,11 +68,8 @@ class Debugger:
         single_bank: SingleBank,
         fairway_data: FairwayData,
         erosion_inputs: SingleErosion,
-        discharge_level_pars: ParametersPerBank,
-        water_depth_fairway,
-        velocity,
-        bank_height,
-        parameter: DischargeCalculationParameters,
+        single_parameters: SingleParameters,
+        single_calculation: SingleCalculation,
     ):
         """Write the middle levels to a shapefile and CSV file."""
         bank_coords_mind = single_bank.get_mid_points()
@@ -85,29 +79,29 @@ class Debugger:
             "y": bank_coords_mind[:, 1],
             "iface_fw": single_bank.fairway_face_indices,
             "iface_bank": single_bank.bank_face_indices,
-            "velocity": velocity,
-            "bank_height": bank_height[bank_ind],
+            "velocity": single_calculation.bank_velocity,
+            "bank_height": single_bank.height,
             "segment_length": single_bank.segment_length,
-            "zw": parameter.water_level,
+            "zw": single_calculation.water_level,
             "zw0": fairway_data.fairway_initial_water_levels[bank_ind],
             "tauc": erosion_inputs.tauc,
-            "num_ship": discharge_level_pars.num_ship,
-            "ship_velocity": discharge_level_pars.ship_velocity,
-            "num_waves_per_ship": discharge_level_pars.num_waves_per_ship,
-            "ship_type": discharge_level_pars.ship_type,
-            "draught": discharge_level_pars.ship_draught,
-            "mu_slp": discharge_level_pars.mu_slope,
-            "mu_reed": discharge_level_pars.mu_reed,
+            "num_ship": single_parameters.num_ship,
+            "ship_velocity": single_parameters.ship_velocity,
+            "num_waves_per_ship": single_parameters.num_waves_per_ship,
+            "ship_type": single_parameters.ship_type,
+            "draught": single_parameters.ship_draught,
+            "mu_slp": single_parameters.mu_slope,
+            "mu_reed": single_parameters.mu_reed,
             "dist_fw": single_bank.fairway_distances,
             "fairway_wave_reduction_distance": erosion_inputs.wave_fairway_distance_0,
             "fairway_wave_disappear_distance": erosion_inputs.wave_fairway_distance_1,
-            "water_depth_fairway": water_depth_fairway,
-            "chez": parameter.chezy,
+            "water_depth_fairway": single_calculation.water_depth,
+            "chez": single_calculation.chezy,
             "dike_height": erosion_inputs.bank_protection_level,
-            "erosion_distance": parameter.erosion_distance_tot,
-            "erosion_volume": parameter.erosion_volume_tot,
-            "erosion_distance_shipping": parameter.erosion_distance_shipping,
-            "erosion_distance_flow": parameter.erosion_distance_flow,
+            "erosion_distance": single_calculation.erosion_distance_tot,
+            "erosion_volume": single_calculation.erosion_volume_tot,
+            "erosion_distance_shipping": single_calculation.erosion_distance_shipping,
+            "erosion_distance_flow": single_calculation.erosion_distance_flow,
         }
         path = f"{str(self.output_dir)}/debug.Q{q_level + 1}.B{bank_ind + 1}"
         bank_coords_geo = single_bank.get_mid_points(as_geo_series=True, crs=self.crs)

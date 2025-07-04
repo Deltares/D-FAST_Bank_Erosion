@@ -117,13 +117,23 @@ nav:
           - guides/teamcity-ci.md
   - Architecture Design:
       - architecture-design/main-components.md
+      - architecture-design/class-diagram.md
   - API Reference:
-      - api/bank_lines.md
-      - api/bank_lines_data_models.md
-      - api/bank_erosion.md
+      - Bank Line Module:
+          - api/bank_lines/bank_lines.md
+          - api/bank_lines/data_models.md
+      - Bank Erosion Module:
+          - api/bank_erosion/bank_erosion.md
+          - api/bank_erosion/erosion_calculation.md
+          - api/bank_erosion/erosion_calculator.md
+          - api/bank_erosion/mesh_processor.md
+          - api/bank_erosion/debugger.md
+          - Data Models:
+              - api/bank_erosion/data_models/calculation.md
+              - api/bank_erosion/data_models/inputs.md
       - api/io.md
       - api/cmd.md
-      - api/kernel.md
+      - api/utils.md
       - api/plotting.md
   - User Interface:
       - gui/gui.md

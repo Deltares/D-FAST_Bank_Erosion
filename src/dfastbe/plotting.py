@@ -36,6 +36,8 @@ from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from dfastbe.io.data_models import BaseSimulationData
 
+from dfastbe.io.config import ConfigFile
+from dfastbe.bank_erosion.erosion_calculator import WATER_DENSITY, g
 
 class BasePlot:
 

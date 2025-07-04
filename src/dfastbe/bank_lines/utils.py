@@ -28,47 +28,45 @@ def sort_connect_bank_lines(
     bank : LineString
         The detected bank line.
     """
-
     # convert MultiLineString into list of LineStrings that can be modified later
     banklines_list = [line for line in banklines.geoms]
 
     # loop over banklines and determine minimum/maximum projected length
-
-    minlocs = np.zeros(len(banklines_list))
-    maxlocs = np.zeros(len(banklines_list))
+    min_locs = np.zeros(len(banklines_list))
+    max_locs = np.zeros(len(banklines_list))
     lengths = np.zeros(len(banklines_list))
     keep = lengths == 1
 
     for i, bl in enumerate(banklines_list):
-        minloc = 1e20
-        maxloc = -1
+        min_loc = 1e20
+        max_loc = -1
         for j, p in enumerate(bl.coords):
             loc = xykm.project(Point(p))
-            if loc < minloc:
-                minloc = loc
-                minj = j
-            if loc > maxloc:
-                maxloc = loc
-                maxj = j
-        minlocs[i] = minloc  # at minj
-        maxlocs[i] = maxloc  # at maxj
-        if minj == maxj:
+            if loc < min_loc:
+                min_loc = loc
+                min_j = j
+            if loc > max_loc:
+                max_loc = loc
+                max_j = j
+        min_locs[i] = min_loc  # at minj
+        max_locs[i] = max_loc  # at maxj
+        if min_j == max_j:
             pass
         elif bl.coords[0] == bl.coords[-1]:
 
             crd_numpy = np.array(bl.coords)
-            ncrd = len(crd_numpy)
-            if minj < maxj:
-                op1 = np.array(bl.coords[minj : maxj + 1])
-                op2 = np.zeros((ncrd + minj - maxj, 2))
-                op2[0 : ncrd - maxj - 1] = crd_numpy[maxj:-1]
-                op2[ncrd - maxj - 1 : ncrd - maxj + minj] = crd_numpy[: minj + 1]
+            num_coord = len(crd_numpy)
+            if min_j < max_j:
+                op1 = np.array(bl.coords[min_j : max_j + 1])
+                op2 = np.zeros((num_coord + min_j - max_j, 2))
+                op2[0: num_coord - max_j - 1] = crd_numpy[max_j:-1]
+                op2[num_coord - max_j - 1: num_coord - max_j + min_j] = crd_numpy[: min_j + 1]
                 op2 = op2[::-1]
             else:  # minj > maxj
-                op1 = np.array(bl.coords[maxj : minj + 1][::-1])
-                op2 = np.zeros((ncrd + maxj - minj, 2))
-                op2[0 : ncrd - minj - 1] = crd_numpy[minj:-1]
-                op2[ncrd - minj - 1 : ncrd - minj + maxj] = crd_numpy[: maxj + 1]
+                op1 = np.array(bl.coords[max_j : min_j + 1][::-1])
+                op2 = np.zeros((num_coord + max_j - min_j, 2))
+                op2[0: num_coord - min_j - 1] = crd_numpy[min_j:-1]
+                op2[num_coord - min_j - 1: num_coord - min_j + max_j] = crd_numpy[: max_j + 1]
             op1_right_of_op2 = on_right_side(op1, op2)
             if (right_bank and op1_right_of_op2) or (
                     (not right_bank) and (not op1_right_of_op2)
@@ -78,11 +76,11 @@ def sort_connect_bank_lines(
                 op = op1
             banklines_list[i] = LineString(op)
         else:
-            if minj < maxj:
-                banklines_list[i] = LineString(bl.coords[minj : maxj + 1])
+            if min_j < max_j:
+                banklines_list[i] = LineString(bl.coords[min_j : max_j + 1])
             else:  # minj > maxj
-                banklines_list[i] = LineString(bl.coords[maxj : minj + 1][::-1])
-        lengths[i] = maxloc - minloc
+                banklines_list[i] = LineString(bl.coords[max_j : min_j + 1][::-1])
+        lengths[i] = max_loc - min_loc
 
     while True:
         maxl = lengths.max()
@@ -93,11 +91,11 @@ def sort_connect_bank_lines(
 
         keep[i] = True
         # remove lines that are a subset
-        lengths[(minlocs >= minlocs[i]) & (maxlocs <= maxlocs[i])] = 0
+        lengths[(min_locs >= min_locs[i]) & (max_locs <= max_locs[i])] = 0
 
         # if line partially overlaps ... but stick out on the high side
         jarray = np.nonzero(
-            (minlocs > minlocs[i]) & (minlocs < maxlocs[i]) & (maxlocs > maxlocs[i])
+            (min_locs > min_locs[i]) & (min_locs < max_locs[i]) & (max_locs > max_locs[i])
         )[0]
         if jarray.size > 0:
             for j in jarray:
@@ -109,13 +107,13 @@ def sort_connect_bank_lines(
                         lengths[j] = 0
                         break
                     loc = xykm.project(Point(p))
-                    if loc >= maxlocs[i]:
+                    if loc >= max_locs[i]:
                         banklines_list[j] = LineString(bl.coords[k:])
-                        minlocs[j] = loc
+                        min_locs[j] = loc
                         break
         # if line partially overlaps ... but stick out on the low side
         jarray = np.nonzero(
-            (minlocs < minlocs[i]) & (maxlocs > minlocs[i]) & (maxlocs < maxlocs[i])
+            (min_locs < min_locs[i]) & (max_locs > min_locs[i]) & (max_locs < max_locs[i])
         )[0]
         if jarray.size > 0:
             for j in jarray:
@@ -127,13 +125,13 @@ def sort_connect_bank_lines(
                         lengths[j] = 0
                         break
                     loc = xykm.project(Point(p))
-                    if loc <= minlocs[i]:
+                    if loc <= min_locs[i]:
                         banklines_list[j] = LineString(bl.coords[:k])
-                        maxlocs[j] = loc
+                        max_locs[j] = loc
                         break
 
     # select banks in order of projected length
-    idx = np.argsort(minlocs[keep])
+    idx = np.argsort(min_locs[keep])
     idx2 = np.nonzero(keep)[0]
     new_bank_coords = []
     for i in idx2[idx]:

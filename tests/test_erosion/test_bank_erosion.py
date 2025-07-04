@@ -5,10 +5,10 @@ import numpy as np
 import pytest
 
 from dfastbe.bank_erosion.bank_erosion import Erosion
-from dfastbe.bank_erosion.data_models import FairwayData
+from dfastbe.bank_erosion.data_models.calculation import FairwayData
 from dfastbe.cmd import run
 from dfastbe.io.config import ConfigFile
-
+from dfastbe.bank_erosion.data_models.calculation import FairwayData
 
 matplotlib.use('Agg')
 

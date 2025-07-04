@@ -5,18 +5,17 @@ import numpy as np
 import pytest
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
-
-from dfastbe.bank_erosion.data_models import (
-    BankData,
+from dfastbe.io.config import ConfigFile
+from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData, ErosionSimulationData
+from dfastbe.bank_erosion.data_models.calculation import (
     ErosionInputs,
-    ErosionResults,
-    ErosionRiverData,
-    ErosionSimulationData,
-    FairwayData,
-    MeshData,
-    SingleBank,
-    SingleErosion,
     WaterLevelData,
+    MeshData,
+    BankData,
+    FairwayData,
+    ErosionResults,
+    SingleBank,
+    SingleErosion
 )
 from dfastbe.io.config import ConfigFile
 
@@ -58,13 +57,11 @@ def test_water_level_data():
         ship_wave_max=[[np.array([0.5, 1.0])]],
         ship_wave_min=[[np.array([0.2, 0.4])]],
         velocity=[[np.array([0.1, 0.2])]],
-        bank_height=[np.array([3.0, 4.0])],
         chezy=[[np.array([30.0, 40.0])]],
         vol_per_discharge=[[np.array([0.9, 1.0])]],
     )
     assert water_level_data.hfw_max == pytest.approx(5.0)
     assert water_level_data.water_level[0][0][1] == pytest.approx(2.0)
-    assert water_level_data.bank_height[0][1] == pytest.approx(4.0)
 
 
 def test_mesh_data():
@@ -263,9 +260,9 @@ class TestSimulationData:
 
         # Create a BaseRiverData instance
         with patch(
-            "dfastbe.bank_erosion.data_models.ErosionRiverData._get_bank_line_dir"
+            "dfastbe.bank_erosion.data_models.inputs.ErosionRiverData._get_bank_line_dir"
         ) as mock_get_bank_line_dir, patch(
-            "dfastbe.bank_erosion.data_models.ErosionRiverData._read_river_axis"
+            "dfastbe.bank_erosion.data_models.inputs.ErosionRiverData._read_river_axis"
         ) as mock_read_river_axis:
             mock_get_bank_line_dir.return_value = Path("tests/data/erosion/inputs")
             mock_read_river_axis.return_value = LineString([(0, 0), (1, 1), (2, 2)])
@@ -274,7 +271,7 @@ class TestSimulationData:
 
         # Call the simulation_data method
         with patch(
-            "dfastbe.bank_erosion.data_models.ErosionSimulationData.read",
+            "dfastbe.bank_erosion.data_models.inputs.ErosionSimulationData.read",
         ) as mock_read_simulation_data:
             mock_read_simulation_data.return_value = mock_simulation_data_class
             # Call the simulation_data method

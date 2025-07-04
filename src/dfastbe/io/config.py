@@ -104,10 +104,11 @@ class ConfigFile:
 
     @property
     def debug(self) -> bool:
+        """bool: Get the debug flag."""
         return self.get_bool("General", "DebugOutput", False)
 
     @property
-    def root_dir(self) -> Path:
+    def root_dir(self) -> Path | str:
         """Path: Get the root directory of the configuration file."""
         return self._root_dir
 
@@ -595,14 +596,14 @@ class ConfigFile:
         """
         # read guiding bank line
         n_bank = self.get_int("Detect", "NBank")
-        line = [None] * n_bank
+        line = []
         for b in range(n_bank):
             bankfile = self.config["Detect"][f"Line{b + 1}"]
             log_text("read_search_line", data={"nr": b + 1, "file": bankfile})
-            line[b] = XYCModel.read(bankfile)
+            line.append(XYCModel.read(bankfile))
         return line
 
-    def read_bank_lines(self, bank_dir: str) -> List[np.ndarray]:
+    def read_bank_lines(self, bank_dir: str) -> List[np.ndarray] | GeoDataFrame:
         """Get the bank lines from the detection step.
 
         Args:
@@ -733,13 +734,9 @@ class ConfigFile:
             float: The validated parameter value.
         """
         if positive and value < 0:
-            raise ValueError(
-                f'Value of "{key}" should be positive, not {value}.'
-            )
+            raise ValueError(f'Value of "{key}" should be positive, not {value}.')
         if valid is not None and valid.count(value) == 0:
-            raise ValueError(
-                f'Value of "{key}" should be in {valid}, not {value}.'
-            )
+            raise ValueError(f'Value of "{key}" should be in {valid}, not {value}.')
         return value
 
     def process_parameter(
@@ -748,33 +745,41 @@ class ConfigFile:
         key: str,
         num_stations_per_bank: List[int],
         use_default: bool = False,
-        default=None,
+        default: Any = None,
         ext: str = "",
         positive: bool = False,
         valid: Optional[List[float]] = None,
         onefile: bool = False,
     ) -> List[np.ndarray]:
-        """Process a parameter value into arrays for each bank.
+        """
+        Process a parameter value into arrays for each bank.
 
         Args:
-            value (Union[str, float]): The parameter value or filename.
-            key (str): Name of the parameter for error messages.
-            num_stations_per_bank (List[int]): Number of stations for each bank.
-            use_default (bool): Flag indicating whether to use the default value; default False.
-            default: Default value to use if use_default is True; default None.
-            ext (str): File name extension; default empty string.
-            positive (bool): Flag specifying whether all values are accepted (if False),
-                or only positive values (if True); default False.
-            valid (Optional[List[float]]): Optional list of valid values; default None.
-            onefile (bool): Flag indicating whether parameters are read from one file.
-                One file should be used for all bank lines (True) or one file per bank line (False; default).
+            value (Union[str, float]):
+                The parameter value or a path to a file.
+            key (str):
+                Name of the parameter for error messages.
+            num_stations_per_bank (List[int]):
+                Number of stations for each bank.
+            use_default (bool):
+                Whether to use the default value.
+            default (Optional[float], default=None):
+                Default value used if `use_default` is True.
+            ext (str, default=''):
+                File name extension.
+            positive (bool, default=False):
+                If True, only positive values are allowed.
+            valid (Optional[List[float]], default=None):
+                List of valid values.
+            onefile (bool, default=False):
+                If True, parameters are read from a single file for all banks;
+                otherwise, one file per bank.
 
         Returns:
             List[np.ndarray]: Parameter values for each bank.
         """
         # if val is value then use that value globally
-        num_banks = len(num_stations_per_bank)
-        parameter_values = [None] * num_banks
+        parameter_values = []
         try:
             if use_default:
                 if isinstance(default, list):
@@ -784,8 +789,8 @@ class ConfigFile:
                 real_val = float(value)
                 self.validate_parameter_value(real_val, key, positive, valid)
 
-            for ib, num_stations in enumerate(num_stations_per_bank):
-                parameter_values[ib] = np.zeros(num_stations) + real_val
+            for num_stations in num_stations_per_bank:
+                parameter_values.append(np.zeros(num_stations) + real_val)
 
         except (ValueError, TypeError):
             if onefile:
@@ -802,14 +807,13 @@ class ConfigFile:
                     km_thr, val = _get_stations(filename_i, key, positive)
 
                 if km_thr is None:
-                    parameter_values[ib] = np.zeros(num_stations) + val[0]
+                    parameter_values.append(np.zeros(num_stations) + val[0])
                 else:
                     idx = np.zeros(num_stations, dtype=int)
 
                     for thr in km_thr:
                         idx[num_stations >= thr] += 1
-                    parameter_values[ib] = val[idx]
-                # print("Min/max of data: ", parfield[ib].min(), parfield[ib].max())
+                    parameter_values.append(val[idx])
 
         return parameter_values
 
@@ -1072,7 +1076,7 @@ class ConfigFile:
             except ValueError:
                 self.config[group][key] = relative_path(rootdir, val_str)
 
-    def get_plotting_flags(self, root_dir: str) -> Dict[str, bool]:
+    def get_plotting_flags(self, root_dir: Path | str) -> Dict[str, bool]:
         """Get the plotting flags from the configuration file.
 
         Returns:
@@ -1226,8 +1230,6 @@ def _get_stations(filename: str, key: str, positive: bool):
         Name of the quantity that we're reading.
     positive : bool
         Flag specifying whether all values are accepted (if False), or only positive values (if True).
-    valid : Optional[List[float]]
-        Optional list of valid values.
 
     Raises
     ------
