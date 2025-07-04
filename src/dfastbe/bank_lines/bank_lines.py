@@ -149,13 +149,11 @@ class BankLines:
 
         if self.plot_flags["plot_data"]:
             bank_lines_plotter = BankLinesPlotter(
-                self.gui, self.plot_flags, config_file, self.simulation_data
+                self.gui, self.plot_flags, config_file.crs, self.simulation_data, river_center_line, station_bounds,
             )
             bank_lines_plotter.plot(
-                center_line_arr,
                 self.search_lines.size,
                 bank,
-                station_bounds,
                 bank_areas,
             )
 
