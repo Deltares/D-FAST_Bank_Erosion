@@ -10,7 +10,7 @@ from shapely.geometry import LineString, MultiLineString, Polygon
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.bank_lines.plotter import BankLinesPlotter
 from dfastbe.cmd import run
-from dfastbe.io.data_models import BaseSimulationData
+from dfastbe.io.data_models import BaseSimulationData, LineGeometry
 from dfastbe.io.config import ConfigFile
 
 matplotlib.use('Agg')
@@ -108,7 +108,7 @@ class TestBankLines:
         mock_config_file.get_plotting_flags.return_value = {"plot_data": False}
 
         mock_river_data = MagicMock()
-        mock_river_data.river_center_line.station_bounds = (0, 100)
+        mock_river_data.river_center_line.stations_bounds = (0, 100)
         mock_river_data.river_center_line.values = MagicMock()
         mock_river_data.river_center_line.as_array.return_value = np.array(
             [[0, 0], [100, 100]]
@@ -295,7 +295,7 @@ class TestBankLines:
 
     def test_plot(self, mock_config_file, tmp_path: Path):
         """Test the plot method of the BankLines class."""
-        xy_km_numpy = np.array([[0, 0, 0], [1, 1, 0]])
+        xy_km_numpy = LineGeometry(line=np.array([[0, 0, 0], [1, 1, 0]]))
         n_search_lines = 1
         bank = [LineString([(0, 0), (1, 1)])]
         km_bounds = (0, 1)
@@ -335,19 +335,17 @@ class TestBankLines:
             mock_plot_detect1.return_value = (MagicMock(), MagicMock())
 
             bank_lines_plotter = BankLinesPlotter(
-                False, bank_lines.plot_flags, mock_config_file, mock_simulation_data
+                False, bank_lines.plot_flags, mock_config_file.crs, mock_simulation_data, xy_km_numpy, km_bounds,
             )
             bank_lines_plotter.plot(
-                xy_km_numpy,
                 n_search_lines,
                 bank,
-                km_bounds,
                 bank_areas,
             )
 
             mock_plot_detect1.assert_called_once_with(
-                (-0.1, -0.1, 1.1, 1.1),  # bbox
-                xy_km_numpy,
+                # (-0.1, -0.1, 1.1, 1.1),  # bbox
+                # xy_km_numpy,
                 bank_areas,
                 bank,
                 "x-coordinate [m]",
@@ -356,7 +354,6 @@ class TestBankLines:
                 "water depth [m]",
                 "bank search area",
                 "detected bank line",
-                mock_config_file,
             )
             mock_zoom_xy_and_save.assert_called_once()
             mock_show.assert_called_once()
