@@ -15,6 +15,17 @@ from dfastbe.io.data_models import BaseSimulationData, LineGeometry
 from dfastbe.utils import get_zoom_extends
 from dfastbe.plotting import BasePlot
 
+# Texts for the plot
+PLOT_TEXTS = {
+    "x_label": "x-coordinate [m]",
+    "y_label": "y-coordinate [m]",
+    "title": "water depth and detected bank lines", # Label for the axes title.
+    "color_bar_label": "water depth [m]",  # Label for the color bar.
+    "bank_area_txt": "bank search area", # Label for the bank search areas.
+    "bankline_txt": "detected bank line", # Label for the identified bank lines.
+}
+
+
 
 class BankLinesPlotter(BasePlot):
 
@@ -63,8 +74,8 @@ class BankLinesPlotter(BasePlot):
                 Coordinate reference system.
 
         Returns:
-            Optional(np.ndarray):
-                Array of zoom extents in x, y space, or None if zooming is disabled.
+            np.ndarray:
+                Array of zoom extents in x, y space.
         """
         banks_coords: List[np.ndarray] = []
         banks_station: List[np.ndarray] = []
@@ -135,18 +146,12 @@ class BankLinesPlotter(BasePlot):
         else:
             xy_zoom = None
 
-        fig, ax = self.plot_detect1(
+        fig, ax = self._plot_data(
             bank_areas,
             bank,
-            "x-coordinate [m]",
-            "y-coordinate [m]",
-            "water depth and detected bank lines",
-            "water depth [m]",
-            "bank search area",
-            "detected bank line",
         )
         if self.flags["save_plot"]:
-            fig_i = self.save_plot(
+            self.save_plot(
                 fig, ax, fig_i, "banklinedetection", xy_zoom, self.flags, True
             )
 
@@ -155,50 +160,27 @@ class BankLinesPlotter(BasePlot):
         else:
             plt.show(block=not self.gui)
 
-    def plot_detect1(
+    def _plot_data(
         self,
-        bankareas: List[Polygon],
+        bank_areas: List[Polygon],
         bank: List[LineString],
-        xlabel_txt: str,
-        ylabel_txt: str,
-        title_txt: str,
-        waterdepth_txt: str,
-        bankarea_txt: str,
-        bankline_txt: str,
     ) -> Tuple[Figure, Axes]:
         """
         Create the bank line detection plot.
 
-        The figure contains a map of the water depth, the chainage, and detected
-        bank lines.
+        The figure contains a map of the water depth, the chainage, and detected bank lines.
 
-        Arguments
-        ---------
-        xykm : np.ndarray
-            Array containing the x, y, and chainage; unit m for x and y, km for chainage.
-        bankareas : List[Polygon]
-            List of bank polygons.
-        bank : List[LineString]
-            List of bank lines.
-        xlabel_txt : str
-            Label for the x-axis.
-        ylabel_txt : str
-            Label for the y-axis.
-        title_txt : str
-            Label for the axes title.
-        waterdepth_txt : str
-            Label for the color bar.
-        bankarea_txt : str
-            Label for the bank search areas.
-        bankline_txt : str
-            Label for the identified bank lines.
+        Args:
+            bank_areas (List[Polygon]):
+                List of bank polygons.
+            bank (List[LineString]):
+                List of bank lines.
 
-        Returns
-        -------
-        fig : matplotlib.figure.Figure:
-            Figure object.
-        ax : matplotlib.axes.Axes
-            Axes object.
+        Returns:
+            fig : matplotlib.figure.Figure:
+                Figure object.
+            ax : matplotlib.axes.Axes
+                Axes object.
         """
         fig, ax = plt.subplots()
         self.set_size(fig)
@@ -207,23 +189,24 @@ class BankLinesPlotter(BasePlot):
         scale = 1  # using scale 1 here because of the geopandas plot commands
         maximum_water_depth = 1.1 * self.simulation_data.water_depth_face.max()
         self.stations_marker(self.river_center_line.as_array(), ax, float_format=0, scale=scale)
-        p = self.plot_mesh_patches(
+        patches = self.plot_mesh_patches(
             ax, self.simulation_data, 0, maximum_water_depth, scale=scale
         )
-        for b, bankarea in enumerate(bankareas):
-            gpd.GeoSeries(bankarea, crs=self.crs).plot(
+        for ind, bank_area in enumerate(bank_areas):
+            gpd.GeoSeries(bank_area, crs=self.crs).plot(
                 ax=ax, alpha=0.2, color="k"
             )
-            gpd.GeoSeries(bank[b], crs=self.crs).plot(ax=ax, color="r")
-        fig.colorbar(p, ax=ax, shrink=0.5, drawedges=False, label=waterdepth_txt)
+            gpd.GeoSeries(bank[ind], crs=self.crs).plot(ax=ax, color="r")
+
+        fig.colorbar(patches, ax=ax, shrink=0.5, drawedges=False, label=PLOT_TEXTS["color_bar_label"])
 
         shaded = Patch(color="k", alpha=0.2)
         bankln = Line2D([], [], color="r")
         handles = [shaded, bankln]
-        labels = [bankarea_txt, bankline_txt]
-        #
+        labels = [PLOT_TEXTS["bank_area_txt"], PLOT_TEXTS["bankline_txt"]]
+
         self.set_bbox(ax, self.bbox, scale=scale)
         self.set_axes_properties(
-            ax, xlabel_txt, ylabel_txt, True, title_txt, handles, labels
+            ax, PLOT_TEXTS["x_label"], PLOT_TEXTS["y_label"], True, PLOT_TEXTS["title"], handles, labels
         )
         return fig, ax
