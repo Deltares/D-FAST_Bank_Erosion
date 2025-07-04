@@ -201,8 +201,8 @@ class BankLinesPlotter(BasePlot):
         fig.colorbar(patches, ax=ax, shrink=0.5, drawedges=False, label=PLOT_TEXTS["color_bar_label"])
 
         shaded = Patch(color="k", alpha=0.2)
-        bankln = Line2D([], [], color="r")
-        handles = [shaded, bankln]
+        banklines = Line2D([], [], color="r")
+        handles = [shaded, banklines]
         labels = [PLOT_TEXTS["bank_area_txt"], PLOT_TEXTS["bankline_txt"]]
 
         self.set_bbox(ax, self.bbox, scale=scale)
