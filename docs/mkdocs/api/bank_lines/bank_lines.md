@@ -184,6 +184,9 @@ bank_lines.detect()
 
 # plot results
 bank_lines.plot()
+
+# Save results
+bank_lines.save()
 ```
 
 For more details on the specific methods and classes, refer to the API reference below.

@@ -89,7 +89,18 @@ class BankLines:
 
     @property
     def results(self) -> Dict[str, Any]:
-        """dict: Results of the bank line detection analysis."""
+        """dict: Results of the bank line detection analysis.
+
+        Returns:
+            bank (List[LineString]):
+                List of bank lines.
+            banklines (GeoSeries):
+                Un-ordered set of bank line segments.
+            masked_bank_lines (List[MultiLineString]):
+                Un-ordered set of bank line segments, clipped to bank area.
+            bank_areas (List[Polygon]):
+                A search area corresponding to one of the bank search lines.
+        """
         return self._results
 
     @results.setter
@@ -113,6 +124,8 @@ class BankLines:
             >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS
             N...e
             >>> bank_lines.detect()
+            >>> bank_lines.plot()
+            >>> bank_lines.save()
                0...-
 
             ```
@@ -161,8 +174,6 @@ class BankLines:
             log_text("bank_lines", data={"ib": ib + 1})
             masked_bank_lines.append(self.mask(banklines, bank_area))
             bank.append(sort_connect_bank_lines(masked_bank_lines[ib], river_center_line_values, to_right[ib]))
-
-        self.save(bank, banklines, masked_bank_lines, bank_areas, self.config_file)
 
         self.results = {
             "bank": bank,
@@ -219,55 +230,23 @@ class BankLines:
                 self.results["bank_areas"],
             )
 
-    def save(
-        self,
-        bank: List[LineString],
-        banklines: GeoSeries,
-        masked_bank_lines: List[MultiLineString],
-        bank_areas: List[Polygon],
-        config_file: ConfigFile,
-    ):
-        """Save results to files.
+    def save(self):
+        """Save results to files."""
+        if self.results is None:
+            raise ValueError("No results to save. Run the detect method first.")
 
-        Args:
-            bank (List[LineString]):
-                List of bank lines.
-            banklines (GeoSeries):
-                Un-ordered set of bank line segments.
-            masked_bank_lines (List[MultiLineString]):
-                Un-ordered set of bank line segments, clipped to bank area.
-            bank_areas (List[Polygon]):
-                A search area corresponding to one of the bank search lines.
-            config_file (ConfigFile):
-                Configuration file object.
-
-        Examples:
-            ```python
-            >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")  # doctest: +ELLIPSIS
-            >>> bank_lines = BankLines(config_file)
-            N...e
-            >>> bank = [LineString([(0, 0), (1, 1)])]
-            >>> banklines = gpd.GeoSeries([LineString([(0, 0), (1, 1)])])
-            >>> masked_bank_lines = [MultiLineString([LineString([(0, 0), (1, 1)])])]
-            >>> bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]
-            >>> bank_lines.save(bank, banklines, masked_bank_lines, bank_areas, config_file)
-            No message found for save_banklines
-
-            ```
-        """
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
-        bank_file = self.bank_output_dir / f"{bank_name}.shp"
+        bank_file = self.bank_output_dir / f"{bank_name}{EXTENSION}"
         log_text("save_banklines", data={"file": bank_file})
-        gpd.GeoSeries(bank, crs=config_file.crs).to_file(bank_file)
+        gpd.GeoSeries(self.results["bank"], crs=self.config_file.crs).to_file(bank_file)
 
-        gpd.GeoSeries(masked_bank_lines, crs=config_file.crs).to_file(
+        gpd.GeoSeries(self.results["masked_bank_lines"], crs=self.config_file.crs).to_file(
             self.bank_output_dir / f"{BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE}{EXTENSION}"
         )
-        banklines.to_file(
+        self.results["banklines"].to_file(
             self.bank_output_dir / f"{RAW_DETECTED_BANKLINE_FRAGMENTS_FILE}{EXTENSION}"
         )
-        gpd.GeoSeries(bank_areas, crs=config_file.crs).to_file(
+        gpd.GeoSeries(self.results["bank_areas"], crs=self.config_file.crs).to_file(
             self.bank_output_dir / f"{BANK_AREAS_FILE}{EXTENSION}"
         )
 
