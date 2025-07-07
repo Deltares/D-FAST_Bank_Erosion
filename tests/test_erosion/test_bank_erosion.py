@@ -243,6 +243,11 @@ class TestErosion:
                     123.00166634401488,
                     123.01335778611656,
                     123.03520808078332,
+                    123.05705837545008,
+                    123.06099330347638,
+                    123.08492823150268,
+                    123.10886315952898,
+                    123.13279808755528,
                 ]
             ),
             fairway_face_indices=np.array([1, 2]),
@@ -264,6 +269,11 @@ class TestErosion:
                     123.00943873095339,
                     123.01990543424606,
                     123.04044936886122,
+                    123.06099330347638,
+                    123.08153723809154,
+                    123.1020811727067,
+                    123.12262510732186,
+                    123.14316904193702,
                 ]
             ),
             fairway_face_indices=np.array([0, 1, 2]),
@@ -323,9 +333,9 @@ class TestErosion:
                 [
                     24.20999908,
                     23.95000076,
-                    21.69000053,
-                    21.69000053,
                     22.68000031,
+                    21.69000053,
+                    21.69000053,
                     22.68000031,
                     22.68000031,
                     22.68000031,
@@ -340,6 +350,9 @@ class TestErosion:
                     0.14170171,
                     0.14170133,
                     0.20039541,
+                    0.14170133,
+                    0.20039541,
+                    0.14170171,
                 ],
             ),
             dry_wet_threshold=0.1,
@@ -349,15 +362,18 @@ class TestErosion:
             n_nodes=np.array([4, 4, 4, 4]),
             velocity_x_face=np.ma.array([0.0, 0.0, 0.0, 0.0]),
             velocity_y_face=np.ma.array([0.0, 0.0, 0.0, 0.0]),
-            water_depth_face=np.ma.array(
-                [0.00499916, 0.00499916, 0.00499916, 0.00499916]
-            ),
+            water_depth_face=np.ma.array([0.00499916] * 9),
             water_level_face=np.ma.array(
                 [
-                    23.95499992,
-                    21.69499969,
-                    21.69499969,
-                    22.67499924,
+                    23.954999923706055,
+                    21.69499969482422,
+                    21.69499969482422,
+                    21.809999465942383,
+                    21.545000076293945,
+                    21.134998321533203,
+                    22.68000030517578,
+                    22.910000076293945,
+                    22.68000030517578,
                 ],
             ),
             x_node=np.ma.array(
@@ -581,16 +597,7 @@ class TestErosion:
         mock_km_mid = MagicMock()
         mock_km_mid.return_value = [123.05, 123.14999999999999, 123.25, 123.35, 123.45]
         mock_erosion.bl_processor.intersect_with_mesh.return_value = mock_bank_data
-        mock_erosion.simulation_data.water_level_face = np.array(
-            [
-                23.954999923706055,
-                21.69499969482422,
-                21.69499969482422,
-                21.809999465942383,
-                21.545000076293945,
-                21.134998321533203,
-            ]
-        )
+        mock_erosion.simulation_data = mock_simulation_data
         mock_erosion.config_file.get_parameter.side_effect = [
             [np.array([150.0, 150.0, 150.0]), np.array([150.0, 150.0, 150.0])],
             [np.array([110.0, 110.0, 110.0]), np.array([110.0, 110.0, 110.0])],
@@ -599,6 +606,15 @@ class TestErosion:
         ]
         mock_erosion.config_file.get_bool.return_value = False
         mock_erosion.river_data.zb_dx = 0.3
+        mock_erosion.river_data.vel_dx = 0.3
+        average_results = np.array(
+            [
+                12.671252954404748,
+                12.689950029452636,
+                12.660388714966068,
+                12.671252954404748,
+            ]
+        )
         with patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion._get_fairway_data",
             return_value=mock_fairway_data,
@@ -615,6 +631,9 @@ class TestErosion:
         ), patch(
             "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.read",
             return_value=mock_simulation_data,
+        ), patch(
+            "dfastbe.bank_erosion.utils.moving_avg",
+            return_value=average_results,
         ):
             mock_erosion.run()
 
