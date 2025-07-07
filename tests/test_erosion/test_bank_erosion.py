@@ -19,6 +19,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
     SingleParameters,
 )
 from dfastbe.bank_erosion.data_models.inputs import ErosionSimulationData
+from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.cmd import run
 from dfastbe.io.config import ConfigFile
 
@@ -306,21 +307,42 @@ class TestErosion:
         return SingleLevelParameters.from_column_arrays(
             {
                 "id": 0,
-                "ship_velocity": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
+                "ship_velocity": [
+                    np.array([5.0] * 3),
+                    np.array([5.0] * 3),
+                ],
                 "num_ship": [
-                    np.array([15613, 15613, 15613]),
-                    np.array([15613, 15613, 15613]),
+                    np.array([15613] * 3),
+                    np.array([15613] * 3),
                 ],
                 "num_waves_per_ship": [
-                    np.array([5.0, 5.0, 5.0]),
-                    np.array([5.0, 5.0, 5.0]),
+                    np.array([5.0] * 3),
+                    np.array([5.0] * 3),
                 ],
-                "ship_draught": [np.array([1.2, 1.2, 1.2]), np.array([1.2, 1.2, 1.2])],
-                "ship_type": [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])],
-                "par_slope": [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])],
-                "par_reed": [np.array([0.0, 0.0, 0.0]), np.array([0.0, 0.0, 0.0])],
-                "mu_slope": [np.array([0.5, 0.5, 0.5]), np.array([0.5, 0.5, 0.5])],
-                "mu_reed": [np.array([0.0, 0.0, 0.0]), np.array([0.0, 0.0, 0.0])],
+                "ship_draught": [
+                    np.array([1.2] * 3),
+                    np.array([1.2] * 3),
+                ],
+                "ship_type": [
+                    np.array([2] * 3),
+                    np.array([2] * 3),
+                ],
+                "par_slope": [
+                    np.array([2.0] * 3),
+                    np.array([2.0] * 3),
+                ],
+                "par_reed": [
+                    np.array([0.0] * 3),
+                    np.array([0.0] * 3),
+                ],
+                "mu_slope": [
+                    np.array([0.5] * 3),
+                    np.array([0.5] * 3),
+                ],
+                "mu_reed": [
+                    np.array([0.0] * 3),
+                    np.array([0.0] * 3),
+                ],
             },
             SingleParameters,
         )
@@ -599,27 +621,34 @@ class TestErosion:
         mock_erosion.bl_processor.intersect_with_mesh.return_value = mock_bank_data
         mock_erosion.simulation_data = mock_simulation_data
         mock_erosion.config_file.get_parameter.side_effect = [
-            [np.array([150.0, 150.0, 150.0]), np.array([150.0, 150.0, 150.0])],
-            [np.array([110.0, 110.0, 110.0]), np.array([110.0, 110.0, 110.0])],
-            [np.array([1.0, 1.0, 1.0]), np.array([0.18, 0.18, 0.18])],
-            [np.array([-13.0, -13.0, -13.0]), np.array([-13.0, -13.0, -13.0])],
+            [np.array([150.0] * 3), np.array([150.0] * 3)],
+            [np.array([110.0] * 3), np.array([110.0] * 3)],
+            [np.array([1.0] * 3), np.array([0.18] * 3)],
+            [np.array([-13.0] * 3), np.array([-13.0] * 3)],
         ]
         mock_erosion.config_file.get_bool.return_value = False
         mock_erosion.river_data.zb_dx = 0.3
         mock_erosion.river_data.vel_dx = 0.3
+        mock_erosion.river_data.output_intervals = 1.0
+        mock_erosion.river_data.erosion_time = 1.0
+        mock_erosion.erosion_calculator = ErosionCalculator()
+        mock_erosion.p_discharge = np.array([0.311, 0.2329, 0.2055])
         average_results = np.array(
             [
                 12.671252954404748,
                 12.689950029452636,
                 12.660388714966068,
-                12.671252954404748,
             ]
         )
+        center_line_mock = MagicMock()
+        center_line_mock.data["stations"].min.return_value = 123.0
+        center_line_mock.data["stations"].max.return_value = 123.5
         with patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion._get_fairway_data",
             return_value=mock_fairway_data,
         ), patch("dfastbe.bank_erosion.bank_erosion.get_km_bins", mock_km_mid), patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion._process_river_axis_by_center_line"
+            "dfastbe.bank_erosion.bank_erosion.Erosion._process_river_axis_by_center_line",
+            return_value=center_line_mock,
         ), patch(
             "dfastbe.io.data_models.GeoDataFrame"
         ), patch(
