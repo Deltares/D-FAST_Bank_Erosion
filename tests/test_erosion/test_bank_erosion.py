@@ -271,7 +271,9 @@ class TestErosion:
             fairway_face_indices=np.array([1, 2, 3]),
         )
 
-        mock_bank_data = BankData(left=mock_left_bank, right=mock_right_bank)
+        mock_bank_data = BankData(
+            left=mock_left_bank, right=mock_right_bank, n_bank_lines=2
+        )
         return mock_bank_data
 
     @pytest.fixture
@@ -621,6 +623,13 @@ class TestErosion:
             [np.array([-13.0] * 3), np.array([-13.0] * 3)],
         ]
         mock_erosion.config_file.get_bool.return_value = False
+        mock_erosion.config_file.get_str.side_effect = [
+            "erovolQ1.evo",
+            "erovolQ2.evo",
+            "erovolQ3.evo",
+            "erovol.evo",
+            "erovol_eq.evo",
+        ]
 
         mock_erosion.river_data.zb_dx = 0.3
         mock_erosion.river_data.vel_dx = 0.3
@@ -652,6 +661,10 @@ class TestErosion:
         ), patch(
             "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.read",
             return_value=mock_simulation_data,
+        ), patch(
+            "dfastbe.bank_erosion.bank_erosion.Erosion._write_bankline_shapefiles"
+        ), patch(
+            "dfastbe.bank_erosion.bank_erosion.Erosion._generate_plots"
         ):
             mock_erosion.run()
 
