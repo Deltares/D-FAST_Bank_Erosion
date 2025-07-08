@@ -232,10 +232,10 @@ class TestErosion:
             is_right_bank=False,
             bank_line_coords=np.array(
                 [
-                    [209117.80853726, 389680.26397752],
-                    [209118.99815819, 389684.66797463],
-                    [209118.7134304, 389703.72840232],
-                    [209127.20673008, 389727.17509686],
+                    [208270.01, 389660.0],
+                    [208270.02, 389702.01],
+                    [20980.0, 389702.02],
+                    [209288.0, 389740.0],
                 ]
             ),
             bank_face_indices=np.array([0, 1, 2]),
@@ -244,40 +244,30 @@ class TestErosion:
                     123.00166634401488,
                     123.01335778611656,
                     123.03520808078332,
-                    123.05705837545008,
-                    123.06099330347638,
-                    123.08492823150268,
-                    123.10886315952898,
-                    123.13279808755528,
                 ]
             ),
-            fairway_face_indices=np.array([1, 2]),
+            fairway_face_indices=np.array([1, 2, 3]),
         )
 
         mock_right_bank = SingleBank(
             is_right_bank=True,
             bank_line_coords=np.array(
                 [
-                    [209266.44709443, 389650.16238121],
-                    [209267.30013864, 389654.45330198],
-                    [209269.67183787, 389664.217019],
-                    [209271.7614607, 389674.70572161],
+                    [209254.01, 389626.0],
+                    [209254.02, 389664.1],
+                    [209271.6, 389665.0],
+                    [208272.0, 389704.1],
                 ]
             ),
-            bank_face_indices=np.array([2, 3]),
+            bank_face_indices=np.array([0, 1, 2]),
             bank_chainage_midpoints=np.array(
                 [
                     123.00943873095339,
-                    123.01990543424606,
-                    123.04044936886122,
-                    123.06099330347638,
-                    123.08153723809154,
-                    123.1020811727067,
-                    123.12262510732186,
-                    123.14316904193702,
+                    124.00943873095339,
+                    125.04044936886122,
                 ]
             ),
-            fairway_face_indices=np.array([0, 1, 2]),
+            fairway_face_indices=np.array([1, 2, 3]),
         )
 
         mock_bank_data = BankData(left=mock_left_bank, right=mock_right_bank)
@@ -381,8 +371,8 @@ class TestErosion:
                 [[0, 1, 2, 3], [1, 4, 5, 2], [2, 5, 6, 7], [5, 8, 9, 6]],
             ),
             n_nodes=np.array([4, 4, 4, 4]),
-            velocity_x_face=np.ma.array([0.0, 0.0, 0.0, 0.0]),
-            velocity_y_face=np.ma.array([0.0, 0.0, 0.0, 0.0]),
+            velocity_x_face=np.ma.array([0.0, 0.0, 0.0]),
+            velocity_y_face=np.ma.array([0.0, 0.0, 0.0]),
             water_depth_face=np.ma.array([0.00499916] * 10),
             water_level_face=np.ma.array(
                 [
@@ -619,7 +609,7 @@ class TestErosion:
     ):
         """Test the run method."""
         mock_km_mid = MagicMock()
-        mock_km_mid.return_value = [123.05, 123.35, 123.45]
+        mock_km_mid.return_value = [123.05, 124.35, 125.45]
         mock_erosion.bl_processor.intersect_with_mesh.return_value = mock_bank_data
         mock_erosion.simulation_data = mock_simulation_data
         mock_erosion.config_file.get_parameter.side_effect = [
@@ -635,16 +625,9 @@ class TestErosion:
         mock_erosion.river_data.erosion_time = 1.0
         mock_erosion.erosion_calculator = ErosionCalculator()
         mock_erosion.p_discharge = np.array([0.311, 0.2329, 0.2055])
-        average_results = np.array(
-            [
-                12.671252954404748,
-                12.689950029452636,
-                12.660388714966068,
-            ]
-        )
         center_line_mock = MagicMock()
         center_line_mock.data["stations"].min.return_value = 123.0
-        center_line_mock.data["stations"].max.return_value = 123.5
+        center_line_mock.data["stations"].max.return_value = 126.5
         with patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion._get_fairway_data",
             return_value=mock_fairway_data,
@@ -662,9 +645,6 @@ class TestErosion:
         ), patch(
             "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.read",
             return_value=mock_simulation_data,
-        ), patch(
-            "dfastbe.bank_erosion.utils.moving_avg",
-            return_value=average_results,
         ):
             mock_erosion.run()
 
