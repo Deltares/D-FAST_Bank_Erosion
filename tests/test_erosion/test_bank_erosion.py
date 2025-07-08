@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 import matplotlib
 import numpy as np
 import pytest
+from pyfakefs.fake_filesystem import FakeFilesystem
 
 import dfastbe.io.logger
 from dfastbe.bank_erosion.bank_erosion import Erosion, calculate_alpha
@@ -371,8 +372,8 @@ class TestErosion:
                 [[0, 1, 2, 3], [1, 4, 5, 2], [2, 5, 6, 7], [5, 8, 9, 6]],
             ),
             n_nodes=np.array([4, 4, 4, 4]),
-            velocity_x_face=np.ma.array([0.0, 0.0, 0.0]),
-            velocity_y_face=np.ma.array([0.0, 0.0, 0.0]),
+            velocity_x_face=np.ma.array([0.271095, 0.14170133, 0.20039541]),
+            velocity_y_face=np.ma.array([0.143741, 0.20039541, 0.14170133]),
             water_depth_face=np.ma.array([0.00499916] * 10),
             water_level_face=np.ma.array(
                 [
@@ -606,6 +607,7 @@ class TestErosion:
         mock_single_level_parameters,
         mock_simulation_data,
         mock_debug,
+        fs: FakeFilesystem,
     ):
         """Test the run method."""
         mock_km_mid = MagicMock()
@@ -619,10 +621,15 @@ class TestErosion:
             [np.array([-13.0] * 3), np.array([-13.0] * 3)],
         ]
         mock_erosion.config_file.get_bool.return_value = False
+
         mock_erosion.river_data.zb_dx = 0.3
         mock_erosion.river_data.vel_dx = 0.3
         mock_erosion.river_data.output_intervals = 1.0
         mock_erosion.river_data.erosion_time = 1.0
+        mock_erosion.river_data.output_dir = Path("mock_output_dir")
+        mock_erosion.river_data.num_discharge_levels = 3
+        fs.create_dir(mock_erosion.river_data.output_dir)
+
         mock_erosion.erosion_calculator = ErosionCalculator()
         mock_erosion.p_discharge = np.array([0.311, 0.2329, 0.2055])
         center_line_mock = MagicMock()
