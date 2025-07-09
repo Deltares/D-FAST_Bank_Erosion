@@ -229,6 +229,17 @@ class TestErosion:
 
     @pytest.fixture
     def read_grid_data(self):
+        """Fixture to read grid data from files.
+
+        Reads nodes, x_coords, and y_coords from specified text files using np.loadtxt.
+        First 30 entries are fairway squares, second 30 is the right bank, third 30 is the left bank.
+
+        Returns:
+            tuple: A tuple containing three numpy masked arrays:
+                - nodes: Masked array of node indices.
+                - x_coords: Masked array of x coordinates.
+                - y_coords: Masked array of y coordinates.
+        """
         nodes = np.loadtxt("./tests/data/input/nodes.txt", dtype=int, delimiter=",")
         x_coords = np.loadtxt("./tests/data/input/x_coords.txt")
         y_coords = np.loadtxt("./tests/data/input/y_coords.txt")
@@ -236,7 +247,38 @@ class TestErosion:
 
     @pytest.fixture
     def read_line_data(self):
+        """Fixture to read line data from a text file.
+
+        Reads points from a specified text file using np.loadtxt.
+        The 30 entries intersects the fairway, the second 30 entries are the right bank,
+        and the third 30 entries are the left bank.
+
+        Returns:
+            np.ndarray: A numpy array of points read from the file.
+        """
         return np.loadtxt("./tests/data/input/points.txt", delimiter=",")
+
+    @pytest.fixture
+    def read_face_values(self):
+        """Fixture to read face values from a text file.
+
+        These values are coupled to the nodes in the grid data.
+
+        Returns:
+            np.ndarray: A numpy array of face values read from the file.
+        """
+        return np.loadtxt("./tests/data/input/face_values.txt", delimiter=",")
+
+    @pytest.fixture
+    def read_coord_values(self):
+        """Fixture to read coordinate values from a text file.
+
+        These values are coupled to the coordinates in the grid data.
+
+        Returns:
+            np.ndarray: A numpy array of coordinate values read from the file.
+        """
+        return np.loadtxt("./tests/data/input/coord_values.txt", delimiter=",")
 
     @pytest.fixture
     def mock_bank_data(self, read_line_data):
@@ -318,33 +360,19 @@ class TestErosion:
         )
 
     @pytest.fixture
-    def mock_simulation_data(self, read_grid_data):
+    def mock_simulation_data(self, read_grid_data, read_face_values, read_coord_values):
         nodes, x_coords, y_coords = read_grid_data
         return ErosionSimulationData(
             bed_elevation_location="node",
-            bed_elevation_values=np.ma.array([24.20999908] * 186),
-            chezy_face=np.ma.array([0.20039541] * 186),
+            bed_elevation_values=np.ma.array(read_coord_values[0]),
+            chezy_face=np.ma.array(read_coord_values[1]),
             dry_wet_threshold=0.1,
             face_node=nodes,
             n_nodes=np.array([4] * 90),
-            velocity_x_face=np.ma.array([0.271095] * 90),
-            velocity_y_face=np.ma.array([0.143741] * 90),
-            water_depth_face=np.ma.array([0.00499916] * 90),
-            water_level_face=np.ma.array(
-                [
-                    23.954999923706055,
-                    21.69499969482422,
-                    21.69499969482422,
-                    21.809999465942383,
-                    21.545000076293945,
-                    21.134998321533203,
-                    22.68000030517578,
-                    22.910000076293945,
-                    22.68000030517578,
-                    22.68000030517578,
-                ]
-                * 9,
-            ),
+            velocity_x_face=np.ma.array(read_face_values[0]),
+            velocity_y_face=np.ma.array(read_face_values[1]),
+            water_depth_face=np.ma.array(read_face_values[2]),
+            water_level_face=np.ma.array(read_face_values[3]),
             x_node=x_coords,
             y_node=y_coords,
         )
