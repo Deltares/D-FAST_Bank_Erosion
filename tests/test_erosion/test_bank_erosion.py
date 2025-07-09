@@ -228,47 +228,33 @@ class TestErosion:
         )
 
     @pytest.fixture
-    def mock_bank_data(self):
+    def read_grid_data(self):
+        nodes = np.loadtxt("./tests/data/input/nodes.txt", dtype=int, delimiter=",")
+        x_coords = np.loadtxt("./tests/data/input/x_coords.txt")
+        y_coords = np.loadtxt("./tests/data/input/y_coords.txt")
+        return np.ma.array(nodes), np.ma.array(x_coords), np.ma.array(y_coords)
+
+    @pytest.fixture
+    def read_line_data(self):
+        return np.loadtxt("./tests/data/input/points.txt", delimiter=",")
+
+    @pytest.fixture
+    def mock_bank_data(self, read_line_data):
+        points = read_line_data
         mock_left_bank = SingleBank(
             is_right_bank=False,
-            bank_line_coords=np.array(
-                [
-                    [208270.01, 389660.0],
-                    [208270.02, 389702.01],
-                    [20980.0, 389702.02],
-                    [209288.0, 389740.0],
-                ]
-            ),
-            bank_face_indices=np.array([0, 1, 2]),
-            bank_chainage_midpoints=np.array(
-                [
-                    123.00166634401488,
-                    123.01335778611656,
-                    123.03520808078332,
-                ]
-            ),
-            fairway_face_indices=np.array([1, 2, 3]),
+            bank_line_coords=points[30:60],
+            bank_face_indices=np.arange(30, 59),
+            bank_chainage_midpoints=np.array([123.00166634401488] * 29),
+            fairway_face_indices=np.arange(0, 29),
         )
 
         mock_right_bank = SingleBank(
             is_right_bank=True,
-            bank_line_coords=np.array(
-                [
-                    [209254.01, 389626.0],
-                    [209254.02, 389664.1],
-                    [209271.6, 389665.0],
-                    [208272.0, 389704.1],
-                ]
-            ),
-            bank_face_indices=np.array([0, 1, 2]),
-            bank_chainage_midpoints=np.array(
-                [
-                    123.00943873095339,
-                    124.00943873095339,
-                    125.04044936886122,
-                ]
-            ),
-            fairway_face_indices=np.array([1, 2, 3]),
+            bank_line_coords=points[60:90],
+            bank_face_indices=np.arange(60, 89),
+            bank_chainage_midpoints=np.array([123.00943873095339] * 29),
+            fairway_face_indices=np.arange(0, 29),
         )
 
         mock_bank_data = BankData(
@@ -277,18 +263,12 @@ class TestErosion:
         return mock_bank_data
 
     @pytest.fixture
-    def mock_fairway_data(self):
+    def mock_fairway_data(self, read_line_data):
         """Fixture to create a mock FairwayData."""
+        points = read_line_data
         mock_fairway_data = FairwayData(
-            intersection_coords=np.array(
-                [
-                    [209266.44709443, 389650.16238121],
-                    [209269.67183787, 389664.217019],
-                    [209271.7614607, 389674.70572161],
-                    [209278.48314731, 389704.10923615],
-                ]
-            ),
-            fairway_face_indices=np.array([0, 1, 2, 3]),
+            intersection_coords=points[:30],
+            fairway_face_indices=np.arange(0, 29),
         )
         return mock_fairway_data
 
@@ -298,85 +278,58 @@ class TestErosion:
             {
                 "id": 0,
                 "ship_velocity": [
-                    np.array([5.0] * 3),
-                    np.array([5.0] * 3),
+                    np.array([5.0] * 29),
+                    np.array([5.0] * 29),
                 ],
                 "num_ship": [
-                    np.array([15613] * 3),
-                    np.array([15613] * 3),
+                    np.array([15613] * 29),
+                    np.array([15613] * 29),
                 ],
                 "num_waves_per_ship": [
-                    np.array([5.0] * 3),
-                    np.array([5.0] * 3),
+                    np.array([5.0] * 29),
+                    np.array([5.0] * 29),
                 ],
                 "ship_draught": [
-                    np.array([1.2] * 3),
-                    np.array([1.2] * 3),
+                    np.array([1.2] * 29),
+                    np.array([1.2] * 29),
                 ],
                 "ship_type": [
-                    np.array([2] * 3),
-                    np.array([2] * 3),
+                    np.array([2] * 29),
+                    np.array([2] * 29),
                 ],
                 "par_slope": [
-                    np.array([2.0] * 3),
-                    np.array([2.0] * 3),
+                    np.array([2.0] * 29),
+                    np.array([2.0] * 29),
                 ],
                 "par_reed": [
-                    np.array([0.0] * 3),
-                    np.array([0.0] * 3),
+                    np.array([0.0] * 29),
+                    np.array([0.0] * 29),
                 ],
                 "mu_slope": [
-                    np.array([0.5] * 3),
-                    np.array([0.5] * 3),
+                    np.array([0.5] * 29),
+                    np.array([0.5] * 29),
                 ],
                 "mu_reed": [
-                    np.array([0.0] * 3),
-                    np.array([0.0] * 3),
+                    np.array([0.0] * 29),
+                    np.array([0.0] * 29),
                 ],
             },
             SingleParameters,
         )
 
     @pytest.fixture
-    def mock_simulation_data(self):
+    def mock_simulation_data(self, read_grid_data):
+        nodes, x_coords, y_coords = read_grid_data
         return ErosionSimulationData(
             bed_elevation_location="node",
-            bed_elevation_values=np.ma.array(
-                [
-                    24.20999908,
-                    23.95000076,
-                    22.68000031,
-                    21.69000053,
-                    21.69000053,
-                    22.68000031,
-                    22.68000031,
-                    22.68000031,
-                    22.68000031,
-                    22.68000031,
-                ]
-            ),
-            chezy_face=np.ma.array(
-                [
-                    0.20039541,
-                    0.14170133,
-                    0.20039433,
-                    0.14170171,
-                    0.14170133,
-                    0.20039541,
-                    0.14170133,
-                    0.20039541,
-                    0.14170171,
-                    0.20039541,
-                ],
-            ),
+            bed_elevation_values=np.ma.array([24.20999908] * 186),
+            chezy_face=np.ma.array([0.20039541] * 186),
             dry_wet_threshold=0.1,
-            face_node=np.ma.array(
-                [[0, 1, 2, 3], [1, 4, 5, 2], [2, 5, 6, 7], [5, 8, 9, 6]],
-            ),
-            n_nodes=np.array([4, 4, 4, 4]),
-            velocity_x_face=np.ma.array([0.271095, 0.14170133, 0.20039541]),
-            velocity_y_face=np.ma.array([0.143741, 0.20039541, 0.14170133]),
-            water_depth_face=np.ma.array([0.00499916] * 10),
+            face_node=nodes,
+            n_nodes=np.array([4] * 90),
+            velocity_x_face=np.ma.array([0.271095] * 90),
+            velocity_y_face=np.ma.array([0.143741] * 90),
+            water_depth_face=np.ma.array([0.00499916] * 90),
             water_level_face=np.ma.array(
                 [
                     23.954999923706055,
@@ -389,36 +342,11 @@ class TestErosion:
                     22.910000076293945,
                     22.68000030517578,
                     22.68000030517578,
-                ],
+                ]
+                * 9,
             ),
-            x_node=np.ma.array(
-                [
-                    209253.125,
-                    209252.734375,
-                    209271.921875,
-                    209273.3125,
-                    209253.046875,
-                    209271.3125,
-                    209290.453125,
-                    209292.125,
-                    209271.40625,
-                    209289.546875,
-                ],
-            ),
-            y_node=np.ma.array(
-                [
-                    389624.40625,
-                    389663.96875,
-                    389664.25,
-                    389625.09375,
-                    389704.34375,
-                    389703.96875,
-                    389704.34375,
-                    389665.0625,
-                    389744.0625,
-                    389744.09375,
-                ],
-            ),
+            x_node=x_coords,
+            y_node=y_coords,
         )
 
     def test_calculate_fairway_bank_line_distance(
@@ -613,14 +541,14 @@ class TestErosion:
     ):
         """Test the run method."""
         mock_km_mid = MagicMock()
-        mock_km_mid.return_value = [123.05, 124.35, 125.45]
+        mock_km_mid.return_value = np.arange(123.0, 123.6, 0.02)
         mock_erosion.bl_processor.intersect_with_mesh.return_value = mock_bank_data
         mock_erosion.simulation_data = mock_simulation_data
         mock_erosion.config_file.get_parameter.side_effect = [
-            [np.array([150.0] * 3), np.array([150.0] * 3)],
-            [np.array([110.0] * 3), np.array([110.0] * 3)],
-            [np.array([1.0] * 3), np.array([0.18] * 3)],
-            [np.array([-13.0] * 3), np.array([-13.0] * 3)],
+            [np.array([150.0] * 29), np.array([150.0] * 29)],
+            [np.array([110.0] * 29), np.array([110.0] * 29)],
+            [np.array([1.0] * 29), np.array([0.18] * 29)],
+            [np.array([-13.0] * 29), np.array([-13.0] * 29)],
         ]
         mock_erosion.config_file.get_bool.return_value = False
         mock_erosion.config_file.get_str.side_effect = [
@@ -633,7 +561,7 @@ class TestErosion:
 
         mock_erosion.river_data.zb_dx = 0.3
         mock_erosion.river_data.vel_dx = 0.3
-        mock_erosion.river_data.output_intervals = 1.0
+        mock_erosion.river_data.output_intervals = 0.02
         mock_erosion.river_data.erosion_time = 1.0
         mock_erosion.river_data.output_dir = Path("mock_output_dir")
         mock_erosion.river_data.num_discharge_levels = 3
@@ -643,7 +571,7 @@ class TestErosion:
         mock_erosion.p_discharge = np.array([0.311, 0.2329, 0.2055])
         center_line_mock = MagicMock()
         center_line_mock.data["stations"].min.return_value = 123.0
-        center_line_mock.data["stations"].max.return_value = 126.5
+        center_line_mock.data["stations"].max.return_value = 123.61
         with patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion._get_fairway_data",
             return_value=mock_fairway_data,
