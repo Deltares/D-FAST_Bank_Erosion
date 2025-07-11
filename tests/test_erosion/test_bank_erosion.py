@@ -1,20 +1,42 @@
+from pathlib import Path
+from typing import List
 from unittest.mock import MagicMock
 
 import matplotlib
 import numpy as np
 import pytest
+from matplotlib.testing.compare import compare_images
 
 from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_erosion.data_models.calculation import FairwayData
 from dfastbe.cmd import run
 from dfastbe.io.config import ConfigFile
-from dfastbe.bank_erosion.data_models.calculation import FairwayData
 
 matplotlib.use('Agg')
 
 
+@pytest.fixture
+def image_list() -> List[str]:
+    """Fixture to provide a list of all expected resulting images from an erosion run."""
+    return [
+        "1_bankline-detection.png",
+        "1_banklines.png",
+        "2_erosion_sensitivity.png",
+        "3_eroded_volume.png",
+        "4_eroded_volume_per_discharge.png",
+        "5_eroded_volume_per_bank.png",
+        "6_eroded_volume_eq.png",
+        "7_levels_bank_1.png",
+        "8_levels_bank_2.png",
+        "9_velocity_bank_1.png",
+        "10_velocity_bank_2.png",
+        "11_banktype.png",
+        "12_erodis.png",
+    ]
+
+
 @pytest.mark.e2e
-def test_bank_erosion():
+def test_bank_erosion(image_list: List[str]):
     file = "erosion"
     language = "UK"
     config_file = f"tests/data/{file}/meuse_manual.cfg"
@@ -22,6 +44,16 @@ def test_bank_erosion():
     print("Banklines done")
     run(language, "BANKEROSION", config_file)
     print("Bank erosion done")
+    test_path = Path(f"./tests/data/{file}")
+
+    output_dir = test_path / "output/figures"
+    reference_dir = test_path / "reference/figures"
+
+    for image in image_list:
+        reference_img = reference_dir / image
+        output_img = output_dir / image
+        assert output_img.exists()
+        assert compare_images(str(output_img), str(reference_img), 0.0001) is None
 
 
 class TestErosion:
