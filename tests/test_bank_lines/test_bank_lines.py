@@ -62,7 +62,7 @@ def test_bank_lines():
     assert all(isinstance(bankfile.loc[i, "geometry"], LineString) for i in range(2))
 
     # check the bankline plotted image
-    fig_1 = test_r_dir / r"output/figures/1_banklinedetection.png"
+    fig_1 = test_r_dir / "output/figures/1_bankline-detection.png"
     assert fig_1.exists()
 
 
@@ -333,14 +333,13 @@ class TestBankLines:
                 "plot_ext": ".png",
             }
 
-        with patch(
-            "dfastbe.bank_lines.plotter.BankLinesPlotter.plot_detect1"
-        ) as mock_plot_detect1, patch("matplotlib.pyplot.show") as mock_show, patch(
+        with patch("matplotlib.pyplot.show") as mock_show, patch(
             "matplotlib.pyplot.close"
         ) as mock_close, patch(
             "dfastbe.plotting.BasePlot.zoom_xy_and_save"
-        ) as mock_zoom_xy_and_save:
-            mock_plot_detect1.return_value = (MagicMock(), MagicMock())
+        ) as mock_zoom_xy_and_save, patch(
+            "dfastbe.bank_lines.plotter.log_text"
+        ):
 
             bank_lines_plotter = BankLinesPlotter(
                 False, bank_lines.plot_flags, mock_config_file.crs, mock_simulation_data, xy_km_numpy, km_bounds,
@@ -351,16 +350,6 @@ class TestBankLines:
                 bank_areas,
             )
 
-            mock_plot_detect1.assert_called_once_with(
-                bank_areas,
-                bank,
-                "x-coordinate [m]",
-                "y-coordinate [m]",
-                "water depth and detected bank lines",
-                "water depth [m]",
-                "bank search area",
-                "detected bank line",
-            )
             mock_zoom_xy_and_save.assert_called_once()
             mock_show.assert_called_once()
             mock_close.assert_called_once()
