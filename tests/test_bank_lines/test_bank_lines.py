@@ -5,6 +5,7 @@ import geopandas as gpd
 import matplotlib
 import numpy as np
 import pytest
+from matplotlib.testing.compare import compare_images
 from shapely.geometry import LineString, MultiLineString, Polygon
 
 from dfastbe.bank_lines.bank_lines import BankLines
@@ -63,7 +64,9 @@ def test_bank_lines():
 
     # check the bankline plotted image
     fig_1 = test_r_dir / "output/figures/1_bankline-detection.png"
+    reference = test_r_dir / "reference/figures/1_bankline-detection.png"
     assert fig_1.exists()
+    assert compare_images(str(fig_1), str(reference), 0.0001) is None
 
 
 class TestBankLines:
