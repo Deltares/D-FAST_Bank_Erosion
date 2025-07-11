@@ -364,8 +364,8 @@ class TestErosion:
         nodes, x_coords, y_coords = read_grid_data
         return ErosionSimulationData(
             bed_elevation_location="node",
-            bed_elevation_values=np.ma.array(read_coord_values[0]),
-            chezy_face=np.ma.array(read_coord_values[1]),
+            bed_elevation_values=np.ma.array(read_coord_values),
+            chezy_face=np.ma.array(read_face_values[4]),
             dry_wet_threshold=0.1,
             face_node=nodes,
             n_nodes=np.array([4] * 90),
@@ -674,6 +674,12 @@ class TestErosion:
             "dfastbe.bank_erosion.bank_erosion.Erosion._generate_plots"
         ):
             mock_erosion.run()
+
+        with open(mock_erosion.river_data.output_dir / "erovolQ3.evo", "r") as file:
+            content = file.read()
+            assert "123.0" in content
+            assert "123.58" in content
+            assert "0.0" in content
 
 
 def test_calculate_alpha():
