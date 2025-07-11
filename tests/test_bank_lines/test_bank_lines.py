@@ -75,6 +75,7 @@ class TestBankLines:
         mock_data.x_node = np.array([0, 1, 2, 3, 4, 5, 6, 7])
         mock_data.y_node = np.array([0, 1, 2, 3, 4, 5, 6, 7])
         mock_data.water_level_face = np.array([1.0, 2.0, 1.0])
+        mock_data.water_depth_face = np.array([0.1, 0.6, 0.4])
         mock_data.bed_elevation_values = np.ma.masked_array(
             [0.9, 0.9, 1.1, 1.1, 1.1, 0.9, 1.1, 0.9]
         )
@@ -301,20 +302,14 @@ class TestBankLines:
         assert (tmp_path / "bank_areas.shp").exists()
         assert (tmp_path / "bankline_fragments_per_bank_area.shp").exists()
 
-    def test_plot(self, mock_config_file, tmp_path: Path):
+    @pytest.mark.unit
+    def test_plot(self, mock_config_file, mock_simulation_data, tmp_path: Path):
         """Test the plot method of the BankLines class."""
         xy_km_numpy = LineGeometry(line=np.array([[0, 0, 0], [1, 1, 0]]))
         n_search_lines = 1
         bank = [LineString([(0, 0), (1, 1)])]
         km_bounds = (0, 1)
         bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]
-
-        mock_simulation_data = MagicMock()
-        mock_simulation_data.face_node = np.array([[0, 1, 2]])
-        mock_simulation_data.n_nodes = np.array([3])
-        mock_simulation_data.x_node = np.array([0, 1, 2])
-        mock_simulation_data.y_node = np.array([0, 1, 2])
-        mock_simulation_data.water_depth_face = np.array([1.0, 2.0, 1.5])
 
         with patch(
             "dfastbe.bank_lines.bank_lines.BankLinesRiverData"
