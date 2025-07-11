@@ -69,7 +69,14 @@ def test_bank_lines():
 class TestBankLines:
     @pytest.fixture
     def mock_simulation_data(self):
-        """Fixture to create a mock BaseSimulationData object."""
+        """Fixture to create a mock BaseSimulationData object.
+
+        This mock creates 3 triangles as a small river. It can be used for basic tests
+        of the BankLines class methods that require simulation data.
+
+        Returns:
+            MagicMock: A mock object simulating BaseSimulationData.
+        """
         mock_data = MagicMock(spec=BaseSimulationData)
         mock_data.face_node = np.array([[0, 1, 2], [1, 2, 3], [2, 3, 4]])
         mock_data.x_node = np.array([0, 1, 2, 3, 4, 5, 6, 7])
@@ -90,7 +97,7 @@ class TestBankLines:
         return mock_config
 
     def test_max_river_width(self, mock_simulation_data):
-        """Test the _max_river_width method."""
+        """Test the max_river_width property."""
         with patch(
             "dfastbe.bank_lines.bank_lines.BankLinesRiverData"
         ) as mock_river_data:
@@ -103,7 +110,16 @@ class TestBankLines:
 
     @patch("dfastbe.bank_lines.bank_lines.BankLinesRiverData")
     def test_detect(self, mock_river_data_class):
-        """Test the detect method of the BankLines class."""
+        """Test the detect method of the BankLines class.
+
+        This test mocks the BankLinesRiverData class and its methods to ensure
+        that the detect method of BankLines works as expected.
+
+        Asserts:
+            - The detect_bank_lines method is called with the correct parameters.
+            - The save method is called.
+            - The plot method is called if plotting is enabled in the config file.
+        """
         mock_config_file = MagicMock(spec=ConfigFile)
         mock_config_file.get_output_dir.return_value = "mock_output_dir"
         mock_config_file.get_plotting_flags.return_value = {"plot_data": False}
@@ -130,7 +146,7 @@ class TestBankLines:
 
         with patch(
             "dfastbe.bank_lines.bank_lines.sort_connect_bank_lines"
-        ) as mock_sort:
+        ) as mock_sort, patch("dfastbe.bank_lines.bank_lines.log_text"):
             mock_sort.return_value = [LineString([(0, 0), (1, 1)])]
             bank_lines.detect()
             bank_lines.plot()
@@ -146,7 +162,16 @@ class TestBankLines:
             bank_lines.plot.assert_called_once()
 
     def test_calculate_water_depth_per_node(self, mock_simulation_data):
-        """Test the calculate_water_depth_per_node method."""
+        """Test the calculate_water_depth_per_node method.
+
+        This method calculates the water depth at each node based on the face node
+        water levels and bed elevations. It uses the face_node, water_level_face, and
+        bed_elevation_values attributes of the BaseSimulationData object.
+
+        Asserts:
+            - The shape of the resulting water depth array matches the face_node shape.
+            - The calculated water depth matches the expected values.
+        """
         h_node = BankLines._calculate_water_depth(mock_simulation_data)
         expected_h_node = np.array(
             [
@@ -159,7 +184,18 @@ class TestBankLines:
         assert np.allclose(h_node, expected_h_node)
 
     def test_generate_bank_lines(self, mock_simulation_data):
-        """Test the _generate_bank_lines method."""
+        """Test the _generate_bank_lines method.
+
+        This method generates bank lines based on the wet nodes, number of wet nodes,
+        water depth at nodes, and critical water depth (h0). It calculates the bank lines
+        by determining the start and end points of each line segment based on the water
+        depth and wet nodes.
+
+        Asserts:
+            - The generated bank lines match the expected LineString objects.
+            - The method correctly handles the wet nodes and water depth to create
+              appropriate bank lines.
+        """
         wet_node = np.array(
             [[True, False, True], [False, True, True], [True, False, True]]
         )
@@ -252,6 +288,10 @@ class TestBankLines:
         triangle faces: a simple triangle face with 3 nodes.
         polygonal faces: a polygon with 4 nodes.
         masked faces: a masked array with 4 nodes, where the last row is masked.
+
+        Asserts:
+            - The resulting GeoSeries contains the expected LineString or MultiLineString.
+            - The length of the GeoSeries matches the expected number of bank lines.
         """
         mock_simulation_data.face_node = face_node
         mock_simulation_data.n_nodes = n_nodes
@@ -270,7 +310,14 @@ class TestBankLines:
         assert "Progress: 100.00%" in captured.out
 
     def test_save(self, mock_config_file, tmp_path: Path):
-        """Test the save method of the BankLines class."""
+        """Test the save method of the BankLines class.
+
+        This test checks if the save method correctly saves the bank lines, bank areas,
+        and bankline fragments per bank area to the specified output directory.
+
+        Asserts:
+            - The saved files exist in the output directory.
+        """
         bank = [LineString([(0, 0), (1, 1)])]
         banklines = gpd.GeoSeries([LineString([(0, 0), (1, 1)])], crs="EPSG:4326")
         clipped_banklines = [MultiLineString([LineString([(0, 0), (1, 1)])])]
@@ -304,7 +351,16 @@ class TestBankLines:
 
     @pytest.mark.unit
     def test_plot(self, mock_config_file, mock_simulation_data, tmp_path: Path):
-        """Test the plot method of the BankLines class."""
+        """Test the plot method of the BankLines class.
+
+        This test checks if the plot method correctly plots the bank lines and saves the
+        plot to the specified directory.
+
+        Asserts:
+            - The plot is saved to the specified directory.
+            - The zoom_xy_and_save method is called.
+            - The show and close methods of matplotlib.pyplot are called.
+        """
         xy_km_numpy = LineGeometry(line=np.array([[0, 0, 0], [1, 1, 0]]))
         n_search_lines = 1
         bank = [LineString([(0, 0), (1, 1)])]
@@ -348,9 +404,17 @@ class TestBankLines:
             mock_zoom_xy_and_save.assert_called_once()
             mock_show.assert_called_once()
             mock_close.assert_called_once()
+            assert (tmp_path / "1_bankline-detection.png").exists()
 
     def test_mask(self):
-        """Test the mask method of the BankLines class."""
+        """Test the mask method of the BankLines class.
+
+        This test checks if the mask method correctly clips bank lines to a specified area.
+
+        Asserts:
+            - The clipped bank lines are of type LineString.
+            - The clipped bank lines match the expected geometry.
+        """
         # Mock banklines as a GeoSeries
         banklines = gpd.GeoSeries(
             [
