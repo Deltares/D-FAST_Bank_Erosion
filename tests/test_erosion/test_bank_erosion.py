@@ -23,6 +23,7 @@ from dfastbe.bank_erosion.data_models.inputs import ErosionSimulationData
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.cmd import run
 from dfastbe.io.config import ConfigFile
+from dfastbe.io.data_models import LineGeometry
 
 matplotlib.use('Agg')
 
@@ -42,7 +43,25 @@ class TestErosion:
 
     @pytest.fixture
     def shipping_data(self) -> Dict[str, list]:
-        """Fixture to create mock shipping data."""
+        """Fixture to create mock shipping data.
+
+        Returns:
+            Dict[str, list]: A dictionary with mock shipping data arrays.
+                vship0 (np.array):
+                    initial ship velocities for two banks.
+                Nship0 (np.array):
+                    initial number of ships for two banks.
+                nwave0 (np.array):
+                    initial amount of waves per ship for two banks.
+                Tship0 (np.array):
+                    initial ship periods for two banks.
+                ship0 (np.array):
+                    initial ship heights for two banks.
+                parslope0 (np.array):
+                    initial bank slope parameters for two banks.
+                parreed0 (np.array):
+                    initial bank vegetation parameters for two banks.
+        """
         return {
             "vship0": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
             "Nship0": [
@@ -58,14 +77,19 @@ class TestErosion:
 
     @pytest.fixture
     def mock_erosion(self):
-        """Fixture to patch and mock the __init__ method of the Erosion class."""
+        """Fixture to patch and mock the __init__ method of the Erosion class.
+
+        This allows us to create an instance of Erosion without executing the original __init__ method,
+        which may involve file system operations or other side effects that are not suitable for unit tests.
+
+        Yields:
+            Erosion: A mock instance of the Erosion class.
+        """
         with patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion.__init__", return_value=None
         ):
-            # Create an instance of Erosion with the patched __init__
             erosion_instance = Erosion(MagicMock())
 
-            # Mock attributes that would normally be initialized in __init__
             erosion_instance.root_dir = Path("mock_root_dir")
             erosion_instance._config_file = MagicMock()
             erosion_instance.gui = False
@@ -82,7 +106,13 @@ class TestErosion:
 
     @pytest.fixture
     def mock_config_file(self):
-        """Fixture to create a mock ConfigFile."""
+        """Fixture to create a mock ConfigFile.
+
+        Creates a mock ConfigFile instance with predefined parameters.
+
+        Returns:
+            MagicMock: A mocked ConfigFile instance.
+        """
         mock_config = MagicMock(spec=ConfigFile)
         mock_config.get_parameter.side_effect = (
             lambda section, key, num_stations, **kwargs: [
@@ -98,7 +128,26 @@ class TestErosion:
             yield
 
     def test_get_ship_parameters(self, mock_erosion: Erosion, mock_config_file):
-        """Test the get_ship_parameters method."""
+        """Test the get_ship_parameters method.
+
+        This method retrieves ship parameters based on the number of stations per bank.
+        Leverage the mock_config_file to simulate the configuration file behavior.
+
+        Args:
+            mock_erosion (Erosion): The Erosion instance to test.
+            mock_config_file (MagicMock): A mocked ConfigFile instance.
+
+        Mocks:
+            Erosion:
+                The Erosion instance without executing the original __init__ method.
+            ConfigFile:
+                The behavior of the get_parameter method to return predefined numpy arrays.
+
+        Asserts:
+            The returned ship parameters are a dictionary with expected keys.
+            Each value in the dictionary is a list of numpy arrays,
+                each array's length matches the number of stations per bank.
+        """
         num_stations_per_bank = [10, 15]
         mock_erosion._config_file = mock_config_file
 
@@ -124,7 +173,26 @@ class TestErosion:
                 assert len(arr) == n
 
     def test_prepare_initial_conditions(self, mock_erosion: Erosion, shipping_data):
-        """Test the _prepare_initial_conditions method."""
+        """Test the _prepare_initial_conditions method.
+
+        This method tests the prepare initial conditions for bank erosion calculations.
+
+        Args:
+            mock_erosion (Erosion): The Erosion instance to test.
+            shipping_data (Dict[str, list]): Mocked shipping data to be used in the test.
+
+        Mocks:
+            FairwayData:
+                A mocked FairwayData instance to simulate fairway data retrieval.
+            ConfigFile:
+                A mocked ConfigFile instance to simulate configuration file behavior.
+            get_ship_parameters:
+                A mocked method to return predefined shipping data.
+
+        Asserts:
+            The returned erosion inputs contain expected shipping data and parameters.
+            The bank protection levels, wave fairway distances, and taucls are correctly set.
+        """
         num_stations_per_bank = [3, 3]
         mock_fairway_data = MagicMock(spec=FairwayData)
         mock_fairway_data.fairway_initial_water_levels = [
@@ -175,7 +243,22 @@ class TestErosion:
         assert len(erosion_inputs.bank_type) == 4
 
     def test_process_river_axis_by_center_line(self, mock_erosion: Erosion, mock_debug):
-        """Test the _process_river_axis_by_center_line method."""
+        """Test the _process_river_axis_by_center_line method.
+
+        This method processes the river axis based on the center line of the river.
+
+        Args:
+            mock_erosion (Erosion): The Erosion instance to test.
+
+        Mocks:
+            LineGeometry:
+                A mocked LineGeometry instance to simulate line geometry operations.
+            Erosion:
+                The Erosion instance without executing the original __init__ method.
+
+        Asserts:
+            The river axis is processed correctly based on the center line.
+        """
         mock_center_line = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
         mock_erosion.river_center_line_arr = mock_center_line
 
@@ -202,6 +285,25 @@ class TestErosion:
     def test_get_fairway_data(
         self, mock_erosion: Erosion, mock_config_file, mock_debug
     ):
+        """Test the _get_fairway_data method.
+
+        This method retrieves fairway data by intersecting the river center line with the mesh.
+
+        Args:
+            mock_erosion (Erosion): The Erosion instance to test.
+            mock_config_file (MagicMock): A mocked ConfigFile instance.
+
+        Mocks:
+            FairwayData:
+                A mocked FairwayData instance to simulate fairway data retrieval.
+            intersect_line_mesh:
+                A mocked function to simulate the intersection of a line with a mesh.
+            GeoDataFrame:
+                A mocked GeoDataFrame to simulate the saving of fairway data to a file.
+
+        Asserts:
+            The fairway data contains the expected intersection coordinates and face indices.
+        """
         mock_erosion.river_data.debug = True
         mock_erosion._config_file = mock_config_file
         with patch("dfastbe.bank_erosion.data_models.calculation.FairwayData"), patch(
@@ -237,6 +339,9 @@ class TestErosion:
         Returns:
             tuple: A tuple containing three numpy masked arrays:
                 - nodes: Masked array of node indices.
+                    - (0,29) entries are fairway squares,
+                    - (30,59) entries are the right bank,
+                    - (60,89) entries are the left bank.
                 - x_coords: Masked array of x coordinates.
                 - y_coords: Masked array of y coordinates.
         """
@@ -255,6 +360,9 @@ class TestErosion:
 
         Returns:
             np.ndarray: A numpy array of points read from the file.
+                - (0,29) entries are fairway squares,
+                - (30,59) entries are the right bank,
+                - (60,89) entries are the left bank.
         """
         return np.loadtxt("./tests/data/input/points.txt", delimiter=",")
 
@@ -265,7 +373,12 @@ class TestErosion:
         These values are coupled to the nodes in the grid data.
 
         Returns:
-            np.ndarray: A numpy array of face values read from the file.
+            np.ndarray: A multidemensional numpy array of values for each face read from a file.
+                - The first dimension corresponds to velocity_x_face,
+                - The second dimension corresponds to velocity_y_face,
+                - The third dimension corresponds to water_depth_face,
+                - The fourth dimension corresponds to water_level_face,
+                - The fifth dimension corresponds to chezy_face.
         """
         return np.loadtxt("./tests/data/input/face_values.txt", delimiter=",")
 
@@ -276,12 +389,23 @@ class TestErosion:
         These values are coupled to the coordinates in the grid data.
 
         Returns:
-            np.ndarray: A numpy array of coordinate values read from the file.
+            np.ndarray: A numpy array of bed_elevation_values for each coordinate read from a file.
         """
         return np.loadtxt("./tests/data/input/coord_values.txt", delimiter=",")
 
     @pytest.fixture
     def mock_bank_data(self, read_line_data):
+        """Fixture to create a mock BankData.
+
+        Creates two SingleBank instances representing left and right banks,
+        each with specific coordinates, face indices, and chainage midpoints.
+
+        Args:
+            read_line_data (np.ndarray): The points read from the input file.
+
+        Returns:
+            BankData: A BankData instance containing the left and right banks.
+        """
         points = read_line_data
         mock_left_bank = SingleBank(
             is_right_bank=False,
@@ -306,7 +430,16 @@ class TestErosion:
 
     @pytest.fixture
     def mock_fairway_data(self, read_line_data):
-        """Fixture to create a mock FairwayData."""
+        """Fixture to create a mock FairwayData.
+
+        Creates a FairwayData instance with intersection coordinates and face indices.
+
+        Args:
+            read_line_data (np.ndarray): The points read from the input file.
+
+        Returns:
+            FairwayData: A FairwayData instance containing intersection coordinates and face indices.
+        """
         points = read_line_data
         mock_fairway_data = FairwayData(
             intersection_coords=points[:30],
@@ -316,6 +449,23 @@ class TestErosion:
 
     @pytest.fixture
     def mock_single_level_parameters(self):
+        """Fixture to create a mock SingleLevelParameters.
+
+        Creates a SingleLevelParameters instance with predefined parameters for two banks.
+
+        Returns:
+            SingleLevelParameters: A SingleLevelParameters instance with predefined parameters.
+                - id: 0
+                - ship_velocity: [5.0, 5.0] for both banks
+                - num_ship: [15613, 15613] for both banks
+                - num_waves_per_ship: [5.0, 5.0] for both banks
+                - ship_draught: [1.2, 1.2] for both banks
+                - ship_type: [2, 2] for both banks
+                - par_slope: [2.0, 2.0] for both banks
+                - par_reed: [0.0, 0.0] for both banks
+                - mu_slope: [0.5, 0.5] for both banks
+                - mu_reed: [0.0, 0.0] for both banks
+        """
         return SingleLevelParameters.from_column_arrays(
             {
                 "id": 0,
@@ -361,6 +511,32 @@ class TestErosion:
 
     @pytest.fixture
     def mock_simulation_data(self, read_grid_data, read_face_values, read_coord_values):
+        """Fixture to create a mock ErosionSimulationData.
+
+        Creates an ErosionSimulationData instance with bed elevation values, chezy face values,
+        dry-wet threshold, face-node indices, number of nodes, velocity components,
+        water depth, water level, and node coordinates.
+
+        Args:
+            read_grid_data (tuple): A tuple containing nodes, x_coords, and y_coords.
+            read_face_values (np.ndarray): The face values read from the input file.
+            read_coord_values (np.ndarray): The coordinate values read from the input file.
+
+        Returns:
+            ErosionSimulationData: An ErosionSimulationData instance with the following attributes:
+                - bed_elevation_location: "node"
+                - bed_elevation_values: np.ma.array(read_coord_values)
+                - chezy_face: np.ma.array(read_face_values[4])
+                - dry_wet_threshold: 0.1
+                - face_node: nodes
+                - n_nodes: np.array([4] * 90)
+                - velocity_x_face: np.ma.array(read_face_values[0])
+                - velocity_y_face: np.ma.array(read_face_values[1])
+                - water_depth_face: np.ma.array(read_face_values[2])
+                - water_level_face: np.ma.array(read_face_values[3])
+                - x_node: x_coords
+                - y_node: y_coords
+        """
         nodes, x_coords, y_coords = read_grid_data
         return ErosionSimulationData(
             bed_elevation_location="node",
@@ -386,12 +562,39 @@ class TestErosion:
         mock_simulation_data,
         mock_debug,
     ):
-        """Test the calculate_fairway_bank_line_distance method."""
+        """Test the calculate_fairway_bank_line_distance method.
+
+        This test, tests the calculation of the distance between the fairway and bank lines.
+
+        Args:
+            mock_erosion (Erosion):
+                The Erosion instance to test.
+            mock_config_file (MagicMock):
+                A mocked ConfigFile instance.
+            mock_bank_data (BankData):
+                A BankData instance containing left and right banks from real data.
+            mock_fairway_data (FairwayData):
+                A FairwayData instance containing intersection points from real data.
+            mock_simulation_data (ErosionSimulationData):
+                An ErosionSimulationData instance containing a section of the real test case data.
+
+        Mocks:
+            Erosion:
+                The Erosion instance without executing the original __init__ method.
+            ConfigFile:
+                The behavior of the ConfigFile to return predefined parameters.
+            GeoDataFrame:
+                A mocked GeoDataFrame to simulate the saving of fairway data to a file.
+
+        Asserts:
+            The fairway initial water levels are calculated correctly based on the bank data and fairway data.
+            The calculated fairway initial water levels match the expected values.
+        """
         mock_erosion._config_file = mock_config_file
 
         with patch("dfastbe.io.data_models.GeoDataFrame"):
             mock_erosion.calculate_fairway_bank_line_distance(
-                mock_bank_data, mock_fairway_data, mock_simulation_data
+                mock_bank_data, mock_fairway_data, mock_simulation_daSta
             )
 
         assert np.allclose(
@@ -467,6 +670,33 @@ class TestErosion:
         )
 
     def test_process_discharge_levels(self, mock_erosion: Erosion, mock_debug):
+        """Test the _process_discharge_levels method.
+
+        This method processes discharge levels and calculates erosion results.
+
+        Args:
+            mock_erosion (Erosion): The Erosion instance to test.
+
+        Mocks:
+            _read_discharge_parameters:
+                Mocks the read method to return a SingleLevelParameters instance with predefined parameters.
+            ErosionSimulationData.read:
+                Mocks the read method to return an instance containing a section of the real test case data.
+            _calculate_bank_height:
+                Mocks the method to return a MagicMock instance simulating bank height calculations.
+            compute_erosion_per_level:
+                Mocks the method to return two MagicMock instances simulating erosion calculations.
+            write_km_eroded_volumes:
+                Mocks the method to simulate writing eroded volumes to a file.
+            DischargeLevels:
+                Mocks the DischargeLevels class to simulate the accumulation of erosion distributions.
+
+        Asserts:
+            The write_km_eroded_volumes method is called, indicating that eroded volumes are written to a file.
+            The method returns a WaterLevelData instance and an ErosionResults instance.
+            The erosion results contain flow erosion distribution, ship erosion distribution,
+            total erosion distribution, and total eroded volume arrays that match the expected values.
+        """
         km_bin = np.array([123.0, 128.0, 0.1])
         km_mid = np.array(
             [123.05, 123.15, 123.25, 123.35, 123.45, 123.55, 123.65, 123.75]
@@ -542,6 +772,26 @@ class TestErosion:
         assert np.allclose(erosion_results.total_eroded_vol, total_eroded_vol)
 
     def test_read_discharge_parameters(self, mock_erosion: Erosion, shipping_data):
+        """Test the _read_discharge_parameters method.
+
+        This method reads discharge parameters for a specific discharge level.
+
+        Args:
+            mock_erosion (Erosion):
+                The Erosion instance to test.
+            shipping_data (dict):
+                The shipping data to use for testing.
+
+        Mocks:
+            Erosion._get_param:
+                Mocks the method to return predefined values for testing.
+            Erosion:
+                The Erosion instance without executing the original __init__ method.
+
+        Asserts:
+            The returned discharge parameters are an instance of SingleLevelParameters.
+            The parameters match the expected values from the shipping data.
+        """
         with patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion._get_param"
         ) as mock_get_param:
@@ -568,7 +818,32 @@ class TestErosion:
         )
 
     def test_compute_erosion_per_level(self, mock_erosion: Erosion, mock_debug):
-        """Test the compute_erosion_per_level method."""
+        """Test the compute_erosion_per_level method.
+
+        This method computes the erosion for a specific discharge level.
+
+        Args:
+            mock_erosion (Erosion): The Erosion instance to test.
+
+        Mocks:
+            ErosionSimulationData:
+                A mocked ErosionSimulationData instance to simulate simulation data.
+            BankData:
+                A mocked BankData instance to simulate bank data.
+            FairwayData:
+                A mocked FairwayData instance to simulate fairway data.
+            SingleLevelParameters:
+                A mocked SingleLevelParameters instance to simulate parameters for a single discharge level.
+            ErosionInputs:
+                A mocked ErosionInputs instance to simulate erosion inputs.
+            get_km_eroded_volume:
+                A mocked function to simulate the retrieval of eroded volume per kilometer.
+
+        Asserts:
+            The method returns a SingleDischargeLevel instance and a 2D numpy array of eroded volumes.
+            The SingleDischargeLevel instance has the expected maximum water level.
+            The eroded volume array is correctly initialized with zeros.
+        """
         mock_erosion.river_data.num_discharge_levels = 2
         bank_data = MagicMock(spec=BankData)
         bank_data.__iter__.return_value = [MagicMock(), MagicMock()]
@@ -618,7 +893,52 @@ class TestErosion:
         mock_debug,
         fs: FakeFilesystem,
     ):
-        """Test the run method."""
+        """Test the run method.
+
+        This method runs the bank erosion simulation and generates output files.
+
+        Args:
+            mock_erosion (Erosion):
+                The Erosion instance to test.
+            mock_fairway_data (FairwayData):
+                A FairwayData instance.
+            mock_bank_data (BankData):
+                A BankData instance.
+            shipping_data (dict):
+                A dictionary containing shipping data.
+            mock_single_level_parameters (SingleLevelParameters):
+                A SingleLevelParameters instance.
+            mock_simulation_data (ErosionSimulationData):
+                A ErosionSimulationData instance.
+
+        Mocks:
+            Erosion:
+                The Erosion instance without executing the original __init__ method.
+            LineGeometry:
+                A mocked LineGeometry instance to simulate line geometry operations.
+            GeoDataFrame:
+                A mocked GeoDataFrame to simulate the saving of fairway data to a file.
+            _get_fairway_data:
+                Return the mock_fairway_data instance instead of executing the function.
+            get_km_bins:
+                A mocked function to return a predefined array of km midpoints.
+            _process_river_axis_by_center_line:
+                Return a mocked center line instead of executing the function.
+            get_ship_parameters:
+                A mocked function to return the shipping_data dictionary.
+            _read_discharge_parameters:
+                Return the mock_single_level_parameters instance instead of executing the function.
+            ErosionSimulationData.read:
+                Return the mock_simulation_data instance instead of executing the function.
+            _write_bankline_shapefiles:
+                A mocked function to simulate writing bankline shapefiles.
+            _generate_plots:
+                A mocked function to simulate generating plots.
+
+        Asserts:
+            The run method processes the bank erosion simulation correctly.
+            The output files are generated with the expected content.
+        """
         mock_km_mid = MagicMock()
         mock_km_mid.return_value = np.arange(123.0, 123.6, 0.02)
         mock_erosion.bl_processor.intersect_with_mesh.return_value = mock_bank_data
@@ -648,7 +968,7 @@ class TestErosion:
 
         mock_erosion.erosion_calculator = ErosionCalculator()
         mock_erosion.p_discharge = np.array([0.311, 0.2329, 0.2055])
-        center_line_mock = MagicMock()
+        center_line_mock = MagicMock(spec=LineGeometry)
         center_line_mock.data["stations"].min.return_value = 123.0
         center_line_mock.data["stations"].max.return_value = 123.61
         with patch(
