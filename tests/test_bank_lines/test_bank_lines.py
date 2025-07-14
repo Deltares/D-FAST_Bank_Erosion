@@ -19,6 +19,23 @@ matplotlib.use('Agg')
 
 @pytest.mark.e2e
 def test_bank_lines():
+    """End-to-end test for the bank lines detection.
+
+    Use a real world case to run the bank lines detection module and verify the output.
+    This test checks the detection of bank lines, bank areas, and the generation of
+    bankline fragments per bank area. It also verifies the plotting of the detected
+    bank lines and compares the generated image with a reference image.
+
+    The test uses a configuration file located in the `tests/data/bank_lines` directory
+    and runs the bank lines detection in the "BANKLINES" mode for the "UK" language.
+
+    Asserts:
+        - The detected bankline fragments are correctly formed as a MultiLineString.
+        - The bank areas are correctly formed as Polygons.
+        - The bankline fragments per bank area are correctly formed as MultiLineStrings.
+        - The bankfile is correctly formed as LineStrings.
+        - The generated plot image matches the reference image within a tolerance.
+    """
     test_r_dir = Path("tests/data/bank_lines")
     language = "UK"
     run_mode = "BANKLINES"
@@ -94,14 +111,24 @@ class TestBankLines:
 
     @pytest.fixture
     def mock_config_file(self):
-        """Fixture to create a mock ConfigFile object."""
+        """Fixture to create a mock ConfigFile object.
+
+        This mock simulates a configuration file with a specific CRS.
+
+        Returns:
+            MagicMock: A mock object simulating ConfigFile.
+        """
         mock_config = MagicMock(spec=ConfigFile)
         mock_config.crs = "EPSG:4326"
         return mock_config
 
     @pytest.mark.unit
     def test_max_river_width(self, mock_simulation_data):
-        """Test the max_river_width property."""
+        """Test the max_river_width property.
+
+        Asserts:
+            The max_river_width is correctly calculated based on the simulation data.
+        """
         with patch(
             "dfastbe.bank_lines.bank_lines.BankLinesRiverData"
         ) as mock_river_data:
@@ -120,10 +147,26 @@ class TestBankLines:
         This test mocks the BankLinesRiverData class and its methods to ensure
         that the detect method of BankLines works as expected.
 
+        Args:
+            mock_river_data_class (MagicMock): Mocked class for BankLinesRiverData.
+
+        Mocks:
+            BankLinesRiverData:
+                Mocked to return a MagicMock data object with
+                predefined values matching a BankLinesRiverData class object.
+            detect_bank_lines:
+                Mocked to simulate the detection of bank lines.
+            mask:
+                Mocked to simulate the masking of bank lines.
+            save:
+                Mocked to simulate saving the detected bank lines.
+            plot:
+                Mocked to simulate plotting the detected bank lines.
+
         Asserts:
-            - The detect_bank_lines method is called with the correct parameters.
-            - The save method is called.
-            - The plot method is called if plotting is enabled in the config file.
+            The detect_bank_lines method is called with the correct parameters.
+            The save method is called.
+            The plot method is called if plotting is enabled in the config file.
         """
         mock_config_file = MagicMock(spec=ConfigFile)
         mock_config_file.get_output_dir.return_value = "mock_output_dir"
@@ -174,9 +217,17 @@ class TestBankLines:
         water levels and bed elevations. It uses the face_node, water_level_face, and
         bed_elevation_values attributes of the BaseSimulationData object.
 
+        Args:
+            mock_simulation_data (MagicMock):
+                Mocked BaseSimulationData object with predefined attributes.
+
+        Mocks:
+            BaseSimulationData:
+                A MagicMock data object with predefined values matching a BaseSimulationData class object.
+
         Asserts:
-            - The shape of the resulting water depth array matches the face_node shape.
-            - The calculated water depth matches the expected values.
+            The shape of the resulting water depth array matches the face_node shape.
+            The calculated water depth matches the expected values.
         """
         h_node = BankLines._calculate_water_depth(mock_simulation_data)
         expected_h_node = np.array(
@@ -198,10 +249,18 @@ class TestBankLines:
         by determining the start and end points of each line segment based on the water
         depth and wet nodes.
 
+        Args:
+            mock_simulation_data (MagicMock):
+                Mocked BaseSimulationData object with predefined attributes.
+
+        Mocks:
+            BaseSimulationData:
+                A MagicMock data object with predefined values matching a BaseSimulationData class object.
+
         Asserts:
-            - The generated bank lines match the expected LineString objects.
-            - The method correctly handles the wet nodes and water depth to create
-              appropriate bank lines.
+            The generated bank lines match the expected LineString objects.
+            The method correctly handles the wet nodes and water depth to create
+                appropriate bank lines.
         """
         wet_node = np.array(
             [[True, False, True], [False, True, True], [True, False, True]]
@@ -297,9 +356,27 @@ class TestBankLines:
         polygonal faces: a polygon with 4 nodes.
         masked faces: a masked array with 4 nodes, where the last row is masked.
 
+        Args:
+            mock_simulation_data (MagicMock):
+                Mocked BaseSimulationData object with predefined attributes.
+            mock_config_file (MagicMock):
+                Mocked ConfigFile object with predefined attributes.
+            face_node (np.ndarray):
+                The face node array to test.
+            n_nodes (np.ndarray):
+                The number of nodes per face to test.
+            expected (LineString or MultiLineString):
+                The expected result for the given face_node and n_nodes.
+
+        Mocks:
+            BaseSimulationData:
+                A MagicMock data object with predefined values matching a BaseSimulationData class object.
+            ConfigFile:
+                A MagicMock data object with predefined values matching a ConfigFile class object.
+
         Asserts:
-            - The resulting GeoSeries contains the expected LineString or MultiLineString.
-            - The length of the GeoSeries matches the expected number of bank lines.
+            The resulting GeoSeries contains the expected LineString or MultiLineString.
+            The length of the GeoSeries matches the expected number of bank lines.
         """
         mock_simulation_data.face_node = face_node
         mock_simulation_data.n_nodes = n_nodes
@@ -324,8 +401,17 @@ class TestBankLines:
         This test checks if the save method correctly saves the bank lines, bank areas,
         and bankline fragments per bank area to the specified output directory.
 
+        Args:
+            mock_config_file (MagicMock): Mocked ConfigFile object with predefined attributes.
+            tmp_path (Path): Temporary path to save the output files.
+
+        Mocks:
+            BankLinesRiverData:
+                Mocked to return a MagicMock data object with
+                predefined values matching a BankLinesRiverData class object.
+
         Asserts:
-            - The saved files exist in the output directory.
+            The saved files exist in the output directory.
         """
         bank = [LineString([(0, 0), (1, 1)])]
         banklines = gpd.GeoSeries([LineString([(0, 0), (1, 1)])], crs="EPSG:4326")
@@ -365,10 +451,31 @@ class TestBankLines:
         This test checks if the plot method correctly plots the bank lines and saves the
         plot to the specified directory.
 
+        Args:
+            mock_config_file (MagicMock):
+                Mocked ConfigFile object with predefined attributes.
+            mock_simulation_data (MagicMock):
+                Mocked BaseSimulationData object with predefined attributes.
+            tmp_path (Path):
+                Temporary path to save the output plot.
+
+        Mocks:
+            BankLinesRiverData:
+                Mocked to return a MagicMock data object with
+                predefined values matching a BankLinesRiverData class object.
+            pyplot.show:
+                Mocked to prevent displaying the plot on screen during tests,
+                ensuring compatibility with non-GUI environments.
+            pyplot.close:
+                Mocked to prevent closing the plot during tests,
+                ensuring compatibility with non-GUI environments.
+            BasePlot.zoom_xy_and_save:
+                Mocked to simulate the zooming and saving of the plot.
+
         Asserts:
-            - The plot is saved to the specified directory.
-            - The zoom_xy_and_save method is called.
-            - The show and close methods of matplotlib.pyplot are called.
+            The plot is saved to the specified directory.
+            The zoom_xy_and_save method is called.
+            The show and close methods of matplotlib.pyplot are called.
         """
         xy_km_numpy = LineGeometry(line=np.array([[0, 0, 0], [1, 1, 0]]))
         n_search_lines = 1
