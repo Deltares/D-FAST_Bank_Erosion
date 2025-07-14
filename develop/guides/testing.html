@@ -1867,6 +1867,36 @@
         <span class="k">pass</span>
 </code></pre></div></li>
 </ul>
+<h1 id="docstring-convention-for-tests"><a class="toclink" href="#docstring-convention-for-tests">Docstring Convention for tests</a><a class="headerlink" href="#docstring-convention-for-tests" title="Permanent link">#</a></h1>
+<p>All pytest test functions and classes in D-FAST Bank Erosion should include a clear and structured docstring describing the purpose and behavior of the test. The recommended format includes the following sections:</p>
+<h2 id="example-docstring-structure"><a class="toclink" href="#example-docstring-structure">Example Docstring Structure</a><a class="headerlink" href="#example-docstring-structure" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">test_my_functionality</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Brief description of what the test covers.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param1 (Type): Description of the parameter.</span>
+<span class="sd">        param2 (Type): Description of the parameter.</span>
+
+<span class="sd">    Mocks:</span>
+<span class="sd">        - Description of any objects, functions, or modules that are mocked in the test.</span>
+<span class="sd">        - Example: Mocked database connection to avoid real I/O.</span>
+
+<span class="sd">    Asserts:</span>
+<span class="sd">        - Description of what is being asserted or validated in the test.</span>
+<span class="sd">        - Example: Asserts that the output matches the expected result.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Test code here</span>
+    <span class="k">pass</span>
+</code></pre></div>
+<h2 id="guidelines"><a class="toclink" href="#guidelines">Guidelines</a><a class="headerlink" href="#guidelines" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>Description:</strong> Start with a concise summary of what the test is verifying.</li>
+<li><strong>Args:</strong> List and describe any parameters used in the test (optional for simple tests).</li>
+<li><strong>Mocks:</strong> Clearly state what is mocked, why, and how it affects the test.</li>
+<li><strong>Asserts:</strong> Explicitly describe what the test is asserting, including expected outcomes or behaviors.</li>
+</ul>
+<p>This convention helps maintain clarity, consistency, and traceability in the test suite, making it easier for contributors to understand the intent and coverage of each test.</p>
 <h1 id="binaries"><a class="toclink" href="#binaries">Binaries</a><a class="headerlink" href="#binaries" title="Permanent link">#</a></h1>
 <h2 id="creating-tests-for-the-binaries"><a class="toclink" href="#creating-tests-for-the-binaries">Creating tests for the binaries</a><a class="headerlink" href="#creating-tests-for-the-binaries" title="Permanent link">#</a></h2>
 <ul>
