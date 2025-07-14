@@ -99,6 +99,7 @@ class TestBankLines:
         mock_config.crs = "EPSG:4326"
         return mock_config
 
+    @pytest.mark.unit
     def test_max_river_width(self, mock_simulation_data):
         """Test the max_river_width property."""
         with patch(
@@ -112,6 +113,7 @@ class TestBankLines:
         assert bank_lines.max_river_width == 1000
 
     @patch("dfastbe.bank_lines.bank_lines.BankLinesRiverData")
+    @pytest.mark.unit
     def test_detect(self, mock_river_data_class):
         """Test the detect method of the BankLines class.
 
@@ -164,6 +166,7 @@ class TestBankLines:
         if mock_config_file.get_plotting_flags.return_value["plot_data"]:
             bank_lines.plot.assert_called_once()
 
+    @pytest.mark.unit
     def test_calculate_water_depth_per_node(self, mock_simulation_data):
         """Test the calculate_water_depth_per_node method.
 
@@ -186,6 +189,7 @@ class TestBankLines:
         assert h_node.shape == mock_simulation_data.face_node.shape
         assert np.allclose(h_node, expected_h_node)
 
+    @pytest.mark.unit
     def test_generate_bank_lines(self, mock_simulation_data):
         """Test the _generate_bank_lines method.
 
@@ -282,6 +286,7 @@ class TestBankLines:
         ],
         ids=["triangle faces", "polygonal faces", "masked faces"],
     )
+    @pytest.mark.unit
     def test_detect_bank_lines(
         self, mock_simulation_data, mock_config_file, face_node, n_nodes, expected
     ):
@@ -312,6 +317,7 @@ class TestBankLines:
         captured = capsys.readouterr()
         assert "Progress: 100.00%" in captured.out
 
+    @pytest.mark.unit
     def test_save(self, mock_config_file, tmp_path: Path):
         """Test the save method of the BankLines class.
 
@@ -409,6 +415,7 @@ class TestBankLines:
             mock_close.assert_called_once()
             assert (tmp_path / "1_bankline-detection.png").exists()
 
+    @pytest.mark.unit
     def test_mask(self):
         """Test the mask method of the BankLines class.
 
