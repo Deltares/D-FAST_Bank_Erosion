@@ -27,19 +27,21 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+
+from dfastbe.io.config import PlottingFlags
 from dfastbe.io.data_models import BaseSimulationData
 
 
 class BasePlot:
 
-    def __init__(self, gui, plot_flags) -> None:
+    def __init__(self, gui, plot_flags: PlottingFlags) -> None:
         self.gui = gui
         self.flags = plot_flags
 
@@ -340,7 +342,6 @@ class BasePlot:
         ax.set_xlim(xmin=xmin, xmax=xmax)
         ax.set_ylim(ymin=ymin, ymax=ymax)
 
-
     def set_axes_properties(
         self,
         ax: Axes,
@@ -376,26 +377,34 @@ class BasePlot:
         figure_index: int,
         plot_name: str,
         zoom_coords: Optional[List[Tuple[float, float, float, float]]],
-        plot_flags: Dict[str, Any],
+        plot_flags: PlottingFlags,
         zoom_xy: bool,
     ) -> int:
         """Save the plot to a file."""
         figure_index += 1
-        fig_base = Path(plot_flags['fig_dir']) / f"{figure_index}_{plot_name}"
-        if plot_flags["save_plot_zoomed"] and zoom_xy:
+        fig_base = Path(plot_flags.fig_dir) / f"{figure_index}_{plot_name}"
+        if plot_flags.save_plot_zoomed and zoom_xy:
             self.zoom_xy_and_save(
-                fig, ax, fig_base, plot_flags["plot_ext"], zoom_coords
+                fig, ax, fig_base, plot_flags.plot_extension, zoom_coords
             )
-        elif plot_flags["save_plot_zoomed"]:
-            self.zoom_x_and_save(fig, ax, fig_base, plot_flags["plot_ext"], zoom_coords)
-        fig_path = fig_base.with_suffix(plot_flags["plot_ext"])
+        elif plot_flags.save_plot_zoomed:
+            self.zoom_x_and_save(
+                fig, ax, fig_base, plot_flags.plot_extension, zoom_coords
+            )
+        fig_path = fig_base.with_suffix(plot_flags.plot_extension)
         self.save_fig(fig, fig_path)
         return figure_index
 
 
 class Plot:
 
-    def __init__(self, plot_flags, scale: int = 1000, aspect: int = None, gui: bool = False) -> None:
+    def __init__(
+        self,
+        plot_flags: PlottingFlags,
+        scale: int = 1000,
+        aspect: int = None,
+        gui: bool = False,
+    ) -> None:
         """
 
         Args:
@@ -453,13 +462,13 @@ class Plot:
     ) -> int:
         """Save the plot to a file."""
         figure_index += 1
-        path = Path(self.flags['fig_dir']) / f"{figure_index}_{plot_name}"
-        if self.flags["save_plot_zoomed"] and zoom_xy:
-            self._zoom_xy_and_save(path, self.flags["plot_ext"], zoom_coords)
-        elif self.flags["save_plot_zoomed"]:
-            self._zoom_x_and_save(path, self.flags["plot_ext"], zoom_coords)
+        path = Path(self.flags.fig_dir) / f"{figure_index}_{plot_name}"
+        if self.flags.save_plot_zoomed and zoom_xy:
+            self._zoom_xy_and_save(path, self.flags.plot_extension, zoom_coords)
+        elif self.flags.save_plot_zoomed:
+            self._zoom_x_and_save(path, self.flags.plot_extension, zoom_coords)
 
-        fig_path = path.with_suffix(self.flags["plot_ext"])
+        fig_path = path.with_suffix(self.flags.plot_extension)
         self.save_fig(fig_path)
         return figure_index
 
