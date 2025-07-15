@@ -10,7 +10,7 @@ from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
-from dfastbe.plotting import BasePlot
+from dfastbe.plotting import BasePlot, Plot
 from dfastbe.bank_erosion.data_models.inputs import ErosionSimulationData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
@@ -165,24 +165,22 @@ class ErosionPlotter(BasePlot):
         xy_zoom: List[Tuple],
     ) -> int:
         """Plot the water level data."""
-        fig, ax = plt.subplots()
-        self.set_size(fig)
-        ax.set_aspect(1)
-
         scale = 1000
-        plot = self._plot_base_water_level(
-            ax, river_center_line_arr, simulation_data, scale
+        plot = Plot(self.flags, aspect=1)
+
+        collection = self._plot_base_water_level(
+            plot.ax, river_center_line_arr, simulation_data, scale
         )
-        fig.colorbar(
-            plot, ax=ax, shrink=0.5, drawedges=False, label="water depth [m]"
+        plot.fig.colorbar(
+            collection, ax=plot.ax, shrink=0.5, drawedges=False, label="water depth [m]"
         )
-        self.set_bbox(ax, bbox)
-        ax.set_xlabel(X_AXIS_TITLE)
-        ax.set_ylabel(Y_AXIS_TITLE)
-        ax.grid(True)
-        ax.set_title("water depth and initial bank lines")
+        plot.set_bbox(bbox)
+        plot.ax.set_xlabel(X_AXIS_TITLE)
+        plot.ax.set_ylabel(Y_AXIS_TITLE)
+        plot.ax.grid(True)
+        plot.ax.set_title("water depth and initial bank lines")
         if self.flags["save_plot"]:
-            fig_i = self._save_plot(fig, ax, fig_i, "banklines", xy_zoom, True)
+            fig_i = plot.save(fig_i, "banklines", xy_zoom, True)
         return fig_i
 
     def _plot_erosion_sensitivity(
@@ -194,26 +192,23 @@ class ErosionPlotter(BasePlot):
         xy_zoom: List[Tuple],
     ) -> int:
         scale = 1000
-        fig, ax = plt.subplots()
-        self.set_size(fig)
-        ax.set_aspect(1)
+        plot = Plot(self.flags,  aspect=1, scale=scale)
 
-
-        self.stations_marker(river_center_line_arr, ax, float_format=0, scale=scale)
+        self.stations_marker(river_center_line_arr, plot.ax, float_format=0, scale=scale)
         avg_erosion_rate_max = self.erosion_results.avg_erosion_rate.max()
 
         p = self._create_patches(
-            ax,
+            plot.ax,
             self.bank_data.bank_line_coords,
             self.erosion_results.total_erosion_dist,
             self.bank_data.is_right_bank,
             avg_erosion_rate_max,
             xy_line_eq_list,
-            scale,
+            plot.scale,
         )
 
-        cbar = fig.colorbar(
-            p, ax=ax, shrink=0.5, drawedges=False, label="eroded distance [m]"
+        plot.fig.colorbar(
+            p, ax=plot.ax, shrink=0.5, drawedges=False, label="eroded distance [m]"
         )
         shaded = Patch(color="gold", linewidth=0.5)
         eqbank = Line2D([], [], color="k", linewidth=1)
@@ -223,9 +218,8 @@ class ErosionPlotter(BasePlot):
             "equilibrium location",
         ]
 
-        self.set_bbox(ax, bbox)
-        self.set_axes_properties(
-            ax,
+        plot.set_bbox(bbox)
+        plot.set_axes_properties(
             X_AXIS_TITLE,
             Y_AXIS_TITLE,
             True,
@@ -234,8 +228,8 @@ class ErosionPlotter(BasePlot):
             labels,
         )
         if self.flags["save_plot"]:
-            fig_i = self._save_plot(
-                fig, ax, fig_i, "erosion_sensitivity", xy_zoom, True
+            fig_i = plot.save(
+                fig_i, "erosion_sensitivity", xy_zoom, True
             )
         return fig_i
 
@@ -246,10 +240,10 @@ class ErosionPlotter(BasePlot):
         km_step: float,
         km_zoom: List[Tuple],
     ) -> int:
-        fig, ax = plt.subplots()
-        self.set_size(fig)
+        plot = Plot(self.flags)
+
         self._plot_stacked_per_discharge(
-            ax,
+            plot.ax,
             km_mid + 0.2 * km_step,
             km_step,
             self.water_level_data.vol_per_discharge,
@@ -257,22 +251,21 @@ class ErosionPlotter(BasePlot):
             0.4,
         )
         self._plot_stacked_per_bank(
-            ax,
+            plot.ax,
             km_mid - 0.2 * km_step,
             km_step,
             self.water_level_data.vol_per_discharge,
             "Bank {ib}",
             0.4,
         )
-        self.set_axes_properties(
-            ax,
+        plot.set_axes_properties(
             "river chainage [km]",
             "eroded volume [m^3]",
             True,
             f"eroded volume per {km_step} chainage km ({self.erosion_results.erosion_time} years)",
         )
         if self.flags["save_plot"]:
-            fig_i = self._save_plot(fig, ax, fig_i, "eroded_volume", km_zoom, False)
+            fig_i = plot.save(fig_i, "eroded_volume", km_zoom, False)
         return fig_i
 
     def _plot_eroded_volume_per_discharge(
@@ -282,27 +275,25 @@ class ErosionPlotter(BasePlot):
         km_step: float,
         km_zoom: List[Tuple],
     ) -> int:
-        fig, ax = plt.subplots()
-        self.set_size(fig)
+        plot = Plot(self.flags)
 
         self._plot_stacked_per_discharge(
-            ax,
+            plot.ax,
             km_mid,
             km_step,
             self.water_level_data.vol_per_discharge,
             "Q{iq}",
             0.8,
         )
-        self.set_axes_properties(
-            ax,
+        plot.set_axes_properties(
             "river chainage [km]",
             "eroded volume [m^3]",
             True,
             f"eroded volume per {km_step} chainage km ({self.erosion_results.erosion_time} years)",
         )
         if self.flags["save_plot"]:
-            fig_i = self._save_plot(
-                fig, ax, fig_i, "eroded_volume_per_discharge", km_zoom, False
+            fig_i = plot.save(
+                fig_i, "eroded_volume_per_discharge", km_zoom, False
             )
         return fig_i
 
@@ -313,27 +304,25 @@ class ErosionPlotter(BasePlot):
         km_step: float,
         km_zoom: List[Tuple],
     ) -> int:
-        fig, ax = plt.subplots()
-        self.set_size(fig)
+        plot = Plot(self.flags)
 
         self._plot_stacked_per_bank(
-            ax,
+            plot.ax,
             km_mid,
             km_step,
             self.water_level_data.vol_per_discharge,
             "Bank {ib}",
             0.8,
         )
-        self.set_axes_properties(
-            ax,
+        plot.set_axes_properties(
             "river chainage [km]",
             "eroded volume [m^3]",
             True,
             f"eroded volume per {km_step} chainage km ({self.erosion_results.erosion_time} years)",
         )
         if self.flags["save_plot"]:
-            fig_i = self._save_plot(
-                fig, ax, fig_i, "eroded_volume_per_bank", km_zoom, False
+            fig_i = plot.save(
+                fig_i, "eroded_volume_per_bank", km_zoom, False
             )
         return fig_i
 
@@ -344,20 +333,19 @@ class ErosionPlotter(BasePlot):
         km_step: float,
         km_zoom: List[Tuple],
     ) -> int:
-        fig, ax = plt.subplots()
-        self.set_size(fig)
+        plot = Plot(self.flags)
 
         tvol = np.zeros(km_mid.shape)
         for i in range(len(km_mid)):
             tvol[i] = self.erosion_results.eq_eroded_vol_per_km[i].sum()
-        ax.bar(km_mid, tvol, width=0.8 * km_step)
+        plot.ax.bar(km_mid, tvol, width=0.8 * km_step)
 
-        ax.set_xlabel("river chainage [km]")
-        ax.set_ylabel("eroded volume [m^3]")
-        ax.grid(True)
-        ax.set_title(f"eroded volume per {km_step} chainage km (equilibrium)")
+        plot.ax.set_xlabel("river chainage [km]")
+        plot.ax.set_ylabel("eroded volume [m^3]")
+        plot.ax.grid(True)
+        plot.ax.set_title(f"eroded volume per {km_step} chainage km (equilibrium)")
         if self.flags["save_plot"]:
-            fig_i = self._save_plot(fig, ax, fig_i, "eroded_volume_eq", km_zoom, False)
+            fig_i = plot.save(fig_i, "eroded_volume_eq", km_zoom, False)
         return fig_i
 
     def _plot_water_levels_per_bank(
@@ -365,7 +353,7 @@ class ErosionPlotter(BasePlot):
         fig_i: int,
         km_zoom: List[Tuple],
     ) -> int:
-        figlist, axlist = self.plot5series_waterlevels_per_bank(
+        plot_list = self.plot5series_waterlevels_per_bank(
             "river chainage [km]",
             "water level at Q{iq}",
             "average water level",
@@ -377,9 +365,9 @@ class ErosionPlotter(BasePlot):
             "[m NAP]",
         )
         if self.flags["save_plot"]:
-            for ib, fig in enumerate(figlist):
-                fig_i = self._save_plot(
-                    fig, axlist[ib], fig_i, f"levels_bank_{ib + 1}", km_zoom, False
+            for ib, plot in enumerate(plot_list):
+                fig_i = plot.save(
+                    fig_i, f"levels_bank_{ib + 1}", km_zoom, False
                 )
         return fig_i
 
@@ -390,11 +378,10 @@ class ErosionPlotter(BasePlot):
     ) -> int:
         n_banklines = len(self.bank_data.bank_chainage_midpoints)
         n_levels = len(self.water_level_data.velocity)
-        figlist: List[Figure] = []
-        axlist: List[Axes] = []
+        plot_list = []
         clrs = self.get_colors("Blues", n_levels + 1)
         for i in range(n_banklines):
-            fig, ax = self._velocity_per_bank(
+            plot = self._velocity_per_bank(
                 clrs,
                 "river chainage [km]",
                 "velocity at Q{iq}",
@@ -404,12 +391,12 @@ class ErosionPlotter(BasePlot):
                 "[m/s]",
                 i,
             )
-            figlist.append(fig)
-            axlist.append(ax)
+            plot_list.append(plot)
+
         if self.flags["save_plot"]:
-            for ib, fig in enumerate(figlist):
-                fig_i = self._save_plot(
-                    fig, axlist[ib], fig_i, f"velocity_bank_{ib + 1}", km_zoom, False
+            for ib, plot in enumerate(plot_list):
+                fig_i = plot.save(
+                    fig_i, f"velocity_bank_{ib + 1}", km_zoom, False
                 )
         return fig_i
 
@@ -420,15 +407,13 @@ class ErosionPlotter(BasePlot):
         river_center_line_arr: np.ndarray,
         xy_zoom: List[Tuple],
     ) -> int:
-        fig, ax = plt.subplots()
-        self.set_size(fig)
-        ax.set_aspect(1)
-
         scale = 1000
-        self.stations_marker(river_center_line_arr, ax, float_format=0, scale=scale)
+        plot = Plot(self.flags, aspect=1, scale=scale)
+
+        self.stations_marker(river_center_line_arr, plot.ax, float_format=0, scale=scale)
         clrs = self.get_colors("plasma", len(self.erosion_inputs.taucls_str) + 1)
         self._plot_bank_type_segments(
-            ax,
+            plot.ax,
             self.bank_data.bank_line_coords,
             self.erosion_inputs.bank_type,
             self.erosion_inputs.taucls_str,
@@ -436,43 +421,41 @@ class ErosionPlotter(BasePlot):
             scale,
         )
 
-        self.set_bbox(ax, bbox)
-        self.set_axes_properties(ax, X_AXIS_TITLE, Y_AXIS_TITLE, True, "bank type")
+        plot.set_bbox(bbox)
+        plot.set_axes_properties(X_AXIS_TITLE, Y_AXIS_TITLE, True, "bank type")
         if self.flags["save_plot"]:
-            fig_i = self._save_plot(fig, ax, fig_i, "banktype", xy_zoom, True)
+            fig_i = plot.save(fig_i, "banktype", xy_zoom, True)
         return fig_i
 
     def _plot_eroded_distance(self, fig_i: int, km_zoom: List[Tuple]) -> int:
-        fig, ax = plt.subplots()
-        self.set_size(fig)
-        #
+        plot = Plot(self.flags)
+
         n_banklines = len(self.erosion_results.total_erosion_dist)
         clrs = self.get_colors("plasma", n_banklines + 1)
         for ib in range(n_banklines):
             bk = self.bank_data.bank_chainage_midpoints[ib]
-            ax.plot(
+            plot.ax.plot(
                 bk,
                 self.erosion_results.total_erosion_dist[ib],
                 color=clrs[ib],
                 label=f"Bank {ib + 1}",
             )
-            ax.plot(
+            plot.ax.plot(
                 bk,
                 self.erosion_results.eq_erosion_dist[ib],
                 linestyle=":",
                 color=clrs[ib],
                 label=f"Bank {ib + 1} (eq)",
             )
-        #
-        self.set_axes_properties(
-            ax,
+
+        plot.set_axes_properties(
             "river chainage [km]",
             "eroded distance [m]",
             True,
             "eroded distance",
         )
         if self.flags["save_plot"]:
-            fig_i = self._save_plot(fig, ax, fig_i, "erodis", km_zoom, False)
+            fig_i = plot.save(fig_i, "erodis", km_zoom, False)
         return fig_i
 
     def _save_plot(self, fig, ax, fig_i, plot_name, zoom_coords, zoom_xy) -> int:
@@ -719,31 +702,31 @@ class ErosionPlotter(BasePlot):
         """
         n_banklines = len(self.bank_data.bank_chainage_midpoints)
         n_levels = len(self.water_level_data.water_level)
-        figlist: List[Figure] = []
-        axlist: List[Axes] = []
+        plot_list = []
+
         clrs = self.get_colors("Blues", n_levels + 1)
         for ib in range(n_banklines):
-            fig, ax = plt.subplots()
-            self.set_size(fig)
+            plot = Plot(self.flags)
+
             bk = self.bank_data.bank_chainage_midpoints[ib]
-            #
+
             for iq in range(n_levels):
                 # shaded range of influence for ship waves
-                ax.fill_between(
+                plot.ax.fill_between(
                     bk,
                     self.water_level_data.ship_wave_min[iq][ib],
                     self.water_level_data.ship_wave_max[iq][ib],
                     color=clrs[iq + 1],
                     alpha=0.1,
                 )
-                ax.plot(
+                plot.ax.plot(
                     bk,
                     self.water_level_data.ship_wave_max[iq][ib],
                     color=clrs[iq + 1],
                     linestyle="--",
                     linewidth=0.5,
                 )
-                ax.plot(
+                plot.ax.plot(
                     bk,
                     self.water_level_data.ship_wave_min[iq][ib],
                     color=clrs[iq + 1],
@@ -751,7 +734,7 @@ class ErosionPlotter(BasePlot):
                     linewidth=0.5,
                 )
                 # water level line itself
-                ax.plot(
+                plot.ax.plot(
                     bk,
                     self.water_level_data.water_level[iq][ib],
                     color=clrs[iq + 1],
@@ -761,43 +744,42 @@ class ErosionPlotter(BasePlot):
                     wl_avg = self.water_level_data.water_level[iq][ib].copy()
                 else:
                     wl_avg = wl_avg + self.water_level_data.water_level[iq][ib]
-            #
+
             wl_avg = wl_avg / n_levels
-            ax.plot(
+            plot.ax.plot(
                 bk,
                 wl_avg,
                 color=(0.5, 0.5, 0.5),
                 linewidth=2,
                 label=avg_waterlevel_txt,
             )
-            ax.plot(
+            plot.ax.plot(
                 bk,
                 self.bank_data.height[ib],
                 color=(0.5, 0.5, 0.5),
                 label=bankheight_txt,
             )
-            ymin, ymax = ax.get_ylim()
-            #
+            ymin, ymax = plot.ax.get_ylim()
+
             # bank protection is only visually included in the plot
             # if it is in the same range as the other quantities
             # don't stretch the vertical scale to squeeze in a very low value.
-            #
-            ax.plot(
+
+            plot.ax.plot(
                 bk,
                 self.erosion_inputs.bank_protection_level[ib],
                 color=(0.5, 0.5, 0.5),
                 linestyle="--",
                 label=bankprotect_txt,
             )
-            ax.set_ylim(ymin=ymin, ymax=ymax)
-            handles, labels = ax.get_legend_handles_labels()
+            plot.ax.set_ylim(ymin=ymin, ymax=ymax)
+            handles, labels = plot.ax.get_legend_handles_labels()
             # use a slightly higher alpha for the legend to make it stand out better.
             iq = int(n_levels / 2)
             shaded = Patch(color=clrs[iq + 1], alpha=0.2)
             handles = [*handles[:-3], shaded, *handles[-3:]]
             labels = [*labels[:-3], shipwave_txt, *labels[-3:]]
-            self.set_axes_properties(
-                ax,
+            plot.set_axes_properties(
                 chainage_txt,
                 elevation_txt + " " + elevation_unit,
                 True,
@@ -805,9 +787,9 @@ class ErosionPlotter(BasePlot):
                 handles,
                 labels,
             )
-            figlist.append(fig)
-            axlist.append(ax)
-        return figlist, axlist
+            plot_list.append(plot)
+
+        return plot_list
 
     def _velocity_per_bank(
         self,
@@ -820,37 +802,36 @@ class ErosionPlotter(BasePlot):
         veloc_unit: str,
         index: int,
     ):
-        fig, ax = plt.subplots()
-        self.set_size(fig)
-        bk = self.bank_data.bank_chainage_midpoints[index]
+        plot = Plot(self.flags)
+
+        bank = self.bank_data.bank_chainage_midpoints[index]
         n_levels = len(self.water_level_data.velocity)
-        velc = np.sqrt(
+        velocity = np.sqrt(
             self.erosion_inputs.tauc[index]
             * self.water_level_data.chezy[0][index] ** 2
             / (WATER_DENSITY * g)
         )
-        ax.plot(
+        plot.ax.plot(
             self.bank_data.bank_chainage_midpoints[index],
-            velc,
+            velocity,
             color="k",
             label=ucrit_txt,
         )
         for iq in range(n_levels):
-            ax.plot(
-                bk,
+            plot.ax.plot(
+                bank,
                 self.water_level_data.velocity[iq][index],
                 color=clrs[iq + 1],
                 label=velocq_txt.format(iq=iq + 1),
             )
-        #
-        self.set_axes_properties(
-            ax,
+
+        plot.set_axes_properties(
             chainage_txt,
             ylabel_txt + " " + veloc_unit,
             True,
             title_txt.format(ib=index + 1),
         )
-        return fig, ax
+        return plot
 
     def _plot_bank_type_segments(
         self,

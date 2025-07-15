@@ -30,7 +30,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import matplotlib
-import matplotlib.pyplot
+import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -55,7 +55,7 @@ class BasePlot:
             Name of the file to be written.
         """
         print("saving figure {file}".format(file=filename))
-        matplotlib.pyplot.show(block=False)
+        plt.show(block=False)
         fig.savefig(filename, dpi=300)
 
     def set_size(self, fig: Figure) -> None:
@@ -391,3 +391,191 @@ class BasePlot:
         fig_path = fig_base.with_suffix(plot_flags["plot_ext"])
         self.save_fig(fig, fig_path)
         return figure_index
+
+
+class Plot:
+
+    def __init__(self, plot_flags, scale: int = 1000, aspect: int = None, gui: bool = False) -> None:
+        """
+
+        Args:
+            gui:
+            plot_flags:
+            scale: float
+                Indicates whether the axes are in m (1) or km (1000).
+        """
+        self.gui = gui
+        self.flags = plot_flags
+        self._fig, self._ax = plt.subplots()
+        self.set_size()
+        if aspect:
+            self._ax.set_aspect(aspect)
+        self.scale = scale
+
+    @property
+    def fig(self) -> Figure:
+        """Get the figure object."""
+        return self._fig
+
+    @property
+    def ax(self) -> Axes:
+        """Get the axes object."""
+        return self._ax
+
+    def set_size(self) -> None:
+        """
+        Set the size of a figure.
+
+        Currently, the size is hardcoded, but functionality may be extended in the
+        future.
+        """
+        # the size of an a3 is (16.5, 11.75)
+        # the size of an a3 is (16.5, 11.75)
+        self.fig.set_size_inches(11.75, 8.25)  # a4
+
+    def save_fig(self, path: Union[str, Path]) -> None:
+        """
+        Save a single figure to file.
+
+        Args:
+            path : str
+                Name of the file to be written.
+        """
+        plt.show(block=False)
+        self.fig.savefig(path, dpi=300)
+
+    def save(
+        self,
+        figure_index: int,
+        plot_name: str,
+        zoom_coords: Optional[List[Tuple[float, float, float, float]]],
+        zoom_xy: bool,
+    ) -> int:
+        """Save the plot to a file."""
+        figure_index += 1
+        path = Path(self.flags['fig_dir']) / f"{figure_index}_{plot_name}"
+        if self.flags["save_plot_zoomed"] and zoom_xy:
+            self._zoom_xy_and_save(path, self.flags["plot_ext"], zoom_coords)
+        elif self.flags["save_plot_zoomed"]:
+            self._zoom_x_and_save(path, self.flags["plot_ext"], zoom_coords)
+
+        fig_path = path.with_suffix(self.flags["plot_ext"])
+        self.save_fig(fig_path)
+        return figure_index
+
+    def _zoom_x_and_save(
+        self,
+        path: Path,
+        plot_ext: str,
+        xzoom: List[Tuple[float, float]],
+    ) -> None:
+        """
+        Zoom in on subregions of the x-axis and save the figure.
+
+        Args:
+            path: Path
+
+            plot_ext : str
+                File extension of the figure to be saved.
+            xzoom : List[list[float,float]]
+                Values at which to split the x-axis.
+        """
+        x_min, x_max = self.ax.get_xlim()
+        for ix, zoom in enumerate(xzoom):
+            self.ax.set_xlim(xmin=zoom[0], xmax=zoom[1])
+            path = path.with_name(f"{path.stem}.sub{str(ix + 1)}{plot_ext}")
+            self.save_fig(path)
+        self.ax.set_xlim(xmin=x_min, xmax=x_max)
+
+    def _zoom_xy_and_save(
+        self,
+        fig_base: Path,
+        plot_ext: str,
+        xyzoom: List[Tuple[float, float, float, float]],
+    ) -> None:
+        """
+        Zoom in on subregions in x,y-space and save the figure.
+
+        Args:
+            fig_base : str
+                Base name of the figure to be saved.
+            plot_ext : str
+                File extension of the figure to be saved.
+            xyzoom : List[List[float, float, float, float]]
+                List of xmin, xmax, ymin, ymax values to zoom into.
+        """
+        xmin, xmax = self.ax.get_xlim()
+        ymin, ymax = self.ax.get_ylim()
+
+        dx_zoom = 0
+        xy_ratio = (ymax - ymin) / (xmax - xmin)
+        for zoom in xyzoom:
+            xmin0 = zoom[0]
+            xmax0 = zoom[1]
+            ymin0 = zoom[2]
+            ymax0 = zoom[3]
+            dx = xmax0 - xmin0
+            dy = ymax0 - ymin0
+            if dy < xy_ratio * dx:
+                # x range limiting
+                dx_zoom = max(dx_zoom, dx)
+            else:
+                # y range limiting
+                dx_zoom = max(dx_zoom, dy / xy_ratio)
+        dy_zoom = dx_zoom * xy_ratio
+
+        for ix, zoom in enumerate(xyzoom):
+            x0 = (zoom[0] + zoom[1]) / 2
+            y0 = (zoom[2] + zoom[3]) / 2
+            self.ax.set_xlim(
+                xmin=(x0 - dx_zoom / 2) / self.scale, xmax=(x0 + dx_zoom / 2) / self.scale
+            )
+            self.ax.set_ylim(
+                ymin=(y0 - dy_zoom / 2) / self.scale, ymax=(y0 + dy_zoom / 2) / self.scale
+            )
+            path = fig_base.with_name(f"{fig_base.stem}.sub{str(ix + 1)}{plot_ext}")
+            self.save_fig(path)
+
+        self.ax.set_xlim(xmin=xmin, xmax=xmax)
+        self.ax.set_ylim(ymin=ymin, ymax=ymax)
+
+    def set_axes_properties(
+        self,
+        chainage_txt: str,
+        ylabel_txt: str,
+        grid: bool,
+        title_txt: str,
+        handles: Optional[List[Any]] = None,
+        labels: Optional[List[str]] = None,
+    ) -> None:
+        """
+        Set the properties of the axes.
+
+        Args:
+            ax (Axes): The axes object to set properties for.
+            chainage_txt (str): Label for the horizontal chainage axes.
+            ylabel_txt (str): Label for the vertical axes.
+            title_txt (str): Title for the plot.
+        """
+        self.ax.set_xlabel(chainage_txt)
+        self.ax.set_ylabel(ylabel_txt)
+        self.ax.grid(grid)
+        self.ax.set_title(title_txt)
+        if handles and labels:
+            self.ax.legend(handles, labels, loc="upper right")
+        else:
+            self.ax.legend(loc="upper right")
+
+    def set_bbox(
+        self,
+        bbox: Tuple[float, float, float, float],
+    ) -> None:
+        """
+        Specify the bounding limits of an axes object.
+
+        Args:
+            bbox : Tuple[float, float, float, float]
+                Tuple containing boundary limits (xmin, ymin, xmax, ymax); unit m.
+        """
+        self.ax.set_xlim(xmin=bbox[0] / self.scale, xmax=bbox[2] / self.scale)
+        self.ax.set_ylim(ymin=bbox[1] / self.scale, ymax=bbox[3] / self.scale)
