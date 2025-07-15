@@ -162,6 +162,7 @@ class TestErosion:
             "parslope0",
             "parreed0",
         ]
+        mock_config_file.get_parameter.assert_called()
         assert isinstance(ship_parameters, dict)
         assert set(ship_parameters.keys()) == set(expected_keys)
 
@@ -172,14 +173,21 @@ class TestErosion:
                 assert isinstance(arr, np.ndarray)
                 assert len(arr) == n
 
-    def test_prepare_initial_conditions(self, mock_erosion: Erosion, shipping_data):
+    @pytest.mark.integration
+    def test_prepare_initial_conditions(
+        self, mock_erosion: Erosion, shipping_data, mock_config_file
+    ):
         """Test the _prepare_initial_conditions method.
 
         This method tests the prepare initial conditions for bank erosion calculations.
 
         Args:
-            mock_erosion (Erosion): The Erosion instance to test.
-            shipping_data (Dict[str, list]): Mocked shipping data to be used in the test.
+            mock_erosion (Erosion):
+                The Erosion instance to test.
+            shipping_data (Dict[str, list]):
+                Mocked shipping data to be used in the test.
+            mock_config_file (MagicMock):
+                A mocked ConfigFile instance.
 
         Mocks:
             FairwayData:
@@ -192,6 +200,7 @@ class TestErosion:
         Asserts:
             The returned erosion inputs contain expected shipping data and parameters.
             The bank protection levels, wave fairway distances, and taucls are correctly set.
+            The mocked config file methods are called.
         """
         num_stations_per_bank = [3, 3]
         mock_fairway_data = MagicMock(spec=FairwayData)
@@ -207,8 +216,7 @@ class TestErosion:
             "moderate/bad clay",
             "sand",
         )
-        config_file = MagicMock(spec=ConfigFile)
-        config_file.get_parameter.side_effect = [
+        mock_config_file.get_parameter.side_effect = [
             [np.array([150.0, 150.0, 150.0]), np.array([150.0, 150.0, 150.0])],  # Wave0
             [np.array([110.0, 110.0, 110.0]), np.array([110.0, 110.0, 110.0])],  # Wave1
             [np.array([1.0, 1.0, 1.0]), np.array([0.18, 0.18, 0.18])],  # BankType
@@ -218,8 +226,8 @@ class TestErosion:
             ],  # ProtectionLevel
         ]
 
-        config_file.get_bool.return_value = False
-        mock_erosion._config_file = config_file
+        mock_config_file.get_bool.return_value = False
+        mock_erosion._config_file = mock_config_file
 
         with patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters",
@@ -228,6 +236,9 @@ class TestErosion:
             erosion_inputs = mock_erosion._prepare_initial_conditions(
                 num_stations_per_bank, mock_fairway_data
             )
+
+        mock_config_file.get_parameter.assert_called()
+        mock_config_file.get_bool.assert_called_once()
 
         assert np.array_equal(
             erosion_inputs.shipping_data["vship0"][0], np.array([5.0, 5.0, 5.0])
@@ -245,6 +256,7 @@ class TestErosion:
         assert erosion_inputs.taucls_str == taucls_str
         assert len(erosion_inputs.bank_type) == 4
 
+    @pytest.mark.unit
     def test_process_river_axis_by_center_line(self, mock_erosion: Erosion, mock_debug):
         """Test the _process_river_axis_by_center_line method.
 
@@ -261,6 +273,7 @@ class TestErosion:
 
         Asserts:
             The river axis is processed correctly based on the center line.
+            The mocked LineGeometry methods are called.
         """
         mock_center_line = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
         mock_erosion.river_center_line_arr = mock_center_line
@@ -283,6 +296,8 @@ class TestErosion:
             )
             river_axis = mock_erosion._process_river_axis_by_center_line()
 
+        mock_line_geometry.return_value.as_array.assert_called_once()
+        mock_line_geometry.return_value.intersect_with_line.assert_called_once()
         river_axis.add_data.assert_called_with(data={"stations": np.array([128.0])})
 
     def test_get_fairway_data(
