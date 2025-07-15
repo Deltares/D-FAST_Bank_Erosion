@@ -1242,6 +1242,8 @@ def run_erosion() -> None:
     matplotlib.pyplot.close("all")
     erosion = Erosion(config_file, gui=True)
     erosion.run()
+    erosion.plot()
+    erosion.save()
     dialog["application"].restoreOverrideCursor()
 
 
