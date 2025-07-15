@@ -27,7 +27,7 @@ object CondaTemplate : Template({
             id = "Conda_create_environment"
             scriptContent = """
                 rmdir /S /Q %CONDA_PATH%\\%CONDA_ENV_NAME%
-                CALL conda create -v -y -n %CONDA_ENV_NAME% python=%python.version%
+                CALL conda create -v -y -n %CONDA_ENV_NAME% python=%python.version% certifi=2025.1.31
             """.trimIndent()
         }
         script {
