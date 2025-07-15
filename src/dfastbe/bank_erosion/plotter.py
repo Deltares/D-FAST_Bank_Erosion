@@ -60,11 +60,6 @@ class ErosionPlotter(BasePlot):
         self._erosion_inputs = erosion_inputs
 
     @property
-    def gui(self) -> bool:
-        """bool: whether to use the GUI for plotting."""
-        return self._gui
-
-    @property
     def erosion_results(self) -> ErosionResults:
         """ErosionResults: the results from the erosion analysis."""
         return self._erosion_results
@@ -173,7 +168,7 @@ class ErosionPlotter(BasePlot):
         fig, ax = plt.subplots()
         self.set_size(fig)
         ax.set_aspect(1)
-        #
+
         scale = 1000
         plot = self._plot_base_water_level(
             ax, river_center_line_arr, simulation_data, scale
@@ -181,7 +176,6 @@ class ErosionPlotter(BasePlot):
         cbar = fig.colorbar(
             plot, ax=ax, shrink=0.5, drawedges=False, label="water depth [m]"
         )
-        #
         self.set_bbox(ax, bbox)
         ax.set_xlabel(X_AXIS_TITLE)
         ax.set_ylabel(Y_AXIS_TITLE)
