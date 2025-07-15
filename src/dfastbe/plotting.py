@@ -41,6 +41,10 @@ from dfastbe.bank_erosion.erosion_calculator import WATER_DENSITY, g
 
 class BasePlot:
 
+    def __init__(self, gui, plot_flags) -> None:
+        self.gui = gui
+        self.flags = plot_flags
+
     def save_fig(self, fig: Figure, filename: Union[str, Path]) -> None:
         """
         Save a single figure to file.

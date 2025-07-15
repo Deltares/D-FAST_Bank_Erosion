@@ -53,8 +53,7 @@ class ErosionPlotter(BasePlot):
             midpoint_chainages (np.ndarray):
                 The midpoint chainages for the analysis.
         """
-        self._gui = gui
-        self._plot_flags = plot_flags
+        super().__init__(gui, plot_flags)
         self._erosion_results = erosion_results
         self._bank_data = bank_data
         self._water_level_data = water_level_data

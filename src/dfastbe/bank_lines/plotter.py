@@ -49,8 +49,7 @@ class BankLinesPlotter(BasePlot):
             stations_bounds (Tuple[float, float]):
                 Minimum and maximum chainage bounds.
         """
-        self.gui = gui
-        self.flags = plot_flags
+        super().__init__(gui, plot_flags)
         self.crs = crs
         self.simulation_data = simulation_data
         self.river_center_line = river_center_line
