@@ -9,11 +9,11 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from shapely import LineString, Polygon
 
-from dfastbe.io.config import ConfigFile
-from dfastbe.io.logger import log_text
+from dfastbe.io.config import PlottingFlags
 from dfastbe.io.data_models import BaseSimulationData, LineGeometry
-from dfastbe.utils import get_zoom_extends
+from dfastbe.io.logger import log_text
 from dfastbe.plotting import BasePlot
+from dfastbe.utils import get_zoom_extends
 
 # Texts for the plot
 PLOT_TEXTS = {
@@ -26,13 +26,12 @@ PLOT_TEXTS = {
 }
 
 
-
 class BankLinesPlotter(BasePlot):
 
     def __init__(
         self,
         gui: bool,
-        plot_flags: dict,
+        plot_flags: PlottingFlags,
         crs: str,
         simulation_data: BaseSimulationData,
         river_center_line: LineGeometry,
@@ -88,7 +87,7 @@ class BankLinesPlotter(BasePlot):
         _, xy_zoom = get_zoom_extends(
             self.stations_bounds[0],
             self.stations_bounds[1],
-            self.flags["zoom_km_step"],
+            self.flags.zoom_km_step,
             banks_coords,
             banks_station,
         )
@@ -136,7 +135,7 @@ class BankLinesPlotter(BasePlot):
         log_text("create_figures")
         fig_i = 0
 
-        if self.flags["save_plot_zoomed"]:
+        if self.flags.save_plot_zoomed:
             xy_zoom = self._get_zoom_extends(
                 bank,
                 num_search_lines,
@@ -149,12 +148,12 @@ class BankLinesPlotter(BasePlot):
             bank_areas,
             bank,
         )
-        if self.flags["save_plot"]:
+        if self.flags.save_plot:
             self.save_plot(
                 fig, ax, fig_i, "bankline-detection", xy_zoom, self.flags, True
             )
 
-        if self.flags["close_plot"]:
+        if self.flags.close_plot:
             plt.close("all")
         else:
             plt.show(block=not self.gui)
