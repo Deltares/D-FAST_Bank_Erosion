@@ -11,7 +11,7 @@ from shapely.geometry import LineString, MultiLineString, Polygon
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.bank_lines.plotter import BankLinesPlotter
 from dfastbe.cmd import run
-from dfastbe.io.config import ConfigFile
+from dfastbe.io.config import ConfigFile, PlottingFlags
 from dfastbe.io.data_models import BaseSimulationData, LineGeometry
 
 matplotlib.use('Agg')
@@ -170,7 +170,9 @@ class TestBankLines:
         """
         mock_config_file = MagicMock(spec=ConfigFile)
         mock_config_file.get_output_dir.return_value = "mock_output_dir"
-        mock_config_file.get_plotting_flags.return_value = {"plot_data": False}
+        plotting_flags = MagicMock(spec=PlottingFlags)
+        plotting_flags.plot_data = False
+        mock_config_file.get_plotting_flags.return_value = plotting_flags
 
         mock_river_data = MagicMock()
         mock_river_data.river_center_line.stations_bounds = (0, 100)
@@ -206,7 +208,7 @@ class TestBankLines:
             mock_config_file,
         )
         bank_lines.save.assert_called_once()
-        if mock_config_file.get_plotting_flags.return_value["plot_data"]:
+        if mock_config_file.get_plotting_flags.return_value.plot_data:
             bank_lines.plot.assert_called_once()
 
     @pytest.mark.unit
@@ -491,14 +493,15 @@ class TestBankLines:
                 0.3,
             )
             bank_lines = BankLines(mock_config_file)
-            bank_lines.plot_flags = {
-                "save_plot": True,
-                "save_plot_zoomed": True,
-                "close_plot": True,
-                "zoom_km_step": 0.1,
-                "fig_dir": str(tmp_path),
-                "plot_ext": ".png",
-            }
+            bank_lines.plot_flags = PlottingFlags(
+                plot_data=True,
+                save_plot=True,
+                save_plot_zoomed=True,
+                close_plot=True,
+                zoom_km_step=0.1,
+                fig_dir=str(tmp_path),
+                plot_extension=".png",
+            )
 
         with patch("matplotlib.pyplot.show") as mock_show, patch(
             "matplotlib.pyplot.close"
