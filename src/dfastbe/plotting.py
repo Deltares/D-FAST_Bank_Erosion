@@ -99,7 +99,7 @@ class BasePlot:
 
     def stations_marker(
         self,
-        xykm: np.ndarray,
+        river_center_line_arr: np.ndarray,
         ax: Axes,
         float_format: int = 1,
         scale: float = 1000,
@@ -109,7 +109,7 @@ class BasePlot:
 
         Arguments
         ---------
-        xykm : np.ndarray
+        river_center_line_arr : np.ndarray
             Array containing the x, y, and chainage; unit m for x and y, km for chainage.
         ax : matplotlib.axes.Axes
             Axes object in which to add the markers.
@@ -120,20 +120,20 @@ class BasePlot:
         """
         step = 10 ** (-float_format)
         label_str = " {:." + str(float_format) + "f}"
-        km_rescaled = xykm[:, 2] / step
+        km_rescaled = river_center_line_arr[:, 2] / step
         mask = np.isclose(np.round(km_rescaled), km_rescaled)
         ax.plot(
-            xykm[mask, 0] / scale,
-            xykm[mask, 1] / scale,
+            river_center_line_arr[mask, 0] / scale,
+            river_center_line_arr[mask, 1] / scale,
             linestyle="None",
             marker="+",
             color="k",
         )
         for i in np.nonzero(mask)[0]:
             ax.text(
-                xykm[i, 0] / scale,
-                xykm[i, 1] / scale,
-                label_str.format(xykm[i, 2]),
+                river_center_line_arr[i, 0] / scale,
+                river_center_line_arr[i, 1] / scale,
+                label_str.format(river_center_line_arr[i, 2]),
                 fontsize="x-small",
                 clip_on=True,
             )
@@ -213,7 +213,7 @@ class BasePlot:
             tval_list.append(simulation_data.water_depth_face[mask])
         tfn = np.concatenate(tfn_list, axis=0)
         tval = np.concatenate(tval_list, axis=0)
-        # cmap = matplotlib.pyplot.get_cmap('Spectral')
+
         if minval is None:
             minval = np.min(tval)
         if maxval is None:
