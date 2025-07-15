@@ -89,11 +89,25 @@ class Erosion:
         self.bl_processor = BankLinesProcessor(self.river_data)
         self.debugger = Debugger(config_file.crs, self.river_data.output_dir)
         self.erosion_calculator = ErosionCalculator()
+        self._results = None
 
     @property
     def config_file(self) -> ConfigFile:
         """Configuration file object."""
         return self._config_file
+
+    @property
+    def results(self) -> Dict[str, Any]:
+        """dict: Results of the bank line detection analysis.
+
+        Returns:
+        """
+        return self._results
+
+    @results.setter
+    def results(self, value: Dict[str, Any]):
+        """Set the results of the bank erosion analysis."""
+        self._results = value
 
     def get_ship_parameters(
         self, num_stations_per_bank: List[int]
@@ -863,10 +877,17 @@ class Erosion:
             )
         )
 
-        self._write_bankline_shapefiles(
-            bankline_new_list, bankline_eq_list, config_file
-        )
-        self._write_volume_outputs(erosion_results, km_mid)
+        self.results = {
+            "river_axis": river_axis,
+            "bank_data": bank_data,
+            "water_level_data": water_level_data,
+            "erosion_results": erosion_results,
+            "erosion_inputs": erosion_inputs,
+            "bankline_new_list": bankline_new_list,
+            "bankline_eq_list": bankline_eq_list,
+            "xy_line_eq_list": xy_line_eq_list,
+            "km_mid": km_mid,
+        }
 
         # create various plots
         erosion_plotter = ErosionPlotter(
