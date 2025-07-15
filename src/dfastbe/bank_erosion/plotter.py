@@ -173,7 +173,7 @@ class ErosionPlotter(BasePlot):
         plot = self._plot_base_water_level(
             ax, river_center_line_arr, simulation_data, scale
         )
-        cbar = fig.colorbar(
+        fig.colorbar(
             plot, ax=ax, shrink=0.5, drawedges=False, label="water depth [m]"
         )
         self.set_bbox(ax, bbox)
@@ -198,16 +198,16 @@ class ErosionPlotter(BasePlot):
         self.set_size(fig)
         ax.set_aspect(1)
 
-        # plot_mesh(ax, xe, ye, scale=scale)
+
         self.stations_marker(river_center_line_arr, ax, float_format=0, scale=scale)
-        dnav_max = self.erosion_results.avg_erosion_rate.max()
+        avg_erosion_rate_max = self.erosion_results.avg_erosion_rate.max()
 
         p = self._create_patches(
             ax,
             self.bank_data.bank_line_coords,
             self.erosion_results.total_erosion_dist,
             self.bank_data.is_right_bank,
-            dnav_max,
+            avg_erosion_rate_max,
             xy_line_eq_list,
             scale,
         )
@@ -520,7 +520,7 @@ class ErosionPlotter(BasePlot):
         maximum_water_depth = 1.1 * self.water_level_data.hfw_max
         return self.mesh_patches(ax, simulation_data, 0, maximum_water_depth)
 
-    def _create_patches(self, ax, bank_crds, dn_tot, to_right, dnav_max, xy_eq, scale):
+    def _create_patches(self, ax, bank_coords, total_erosion_dist, is_right_bank, avg_erosion_rate_max, xy_eq, scale):
         for i, xy_eq_part in enumerate(xy_eq):
             ax.plot(
                 xy_eq_part[:, 0] / scale,
@@ -528,17 +528,17 @@ class ErosionPlotter(BasePlot):
                 linewidth=1,
                 color="k",
             )
-            if to_right[i]:
-                bankc = bank_crds[i]
-                dnc = dn_tot[i]
+            if is_right_bank[i]:
+                bankc = bank_coords[i]
+                dnc = total_erosion_dist[i]
             else:
-                bankc = bank_crds[i][::-1]
-                dnc = dn_tot[i][::-1]
+                bankc = bank_coords[i][::-1]
+                dnc = total_erosion_dist[i][::-1]
             nbp = len(bankc)
 
             dxy = bankc[1:] - bankc[:-1]
             ds = np.sqrt((dxy**2).sum(axis=1))
-            dxy = dxy * (dn_tot[i] / ds).reshape((nbp - 1, 1))
+            dxy = dxy * (total_erosion_dist[i] / ds).reshape((nbp - 1, 1))
 
             x = np.zeros(((nbp - 1) * 4,))
             x[0::4] = bankc[:-1, 0]
@@ -576,7 +576,7 @@ class ErosionPlotter(BasePlot):
                 linewidth=0.5,
                 cmap=cmap,
                 vmin=0,
-                vmax=2 * dnav_max,
+                vmax=2 * avg_erosion_rate_max,
             )
         return p
 
