@@ -640,11 +640,6 @@ class TestErosion:
                 mock_bank_data, mock_fairway_data, mock_simulation_data
             )
 
-        np.savetxt(
-            "c:/checkouts/temp.txt",
-            mock_fairway_data.fairway_initial_water_levels,
-            delimiter=",",
-        )
         assert np.allclose(
             mock_fairway_data.fairway_initial_water_levels,
             np.array(
