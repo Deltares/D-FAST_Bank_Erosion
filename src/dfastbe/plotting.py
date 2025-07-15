@@ -173,7 +173,7 @@ class BasePlot:
                 linewidth=0.25,
             )
 
-    def plot_mesh_patches(
+    def mesh_patches(
         self,
         ax: Axes,
         simulation_data: BaseSimulationData,

@@ -56,7 +56,6 @@ from dfastbe.bank_erosion.utils import BankLinesProcessor, intersect_line_mesh
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.logger import log_text
 from dfastbe.io.data_models import LineGeometry
-from dfastbe.utils import get_zoom_extends
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.bank_erosion.utils import (
     get_km_bins,
@@ -198,7 +197,6 @@ class Erosion:
             river_axis_km = river_axis_km[i2 : i1 + 1][::-1]
             river_axis_numpy = river_axis_numpy[i2 : i1 + 1][::-1]
 
-        # river_axis = LineString(river_axis_numpy)
         river_axis = LineGeometry(river_axis_numpy, crs=self.config_file.crs)
         river_axis.add_data(data={"stations": river_axis_km})
         return river_axis
@@ -889,26 +887,39 @@ class Erosion:
             "km_mid": km_mid,
         }
 
-        # create various plots
-        erosion_plotter = ErosionPlotter(
-            self.gui,
-            self.river_data.plot_flags,
-            erosion_results,
-            bank_data,
-            water_level_data,
-            erosion_inputs,
-        )
-        erosion_plotter.plot_all(
-            river_axis.data["stations"],
-            xy_line_eq_list,
-            km_mid,
-            self.river_data.output_intervals,
-            self.river_center_line_arr,
-            self.simulation_data,
-        )
         log_text("end_bankerosion")
         timed_logger("-- end analysis --")
 
+    def plot(self):
+        # create various plots
+        if self.river_data.plot_flags["plot_data"]:
+            plotter = ErosionPlotter(
+                self.gui,
+                self.river_data.plot_flags,
+                self.results["erosion_results"],
+                self.results["bank_data"],
+                self.results["water_level_data"],
+                self.results["erosion_inputs"],
+            )
+            plotter.plot_all(
+                self.results["river_axis"].data["stations"],
+                self.results["xy_line_eq_list"],
+                self.results["km_mid"],
+                self.river_data.output_intervals,
+                self.river_center_line_arr,
+                self.simulation_data,
+            )
+
+    def save(self):
+        self._write_bankline_shapefiles(
+            self.results["bankline_new_list"],
+            self.results["bankline_eq_list"],
+            self.config_file
+        )
+        self._write_volume_outputs(
+            self.results["erosion_results"],
+            self.results["km_mid"]
+        )
     def _write_bankline_shapefiles(
         self, bankline_new_list, bankline_eq_list, config_file: ConfigFile
     ):

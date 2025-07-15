@@ -189,7 +189,7 @@ class BankLinesPlotter(BasePlot):
         scale = 1  # using scale 1 here because of the geopandas plot commands
         maximum_water_depth = 1.1 * self.simulation_data.water_depth_face.max()
         self.stations_marker(self.river_center_line.as_array(), ax, float_format=0, scale=scale)
-        patches = self.plot_mesh_patches(
+        patches = self.mesh_patches(
             ax, self.simulation_data, 0, maximum_water_depth, scale=scale
         )
         for ind, bank_area in enumerate(bank_areas):
