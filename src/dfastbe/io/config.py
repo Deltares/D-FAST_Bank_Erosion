@@ -28,8 +28,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
 from configparser import ConfigParser
 from configparser import Error as ConfigparserError
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -38,10 +39,24 @@ from dfastio.xyc.models import XYCModel
 from geopandas.geodataframe import GeoDataFrame
 from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
+
 from dfastbe.io.file_utils import absolute_path, relative_path
 from dfastbe.io.logger import log_text
 
 __all__ = ["ConfigFile", "ConfigFileError", "SimulationFilesError"]
+
+
+@dataclass
+class PlottingFlags:
+    """Class to hold plotting flags for the erosion simulation."""
+
+    plot_data: bool
+    save_plot: bool
+    save_plot_zoomed: bool
+    zoom_km_step: float
+    close_plot: bool
+    fig_dir: Optional[str] = None
+    plot_extension: str = ".png"
 
 
 class ConfigFile:
@@ -1076,16 +1091,17 @@ class ConfigFile:
             except ValueError:
                 self.config[group][key] = relative_path(rootdir, val_str)
 
-    def get_plotting_flags(self, root_dir: Path | str) -> Dict[str, bool]:
+    def get_plotting_flags(self, root_dir: Path | str) -> PlottingFlags:
         """Get the plotting flags from the configuration file.
 
         Returns:
-            data (Dict[str, bool]):
-                Dictionary containing the plotting flags.
+            PlottingFlags:
                 save_plot (bool): Flag indicating whether to save the plot.
                 save_plot_zoomed (bool): Flag indicating whether to save the zoomed plot.
                 zoom_km_step (float): Step size for zooming in on the plot.
                 close_plot (bool): Flag indicating whether to close the plot.
+                fig_dir (str): Directory where the figures will be saved.
+                plot_ext (str): File extension for the saved figures.
         """
         plot_data = self.get_bool("General", "Plotting", True)
 
@@ -1120,10 +1136,10 @@ class ConfigFile:
             plot_ext = self.get_str("General", "FigureExt", ".png")
             data = data | {
                 "fig_dir": fig_dir,
-                "plot_ext": plot_ext,
+                "plot_extension": plot_ext,
             }
 
-        return data
+        return PlottingFlags(**data)
 
     def get_output_dir(self, option: str) -> Path:
         """Get the output directory for the analysis.
