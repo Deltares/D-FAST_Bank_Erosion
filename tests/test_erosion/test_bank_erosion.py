@@ -635,7 +635,7 @@ class TestErosion:
         """
         mock_erosion._config_file = mock_config_file
 
-        with patch("dfastbe.io.data_models.GeoDataFrame"):
+        with patch("dfastbe.io.data_models.LineGeometry.to_file"):
             mock_erosion.calculate_fairway_bank_line_distance(
                 mock_bank_data, mock_fairway_data, mock_simulation_data
             )
@@ -1028,7 +1028,7 @@ class TestErosion:
             "dfastbe.bank_erosion.bank_erosion.Erosion._process_river_axis_by_center_line",
             return_value=center_line_mock,
         ) as mock_process_river_axis_by_center_line, patch(
-            "dfastbe.io.data_models.GeoDataFrame"
+            "dfastbe.io.data_models.LineGeometry.to_file",
         ), patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters",
             return_value=shipping_data,
