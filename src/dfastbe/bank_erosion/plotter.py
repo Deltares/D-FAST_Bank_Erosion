@@ -624,7 +624,7 @@ class ErosionPlotter(BasePlot):
         """
         Add a stacked plot of bank erosion with total eroded volume subdivided per discharge level to the selected axes.
         """
-        labels = [qlabel.format(iq=iq + 1) for iq in range(len(erosion_volume))]
+        labels = [qlabel.format(iq=ind + 1) for ind,_ in enumerate(erosion_volume)]
         colors = self.get_colors("Blues", len(erosion_volume) + 1)[1:]
         self._plot_stacked_bars(
             ax,
@@ -649,7 +649,7 @@ class ErosionPlotter(BasePlot):
         """
         Add a stacked plot of bank erosion with total eroded volume subdivided per bank to the selected axes.
         """
-        labels = [banklabel.format(ib=ib + 1) for ib in range(len(erosion_volume[0]))]
+        labels = [banklabel.format(ib=ind + 1) for ind, _ in enumerate(erosion_volume[0])]
         colors = self.get_colors("plasma", len(erosion_volume[0]) + 1)[:-1]
         self._plot_stacked_bars(
             ax,
