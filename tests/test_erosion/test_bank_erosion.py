@@ -362,7 +362,7 @@ class TestErosion:
                 - (60,89) entries are the left bank squares.
         """
         nodes = np.loadtxt(
-            "./tests/data/input/meuse_cropped_data/erosion_simulation_data/grid_nodes.txt",
+            "tests/data/input/meuse_cropped_data/erosion_simulation_data/grid_nodes.txt",
             dtype=int,
             comments="#",
             delimiter=",",
@@ -390,7 +390,7 @@ class TestErosion:
                     containing (x,y) coordinates.
         """
         data = np.loadtxt(
-            "./tests/data/input/meuse_cropped_data/bank_data/line_points.txt",
+            "tests/data/input/meuse_cropped_data/bank_data/line_points.txt",
             comments="#",
             delimiter=",",
         )
@@ -414,7 +414,7 @@ class TestErosion:
                 - chezy_face: fifth row.
         """
         return np.loadtxt(
-            "./tests/data/input/meuse_cropped_data/erosion_simulation_data/grid_node_values.txt",
+            "tests/data/input/meuse_cropped_data/erosion_simulation_data/grid_node_values.txt",
             comments="#",
             delimiter=",",
         )
@@ -432,7 +432,7 @@ class TestErosion:
                 - bed_elevation: Array of bed elevation values.
         """
         data = np.loadtxt(
-            "./tests/data/input/meuse_cropped_data/erosion_simulation_data/grid_coordinates.txt",
+            "tests/data/input/meuse_cropped_data/erosion_simulation_data/grid_coordinates.txt",
             comments="#",
             delimiter=",",
         )
