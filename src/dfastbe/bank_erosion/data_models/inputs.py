@@ -1,13 +1,16 @@
 import os
-import numpy as np
 from pathlib import Path
-from shapely.geometry import LineString
+
+import numpy as np
 from dfastio.xyc.models import XYCModel
+from shapely.geometry import LineString
+
+from dfastbe.bank_erosion.data_models.calculation import MeshData, SingleBank
+from dfastbe.io.config import ConfigFile
 from dfastbe.io.data_models import BaseRiverData, BaseSimulationData
 from dfastbe.io.logger import log_text
-from dfastbe.io.config import ConfigFile
-from dfastbe.bank_erosion.data_models.calculation import MeshData, SingleBank
 
+__all__ = ["ErosionSimulationData", "ErosionRiverData", "BankLinesResultsError"]
 
 class ErosionSimulationData(BaseSimulationData):
 

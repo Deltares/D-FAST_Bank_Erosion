@@ -21,6 +21,22 @@ from shapely.geometry import Point
 
 GenericType = TypeVar("GenericType")
 
+__all__ = [
+    "BaseBank",
+    "SingleErosion",
+    "ErosionInputs",
+    "WaterLevelData",
+    "MeshData",
+    "SingleBank",
+    "BankData",
+    "FairwayData",
+    "ErosionResults",
+    "SingleParameters",
+    "SingleLevelParameters",
+    "SingleCalculation",
+    "SingleDischargeLevel",
+    "DischargeLevels",
+]
 
 @dataclass
 class BaseBank(Generic[GenericType]):
