@@ -712,6 +712,7 @@ class TestErosion:
             ),
         )
 
+    @pytest.mark.unit
     def test_process_discharge_levels(self, mock_erosion: Erosion, mock_debug):
         """Test the _process_discharge_levels method.
 
