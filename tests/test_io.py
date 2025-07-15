@@ -6,19 +6,23 @@ from contextlib import contextmanager
 from io import StringIO
 from pathlib import Path
 from typing import Dict, Tuple
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 from geopandas import GeoDataFrame
 from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry import LineString
-from dfastbe.io.data_models import LineGeometry, BaseSimulationData, BaseRiverData, _read_fm_map
+
+from dfastbe.io.config import ConfigFile, SimulationFilesError
+from dfastbe.io.data_models import (
+    BaseRiverData,
+    BaseSimulationData,
+    LineGeometry,
+    _read_fm_map,
+)
 from dfastbe.io.file_utils import absolute_path, relative_path
 from dfastbe.io.logger import get_text, load_program_texts, log_text
-from dfastbe.io.config import SimulationFilesError, ConfigFile
-
-
 
 filename = "tests/data/files/e02_f001_c011_simplechannel_map.nc"
 
@@ -750,13 +754,13 @@ class TestConfigFile:
         root_dir = Path("tests/data/erosion").resolve()
         plotting_flags = config_file.get_plotting_flags(str(root_dir))
 
-        assert plotting_flags["plot_data"] is True
-        assert plotting_flags["save_plot"] is True
-        assert plotting_flags["save_plot_zoomed"] is False
-        assert plotting_flags["zoom_km_step"] == 0.5
-        assert plotting_flags["close_plot"] is False
-        assert plotting_flags["fig_dir"] == str(root_dir / "output/figures")
-        assert plotting_flags["plot_ext"] == ".png"
+        assert plotting_flags.plot_data is True
+        assert plotting_flags.save_plot is True
+        assert plotting_flags.save_plot_zoomed is False
+        assert plotting_flags.zoom_km_step == 0.5
+        assert plotting_flags.close_plot is False
+        assert plotting_flags.fig_dir == str(root_dir / "output/figures")
+        assert plotting_flags.plot_extension == ".png"
 
 
 class TestConfigFileE2E:
