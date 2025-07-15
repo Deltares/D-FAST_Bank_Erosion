@@ -518,7 +518,7 @@ class ErosionPlotter(BasePlot):
             ax.plot(bp[:, 0] / scale, bp[:, 1] / scale, color="k")
 
         maximum_water_depth = 1.1 * self.water_level_data.hfw_max
-        return self.plot_mesh_patches(ax, simulation_data, 0, maximum_water_depth)
+        return self.mesh_patches(ax, simulation_data, 0, maximum_water_depth)
 
     def _create_patches(self, ax, bank_crds, dn_tot, to_right, dnav_max, xy_eq, scale):
         for i, xy_eq_part in enumerate(xy_eq):
