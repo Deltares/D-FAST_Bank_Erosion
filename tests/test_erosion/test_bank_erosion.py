@@ -209,10 +209,13 @@ class TestErosion:
         )
         config_file = MagicMock(spec=ConfigFile)
         config_file.get_parameter.side_effect = [
-            [np.array([150.0, 150.0, 150.0]), np.array([150.0, 150.0, 150.0])],
-            [np.array([110.0, 110.0, 110.0]), np.array([110.0, 110.0, 110.0])],
-            [np.array([1.0, 1.0, 1.0]), np.array([0.18, 0.18, 0.18])],
-            [np.array([-13.0, -13.0, -13.0]), np.array([-13.0, -13.0, -13.0])],
+            [np.array([150.0, 150.0, 150.0]), np.array([150.0, 150.0, 150.0])],  # Wave0
+            [np.array([110.0, 110.0, 110.0]), np.array([110.0, 110.0, 110.0])],  # Wave1
+            [np.array([1.0, 1.0, 1.0]), np.array([0.18, 0.18, 0.18])],  # BankType
+            [
+                np.array([-13.0, -13.0, -13.0]),
+                np.array([-13.0, -13.0, -13.0]),
+            ],  # ProtectionLevel
         ]
 
         config_file.get_bool.return_value = False
@@ -594,7 +597,7 @@ class TestErosion:
 
         with patch("dfastbe.io.data_models.GeoDataFrame"):
             mock_erosion.calculate_fairway_bank_line_distance(
-                mock_bank_data, mock_fairway_data, mock_simulation_daSta
+                mock_bank_data, mock_fairway_data, mock_simulation_data
             )
 
         assert np.allclose(
@@ -805,7 +808,7 @@ class TestErosion:
                 shipping_data["parreed0"],
             ]
             discharge_parameters = mock_erosion._read_discharge_parameters(
-                1, shipping_data, 13
+                1, shipping_data, [13]
             )
         assert isinstance(discharge_parameters, SingleLevelParameters)
         assert discharge_parameters.id == 1
@@ -895,7 +898,10 @@ class TestErosion:
     ):
         """Test the run method.
 
-        This method runs the bank erosion simulation and generates output files.
+        This test simulates running the bank erosion workflow and verifies,
+        that output files are generated as expected. Input data and dependencies are mocked
+        to isolate the behavior of the Erosion class, avoiding execution
+        of the original __init__ method and file I/O.
 
         Args:
             mock_erosion (Erosion):
@@ -936,6 +942,7 @@ class TestErosion:
                 A mocked function to simulate generating plots.
 
         Asserts:
+            - All mocked methods are called as expected.
             The run method processes the bank erosion simulation correctly.
             The output files are generated with the expected content.
         """
@@ -944,12 +951,13 @@ class TestErosion:
         mock_erosion.bl_processor.intersect_with_mesh.return_value = mock_bank_data
         mock_erosion.simulation_data = mock_simulation_data
         mock_erosion.config_file.get_parameter.side_effect = [
-            [np.array([150.0] * 29), np.array([150.0] * 29)],
-            [np.array([110.0] * 29), np.array([110.0] * 29)],
-            [np.array([1.0] * 29), np.array([0.18] * 29)],
-            [np.array([-13.0] * 29), np.array([-13.0] * 29)],
+            [np.array([150.0] * 29), np.array([150.0] * 29)],  # wave0
+            [np.array([110.0] * 29), np.array([110.0] * 29)],  # wave1
+            [np.array([1.0] * 29), np.array([0.18] * 29)],  # BankType
+            [np.array([-13.0] * 29), np.array([-13.0] * 29)],  # ProtectionLevel
         ]
-        mock_erosion.config_file.get_bool.return_value = False
+        mock_erosion.config_file.get_bool.return_value = False  # Classes
+        # write km output filenames
         mock_erosion.config_file.get_str.side_effect = [
             "erovolQ1.evo",
             "erovolQ2.evo",
@@ -974,27 +982,37 @@ class TestErosion:
         with patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion._get_fairway_data",
             return_value=mock_fairway_data,
-        ), patch("dfastbe.bank_erosion.bank_erosion.get_km_bins", mock_km_mid), patch(
+        ) as mock_get_fairway_data, patch(
+            "dfastbe.bank_erosion.bank_erosion.get_km_bins", mock_km_mid
+        ) as mock_get_km_bins, patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion._process_river_axis_by_center_line",
             return_value=center_line_mock,
-        ), patch(
+        ) as mock_process_river_axis_by_center_line, patch(
             "dfastbe.io.data_models.GeoDataFrame"
         ), patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters",
             return_value=shipping_data,
-        ), patch(
+        ) as mock_get_ship_parameters, patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion._read_discharge_parameters",
             return_value=mock_single_level_parameters,
-        ), patch(
+        ) as mock_read_discharge_parameters, patch(
             "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.read",
             return_value=mock_simulation_data,
-        ), patch(
+        ) as mock_read_simulation_data, patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion._write_bankline_shapefiles"
-        ), patch(
+        ) as mock_write_bankline_shapefiles, patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion._generate_plots"
-        ):
+        ) as mock_generate_plots:
             mock_erosion.run()
 
+        mock_get_fairway_data.assert_called_once()
+        mock_get_km_bins.assert_called_once()
+        mock_process_river_axis_by_center_line.assert_called_once()
+        mock_get_ship_parameters.assert_called_once()
+        mock_read_discharge_parameters.assert_called()
+        mock_read_simulation_data.assert_called()
+        mock_write_bankline_shapefiles.assert_called_once()
+        mock_generate_plots.assert_called_once()
         with open(mock_erosion.river_data.output_dir / "erovolQ3.evo", "r") as file:
             content = file.read()
             assert "123.0" in content
