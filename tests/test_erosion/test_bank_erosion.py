@@ -1042,7 +1042,9 @@ class TestErosion:
             "dfastbe.bank_erosion.bank_erosion.Erosion._write_bankline_shapefiles"
         ) as mock_write_bankline_shapefiles, patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion._generate_plots"
-        ) as mock_generate_plots:
+        ) as mock_generate_plots, patch(
+            "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.compute_mesh_topology"
+        ) as mock_compute_mesh_topology:
             mock_erosion.run()
 
         mock_get_fairway_data.assert_called_once()
@@ -1053,6 +1055,7 @@ class TestErosion:
         mock_read_simulation_data.assert_called()
         mock_write_bankline_shapefiles.assert_called_once()
         mock_generate_plots.assert_called_once()
+        mock_compute_mesh_topology.assert_called_once()
         with open(mock_erosion.river_data.output_dir / "erovolQ3.evo", "r") as file:
             content = file.read()
             assert "123.0" in content
