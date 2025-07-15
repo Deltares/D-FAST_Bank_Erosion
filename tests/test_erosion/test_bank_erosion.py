@@ -127,6 +127,7 @@ class TestErosion:
         with patch.object(dfastbe.io.logger, "PROGTEXTS", {}, create=True):
             yield
 
+    @pytest.mark.unit
     def test_get_ship_parameters(self, mock_erosion: Erosion, mock_config_file):
         """Test the get_ship_parameters method.
 
@@ -355,18 +356,18 @@ class TestErosion:
         First 30 entries are fairway squares, second 30 is the right bank, third 30 is the left bank.
 
         Returns:
-            tuple: A tuple containing three numpy masked arrays:
-                - nodes: Masked array of node indices.
-                    - (0,29) entries are fairway squares,
-                    - (30,59) entries are the right bank,
-                    - (60,89) entries are the left bank.
-                - x_coords: Masked array of x coordinates.
-                - y_coords: Masked array of y coordinates.
+            - np.ma.array: Masked array of node indices.
+                - (0,29) entries are fairway squares,
+                - (30,59) entries are the right bank squares,
+                - (60,89) entries are the left bank squares.
         """
-        nodes = np.loadtxt("./tests/data/input/nodes.txt", dtype=int, delimiter=",")
-        x_coords = np.loadtxt("./tests/data/input/x_coords.txt")
-        y_coords = np.loadtxt("./tests/data/input/y_coords.txt")
-        return np.ma.array(nodes), np.ma.array(x_coords), np.ma.array(y_coords)
+        nodes = np.loadtxt(
+            "./tests/data/input/meuse_cropped_data/erosion_simulation_data/grid_nodes.txt",
+            dtype=int,
+            comments="#",
+            delimiter=",",
+        )
+        return np.ma.array(nodes)
 
     @pytest.fixture
     def read_line_data(self):
@@ -377,12 +378,26 @@ class TestErosion:
         and the third 30 entries are the left bank.
 
         Returns:
-            np.ndarray: A numpy array of points read from the file.
-                - (0,29) entries are fairway squares,
-                - (30,59) entries are the right bank,
-                - (60,89) entries are the left bank.
+            Tuple[np.ndarray, np.ndarray, np.ndarray]:
+                - fairway_points:
+                    Fairway line data corresponds to the first 2 columns (0, 1),
+                    containing (x,y) coordinates.
+                - left_bank:
+                    Left bank data corresponds to the second 2 columns (2, 3) (x,y),
+                    containing (x,y) coordinates.
+                - right_bank:
+                    Right bank data corresponds to the third 2 columns (4, 5) (x,y),
+                    containing (x,y) coordinates.
         """
-        return np.loadtxt("./tests/data/input/points.txt", delimiter=",")
+        data = np.loadtxt(
+            "./tests/data/input/meuse_cropped_data/bank_data/line_points.txt",
+            comments="#",
+            delimiter=",",
+        )
+        fairway_points = np.array([(entry[0], entry[1]) for entry in data])
+        left_bank = np.array([(entry[1], entry[2]) for entry in data])
+        right_bank = np.array([(entry[2], entry[3]) for entry in data])
+        return fairway_points, left_bank, right_bank
 
     @pytest.fixture
     def read_face_values(self):
@@ -392,24 +407,36 @@ class TestErosion:
 
         Returns:
             np.ndarray: A multidemensional numpy array of values for each face read from a file.
-                - The first dimension corresponds to velocity_x_face,
-                - The second dimension corresponds to velocity_y_face,
-                - The third dimension corresponds to water_depth_face,
-                - The fourth dimension corresponds to water_level_face,
-                - The fifth dimension corresponds to chezy_face.
+                - velocity_x_face: first row,
+                - velocity_y_face: second row,
+                - water_depth_face: third row,
+                - water_level_face: fourth row,
+                - chezy_face: fifth row.
         """
-        return np.loadtxt("./tests/data/input/face_values.txt", delimiter=",")
+        return np.loadtxt(
+            "./tests/data/input/meuse_cropped_data/erosion_simulation_data/grid_node_values.txt",
+            comments="#",
+            delimiter=",",
+        )
 
     @pytest.fixture
     def read_coord_values(self):
         """Fixture to read coordinate values from a text file.
 
-        These values are coupled to the coordinates in the grid data.
+        These are coordinate values for each point in the grid a (x, y) with bed_elevation as z.
 
         Returns:
-            np.ndarray: A numpy array of bed_elevation_values for each coordinate read from a file.
+            Tuple[np.ma.array, np.ma.array, np.array]: A tuple containing:
+                - x_coords: Masked array of x coordinates.
+                - y_coords: Masked array of y coordinates.
+                - bed_elevation: Array of bed elevation values.
         """
-        return np.loadtxt("./tests/data/input/coord_values.txt", delimiter=",")
+        data = np.loadtxt(
+            "./tests/data/input/meuse_cropped_data/erosion_simulation_data/grid_coordinates.txt",
+            comments="#",
+            delimiter=",",
+        )
+        return np.ma.array(data[0]), np.ma.array(data[1]), np.array(data[2])
 
     @pytest.fixture
     def mock_bank_data(self, read_line_data):
@@ -424,10 +451,9 @@ class TestErosion:
         Returns:
             BankData: A BankData instance containing the left and right banks.
         """
-        points = read_line_data
         mock_left_bank = SingleBank(
             is_right_bank=False,
-            bank_line_coords=points[30:60],
+            bank_line_coords=read_line_data[1],
             bank_face_indices=np.arange(30, 59),
             bank_chainage_midpoints=np.array([123.00166634401488] * 29),
             fairway_face_indices=np.arange(0, 29),
@@ -435,7 +461,7 @@ class TestErosion:
 
         mock_right_bank = SingleBank(
             is_right_bank=True,
-            bank_line_coords=points[60:90],
+            bank_line_coords=read_line_data[2],
             bank_face_indices=np.arange(60, 89),
             bank_chainage_midpoints=np.array([123.00943873095339] * 29),
             fairway_face_indices=np.arange(0, 29),
@@ -460,7 +486,7 @@ class TestErosion:
         """
         points = read_line_data
         mock_fairway_data = FairwayData(
-            intersection_coords=points[:30],
+            intersection_coords=points[0],
             fairway_face_indices=np.arange(0, 29),
         )
         return mock_fairway_data
@@ -555,20 +581,19 @@ class TestErosion:
                 - x_node: x_coords
                 - y_node: y_coords
         """
-        nodes, x_coords, y_coords = read_grid_data
         return ErosionSimulationData(
             bed_elevation_location="node",
-            bed_elevation_values=np.ma.array(read_coord_values),
+            bed_elevation_values=np.ma.array(read_coord_values[2]),
             chezy_face=np.ma.array(read_face_values[4]),
             dry_wet_threshold=0.1,
-            face_node=nodes,
+            face_node=read_grid_data,
             n_nodes=np.array([4] * 90),
             velocity_x_face=np.ma.array(read_face_values[0]),
             velocity_y_face=np.ma.array(read_face_values[1]),
             water_depth_face=np.ma.array(read_face_values[2]),
             water_level_face=np.ma.array(read_face_values[3]),
-            x_node=x_coords,
-            y_node=y_coords,
+            x_node=read_coord_values[0],
+            y_node=read_coord_values[1],
         )
 
     def test_calculate_fairway_bank_line_distance(
@@ -615,11 +640,47 @@ class TestErosion:
                 mock_bank_data, mock_fairway_data, mock_simulation_data
             )
 
+        np.savetxt(
+            "c:/checkouts/temp.txt",
+            mock_fairway_data.fairway_initial_water_levels,
+            delimiter=",",
+        )
         assert np.allclose(
             mock_fairway_data.fairway_initial_water_levels,
             np.array(
                 [
                     [
+                        [
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                            1.152048969268798828e01,
+                        ],
                         [
                             1.152041339874267578e01,
                             1.152041339874267578e01,
@@ -648,37 +709,6 @@ class TestErosion:
                             1.151172065734863281e01,
                             1.151096057891845703e01,
                             1.151048469543457031e01,
-                            1.151048469543457031e01,
-                            1.151048469543457031e01,
-                        ],
-                        [
-                            1.152022457122802734e01,
-                            1.152041339874267578e01,
-                            1.152041339874267578e01,
-                            1.151991367340087891e01,
-                            1.151934814453125000e01,
-                            1.151847076416015625e01,
-                            1.151847076416015625e01,
-                            1.151850986480712891e01,
-                            1.151728820800781250e01,
-                            1.151728820800781250e01,
-                            1.151696395874023438e01,
-                            1.151589488983154297e01,
-                            1.151641559600830078e01,
-                            1.151629066467285156e01,
-                            1.151542472839355469e01,
-                            1.151440048217773438e01,
-                            1.151440048217773438e01,
-                            1.151371192932128906e01,
-                            1.151322746276855469e01,
-                            1.151289367675781250e01,
-                            1.151289367675781250e01,
-                            1.151273822784423828e01,
-                            1.151253795623779297e01,
-                            1.151253795623779297e01,
-                            1.151172065734863281e01,
-                            1.151096057891845703e01,
-                            1.151096057891845703e01,
                             1.151048469543457031e01,
                             1.151048469543457031e01,
                         ],
