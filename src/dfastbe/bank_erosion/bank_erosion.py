@@ -379,17 +379,17 @@ class Erosion:
                 bank_type[ib] = bt
 
         # read bank protection level dike_height
-        zss_miss = -1000
+        dike_height_default = -1000
         dike_height = self.config_file.get_parameter(
             "Erosion",
             "ProtectionLevel",
             num_stations_per_bank,
-            default=zss_miss,
+            default=dike_height_default,
             ext=".bpl",
         )
         # if dike_height undefined, set dike_height equal to water_level_fairway_ref - 1
         for ib, one_zss in enumerate(dike_height):
-            mask = one_zss == zss_miss
+            mask = one_zss == dike_height_default
             one_zss[mask] = fairway_data.fairway_initial_water_levels[ib][mask] - 1
 
         data = dict(
