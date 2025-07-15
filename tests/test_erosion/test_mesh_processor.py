@@ -1,8 +1,7 @@
-from unittest.mock import MagicMock
-
 import numpy as np
 import pytest
 
+from dfastbe.bank_erosion.data_models.calculation import MeshData
 from dfastbe.bank_erosion.mesh_processor import (
     _get_slices,
     _get_slices_core,
@@ -15,113 +14,128 @@ from dfastbe.bank_erosion.mesh_processor import (
 class TestMeshProcessor:
 
     @pytest.fixture
-    def mesh_data(self) -> MagicMock:
-        """Fixture to provide a mock mesh data object."""
-        mesh_data = MagicMock()
-        mesh_data.x_face_coords = np.array(
-            [
-                [209253.125, 209252.734375, 209271.921875, 209273.3125],
-                [209252.734375, 209253.046875, 209271.3125, 209271.921875],
-                [209271.921875, 209271.3125, 209290.453125, 209292.125],
-                [209271.3125, 209271.40625, 209289.546875, 209290.453125],
-            ]
+    def mesh_data(self) -> MeshData:
+        """Fixture to provide a mock mesh data object.
+
+        Returns:
+            MeshData:
+                - x_face_coords: X coordinates of the mesh faces.
+                - y_face_coords: Y coordinates of the mesh faces.
+                - face_node: Node connectivity for each face.
+                - n_nodes: Number of nodes per face.
+                - x_edge_coords: X coordinates of the mesh edges.
+                - y_edge_coords: Y coordinates of the mesh edges.
+                - edge_node: Node connectivity for each edge.
+                - edge_face_connectivity: Connectivity between edges and faces.
+                - face_edge_connectivity: Connectivity between faces and edges.
+                - boundary_edge_nrs: Boundary edge numbers.
+        """
+        mesh_data = MeshData(
+            x_face_coords=np.array(
+                [
+                    [209253.125, 209252.734375, 209271.921875, 209273.3125],
+                    [209252.734375, 209253.046875, 209271.3125, 209271.921875],
+                    [209271.921875, 209271.3125, 209290.453125, 209292.125],
+                    [209271.3125, 209271.40625, 209289.546875, 209290.453125],
+                ]
+            ),
+            y_face_coords=np.array(
+                [
+                    [389624.40625, 389663.96875, 389664.25, 389625.09375],
+                    [389663.96875, 389704.0, 389703.96875, 389664.25],
+                    [389664.25, 389703.96875, 389704.34375, 389665.0625],
+                    [389703.96875, 389744.0625, 389744.09375, 389704.34375],
+                ]
+            ),
+            face_node=np.array(
+                [[2, 0, 5, 6], [0, 1, 3, 5], [5, 3, 8, 9], [3, 4, 7, 8]]
+            ),
+            n_nodes=np.array([4] * 4),
+            x_edge_coords=np.array(
+                [
+                    [209253.125, 209273.3125],
+                    [209253.125, 209252.734375],
+                    [209252.734375, 209271.921875],
+                    [209273.3125, 209271.921875],
+                    [209252.734375, 209271.921875],
+                    [209252.734375, 209253.046875],
+                    [209253.046875, 209271.3125],
+                    [209271.921875, 209271.3125],
+                    [209271.921875, 209292.125],
+                    [209271.921875, 209271.3125],
+                    [209271.3125, 209290.453125],
+                    [209292.125, 209290.453125],
+                    [209271.3125, 209290.453125],
+                    [209271.3125, 209271.40625],
+                    [209271.40625, 209289.546875],
+                    [209290.453125, 209289.546875],
+                ]
+            ),
+            y_edge_coords=np.array(
+                [
+                    [389624.40625, 389625.09375],
+                    [389624.40625, 389663.96875],
+                    [389663.96875, 389664.25],
+                    [389625.09375, 389664.25],
+                    [389663.96875, 389664.25],
+                    [389663.96875, 389704.0],
+                    [389704.0, 389703.96875],
+                    [389664.25, 389703.96875],
+                    [389664.25, 389665.0625],
+                    [389664.25, 389703.96875],
+                    [389703.96875, 389704.34375],
+                    [389665.0625, 389704.34375],
+                    [389703.96875, 389704.34375],
+                    [389703.96875, 389744.0625],
+                    [389744.0625, 389744.09375],
+                    [389704.34375, 389744.09375],
+                ]
+            ),
+            edge_node=np.array(
+                [
+                    [2, 6],
+                    [2, 0],
+                    [0, 5],
+                    [6, 5],
+                    [0, 5],
+                    [0, 1],
+                    [1, 3],
+                    [5, 3],
+                    [5, 9],
+                    [5, 3],
+                    [3, 8],
+                    [9, 8],
+                    [3, 8],
+                    [3, 4],
+                    [4, 7],
+                    [8, 7],
+                ]
+            ),
+            edge_face_connectivity=np.array(
+                [
+                    [0, -1],
+                    [0, -1],
+                    [0, 1],
+                    [0, -1],
+                    [-1, -1],
+                    [1, -1],
+                    [1, -1],
+                    [1, 2],
+                    [2, -1],
+                    [-1, -1],
+                    [2, 3],
+                    [2, -1],
+                    [-1, -1],
+                    [3, -1],
+                    [3, -1],
+                    [3, -1],
+                ]
+            ),
+            face_edge_connectivity=np.array(
+                [[1, 2, 3, 0], [5, 6, 7, 2], [7, 10, 11, 8], [13, 14, 15, 10]]
+            ),
+            boundary_edge_nrs=np.arange(16),
         )
-        mesh_data.y_face_coords = np.array(
-            [
-                [389624.40625, 389663.96875, 389664.25, 389625.09375],
-                [389663.96875, 389704.0, 389703.96875, 389664.25],
-                [389664.25, 389703.96875, 389704.34375, 389665.0625],
-                [389703.96875, 389744.0625, 389744.09375, 389704.34375],
-            ]
-        )
-        mesh_data.face_node = np.array(
-            [[2, 0, 5, 6], [0, 1, 3, 5], [5, 3, 8, 9], [3, 4, 7, 8]]
-        )
-        mesh_data.n_nodes = np.array([4] * 4)
-        mesh_data.x_edge_coords = np.array(
-            [
-                [209253.125, 209273.3125],
-                [209253.125, 209252.734375],
-                [209252.734375, 209271.921875],
-                [209273.3125, 209271.921875],
-                [209252.734375, 209271.921875],
-                [209252.734375, 209253.046875],
-                [209253.046875, 209271.3125],
-                [209271.921875, 209271.3125],
-                [209271.921875, 209292.125],
-                [209271.921875, 209271.3125],
-                [209271.3125, 209290.453125],
-                [209292.125, 209290.453125],
-                [209271.3125, 209290.453125],
-                [209271.3125, 209271.40625],
-                [209271.40625, 209289.546875],
-                [209290.453125, 209289.546875],
-            ]
-        )
-        mesh_data.y_edge_coords = np.array(
-            [
-                [389624.40625, 389625.09375],
-                [389624.40625, 389663.96875],
-                [389663.96875, 389664.25],
-                [389625.09375, 389664.25],
-                [389663.96875, 389664.25],
-                [389663.96875, 389704.0],
-                [389704.0, 389703.96875],
-                [389664.25, 389703.96875],
-                [389664.25, 389665.0625],
-                [389664.25, 389703.96875],
-                [389703.96875, 389704.34375],
-                [389665.0625, 389704.34375],
-                [389703.96875, 389704.34375],
-                [389703.96875, 389744.0625],
-                [389744.0625, 389744.09375],
-                [389704.34375, 389744.09375],
-            ]
-        )
-        mesh_data.edge_node = np.array(
-            [
-                [2, 6],
-                [2, 0],
-                [0, 5],
-                [6, 5],
-                [0, 5],
-                [0, 1],
-                [1, 3],
-                [5, 3],
-                [5, 9],
-                [5, 3],
-                [3, 8],
-                [9, 8],
-                [3, 8],
-                [3, 4],
-                [4, 7],
-                [8, 7],
-            ]
-        )
-        mesh_data.edge_face_connectivity = np.array(
-            [
-                [0, -1],
-                [0, -1],
-                [0, 1],
-                [0, -1],
-                [-1, -1],
-                [1, -1],
-                [1, -1],
-                [1, 2],
-                [2, -1],
-                [-1, -1],
-                [2, 3],
-                [2, -1],
-                [-1, -1],
-                [3, -1],
-                [3, -1],
-                [3, -1],
-            ]
-        )
-        mesh_data.face_edge_connectivity = np.array(
-            [[1, 2, 3, 0], [5, 6, 7, 2], [7, 10, 11, 8], [13, 14, 15, 10]]
-        )
-        mesh_data.boundary_edge_nrs = np.arange(16)
         return mesh_data
 
     @pytest.mark.parametrize(
@@ -248,6 +262,17 @@ class TestMeshProcessor:
         ],
     )
     def test_intersect_line_mesh(self, mesh_data, line, expected_coords, expected_idx):
+        """Test the intersection of a line with the mesh data.
+
+        Args:
+            mesh_data (MeshData): The mesh data containing coordinates and connectivity.
+            line (np.ndarray): The line to be tested for intersection.
+            expected_coords (np.ndarray): Expected coordinates of the intersection.
+            expected_idx (list): Expected indices of the intersected elements.
+
+        Asserts:
+            The coordinates and indices of the intersection match the expected values.
+        """
         crds, idx = intersect_line_mesh(line, mesh_data)
         assert np.allclose(crds, expected_coords)
         assert np.array_equal(idx, expected_idx)
@@ -270,11 +295,29 @@ class TestMeshProcessor:
         ids=["Enlarge to (2, 4)", "Enlarge to (4, 2)", "Enlarge to (4,)"],
     )
     def test_enlarge(self, line, shape, expected_enlarged_line):
-        # Test with a line that intersects the mesh
+        """Test the enlargement of a line to a specified shape.
+
+        Args:
+            line (np.ndarray): The line to be enlarged.
+            shape (tuple): The target shape for enlargement.
+            expected_enlarged_line (np.ndarray): Expected enlarged line.
+
+        Asserts:
+            The enlarged line matches the expected enlarged line.
+        """
         enlarged_line = enlarge(line, shape)
         assert np.allclose(enlarged_line, expected_enlarged_line)
 
     def test_get_slices_ab(self):
+        """Test the computation of slices and coefficients for a given mesh.
+
+        This test checks the calculation of coefficients 'a' and 'b' for a specific
+        mesh segment defined by two points (xi0, yi0) and (xi1, yi1).
+
+        Asserts:
+            The computed coefficients 'a' and 'b' match expected values.
+            The computed slices match expected values.
+        """
         X0 = np.ma.array([209171.296875, 209171.296875, 209171.484375, 209188.1875])
         Y0 = np.ma.array([389625.15625, 389625.15625, 389665.5625, 389624.96875])
         X1 = np.ma.array([209188.1875, 209171.484375, 209189.09375, 209189.09375])
@@ -292,6 +335,16 @@ class TestMeshProcessor:
         assert np.array_equal(slices, expected_slices)
 
     def test_get_slices(self, mesh_data):
+        """Test the computation of slices for a given mesh segment.
+
+        This test checks the calculation of slices for a specific mesh segment defined
+        by an index and two boundary points (bpj, bpj1).
+
+        Asserts:
+            The computed slices match expected values.
+            The computed edges match expected values.
+            The computed nodes match expected values.
+        """
         index = 1
         prev_b = 0.0
         bpj = np.array([209266.44709443, 389670.16238121])
@@ -302,6 +355,16 @@ class TestMeshProcessor:
         assert np.array_equal(nodes, np.array([-1]))
 
     def test_get_slices_core(self, mesh_data):
+        """Test the core computation of slices for a given mesh segment.
+
+        This test checks the calculation of slices for a specific mesh segment defined
+        by two boundary points (bpj, bpj1) and a previous boundary value (prev_b).
+
+        Asserts:
+            The computed slices match expected values.
+            The computed edges match expected values.
+            The computed nodes match expected values.
+        """
         edges = np.array([5, 6, 7, 2])
         bpj = np.array([209266.44709443, 389670.16238121])
         bpj1 = np.array([209266.44709443, 389651.16238121])
