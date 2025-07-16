@@ -208,8 +208,7 @@ class TestBankLines:
             mock_config_file,
         )
         bank_lines.save.assert_called_once()
-        if mock_config_file.get_plotting_flags.return_value.plot_data:
-            bank_lines.plot.assert_called_once()
+        bank_lines.plot.assert_called_once()
 
     @pytest.mark.unit
     def test_calculate_water_depth_per_node(self, mock_simulation_data):
