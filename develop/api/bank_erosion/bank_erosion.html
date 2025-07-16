@@ -3391,8 +3391,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/bank_erosion.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  78</span>
-<span class="normal">  79</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  79</span>
 <span class="normal">  80</span>
 <span class="normal">  81</span>
 <span class="normal">  82</span>
@@ -4546,7 +4545,18 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">1230</span>
 <span class="normal">1231</span>
 <span class="normal">1232</span>
-<span class="normal">1233</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Erosion</span><span class="p">:</span>
+<span class="normal">1233</span>
+<span class="normal">1234</span>
+<span class="normal">1235</span>
+<span class="normal">1236</span>
+<span class="normal">1237</span>
+<span class="normal">1238</span>
+<span class="normal">1239</span>
+<span class="normal">1240</span>
+<span class="normal">1241</span>
+<span class="normal">1242</span>
+<span class="normal">1243</span>
+<span class="normal">1244</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Erosion</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to handle the bank erosion calculations.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
@@ -5095,18 +5105,28 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">iq_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">level_i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
 
-        <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;Vship&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;vship0&quot;</span><span class="p">]),</span>
-            <span class="p">(</span><span class="s2">&quot;Nship&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;Nship0&quot;</span><span class="p">]),</span>
-            <span class="p">(</span><span class="s2">&quot;Nwave&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;nwave0&quot;</span><span class="p">]),</span>
-            <span class="p">(</span><span class="s2">&quot;Draught&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;Tship0&quot;</span><span class="p">]),</span>
-            <span class="p">(</span><span class="s2">&quot;ShipType&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;ship0&quot;</span><span class="p">]),</span>
-            <span class="p">(</span><span class="s2">&quot;Slope&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;parslope0&quot;</span><span class="p">]),</span>
-            <span class="p">(</span><span class="s2">&quot;Reed&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;parreed0&quot;</span><span class="p">]),</span>
+        <span class="n">Param</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s2">&quot;Param&quot;</span><span class="p">,</span> <span class="s2">&quot;name default valid onefile positive ext&quot;</span><span class="p">)</span>
+        <span class="n">param_defs</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">Param</span><span class="p">(</span><span class="s2">&quot;Vship&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;vship0&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">Param</span><span class="p">(</span><span class="s2">&quot;Nship&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;Nship0&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">Param</span><span class="p">(</span><span class="s2">&quot;Nwave&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;nwave0&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">Param</span><span class="p">(</span><span class="s2">&quot;Draught&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;Tship0&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">Param</span><span class="p">(</span><span class="s2">&quot;ShipType&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;ship0&quot;</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">Param</span><span class="p">(</span><span class="s2">&quot;Slope&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;parslope0&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;slp&quot;</span><span class="p">),</span>
+            <span class="n">Param</span><span class="p">(</span><span class="s2">&quot;Reed&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;parreed0&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;rdd&quot;</span><span class="p">),</span>
         <span class="p">]</span>
         <span class="n">parameter_values</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_get_param</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">iq_str</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">parameters</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_param</span><span class="p">(</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">param</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+                <span class="n">iq_str</span><span class="p">,</span>
+                <span class="n">num_stations_per_bank</span><span class="p">,</span>
+                <span class="n">valid</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">valid</span><span class="p">,</span>
+                <span class="n">onefile</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">onefile</span><span class="p">,</span>
+                <span class="n">positive</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">positive</span><span class="p">,</span>
+                <span class="n">ext</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">ext</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">param_defs</span>
         <span class="p">]</span>
 
         <span class="n">mu_slope</span><span class="p">,</span> <span class="n">mu_reed</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
@@ -5753,8 +5773,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/bank_erosion.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">81</span>
-<span class="normal">82</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">82</span>
 <span class="normal">83</span>
 <span class="normal">84</span>
 <span class="normal">85</span>
@@ -5767,7 +5786,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">92</span>
 <span class="normal">93</span>
 <span class="normal">94</span>
-<span class="normal">95</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="normal">95</span>
+<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the Erosion class.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">root_dir</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">root_dir</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_config_file</span> <span class="o">=</span> <span class="n">config_file</span>
@@ -5900,8 +5920,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/bank_erosion.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">219</span>
-<span class="normal">220</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">220</span>
 <span class="normal">221</span>
 <span class="normal">222</span>
 <span class="normal">223</span>
@@ -6004,7 +6023,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">320</span>
 <span class="normal">321</span>
 <span class="normal">322</span>
-<span class="normal">323</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_fairway_bank_line_distance</span><span class="p">(</span>
+<span class="normal">323</span>
+<span class="normal">324</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_fairway_bank_line_distance</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">bank_data</span><span class="p">:</span> <span class="n">BankData</span><span class="p">,</span>
     <span class="n">fairway_data</span><span class="p">:</span> <span class="n">FairwayData</span><span class="p">,</span>
@@ -6130,18 +6150,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/bank_erosion.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">664</span>
-<span class="normal">665</span>
-<span class="normal">666</span>
-<span class="normal">667</span>
-<span class="normal">668</span>
-<span class="normal">669</span>
-<span class="normal">670</span>
-<span class="normal">671</span>
-<span class="normal">672</span>
-<span class="normal">673</span>
-<span class="normal">674</span>
-<span class="normal">675</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">675</span>
 <span class="normal">676</span>
 <span class="normal">677</span>
 <span class="normal">678</span>
@@ -6215,7 +6224,18 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">746</span>
 <span class="normal">747</span>
 <span class="normal">748</span>
-<span class="normal">749</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">compute_erosion_per_level</span><span class="p">(</span>
+<span class="normal">749</span>
+<span class="normal">750</span>
+<span class="normal">751</span>
+<span class="normal">752</span>
+<span class="normal">753</span>
+<span class="normal">754</span>
+<span class="normal">755</span>
+<span class="normal">756</span>
+<span class="normal">757</span>
+<span class="normal">758</span>
+<span class="normal">759</span>
+<span class="normal">760</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">compute_erosion_per_level</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">level_i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">bank_data</span><span class="p">:</span> <span class="n">BankData</span><span class="p">,</span>
@@ -6322,8 +6342,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/bank_erosion.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">102</span>
-<span class="normal">103</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">103</span>
 <span class="normal">104</span>
 <span class="normal">105</span>
 <span class="normal">106</span>
@@ -6372,7 +6391,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">149</span>
 <span class="normal">150</span>
 <span class="normal">151</span>
-<span class="normal">152</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_ship_parameters</span><span class="p">(</span>
+<span class="normal">152</span>
+<span class="normal">153</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_ship_parameters</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get ship parameters from the configuration file.&quot;&quot;&quot;</span>
@@ -6444,18 +6464,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/bank_erosion.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">783</span>
-<span class="normal">784</span>
-<span class="normal">785</span>
-<span class="normal">786</span>
-<span class="normal">787</span>
-<span class="normal">788</span>
-<span class="normal">789</span>
-<span class="normal">790</span>
-<span class="normal">791</span>
-<span class="normal">792</span>
-<span class="normal">793</span>
-<span class="normal">794</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">794</span>
 <span class="normal">795</span>
 <span class="normal">796</span>
 <span class="normal">797</span>
@@ -6518,7 +6527,18 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">854</span>
 <span class="normal">855</span>
 <span class="normal">856</span>
-<span class="normal">857</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">857</span>
+<span class="normal">858</span>
+<span class="normal">859</span>
+<span class="normal">860</span>
+<span class="normal">861</span>
+<span class="normal">862</span>
+<span class="normal">863</span>
+<span class="normal">864</span>
+<span class="normal">865</span>
+<span class="normal">866</span>
+<span class="normal">867</span>
+<span class="normal">868</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the bank erosion analysis for a specified configuration.&quot;&quot;&quot;</span>
     <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- start analysis --&quot;</span><span class="p">)</span>
     <span class="n">log_text</span><span class="p">(</span>
