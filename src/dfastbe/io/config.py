@@ -43,7 +43,7 @@ from shapely.geometry import LineString
 from dfastbe.io.file_utils import absolute_path, relative_path
 from dfastbe.io.logger import log_text
 
-__all__ = ["ConfigFile", "ConfigFileError", "SimulationFilesError"]
+__all__ = ["ConfigFile", "ConfigFileError", "SimulationFilesError", "PlottingFlags"]
 
 
 @dataclass
