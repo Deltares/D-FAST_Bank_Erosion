@@ -25,13 +25,31 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-from typing import List, Dict, Optional, TextIO, Any, Tuple
-from pathlib import Path
+import logging
 import time
+from pathlib import Path
+from typing import Any, Dict, List, Optional, TextIO, Tuple
 
 PROGTEXTS: Dict[str, List[str]]
 
 __all__ = ["load_program_texts", "get_text", "log_text", "timed_logger"]
+
+
+def configure_logging(debug: bool = False):
+    """Configure the logging system.
+
+    This routine sets up the logging system to log messages using the python standard logging module.
+    The logging level is set to DEBUG if the debug parameter is True, otherwise it is set to INFO.
+
+    Args:
+        debug (bool): If True, set logging level to DEBUG; otherwise, set to INFO.
+    """
+    level = logging.DEBUG if debug else logging.INFO
+    logging.basicConfig(
+        level=level,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
 
 
 def load_program_texts(file_name: str | Path) -> None:
