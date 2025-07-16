@@ -27,6 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 import os
+from collections import namedtuple
 from typing import Dict, List, Tuple
 
 import matplotlib.pyplot as plt
@@ -624,18 +625,28 @@ class Erosion:
         """
         iq_str = f"{level_i + 1}"
 
-        parameters = [
-            ("Vship", shipping_data["vship0"]),
-            ("Nship", shipping_data["Nship0"]),
-            ("Nwave", shipping_data["nwave0"]),
-            ("Draught", shipping_data["Tship0"]),
-            ("ShipType", shipping_data["ship0"]),
-            ("Slope", shipping_data["parslope0"]),
-            ("Reed", shipping_data["parreed0"]),
+        Param = namedtuple("Param", "name default valid onefile positive ext")
+        param_defs = [
+            Param("Vship", shipping_data["vship0"], None, None, None, None),
+            Param("Nship", shipping_data["Nship0"], None, None, None, None),
+            Param("Nwave", shipping_data["nwave0"], None, None, None, None),
+            Param("Draught", shipping_data["Tship0"], None, None, None, None),
+            Param("ShipType", shipping_data["ship0"], [1, 2, 3], True, None, None),
+            Param("Slope", shipping_data["parslope0"], None, None, True, "slp"),
+            Param("Reed", shipping_data["parreed0"], None, None, True, "rdd"),
         ]
         parameter_values = [
-            self._get_param(name, default, iq_str, num_stations_per_bank)
-            for name, default in parameters
+            self._get_param(
+                param.name,
+                param.default,
+                iq_str,
+                num_stations_per_bank,
+                valid=param.valid,
+                onefile=param.onefile,
+                positive=param.positive,
+                ext=param.ext,
+            )
+            for param in param_defs
         ]
 
         mu_slope, mu_reed = [], []
