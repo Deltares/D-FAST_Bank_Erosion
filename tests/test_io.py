@@ -757,7 +757,7 @@ class TestConfigFile:
         assert plotting_flags.plot_data is True
         assert plotting_flags.save_plot is True
         assert plotting_flags.save_plot_zoomed is False
-        assert plotting_flags.zoom_km_step == 0.5
+        assert plotting_flags.zoom_km_step == pytest.approx(0.5)
         assert plotting_flags.close_plot is False
         assert plotting_flags.fig_dir == str(root_dir / "output/figures")
         assert plotting_flags.plot_extension == ".png"
