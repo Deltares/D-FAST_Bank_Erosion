@@ -53,8 +53,8 @@ class PlottingFlags:
     plot_data: bool
     save_plot: bool
     save_plot_zoomed: bool
-    zoom_km_step: float
     close_plot: bool
+    zoom_km_step: float = 1.0
     fig_dir: Optional[str] = None
     plot_extension: str = ".png"
 
