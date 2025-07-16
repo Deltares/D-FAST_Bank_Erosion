@@ -18,7 +18,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
 )
 from dfastbe.bank_erosion.data_models.inputs import ErosionSimulationData
 from dfastbe.bank_erosion.erosion_calculator import WATER_DENSITY, g
-from dfastbe.io.config import PlottingFlags, get_bbox
+from dfastbe.io.config import PlotProperties, get_bbox
 from dfastbe.io.logger import log_text
 from dfastbe.plotting import BasePlot, Plot
 from dfastbe.utils import get_zoom_extends
@@ -33,7 +33,7 @@ class ErosionPlotter(BasePlot):
     def __init__(
         self,
         gui: bool,
-        plot_flags: PlottingFlags,
+        plot_flags: PlotProperties,
         erosion_results: ErosionResults,
         bank_data: BankData,
         water_level_data: WaterLevelData,
@@ -44,7 +44,7 @@ class ErosionPlotter(BasePlot):
         Args:
             gui (bool):
                 Whether the plot is for a GUI application.
-            plot_flags (PlottingFlags):
+            plot_flags (PlotProperties):
                 Flags for plotting options.
             erosion_results (ErosionResults):
                 The results of the erosion analysis.
@@ -111,7 +111,7 @@ class ErosionPlotter(BasePlot):
         fig_i = 0
         bbox = get_bbox(river_center_line_arr)
 
-        if self.flags.save_plot_zoomed:
+        if self.flags.save_zoomed_plot:
             km_zoom, xy_zoom = self._generate_zoomed_coordinates(river_axis_km)
         else:
             km_zoom = None
@@ -152,7 +152,7 @@ class ErosionPlotter(BasePlot):
         return get_zoom_extends(
             river_axis_km.min(),
             river_axis_km.max(),
-            self.flags.zoom_km_step,
+            self.flags.zoom_step_km,
             bank_coords_mid,
             self.bank_data.bank_chainage_midpoints,
         )

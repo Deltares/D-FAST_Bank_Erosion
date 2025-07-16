@@ -11,7 +11,7 @@ from shapely.geometry import LineString, MultiLineString, Polygon
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.bank_lines.plotter import BankLinesPlotter
 from dfastbe.cmd import run
-from dfastbe.io.config import ConfigFile, PlottingFlags
+from dfastbe.io.config import ConfigFile, PlotProperties
 from dfastbe.io.data_models import BaseSimulationData, LineGeometry
 
 matplotlib.use('Agg')
@@ -170,7 +170,7 @@ class TestBankLines:
         """
         mock_config_file = MagicMock(spec=ConfigFile)
         mock_config_file.get_output_dir.return_value = "mock_output_dir"
-        plotting_flags = MagicMock(spec=PlottingFlags)
+        plotting_flags = MagicMock(spec=PlotProperties)
         plotting_flags.plot_data = False
         mock_config_file.get_plotting_flags.return_value = plotting_flags
 
@@ -493,13 +493,13 @@ class TestBankLines:
                 0.3,
             )
             bank_lines = BankLines(mock_config_file)
-            bank_lines.plot_flags = PlottingFlags(
+            bank_lines.plot_flags = PlotProperties(
                 plot_data=True,
                 save_plot=True,
-                save_plot_zoomed=True,
+                save_zoomed_plot=True,
                 close_plot=True,
-                zoom_km_step=0.1,
-                fig_dir=str(tmp_path),
+                zoom_step_km=0.1,
+                save_dir=str(tmp_path),
                 plot_extension=".png",
             )
 

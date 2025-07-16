@@ -25,15 +25,16 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-from typing import List, Tuple
-import numpy as np
 import math
+from typing import List, Tuple
+
+import numpy as np
 
 
 def get_zoom_extends(
     km_min: float,
     km_max: float,
-    zoom_km_step: float,
+    zoom_step_km: float,
     bank_crds: List[np.ndarray],
     bank_km: List[np.ndarray],
 ) -> tuple[list[tuple[float, float]], list[tuple[float, float, float, float]]]:
@@ -44,7 +45,7 @@ def get_zoom_extends(
             Minimum value for the chainage range of interest.
         km_max (float):
             Maximum value for the chainage range of interest.
-        zoom_km_step (float):
+        zoom_step_km (float):
             Preferred chainage length of zoom box.
         bank_crds (List[np.ndarray]):
             List of N x 2 np arrays of coordinates per bank.
@@ -59,9 +60,9 @@ def get_zoom_extends(
     """
     from dfastbe.bank_erosion.utils import get_km_bins
 
-    zoom_km_bin = (km_min, km_max, zoom_km_step)
+    zoom_km_bin = (km_min, km_max, zoom_step_km)
     zoom_km_bnd = get_km_bins(zoom_km_bin, station_type="all", adjust=True)
-    eps = 0.1 * zoom_km_step
+    eps = 0.1 * zoom_step_km
 
     station_zoom: List[Tuple[float, float]] = []
     coords_zoom: List[Tuple[float, float, float, float]] = []

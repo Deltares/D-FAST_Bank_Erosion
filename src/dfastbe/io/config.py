@@ -43,11 +43,11 @@ from shapely.geometry import LineString
 from dfastbe.io.file_utils import absolute_path, relative_path
 from dfastbe.io.logger import log_text
 
-__all__ = ["ConfigFile", "ConfigFileError", "SimulationFilesError", "PlottingFlags"]
+__all__ = ["ConfigFile", "ConfigFileError", "SimulationFilesError", "PlotProperties"]
 
 
 @dataclass
-class PlottingFlags:
+class PlotProperties:
     """Class to hold plotting flags for the erosion simulation.
 
     Args:
@@ -1108,22 +1108,22 @@ class ConfigFile:
             except ValueError:
                 self.config[group][key] = relative_path(rootdir, val_str)
 
-    def get_plotting_flags(self, root_dir: Path | str) -> PlottingFlags:
+    def get_plotting_flags(self, root_dir: Path | str) -> PlotProperties:
         """Get the plotting flags from the configuration file.
 
         Returns:
-            PlottingFlags:
+            PlotProperties:
                 plot_data (bool):
                     Flag indicating whether to plot the data.
                 save_plot (bool):
                     Flag indicating whether to save the plot.
-                save_plot_zoomed (bool):
+                save_zoomed_plot (bool):
                     Flag indicating whether to save the zoomed plot.
-                zoom_km_step (float):
+                zoom_step_km (float):
                     Step size for zooming in on the plot.
                 close_plot (bool):
                     Flag indicating whether to close the plot.
-                fig_dir (str):
+                save_dir (str):
                     Directory where the figures will be saved.
                 plot_extension (str):
                     File extension for the saved figures.
@@ -1132,21 +1132,21 @@ class ConfigFile:
 
         if plot_data:
             save_plot = self.get_bool("General", "SavePlots", True)
-            save_plot_zoomed = self.get_bool("General", "SaveZoomPlots", True)
-            zoom_km_step = self.get_float("General", "ZoomStepKM", 1.0)
-            if zoom_km_step < 0.01:
-                save_plot_zoomed = False
+            save_zoomed_plot = self.get_bool("General", "SaveZoomPlots", True)
+            zoom_step_km = self.get_float("General", "ZoomStepKM", 1.0)
+            if zoom_step_km < 0.01:
+                save_zoomed_plot = False
             close_plot = self.get_bool("General", "ClosePlots", False)
         else:
             save_plot = False
-            save_plot_zoomed = False
+            save_zoomed_plot = False
             close_plot = False
 
         data = {
             "plot_data": plot_data,
             "save_plot": save_plot,
-            "save_zoomed_plot": save_plot_zoomed,
-            "zoom_step_km": zoom_km_step,
+            "save_zoomed_plot": save_zoomed_plot,
+            "zoom_step_km": zoom_step_km,
             "close_plot": close_plot,
         }
 
@@ -1164,7 +1164,7 @@ class ConfigFile:
                 "plot_extension": plot_ext,
             }
 
-        return PlottingFlags(**data)
+        return PlotProperties(**data)
 
     def get_output_dir(self, option: str) -> Path:
         """Get the output directory for the analysis.

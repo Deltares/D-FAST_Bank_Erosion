@@ -35,13 +35,13 @@ import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 
-from dfastbe.io.config import PlottingFlags
+from dfastbe.io.config import PlotProperties
 from dfastbe.io.data_models import BaseSimulationData
 
 
 class BasePlot:
 
-    def __init__(self, gui, plot_flags: PlottingFlags) -> None:
+    def __init__(self, gui, plot_flags: PlotProperties) -> None:
         self.gui = gui
         self.flags = plot_flags
 
@@ -377,17 +377,17 @@ class BasePlot:
         figure_index: int,
         plot_name: str,
         zoom_coords: Optional[List[Tuple[float, float, float, float]]],
-        plot_flags: PlottingFlags,
+        plot_flags: PlotProperties,
         zoom_xy: bool,
     ) -> int:
         """Save the plot to a file."""
         figure_index += 1
-        fig_base = Path(plot_flags.fig_dir) / f"{figure_index}_{plot_name}"
-        if plot_flags.save_plot_zoomed and zoom_xy:
+        fig_base = Path(plot_flags.save_dir) / f"{figure_index}_{plot_name}"
+        if plot_flags.save_zoomed_plot and zoom_xy:
             self.zoom_xy_and_save(
                 fig, ax, fig_base, plot_flags.plot_extension, zoom_coords
             )
-        elif plot_flags.save_plot_zoomed:
+        elif plot_flags.save_zoomed_plot:
             self.zoom_x_and_save(
                 fig, ax, fig_base, plot_flags.plot_extension, zoom_coords
             )
@@ -400,7 +400,7 @@ class Plot:
 
     def __init__(
         self,
-        plot_flags: PlottingFlags,
+        plot_flags: PlotProperties,
         scale: int = 1000,
         aspect: int = None,
         gui: bool = False,
@@ -462,10 +462,10 @@ class Plot:
     ) -> int:
         """Save the plot to a file."""
         figure_index += 1
-        path = Path(self.flags.fig_dir) / f"{figure_index}_{plot_name}"
-        if self.flags.save_plot_zoomed and zoom_xy:
+        path = Path(self.flags.save_dir) / f"{figure_index}_{plot_name}"
+        if self.flags.save_zoomed_plot and zoom_xy:
             self._zoom_xy_and_save(path, self.flags.plot_extension, zoom_coords)
-        elif self.flags.save_plot_zoomed:
+        elif self.flags.save_zoomed_plot:
             self._zoom_x_and_save(path, self.flags.plot_extension, zoom_coords)
 
         fig_path = path.with_suffix(self.flags.plot_extension)

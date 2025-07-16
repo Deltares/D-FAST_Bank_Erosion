@@ -9,7 +9,7 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from shapely import LineString, Polygon
 
-from dfastbe.io.config import PlottingFlags
+from dfastbe.io.config import PlotProperties
 from dfastbe.io.data_models import BaseSimulationData, LineGeometry
 from dfastbe.io.logger import log_text
 from dfastbe.plotting import BasePlot
@@ -31,7 +31,7 @@ class BankLinesPlotter(BasePlot):
     def __init__(
         self,
         gui: bool,
-        plot_flags: PlottingFlags,
+        plot_flags: PlotProperties,
         crs: str,
         simulation_data: BaseSimulationData,
         river_center_line: LineGeometry,
@@ -87,7 +87,7 @@ class BankLinesPlotter(BasePlot):
         _, xy_zoom = get_zoom_extends(
             self.stations_bounds[0],
             self.stations_bounds[1],
-            self.flags.zoom_km_step,
+            self.flags.zoom_step_km,
             banks_coords,
             banks_station,
         )
@@ -135,7 +135,7 @@ class BankLinesPlotter(BasePlot):
         log_text("create_figures")
         fig_i = 0
 
-        if self.flags.save_plot_zoomed:
+        if self.flags.save_zoomed_plot:
             xy_zoom = self._get_zoom_extends(
                 bank,
                 num_search_lines,
