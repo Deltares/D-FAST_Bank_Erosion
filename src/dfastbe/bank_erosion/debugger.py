@@ -5,12 +5,13 @@ from typing import Dict
 import numpy as np
 from geopandas import GeoSeries
 from geopandas.geodataframe import GeoDataFrame
+
 from dfastbe.bank_erosion.data_models.calculation import (
-    SingleCalculation,
     FairwayData,
-    SingleParameters,
     SingleBank,
+    SingleCalculation,
     SingleErosion,
+    SingleParameters,
 )
 
 __all__ = ["Debugger"]

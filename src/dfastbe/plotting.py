@@ -26,16 +26,17 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import List, Tuple, Optional
+from typing import List, Optional, Tuple
 
-from shapely.geometry import LineString, Polygon
+import geopandas
 import matplotlib
 import matplotlib.pyplot
-import geopandas
 import numpy
+from shapely.geometry import LineString, Polygon
 
-from dfastbe.io.config import ConfigFile
 from dfastbe.bank_erosion.erosion_calculator import WATER_DENSITY, g
+from dfastbe.io.config import ConfigFile
+
 
 def savefig(fig: matplotlib.figure.Figure, filename: str) -> None:
     """

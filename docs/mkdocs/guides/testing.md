@@ -18,6 +18,42 @@ class TestMyFunctionality:
         pass
 ```
 
+# Docstring Convention for tests
+
+All pytest test functions and classes in D-FAST Bank Erosion should include a clear and structured docstring describing the purpose and behavior of the test. The recommended format includes the following sections:
+
+## Example Docstring Structure
+
+```python
+def test_my_functionality():
+    """
+    Brief description of what the test covers.
+
+    Args:
+        param1 (Type): Description of the parameter.
+        param2 (Type): Description of the parameter.
+
+    Mocks:
+        - Description of any objects, functions, or modules that are mocked in the test.
+        - Example: Mocked database connection to avoid real I/O.
+
+    Asserts:
+        - Description of what is being asserted or validated in the test.
+        - Example: Asserts that the output matches the expected result.
+    """
+    # Test code here
+    pass
+```
+
+## Guidelines
+
+- **Description:** Start with a concise summary of what the test is verifying.
+- **Args:** List and describe any parameters used in the test (optional for simple tests).
+- **Mocks:** Clearly state what is mocked, why, and how it affects the test.
+- **Asserts:** Explicitly describe what the test is asserting, including expected outcomes or behaviors.
+
+This convention helps maintain clarity, consistency, and traceability in the test suite, making it easier for contributors to understand the intent and coverage of each test.
+
 # Binaries
 
 ## Creating tests for the binaries
