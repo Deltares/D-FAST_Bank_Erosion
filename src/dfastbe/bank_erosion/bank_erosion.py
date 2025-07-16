@@ -887,9 +887,6 @@ class Erosion:
             "km_mid": km_mid,
         }
 
-        log_text("end_bankerosion")
-        timed_logger("-- end analysis --")
-
     def plot(self):
         # create various plots
         if self.river_data.plot_flags["plot_data"]:
