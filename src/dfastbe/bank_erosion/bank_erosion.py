@@ -610,8 +610,17 @@ class Erosion:
         """Read Discharge level parameters.
 
         Read all discharge-specific input arrays for level *iq*.
-        Returns a dict with keys: vship, num_ship, n_wave, t_ship, ship_type,
-        mu_slope, mu_reed, par_slope, par_reed.
+
+        Args:
+            level_i (int):
+                The index of the discharge level.
+            shipping_data (Dict[str, List[np.ndarray]]):
+                The shipping data.
+            num_stations_per_bank (List[int]):
+                The number of stations per bank.
+
+        Returns:
+            SingleLevelParameters: The discharge level parameters.
         """
         iq_str = f"{level_i + 1}"
 
