@@ -48,7 +48,24 @@ __all__ = ["ConfigFile", "ConfigFileError", "SimulationFilesError"]
 
 @dataclass
 class PlottingFlags:
-    """Class to hold plotting flags for the erosion simulation."""
+    """Class to hold plotting flags for the erosion simulation.
+
+    Args:
+        plot_data (bool):
+            Flag to indicate if data should be plotted.
+        save_plot (bool):
+            Flag to indicate if the plot should be saved.
+        save_plot_zoomed (bool):
+            Flag to indicate if the zoomed plot should be saved.
+        close_plot (bool):
+            Flag to indicate if the plot should be closed after saving.
+        zoom_km_step (float):
+            Step size for zooming in kilometers.
+        fig_dir (Optional[str]):
+            Directory where figures are saved.
+        plot_extension (str):
+            File extension for saved plots.
+    """
 
     plot_data: bool
     save_plot: bool
