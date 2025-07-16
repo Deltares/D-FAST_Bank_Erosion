@@ -10,17 +10,17 @@ from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 
-from dfastbe.plotting import BasePlot, Plot
-from dfastbe.bank_erosion.data_models.inputs import ErosionSimulationData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     ErosionInputs,
     ErosionResults,
     WaterLevelData,
 )
-from dfastbe.io.logger import log_text
-from dfastbe.io.config import get_bbox
+from dfastbe.bank_erosion.data_models.inputs import ErosionSimulationData
 from dfastbe.bank_erosion.erosion_calculator import WATER_DENSITY, g
+from dfastbe.io.config import PlottingFlags, get_bbox
+from dfastbe.io.logger import log_text
+from dfastbe.plotting import BasePlot, Plot
 from dfastbe.utils import get_zoom_extends
 
 X_AXIS_TITLE = "x-coordinate [km]"
@@ -33,15 +33,19 @@ class ErosionPlotter(BasePlot):
     def __init__(
         self,
         gui: bool,
-        plot_flags: Dict[str, Any],
+        plot_flags: PlottingFlags,
         erosion_results: ErosionResults,
         bank_data: BankData,
         water_level_data: WaterLevelData,
         erosion_inputs: ErosionInputs,
     ):
         """Initialize the ErosionPlotter with the required data.
-        
+
         Args:
+            gui (bool):
+                Whether the plot is for a GUI application.
+            plot_flags (PlottingFlags):
+                Flags for plotting options.
             erosion_results (ErosionResults):
                 The results of the erosion analysis.
             bank_data (BankData):
@@ -50,8 +54,6 @@ class ErosionPlotter(BasePlot):
                 The water level data used in the analysis.
             erosion_inputs (ErosionInputs):
                 The inputs for the erosion analysis.
-            midpoint_chainages (np.ndarray):
-                The midpoint chainages for the analysis.
         """
         super().__init__(gui, plot_flags)
         self._erosion_results = erosion_results
@@ -78,7 +80,6 @@ class ErosionPlotter(BasePlot):
     def erosion_inputs(self) -> ErosionInputs:
         """ErosionInputs: the inputs for the erosion analysis."""
         return self._erosion_inputs
-
 
     def plot_all(
         self,
@@ -110,7 +111,7 @@ class ErosionPlotter(BasePlot):
         fig_i = 0
         bbox = get_bbox(river_center_line_arr)
 
-        if self.flags["save_plot_zoomed"]:
+        if self.flags.save_plot_zoomed:
             km_zoom, xy_zoom = self._generate_zoomed_coordinates(river_axis_km)
         else:
             km_zoom = None
@@ -151,7 +152,7 @@ class ErosionPlotter(BasePlot):
         return get_zoom_extends(
             river_axis_km.min(),
             river_axis_km.max(),
-            self.flags["zoom_km_step"],
+            self.flags.zoom_km_step,
             bank_coords_mid,
             self.bank_data.bank_chainage_midpoints,
         )
@@ -179,7 +180,7 @@ class ErosionPlotter(BasePlot):
         plot.ax.set_ylabel(Y_AXIS_TITLE)
         plot.ax.grid(True)
         plot.ax.set_title("water depth and initial bank lines")
-        if self.flags["save_plot"]:
+        if self.flags.save_plot:
             fig_i = plot.save(fig_i, "banklines", xy_zoom, True)
         return fig_i
 
@@ -227,7 +228,7 @@ class ErosionPlotter(BasePlot):
             handles,
             labels,
         )
-        if self.flags["save_plot"]:
+        if self.flags.save_plot:
             fig_i = plot.save(
                 fig_i, "erosion_sensitivity", xy_zoom, True
             )
@@ -264,7 +265,7 @@ class ErosionPlotter(BasePlot):
             True,
             f"eroded volume per {km_step} chainage km ({self.erosion_results.erosion_time} years)",
         )
-        if self.flags["save_plot"]:
+        if self.flags.save_plot:
             fig_i = plot.save(fig_i, "eroded_volume", km_zoom, False)
         return fig_i
 
@@ -291,7 +292,7 @@ class ErosionPlotter(BasePlot):
             True,
             f"eroded volume per {km_step} chainage km ({self.erosion_results.erosion_time} years)",
         )
-        if self.flags["save_plot"]:
+        if self.flags.save_plot:
             fig_i = plot.save(
                 fig_i, "eroded_volume_per_discharge", km_zoom, False
             )
@@ -320,7 +321,7 @@ class ErosionPlotter(BasePlot):
             True,
             f"eroded volume per {km_step} chainage km ({self.erosion_results.erosion_time} years)",
         )
-        if self.flags["save_plot"]:
+        if self.flags.save_plot:
             fig_i = plot.save(
                 fig_i, "eroded_volume_per_bank", km_zoom, False
             )
@@ -344,7 +345,7 @@ class ErosionPlotter(BasePlot):
         plot.ax.set_ylabel("eroded volume [m^3]")
         plot.ax.grid(True)
         plot.ax.set_title(f"eroded volume per {km_step} chainage km (equilibrium)")
-        if self.flags["save_plot"]:
+        if self.flags.save_plot:
             fig_i = plot.save(fig_i, "eroded_volume_eq", km_zoom, False)
         return fig_i
 
@@ -364,7 +365,7 @@ class ErosionPlotter(BasePlot):
             "(water)levels along bank line {ib}",
             "[m NAP]",
         )
-        if self.flags["save_plot"]:
+        if self.flags.save_plot:
             for ib, plot in enumerate(plot_list):
                 fig_i = plot.save(
                     fig_i, f"levels_bank_{ib + 1}", km_zoom, False
@@ -393,7 +394,7 @@ class ErosionPlotter(BasePlot):
             )
             plot_list.append(plot)
 
-        if self.flags["save_plot"]:
+        if self.flags.save_plot:
             for ib, plot in enumerate(plot_list):
                 fig_i = plot.save(
                     fig_i, f"velocity_bank_{ib + 1}", km_zoom, False
@@ -423,7 +424,7 @@ class ErosionPlotter(BasePlot):
 
         plot.set_bbox(bbox)
         plot.set_axes_properties(X_AXIS_TITLE, Y_AXIS_TITLE, True, "bank type")
-        if self.flags["save_plot"]:
+        if self.flags.save_plot:
             fig_i = plot.save(fig_i, "banktype", xy_zoom, True)
         return fig_i
 
@@ -454,7 +455,7 @@ class ErosionPlotter(BasePlot):
             True,
             "eroded distance",
         )
-        if self.flags["save_plot"]:
+        if self.flags.save_plot:
             fig_i = plot.save(fig_i, "erodis", km_zoom, False)
         return fig_i
 
@@ -465,7 +466,7 @@ class ErosionPlotter(BasePlot):
         )
 
     def _finalize_plots(self):
-        if self.flags["close_plot"]:
+        if self.flags.close_plot:
             plt.close("all")
         else:
             plt.show(block=not self.gui)
