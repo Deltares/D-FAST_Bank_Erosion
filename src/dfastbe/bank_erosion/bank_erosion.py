@@ -627,9 +627,9 @@ class Erosion:
 
         Param = namedtuple("Param", "name default valid onefile positive ext")
         param_defs = [
-            Param("Vship", shipping_data["vship0"], None, None, None, None),
-            Param("Nship", shipping_data["Nship0"], None, None, None, None),
-            Param("Nwave", shipping_data["nwave0"], None, None, None, None),
+            Param("VShip", shipping_data["vship0"], None, None, None, None),
+            Param("NShip", shipping_data["Nship0"], None, None, None, None),
+            Param("NWave", shipping_data["nwave0"], None, None, None, None),
             Param("Draught", shipping_data["Tship0"], None, None, None, None),
             Param("ShipType", shipping_data["ship0"], [1, 2, 3], True, None, None),
             Param("Slope", shipping_data["parslope0"], None, None, True, "slp"),
