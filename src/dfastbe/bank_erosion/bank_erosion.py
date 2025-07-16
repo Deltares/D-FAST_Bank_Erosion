@@ -661,9 +661,9 @@ class Erosion:
         return SingleLevelParameters.from_column_arrays(
             {
                 "id": level_i,
-                "ship_velocity": param_dict["Vship"],
-                "num_ship": param_dict["Nship"],
-                "num_waves_per_ship": param_dict["Nwave"],
+                "ship_velocity": param_dict["VShip"],
+                "num_ship": param_dict["NShip"],
+                "num_waves_per_ship": param_dict["NWave"],
                 "ship_draught": param_dict["Draught"],
                 "ship_type": param_dict["ShipType"],
                 "par_slope": param_dict["Slope"],
