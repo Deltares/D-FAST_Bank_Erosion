@@ -1884,9 +1884,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dfastbe.io.config.PlottingFlags" class="md-nav__link">
+  <a href="#dfastbe.io.config.PlotProperties" class="md-nav__link">
     <span class="md-ellipsis">
-      PlottingFlags
+      PlotProperties
     </span>
   </a>
   
@@ -2791,9 +2791,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dfastbe.io.config.PlottingFlags" class="md-nav__link">
+  <a href="#dfastbe.io.config.PlotProperties" class="md-nav__link">
     <span class="md-ellipsis">
-      PlottingFlags
+      PlotProperties
     </span>
   </a>
   
@@ -5397,22 +5397,22 @@ settings and supports upgrading older configuration formats.</p>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="n">group</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">relative_path</span><span class="p">(</span><span class="n">rootdir</span><span class="p">,</span> <span class="n">val_str</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_plotting_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PlottingFlags</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_plotting_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PlotProperties</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the plotting flags from the configuration file.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            PlottingFlags:</span>
+<span class="sd">            PlotProperties:</span>
 <span class="sd">                plot_data (bool):</span>
 <span class="sd">                    Flag indicating whether to plot the data.</span>
 <span class="sd">                save_plot (bool):</span>
 <span class="sd">                    Flag indicating whether to save the plot.</span>
-<span class="sd">                save_plot_zoomed (bool):</span>
+<span class="sd">                save_zoomed_plot (bool):</span>
 <span class="sd">                    Flag indicating whether to save the zoomed plot.</span>
-<span class="sd">                zoom_km_step (float):</span>
+<span class="sd">                zoom_step_km (float):</span>
 <span class="sd">                    Step size for zooming in on the plot.</span>
 <span class="sd">                close_plot (bool):</span>
 <span class="sd">                    Flag indicating whether to close the plot.</span>
-<span class="sd">                fig_dir (str):</span>
+<span class="sd">                save_dir (str):</span>
 <span class="sd">                    Directory where the figures will be saved.</span>
 <span class="sd">                plot_extension (str):</span>
 <span class="sd">                    File extension for the saved figures.</span>
@@ -5421,21 +5421,21 @@ settings and supports upgrading older configuration formats.</p>
 
         <span class="k">if</span> <span class="n">plot_data</span><span class="p">:</span>
             <span class="n">save_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;SavePlots&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-            <span class="n">save_plot_zoomed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;SaveZoomPlots&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-            <span class="n">zoom_km_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;ZoomStepKM&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">zoom_km_step</span> <span class="o">&lt;</span> <span class="mf">0.01</span><span class="p">:</span>
-                <span class="n">save_plot_zoomed</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">save_zoomed_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;SaveZoomPlots&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+            <span class="n">zoom_step_km</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;ZoomStepKM&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">zoom_step_km</span> <span class="o">&lt;</span> <span class="mf">0.01</span><span class="p">:</span>
+                <span class="n">save_zoomed_plot</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">close_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;ClosePlots&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">save_plot</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">save_plot_zoomed</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">save_zoomed_plot</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">close_plot</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;plot_data&quot;</span><span class="p">:</span> <span class="n">plot_data</span><span class="p">,</span>
             <span class="s2">&quot;save_plot&quot;</span><span class="p">:</span> <span class="n">save_plot</span><span class="p">,</span>
-            <span class="s2">&quot;save_zoomed_plot&quot;</span><span class="p">:</span> <span class="n">save_plot_zoomed</span><span class="p">,</span>
-            <span class="s2">&quot;zoom_step_km&quot;</span><span class="p">:</span> <span class="n">zoom_km_step</span><span class="p">,</span>
+            <span class="s2">&quot;save_zoomed_plot&quot;</span><span class="p">:</span> <span class="n">save_zoomed_plot</span><span class="p">,</span>
+            <span class="s2">&quot;zoom_step_km&quot;</span><span class="p">:</span> <span class="n">zoom_step_km</span><span class="p">,</span>
             <span class="s2">&quot;close_plot&quot;</span><span class="p">:</span> <span class="n">close_plot</span><span class="p">,</span>
         <span class="p">}</span>
 
@@ -5453,7 +5453,7 @@ settings and supports upgrading older configuration formats.</p>
                 <span class="s2">&quot;plot_extension&quot;</span><span class="p">:</span> <span class="n">plot_ext</span><span class="p">,</span>
             <span class="p">}</span>
 
-        <span class="k">return</span> <span class="n">PlottingFlags</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">PlotProperties</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_output_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the output directory for the analysis.</span>
@@ -7229,7 +7229,7 @@ For each bank a parameter value per bank point (bank chainage location).</p>
 
 
 <h4 id="dfastbe.io.config.ConfigFile.get_plotting_flags" class="doc doc-heading"><a href="#dfastbe.io.config.ConfigFile.get_plotting_flags" class="toclink">
-            <code class="highlight language-python"><span class="n">get_plotting_flags</span><span class="p">(</span><span class="n">root_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PlottingFlags</span></code>
+            <code class="highlight language-python"><span class="n">get_plotting_flags</span><span class="p">(</span><span class="n">root_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PlotProperties</span></code>
 
 </a><a href="#dfastbe.io.config.ConfigFile.get_plotting_flags" class="headerlink" title="Permanent link">#</a></h4>
 
@@ -7249,8 +7249,8 @@ For each bank a parameter value per bank point (bank chainage location).</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-<td><code>PlottingFlags</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="PlottingFlags (&lt;code&gt;dfastbe.io.config.PlottingFlags&lt;/code&gt;)" href="#dfastbe.io.config.PlottingFlags">PlottingFlags</a></code>
+<td><code>PlotProperties</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="PlotProperties (&lt;code&gt;dfastbe.io.config.PlotProperties&lt;/code&gt;)" href="#dfastbe.io.config.PlotProperties">PlotProperties</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7258,13 +7258,13 @@ For each bank a parameter value per bank point (bank chainage location).</p>
     Flag indicating whether to plot the data.
 save_plot (bool):
     Flag indicating whether to save the plot.
-save_plot_zoomed (bool):
+save_zoomed_plot (bool):
     Flag indicating whether to save the zoomed plot.
-zoom_km_step (float):
+zoom_step_km (float):
     Step size for zooming in on the plot.
 close_plot (bool):
     Flag indicating whether to close the plot.
-fig_dir (str):
+save_dir (str):
     Directory where the figures will be saved.
 plot_extension (str):
     File extension for the saved figures.</p>
@@ -7332,22 +7332,22 @@ plot_extension (str):
 <span class="normal">1164</span>
 <span class="normal">1165</span>
 <span class="normal">1166</span>
-<span class="normal">1167</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_plotting_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PlottingFlags</span><span class="p">:</span>
+<span class="normal">1167</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_plotting_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PlotProperties</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the plotting flags from the configuration file.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        PlottingFlags:</span>
+<span class="sd">        PlotProperties:</span>
 <span class="sd">            plot_data (bool):</span>
 <span class="sd">                Flag indicating whether to plot the data.</span>
 <span class="sd">            save_plot (bool):</span>
 <span class="sd">                Flag indicating whether to save the plot.</span>
-<span class="sd">            save_plot_zoomed (bool):</span>
+<span class="sd">            save_zoomed_plot (bool):</span>
 <span class="sd">                Flag indicating whether to save the zoomed plot.</span>
-<span class="sd">            zoom_km_step (float):</span>
+<span class="sd">            zoom_step_km (float):</span>
 <span class="sd">                Step size for zooming in on the plot.</span>
 <span class="sd">            close_plot (bool):</span>
 <span class="sd">                Flag indicating whether to close the plot.</span>
-<span class="sd">            fig_dir (str):</span>
+<span class="sd">            save_dir (str):</span>
 <span class="sd">                Directory where the figures will be saved.</span>
 <span class="sd">            plot_extension (str):</span>
 <span class="sd">                File extension for the saved figures.</span>
@@ -7356,21 +7356,21 @@ plot_extension (str):
 
     <span class="k">if</span> <span class="n">plot_data</span><span class="p">:</span>
         <span class="n">save_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;SavePlots&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="n">save_plot_zoomed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;SaveZoomPlots&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="n">zoom_km_step</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;ZoomStepKM&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">zoom_km_step</span> <span class="o">&lt;</span> <span class="mf">0.01</span><span class="p">:</span>
-            <span class="n">save_plot_zoomed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">save_zoomed_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;SaveZoomPlots&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">zoom_step_km</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;ZoomStepKM&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">zoom_step_km</span> <span class="o">&lt;</span> <span class="mf">0.01</span><span class="p">:</span>
+            <span class="n">save_zoomed_plot</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">close_plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;ClosePlots&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">save_plot</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">save_plot_zoomed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">save_zoomed_plot</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">close_plot</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;plot_data&quot;</span><span class="p">:</span> <span class="n">plot_data</span><span class="p">,</span>
         <span class="s2">&quot;save_plot&quot;</span><span class="p">:</span> <span class="n">save_plot</span><span class="p">,</span>
-        <span class="s2">&quot;save_zoomed_plot&quot;</span><span class="p">:</span> <span class="n">save_plot_zoomed</span><span class="p">,</span>
-        <span class="s2">&quot;zoom_step_km&quot;</span><span class="p">:</span> <span class="n">zoom_km_step</span><span class="p">,</span>
+        <span class="s2">&quot;save_zoomed_plot&quot;</span><span class="p">:</span> <span class="n">save_zoomed_plot</span><span class="p">,</span>
+        <span class="s2">&quot;zoom_step_km&quot;</span><span class="p">:</span> <span class="n">zoom_step_km</span><span class="p">,</span>
         <span class="s2">&quot;close_plot&quot;</span><span class="p">:</span> <span class="n">close_plot</span><span class="p">,</span>
     <span class="p">}</span>
 
@@ -7388,7 +7388,7 @@ plot_extension (str):
             <span class="s2">&quot;plot_extension&quot;</span><span class="p">:</span> <span class="n">plot_ext</span><span class="p">,</span>
         <span class="p">}</span>
 
-    <span class="k">return</span> <span class="n">PlottingFlags</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">PlotProperties</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -9936,15 +9936,15 @@ and adds an empty line before the start of a new block.</p>
 
 
 
-<h3 id="dfastbe.io.config.PlottingFlags" class="doc doc-heading"><a href="#dfastbe.io.config.PlottingFlags" class="toclink">
-            <code>PlottingFlags</code>
+<h3 id="dfastbe.io.config.PlotProperties" class="doc doc-heading"><a href="#dfastbe.io.config.PlotProperties" class="toclink">
+            <code>PlotProperties</code>
 
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
   </span>
 
-</a><a href="#dfastbe.io.config.PlottingFlags" class="headerlink" title="Permanent link">#</a></h3>
+</a><a href="#dfastbe.io.config.PlotProperties" class="headerlink" title="Permanent link">#</a></h3>
 
 
     <div class="doc doc-contents ">
@@ -10114,7 +10114,7 @@ and adds an empty line before the start of a new block.</p>
 <span class="normal">74</span>
 <span class="normal">75</span>
 <span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">PlottingFlags</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PlotProperties</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to hold plotting flags for the erosion simulation.</span>
 
 <span class="sd">    Args:</span>
