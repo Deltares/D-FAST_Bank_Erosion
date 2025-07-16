@@ -462,12 +462,6 @@ class ErosionPlotter(BasePlot):
             fig_i = plot.save(fig_i, "erodis", km_zoom, False)
         return fig_i
 
-    def _save_plot(self, fig, ax, fig_i, plot_name, zoom_coords, zoom_xy) -> int:
-        """Save the plot to a file."""
-        return self.save_plot(
-            fig, ax, fig_i, plot_name, zoom_coords, self.flags, zoom_xy
-        )
-
     def _finalize_plots(self):
         if self.flags["close_plot"]:
             plt.close("all")
