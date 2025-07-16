@@ -14,7 +14,7 @@ from geopandas import GeoDataFrame
 from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry import LineString
 
-from dfastbe.io.config import ConfigFile, SimulationFilesError
+from dfastbe.io.config import ConfigFile, PlottingFlags, SimulationFilesError
 from dfastbe.io.data_models import (
     BaseRiverData,
     BaseSimulationData,
@@ -43,6 +43,49 @@ def test_load_program_texts_01():
     """
     print("current work directory: ", os.getcwd())
     assert load_program_texts("tests/data/files/messages.UK.ini") is None
+
+
+class TestPlottingFlags:
+    @pytest.fixture
+    def plotting_flags_dict(self):
+        return {
+            "plot_data": True,
+            "save_plot": False,
+            "save_plot_zoomed": False,
+            "close_plot": True,
+        }
+
+    @pytest.mark.unit
+    def test_plotting_flags_initialization(self, plotting_flags_dict):
+        """Test initialization of PlottingFlags with all values.
+
+        Args:
+            plotting_flags_dict (dict): Dictionary with plotting flag values.
+        """
+        plotting_flags_dict["plot_extension"] = ".jpg"
+        plotting_flags_dict["zoom_km_step"] = 2.0
+        plotting_flags_dict["fig_dir"] = "figures"
+        plotting_flags = PlottingFlags(**plotting_flags_dict)
+        assert isinstance(plotting_flags, PlottingFlags)
+        assert plotting_flags.plot_data is True
+        assert plotting_flags.save_plot is False
+        assert plotting_flags.save_plot_zoomed is False
+        assert plotting_flags.close_plot is True
+        assert plotting_flags.zoom_km_step == pytest.approx(2.0)
+        assert plotting_flags.fig_dir == "figures"
+        assert plotting_flags.plot_extension == ".jpg"
+
+    @pytest.mark.unit
+    def test_plotting_flags_defaults(self, plotting_flags_dict):
+        """Test default values of PlottingFlags.
+
+        Args:
+            plotting_flags_dict (dict): Dictionary with plotting flag values.
+        """
+        plotting_flags = PlottingFlags(**plotting_flags_dict)
+        assert plotting_flags.zoom_km_step == pytest.approx(1.0)
+        assert plotting_flags.fig_dir is None
+        assert plotting_flags.plot_extension == ".png"
 
 
 class TestSimulationData:
