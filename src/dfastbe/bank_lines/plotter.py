@@ -150,8 +150,8 @@ class BankLinesPlotter(BasePlot):
             bank,
         )
         if self.flags["save_plot"]:
-            plot.save_plot(
-                fig_i, "bankline-detection", xy_zoom, self.flags, True
+            plot.save(
+                fig_i, "bankline-detection", xy_zoom, True
             )
 
         if self.flags["close_plot"]:

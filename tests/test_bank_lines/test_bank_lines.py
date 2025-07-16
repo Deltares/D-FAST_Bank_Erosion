@@ -503,7 +503,7 @@ class TestBankLines:
         with patch("matplotlib.pyplot.show") as mock_show, patch(
             "matplotlib.pyplot.close"
         ) as mock_close, patch(
-            "dfastbe.plotting.BasePlot.zoom_xy_and_save"
+            "dfastbe.plotting.Plot._zoom_xy_and_save"
         ) as mock_zoom_xy_and_save, patch(
             "dfastbe.bank_lines.plotter.log_text"
         ):
