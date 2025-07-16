@@ -652,7 +652,7 @@ class Erosion:
             param.name: value for param, value in zip(param_defs, parameter_values)
         }
         mu_slope, mu_reed = [], []
-        for ps, pr in zip(parameter_values[5], parameter_values[6]):
+        for ps, pr in zip(param_dict["Slope"], param_dict["Reed"]):
             mus = ps.copy()
             mus[mus > 0] = 1.0 / mus[mus > 0]  # 1/slope for non-zero values
             mu_slope.append(mus)
