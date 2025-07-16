@@ -51,7 +51,7 @@ class TestPlottingFlags:
         return {
             "plot_data": True,
             "save_plot": False,
-            "save_plot_zoomed": False,
+            "save_zoomed_plot": False,
             "close_plot": True,
         }
 
@@ -67,16 +67,16 @@ class TestPlottingFlags:
             Individual flags are set as expected.
         """
         plotting_flags_dict["plot_extension"] = ".jpg"
-        plotting_flags_dict["zoom_km_step"] = 2.0
-        plotting_flags_dict["fig_dir"] = "figures"
+        plotting_flags_dict["zoom_step_km"] = 2.0
+        plotting_flags_dict["save_dir"] = "figures"
         plotting_flags = PlottingFlags(**plotting_flags_dict)
         assert isinstance(plotting_flags, PlottingFlags)
         assert plotting_flags.plot_data is True
         assert plotting_flags.save_plot is False
-        assert plotting_flags.save_plot_zoomed is False
+        assert plotting_flags.save_zoomed_plot is False
         assert plotting_flags.close_plot is True
-        assert plotting_flags.zoom_km_step == pytest.approx(2.0)
-        assert plotting_flags.fig_dir == "figures"
+        assert plotting_flags.zoom_step_km == pytest.approx(2.0)
+        assert plotting_flags.save_dir == "figures"
         assert plotting_flags.plot_extension == ".jpg"
 
     @pytest.mark.unit
@@ -90,8 +90,8 @@ class TestPlottingFlags:
             Individual flags are set to their default values when missing from the dict.
         """
         plotting_flags = PlottingFlags(**plotting_flags_dict)
-        assert plotting_flags.zoom_km_step == pytest.approx(1.0)
-        assert plotting_flags.fig_dir is None
+        assert plotting_flags.zoom_step_km == pytest.approx(1.0)
+        assert plotting_flags.save_dir is None
         assert plotting_flags.plot_extension == ".png"
 
 
@@ -806,10 +806,10 @@ class TestConfigFile:
 
         assert plotting_flags.plot_data is True
         assert plotting_flags.save_plot is True
-        assert plotting_flags.save_plot_zoomed is False
-        assert plotting_flags.zoom_km_step == pytest.approx(0.5)
+        assert plotting_flags.save_zoomed_plot is False
+        assert plotting_flags.zoom_step_km == pytest.approx(0.5)
         assert plotting_flags.close_plot is False
-        assert plotting_flags.fig_dir == str(root_dir / "output/figures")
+        assert plotting_flags.save_dir == str(root_dir / "output/figures")
         assert plotting_flags.plot_extension == ".png"
 
 

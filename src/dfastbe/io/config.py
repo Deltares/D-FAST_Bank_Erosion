@@ -55,13 +55,13 @@ class PlottingFlags:
             Flag to indicate if data should be plotted.
         save_plot (bool):
             Flag to indicate if the plot should be saved.
-        save_plot_zoomed (bool):
+        save_zoomed_plot (bool):
             Flag to indicate if the zoomed plot should be saved.
         close_plot (bool):
             Flag to indicate if the plot should be closed after saving.
-        zoom_km_step (float):
+        zoom_step_km (float):
             Step size for zooming in kilometers.
-        fig_dir (Optional[str]):
+        save_dir (Optional[str]):
             Directory where figures are saved.
         plot_extension (str):
             File extension for saved plots.
@@ -69,10 +69,10 @@ class PlottingFlags:
 
     plot_data: bool
     save_plot: bool
-    save_plot_zoomed: bool
+    save_zoomed_plot: bool
     close_plot: bool
-    zoom_km_step: float = 1.0
-    fig_dir: Optional[str] = None
+    zoom_step_km: float = 1.0
+    save_dir: Optional[str] = None
     plot_extension: str = ".png"
 
 
@@ -1145,8 +1145,8 @@ class ConfigFile:
         data = {
             "plot_data": plot_data,
             "save_plot": save_plot,
-            "save_plot_zoomed": save_plot_zoomed,
-            "zoom_km_step": zoom_km_step,
+            "save_zoomed_plot": save_plot_zoomed,
+            "zoom_step_km": zoom_km_step,
             "close_plot": close_plot,
         }
 
@@ -1160,7 +1160,7 @@ class ConfigFile:
             path_fig_dir.mkdir(parents=True, exist_ok=True)
             plot_ext = self.get_str("General", "FigureExt", ".png")
             data = data | {
-                "fig_dir": fig_dir,
+                "save_dir": fig_dir,
                 "plot_extension": plot_ext,
             }
 
