@@ -1066,8 +1066,6 @@ class TestErosion:
 
 def test_calculate_alpha():
     """Test the calculate_alpha method."""
-    # Mock the bank data and fairway data
-
     coords = np.array(
         [
             [209186.621094, 389659.99609375],
