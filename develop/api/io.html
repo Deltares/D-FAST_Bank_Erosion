@@ -4357,7 +4357,15 @@ settings and supports upgrading older configuration formats.</p>
 <span class="normal">1181</span>
 <span class="normal">1182</span>
 <span class="normal">1183</span>
-<span class="normal">1184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConfigFile</span><span class="p">:</span>
+<span class="normal">1184</span>
+<span class="normal">1185</span>
+<span class="normal">1186</span>
+<span class="normal">1187</span>
+<span class="normal">1188</span>
+<span class="normal">1189</span>
+<span class="normal">1190</span>
+<span class="normal">1191</span>
+<span class="normal">1192</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConfigFile</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to read configuration files for D-FAST Bank Erosion.</span>
 
 <span class="sd">    This class provides methods to read, write, and manage configuration files</span>
@@ -5394,12 +5402,20 @@ settings and supports upgrading older configuration formats.</p>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            PlottingFlags:</span>
-<span class="sd">                save_plot (bool): Flag indicating whether to save the plot.</span>
-<span class="sd">                save_plot_zoomed (bool): Flag indicating whether to save the zoomed plot.</span>
-<span class="sd">                zoom_km_step (float): Step size for zooming in on the plot.</span>
-<span class="sd">                close_plot (bool): Flag indicating whether to close the plot.</span>
-<span class="sd">                fig_dir (str): Directory where the figures will be saved.</span>
-<span class="sd">                plot_ext (str): File extension for the saved figures.</span>
+<span class="sd">                plot_data (bool):</span>
+<span class="sd">                    Flag indicating whether to plot the data.</span>
+<span class="sd">                save_plot (bool):</span>
+<span class="sd">                    Flag indicating whether to save the plot.</span>
+<span class="sd">                save_plot_zoomed (bool):</span>
+<span class="sd">                    Flag indicating whether to save the zoomed plot.</span>
+<span class="sd">                zoom_km_step (float):</span>
+<span class="sd">                    Step size for zooming in on the plot.</span>
+<span class="sd">                close_plot (bool):</span>
+<span class="sd">                    Flag indicating whether to close the plot.</span>
+<span class="sd">                fig_dir (str):</span>
+<span class="sd">                    Directory where the figures will be saved.</span>
+<span class="sd">                plot_extension (str):</span>
+<span class="sd">                    File extension for the saved figures.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">plot_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;Plotting&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
@@ -6780,15 +6796,7 @@ directory will be returned.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io/config.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1161</span>
-<span class="normal">1162</span>
-<span class="normal">1163</span>
-<span class="normal">1164</span>
-<span class="normal">1165</span>
-<span class="normal">1166</span>
-<span class="normal">1167</span>
-<span class="normal">1168</span>
-<span class="normal">1169</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1169</span>
 <span class="normal">1170</span>
 <span class="normal">1171</span>
 <span class="normal">1172</span>
@@ -6803,7 +6811,15 @@ directory will be returned.</p>
 <span class="normal">1181</span>
 <span class="normal">1182</span>
 <span class="normal">1183</span>
-<span class="normal">1184</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_output_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="normal">1184</span>
+<span class="normal">1185</span>
+<span class="normal">1186</span>
+<span class="normal">1187</span>
+<span class="normal">1188</span>
+<span class="normal">1189</span>
+<span class="normal">1190</span>
+<span class="normal">1191</span>
+<span class="normal">1192</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_output_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the output directory for the analysis.</span>
 
 <span class="sd">    Args:</span>
@@ -7238,12 +7254,20 @@ For each bank a parameter value per bank point (bank chainage location).</p>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>save_plot (bool): Flag indicating whether to save the plot.
-save_plot_zoomed (bool): Flag indicating whether to save the zoomed plot.
-zoom_km_step (float): Step size for zooming in on the plot.
-close_plot (bool): Flag indicating whether to close the plot.
-fig_dir (str): Directory where the figures will be saved.
-plot_ext (str): File extension for the saved figures.</p>
+                <p>plot_data (bool):
+    Flag indicating whether to plot the data.
+save_plot (bool):
+    Flag indicating whether to save the plot.
+save_plot_zoomed (bool):
+    Flag indicating whether to save the zoomed plot.
+zoom_km_step (float):
+    Step size for zooming in on the plot.
+close_plot (bool):
+    Flag indicating whether to close the plot.
+fig_dir (str):
+    Directory where the figures will be saved.
+plot_extension (str):
+    File extension for the saved figures.</p>
               </div>
             </td>
           </tr>
@@ -7300,17 +7324,33 @@ plot_ext (str): File extension for the saved figures.</p>
 <span class="normal">1156</span>
 <span class="normal">1157</span>
 <span class="normal">1158</span>
-<span class="normal">1159</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_plotting_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PlottingFlags</span><span class="p">:</span>
+<span class="normal">1159</span>
+<span class="normal">1160</span>
+<span class="normal">1161</span>
+<span class="normal">1162</span>
+<span class="normal">1163</span>
+<span class="normal">1164</span>
+<span class="normal">1165</span>
+<span class="normal">1166</span>
+<span class="normal">1167</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_plotting_flags</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PlottingFlags</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the plotting flags from the configuration file.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        PlottingFlags:</span>
-<span class="sd">            save_plot (bool): Flag indicating whether to save the plot.</span>
-<span class="sd">            save_plot_zoomed (bool): Flag indicating whether to save the zoomed plot.</span>
-<span class="sd">            zoom_km_step (float): Step size for zooming in on the plot.</span>
-<span class="sd">            close_plot (bool): Flag indicating whether to close the plot.</span>
-<span class="sd">            fig_dir (str): Directory where the figures will be saved.</span>
-<span class="sd">            plot_ext (str): File extension for the saved figures.</span>
+<span class="sd">            plot_data (bool):</span>
+<span class="sd">                Flag indicating whether to plot the data.</span>
+<span class="sd">            save_plot (bool):</span>
+<span class="sd">                Flag indicating whether to save the plot.</span>
+<span class="sd">            save_plot_zoomed (bool):</span>
+<span class="sd">                Flag indicating whether to save the zoomed plot.</span>
+<span class="sd">            zoom_km_step (float):</span>
+<span class="sd">                Step size for zooming in on the plot.</span>
+<span class="sd">            close_plot (bool):</span>
+<span class="sd">                Flag indicating whether to close the plot.</span>
+<span class="sd">            fig_dir (str):</span>
+<span class="sd">                Directory where the figures will be saved.</span>
+<span class="sd">            plot_extension (str):</span>
+<span class="sd">                File extension for the saved figures.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">plot_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bool</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;Plotting&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
 
@@ -9878,10 +9918,10 @@ and adds an empty line before the start of a new block.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/io/config.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1338</span>
-<span class="normal">1339</span>
-<span class="normal">1340</span>
-<span class="normal">1341</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConfigFileError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1346</span>
+<span class="normal">1347</span>
+<span class="normal">1348</span>
+<span class="normal">1349</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ConfigFileError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom exception for configuration file errors.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span>
@@ -10149,10 +10189,10 @@ and adds an empty line before the start of a new block.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/io/config.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1344</span>
-<span class="normal">1345</span>
-<span class="normal">1346</span>
-<span class="normal">1347</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SimulationFilesError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1352</span>
+<span class="normal">1353</span>
+<span class="normal">1354</span>
+<span class="normal">1355</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">SimulationFilesError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom exception for configuration file errors.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span>
@@ -10249,15 +10289,7 @@ Buffer fraction surrounding the tight bounding box</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/io/config.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1187</span>
-<span class="normal">1188</span>
-<span class="normal">1189</span>
-<span class="normal">1190</span>
-<span class="normal">1191</span>
-<span class="normal">1192</span>
-<span class="normal">1193</span>
-<span class="normal">1194</span>
-<span class="normal">1195</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1195</span>
 <span class="normal">1196</span>
 <span class="normal">1197</span>
 <span class="normal">1198</span>
@@ -10274,7 +10306,15 @@ Buffer fraction surrounding the tight bounding box</p>
 <span class="normal">1209</span>
 <span class="normal">1210</span>
 <span class="normal">1211</span>
-<span class="normal">1212</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bbox</span><span class="p">(</span>
+<span class="normal">1212</span>
+<span class="normal">1213</span>
+<span class="normal">1214</span>
+<span class="normal">1215</span>
+<span class="normal">1216</span>
+<span class="normal">1217</span>
+<span class="normal">1218</span>
+<span class="normal">1219</span>
+<span class="normal">1220</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bbox</span><span class="p">(</span>
     <span class="n">coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">buffer</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
