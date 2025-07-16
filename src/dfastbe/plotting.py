@@ -541,8 +541,8 @@ class Plot:
 
     def set_axes_properties(
         self,
-        chainage_txt: str,
-        ylabel_txt: str,
+        x_label: str,
+        y_label: str,
         grid: bool,
         title_txt: str,
         handles: Optional[List[Any]] = None,
@@ -553,12 +553,12 @@ class Plot:
 
         Args:
             ax (Axes): The axes object to set properties for.
-            chainage_txt (str): Label for the horizontal chainage axes.
-            ylabel_txt (str): Label for the vertical axes.
+            x_label (str): Label for the horizontal chainage axes.
+            y_label (str): Label for the vertical axes.
             title_txt (str): Title for the plot.
         """
-        self.ax.set_xlabel(chainage_txt)
-        self.ax.set_ylabel(ylabel_txt)
+        self.ax.set_xlabel(x_label)
+        self.ax.set_ylabel(y_label)
         self.ax.grid(grid)
         self.ax.set_title(title_txt)
         if handles and labels:
