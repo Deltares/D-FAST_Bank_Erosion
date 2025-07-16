@@ -648,7 +648,9 @@ class Erosion:
             )
             for param in param_defs
         ]
-
+        param_dict = {
+            param.name: value for param, value in zip(param_defs, parameter_values)
+        }
         mu_slope, mu_reed = [], []
         for ps, pr in zip(parameter_values[5], parameter_values[6]):
             mus = ps.copy()
@@ -659,13 +661,13 @@ class Erosion:
         return SingleLevelParameters.from_column_arrays(
             {
                 "id": level_i,
-                "ship_velocity": parameter_values[0],
-                "num_ship": parameter_values[1],
-                "num_waves_per_ship": parameter_values[2],
-                "ship_draught": parameter_values[3],
-                "ship_type": parameter_values[4],
-                "par_slope": parameter_values[5],
-                "par_reed": parameter_values[6],
+                "ship_velocity": param_dict["Vship"],
+                "num_ship": param_dict["Nship"],
+                "num_waves_per_ship": param_dict["Nwave"],
+                "ship_draught": param_dict["Draught"],
+                "ship_type": param_dict["ShipType"],
+                "par_slope": param_dict["Slope"],
+                "par_reed": param_dict["Reed"],
                 "mu_slope": mu_slope,
                 "mu_reed": mu_reed,
             },
