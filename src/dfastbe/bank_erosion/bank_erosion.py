@@ -610,7 +610,7 @@ class Erosion:
     ) -> SingleLevelParameters:
         """Read Discharge level parameters.
 
-        Read all discharge-specific input arrays for level *iq*.
+        Read all discharge-specific input arrays for level_i.
 
         Args:
             level_i (int):
@@ -623,7 +623,7 @@ class Erosion:
         Returns:
             SingleLevelParameters: The discharge level parameters.
         """
-        iq_str = f"{level_i + 1}"
+        level_i_str = f"{level_i + 1}"
 
         Param = namedtuple("Param", "name default valid onefile positive ext")
         param_defs = [
@@ -639,7 +639,7 @@ class Erosion:
             self._get_param(
                 param.name,
                 param.default,
-                iq_str,
+                level_i_str,
                 num_stations_per_bank,
                 valid=param.valid,
                 onefile=param.onefile,
