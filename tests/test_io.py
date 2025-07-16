@@ -47,7 +47,7 @@ def test_load_program_texts_01():
 
 class TestPlottingFlags:
     @pytest.fixture
-    def plotting_flags_dict(self):
+    def plotting_flags_dict(self) -> Dict[str, bool]:
         return {
             "plot_data": True,
             "save_plot": False,
@@ -61,6 +61,10 @@ class TestPlottingFlags:
 
         Args:
             plotting_flags_dict (dict): Dictionary with plotting flag values.
+
+        Asserts:
+            PlottingFlags is initialized correctly with the provided values.
+            Individual flags are set as expected.
         """
         plotting_flags_dict["plot_extension"] = ".jpg"
         plotting_flags_dict["zoom_km_step"] = 2.0
@@ -81,6 +85,9 @@ class TestPlottingFlags:
 
         Args:
             plotting_flags_dict (dict): Dictionary with plotting flag values.
+
+        Asserts:
+            Individual flags are set to their default values when missing from the dict.
         """
         plotting_flags = PlottingFlags(**plotting_flags_dict)
         assert plotting_flags.zoom_km_step == pytest.approx(1.0)
