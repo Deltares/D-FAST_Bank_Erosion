@@ -1113,12 +1113,20 @@ class ConfigFile:
 
         Returns:
             PlottingFlags:
-                save_plot (bool): Flag indicating whether to save the plot.
-                save_plot_zoomed (bool): Flag indicating whether to save the zoomed plot.
-                zoom_km_step (float): Step size for zooming in on the plot.
-                close_plot (bool): Flag indicating whether to close the plot.
-                fig_dir (str): Directory where the figures will be saved.
-                plot_ext (str): File extension for the saved figures.
+                plot_data (bool):
+                    Flag indicating whether to plot the data.
+                save_plot (bool):
+                    Flag indicating whether to save the plot.
+                save_plot_zoomed (bool):
+                    Flag indicating whether to save the zoomed plot.
+                zoom_km_step (float):
+                    Step size for zooming in on the plot.
+                close_plot (bool):
+                    Flag indicating whether to close the plot.
+                fig_dir (str):
+                    Directory where the figures will be saved.
+                plot_extension (str):
+                    File extension for the saved figures.
         """
         plot_data = self.get_bool("General", "Plotting", True)
 
