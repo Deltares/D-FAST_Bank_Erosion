@@ -615,57 +615,22 @@ class Erosion:
         """
         iq_str = f"{level_i + 1}"
 
-        ship_velocity = self._get_param(
-            "VShip",
-            shipping_data["vship0"],
-            iq_str,
-            num_stations_per_bank,
-        )
-        num_ship = self._get_param(
-            "NShip",
-            shipping_data["Nship0"],
-            iq_str,
-            num_stations_per_bank,
-        )
-        num_waves_per_ship = self._get_param(
-            "NWave",
-            shipping_data["nwave0"],
-            iq_str,
-            num_stations_per_bank,
-        )
-        ship_draught = self._get_param(
-            "Draught",
-            shipping_data["Tship0"],
-            iq_str,
-            num_stations_per_bank,
-        )
-        ship_type = self._get_param(
-            "ShipType",
-            shipping_data["ship0"],
-            iq_str,
-            num_stations_per_bank,
-            valid=[1, 2, 3],
-            onefile=True,
-        )
-        par_slope = self._get_param(
-            "Slope",
-            shipping_data["parslope0"],
-            iq_str,
-            num_stations_per_bank,
-            positive=True,
-            ext="slp",
-        )
-        par_reed = self._get_param(
-            "Reed",
-            shipping_data["parreed0"],
-            iq_str,
-            num_stations_per_bank,
-            positive=True,
-            ext="rdd",
-        )
+        parameters = [
+            ("Vship", shipping_data["vship0"]),
+            ("Nship", shipping_data["Nship0"]),
+            ("Nwave", shipping_data["nwave0"]),
+            ("Draught", shipping_data["Tship0"]),
+            ("ShipType", shipping_data["ship0"]),
+            ("Slope", shipping_data["parslope0"]),
+            ("Reed", shipping_data["parreed0"]),
+        ]
+        parameter_values = [
+            self._get_param(name, default, iq_str, num_stations_per_bank)
+            for name, default in parameters
+        ]
 
         mu_slope, mu_reed = [], []
-        for ps, pr in zip(par_slope, par_reed):
+        for ps, pr in zip(parameter_values[5], parameter_values[6]):
             mus = ps.copy()
             mus[mus > 0] = 1.0 / mus[mus > 0]  # 1/slope for non-zero values
             mu_slope.append(mus)
@@ -674,13 +639,13 @@ class Erosion:
         return SingleLevelParameters.from_column_arrays(
             {
                 "id": level_i,
-                "ship_velocity": ship_velocity,
-                "num_ship": num_ship,
-                "num_waves_per_ship": num_waves_per_ship,
-                "ship_draught": ship_draught,
-                "ship_type": ship_type,
-                "par_slope": par_slope,
-                "par_reed": par_reed,
+                "ship_velocity": parameter_values[0],
+                "num_ship": parameter_values[1],
+                "num_waves_per_ship": parameter_values[2],
+                "ship_draught": parameter_values[3],
+                "ship_type": parameter_values[4],
+                "par_slope": parameter_values[5],
+                "par_reed": parameter_values[6],
                 "mu_slope": mu_slope,
                 "mu_reed": mu_reed,
             },
