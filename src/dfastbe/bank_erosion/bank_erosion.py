@@ -35,36 +35,39 @@ from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
 
 from dfastbe import __version__
-from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData, ErosionSimulationData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
-    SingleCalculation,
-    SingleLevelParameters,
     DischargeLevels,
     ErosionInputs,
     ErosionResults,
     FairwayData,
-    SingleDischargeLevel,
     MeshData,
-    SingleParameters,
+    SingleCalculation,
+    SingleDischargeLevel,
     SingleErosion,
+    SingleLevelParameters,
+    SingleParameters,
     WaterLevelData,
 )
+from dfastbe.bank_erosion.data_models.inputs import (
+    ErosionRiverData,
+    ErosionSimulationData,
+)
 from dfastbe.bank_erosion.debugger import Debugger
-from dfastbe.bank_erosion.plotter import ErosionPlotter
-from dfastbe.bank_erosion.utils import BankLinesProcessor, intersect_line_mesh
-from dfastbe.io.config import ConfigFile
-from dfastbe.io.logger import log_text
-from dfastbe.io.data_models import LineGeometry
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
+from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.utils import (
+    BankLinesProcessor,
+    calculate_alpha,
     get_km_bins,
     get_km_eroded_volume,
-    write_km_eroded_volumes,
+    intersect_line_mesh,
     move_line,
-    calculate_alpha
+    write_km_eroded_volumes,
 )
-from dfastbe.io.logger import timed_logger
+from dfastbe.io.config import ConfigFile
+from dfastbe.io.data_models import LineGeometry
+from dfastbe.io.logger import log_text, timed_logger
 
 X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
@@ -892,7 +895,7 @@ class Erosion:
 
     def plot(self):
         # create various plots
-        if self.river_data.plot_flags["plot_data"]:
+        if self.river_data.plot_flags.plot_data:
             plotter = ErosionPlotter(
                 self.gui,
                 self.river_data.plot_flags,
