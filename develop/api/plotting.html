@@ -4567,8 +4567,8 @@ scale: float
 
     <span class="k">def</span><span class="w"> </span><span class="nf">set_axes_properties</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">x_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">y_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">grid</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">handles</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -4579,12 +4579,12 @@ scale: float
 
 <span class="sd">        Args:</span>
 <span class="sd">            ax (Axes): The axes object to set properties for.</span>
-<span class="sd">            chainage_txt (str): Label for the horizontal chainage axes.</span>
-<span class="sd">            ylabel_txt (str): Label for the vertical axes.</span>
+<span class="sd">            x_label (str): Label for the horizontal chainage axes.</span>
+<span class="sd">            y_label (str): Label for the vertical axes.</span>
 <span class="sd">            title_txt (str): Title for the plot.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">chainage_txt</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel_txt</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">x_label</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">y_label</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title_txt</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">handles</span> <span class="ow">and</span> <span class="n">labels</span><span class="p">:</span>
@@ -4907,7 +4907,7 @@ Name of the file to be written.</p>
 
 
 <h4 id="dfastbe.plotting.Plot.set_axes_properties" class="doc doc-heading"><a href="#dfastbe.plotting.Plot.set_axes_properties" class="toclink">
-            <code class="highlight language-python"><span class="n">set_axes_properties</span><span class="p">(</span><span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">grid</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">handles</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+            <code class="highlight language-python"><span class="n">set_axes_properties</span><span class="p">(</span><span class="n">x_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">y_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">grid</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">handles</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">labels</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
 </a><a href="#dfastbe.plotting.Plot.set_axes_properties" class="headerlink" title="Permanent link">#</a></h4>
 
@@ -4946,7 +4946,7 @@ Name of the file to be written.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>chainage_txt</code>
+                <code>x_label</code>
             </td>
             <td>
                   <code><span title="str">str</span></code>
@@ -4962,7 +4962,7 @@ Name of the file to be written.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>ylabel_txt</code>
+                <code>y_label</code>
             </td>
             <td>
                   <code><span title="str">str</span></code>
@@ -5024,8 +5024,8 @@ Name of the file to be written.</p>
 <span class="normal">566</span>
 <span class="normal">567</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">set_axes_properties</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">chainage_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">ylabel_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">x_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">y_label</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">grid</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">title_txt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">handles</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -5036,12 +5036,12 @@ Name of the file to be written.</p>
 
 <span class="sd">    Args:</span>
 <span class="sd">        ax (Axes): The axes object to set properties for.</span>
-<span class="sd">        chainage_txt (str): Label for the horizontal chainage axes.</span>
-<span class="sd">        ylabel_txt (str): Label for the vertical axes.</span>
+<span class="sd">        x_label (str): Label for the horizontal chainage axes.</span>
+<span class="sd">        y_label (str): Label for the vertical axes.</span>
 <span class="sd">        title_txt (str): Title for the plot.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">chainage_txt</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel_txt</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">x_label</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">y_label</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title_txt</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">handles</span> <span class="ow">and</span> <span class="n">labels</span><span class="p">:</span>
