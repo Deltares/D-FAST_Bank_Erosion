@@ -46,8 +46,10 @@ class BankLines:
             ```python
             >>> from unittest.mock import patch
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
-            >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)
+            >>> bank_lines = BankLines(config_file, logger)  # doctest: +ELLIPSIS
             N...e
             >>> isinstance(bank_lines, BankLines)
             True
@@ -92,8 +94,10 @@ class BankLines:
             >>> import matplotlib
             >>> matplotlib.use('Agg')
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
-            >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)
+            >>> bank_lines = BankLines(config_file, logger)  # doctest: +ELLIPSIS
             N...e
             >>> bank_lines.detect()
                0...-
@@ -180,7 +184,9 @@ class BankLines:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)
             >>> river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
             N...e
             >>> bank_lines = BankLines(config_file)
@@ -229,8 +235,10 @@ class BankLines:
             ```python
             >>> import matplotlib
             >>> matplotlib.use('Agg')
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")  # doctest: +ELLIPSIS
-            >>> bank_lines = BankLines(config_file)
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)  # doctest: +ELLIPSIS
+            >>> bank_lines = BankLines(config_file, logger)
             N...e
             >>> bank_lines.plot_flags["save_plot"] = False
             >>> station_coords = np.array([[0, 0, 0], [1, 1, 0]])
@@ -326,8 +334,10 @@ class BankLines:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")  # doctest: +ELLIPSIS
-            >>> bank_lines = BankLines(config_file)
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)
+            >>> bank_lines = BankLines(config_file, logger)
             N...e
             >>> bank = [LineString([(0, 0), (1, 1)])]
             >>> banklines = gpd.GeoSeries([LineString([(0, 0), (1, 1)])])
@@ -375,8 +385,10 @@ class BankLines:
 
         Examples:
             ```python
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
-            >>> river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)
+            >>> river_data = BankLinesRiverData(config_file, logger)  # doctest: +ELLIPSIS
             N...e
             >>> simulation_data, critical_water_depth = river_data.simulation_data()
             N...e

@@ -25,16 +25,18 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-from typing import Tuple, List, Dict, Optional
-from pathlib import Path
-import numpy as np
-import netCDF4
-from shapely.geometry import LineString, Point
-from shapely import prepare
-from geopandas.geodataframe import GeoDataFrame
-from dfastbe.io.logger import log_text
-from dfastbe.io.config import SimulationFilesError, ConfigFile, get_bbox
 
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+import netCDF4
+import numpy as np
+from geopandas.geodataframe import GeoDataFrame
+from shapely import prepare
+from shapely.geometry import LineString, Point
+
+from dfastbe.io.config import ConfigFile, SimulationFilesError, get_bbox
+from dfastbe.io.logger import log_text
 
 __all__ = ["BaseSimulationData", "BaseRiverData", "LineGeometry"]
 
@@ -621,7 +623,9 @@ class BaseRiverData:
         Examples:
             ```python
             >>> from dfastbe.io.data_models import ConfigFile, BaseRiverData
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> river_data = BaseRiverData(config_file)
             No message found for read_chainage
             No message found for clip_chainage

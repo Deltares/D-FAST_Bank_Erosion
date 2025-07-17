@@ -445,7 +445,7 @@ class TestConfigFile:
 
     def test_init(self, config: ConfigParser):
         """Test initialization of ConfigFile."""
-        config_file = ConfigFile(config=config)
+        config_file = ConfigFile(config, MagicMock())
         assert isinstance(config_file, ConfigFile)
 
     def test_read(self, config_data: str, fs: FakeFilesystem):
@@ -458,29 +458,29 @@ class TestConfigFile:
 
     def test_write(self, config: ConfigParser, config_data: str, fs: FakeFilesystem):
         """Test writing a configuration file."""
-        config_file = ConfigFile(config=config)
+        config_file = ConfigFile(config, MagicMock())
         config_file.write("test_output.cfg")
         with open("test_output.cfg", "r") as file:
             assert file.read() == config_data
 
     def test_get_str(self, config: ConfigParser):
         """Test retrieving a string value."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock, "tests/data/erosion/test.cfg")
         assert config_file.get_str("General", "Version") == "1.0"
 
     def test_get_int(self, config: ConfigParser):
         """Test retrieving an integer value."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         assert config_file.get_int("Detect", "NBank") == 2
 
     def test_get_bool(self, config: ConfigParser):
         """Test retrieving a boolean value."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         assert config_file.get_bool("General", "plotting") is True
 
     def test_get_float(self, config: ConfigParser):
         """Test retrieving a float value."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         assert config_file.get_float("General", "ZoomStepKM") == pytest.approx(
             0.1, rel=1e-6
         )
@@ -488,14 +488,14 @@ class TestConfigFile:
     def test_get_sim_file(self, config: ConfigParser):
         """Test retrieving a simulation file."""
         path = Path("tests/data/erosion")
-        config_file = ConfigFile(config, str(path / "test.cfg"))
+        config_file = ConfigFile(config, MagicMock(), str(path / "test.cfg"))
         assert config_file.get_sim_file("Detect", "") == str(
             path.resolve() / "test_sim.nc"
         )
 
     def test_get_start_end_stations(self, config: ConfigParser):
         """Test retrieving km bounds."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         start, end = config_file.get_start_end_stations()
         assert start == pytest.approx(123.0, rel=1e-6)
         assert end == pytest.approx(128.0, rel=1e-6)
@@ -514,7 +514,7 @@ class TestConfigFile:
     def test_read_bank_lines(self, config: ConfigParser, fs: FakeFilesystem):
         """Test retrieving bank lines."""
         config["General"]["BankLine"] = "bankfile"
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
 
         fs.create_file(
             "inputs/bankfile_1.xyc",
@@ -568,7 +568,7 @@ class TestConfigFile:
         self, key, value, default, valid, expected, config: ConfigParser
     ):
         """Test retrieving a parameter field."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5, 6, 7])]
         num_stations_per_bank = [len(bank_i) for bank_i in bank_km]
         if value:
@@ -593,7 +593,7 @@ class TestConfigFile:
         self, key, value, positive, valid, expected, config: ConfigParser
     ):
         """Test retrieving a parameter field."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5])]
 
         # Case 5: Parameter does not match valid values
@@ -605,7 +605,7 @@ class TestConfigFile:
 
     def test_get_bank_search_distances(self, config: ConfigParser):
         """Test retrieving bank search distances."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
 
         # Case 1: Bank search distances exist in the configuration
         result = config_file.get_bank_search_distances(2)
@@ -640,7 +640,7 @@ class TestConfigFile:
         """Test resolving paths in the configuration."""
         config = ConfigParser()
         config.read_dict(path_dict)
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         config_file.resolve("tests/data/erosion")
         assert config_file.config["General"]["RiverKM"] == str(
             Path("tests/data/erosion").resolve() / "inputs/rivkm_20m.xyc"
@@ -650,7 +650,7 @@ class TestConfigFile:
         """Test converting paths to relative paths."""
         config = ConfigParser()
         config.read_dict(path_dict)
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         config_file.relative_to("tests/data")
         assert config_file.config["General"]["RiverKM"] == str(
             Path("erosion") / "inputs/rivkm_20m.xyc"
@@ -661,7 +661,7 @@ class TestConfigFile:
         cwd = Path("tests/data/erosion").resolve()
         config = ConfigParser()
         config.read_dict(path_dict)
-        config_file = ConfigFile(config, cwd / "test.cfg")
+        config_file = ConfigFile(config, MagicMock(), cwd / "test.cfg")
 
         with patch("dfastbe.io.config.Path.cwd", return_value=str(cwd)):
             rootdir = config_file.make_paths_absolute()
@@ -726,8 +726,8 @@ class TestConfigFile:
                 }
             }
         )
-        config_file = ConfigFile(config=config)
-        config_result = config_file._upgrade(config_file.config)
+        config_file = ConfigFile(config, MagicMock())
+        config_result = config_file._upgrade(config_file.config, MagicMock())
         assert config_result["General"]["plotting"] == "yes"
         assert config_result["Detect"]["SimFile"] == "inputs/sim0270/SDS-j19_map.nc"
 
@@ -750,7 +750,7 @@ class TestConfigFile:
         """Test the get_plotting_flags method."""
         config = ConfigParser()
         config.read_dict(plotting_data)
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         root_dir = Path("tests/data/erosion").resolve()
         plotting_flags = config_file.get_plotting_flags(str(root_dir))
 
@@ -784,7 +784,7 @@ class TestConfigFileE2E:
         config.add_section("Group 3")
         config["Group 3"]["LongKey"] = "3"
 
-        config = ConfigFile(config)
+        config = ConfigFile(config, MagicMock())
         config.write(filename)
         all_lines = open(filename, "r").read().splitlines()
         all_lines_ref = [

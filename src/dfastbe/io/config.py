@@ -54,7 +54,9 @@ class ConfigFile:
     settings and supports upgrading older configuration formats.
     """
 
-    def __init__(self, config: ConfigParser, path: Union[Path, str] = None):
+    def __init__(
+        self, config: ConfigParser, logger: Logger, path: Union[Path, str] = None
+    ):
         """
         Initialize the ConfigFile object.
 
@@ -69,7 +71,9 @@ class ConfigFile:
                 ```python
                 >>> import tempfile
                 >>> from dfastbe.io.config import ConfigFile
-                >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+                >>> import logging
+                >>> logger = logging.getLogger("test_logger")
+                >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
                 >>> print(config_file.config["General"]["Version"])
                 1.0
 
@@ -77,7 +81,9 @@ class ConfigFile:
             Writing a configuration file:
                 ```python
                 >>> from dfastbe.io.config import ConfigFile
-                >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+                >>> import logging
+                >>> logger = logging.getLogger("test_logger")
+                >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
                 >>> with tempfile.TemporaryDirectory() as tmpdirname:
                 ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
 
@@ -85,6 +91,7 @@ class ConfigFile:
         """
         self._config = config
         self.crs = "EPSG:28992"
+        self.logger = logger
         if path:
             self.path = Path(path)
             self.root_dir = self.path.parent
@@ -139,7 +146,9 @@ class ConfigFile:
             Read a config file:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
 
             ```
         """
@@ -157,8 +166,8 @@ class ConfigFile:
             config = cls.config_file_callback_parser(path)
 
         # if version != "1.0":
-        config = cls._upgrade(config)
-        return cls(config, path=path)
+        config = cls._upgrade(config, logger)
+        return cls(config, logger, path=path)
 
     @staticmethod
     def config_file_callback_parser(path: str) -> ConfigParser:
@@ -183,7 +192,7 @@ class ConfigFile:
         return config
 
     @staticmethod
-    def _upgrade(config: ConfigParser) -> ConfigParser:
+    def _upgrade(config: ConfigParser, logger: Logger) -> ConfigParser:
         """Upgrade the configuration data structure to version 1.0 format.
 
         Args:
@@ -195,7 +204,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> result = config_file._upgrade(config_file.config)
             >>> isinstance(result, ConfigParser)
             True
@@ -219,7 +230,7 @@ class ConfigFile:
             )
             config = _move_parameter_location(config, "General", "SimFile", "Detect")
             config = _move_parameter_location(config, "General", "NBank", "Detect")
-            config_file = ConfigFile(config)
+            config_file = ConfigFile(config, logger)
             n_bank = config_file.get_int("Detect", "NBank", default=0, positive=True)
             for i in range(1, n_bank + 1):
                 config = _move_parameter_location(
@@ -245,7 +256,7 @@ class ConfigFile:
                 config, "General", "EroVolEqui", "Erosion"
             )
             config = _move_parameter_location(config, "General", "NLevel", "Erosion")
-            config_file = ConfigFile(config)
+            config_file = ConfigFile(config, logger)
             n_level = config_file.get_int("Erosion", "NLevel", default=0, positive=True)
 
             for i in range(1, n_level + 1):
@@ -331,7 +342,9 @@ class ConfigFile:
             ```python
             >>> import tempfile
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> with tempfile.TemporaryDirectory() as tmpdirname:
             ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
 
@@ -386,7 +399,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> result = config_file.get_str("General", "BankDir")
             >>> expected = Path("tests/data/erosion/output/banklines").resolve()
             >>> str(expected) == result
@@ -400,9 +415,11 @@ class ConfigFile:
             if default is not None:
                 val = default
             else:
-                raise ConfigFileError(
+                error = (
                     f"No value specified for required keyword {key} in block {group}."
-                ) from e
+                )
+                self.logger.error(error)
+                raise ConfigFileError(error) from e
         return val
 
     def get_bool(
@@ -427,7 +444,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.get_bool("General", "Plotting")
             True
 
@@ -479,7 +498,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.get_float("General", "ZoomStepKM")
             1.0
 
@@ -527,7 +548,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.get_int("Detect", "NBank")
             2
 
@@ -562,7 +585,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> result = config_file.get_sim_file("Erosion", "1")
             >>> expected = Path("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc").resolve()
             >>> str(expected) == result
@@ -582,7 +607,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.get_start_end_stations()
             (123.0, 128.0)
 
@@ -684,7 +711,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5, 6, 7])]
             >>> num_stations_per_bank = [len(bank) for bank in bank_km]
             >>> config_file.get_parameter("General", "ZoomStepKM", num_stations_per_bank)
@@ -833,7 +862,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.get_bank_search_distances(2)
             [50.0, 50.0]
 
@@ -868,7 +899,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.get_range("General", "Boundaries")
             (123.0, 128.0)
 
@@ -917,7 +950,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.resolve("tests/data/erosion")
 
             ```
@@ -976,7 +1011,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.relative_to("testing/data/erosion")
 
             ```
@@ -1041,7 +1078,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.resolve_parameter("General", "RiverKM", "tests/data/erosion")
 
             ```
@@ -1067,7 +1106,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.parameter_relative_to("General", "RiverKM", "tests/data/erosion")
 
             ```

@@ -3,8 +3,8 @@ from typing import List, Tuple
 from shapely.geometry import LineString, MultiLineString, Point
 from shapely.geometry.polygon import Polygon
 
-from dfastbe.io.logger import log_text
 from dfastbe.io.data_models import BaseRiverData, BaseSimulationData, LineGeometry
+from dfastbe.io.logger import log_text
 
 MAX_RIVER_WIDTH = 1000
 
@@ -171,7 +171,9 @@ class BankLinesRiverData(BaseRiverData):
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)
             >>> bank_lines_river_data = BankLinesRiverData(config_file)
             No message found for read_chainage
             No message found for clip_chainage
@@ -216,8 +218,10 @@ class BankLinesRiverData(BaseRiverData):
             ```python
             >>> from dfastbe.io.config import ConfigFile
             >>> from unittest.mock import patch
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
-            >>> bank_lines_river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)
+            >>> bank_lines_river_data = BankLinesRiverData(config_file, logger)  # doctest: +ELLIPSIS
             N...e
             >>> simulation_data, h0 = bank_lines_river_data.simulation_data()
             N...e

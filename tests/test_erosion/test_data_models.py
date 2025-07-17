@@ -1,21 +1,26 @@
-import pytest
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+
 import numpy as np
-from unittest.mock import patch, MagicMock
+import pytest
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
-from dfastbe.io.config import ConfigFile
-from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData, ErosionSimulationData
+
 from dfastbe.bank_erosion.data_models.calculation import (
-    ErosionInputs,
-    WaterLevelData,
-    MeshData,
     BankData,
-    FairwayData,
+    ErosionInputs,
     ErosionResults,
+    FairwayData,
+    MeshData,
     SingleBank,
-    SingleErosion
+    SingleErosion,
+    WaterLevelData,
 )
+from dfastbe.bank_erosion.data_models.inputs import (
+    ErosionRiverData,
+    ErosionSimulationData,
+)
+from dfastbe.io.config import ConfigFile
 
 
 class TestErosionInputs:
@@ -107,7 +112,6 @@ class TestBankData:
         )
         assert bank_data.right.bank_line_coords[0, 0] == result[bank_order.index("right")]
         assert bank_data.left.bank_line_coords[0, 0] == result[bank_order.index("left")]
-
 
 
 def test_fairway_data():
@@ -274,7 +278,7 @@ class TestErosionRiverData:
     @pytest.fixture
     def river_data(self) -> ErosionRiverData:
         path = "tests/data/erosion/meuse_manual.cfg"
-        config_file = ConfigFile.read(path)
+        config_file = ConfigFile.read(path, MagicMock())
         river_data = ErosionRiverData(config_file)
         return river_data
 
