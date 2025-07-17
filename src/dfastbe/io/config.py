@@ -418,7 +418,7 @@ class ConfigFile:
                 error = (
                     f"No value specified for required keyword {key} in block {group}."
                 )
-                self.logger.error(error)
+                self.logger.exception(error)
                 raise ConfigFileError(error) from e
         return val
 
@@ -465,9 +465,9 @@ class ConfigFile:
             if default is not None:
                 val = default
             else:
-                raise ConfigFileError(
-                    f"No boolean value specified for required keyword {key} in block {group}."
-                ) from e
+                error = f"No boolean value specified for required keyword {key} in block {group}."
+                self.logger.exception(error)
+                raise ConfigFileError(error) from e
 
         return val
 
@@ -512,13 +512,13 @@ class ConfigFile:
             if default is not None:
                 val = default
             else:
-                raise ConfigFileError(
-                    f"No floating point value specified for required keyword {key} in block {group}."
-                ) from e
+                error = f"No floating point value specified for required keyword {key} in block {group}."
+                self.logger.exception(error)
+                raise ConfigFileError(error) from e
         if positive and val < 0.0:
-            raise ConfigFileError(
-                f"Value for {key} in block {group} must be positive, not {val}."
-            )
+            error = f"Value for {key} in block {group} must be positive, not {val}."
+            self.logger.exception(error)
+            raise ConfigFileError(error)
         return val
 
     def get_int(
@@ -562,13 +562,13 @@ class ConfigFile:
             if default is not None:
                 val = default
             else:
-                raise ConfigFileError(
-                    f"No integer value specified for required keyword {key} in block {group}."
-                ) from e
+                error = f"No integer value specified for required keyword {key} in block {group}."
+                self.logger.exception(error)
+                raise ConfigFileError(error) from e
         if positive and val <= 0:
-            raise ConfigFileError(
-                f"Value for {key} in block {group} must be positive, not {val}."
-            )
+            error = f"Value for {key} in block {group} must be positive, not {val}."
+            self.logger.exception(error)
+            raise ConfigFileError(error)
         return val
 
     def get_sim_file(self, group: str, istr: str) -> str:
@@ -727,9 +727,9 @@ class ConfigFile:
         except (KeyError, TypeError) as e:
             value = None
             if default is None:
-                raise ConfigFileError(
-                    f'No value specified for required keyword "{key}" in block "{group}".'
-                ) from e
+                error = f'No value specified for required keyword "{key}" in block "{group}".'
+                self.logger.exception(error)
+                raise ConfigFileError(error) from e
             use_default = True
 
         return self.process_parameter(
@@ -767,9 +767,13 @@ class ConfigFile:
             float: The validated parameter value.
         """
         if positive and value < 0:
-            raise ValueError(f'Value of "{key}" should be positive, not {value}.')
+            error = f'Value of "{key}" should be positive, not {value}.'
+            self.logger.exception(error)
+            raise ValueError(error)
         if valid is not None and valid.count(value) == 0:
-            raise ValueError(f'Value of "{key}" should be in {valid}, not {value}.')
+            error = f'Value of "{key}" should be in {valid}, not {value}.'
+            self.logger.exception(error)
+            raise ValueError(error)
         return value
 
     def process_parameter(
@@ -877,13 +881,13 @@ class ConfigFile:
             d_lines_split = d_lines_key[1:-1].split(",")
             d_lines = [float(d) for d in d_lines_split]
             if not all([d > 0 for d in d_lines]):
-                raise ValueError(
-                    "keyword DLINES should contain positive values in the configuration file."
-                )
+                error = f"keyword DLINES should contain positive values in the configuration file."
+                self.logger.exception(error)
+                raise ValueError(error)
             if len(d_lines) != num_search_lines:
-                raise ConfigFileError(
-                    "keyword DLINES should contain NBANK values in the configuration file."
-                )
+                error = "keyword DLINES should contain NBANK values in the configuration file."
+                self.logger.exception(error)
+                raise ConfigFileError(error)
         return d_lines
 
     def get_range(self, group: str, key: str) -> Tuple[float, float]:
@@ -919,9 +923,9 @@ class ConfigFile:
             else:
                 val = (val_list[0], val_list[1])
         except ValueError as e:
-            raise ValueError(
-                f'Invalid range specification "{str_val}" for required keyword "{key}" in block "{group}".'
-            ) from e
+            error = f'Invalid range specification "{str_val}" for keyword "{key}" in block "{group}".'
+            self.logger.exception(error)
+            raise ValueError(error) from e
         return val
 
     def get_river_center_line(self) -> LineString:
