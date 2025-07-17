@@ -27,12 +27,14 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 import logging
 from pathlib import Path
-from dfastbe.io.logger import load_program_texts
-from dfastbe.io.config import ConfigFile
+
+from dfastbe import __file__
 from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.gui.gui import main
-from dfastbe import __file__
+from dfastbe.io.config import ConfigFile
+from dfastbe.io.logger import load_program_texts
+
 R_DIR = Path(__file__).resolve().parent
 LOG_DATA_DIR = R_DIR / "io/log_data"
 
@@ -89,7 +91,7 @@ def run(
     if run_mode == "GUI":
         main(configfile)
     else:
-        config_file = ConfigFile.read(configfile)
+        config_file = ConfigFile.read(configfile, logger)
 
         if run_mode == "BANKLINES":
             bank_lines = BankLines(config_file, logger)

@@ -6,19 +6,23 @@ from contextlib import contextmanager
 from io import StringIO
 from pathlib import Path
 from typing import Dict, Tuple
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 from geopandas import GeoDataFrame
 from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry import LineString
-from dfastbe.io.data_models import LineGeometry, BaseSimulationData, BaseRiverData, _read_fm_map
+
+from dfastbe.io.config import ConfigFile, SimulationFilesError
+from dfastbe.io.data_models import (
+    BaseRiverData,
+    BaseSimulationData,
+    LineGeometry,
+    _read_fm_map,
+)
 from dfastbe.io.file_utils import absolute_path, relative_path
 from dfastbe.io.logger import get_text, load_program_texts, log_text
-from dfastbe.io.config import SimulationFilesError, ConfigFile
-
-
 
 filename = "tests/data/files/e02_f001_c011_simplechannel_map.nc"
 
@@ -447,7 +451,7 @@ class TestConfigFile:
     def test_read(self, config_data: str, fs: FakeFilesystem):
         """Test reading a configuration file."""
         fs.create_file("dummy_path.cfg", contents=config_data)
-        config_file = ConfigFile.read("dummy_path.cfg")
+        config_file = ConfigFile.read("dummy_path.cfg", MagicMock())
         assert isinstance(config_file, ConfigFile)
         assert config_file.config["General"]["Version"] == "1.0"
         assert config_file.config["Detect"]["NBank"] == "2"
@@ -498,7 +502,7 @@ class TestConfigFile:
 
     def test_get_search_lines(self):
         """Test retrieving search lines."""
-        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", MagicMock())
         mock_linestring = LineString([(0, 0), (1, 1), (2, 2)])
 
         with patch("dfastio.xyc.models.XYCModel.read", return_value=mock_linestring):
@@ -613,7 +617,7 @@ class TestConfigFile:
 
     def test_get_river_center_line(self):
         """Test retrieving x and y coordinates."""
-        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", MagicMock())
         mock_linestring = LineString([(0, 0, 1), (1, 1, 2), (2, 2, 3)])
 
         with patch("dfastio.xyc.models.XYCModel.read", return_value=mock_linestring):
@@ -762,7 +766,7 @@ class TestConfigFile:
 class TestConfigFileE2E:
     def test_initialization(self):
         path = "tests/data/erosion/meuse_manual.cfg"
-        config_file = ConfigFile.read(path)
+        config_file = ConfigFile.read(path, MagicMock())
         river_km = config_file.config["General"]["riverkm"]
         assert Path(river_km).exists()
 
@@ -803,7 +807,7 @@ class TestRiverData:
     @pytest.fixture
     def river_data(self) -> BaseRiverData:
         path = "tests/data/erosion/meuse_manual.cfg"
-        config_file = ConfigFile.read(path)
+        config_file = ConfigFile.read(path, MagicMock())
         river_data = BaseRiverData(config_file)
         return river_data
 

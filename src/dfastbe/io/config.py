@@ -28,6 +28,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
 from configparser import ConfigParser
 from configparser import Error as ConfigparserError
+from logging import Logger
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -118,7 +119,7 @@ class ConfigFile:
         self._root_dir = value
 
     @classmethod
-    def read(cls, path: Union[str, Path]) -> "ConfigFile":
+    def read(cls, path: Union[str, Path], logger: Logger) -> "ConfigFile":
         """Read a configParser object (configuration file).
 
         Reads the config file using the standard `configparser`. Falls back to a
@@ -143,14 +144,16 @@ class ConfigFile:
             ```
         """
         if not Path(path).exists():
-            raise FileNotFoundError(f"The Config-File: {path} does not exist")
+            error = f"The Config-File: {path} does not exist"
+            logger.exception(error)
+            raise FileNotFoundError(error)
 
         try:
             config = ConfigParser(comment_prefixes="%")
             with open(path, "r") as configfile:
                 config.read_file(configfile)
         except ConfigparserError as e:
-            print(f"Error during reading the config file: {e}")
+            logger.exception(f"Error during reading the config file: {e}")
             config = cls.config_file_callback_parser(path)
 
         # if version != "1.0":
