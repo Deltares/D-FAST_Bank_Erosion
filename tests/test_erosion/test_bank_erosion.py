@@ -128,8 +128,8 @@ class TestErosion:
             yield
 
     @pytest.mark.unit
-    def test_get_ship_parameters(self, mock_erosion: Erosion, mock_config_file):
-        """Test the get_ship_parameters method.
+    def test_get_ship_data(self, mock_erosion: Erosion, mock_config_file):
+        """Test the get_ship_data method.
 
         This method retrieves ship parameters based on the number of stations per bank.
         Leverage the mock_config_file to simulate the configuration file behavior.
@@ -152,7 +152,7 @@ class TestErosion:
         num_stations_per_bank = [10, 15]
         mock_erosion._config_file = mock_config_file
 
-        ship_parameters = mock_erosion.get_ship_parameters(num_stations_per_bank)
+        ship_parameters = mock_erosion.get_ship_data(num_stations_per_bank)
 
         expected_keys = [
             "vship0",
@@ -195,7 +195,7 @@ class TestErosion:
                 A mocked FairwayData instance to simulate fairway data retrieval.
             ConfigFile:
                 A mocked ConfigFile instance to simulate configuration file behavior.
-            get_ship_parameters:
+            get_ship_data:
                 A mocked method to return predefined shipping data.
 
         Asserts:
@@ -231,7 +231,7 @@ class TestErosion:
         mock_erosion._config_file = mock_config_file
 
         with patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters",
+            "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_data",
             return_value=shipping_data,
         ):
             erosion_inputs = mock_erosion._prepare_initial_conditions(
@@ -971,7 +971,7 @@ class TestErosion:
                 A mocked function to return a predefined array of km midpoints.
             _process_river_axis_by_center_line:
                 Return a mocked center line instead of executing the function.
-            get_ship_parameters:
+            get_ship_data:
                 A mocked function to return the shipping_data dictionary.
             _read_discharge_parameters:
                 Return the mock_single_level_parameters instance instead of executing the function.
@@ -1031,9 +1031,9 @@ class TestErosion:
         ) as mock_process_river_axis_by_center_line, patch(
             "dfastbe.io.data_models.LineGeometry.to_file",
         ), patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters",
+            "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_data",
             return_value=shipping_data,
-        ) as mock_get_ship_parameters, patch(
+        ) as mock_get_ship_data, patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion._read_discharge_parameters",
             return_value=mock_single_level_parameters,
         ) as mock_read_discharge_parameters, patch(
@@ -1051,7 +1051,7 @@ class TestErosion:
         mock_get_fairway_data.assert_called_once()
         mock_get_km_bins.assert_called_once()
         mock_process_river_axis_by_center_line.assert_called_once()
-        mock_get_ship_parameters.assert_called_once()
+        mock_get_ship_data.assert_called_once()
         mock_read_discharge_parameters.assert_called()
         mock_read_simulation_data.assert_called()
         mock_write_bankline_shapefiles.assert_called_once()
