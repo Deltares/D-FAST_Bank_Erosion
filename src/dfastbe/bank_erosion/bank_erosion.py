@@ -35,7 +35,6 @@ from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
 
 from dfastbe import __version__
-from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData, ErosionSimulationData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     DischargeLevels,
@@ -57,6 +56,7 @@ from dfastbe.bank_erosion.data_models.inputs import (
 from dfastbe.bank_erosion.debugger import Debugger
 from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
+from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.utils import (
     BankLinesProcessor,
     calculate_alpha,
@@ -889,7 +889,7 @@ class Erosion:
 
     def plot(self):
         # create various plots
-        if self.river_data.plot_flags["plot_data"]:
+        if self.river_data.plot_flags.plot_data:
             plotter = ErosionPlotter(
                 self.gui,
                 self.river_data.plot_flags,

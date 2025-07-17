@@ -27,19 +27,21 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, List, Optional, Tuple, Union
 
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
+
+from dfastbe.io.config import PlotProperties
 from dfastbe.io.data_models import BaseSimulationData
 
 
 class BasePlot:
 
-    def __init__(self, gui, plot_flags) -> None:
+    def __init__(self, gui, plot_flags: PlotProperties) -> None:
         self.gui = gui
         self.flags = plot_flags
 
@@ -198,7 +200,13 @@ class BasePlot:
 
 class Plot:
 
-    def __init__(self, plot_flags, scale: int = 1000, aspect: int = None, gui: bool = False) -> None:
+    def __init__(
+        self,
+        plot_flags: PlotProperties,
+        scale: int = 1000,
+        aspect: int = None,
+        gui: bool = False,
+    ) -> None:
         """
 
         Args:
@@ -256,13 +264,13 @@ class Plot:
     ) -> int:
         """Save the plot to a file."""
         figure_index += 1
-        path = Path(self.flags['fig_dir']) / f"{figure_index}_{plot_name}"
-        if self.flags["save_plot_zoomed"] and zoom_xy:
-            self._zoom_xy_and_save(path, self.flags["plot_ext"], zoom_coords)
-        elif self.flags["save_plot_zoomed"]:
-            self._zoom_x_and_save(path, self.flags["plot_ext"], zoom_coords)
+        path = Path(self.flags.save_dir) / f"{figure_index}_{plot_name}"
+        if self.flags.save_zoomed_plot and zoom_xy:
+            self._zoom_xy_and_save(path, self.flags.plot_extension, zoom_coords)
+        elif self.flags.save_zoomed_plot:
+            self._zoom_x_and_save(path, self.flags.plot_extension, zoom_coords)
 
-        fig_path = path.with_suffix(self.flags["plot_ext"])
+        fig_path = path.with_suffix(self.flags.plot_extension)
         self.save_fig(fig_path)
         return figure_index
 

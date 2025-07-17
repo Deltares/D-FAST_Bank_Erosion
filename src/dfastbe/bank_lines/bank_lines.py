@@ -1,6 +1,6 @@
 """Bank line detection module."""
 
-from typing import List, Tuple, Dict, Any
+from typing import Any, Dict, List, Tuple
 
 import geopandas as gpd
 import numpy as np
@@ -12,12 +12,11 @@ from shapely.geometry.polygon import Polygon
 from dfastbe import __version__
 from dfastbe.bank_lines.data_models import BankLinesRiverData
 from dfastbe.bank_lines.plotter import BankLinesPlotter
-from dfastbe.io.data_models import BaseSimulationData
+from dfastbe.bank_lines.utils import poly_to_line, sort_connect_bank_lines, tri_to_line
 from dfastbe.io.config import ConfigFile
-from dfastbe.io.logger import log_text
-from dfastbe.bank_lines.utils import sort_connect_bank_lines, poly_to_line, tri_to_line
+from dfastbe.io.data_models import BaseSimulationData
+from dfastbe.io.logger import log_text, timed_logger
 from dfastbe.utils import on_right_side
-from dfastbe.io.logger import timed_logger
 
 MAX_RIVER_WIDTH = 1000
 RAW_DETECTED_BANKLINE_FRAGMENTS_FILE = "raw_detected_bankline_fragments"
@@ -66,7 +65,7 @@ class BankLines:
         self.simulation_data, self.critical_water_depth = (
             self.river_data.simulation_data()
         )
-        if self.plot_flags["plot_data"]:
+        if self.plot_flags.plot_data:
             self.plotter = self.get_plotter()
 
         self._results = None
@@ -223,7 +222,7 @@ class BankLines:
         return masked_bank_lines
 
     def plot(self):
-        if self.plot_flags["plot_data"]:
+        if self.plot_flags.plot_data:
             self.plotter.plot(
                 self.search_lines.size,
                 self.results["bank"],
