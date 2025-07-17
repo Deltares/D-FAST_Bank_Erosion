@@ -19,7 +19,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
     SingleLevelParameters,
     SingleParameters,
 )
-from dfastbe.bank_erosion.data_models.inputs import ErosionSimulationData
+from dfastbe.bank_erosion.data_models.inputs import ErosionSimulationData, ShippingData
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.cmd import run
 from dfastbe.io.config import ConfigFile
@@ -42,38 +42,39 @@ def test_bank_erosion():
 class TestErosion:
 
     @pytest.fixture
-    def shipping_data(self) -> Dict[str, list]:
+    def shipping_data(self) -> ShippingData:
         """Fixture to create mock shipping data.
 
         Returns:
-            Dict[str, list]: A dictionary with mock shipping data arrays.
-                vship0 (np.array):
+            ShippingData: A ShippingData instance with mock shipping data arrays.
+                vship (np.array):
                     initial ship velocities for two banks.
-                Nship0 (np.array):
+                nship (np.array):
                     initial number of ships for two banks.
-                nwave0 (np.array):
+                nwave (np.array):
                     initial amount of waves per ship for two banks.
-                Tship0 (np.array):
-                    initial ship periods for two banks.
-                ship0 (np.array):
-                    initial ship heights for two banks.
-                parslope0 (np.array):
+                draught (np.array):
+                    initial ship draughts for two banks.
+                shiptype (np.array):
+                    initial ship types for two banks.
+                slope (np.array):
                     initial bank slope parameters for two banks.
-                parreed0 (np.array):
+                reed (np.array):
                     initial bank vegetation parameters for two banks.
         """
-        return {
-            "vship0": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
-            "Nship0": [
+        ship_dict = {
+            "vship": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
+            "nship": [
                 np.array([20912, 20912, 20912]),
                 np.array([20912, 20912, 20912]),
             ],
-            "nwave0": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
-            "Tship0": [np.array([1.2, 1.2, 1.2]), np.array([1.2, 1.2, 1.2])],
-            "ship0": [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])],
-            "parslope0": [np.array([20.0, 20.0, 20.0]), np.array([20.0, 20.0, 20.0])],
-            "parreed0": [np.array([0.0, 0.0, 0.0]), np.array([0.0, 0.0, 0.0])],
+            "nwave": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
+            "draught": [np.array([1.2, 1.2, 1.2]), np.array([1.2, 1.2, 1.2])],
+            "shiptype": [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])],
+            "slope": [np.array([20.0, 20.0, 20.0]), np.array([20.0, 20.0, 20.0])],
+            "reed": [np.array([0.0, 0.0, 0.0]), np.array([0.0, 0.0, 0.0])],
         }
+        return ShippingData(MagicMock(), **ship_dict)
 
     @pytest.fixture
     def mock_erosion(self):
@@ -231,7 +232,7 @@ class TestErosion:
         mock_erosion._config_file = mock_config_file
 
         with patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_data",
+            "dfastbe.bank_erosion.bank_erosion.ShippingData.get_ship_data",
             return_value=shipping_data,
         ):
             erosion_inputs = mock_erosion._prepare_initial_conditions(
@@ -242,7 +243,7 @@ class TestErosion:
         mock_config_file.get_bool.assert_called_once()
 
         assert np.array_equal(
-            erosion_inputs.shipping_data["vship0"][0], np.array([5.0, 5.0, 5.0])
+            erosion_inputs.shipping_data.vship[0], np.array([5.0, 5.0, 5.0])
         )
         assert np.array_equal(
             erosion_inputs.left.wave_fairway_distance_0, np.array([150, 150, 150])
@@ -1031,10 +1032,10 @@ class TestErosion:
         ) as mock_process_river_axis_by_center_line, patch(
             "dfastbe.io.data_models.LineGeometry.to_file",
         ), patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_data",
+            "dfastbe.bank_erosion.bank_erosion.ShippingData.get_ship_data",
             return_value=shipping_data,
         ) as mock_get_ship_data, patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion._read_discharge_parameters",
+            "dfastbe.bank_erosion.bank_erosion.ShippingData.read_discharge_parameters",
             return_value=mock_single_level_parameters,
         ) as mock_read_discharge_parameters, patch(
             "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.read",
