@@ -128,53 +128,6 @@ class TestErosion:
         with patch.object(dfastbe.io.logger, "PROGTEXTS", {}, create=True):
             yield
 
-    @pytest.mark.unit
-    def test_get_ship_data(self, mock_erosion: Erosion, mock_config_file):
-        """Test the get_ship_data method.
-
-        This method retrieves ship parameters based on the number of stations per bank.
-        Leverage the mock_config_file to simulate the configuration file behavior.
-
-        Args:
-            mock_erosion (Erosion): The Erosion instance to test.
-            mock_config_file (MagicMock): A mocked ConfigFile instance.
-
-        Mocks:
-            Erosion:
-                The Erosion instance without executing the original __init__ method.
-            ConfigFile:
-                The behavior of the get_parameter method to return predefined numpy arrays.
-
-        Asserts:
-            The returned ship parameters are a dictionary with expected keys.
-            Each value in the dictionary is a list of numpy arrays,
-                each array's length matches the number of stations per bank.
-        """
-        num_stations_per_bank = [10, 15]
-        mock_erosion._config_file = mock_config_file
-
-        ship_parameters = mock_erosion.get_ship_data(num_stations_per_bank)
-
-        expected_keys = [
-            "vship0",
-            "Nship0",
-            "nwave0",
-            "Tship0",
-            "ship0",
-            "parslope0",
-            "parreed0",
-        ]
-        mock_config_file.get_parameter.assert_called()
-        assert isinstance(ship_parameters, dict)
-        assert set(ship_parameters.keys()) == set(expected_keys)
-
-        for key, value in ship_parameters.items():
-            assert isinstance(value, list)
-            assert len(value) == len(num_stations_per_bank)
-            for arr, n in zip(value, num_stations_per_bank):
-                assert isinstance(arr, np.ndarray)
-                assert len(arr) == n
-
     @pytest.mark.integration
     def test_prepare_initial_conditions(
         self, mock_erosion: Erosion, shipping_data, mock_config_file
@@ -815,52 +768,6 @@ class TestErosion:
         assert np.allclose(erosion_results.ship_erosion_dist, ship_erosion_dist)
         assert np.allclose(erosion_results.total_erosion_dist, total_erosion_dist)
         assert np.allclose(erosion_results.total_eroded_vol, total_eroded_vol)
-
-    def test_read_discharge_parameters(self, mock_erosion: Erosion, shipping_data):
-        """Test the _read_discharge_parameters method.
-
-        This method reads discharge parameters for a specific discharge level.
-
-        Args:
-            mock_erosion (Erosion):
-                The Erosion instance to test.
-            shipping_data (dict):
-                The shipping data to use for testing.
-
-        Mocks:
-            Erosion._get_param:
-                Mocks the method to return predefined values for testing.
-            Erosion:
-                The Erosion instance without executing the original __init__ method.
-
-        Asserts:
-            The returned discharge parameters are an instance of SingleLevelParameters.
-            The parameters match the expected values from the shipping data.
-        """
-        with patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion._get_param"
-        ) as mock_get_param:
-            mock_get_param.side_effect = [
-                shipping_data["vship0"],
-                shipping_data["Nship0"],
-                shipping_data["nwave0"],
-                shipping_data["Tship0"],
-                shipping_data["ship0"],
-                shipping_data["parslope0"],
-                shipping_data["parreed0"],
-            ]
-            discharge_parameters = mock_erosion._read_discharge_parameters(
-                1, shipping_data, [13]
-            )
-        assert isinstance(discharge_parameters, SingleLevelParameters)
-        assert discharge_parameters.id == 1
-        assert np.allclose(
-            discharge_parameters.left.ship_velocity, shipping_data["vship0"]
-        )
-        assert np.allclose(discharge_parameters.left.num_ship, shipping_data["Nship0"])
-        assert np.allclose(
-            discharge_parameters.left.num_waves_per_ship, shipping_data["nwave0"]
-        )
 
     def test_compute_erosion_per_level(self, mock_erosion: Erosion, mock_debug):
         """Test the compute_erosion_per_level method.

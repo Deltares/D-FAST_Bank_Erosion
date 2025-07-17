@@ -1,21 +1,28 @@
-import pytest
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+
 import numpy as np
-from unittest.mock import patch, MagicMock
+import pytest
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
-from dfastbe.io.config import ConfigFile
-from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData, ErosionSimulationData
+
 from dfastbe.bank_erosion.data_models.calculation import (
-    ErosionInputs,
-    WaterLevelData,
-    MeshData,
     BankData,
-    FairwayData,
+    ErosionInputs,
     ErosionResults,
+    FairwayData,
+    MeshData,
     SingleBank,
-    SingleErosion
+    SingleErosion,
+    SingleLevelParameters,
+    WaterLevelData,
 )
+from dfastbe.bank_erosion.data_models.inputs import (
+    ErosionRiverData,
+    ErosionSimulationData,
+    ShippingData,
+)
+from dfastbe.io.config import ConfigFile
 
 
 class TestErosionInputs:
@@ -107,7 +114,6 @@ class TestBankData:
         )
         assert bank_data.right.bank_line_coords[0, 0] == result[bank_order.index("right")]
         assert bank_data.left.bank_line_coords[0, 0] == result[bank_order.index("left")]
-
 
 
 def test_fairway_data():
@@ -290,3 +296,126 @@ class TestErosionRiverData:
         mock_read.assert_called_once_with(str(expected_path.resolve()))
         assert isinstance(river_axis, LineString)
         assert river_axis.equals(mock_river_axis)
+
+
+class TestShippingData:
+    @pytest.fixture
+    def shipping_dict(self):
+        """Fixture to provide mock shipping data for testing."""
+        return {
+            "vship": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
+            "nship": [
+                np.array([20912, 20912, 20912]),
+                np.array([20912, 20912, 20912]),
+            ],
+            "nwave": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
+            "draught": [np.array([1.2, 1.2, 1.2]), np.array([1.2, 1.2, 1.2])],
+            "shiptype": [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])],
+            "slope": [np.array([20.0, 20.0, 20.0]), np.array([20.0, 20.0, 20.0])],
+            "reed": [np.array([0.0, 0.0, 0.0]), np.array([0.0, 0.0, 0.0])],
+        }
+
+    @pytest.fixture
+    def mock_config_file(self, shipping_dict):
+        """Fixture to create a mock ConfigFile instance for testing ShippingData."""
+        config_file = MagicMock(spec=ConfigFile)
+        config_file.get_parameter.side_effect = [
+            shipping_dict["vship"],
+            shipping_dict["nship"],
+            shipping_dict["nwave"],
+            shipping_dict["draught"],
+            shipping_dict["shiptype"],
+            shipping_dict["slope"],
+            shipping_dict["reed"],
+        ]
+        return config_file
+
+    def test_read_discharge_parameters(self, mock_config_file, shipping_dict):
+        """Test the _read_discharge_parameters method.
+
+        This method reads discharge parameters for a specific discharge level.
+
+        Args:
+            mock_config_file (ConfigFile):
+                The ConfigFile instance to get parameter data from.
+            shipping_data (dict):
+                The shipping data to use for testing.
+
+        Mocks:
+            ConfigFile:
+                The behavior of the get_parameter method to return predefined numpy arrays.
+
+        Asserts:
+            The returned discharge parameters are an instance of SingleLevelParameters.
+            The parameters match the expected values from the shipping data.
+        """
+        shipping_data = ShippingData(mock_config_file, **shipping_dict)
+        discharge_parameters = shipping_data.read_discharge_parameters(1, [13])
+        assert isinstance(discharge_parameters, SingleLevelParameters)
+        assert discharge_parameters.id == 1
+        assert np.allclose(
+            discharge_parameters.left.ship_velocity, shipping_dict["vship"]
+        )
+        assert np.allclose(discharge_parameters.left.num_ship, shipping_dict["nship"])
+        assert np.allclose(
+            discharge_parameters.left.num_waves_per_ship, shipping_dict["nwave"]
+        )
+
+    @pytest.mark.unit
+    def test_get_ship_data(self, mock_config_file):
+        """Test the get_ship_data method.
+
+        This method retrieves ship parameters based on the number of stations per bank.
+        Leverage the mock_config_file to simulate the configuration file behavior.
+
+        Args:
+            mock_config_file (MagicMock):
+                A mocked ConfigFile instance to get parameter data from.
+
+        Mocks:
+            ConfigFile:
+                The behavior of the get_parameter method to return predefined numpy arrays.
+
+        Asserts:
+            The returned ship parameters are a dictionary with expected keys.
+            Each value in the dictionary is a list of numpy arrays,
+                each array's length matches the number of stations per bank.
+        """
+        num_stations_per_bank = [3, 3]
+
+        ship_data = ShippingData.get_ship_data(num_stations_per_bank, mock_config_file)
+
+        assert isinstance(ship_data, ShippingData)
+        assert ship_data.vship[0].shape[0] == num_stations_per_bank[0]
+        assert ship_data.nship[0].shape[0] == num_stations_per_bank[0]
+        assert ship_data.nwave[0].shape[0] == num_stations_per_bank[0]
+        assert ship_data.draught[0].shape[0] == num_stations_per_bank[0]
+        assert ship_data.shiptype[0].shape[0] == num_stations_per_bank[0]
+        assert ship_data.slope[0].shape[0] == num_stations_per_bank[0]
+        assert ship_data.reed[0].shape[0] == num_stations_per_bank[0]
+
+    def test_calculate_ship_derived_parameters(self, mock_config_file, shipping_dict):
+        """Test the ship_derived_parameters method.
+
+        This method retrieves derived ship parameters based on the shipping data.
+
+        Args:
+            mock_config_file (MagicMock):
+                A mocked ConfigFile instance to get parameter data from.
+            shipping_dict (dict):
+                The shipping data to use for testing.
+
+        Mocks:
+            ConfigFile:
+                The behavior of the get_parameter method to return predefined numpy arrays.
+
+        Asserts:
+            The returned parameters are a list of Parameters instances with expected values.
+        """
+        shipping_data = ShippingData(mock_config_file, **shipping_dict)
+        mu_slope, mu_reed = shipping_data._calculate_ship_derived_parameters(
+            shipping_dict["slope"], shipping_dict["reed"]
+        )
+
+        assert np.allclose(mu_slope[0], np.array([0.05, 0.05, 0.05]))
+        assert np.allclose(mu_reed[0], np.array([0.0, 0.0, 0.0]))
