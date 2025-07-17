@@ -752,7 +752,7 @@ class TestErosion:
         mock_erosion.river_data.erosion_time = 1
 
         with patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion._read_discharge_parameters"
+            "dfastbe.bank_erosion.bank_erosion.ShippingData.read_discharge_parameters"
         ) as mock_read_discharge_parameters, patch(
             "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.read"
         ) as mock_read_data, patch(
