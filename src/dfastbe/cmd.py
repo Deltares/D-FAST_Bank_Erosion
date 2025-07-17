@@ -30,6 +30,7 @@ from dfastbe.io.logger import load_program_texts
 from dfastbe.io.config import ConfigFile
 from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_lines.bank_lines import BankLines
+from dfastbe.io.logger import log_text, timed_logger
 from dfastbe.gui.gui import main
 from dfastbe import __file__
 R_DIR = Path(__file__).resolve().parent
@@ -99,5 +100,7 @@ def run(
             erosion.run()
             erosion.plot()
             erosion.save()
+            log_text("end_bankerosion")
+            timed_logger("-- end analysis --")
         else:
             raise ValueError(f"Invalid run mode {run_mode} specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'.")

@@ -176,10 +176,12 @@ class ErosionPlotter(BasePlot):
             collection, ax=plot.ax, shrink=0.5, drawedges=False, label="water depth [m]"
         )
         plot.set_bbox(bbox)
-        plot.ax.set_xlabel(X_AXIS_TITLE)
-        plot.ax.set_ylabel(Y_AXIS_TITLE)
-        plot.ax.grid(True)
-        plot.ax.set_title("water depth and initial bank lines")
+        plot.set_axes_properties(
+            X_AXIS_TITLE,
+            Y_AXIS_TITLE,
+            True,
+            "water depth and initial bank lines"
+        )
         if self.flags.save_plot:
             fig_i = plot.save(fig_i, "banklines", xy_zoom, True)
         return fig_i
@@ -341,10 +343,12 @@ class ErosionPlotter(BasePlot):
             tvol[i] = self.erosion_results.eq_eroded_vol_per_km[i].sum()
         plot.ax.bar(km_mid, tvol, width=0.8 * km_step)
 
-        plot.ax.set_xlabel("river chainage [km]")
-        plot.ax.set_ylabel("eroded volume [m^3]")
-        plot.ax.grid(True)
-        plot.ax.set_title(f"eroded volume per {km_step} chainage km (equilibrium)")
+        plot.set_axes_properties(
+            "river chainage [km]",
+            "eroded volume [m^3]",
+            True,
+            f"eroded volume per {km_step} chainage km (equilibrium)"
+        )
         if self.flags.save_plot:
             fig_i = plot.save(fig_i, "eroded_volume_eq", km_zoom, False)
         return fig_i
@@ -458,12 +462,6 @@ class ErosionPlotter(BasePlot):
         if self.flags.save_plot:
             fig_i = plot.save(fig_i, "erodis", km_zoom, False)
         return fig_i
-
-    def _save_plot(self, fig, ax, fig_i, plot_name, zoom_coords, zoom_xy) -> int:
-        """Save the plot to a file."""
-        return self.save_plot(
-            fig, ax, fig_i, plot_name, zoom_coords, self.flags, zoom_xy
-        )
 
     def _finalize_plots(self):
         if self.flags.close_plot:

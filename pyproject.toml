@@ -15,6 +15,7 @@ matplotlib = "3.8.4"
 geopandas = "^0.14.4"
 shapely = "^2.1.0"
 dfastio = { git = "https://github.com/Deltares/D-FAST_Commons.git", tag = "0.1.0-alpha.2" }
+certifi = "2025.1.31"
 
 [tool.poetry.group.gui.dependencies]
 pyqt5 = "^5.15.11"

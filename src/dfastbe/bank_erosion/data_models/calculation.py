@@ -1,23 +1,43 @@
 """Erosion-related data structures."""
-import os
-from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Iterator, List, Dict, Tuple, ClassVar, TypeVar, Generic, Any, Type, Optional, Union
-import numpy as np
-from pathlib import Path
-from dfastio.xyc.models import XYCModel
-from geopandas import GeoDataFrame
-from shapely.geometry import Point
-from geopandas.geoseries import GeoSeries
-from shapely.geometry import LineString, Point
+from typing import (
+    Any,
+    ClassVar,
+    Dict,
+    Generic,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
-from dfastbe.io.data_models import BaseRiverData, BaseSimulationData
-from dfastbe.io.logger import log_text
-from dfastbe.io.config import ConfigFile
+import numpy as np
+from geopandas import GeoDataFrame
+from geopandas.geoseries import GeoSeries
+from shapely.geometry import Point
 
 
 GenericType = TypeVar("GenericType")
 
+__all__ = [
+    "BaseBank",
+    "SingleErosion",
+    "ErosionInputs",
+    "WaterLevelData",
+    "MeshData",
+    "SingleBank",
+    "BankData",
+    "FairwayData",
+    "ErosionResults",
+    "SingleParameters",
+    "SingleLevelParameters",
+    "SingleCalculation",
+    "SingleDischargeLevel",
+    "DischargeLevels",
+]
 
 @dataclass
 class BaseBank(Generic[GenericType]):
