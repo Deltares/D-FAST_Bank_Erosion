@@ -9,8 +9,8 @@ from shapely.geometry import LineString, MultiLineString, Polygon
 
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.cmd import run
-from dfastbe.io.data_models import BaseSimulationData
 from dfastbe.io.config import ConfigFile
+from dfastbe.io.data_models import BaseSimulationData
 
 matplotlib.use('Agg')
 
@@ -96,7 +96,7 @@ class TestBankLines:
                 mock_simulation_data,
                 0.3,
             )
-            bank_lines = BankLines(MagicMock())
+            bank_lines = BankLines(MagicMock(), MagicMock())
         assert bank_lines.max_river_width == 1000
 
     @patch("dfastbe.bank_lines.bank_lines.BankLinesRiverData")
@@ -120,7 +120,7 @@ class TestBankLines:
         mock_river_data.simulation_data.return_value = (MagicMock(), 0.8)
         mock_river_data_class.return_value = mock_river_data
 
-        bank_lines = BankLines(mock_config_file)
+        bank_lines = BankLines(mock_config_file, MagicMock())
         bank_lines.detect_bank_lines = MagicMock(return_value=MagicMock())
         bank_lines.mask = MagicMock(return_value=MagicMock())
         bank_lines.save = MagicMock()
@@ -281,7 +281,7 @@ class TestBankLines:
                 0.3,
                 MagicMock(),
             )
-            bank_lines = BankLines(mock_config_file)
+            bank_lines = BankLines(mock_config_file, MagicMock())
 
         bank_lines.save(
             bank, banklines, clipped_banklines, bank_areas, mock_config_file
@@ -314,7 +314,7 @@ class TestBankLines:
                 mock_simulation_data,
                 0.3,
             )
-            bank_lines = BankLines(mock_config_file)
+            bank_lines = BankLines(mock_config_file, MagicMock())
             bank_lines.plot_flags = {
                 "save_plot": True,
                 "save_plot_zoomed": True,
