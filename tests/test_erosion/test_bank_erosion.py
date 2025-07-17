@@ -1,11 +1,12 @@
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
 from unittest.mock import MagicMock, patch
 
 import matplotlib
 import numpy as np
 import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem
+from matplotlib.testing.compare import compare_images
 
 import dfastbe.io.logger
 from dfastbe.bank_erosion.bank_erosion import Erosion, calculate_alpha
@@ -28,8 +29,28 @@ from dfastbe.io.data_models import LineGeometry
 matplotlib.use('Agg')
 
 
+@pytest.fixture
+def image_list() -> List[str]:
+    """Fixture to provide a list of all expected resulting images from an erosion run."""
+    return [
+        "1_bankline-detection.png",
+        "1_banklines.png",
+        "2_erosion_sensitivity.png",
+        "3_eroded_volume.png",
+        "4_eroded_volume_per_discharge.png",
+        "5_eroded_volume_per_bank.png",
+        "6_eroded_volume_eq.png",
+        "7_levels_bank_1.png",
+        "8_levels_bank_2.png",
+        "9_velocity_bank_1.png",
+        "10_velocity_bank_2.png",
+        "11_banktype.png",
+        "12_erodis.png",
+    ]
+
+
 @pytest.mark.e2e
-def test_bank_erosion():
+def test_bank_erosion(image_list: List[str]):
     file = "erosion"
     language = "UK"
     config_file = f"tests/data/{file}/meuse_manual.cfg"
@@ -37,6 +58,16 @@ def test_bank_erosion():
     print("Banklines done")
     run(language, "BANKEROSION", config_file)
     print("Bank erosion done")
+    test_path = Path(f"./tests/data/{file}")
+
+    output_dir = test_path / "output/figures"
+    reference_dir = test_path / "reference/figures"
+
+    for image in image_list:
+        reference_img = reference_dir / image
+        output_img = output_dir / image
+        assert output_img.exists()
+        assert compare_images(str(output_img), str(reference_img), 0.0001) is None
 
 
 class TestErosion:
@@ -928,7 +959,7 @@ class TestErosion:
         center_line_mock = MagicMock(spec=LineGeometry)
         center_line_mock.data["stations"].min.return_value = 123.0
         center_line_mock.data["stations"].max.return_value = 123.61
-        with patch(
+        with (patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion._get_fairway_data",
             return_value=mock_fairway_data,
         ) as mock_get_fairway_data, patch(
@@ -947,13 +978,10 @@ class TestErosion:
         ) as mock_read_discharge_parameters, patch(
             "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.read",
             return_value=mock_simulation_data,
-        ) as mock_read_simulation_data, patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion._write_bankline_shapefiles"
-        ) as mock_write_bankline_shapefiles, patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion._generate_plots"
-        ) as mock_generate_plots, patch(
+        ) as mock_read_simulation_data,
+            patch(
             "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.compute_mesh_topology"
-        ) as mock_compute_mesh_topology:
+        ) as mock_compute_mesh_topology):
             mock_erosion.run()
 
         mock_get_fairway_data.assert_called_once()
@@ -962,8 +990,6 @@ class TestErosion:
         mock_get_ship_data.assert_called_once()
         mock_read_discharge_parameters.assert_called()
         mock_read_simulation_data.assert_called()
-        mock_write_bankline_shapefiles.assert_called_once()
-        mock_generate_plots.assert_called_once()
         mock_compute_mesh_topology.assert_called_once()
         with open(mock_erosion.river_data.output_dir / "erovolQ3.evo", "r") as file:
             content = file.read()

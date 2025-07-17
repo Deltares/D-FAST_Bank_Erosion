@@ -199,7 +199,7 @@ class ErosionSimulationData(BaseSimulationData):
 
     def get_fairway_data(self, fairway_face_indices):
         # get fairway face indices
-        fairway_face_indices = fairway_face_indices
+        # fairway_face_indices = fairway_face_indices
 
         # get water depth along the fair-way
         water_depth_fairway = self.water_depth_face[fairway_face_indices]
