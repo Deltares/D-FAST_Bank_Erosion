@@ -25,6 +25,7 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
+import logging
 from pathlib import Path
 from dfastbe.io.logger import load_program_texts
 from dfastbe.io.config import ConfigFile
@@ -83,6 +84,7 @@ def run(
     language = language.upper()
     load_program_texts( LOG_DATA_DIR / f"messages.{language}.ini")
     run_mode = run_mode.upper()
+    logger = logging.getLogger()
 
     if run_mode == "GUI":
         main(configfile)
@@ -90,10 +92,10 @@ def run(
         config_file = ConfigFile.read(configfile)
 
         if run_mode == "BANKLINES":
-            bank_lines = BankLines(config_file)
+            bank_lines = BankLines(config_file, logger)
             bank_lines.detect()
         elif run_mode == "BANKEROSION":
-            erosion = Erosion(config_file)
+            erosion = Erosion(config_file, logger)
             erosion.run()
         else:
             raise ValueError(f"Invalid run mode {run_mode} specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'.")

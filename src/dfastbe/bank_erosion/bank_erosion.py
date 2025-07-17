@@ -27,6 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 import os
+from logging import Logger
 from typing import Dict, List, Tuple
 
 import matplotlib.pyplot as plt
@@ -78,11 +79,12 @@ Y_AXIS_TITLE = "y-coordinate [km]"
 class Erosion:
     """Class to handle the bank erosion calculations."""
 
-    def __init__(self, config_file: ConfigFile, gui: bool = False):
+    def __init__(self, config_file: ConfigFile, logger: Logger, gui: bool = False):
         """Initialize the Erosion class."""
         self.root_dir = config_file.root_dir
         self._config_file = config_file
         self.gui = gui
+        self.logger = logger
 
         self.river_data = ErosionRiverData(config_file)
         self.river_center_line_arr = self.river_data.river_center_line.as_array()

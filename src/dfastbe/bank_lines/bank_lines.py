@@ -1,6 +1,7 @@
 """Bank line detection module."""
 
 import os
+from logging import Logger
 from typing import List, Tuple
 
 import geopandas as gpd
@@ -14,12 +15,11 @@ from shapely.geometry.polygon import Polygon
 from dfastbe import __version__
 from dfastbe import plotting as df_plt
 from dfastbe.bank_lines.data_models import BankLinesRiverData
-from dfastbe.io.data_models import BaseSimulationData, LineGeometry
+from dfastbe.bank_lines.utils import poly_to_line, sort_connect_bank_lines, tri_to_line
 from dfastbe.io.config import ConfigFile, get_bbox
-from dfastbe.io.logger import log_text
-from dfastbe.bank_lines.utils import sort_connect_bank_lines, poly_to_line, tri_to_line
-from dfastbe.utils import on_right_side, get_zoom_extends
-from dfastbe.io.logger import timed_logger
+from dfastbe.io.data_models import BaseSimulationData, LineGeometry
+from dfastbe.io.logger import log_text, timed_logger
+from dfastbe.utils import get_zoom_extends, on_right_side
 
 MAX_RIVER_WIDTH = 1000
 RAW_DETECTED_BANKLINE_FRAGMENTS_FILE = "raw_detected_bankline_fragments"
@@ -33,7 +33,7 @@ __all__ = ["BankLines"]
 class BankLines:
     """Bank line detection class."""
 
-    def __init__(self, config_file: ConfigFile, gui: bool = False):
+    def __init__(self, config_file: ConfigFile, logger: Logger, gui: bool = False):
         """Bank line initializer.
 
         Args:
@@ -60,6 +60,7 @@ class BankLines:
         self._config_file = config_file
         self.gui = gui
         self.bank_output_dir = config_file.get_output_dir("banklines")
+        self.logger = logger
 
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)
