@@ -280,6 +280,26 @@ Parameters = namedtuple("Parameters", "name default valid onefile positive ext")
 
 @dataclass
 class ShippingData:
+    """Shipping data for bank erosion simulation.
+
+    Args:
+        config_file (ConfigFile):
+            Configuration file containing parameters.
+        vship (List[np.ndarray]):
+            Ship velocities for each bank.
+        nship (List[np.ndarray]):
+            Number of ships for each bank.
+        nwave (List[np.ndarray]):
+            Number of waves per ship for each bank.
+        draught (List[np.ndarray]):
+            Draught of ships for each bank.
+        shiptype (List[np.ndarray]):
+            Type of ships for each bank.
+        slope (List[np.ndarray]):
+            Slope values for each bank.
+        reed (List[np.ndarray]):
+            Reed values for each bank.
+    """
     config_file: ConfigFile
     vship: List[np.ndarray]
     nship: List[np.ndarray]
@@ -293,7 +313,17 @@ class ShippingData:
     def get_ship_data(
         cls, num_stations_per_bank: List[int], config_file: ConfigFile
     ) -> "ShippingData":
-        """Get ship parameters from the configuration file."""
+        """Get ship parameters from the configuration file.
+
+        Args:
+            num_stations_per_bank (List[int]):
+                The number of stations per bank.
+            config_file (ConfigFile):
+                Configuration file containing parameters.
+
+        Returns:
+            ShippingData: An instance of ShippingData with parameters read from the config file.
+        """
 
         param_defs = cls._get_initial_parameter_definitions()
         param_dict = {}
@@ -317,6 +347,22 @@ class ShippingData:
     def _get_param(
         config_file: ConfigFile, name: str, num_stations_per_bank, iq_str="", **kwargs
     ):
+        """Get a parameter from the configuration file.
+
+        Args:
+            config_file (ConfigFile):
+                Configuration file containing parameters.
+            name (str):
+                Name of the parameter to retrieve.
+            num_stations_per_bank (List[int]):
+                The number of stations per bank.
+            iq_str (str, optional):
+                String to append to the parameter name for specific levels.
+            **kwargs:
+                Additional keyword arguments for parameter retrieval.
+        Returns:
+            np.ndarray: The parameter value as a NumPy array.
+        """
         return config_file.get_parameter(
             "Erosion",
             f"{name}{iq_str}",
