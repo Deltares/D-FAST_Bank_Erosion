@@ -1,11 +1,19 @@
 import os
+from collections import namedtuple
+from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Dict, List, Tuple
 
 import numpy as np
 from dfastio.xyc.models import XYCModel
 from shapely.geometry import LineString
 
-from dfastbe.bank_erosion.data_models.calculation import MeshData, SingleBank
+from dfastbe.bank_erosion.data_models.calculation import (
+    MeshData,
+    SingleBank,
+    SingleLevelParameters,
+    SingleParameters,
+)
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.data_models import BaseRiverData, BaseSimulationData
 from dfastbe.io.logger import log_text
@@ -266,6 +274,192 @@ class ErosionRiverData(BaseRiverData):
         log_text("read_river_axis", data={"file": river_axis_file})
         river_axis = XYCModel.read(river_axis_file)
         return river_axis
+
+Parameters = namedtuple("Parameters", "name default valid onefile positive ext")
+
+
+@dataclass
+class ShippingData:
+    config_file: ConfigFile
+    vship: List[np.ndarray]
+    nship: List[np.ndarray]
+    nwave: List[np.ndarray]
+    draught: List[np.ndarray]
+    shiptype: List[np.ndarray]
+    slope: List[np.ndarray]
+    reed: List[np.ndarray]
+
+    @classmethod
+    def get_ship_data(
+        cls, num_stations_per_bank: List[int], config_file: ConfigFile
+    ) -> "ShippingData":
+        """Get ship parameters from the configuration file."""
+
+        param_defs = cls._get_initial_parameter_definitions()
+        param_dict = {}
+
+        # Retrieve parameter values
+        for param in param_defs:
+            param_dict[f"{param.name.lower()}"] = cls._get_param(
+                config_file,
+                param.name,
+                num_stations_per_bank,
+                default=param.default,
+                valid=param.valid,
+                onefile=param.onefile,
+                positive=param.positive,
+                ext=param.ext,
+            )
+
+        return cls(config_file, **param_dict)
+
+    @staticmethod
+    def _get_param(
+        config_file: ConfigFile, name: str, num_stations_per_bank, iq_str="", **kwargs
+    ):
+        return config_file.get_parameter(
+            "Erosion",
+            f"{name}{iq_str}",
+            num_stations_per_bank,
+            **kwargs,
+        )
+
+    @staticmethod
+    def _get_initial_parameter_definitions() -> List[Parameters]:
+        """Get parameter definitions for discharge parameters.
+
+        Args:
+            shipping_data (Dict[str, List[np.ndarray]]):
+                The shipping data.
+
+        Returns:
+            List[namedtuple]: List of parameter definitions.
+        """
+        return [
+            Parameters("VShip", None, None, True, True, None),
+            Parameters("NShip", None, None, True, True, None),
+            Parameters("NWave", 5, None, True, True, None),
+            Parameters("Draught", None, None, True, True, None),
+            Parameters("ShipType", None, [1, 2, 3], True, None, None),
+            Parameters("Slope", 20, None, None, True, "slp"),
+            Parameters("Reed", 0, None, None, True, "rdd"),
+        ]
+
+    @staticmethod
+    def _get_discharge_parameter_definitions(
+        shipping_data: Dict[str, List[np.ndarray]],
+    ) -> List[Parameters]:
+        """Get parameter definitions for discharge parameters.
+
+        Args:
+            shipping_data (Dict[str, List[np.ndarray]]):
+                The shipping data.
+
+        Returns:
+            List[namedtuple]: List of parameter definitions.
+        """
+        return [
+            Parameters("VShip", shipping_data["vship"], None, None, None, None),
+            Parameters("NShip", shipping_data["nship"], None, None, None, None),
+            Parameters("NWave", shipping_data["nwave"], None, None, None, None),
+            Parameters("Draught", shipping_data["draught"], None, None, None, None),
+            Parameters(
+                "ShipType", shipping_data["shiptype"], [1, 2, 3], True, None, None
+            ),
+            Parameters("Slope", shipping_data["slope"], None, None, True, "slp"),
+            Parameters("Reed", shipping_data["reed"], None, None, True, "rdd"),
+        ]
+
+    @staticmethod
+    def _calculate_ship_derived_parameters(
+        slope_values: List[np.ndarray], reed_values: List[np.ndarray]
+    ) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+        """Calculate derived parameters from slope and reed values.
+
+        Args:
+            slope_values (List[np.ndarray]): Slope values for each bank.
+            reed_values (List[np.ndarray]): Reed values for each bank.
+
+        Returns:
+            Tuple[List[np.ndarray], List[np.ndarray]]: Calculated mu_slope and mu_reed values.
+        """
+        mu_slope = []
+        mu_reed = []
+
+        for ps, pr in zip(slope_values, reed_values):
+            # Calculate mu_slope (inverse of slope for non-zero values)
+            mus = ps.copy()
+            mus[mus > 0] = 1.0 / mus[mus > 0]
+            mu_slope.append(mus)
+
+            # Calculate mu_reed (empirical damping coefficient)
+            mu_reed.append(8.5e-4 * pr**0.8)
+
+        return mu_slope, mu_reed
+
+    def read_discharge_parameters(
+        self,
+        level_i: int,
+        num_stations_per_bank: List[int],
+    ) -> SingleLevelParameters:
+        """Read Discharge level parameters.
+
+        Read all discharge-specific input arrays for level_i.
+
+        Args:
+            level_i (int):
+                The index of the discharge level.
+            shipping_data (Dict[str, List[np.ndarray]]):
+                The shipping data.
+            num_stations_per_bank (List[int]):
+                The number of stations per bank.
+
+        Returns:
+            SingleLevelParameters: The discharge level parameters.
+        """
+        level_i_str = f"{level_i + 1}"
+
+        # Get parameter definitions
+        param_defs = self._get_discharge_parameter_definitions(asdict(self))
+
+        # Create a dictionary to store parameter values
+        param_dict = {}
+
+        # Retrieve parameter values
+        for param in param_defs:
+            param_dict[param.name] = self._get_param(
+                self.config_file,
+                param.name,
+                num_stations_per_bank,
+                iq_str=level_i_str,
+                default=param.default,
+                valid=param.valid,
+                onefile=param.onefile,
+                positive=param.positive,
+                ext=param.ext,
+            )
+
+        # Calculate derived parameters
+        mu_slope, mu_reed = self._calculate_ship_derived_parameters(
+            param_dict["Slope"], param_dict["Reed"]
+        )
+
+        # Create and return SingleLevelParameters object
+        return SingleLevelParameters.from_column_arrays(
+            {
+                "id": level_i,
+                "ship_velocity": param_dict["VShip"],
+                "num_ship": param_dict["NShip"],
+                "num_waves_per_ship": param_dict["NWave"],
+                "ship_draught": param_dict["Draught"],
+                "ship_type": param_dict["ShipType"],
+                "par_slope": param_dict["Slope"],
+                "par_reed": param_dict["Reed"],
+                "mu_slope": mu_slope,
+                "mu_reed": mu_reed,
+            },
+            SingleParameters,
+        )
 
 
 class BankLinesResultsError(Exception):

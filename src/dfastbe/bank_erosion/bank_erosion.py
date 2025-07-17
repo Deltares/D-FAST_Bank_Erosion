@@ -27,7 +27,6 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 import os
-from collections import namedtuple
 from typing import Dict, List, Tuple
 
 import matplotlib.pyplot as plt
@@ -55,6 +54,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
 from dfastbe.bank_erosion.data_models.inputs import (
     ErosionRiverData,
     ErosionSimulationData,
+    ShippingData,
 )
 from dfastbe.bank_erosion.debugger import Debugger
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
@@ -78,9 +78,6 @@ Y_AXIS_TITLE = "y-coordinate [km]"
 
 class Erosion:
     """Class to handle the bank erosion calculations."""
-    
-    # Define Param namedtuple at class level to avoid recreation in each method call
-    ship_parameters = namedtuple("Param", "name default valid onefile positive ext")
 
     def __init__(self, config_file: ConfigFile, gui: bool = False):
         """Initialize the Erosion class."""
@@ -102,58 +99,6 @@ class Erosion:
     def config_file(self) -> ConfigFile:
         """Configuration file object."""
         return self._config_file
-
-    def get_ship_data(
-        self, num_stations_per_bank: List[int]
-    ) -> Dict[str, List[np.ndarray]]:
-        """Get ship parameters from the configuration file."""
-        ship_relative_velocity = self.config_file.get_parameter(
-            "Erosion", "VShip", num_stations_per_bank, positive=True, onefile=True
-        )
-        num_ships_year = self.config_file.get_parameter(
-            "Erosion", "NShip", num_stations_per_bank, positive=True, onefile=True
-        )
-        num_waves_p_ship = self.config_file.get_parameter(
-            "Erosion",
-            "NWave",
-            num_stations_per_bank,
-            default=5,
-            positive=True,
-            onefile=True,
-        )
-        ship_draught = self.config_file.get_parameter(
-            "Erosion", "Draught", num_stations_per_bank, positive=True, onefile=True
-        )
-        ship_type = self.config_file.get_parameter(
-            "Erosion", "ShipType", num_stations_per_bank, valid=[1, 2, 3], onefile=True
-        )
-        parslope0 = self.config_file.get_parameter(
-            "Erosion",
-            "Slope",
-            num_stations_per_bank,
-            default=20,
-            positive=True,
-            ext="slp",
-        )
-        reed_wave_damping_coeff = self.config_file.get_parameter(
-            "Erosion",
-            "Reed",
-            num_stations_per_bank,
-            default=0,
-            positive=True,
-            ext="rdd",
-        )
-
-        ship_data = {
-            "vship0": ship_relative_velocity,
-            "Nship0": num_ships_year,
-            "nwave0": num_waves_p_ship,
-            "Tship0": ship_draught,
-            "ship0": ship_type,
-            "parslope0": parslope0,
-            "parreed0": reed_wave_damping_coeff,
-        }
-        return ship_data
 
     def _process_river_axis_by_center_line(self) -> LineGeometry:
         """Process the river axis by the center line.
@@ -351,7 +296,9 @@ class Erosion:
 
         # save 1_banklines
         # read vship, nship, nwave, draught (tship), shiptype ... independent of level number
-        shipping_data = self.get_ship_data(num_stations_per_bank)
+        shipping_data = ShippingData.get_ship_data(
+            num_stations_per_bank, self.config_file
+        )
 
         # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
         classes = self.config_file.get_bool("Erosion", "Classes")
@@ -443,8 +390,8 @@ class Erosion:
             log_text("read_q_params", indent="  ")
             # 1) read level-specific parameters
             # read ship_velocity, num_ship, nwave, draught, ship_type, slope, reed, fairway_depth, ... (level specific values)
-            level_parameters = self._read_discharge_parameters(
-                level_i, erosion_inputs.shipping_data, bank_data.num_stations_per_bank
+            level_parameters = erosion_inputs.shipping_data.read_discharge_parameters(
+                level_i, bank_data.num_stations_per_bank
             )
 
             # 2) load FM result
@@ -593,127 +540,6 @@ class Erosion:
         erosion_results.total_eroded_vol_per_km = total_eroded_vol_per_km
 
         return bankline_new_list, bankline_eq_list, xy_line_eq_list
-
-    def _get_param(
-        self, name: str, default_val, iq_str, num_stations_per_bank, **kwargs
-    ):
-        return self.config_file.get_parameter(
-            "Erosion",
-            f"{name}{iq_str}",
-            num_stations_per_bank,
-            default=default_val,
-            **kwargs,
-        )
-
-    def _get_discharge_parameter_definitions(self, shipping_data: Dict[str, List[np.ndarray]]) -> List[namedtuple]:
-        """Get parameter definitions for discharge parameters.
-        
-        Args:
-            shipping_data (Dict[str, List[np.ndarray]]):
-                The shipping data.
-                
-        Returns:
-            List[namedtuple]: List of parameter definitions.
-        """
-        return [
-            self.ship_parameters("VShip", shipping_data["vship0"], None, None, None, None),
-            self.ship_parameters("NShip", shipping_data["Nship0"], None, None, None, None),
-            self.ship_parameters("NWave", shipping_data["nwave0"], None, None, None, None),
-            self.ship_parameters("Draught", shipping_data["Tship0"], None, None, None, None),
-            self.ship_parameters("ShipType", shipping_data["ship0"], [1, 2, 3], True, None, None),
-            self.ship_parameters("Slope", shipping_data["parslope0"], None, None, True, "slp"),
-            self.ship_parameters("Reed", shipping_data["parreed0"], None, None, True, "rdd"),
-        ]
-    
-    @staticmethod
-    def _calculate_ship_derived_parameters(slope_values: List[np.ndarray], reed_values: List[np.ndarray]) -> Tuple[List[np.ndarray], List[np.ndarray]]:
-        """Calculate derived parameters from slope and reed values.
-        
-        Args:
-            slope_values (List[np.ndarray]): Slope values for each bank.
-            reed_values (List[np.ndarray]): Reed values for each bank.
-            
-        Returns:
-            Tuple[List[np.ndarray], List[np.ndarray]]: Calculated mu_slope and mu_reed values.
-        """
-        mu_slope = []
-        mu_reed = []
-        
-        for ps, pr in zip(slope_values, reed_values):
-            # Calculate mu_slope (inverse of slope for non-zero values)
-            mus = ps.copy()
-            mus[mus > 0] = 1.0 / mus[mus > 0]
-            mu_slope.append(mus)
-            
-            # Calculate mu_reed (empirical damping coefficient)
-            mu_reed.append(8.5e-4 * pr**0.8)
-            
-        return mu_slope, mu_reed
-
-    def _read_discharge_parameters(
-        self,
-        level_i: int,
-        shipping_data: Dict[str, List[np.ndarray]],
-        num_stations_per_bank: List[int],
-    ) -> SingleLevelParameters:
-        """Read Discharge level parameters.
-
-        Read all discharge-specific input arrays for level_i.
-
-        Args:
-            level_i (int):
-                The index of the discharge level.
-            shipping_data (Dict[str, List[np.ndarray]]):
-                The shipping data.
-            num_stations_per_bank (List[int]):
-                The number of stations per bank.
-
-        Returns:
-            SingleLevelParameters: The discharge level parameters.
-        """
-        level_i_str = f"{level_i + 1}"
-
-        # Get parameter definitions
-        param_defs = self._get_discharge_parameter_definitions(shipping_data)
-        
-        # Create a dictionary to store parameter values
-        param_dict = {}
-        
-        # Retrieve parameter values
-        for param in param_defs:
-            param_dict[param.name] = self._get_param(
-                param.name,
-                param.default,
-                level_i_str,
-                num_stations_per_bank,
-                valid=param.valid,
-                onefile=param.onefile,
-                positive=param.positive,
-                ext=param.ext,
-            )
-        
-        # Calculate derived parameters
-        mu_slope, mu_reed = self._calculate_ship_derived_parameters(
-            param_dict["Slope"], 
-            param_dict["Reed"]
-        )
-
-        # Create and return SingleLevelParameters object
-        return SingleLevelParameters.from_column_arrays(
-            {
-                "id": level_i,
-                "ship_velocity": param_dict["VShip"],
-                "num_ship": param_dict["NShip"],
-                "num_waves_per_ship": param_dict["NWave"],
-                "ship_draught": param_dict["Draught"],
-                "ship_type": param_dict["ShipType"],
-                "par_slope": param_dict["Slope"],
-                "par_reed": param_dict["Reed"],
-                "mu_slope": mu_slope,
-                "mu_reed": mu_reed,
-            },
-            SingleParameters,
-        )
 
     def compute_erosion_per_level(
         self,
