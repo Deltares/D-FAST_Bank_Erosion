@@ -28,8 +28,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
 from configparser import ConfigParser
 from configparser import Error as ConfigparserError
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 import geopandas as gpd
 import numpy as np
@@ -42,7 +43,37 @@ from shapely.geometry import LineString
 from dfastbe.io.file_utils import absolute_path, relative_path
 from dfastbe.io.logger import log_text
 
-__all__ = ["ConfigFile", "get_bbox", "ConfigFileError", "SimulationFilesError"]
+__all__ = ["ConfigFile", "ConfigFileError", "SimulationFilesError", "PlotProperties"]
+
+
+@dataclass
+class PlotProperties:
+    """Class to hold plotting flags for the erosion simulation.
+
+    Args:
+        plot_data (bool):
+            Flag to indicate if data should be plotted.
+        save_plot (bool):
+            Flag to indicate if the plot should be saved.
+        save_zoomed_plot (bool):
+            Flag to indicate if the zoomed plot should be saved.
+        close_plot (bool):
+            Flag to indicate if the plot should be closed after saving.
+        zoom_step_km (float):
+            Step size for zooming in kilometers.
+        save_dir (Optional[str]):
+            Directory where figures are saved.
+        plot_extension (str):
+            File extension for saved plots.
+    """
+
+    plot_data: bool
+    save_plot: bool
+    save_zoomed_plot: bool
+    close_plot: bool
+    zoom_step_km: float = 1.0
+    save_dir: Optional[str] = None
+    plot_extension: str = ".png"
 
 
 class ConfigFile:
@@ -1077,36 +1108,45 @@ class ConfigFile:
             except ValueError:
                 self.config[group][key] = relative_path(rootdir, val_str)
 
-    def get_plotting_flags(self, root_dir: Path | str) -> Dict[str, bool]:
+    def get_plotting_flags(self, root_dir: Path | str) -> PlotProperties:
         """Get the plotting flags from the configuration file.
 
         Returns:
-            data (Dict[str, bool]):
-                Dictionary containing the plotting flags.
-                save_plot (bool): Flag indicating whether to save the plot.
-                save_plot_zoomed (bool): Flag indicating whether to save the zoomed plot.
-                zoom_km_step (float): Step size for zooming in on the plot.
-                close_plot (bool): Flag indicating whether to close the plot.
+            PlotProperties:
+                plot_data (bool):
+                    Flag indicating whether to plot the data.
+                save_plot (bool):
+                    Flag indicating whether to save the plot.
+                save_zoomed_plot (bool):
+                    Flag indicating whether to save the zoomed plot.
+                zoom_step_km (float):
+                    Step size for zooming in on the plot.
+                close_plot (bool):
+                    Flag indicating whether to close the plot.
+                save_dir (str):
+                    Directory where the figures will be saved.
+                plot_extension (str):
+                    File extension for the saved figures.
         """
         plot_data = self.get_bool("General", "Plotting", True)
 
         if plot_data:
             save_plot = self.get_bool("General", "SavePlots", True)
-            save_plot_zoomed = self.get_bool("General", "SaveZoomPlots", True)
-            zoom_km_step = self.get_float("General", "ZoomStepKM", 1.0)
-            if zoom_km_step < 0.01:
-                save_plot_zoomed = False
+            save_zoomed_plot = self.get_bool("General", "SaveZoomPlots", True)
+            zoom_step_km = self.get_float("General", "ZoomStepKM", 1.0)
+            if zoom_step_km < 0.01:
+                save_zoomed_plot = False
             close_plot = self.get_bool("General", "ClosePlots", False)
         else:
             save_plot = False
-            save_plot_zoomed = False
+            save_zoomed_plot = False
             close_plot = False
 
         data = {
             "plot_data": plot_data,
             "save_plot": save_plot,
-            "save_plot_zoomed": save_plot_zoomed,
-            "zoom_km_step": zoom_km_step,
+            "save_zoomed_plot": save_zoomed_plot,
+            "zoom_step_km": zoom_step_km,
             "close_plot": close_plot,
         }
 
@@ -1120,11 +1160,11 @@ class ConfigFile:
             path_fig_dir.mkdir(parents=True, exist_ok=True)
             plot_ext = self.get_str("General", "FigureExt", ".png")
             data = data | {
-                "fig_dir": fig_dir,
-                "plot_ext": plot_ext,
+                "save_dir": fig_dir,
+                "plot_extension": plot_ext,
             }
 
-        return data
+        return PlotProperties(**data)
 
     def get_output_dir(self, option: str) -> Path:
         """Get the output directory for the analysis.

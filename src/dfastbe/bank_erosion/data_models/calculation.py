@@ -19,6 +19,7 @@ from geopandas import GeoDataFrame
 from geopandas.geoseries import GeoSeries
 from shapely.geometry import Point
 
+
 GenericType = TypeVar("GenericType")
 
 __all__ = [

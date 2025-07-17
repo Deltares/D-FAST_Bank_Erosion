@@ -1,10 +1,10 @@
-import pytest
 from pathlib import Path
+from unittest.mock import MagicMock, patch
+
 import numpy as np
-from unittest.mock import patch, MagicMock
+import pytest
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
-from dfastbe.io.config import ConfigFile
 from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData, ErosionSimulationData
 from dfastbe.bank_erosion.data_models.calculation import (
     ErosionInputs,
@@ -16,6 +16,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
     SingleBank,
     SingleErosion
 )
+from dfastbe.io.config import ConfigFile
 
 
 class TestErosionInputs:
@@ -107,7 +108,6 @@ class TestBankData:
         )
         assert bank_data.right.bank_line_coords[0, 0] == result[bank_order.index("right")]
         assert bank_data.left.bank_line_coords[0, 0] == result[bank_order.index("left")]
-
 
 
 def test_fairway_data():
@@ -233,41 +233,51 @@ class TestSimulationData:
             ),
         )
 
-    # @patch("dfastbe.bank_lines.data_models.BankLinesRiverData")
-    # @patch("dfastbe.io.config.LineGeometry")
-    # def test_simulation_data(
-    #     self, mock_center_line, mock_simulation_data
-    # ):
-    #     """Test the simulation_data method of the BaseRiverData class with a mocked SimulationData."""
-    #     # Mock the SimulationData instance
-    #     mock_simulation_data_class = MagicMock()
-    #     mock_simulation_data_class.dry_wet_threshold = 0.1
-    #     mock_simulation_data.read.return_value = mock_simulation_data_class
-    #
-    #     # Mock the ConfigFile
-    #     mock_config_file = MagicMock()
-    #     mock_config_file.get_sim_file.return_value = "mock_sim_file.nc"
-    #     mock_config_file.get_float.return_value = 0.5  # Critical water depth
-    #     mock_config_file.get_start_end_stations.return_value = (0.0, 10.0)
-    #     mock_config_file.get_search_lines.return_value = [
-    #         LineString([(0, 0), (1, 1)]),
-    #         LineString([(2, 2), (3, 3)]),
-    #     ]
-    #     mock_config_file.get_bank_search_distances.return_value = [1.0, 2.0]
-    #
-    #     mock_center_line_class = MagicMock()
-    #     mock_center_line_class.values = LineString([(0, 0), (1, 1), (2, 2)])
-    #     mock_center_line.return_value = mock_center_line_class
-    #
-    #     # Create a BaseRiverData instance
-    #     river_data = ErosionRiverData(mock_config_file)
-    #
-    #     # Call the simulation_data method
-    #     simulation_data, h0 = river_data.simulation_data()
-    #
-    #     mock_simulation_data_class.clip.assert_called_once_with(mock_center_line_class.values)
-    #     assert h0 == 0.6  # Critical water depth (0.5) + dry_wet_threshold (0.1)
-    #     assert simulation_data == mock_simulation_data_class
+    @patch("dfastbe.bank_lines.data_models.BankLinesRiverData")
+    @patch("dfastbe.io.data_models.LineGeometry")
+    def test_simulation_data(self, mock_center_line, mock_simulation_data):
+        """Test the simulation_data method of the BaseRiverData class with a mocked SimulationData."""
+        # Mock the SimulationData instance
+        mock_simulation_data_class = MagicMock()
+        mock_simulation_data_class.dry_wet_threshold = 0.1
+        mock_simulation_data.read.return_value = mock_simulation_data_class
+
+        # Mock the ConfigFile
+        mock_config_file = MagicMock()
+        mock_config_file.get_sim_file.return_value = "mock_sim_file.nc"
+        mock_config_file.get_float.return_value = 0.5  # Critical water depth
+        mock_config_file.get_start_end_stations.return_value = (0.0, 10.0)
+        mock_config_file.get_search_lines.return_value = [
+            LineString([(0, 0), (1, 1)]),
+            LineString([(2, 2), (3, 3)]),
+        ]
+        mock_config_file.get_bank_search_distances.return_value = [1.0, 2.0]
+
+        mock_center_line_class = MagicMock()
+        mock_center_line_class.values = LineString([(0, 0), (1, 1), (2, 2)])
+        mock_center_line.return_value = mock_center_line_class
+
+        # Create a BaseRiverData instance
+        with patch(
+            "dfastbe.bank_erosion.data_models.inputs.ErosionRiverData._get_bank_line_dir"
+        ) as mock_get_bank_line_dir, patch(
+            "dfastbe.bank_erosion.data_models.inputs.ErosionRiverData._read_river_axis"
+        ) as mock_read_river_axis:
+            mock_get_bank_line_dir.return_value = Path("tests/data/erosion/inputs")
+            mock_read_river_axis.return_value = LineString([(0, 0), (1, 1), (2, 2)])
+
+            river_data = ErosionRiverData(mock_config_file)
+
+        # Call the simulation_data method
+        with patch(
+            "dfastbe.bank_erosion.data_models.inputs.ErosionSimulationData.read",
+        ) as mock_read_simulation_data:
+            mock_read_simulation_data.return_value = mock_simulation_data_class
+            # Call the simulation_data method
+            simulation_data = river_data.simulation_data()
+
+        assert simulation_data == mock_simulation_data_class
+
 
 class TestErosionRiverData:
 

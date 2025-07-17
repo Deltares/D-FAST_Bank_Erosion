@@ -296,8 +296,8 @@ class LineGeometry:
                 Mx3 array with x, y, and chainage values for the reference line.
 
         Returns:
-            line_km : np.ndarray
-                Array containing the chainage for every coordinate specified in line_xy.
+            line_km (np.ndarray):
+                1D Array containing the chainage(stations in km) for every coordinate specified in line_xy.
         """
         coords = self.as_array()
         # pre-allocates the array for the mapped chainage values
@@ -365,6 +365,31 @@ class LineGeometry:
             projected_stations[i] = station
         return projected_stations
 
+    def get_bbox(
+        self, buffer: float = 0.1
+    ) -> Tuple[float, float, float, float]:
+        """
+        Derive the bounding box from a line.
+
+        Args:
+            buffer : float
+                Buffer fraction surrounding the tight bounding box
+
+        Returns:
+            bbox (Tuple[float, float, float, float]):
+                bounding box consisting of [min x, min y, max x, max y)
+        """
+        coords = self.as_array()
+        x = coords[:, 0]
+        y = coords[:, 1]
+        x_min = x.min()
+        y_min = y.min()
+        x_max = x.max()
+        y_max = y.max()
+        d = buffer * max(x_max - x_min, y_max - y_min)
+        bbox = (x_min - d, y_min - d, x_max + d, y_max + d)
+
+        return bbox
 
 class BaseSimulationData:
     """Class to hold simulation data.
@@ -615,7 +640,7 @@ class BaseRiverData:
         """River Data initialization.
 
         Args:
-            config_file : ConfigFile
+            config_file (ConfigFile):
                 Configuration file with settings for the analysis.
 
         Examples:
@@ -710,9 +735,7 @@ def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndar
     )
     if len(mesh2d) != 1:
         raise Exception(
-            "Currently only one 2D mesh supported ... this file contains {} 2D meshes.".format(
-                len(mesh2d)
-            )
+            f"Currently only one 2D mesh supported ... this file contains {len(mesh2d)} 2D meshes."
         )
     meshname = mesh2d[0].name
 
@@ -756,9 +779,7 @@ def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndar
             )
         if len(var) != 1:
             raise Exception(
-                'Expected one variable for "{}", but obtained {}.'.format(
-                    varname, len(var)
-                )
+                f'Expected one variable for "{varname}", but obtained {len(var)}.'
             )
         var = var[0]
 
