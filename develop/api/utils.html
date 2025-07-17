@@ -2031,7 +2031,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
 
 <h3 id="dfastbe.utils.get_zoom_extends" class="doc doc-heading"><a href="#dfastbe.utils.get_zoom_extends" class="toclink">
-            <code class="highlight language-python"><span class="n">get_zoom_extends</span><span class="p">(</span><span class="n">km_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">km_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">zoom_km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">bank_crds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">bank_km</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span></code>
+            <code class="highlight language-python"><span class="n">get_zoom_extends</span><span class="p">(</span><span class="n">km_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">km_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">zoom_step_km</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">bank_crds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">bank_km</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]</span></code>
 
 </a><a href="#dfastbe.utils.get_zoom_extends" class="headerlink" title="Permanent link">#</a></h3>
 
@@ -2086,7 +2086,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>zoom_km_step</code>
+                <code>zoom_step_km</code>
             </td>
             <td>
                   <code><span title="float">float</span></code>
@@ -2230,7 +2230,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">91</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_zoom_extends</span><span class="p">(</span>
     <span class="n">km_min</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">km_max</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="n">zoom_km_step</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">zoom_step_km</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="n">bank_crds</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
     <span class="n">bank_km</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]]:</span>
@@ -2241,7 +2241,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="sd">            Minimum value for the chainage range of interest.</span>
 <span class="sd">        km_max (float):</span>
 <span class="sd">            Maximum value for the chainage range of interest.</span>
-<span class="sd">        zoom_km_step (float):</span>
+<span class="sd">        zoom_step_km (float):</span>
 <span class="sd">            Preferred chainage length of zoom box.</span>
 <span class="sd">        bank_crds (List[np.ndarray]):</span>
 <span class="sd">            List of N x 2 np arrays of coordinates per bank.</span>
@@ -2256,9 +2256,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.bank_erosion.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_km_bins</span>
 
-    <span class="n">zoom_km_bin</span> <span class="o">=</span> <span class="p">(</span><span class="n">km_min</span><span class="p">,</span> <span class="n">km_max</span><span class="p">,</span> <span class="n">zoom_km_step</span><span class="p">)</span>
+    <span class="n">zoom_km_bin</span> <span class="o">=</span> <span class="p">(</span><span class="n">km_min</span><span class="p">,</span> <span class="n">km_max</span><span class="p">,</span> <span class="n">zoom_step_km</span><span class="p">)</span>
     <span class="n">zoom_km_bnd</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">zoom_km_bin</span><span class="p">,</span> <span class="n">station_type</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">adjust</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">eps</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">zoom_km_step</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">zoom_step_km</span>
 
     <span class="n">station_zoom</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">coords_zoom</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
