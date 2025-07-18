@@ -1174,21 +1174,25 @@ def selectFile(key: str) -> None:
                         # file should end on _<nr>
                         nr = ""
                         while fil[-1] in "1234567890":
-                             nr = rkey[-1] + nr
-                             fil = fil[:-1]
+                            nr = rkey[-1] + nr
+                            fil = fil[:-1]
                         if nr == "" or fil[-1] != "_":
-                            print("Missing bank number(s) at end of file name. Reference not updated.")
+                            LOGGER.warning(
+                                "Missing bank number(s) at end of file name. Reference not updated."
+                            )
                             fil = ""
                         else:
                             fil = fil[:-1]
                 else:
-                    if ext == "":
-                        print("Unsupported file extension {} while expecting no extension. Reference not updated.".format(fext))
-                    else:
-                        print("Unsupported file extension {} while expecting {}. Reference not updated.".format(fext,ext))
+                    expect_ext = "no extension" if ext == "" else ext
+                    LOGGER.warning(
+                        "Unsupported file extension %s while expecting %s. Reference not updated.",
+                        fext,
+                        expect_ext,
+                    )
                     fil = ""
         else:
-            print(key)
+            LOGGER.info(key)
             fil = ""
     if fil != "":
         dialog[key].setText(fil)
@@ -1223,7 +1227,7 @@ def run_detection() -> None:
         msg = str(Ex)
     dialog["application"].restoreOverrideCursor()
     if msg != "":
-        print(msg)
+        LOGGER.exception(msg)
         showError(msg)
 
 
