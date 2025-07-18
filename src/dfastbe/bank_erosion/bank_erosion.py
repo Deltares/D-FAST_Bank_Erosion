@@ -181,7 +181,7 @@ class Erosion:
         dist2 = (np.diff(river_axis_numpy, axis=0) ** 2).sum(axis=1)
         alpha = dist2.max() / dist2.sum()
         if alpha > 0.03:
-            print("The river axis needs sorting!!")
+            self.logger.info("The river axis needs sorting!!")
 
         # map km to axis points, further using axis
         log_text("chainage_to_axis")
