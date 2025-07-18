@@ -429,7 +429,7 @@ class TestBankLines:
                 MagicMock(),
                 0.3,
             )
-            bank_lines = BankLines(mock_config_file)
+            bank_lines = BankLines(mock_config_file, MagicMock())
         bank_lines.results = {
             "bank": bank,
             "banklines": banklines,
@@ -491,7 +491,7 @@ class TestBankLines:
                 mock_simulation_data,
                 0.3,
             )
-            bank_lines = BankLines(mock_config_file)
+            bank_lines = BankLines(mock_config_file, MagicMock())
             bank_lines.plot_flags = PlotProperties(
                 plot_data=True,
                 save_plot=True,
