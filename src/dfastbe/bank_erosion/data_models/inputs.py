@@ -279,7 +279,7 @@ Parameters = namedtuple("Parameters", "name default valid onefile positive ext")
 
 
 @dataclass
-class ShippingData:
+class ShipsParameters:
     """Shipping data for bank erosion simulation.
 
     Args:
@@ -312,7 +312,7 @@ class ShippingData:
     @classmethod
     def get_ship_data(
         cls, num_stations_per_bank: List[int], config_file: ConfigFile
-    ) -> "ShippingData":
+    ) -> "ShipsParameters":
         """Get ship parameters from the configuration file.
 
         Args:
@@ -374,10 +374,6 @@ class ShippingData:
     def _get_initial_parameter_definitions() -> List[Parameters]:
         """Get parameter definitions for discharge parameters.
 
-        Args:
-            shipping_data (Dict[str, List[np.ndarray]]):
-                The shipping data.
-
         Returns:
             List[namedtuple]: List of parameter definitions.
         """
@@ -391,29 +387,20 @@ class ShippingData:
             Parameters("Reed", 0, None, None, True, "rdd"),
         ]
 
-    @staticmethod
-    def _get_discharge_parameter_definitions(
-        shipping_data: Dict[str, List[np.ndarray]],
-    ) -> List[Parameters]:
+    def _get_discharge_parameter_definitions(self) -> List[Parameters]:
         """Get parameter definitions for discharge parameters.
-
-        Args:
-            shipping_data (Dict[str, List[np.ndarray]]):
-                The shipping data.
 
         Returns:
             List[namedtuple]: List of parameter definitions.
         """
         return [
-            Parameters("VShip", shipping_data["vship"], None, None, None, None),
-            Parameters("NShip", shipping_data["nship"], None, None, None, None),
-            Parameters("NWave", shipping_data["nwave"], None, None, None, None),
-            Parameters("Draught", shipping_data["draught"], None, None, None, None),
-            Parameters(
-                "ShipType", shipping_data["shiptype"], [1, 2, 3], True, None, None
-            ),
-            Parameters("Slope", shipping_data["slope"], None, None, True, "slp"),
-            Parameters("Reed", shipping_data["reed"], None, None, True, "rdd"),
+            Parameters("VShip", self.vship, None, None, None, None),
+            Parameters("NShip", self.nship, None, None, None, None),
+            Parameters("NWave", self.nwave, None, None, None, None),
+            Parameters("Draught", self.draught, None, None, None, None),
+            Parameters("ShipType", self.shiptype, [1, 2, 3], True, None, None),
+            Parameters("Slope", self.slope, None, None, True, "slp"),
+            Parameters("Reed", self.reed, None, None, True, "rdd"),
         ]
 
     @staticmethod
@@ -455,8 +442,6 @@ class ShippingData:
         Args:
             level_i (int):
                 The index of the discharge level.
-            shipping_data (Dict[str, List[np.ndarray]]):
-                The shipping data.
             num_stations_per_bank (List[int]):
                 The number of stations per bank.
 
@@ -466,7 +451,7 @@ class ShippingData:
         level_i_str = f"{level_i + 1}"
 
         # Get parameter definitions
-        param_defs = self._get_discharge_parameter_definitions(asdict(self))
+        param_defs = self._get_discharge_parameter_definitions()
 
         # Create a dictionary to store parameter values
         param_dict = {}
