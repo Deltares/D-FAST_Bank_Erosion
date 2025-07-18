@@ -1,25 +1,23 @@
 """Bank line detection module."""
 
-import os
 from logging import Logger
-from typing import List, Tuple
+from typing import Any, Dict, List, Tuple
 
 import geopandas as gpd
 import numpy as np
 from geopandas.geoseries import GeoSeries
-from matplotlib import pyplot as plt
 from shapely import line_merge, union_all
 from shapely.geometry import LineString, MultiLineString
 from shapely.geometry.polygon import Polygon
 
 from dfastbe import __version__
-from dfastbe import plotting as df_plt
 from dfastbe.bank_lines.data_models import BankLinesRiverData
+from dfastbe.bank_lines.plotter import BankLinesPlotter
 from dfastbe.bank_lines.utils import poly_to_line, sort_connect_bank_lines, tri_to_line
-from dfastbe.io.config import ConfigFile, get_bbox
-from dfastbe.io.data_models import BaseSimulationData, LineGeometry
+from dfastbe.io.config import ConfigFile
+from dfastbe.io.data_models import BaseSimulationData
 from dfastbe.io.logger import log_text, timed_logger
-from dfastbe.utils import get_zoom_extends, on_right_side
+from dfastbe.utils import on_right_side
 
 MAX_RIVER_WIDTH = 1000
 RAW_DETECTED_BANKLINE_FRAGMENTS_FILE = "raw_detected_bankline_fragments"
@@ -71,6 +69,10 @@ class BankLines:
         self.simulation_data, self.critical_water_depth = (
             self.river_data.simulation_data()
         )
+        if self.plot_flags.plot_data:
+            self.plotter = self.get_plotter()
+
+        self._results = None
 
     @property
     def config_file(self) -> ConfigFile:
@@ -81,6 +83,33 @@ class BankLines:
     def max_river_width(self) -> int:
         """int: Maximum river width in meters."""
         return MAX_RIVER_WIDTH
+
+    def get_plotter(self) -> BankLinesPlotter:
+        return BankLinesPlotter(
+            self.gui, self.plot_flags, self.config_file.crs, self.simulation_data, self.river_data.river_center_line,
+            self.river_data.river_center_line.station_bounds,
+        )
+
+    @property
+    def results(self) -> Dict[str, Any]:
+        """dict: Results of the bank line detection analysis.
+
+        Returns:
+            bank (List[LineString]):
+                List of bank lines.
+            banklines (GeoSeries):
+                Un-ordered set of bank line segments.
+            masked_bank_lines (List[MultiLineString]):
+                Un-ordered set of bank line segments, clipped to bank area.
+            bank_areas (List[Polygon]):
+                A search area corresponding to one of the bank search lines.
+        """
+        return self._results
+
+    @results.setter
+    def results(self, value: Dict[str, Any]):
+        """Set the results of the bank line detection analysis."""
+        self._results = value
 
     def detect(self) -> None:
         """Run the bank line detection analysis for a specified configuration.
@@ -100,6 +129,8 @@ class BankLines:
             >>> bank_lines = BankLines(config_file, logger)  # doctest: +ELLIPSIS
             N...e
             >>> bank_lines.detect()
+            >>> bank_lines.plot()
+            >>> bank_lines.save()
                0...-
 
             ```
@@ -111,8 +142,6 @@ class BankLines:
             In the FigureDir directory specified in the .cfg, the following files are created:
             - "1_banklinedetection.png"
         """
-        config_file = self.config_file
-        river_data = self.river_data
         timed_logger("-- start analysis --")
 
         log_text(
@@ -125,8 +154,7 @@ class BankLines:
         log_text("-")
 
         # clip the chainage path to the range of chainages of interest
-        river_center_line = river_data.river_center_line
-        station_bounds = river_center_line.station_bounds
+        river_center_line = self.river_data.river_center_line
         river_center_line_values = river_center_line.values
         center_line_arr = river_center_line.as_array()
 
@@ -140,7 +168,7 @@ class BankLines:
 
         log_text("identify_banklines")
         banklines = self.detect_bank_lines(
-            self.simulation_data, self.critical_water_depth, config_file
+            self.simulation_data, self.critical_water_depth, self.config_file
         )
 
         # clip the set of detected bank lines to the bank areas
@@ -152,17 +180,12 @@ class BankLines:
             masked_bank_lines.append(self.mask(banklines, bank_area))
             bank.append(sort_connect_bank_lines(masked_bank_lines[ib], river_center_line_values, to_right[ib]))
 
-        self.save(bank, banklines, masked_bank_lines, bank_areas, config_file)
-
-        if self.plot_flags["plot_data"]:
-            self.plot(
-                center_line_arr,
-                self.search_lines.size,
-                bank,
-                station_bounds,
-                bank_areas,
-                config_file,
-            )
+        self.results = {
+            "bank": bank,
+            "banklines": banklines,
+            "masked_bank_lines": masked_bank_lines,
+            "bank_areas": bank_areas,
+        }
 
         log_text("end_banklines")
         timed_logger("-- stop analysis --")
@@ -206,160 +229,31 @@ class BankLines:
 
         return masked_bank_lines
 
-    def plot(
-        self,
-        station_coords: np.ndarray,
-        num_search_lines: int,
-        bank: List[LineString],
-        stations_bounds: Tuple[float, float],
-        bank_areas: List[Polygon],
-        config_file: ConfigFile,
-    ):
-        """Plot the bank lines and the simulation data.
-
-        Args:
-            station_coords (np.ndarray):
-                Array of x and y coordinates in km.
-            num_search_lines (int):
-                Number of search lines.
-            bank (List):
-                List of bank lines.
-            stations_bounds (Tuple[float, float]):
-                Minimum and maximum km bounds.
-            bank_areas (List[Polygon]):
-                A search area corresponding to one of the bank search lines.
-            config_file (ConfigFile):
-                Configuration file object.
-
-        Examples:
-            ```python
-            >>> import matplotlib
-            >>> matplotlib.use('Agg')
-            >>> import logging
-            >>> logger = logging.getLogger("test_logger")
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)  # doctest: +ELLIPSIS
-            >>> bank_lines = BankLines(config_file, logger)
-            N...e
-            >>> bank_lines.plot_flags["save_plot"] = False
-            >>> station_coords = np.array([[0, 0, 0], [1, 1, 0]])
-            >>> num_search_lines = 1
-            >>> bank = [LineString([(0, 0), (1, 1)])]
-            >>> stations_bounds = (0, 1)
-            >>> bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]
-            >>> bank_lines.plot(station_coords, num_search_lines, bank, stations_bounds, bank_areas, config_file)
-            N...s
-
-            ```
-        """
-        log_text("=")
-        log_text("create_figures")
-        i_fig = 0
-        bbox = get_bbox(station_coords)
-
-        if self.plot_flags["save_plot_zoomed"]:
-            bank_crds: List[np.ndarray] = []
-            bank_km: List[np.ndarray] = []
-            for ib in range(num_search_lines):
-                bcrds_numpy = np.array(bank[ib].coords)
-                line_geom = LineGeometry(bcrds_numpy, crs=config_file.crs)
-                km_numpy = line_geom.intersect_with_line(station_coords)
-                bank_crds.append(bcrds_numpy)
-                bank_km.append(km_numpy)
-            km_zoom, xy_zoom = get_zoom_extends(
-                stations_bounds[0],
-                stations_bounds[1],
-                self.plot_flags["zoom_km_step"],
-                bank_crds,
-                bank_km,
+    def plot(self):
+        if self.plot_flags.plot_data:
+            self.plotter.plot(
+                self.search_lines.size,
+                self.results["bank"],
+                self.results["bank_areas"],
             )
 
-        fig, ax = df_plt.plot_detect1(
-            bbox,
-            station_coords,
-            bank_areas,
-            bank,
-            self.simulation_data.face_node,
-            self.simulation_data.n_nodes,
-            self.simulation_data.x_node,
-            self.simulation_data.y_node,
-            self.simulation_data.water_depth_face,
-            1.1 * self.simulation_data.water_depth_face.max(),
-            "x-coordinate [m]",
-            "y-coordinate [m]",
-            "water depth and detected bank lines",
-            "water depth [m]",
-            "bank search area",
-            "detected bank line",
-            config_file,
-        )
-        if self.plot_flags["save_plot"]:
-            i_fig = i_fig + 1
-            fig_base = (
-                f"{self.plot_flags.get('fig_dir')}{os.sep}{i_fig}_banklinedetection"
-            )
-            if self.plot_flags["save_plot_zoomed"]:
-                df_plt.zoom_xy_and_save(
-                    fig, ax, fig_base, self.plot_flags.get("plot_ext"), xy_zoom, scale=1
-                )
-            fig_file = fig_base + self.plot_flags["plot_ext"]
-            df_plt.savefig(fig, fig_file)
+    def save(self):
+        """Save results to files."""
+        if self.results is None:
+            raise ValueError("No results to save. Run the detect method first.")
 
-        if self.plot_flags["close_plot"]:
-            plt.close("all")
-        else:
-            plt.show(block=not self.gui)
-
-    def save(
-        self,
-        bank: List[LineString],
-        banklines: GeoSeries,
-        masked_bank_lines: List[MultiLineString],
-        bank_areas: List[Polygon],
-        config_file: ConfigFile,
-    ):
-        """Save results to files.
-
-        Args:
-            bank (List[LineString]):
-                List of bank lines.
-            banklines (GeoSeries):
-                Un-ordered set of bank line segments.
-            masked_bank_lines (List[MultiLineString]):
-                Un-ordered set of bank line segments, clipped to bank area.
-            bank_areas (List[Polygon]):
-                A search area corresponding to one of the bank search lines.
-            config_file (ConfigFile):
-                Configuration file object.
-
-        Examples:
-            ```python
-            >>> from dfastbe.io.config import ConfigFile
-            >>> import logging
-            >>> logger = logging.getLogger("test_logger")
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)
-            >>> bank_lines = BankLines(config_file, logger)
-            N...e
-            >>> bank = [LineString([(0, 0), (1, 1)])]
-            >>> banklines = gpd.GeoSeries([LineString([(0, 0), (1, 1)])])
-            >>> masked_bank_lines = [MultiLineString([LineString([(0, 0), (1, 1)])])]
-            >>> bank_areas = [Polygon([(0, 0), (1, 1), (1, 0)])]
-            >>> bank_lines.save(bank, banklines, masked_bank_lines, bank_areas, config_file)
-            No message found for save_banklines
-
-            ```
-        """
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
-        bank_file = self.bank_output_dir / f"{bank_name}.shp"
+        bank_file = self.bank_output_dir / f"{bank_name}{EXTENSION}"
         log_text("save_banklines", data={"file": bank_file})
-        gpd.GeoSeries(bank, crs=config_file.crs).to_file(bank_file)
+        gpd.GeoSeries(self.results["bank"], crs=self.config_file.crs).to_file(bank_file)
 
-        gpd.GeoSeries(masked_bank_lines, crs=config_file.crs).to_file(
+        gpd.GeoSeries(self.results["masked_bank_lines"], crs=self.config_file.crs).to_file(
             self.bank_output_dir / f"{BANKLINE_FRAGMENTS_PER_BANK_AREA_FILE}{EXTENSION}"
         )
-        banklines.to_file(
+        self.results["banklines"].to_file(
             self.bank_output_dir / f"{RAW_DETECTED_BANKLINE_FRAGMENTS_FILE}{EXTENSION}"
         )
-        gpd.GeoSeries(bank_areas, crs=config_file.crs).to_file(
+        gpd.GeoSeries(self.results["bank_areas"], crs=self.config_file.crs).to_file(
             self.bank_output_dir / f"{BANK_AREAS_FILE}{EXTENSION}"
         )
 

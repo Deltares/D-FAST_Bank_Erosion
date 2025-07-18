@@ -14,7 +14,7 @@ from geopandas import GeoDataFrame
 from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry import LineString
 
-from dfastbe.io.config import ConfigFile, SimulationFilesError
+from dfastbe.io.config import ConfigFile, PlotProperties, SimulationFilesError
 from dfastbe.io.data_models import (
     BaseRiverData,
     BaseSimulationData,
@@ -43,6 +43,56 @@ def test_load_program_texts_01():
     """
     print("current work directory: ", os.getcwd())
     assert load_program_texts("tests/data/files/messages.UK.ini") is None
+
+
+class TestPlotProperties:
+    @pytest.fixture
+    def plotting_flags_dict(self) -> Dict[str, bool]:
+        return {
+            "plot_data": True,
+            "save_plot": False,
+            "save_zoomed_plot": False,
+            "close_plot": True,
+        }
+
+    @pytest.mark.unit
+    def test_plotting_flags_initialization(self, plotting_flags_dict):
+        """Test initialization of PlotProperties with all values.
+
+        Args:
+            plotting_flags_dict (dict): Dictionary with plotting flag values.
+
+        Asserts:
+            PlotProperties is initialized correctly with the provided values.
+            Individual flags are set as expected.
+        """
+        plotting_flags_dict["plot_extension"] = ".jpg"
+        plotting_flags_dict["zoom_step_km"] = 2.0
+        plotting_flags_dict["save_dir"] = "figures"
+        plotting_flags = PlotProperties(**plotting_flags_dict)
+        assert isinstance(plotting_flags, PlotProperties)
+        assert plotting_flags.plot_data is True
+        assert plotting_flags.save_plot is False
+        assert plotting_flags.save_zoomed_plot is False
+        assert plotting_flags.close_plot is True
+        assert plotting_flags.zoom_step_km == pytest.approx(2.0)
+        assert plotting_flags.save_dir == "figures"
+        assert plotting_flags.plot_extension == ".jpg"
+
+    @pytest.mark.unit
+    def test_plotting_flags_defaults(self, plotting_flags_dict):
+        """Test default values of PlotProperties.
+
+        Args:
+            plotting_flags_dict (dict): Dictionary with plotting flag values.
+
+        Asserts:
+            Individual flags are set to their default values when missing from the dict.
+        """
+        plotting_flags = PlotProperties(**plotting_flags_dict)
+        assert plotting_flags.zoom_step_km == pytest.approx(1.0)
+        assert plotting_flags.save_dir is None
+        assert plotting_flags.plot_extension == ".png"
 
 
 class TestSimulationData:
@@ -754,13 +804,13 @@ class TestConfigFile:
         root_dir = Path("tests/data/erosion").resolve()
         plotting_flags = config_file.get_plotting_flags(str(root_dir))
 
-        assert plotting_flags["plot_data"] is True
-        assert plotting_flags["save_plot"] is True
-        assert plotting_flags["save_plot_zoomed"] is False
-        assert plotting_flags["zoom_km_step"] == 0.5
-        assert plotting_flags["close_plot"] is False
-        assert plotting_flags["fig_dir"] == str(root_dir / "output/figures")
-        assert plotting_flags["plot_ext"] == ".png"
+        assert plotting_flags.plot_data is True
+        assert plotting_flags.save_plot is True
+        assert plotting_flags.save_zoomed_plot is False
+        assert plotting_flags.zoom_step_km == pytest.approx(0.5)
+        assert plotting_flags.close_plot is False
+        assert plotting_flags.save_dir == str(root_dir / "output/figures")
+        assert plotting_flags.plot_extension == ".png"
 
 
 class TestConfigFileE2E:

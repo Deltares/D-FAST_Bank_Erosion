@@ -87,12 +87,12 @@ class BankLinesProcessor:
                 log_text("left_side_bank", data={"ib": bank_index + 1})
 
         bank_order = tuple("right" if val else "left" for val in is_right_bank)
-        data = dict(
-            is_right_bank=is_right_bank,
-            bank_line_coords=bank_line_coords,
-            bank_face_indices=bank_face_indices,
-            bank_chainage_midpoints=bank_chainage_midpoints,
-        )
+        data = {
+            'is_right_bank': is_right_bank,
+            'bank_line_coords': bank_line_coords,
+            'bank_face_indices': bank_face_indices,
+            'bank_chainage_midpoints': bank_chainage_midpoints
+        }
         return BankData.from_column_arrays(
             data,
             SingleBank,

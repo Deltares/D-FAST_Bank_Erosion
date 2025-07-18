@@ -1217,6 +1217,8 @@ def run_detection() -> None:
     try:
         bank_line = BankLines(config_file, LOGGER, gui=True)
         bank_line.detect()
+        bank_line.plot()
+        bank_line.save()
     except Exception as Ex:
         msg = str(Ex)
     dialog["application"].restoreOverrideCursor()
@@ -1241,6 +1243,8 @@ def run_erosion() -> None:
     matplotlib.pyplot.close("all")
     erosion = Erosion(config_file, LOGGER, gui=True)
     erosion.run()
+    erosion.plot()
+    erosion.save()
     dialog["application"].restoreOverrideCursor()
 
 
