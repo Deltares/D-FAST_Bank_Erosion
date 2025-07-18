@@ -280,20 +280,20 @@ Parameters = namedtuple("Parameters", "name default valid onefile positive ext")
 
 @dataclass
 class ShipsParameters:
-    """Shipping data for bank erosion simulation.
+    """Data for ships going through the fairway for bank erosion simulation.
 
     Args:
         config_file (ConfigFile):
             Configuration file containing parameters.
-        vship (List[np.ndarray]):
+        velocity (List[np.ndarray]):
             Ship velocities for each bank.
-        nship (List[np.ndarray]):
+        number (List[np.ndarray]):
             Number of ships for each bank.
-        nwave (List[np.ndarray]):
+        num_waves (List[np.ndarray]):
             Number of waves per ship for each bank.
         draught (List[np.ndarray]):
             Draught of ships for each bank.
-        shiptype (List[np.ndarray]):
+        type (List[np.ndarray]):
             Type of ships for each bank.
         slope (List[np.ndarray]):
             Slope values for each bank.
@@ -301,11 +301,11 @@ class ShipsParameters:
             Reed values for each bank.
     """
     config_file: ConfigFile
-    vship: List[np.ndarray]
-    nship: List[np.ndarray]
-    nwave: List[np.ndarray]
+    velocity: List[np.ndarray]
+    number: List[np.ndarray]
+    num_waves: List[np.ndarray]
     draught: List[np.ndarray]
-    shiptype: List[np.ndarray]
+    type: List[np.ndarray]
     slope: List[np.ndarray]
     reed: List[np.ndarray]
 
@@ -326,11 +326,11 @@ class ShipsParameters:
         """
 
         param_defs = cls._get_initial_parameter_definitions()
-        param_dict = {}
+        param_resolved = {}
 
         # Retrieve parameter values
         for param in param_defs:
-            param_dict[f"{param.name.lower()}"] = cls._get_param(
+            param_resolved[f"{param.name.lower()}"] = cls._get_param(
                 config_file,
                 param.name,
                 num_stations_per_bank,
@@ -340,6 +340,16 @@ class ShipsParameters:
                 positive=param.positive,
                 ext=param.ext,
             )
+
+        param_dict = {
+            "velocity": param_resolved["vship"],
+            "number": param_resolved["nship"],
+            "num_waves": param_resolved["nwave"],
+            "draught": param_resolved["draught"],
+            "type": param_resolved["shiptype"],
+            "slope": param_resolved["slope"],
+            "reed": param_resolved["reed"],
+        }
 
         return cls(config_file, **param_dict)
 
@@ -394,11 +404,11 @@ class ShipsParameters:
             List[namedtuple]: List of parameter definitions.
         """
         return [
-            Parameters("VShip", self.vship, None, None, None, None),
-            Parameters("NShip", self.nship, None, None, None, None),
-            Parameters("NWave", self.nwave, None, None, None, None),
+            Parameters("VShip", self.velocity, None, None, None, None),
+            Parameters("NShip", self.number, None, None, None, None),
+            Parameters("NWave", self.num_waves, None, None, None, None),
             Parameters("Draught", self.draught, None, None, None, None),
-            Parameters("ShipType", self.shiptype, [1, 2, 3], True, None, None),
+            Parameters("ShipType", self.type, [1, 2, 3], True, None, None),
             Parameters("Slope", self.slope, None, None, True, "slp"),
             Parameters("Reed", self.reed, None, None, True, "rdd"),
         ]
