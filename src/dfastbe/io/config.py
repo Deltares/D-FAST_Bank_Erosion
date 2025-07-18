@@ -912,7 +912,7 @@ class ConfigFile:
             d_lines_split = d_lines_key[1:-1].split(",")
             d_lines = [float(d) for d in d_lines_split]
             if not all([d > 0 for d in d_lines]):
-                error = f"keyword DLINES should contain positive values in the configuration file."
+                error = "keyword DLINES should contain positive values in the configuration file."
                 self.logger.exception(error)
                 raise ValueError(error)
             if len(d_lines) != num_search_lines:
