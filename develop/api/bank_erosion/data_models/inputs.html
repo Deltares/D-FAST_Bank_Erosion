@@ -1630,17 +1630,17 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dfastbe.bank_erosion.data_models.inputs.ShippingData" class="md-nav__link">
+  <a href="#dfastbe.bank_erosion.data_models.inputs.ShipsParameters" class="md-nav__link">
     <span class="md-ellipsis">
-      ShippingData
+      ShipsParameters
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="ShippingData">
+    <nav class="md-nav" aria-label="ShipsParameters">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#dfastbe.bank_erosion.data_models.inputs.ShippingData.get_ship_data" class="md-nav__link">
+  <a href="#dfastbe.bank_erosion.data_models.inputs.ShipsParameters.get_ship_data" class="md-nav__link">
     <span class="md-ellipsis">
       get_ship_data
     </span>
@@ -1649,7 +1649,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dfastbe.bank_erosion.data_models.inputs.ShippingData.read_discharge_parameters" class="md-nav__link">
+  <a href="#dfastbe.bank_erosion.data_models.inputs.ShipsParameters.read_discharge_parameters" class="md-nav__link">
     <span class="md-ellipsis">
       read_discharge_parameters
     </span>
@@ -2057,17 +2057,17 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dfastbe.bank_erosion.data_models.inputs.ShippingData" class="md-nav__link">
+  <a href="#dfastbe.bank_erosion.data_models.inputs.ShipsParameters" class="md-nav__link">
     <span class="md-ellipsis">
-      ShippingData
+      ShipsParameters
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="ShippingData">
+    <nav class="md-nav" aria-label="ShipsParameters">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#dfastbe.bank_erosion.data_models.inputs.ShippingData.get_ship_data" class="md-nav__link">
+  <a href="#dfastbe.bank_erosion.data_models.inputs.ShipsParameters.get_ship_data" class="md-nav__link">
     <span class="md-ellipsis">
       get_ship_data
     </span>
@@ -2076,7 +2076,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dfastbe.bank_erosion.data_models.inputs.ShippingData.read_discharge_parameters" class="md-nav__link">
+  <a href="#dfastbe.bank_erosion.data_models.inputs.ShipsParameters.read_discharge_parameters" class="md-nav__link">
     <span class="md-ellipsis">
       read_discharge_parameters
     </span>
@@ -2219,10 +2219,10 @@
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/inputs.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">511</span>
-<span class="normal">512</span>
-<span class="normal">513</span>
-<span class="normal">514</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesResultsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">507</span>
+<span class="normal">508</span>
+<span class="normal">509</span>
+<span class="normal">510</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesResultsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom exception for BankLine results errors.&quot;&quot;&quot;</span>
 
     <span class="k">pass</span>
@@ -3328,21 +3328,21 @@ in the simulation data.</p>
 
 
 
-<h3 id="dfastbe.bank_erosion.data_models.inputs.ShippingData" class="doc doc-heading"><a href="#dfastbe.bank_erosion.data_models.inputs.ShippingData" class="toclink">
-            <code>ShippingData</code>
+<h3 id="dfastbe.bank_erosion.data_models.inputs.ShipsParameters" class="doc doc-heading"><a href="#dfastbe.bank_erosion.data_models.inputs.ShipsParameters" class="toclink">
+            <code>ShipsParameters</code>
 
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
   </span>
 
-</a><a href="#dfastbe.bank_erosion.data_models.inputs.ShippingData" class="headerlink" title="Permanent link">#</a></h3>
+</a><a href="#dfastbe.bank_erosion.data_models.inputs.ShipsParameters" class="headerlink" title="Permanent link">#</a></h3>
 
 
     <div class="doc doc-contents ">
 
 
-        <p>Shipping data for bank erosion simulation.</p>
+        <p>Data for ships going through the fairway for bank erosion simulation.</p>
 
 
 <p><span class="doc-section-title">Parameters:</span></p>
@@ -3374,7 +3374,7 @@ in the simulation data.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>vship</code>
+                <code>velocity</code>
             </td>
             <td>
                   <code><span title="typing.List">List</span>[<span title="numpy.ndarray">ndarray</span>]</code>
@@ -3390,7 +3390,7 @@ in the simulation data.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>nship</code>
+                <code>number</code>
             </td>
             <td>
                   <code><span title="typing.List">List</span>[<span title="numpy.ndarray">ndarray</span>]</code>
@@ -3406,7 +3406,7 @@ in the simulation data.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>nwave</code>
+                <code>num_waves</code>
             </td>
             <td>
                   <code><span title="typing.List">List</span>[<span title="numpy.ndarray">ndarray</span>]</code>
@@ -3438,7 +3438,7 @@ in the simulation data.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>shiptype</code>
+                <code>type</code>
             </td>
             <td>
                   <code><span title="typing.List">List</span>[<span title="numpy.ndarray">ndarray</span>]</code>
@@ -3494,7 +3494,9 @@ in the simulation data.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/inputs.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">281</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
 <span class="normal">282</span>
 <span class="normal">283</span>
 <span class="normal">284</span>
@@ -3717,45 +3719,44 @@ in the simulation data.</p>
 <span class="normal">501</span>
 <span class="normal">502</span>
 <span class="normal">503</span>
-<span class="normal">504</span>
-<span class="normal">505</span>
-<span class="normal">506</span>
-<span class="normal">507</span>
-<span class="normal">508</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">ShippingData</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Shipping data for bank erosion simulation.</span>
+<span class="normal">504</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ShipsParameters</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Data for ships going through the fairway for bank erosion simulation.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        config_file (ConfigFile):</span>
 <span class="sd">            Configuration file containing parameters.</span>
-<span class="sd">        vship (List[np.ndarray]):</span>
+<span class="sd">        velocity (List[np.ndarray]):</span>
 <span class="sd">            Ship velocities for each bank.</span>
-<span class="sd">        nship (List[np.ndarray]):</span>
+<span class="sd">        number (List[np.ndarray]):</span>
 <span class="sd">            Number of ships for each bank.</span>
-<span class="sd">        nwave (List[np.ndarray]):</span>
+<span class="sd">        num_waves (List[np.ndarray]):</span>
 <span class="sd">            Number of waves per ship for each bank.</span>
 <span class="sd">        draught (List[np.ndarray]):</span>
 <span class="sd">            Draught of ships for each bank.</span>
-<span class="sd">        shiptype (List[np.ndarray]):</span>
+<span class="sd">        type (List[np.ndarray]):</span>
 <span class="sd">            Type of ships for each bank.</span>
 <span class="sd">        slope (List[np.ndarray]):</span>
 <span class="sd">            Slope values for each bank.</span>
 <span class="sd">        reed (List[np.ndarray]):</span>
 <span class="sd">            Reed values for each bank.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Parameters</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="s2">&quot;Parameters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span>
+        <span class="s2">&quot;Parameters&quot;</span><span class="p">,</span> <span class="s2">&quot;name default valid onefile positive ext&quot;</span>
+    <span class="p">)</span>
     <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
-    <span class="n">vship</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
-    <span class="n">nship</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
-    <span class="n">nwave</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+    <span class="n">velocity</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+    <span class="n">number</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+    <span class="n">num_waves</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
     <span class="n">draught</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
-    <span class="n">shiptype</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
     <span class="n">slope</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
     <span class="n">reed</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_ship_data</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ShippingData&quot;</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ShipsParameters&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get ship parameters from the configuration file.</span>
 
 <span class="sd">        Args:</span>
@@ -3765,15 +3766,15 @@ in the simulation data.</p>
 <span class="sd">                Configuration file containing parameters.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            ShippingData: An instance of ShippingData with parameters read from the config file.</span>
+<span class="sd">            ShipsParameters: An instance of ShipsParameters with parameters read from the config file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">param_defs</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_initial_parameter_definitions</span><span class="p">()</span>
-        <span class="n">param_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">param_resolved</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1"># Retrieve parameter values</span>
         <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">param_defs</span><span class="p">:</span>
-            <span class="n">param_dict</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_param</span><span class="p">(</span>
+            <span class="n">param_resolved</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_param</span><span class="p">(</span>
                 <span class="n">config_file</span><span class="p">,</span>
                 <span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                 <span class="n">num_stations_per_bank</span><span class="p">,</span>
@@ -3783,6 +3784,16 @@ in the simulation data.</p>
                 <span class="n">positive</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">positive</span><span class="p">,</span>
                 <span class="n">ext</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">ext</span><span class="p">,</span>
             <span class="p">)</span>
+
+        <span class="n">param_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;velocity&quot;</span><span class="p">:</span> <span class="n">param_resolved</span><span class="p">[</span><span class="s2">&quot;vship&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="n">param_resolved</span><span class="p">[</span><span class="s2">&quot;nship&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;num_waves&quot;</span><span class="p">:</span> <span class="n">param_resolved</span><span class="p">[</span><span class="s2">&quot;nwave&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;draught&quot;</span><span class="p">:</span> <span class="n">param_resolved</span><span class="p">[</span><span class="s2">&quot;draught&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">param_resolved</span><span class="p">[</span><span class="s2">&quot;shiptype&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;slope&quot;</span><span class="p">:</span> <span class="n">param_resolved</span><span class="p">[</span><span class="s2">&quot;slope&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;reed&quot;</span><span class="p">:</span> <span class="n">param_resolved</span><span class="p">[</span><span class="s2">&quot;reed&quot;</span><span class="p">],</span>
+        <span class="p">}</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="o">**</span><span class="n">param_dict</span><span class="p">)</span>
 
@@ -3813,50 +3824,37 @@ in the simulation data.</p>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_initial_parameter_definitions</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Parameters</span><span class="p">]:</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_initial_parameter_definitions</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Parameters</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get parameter definitions for discharge parameters.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            shipping_data (Dict[str, List[np.ndarray]]):</span>
-<span class="sd">                The shipping data.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            List[namedtuple]: List of parameter definitions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span>
-            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;VShip&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NShip&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NWave&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Draught&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;ShipType&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Slope&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;slp&quot;</span><span class="p">),</span>
-            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Reed&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;rdd&quot;</span><span class="p">),</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;VShip&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NShip&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NWave&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Draught&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;ShipType&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Slope&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;slp&quot;</span><span class="p">),</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Reed&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;rdd&quot;</span><span class="p">),</span>
         <span class="p">]</span>
 
-    <span class="nd">@staticmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_get_discharge_parameter_definitions</span><span class="p">(</span>
-        <span class="n">shipping_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]],</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Parameters</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_discharge_parameter_definitions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Parameters</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get parameter definitions for discharge parameters.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            shipping_data (Dict[str, List[np.ndarray]]):</span>
-<span class="sd">                The shipping data.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            List[namedtuple]: List of parameter definitions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span>
-            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;VShip&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;vship&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NShip&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;nship&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NWave&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;nwave&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Draught&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;draught&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="n">Parameters</span><span class="p">(</span>
-                <span class="s2">&quot;ShipType&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;shiptype&quot;</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
-            <span class="p">),</span>
-            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Slope&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;slope&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;slp&quot;</span><span class="p">),</span>
-            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Reed&quot;</span><span class="p">,</span> <span class="n">shipping_data</span><span class="p">[</span><span class="s2">&quot;reed&quot;</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;rdd&quot;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;VShip&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NShip&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NWave&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_waves</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Draught&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">draught</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;ShipType&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Slope&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">slope</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;slp&quot;</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Reed&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reed</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;rdd&quot;</span><span class="p">),</span>
         <span class="p">]</span>
 
     <span class="nd">@staticmethod</span>
@@ -3898,8 +3896,6 @@ in the simulation data.</p>
 <span class="sd">        Args:</span>
 <span class="sd">            level_i (int):</span>
 <span class="sd">                The index of the discharge level.</span>
-<span class="sd">            shipping_data (Dict[str, List[np.ndarray]]):</span>
-<span class="sd">                The shipping data.</span>
 <span class="sd">            num_stations_per_bank (List[int]):</span>
 <span class="sd">                The number of stations per bank.</span>
 
@@ -3909,7 +3905,7 @@ in the simulation data.</p>
         <span class="n">level_i_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">level_i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="c1"># Get parameter definitions</span>
-        <span class="n">param_defs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_discharge_parameter_definitions</span><span class="p">(</span><span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="n">param_defs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_discharge_parameter_definitions</span><span class="p">()</span>
 
         <span class="c1"># Create a dictionary to store parameter values</span>
         <span class="n">param_dict</span> <span class="o">=</span> <span class="p">{}</span>
@@ -3967,14 +3963,14 @@ in the simulation data.</p>
 <div class="doc doc-object doc-function">
 
 
-<h4 id="dfastbe.bank_erosion.data_models.inputs.ShippingData.get_ship_data" class="doc doc-heading"><a href="#dfastbe.bank_erosion.data_models.inputs.ShippingData.get_ship_data" class="toclink">
-            <code class="highlight language-python"><span class="n">get_ship_data</span><span class="p">(</span><span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ShippingData</span></code>
+<h4 id="dfastbe.bank_erosion.data_models.inputs.ShipsParameters.get_ship_data" class="doc doc-heading"><a href="#dfastbe.bank_erosion.data_models.inputs.ShipsParameters.get_ship_data" class="toclink">
+            <code class="highlight language-python"><span class="n">get_ship_data</span><span class="p">(</span><span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ShipsParameters</span></code>
 
   <span class="doc doc-labels">
       <small class="doc doc-label doc-label-classmethod"><code>classmethod</code></small>
   </span>
 
-</a><a href="#dfastbe.bank_erosion.data_models.inputs.ShippingData.get_ship_data" class="headerlink" title="Permanent link">#</a></h4>
+</a><a href="#dfastbe.bank_erosion.data_models.inputs.ShipsParameters.get_ship_data" class="headerlink" title="Permanent link">#</a></h4>
 
 
     <div class="doc doc-contents ">
@@ -4039,12 +4035,12 @@ in the simulation data.</p>
       </thead>
       <tbody>
           <tr class="doc-section-item">
-<td><code>ShippingData</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="ShippingData (&lt;code&gt;dfastbe.bank_erosion.data_models.inputs.ShippingData&lt;/code&gt;)" href="../bank_erosion.html#dfastbe.bank_erosion.data_models.inputs.ShippingData">ShippingData</a></code>
+<td><code>ShipsParameters</code></td>            <td>
+                  <code><a class="autorefs autorefs-internal" title="ShipsParameters (&lt;code&gt;dfastbe.bank_erosion.data_models.inputs.ShipsParameters&lt;/code&gt;)" href="../bank_erosion.html#dfastbe.bank_erosion.data_models.inputs.ShipsParameters">ShipsParameters</a></code>
             </td>
             <td>
               <div class="doc-md-description">
-                <p>An instance of ShippingData with parameters read from the config file.</p>
+                <p>An instance of ShipsParameters with parameters read from the config file.</p>
               </div>
             </td>
           </tr>
@@ -4053,8 +4049,7 @@ in the simulation data.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/inputs.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">312</span>
-<span class="normal">313</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">313</span>
 <span class="normal">314</span>
 <span class="normal">315</span>
 <span class="normal">316</span>
@@ -4085,10 +4080,21 @@ in the simulation data.</p>
 <span class="normal">341</span>
 <span class="normal">342</span>
 <span class="normal">343</span>
-<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">344</span>
+<span class="normal">345</span>
+<span class="normal">346</span>
+<span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
+<span class="normal">350</span>
+<span class="normal">351</span>
+<span class="normal">352</span>
+<span class="normal">353</span>
+<span class="normal">354</span>
+<span class="normal">355</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_ship_data</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ShippingData&quot;</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ShipsParameters&quot;</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get ship parameters from the configuration file.</span>
 
 <span class="sd">    Args:</span>
@@ -4098,15 +4104,15 @@ in the simulation data.</p>
 <span class="sd">            Configuration file containing parameters.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        ShippingData: An instance of ShippingData with parameters read from the config file.</span>
+<span class="sd">        ShipsParameters: An instance of ShipsParameters with parameters read from the config file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">param_defs</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_initial_parameter_definitions</span><span class="p">()</span>
-    <span class="n">param_dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">param_resolved</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># Retrieve parameter values</span>
     <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">param_defs</span><span class="p">:</span>
-        <span class="n">param_dict</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_param</span><span class="p">(</span>
+        <span class="n">param_resolved</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_get_param</span><span class="p">(</span>
             <span class="n">config_file</span><span class="p">,</span>
             <span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">num_stations_per_bank</span><span class="p">,</span>
@@ -4116,6 +4122,16 @@ in the simulation data.</p>
             <span class="n">positive</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">positive</span><span class="p">,</span>
             <span class="n">ext</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">ext</span><span class="p">,</span>
         <span class="p">)</span>
+
+    <span class="n">param_dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;velocity&quot;</span><span class="p">:</span> <span class="n">param_resolved</span><span class="p">[</span><span class="s2">&quot;vship&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="n">param_resolved</span><span class="p">[</span><span class="s2">&quot;nship&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;num_waves&quot;</span><span class="p">:</span> <span class="n">param_resolved</span><span class="p">[</span><span class="s2">&quot;nwave&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;draught&quot;</span><span class="p">:</span> <span class="n">param_resolved</span><span class="p">[</span><span class="s2">&quot;draught&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">param_resolved</span><span class="p">[</span><span class="s2">&quot;shiptype&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;slope&quot;</span><span class="p">:</span> <span class="n">param_resolved</span><span class="p">[</span><span class="s2">&quot;slope&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;reed&quot;</span><span class="p">:</span> <span class="n">param_resolved</span><span class="p">[</span><span class="s2">&quot;reed&quot;</span><span class="p">],</span>
+    <span class="p">}</span>
 
     <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">config_file</span><span class="p">,</span> <span class="o">**</span><span class="n">param_dict</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -4127,10 +4143,10 @@ in the simulation data.</p>
 <div class="doc doc-object doc-function">
 
 
-<h4 id="dfastbe.bank_erosion.data_models.inputs.ShippingData.read_discharge_parameters" class="doc doc-heading"><a href="#dfastbe.bank_erosion.data_models.inputs.ShippingData.read_discharge_parameters" class="toclink">
+<h4 id="dfastbe.bank_erosion.data_models.inputs.ShipsParameters.read_discharge_parameters" class="doc doc-heading"><a href="#dfastbe.bank_erosion.data_models.inputs.ShipsParameters.read_discharge_parameters" class="toclink">
             <code class="highlight language-python"><span class="n">read_discharge_parameters</span><span class="p">(</span><span class="n">level_i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SingleLevelParameters</span></code>
 
-</a><a href="#dfastbe.bank_erosion.data_models.inputs.ShippingData.read_discharge_parameters" class="headerlink" title="Permanent link">#</a></h4>
+</a><a href="#dfastbe.bank_erosion.data_models.inputs.ShipsParameters.read_discharge_parameters" class="headerlink" title="Permanent link">#</a></h4>
 
 
     <div class="doc doc-contents ">
@@ -4160,22 +4176,6 @@ in the simulation data.</p>
             <td>
               <div class="doc-md-description">
                 <p>The index of the discharge level.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>shipping_data</code>
-            </td>
-            <td>
-                  <code><span title="typing.Dict">Dict</span>[<span title="str">str</span>, <span title="typing.List">List</span>[<span title="numpy.ndarray">ndarray</span>]]</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>The shipping data.</p>
               </div>
             </td>
             <td>
@@ -4226,7 +4226,9 @@ in the simulation data.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/inputs.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">446</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
 <span class="normal">447</span>
 <span class="normal">448</span>
 <span class="normal">449</span>
@@ -4284,11 +4286,7 @@ in the simulation data.</p>
 <span class="normal">501</span>
 <span class="normal">502</span>
 <span class="normal">503</span>
-<span class="normal">504</span>
-<span class="normal">505</span>
-<span class="normal">506</span>
-<span class="normal">507</span>
-<span class="normal">508</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">read_discharge_parameters</span><span class="p">(</span>
+<span class="normal">504</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">read_discharge_parameters</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">level_i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
@@ -4300,8 +4298,6 @@ in the simulation data.</p>
 <span class="sd">    Args:</span>
 <span class="sd">        level_i (int):</span>
 <span class="sd">            The index of the discharge level.</span>
-<span class="sd">        shipping_data (Dict[str, List[np.ndarray]]):</span>
-<span class="sd">            The shipping data.</span>
 <span class="sd">        num_stations_per_bank (List[int]):</span>
 <span class="sd">            The number of stations per bank.</span>
 
@@ -4311,7 +4307,7 @@ in the simulation data.</p>
     <span class="n">level_i_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">level_i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
 
     <span class="c1"># Get parameter definitions</span>
-    <span class="n">param_defs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_discharge_parameter_definitions</span><span class="p">(</span><span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+    <span class="n">param_defs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_discharge_parameter_definitions</span><span class="p">()</span>
 
     <span class="c1"># Create a dictionary to store parameter values</span>
     <span class="n">param_dict</span> <span class="o">=</span> <span class="p">{}</span>
