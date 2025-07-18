@@ -2,7 +2,7 @@ import os
 from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Tuple
+from typing import ClassVar, List, Tuple
 
 import numpy as np
 from dfastio.xyc.models import XYCModel
@@ -275,8 +275,6 @@ class ErosionRiverData(BaseRiverData):
         river_axis = XYCModel.read(river_axis_file)
         return river_axis
 
-Parameters = namedtuple("Parameters", "name default valid onefile positive ext")
-
 
 @dataclass
 class ShipsParameters:
@@ -300,6 +298,9 @@ class ShipsParameters:
         reed (List[np.ndarray]):
             Reed values for each bank.
     """
+    Parameters: ClassVar["Parameters"] = namedtuple(
+        "Parameters", "name default valid onefile positive ext"
+    )
     config_file: ConfigFile
     velocity: List[np.ndarray]
     number: List[np.ndarray]
@@ -380,21 +381,21 @@ class ShipsParameters:
             **kwargs,
         )
 
-    @staticmethod
-    def _get_initial_parameter_definitions() -> List[Parameters]:
+    @classmethod
+    def _get_initial_parameter_definitions(cls) -> List[Parameters]:
         """Get parameter definitions for discharge parameters.
 
         Returns:
             List[namedtuple]: List of parameter definitions.
         """
         return [
-            Parameters("VShip", None, None, True, True, None),
-            Parameters("NShip", None, None, True, True, None),
-            Parameters("NWave", 5, None, True, True, None),
-            Parameters("Draught", None, None, True, True, None),
-            Parameters("ShipType", None, [1, 2, 3], True, None, None),
-            Parameters("Slope", 20, None, None, True, "slp"),
-            Parameters("Reed", 0, None, None, True, "rdd"),
+            cls.Parameters("VShip", None, None, True, True, None),
+            cls.Parameters("NShip", None, None, True, True, None),
+            cls.Parameters("NWave", 5, None, True, True, None),
+            cls.Parameters("Draught", None, None, True, True, None),
+            cls.Parameters("ShipType", None, [1, 2, 3], True, None, None),
+            cls.Parameters("Slope", 20, None, None, True, "slp"),
+            cls.Parameters("Reed", 0, None, None, True, "rdd"),
         ]
 
     def _get_discharge_parameter_definitions(self) -> List[Parameters]:
@@ -404,13 +405,13 @@ class ShipsParameters:
             List[namedtuple]: List of parameter definitions.
         """
         return [
-            Parameters("VShip", self.velocity, None, None, None, None),
-            Parameters("NShip", self.number, None, None, None, None),
-            Parameters("NWave", self.num_waves, None, None, None, None),
-            Parameters("Draught", self.draught, None, None, None, None),
-            Parameters("ShipType", self.type, [1, 2, 3], True, None, None),
-            Parameters("Slope", self.slope, None, None, True, "slp"),
-            Parameters("Reed", self.reed, None, None, True, "rdd"),
+            self.Parameters("VShip", self.velocity, None, None, None, None),
+            self.Parameters("NShip", self.number, None, None, None, None),
+            self.Parameters("NWave", self.num_waves, None, None, None, None),
+            self.Parameters("Draught", self.draught, None, None, None, None),
+            self.Parameters("ShipType", self.type, [1, 2, 3], True, None, None),
+            self.Parameters("Slope", self.slope, None, None, True, "slp"),
+            self.Parameters("Reed", self.reed, None, None, True, "rdd"),
         ]
 
     @staticmethod
