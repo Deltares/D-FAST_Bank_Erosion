@@ -1,8 +1,8 @@
 import os
 from collections import namedtuple
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 import numpy as np
 from dfastio.xyc.models import XYCModel
@@ -322,7 +322,7 @@ class ShipsParameters:
                 Configuration file containing parameters.
 
         Returns:
-            ShippingData: An instance of ShippingData with parameters read from the config file.
+            ShipsParameters: An instance of ShipsParameters with parameters read from the config file.
         """
 
         param_defs = cls._get_initial_parameter_definitions()

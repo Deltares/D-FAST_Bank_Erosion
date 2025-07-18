@@ -20,7 +20,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
 from dfastbe.bank_erosion.data_models.inputs import (
     ErosionRiverData,
     ErosionSimulationData,
-    ShippingData,
+    ShipsParameters,
 )
 from dfastbe.io.config import ConfigFile
 
@@ -308,33 +308,33 @@ class TestErosionRiverData:
         assert river_axis.equals(mock_river_axis)
 
 
-class TestShippingData:
+class TestShipsParameters:
     @pytest.fixture
     def shipping_dict(self):
         """Fixture to provide mock shipping data for testing."""
         return {
-            "vship": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
-            "nship": [
+            "velocity": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
+            "number": [
                 np.array([20912, 20912, 20912]),
                 np.array([20912, 20912, 20912]),
             ],
-            "nwave": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
+            "num_waves": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
             "draught": [np.array([1.2, 1.2, 1.2]), np.array([1.2, 1.2, 1.2])],
-            "shiptype": [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])],
+            "type": [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])],
             "slope": [np.array([20.0, 20.0, 20.0]), np.array([20.0, 20.0, 20.0])],
             "reed": [np.array([0.0, 0.0, 0.0]), np.array([0.0, 0.0, 0.0])],
         }
 
     @pytest.fixture
     def mock_config_file(self, shipping_dict):
-        """Fixture to create a mock ConfigFile instance for testing ShippingData."""
+        """Fixture to create a mock ConfigFile instance for testing ShipsParameters."""
         config_file = MagicMock(spec=ConfigFile)
         config_file.get_parameter.side_effect = [
-            shipping_dict["vship"],
-            shipping_dict["nship"],
-            shipping_dict["nwave"],
+            shipping_dict["velocity"],
+            shipping_dict["number"],
+            shipping_dict["num_waves"],
             shipping_dict["draught"],
-            shipping_dict["shiptype"],
+            shipping_dict["type"],
             shipping_dict["slope"],
             shipping_dict["reed"],
         ]
@@ -359,16 +359,16 @@ class TestShippingData:
             The returned discharge parameters are an instance of SingleLevelParameters.
             The parameters match the expected values from the shipping data.
         """
-        shipping_data = ShippingData(mock_config_file, **shipping_dict)
+        shipping_data = ShipsParameters(mock_config_file, **shipping_dict)
         discharge_parameters = shipping_data.read_discharge_parameters(1, [13])
         assert isinstance(discharge_parameters, SingleLevelParameters)
         assert discharge_parameters.id == 1
         assert np.allclose(
-            discharge_parameters.left.ship_velocity, shipping_dict["vship"]
+            discharge_parameters.left.ship_velocity, shipping_dict["velocity"]
         )
-        assert np.allclose(discharge_parameters.left.num_ship, shipping_dict["nship"])
+        assert np.allclose(discharge_parameters.left.num_ship, shipping_dict["number"])
         assert np.allclose(
-            discharge_parameters.left.num_waves_per_ship, shipping_dict["nwave"]
+            discharge_parameters.left.num_waves_per_ship, shipping_dict["num_waves"]
         )
 
     @pytest.mark.unit
@@ -393,14 +393,16 @@ class TestShippingData:
         """
         num_stations_per_bank = [3, 3]
 
-        ship_data = ShippingData.get_ship_data(num_stations_per_bank, mock_config_file)
+        ship_data = ShipsParameters.get_ship_data(
+            num_stations_per_bank, mock_config_file
+        )
 
-        assert isinstance(ship_data, ShippingData)
-        assert ship_data.vship[0].shape[0] == num_stations_per_bank[0]
-        assert ship_data.nship[0].shape[0] == num_stations_per_bank[0]
-        assert ship_data.nwave[0].shape[0] == num_stations_per_bank[0]
+        assert isinstance(ship_data, ShipsParameters)
+        assert ship_data.velocity[0].shape[0] == num_stations_per_bank[0]
+        assert ship_data.number[0].shape[0] == num_stations_per_bank[0]
+        assert ship_data.num_waves[0].shape[0] == num_stations_per_bank[0]
         assert ship_data.draught[0].shape[0] == num_stations_per_bank[0]
-        assert ship_data.shiptype[0].shape[0] == num_stations_per_bank[0]
+        assert ship_data.type[0].shape[0] == num_stations_per_bank[0]
         assert ship_data.slope[0].shape[0] == num_stations_per_bank[0]
         assert ship_data.reed[0].shape[0] == num_stations_per_bank[0]
 
@@ -422,7 +424,7 @@ class TestShippingData:
         Asserts:
             The returned parameters are a list of Parameters instances with expected values.
         """
-        shipping_data = ShippingData(mock_config_file, **shipping_dict)
+        shipping_data = ShipsParameters(mock_config_file, **shipping_dict)
         mu_slope, mu_reed = shipping_data._calculate_ship_derived_parameters(
             shipping_dict["slope"], shipping_dict["reed"]
         )

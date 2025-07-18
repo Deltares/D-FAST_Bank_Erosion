@@ -46,13 +46,12 @@ from dfastbe.bank_erosion.data_models.calculation import (
     SingleDischargeLevel,
     SingleErosion,
     SingleLevelParameters,
-    SingleParameters,
     WaterLevelData,
 )
 from dfastbe.bank_erosion.data_models.inputs import (
     ErosionRiverData,
     ErosionSimulationData,
-    ShippingData,
+    ShipsParameters,
 )
 from dfastbe.bank_erosion.debugger import Debugger
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
@@ -307,7 +306,7 @@ class Erosion:
 
         # save 1_banklines
         # read vship, nship, nwave, draught (tship), shiptype ... independent of level number
-        shipping_data = ShippingData.get_ship_data(
+        ships_parameters = ShipsParameters.get_ship_data(
             num_stations_per_bank, self.config_file
         )
 
@@ -361,7 +360,7 @@ class Erosion:
             'tauc': tauc
         }
         return ErosionInputs.from_column_arrays(
-            data, SingleErosion, shipping_data=shipping_data, bank_type=bank_type
+            data, SingleErosion, shipping_data=ships_parameters, bank_type=bank_type
         )
 
     def _calculate_bank_height(self, bank_data: BankData, simulation_data: ErosionSimulationData) -> BankData:
