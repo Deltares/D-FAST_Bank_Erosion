@@ -25,14 +25,17 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
+import logging
 from pathlib import Path
-from dfastbe.io.logger import load_program_texts
-from dfastbe.io.config import ConfigFile
+
+from dfastbe import __file__
 from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.io.logger import log_text, timed_logger
 from dfastbe.gui.gui import main
-from dfastbe import __file__
+from dfastbe.io.config import ConfigFile
+from dfastbe.io.logger import load_program_texts
+
 R_DIR = Path(__file__).resolve().parent
 LOG_DATA_DIR = R_DIR / "io/log_data"
 
@@ -84,19 +87,20 @@ def run(
     language = language.upper()
     load_program_texts( LOG_DATA_DIR / f"messages.{language}.ini")
     run_mode = run_mode.upper()
+    logger = logging.getLogger()
 
     if run_mode == "GUI":
         main(configfile)
     else:
-        config_file = ConfigFile.read(configfile)
+        config_file = ConfigFile.read(configfile, logger)
 
         if run_mode == "BANKLINES":
-            bank_lines = BankLines(config_file)
+            bank_lines = BankLines(config_file, logger)
             bank_lines.detect()
             bank_lines.plot()
             bank_lines.save()
         elif run_mode == "BANKEROSION":
-            erosion = Erosion(config_file)
+            erosion = Erosion(config_file, logger)
             erosion.run()
             erosion.plot()
             erosion.save()

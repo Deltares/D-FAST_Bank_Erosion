@@ -29,6 +29,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from configparser import ConfigParser
 from configparser import Error as ConfigparserError
 from dataclasses import dataclass
+from logging import Logger
 from pathlib import Path
 from typing import Any, Callable, List, Optional, Tuple, Union
 
@@ -84,7 +85,9 @@ class ConfigFile:
     settings and supports upgrading older configuration formats.
     """
 
-    def __init__(self, config: ConfigParser, path: Union[Path, str] = None):
+    def __init__(
+        self, config: ConfigParser, logger: Logger, path: Union[Path, str] = None
+    ):
         """
         Initialize the ConfigFile object.
 
@@ -99,7 +102,9 @@ class ConfigFile:
                 ```python
                 >>> import tempfile
                 >>> from dfastbe.io.config import ConfigFile
-                >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+                >>> import logging
+                >>> logger = logging.getLogger("test_logger")
+                >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
                 >>> print(config_file.config["General"]["Version"])
                 1.0
 
@@ -107,7 +112,9 @@ class ConfigFile:
             Writing a configuration file:
                 ```python
                 >>> from dfastbe.io.config import ConfigFile
-                >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+                >>> import logging
+                >>> logger = logging.getLogger("test_logger")
+                >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
                 >>> with tempfile.TemporaryDirectory() as tmpdirname:
                 ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
 
@@ -115,6 +122,7 @@ class ConfigFile:
         """
         self._config = config
         self.crs = "EPSG:28992"
+        self.logger = logger
         if path:
             self.path = Path(path)
             self.root_dir = self.path.parent
@@ -149,7 +157,7 @@ class ConfigFile:
         self._root_dir = value
 
     @classmethod
-    def read(cls, path: Union[str, Path]) -> "ConfigFile":
+    def read(cls, path: Union[str, Path], logger: Logger) -> "ConfigFile":
         """Read a configParser object (configuration file).
 
         Reads the config file using the standard `configparser`. Falls back to a
@@ -169,24 +177,28 @@ class ConfigFile:
             Read a config file:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
 
             ```
         """
         if not Path(path).exists():
-            raise FileNotFoundError(f"The Config-File: {path} does not exist")
+            error = f"The Config-File: {path} does not exist"
+            logger.exception(error)
+            raise FileNotFoundError(error)
 
         try:
             config = ConfigParser(comment_prefixes="%")
             with open(path, "r") as configfile:
                 config.read_file(configfile)
         except ConfigparserError as e:
-            print(f"Error during reading the config file: {e}")
+            logger.exception(f"Error during reading the config file: {e}")
             config = cls.config_file_callback_parser(path)
 
         # if version != "1.0":
-        config = cls._upgrade(config)
-        return cls(config, path=path)
+        config = cls._upgrade(config, logger)
+        return cls(config, logger, path=path)
 
     @staticmethod
     def config_file_callback_parser(path: str) -> ConfigParser:
@@ -211,7 +223,7 @@ class ConfigFile:
         return config
 
     @staticmethod
-    def _upgrade(config: ConfigParser) -> ConfigParser:
+    def _upgrade(config: ConfigParser, logger: Logger) -> ConfigParser:
         """Upgrade the configuration data structure to version 1.0 format.
 
         Args:
@@ -223,7 +235,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> result = config_file._upgrade(config_file.config)
             >>> isinstance(result, ConfigParser)
             True
@@ -247,7 +261,7 @@ class ConfigFile:
             )
             config = _move_parameter_location(config, "General", "SimFile", "Detect")
             config = _move_parameter_location(config, "General", "NBank", "Detect")
-            config_file = ConfigFile(config)
+            config_file = ConfigFile(config, logger)
             n_bank = config_file.get_int("Detect", "NBank", default=0, positive=True)
             for i in range(1, n_bank + 1):
                 config = _move_parameter_location(
@@ -273,7 +287,7 @@ class ConfigFile:
                 config, "General", "EroVolEqui", "Erosion"
             )
             config = _move_parameter_location(config, "General", "NLevel", "Erosion")
-            config_file = ConfigFile(config)
+            config_file = ConfigFile(config, logger)
             n_level = config_file.get_int("Erosion", "NLevel", default=0, positive=True)
 
             for i in range(1, n_level + 1):
@@ -359,7 +373,9 @@ class ConfigFile:
             ```python
             >>> import tempfile
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> with tempfile.TemporaryDirectory() as tmpdirname:
             ...     config_file.write(f"{tmpdirname}/meuse_manual_out.cfg")
 
@@ -414,7 +430,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> result = config_file.get_str("General", "BankDir")
             >>> expected = Path("tests/data/erosion/output/banklines").resolve()
             >>> str(expected) == result
@@ -428,9 +446,11 @@ class ConfigFile:
             if default is not None:
                 val = default
             else:
-                raise ConfigFileError(
+                error = (
                     f"No value specified for required keyword {key} in block {group}."
-                ) from e
+                )
+                self.logger.exception(error)
+                raise ConfigFileError(error) from e
         return val
 
     def get_bool(
@@ -455,7 +475,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.get_bool("General", "Plotting")
             True
 
@@ -474,9 +496,9 @@ class ConfigFile:
             if default is not None:
                 val = default
             else:
-                raise ConfigFileError(
-                    f"No boolean value specified for required keyword {key} in block {group}."
-                ) from e
+                error = f"No boolean value specified for required keyword {key} in block {group}."
+                self.logger.exception(error)
+                raise ConfigFileError(error) from e
 
         return val
 
@@ -507,7 +529,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.get_float("General", "ZoomStepKM")
             1.0
 
@@ -519,13 +543,13 @@ class ConfigFile:
             if default is not None:
                 val = default
             else:
-                raise ConfigFileError(
-                    f"No floating point value specified for required keyword {key} in block {group}."
-                ) from e
+                error = f"No floating point value specified for required keyword {key} in block {group}."
+                self.logger.exception(error)
+                raise ConfigFileError(error) from e
         if positive and val < 0.0:
-            raise ConfigFileError(
-                f"Value for {key} in block {group} must be positive, not {val}."
-            )
+            error = f"Value for {key} in block {group} must be positive, not {val}."
+            self.logger.exception(error)
+            raise ConfigFileError(error)
         return val
 
     def get_int(
@@ -555,7 +579,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.get_int("Detect", "NBank")
             2
 
@@ -567,13 +593,13 @@ class ConfigFile:
             if default is not None:
                 val = default
             else:
-                raise ConfigFileError(
-                    f"No integer value specified for required keyword {key} in block {group}."
-                ) from e
+                error = f"No integer value specified for required keyword {key} in block {group}."
+                self.logger.exception(error)
+                raise ConfigFileError(error) from e
         if positive and val <= 0:
-            raise ConfigFileError(
-                f"Value for {key} in block {group} must be positive, not {val}."
-            )
+            error = f"Value for {key} in block {group} must be positive, not {val}."
+            self.logger.exception(error)
+            raise ConfigFileError(error)
         return val
 
     def get_sim_file(self, group: str, istr: str) -> str:
@@ -590,7 +616,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> result = config_file.get_sim_file("Erosion", "1")
             >>> expected = Path("tests/data/erosion/inputs/sim0075/SDS-j19_map.nc").resolve()
             >>> str(expected) == result
@@ -610,7 +638,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.get_start_end_stations()
             (123.0, 128.0)
 
@@ -712,7 +742,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5, 6, 7])]
             >>> num_stations_per_bank = [len(bank) for bank in bank_km]
             >>> config_file.get_parameter("General", "ZoomStepKM", num_stations_per_bank)
@@ -726,9 +758,9 @@ class ConfigFile:
         except (KeyError, TypeError) as e:
             value = None
             if default is None:
-                raise ConfigFileError(
-                    f'No value specified for required keyword "{key}" in block "{group}".'
-                ) from e
+                error = f'No value specified for required keyword "{key}" in block "{group}".'
+                self.logger.exception(error)
+                raise ConfigFileError(error) from e
             use_default = True
 
         return self.process_parameter(
@@ -766,9 +798,13 @@ class ConfigFile:
             float: The validated parameter value.
         """
         if positive and value < 0:
-            raise ValueError(f'Value of "{key}" should be positive, not {value}.')
+            error = f'Value of "{key}" should be positive, not {value}.'
+            self.logger.exception(error)
+            raise ValueError(error)
         if valid is not None and valid.count(value) == 0:
-            raise ValueError(f'Value of "{key}" should be in {valid}, not {value}.')
+            error = f'Value of "{key}" should be in {valid}, not {value}.'
+            self.logger.exception(error)
+            raise ValueError(error)
         return value
 
     def process_parameter(
@@ -861,7 +897,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.get_bank_search_distances(2)
             [50.0, 50.0]
 
@@ -874,13 +912,13 @@ class ConfigFile:
             d_lines_split = d_lines_key[1:-1].split(",")
             d_lines = [float(d) for d in d_lines_split]
             if not all([d > 0 for d in d_lines]):
-                raise ValueError(
-                    "keyword DLINES should contain positive values in the configuration file."
-                )
+                error = "keyword DLINES should contain positive values in the configuration file."
+                self.logger.exception(error)
+                raise ValueError(error)
             if len(d_lines) != num_search_lines:
-                raise ConfigFileError(
-                    "keyword DLINES should contain NBANK values in the configuration file."
-                )
+                error = "keyword DLINES should contain NBANK values in the configuration file."
+                self.logger.exception(error)
+                raise ConfigFileError(error)
         return d_lines
 
     def get_range(self, group: str, key: str) -> Tuple[float, float]:
@@ -896,7 +934,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.get_range("General", "Boundaries")
             (123.0, 128.0)
 
@@ -914,9 +954,9 @@ class ConfigFile:
             else:
                 val = (val_list[0], val_list[1])
         except ValueError as e:
-            raise ValueError(
-                f'Invalid range specification "{str_val}" for required keyword "{key}" in block "{group}".'
-            ) from e
+            error = f'Invalid range specification "{str_val}" for keyword "{key}" in block "{group}".'
+            self.logger.exception(error)
+            raise ValueError(error) from e
         return val
 
     def get_river_center_line(self) -> LineString:
@@ -945,7 +985,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.resolve("tests/data/erosion")
 
             ```
@@ -1004,7 +1046,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.relative_to("testing/data/erosion")
 
             ```
@@ -1069,7 +1113,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.resolve_parameter("General", "RiverKM", "tests/data/erosion")
 
             ```
@@ -1095,7 +1141,9 @@ class ConfigFile:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> config_file.parameter_relative_to("General", "RiverKM", "tests/data/erosion")
 
             ```

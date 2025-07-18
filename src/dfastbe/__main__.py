@@ -34,6 +34,7 @@ from typing import Tuple
 import matplotlib
 
 from dfastbe.cmd import run
+from dfastbe.io.logger import configure_logging
 
 matplotlib.use("Qt5Agg")
 
@@ -58,7 +59,7 @@ if is_nuitka:
 # ------------------------------------------------------------------------------
 
 
-def parse_arguments() -> Tuple[str, str, str]:
+def parse_arguments() -> Tuple[str, str, str, bool]:
     """Parse the command line arguments.
 
     Raises:
@@ -91,18 +92,25 @@ def parse_arguments() -> Tuple[str, str, str]:
         default="dfastbe.cfg",
         help="name of the configuration file ('dfastbe.cfg' is default)",
     )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="enable debug mode (default is False)",
+    )
     args = parser.parse_args()
 
     language = args.language
     run_mode = args.mode
     configfile = args.config
+    debug = args.debug
 
-    return language, run_mode, configfile
+    return language, run_mode, configfile, debug
 
 
 def main():
     """Main function to run the D-FAST Bank Erosion application."""
-    language, run_mode, configfile = parse_arguments()
+    language, run_mode, configfile, debug = parse_arguments()
+    configure_logging(debug)
     run(language, run_mode, configfile)
 
 

@@ -27,6 +27,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 import os
+from logging import Logger
 from typing import Any, Dict, List, Tuple
 
 import numpy as np
@@ -54,7 +55,6 @@ from dfastbe.bank_erosion.data_models.inputs import (
     ErosionSimulationData,
 )
 from dfastbe.bank_erosion.debugger import Debugger
-from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.utils import (
@@ -77,11 +77,12 @@ Y_AXIS_TITLE = "y-coordinate [km]"
 class Erosion:
     """Class to handle the bank erosion calculations."""
 
-    def __init__(self, config_file: ConfigFile, gui: bool = False):
+    def __init__(self, config_file: ConfigFile, logger: Logger, gui: bool = False):
         """Initialize the Erosion class."""
         self.root_dir = config_file.root_dir
         self._config_file = config_file
         self.gui = gui
+        self.logger = logger
 
         self.river_data = ErosionRiverData(config_file)
         self.river_center_line_arr = self.river_data.river_center_line.as_array()
@@ -180,7 +181,7 @@ class Erosion:
         dist2 = (np.diff(river_axis_numpy, axis=0) ** 2).sum(axis=1)
         alpha = dist2.max() / dist2.sum()
         if alpha > 0.03:
-            print("The river axis needs sorting!!")
+            self.logger.info("The river axis needs sorting!!")
 
         # map km to axis points, further using axis
         log_text("chainage_to_axis")
@@ -569,6 +570,7 @@ class Erosion:
                 bank_coords,
                 erosion_results.total_erosion_dist[ib],
                 single_bank.is_right_bank,
+                self.logger,
             )
             xy_line_new_list.append(xy_line_new)
             bankline_new_list.append(LineString(xy_line_new))
@@ -577,6 +579,7 @@ class Erosion:
                 bank_coords,
                 erosion_results.eq_erosion_dist[ib],
                 single_bank.is_right_bank,
+                self.logger,
             )
             xy_line_eq_list.append(xy_line_eq)
             bankline_eq_list.append(LineString(xy_line_eq))
