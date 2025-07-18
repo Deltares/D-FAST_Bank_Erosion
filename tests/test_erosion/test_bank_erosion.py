@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 import matplotlib
 import numpy as np
 import pytest
-from pyfakefs.fake_filesystem import FakeFilesystem
 from matplotlib.testing.compare import compare_images
+from pyfakefs.fake_filesystem import FakeFilesystem
 
 import dfastbe.io.logger
 from dfastbe.bank_erosion.bank_erosion import Erosion, calculate_alpha
@@ -119,9 +119,10 @@ class TestErosion:
         with patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion.__init__", return_value=None
         ):
-            erosion_instance = Erosion(MagicMock())
+            erosion_instance = Erosion(MagicMock(), MagicMock())
 
             erosion_instance.root_dir = Path("mock_root_dir")
+            erosion_instance.logger = MagicMock()
             erosion_instance._config_file = MagicMock()
             erosion_instance.gui = False
             erosion_instance.river_data = MagicMock()
