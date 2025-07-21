@@ -184,7 +184,7 @@ class Erosion:
             self.logger.info("The river axis needs sorting!!")
 
         # map km to axis points, further using axis
-        log_text("chainage_to_axis")
+        self.logger.log_text("chainage_to_axis")
         river_axis_km = river_axis.intersect_with_line(self.river_center_line_arr)
 
         # clip river axis to reach of interest (get the closest point to the first and last station)
@@ -212,7 +212,7 @@ class Erosion:
         mesh_data: MeshData,
     ):
         # map km to fairway points, further using axis
-        log_text("chainage_to_fairway")
+        self.logger.log_text("chainage_to_fairway")
         # intersect fairway and mesh
         fairway_intersection_coords, fairway_face_indices = intersect_line_mesh(
             river_axis.as_array(), mesh_data
@@ -252,7 +252,7 @@ class Erosion:
                     - fairway_initial_water_levels
         """
         # distance fairway-bankline (bank-fairway)
-        log_text("bank_distance_fairway")
+        self.logger.log_text("bank_distance_fairway")
 
         num_fairway_face_ind = len(fairway_data.fairway_face_indices)
 
@@ -437,10 +437,10 @@ class Erosion:
         # initialize arrays for erosion loop over all discharges
         discharge_levels = []
 
-        log_text("total_time", data={"t": self.river_data.erosion_time})
+        self.logger.log_text("total_time", data={"t": self.river_data.erosion_time})
 
         for level_i in range(num_levels):
-            log_text(
+            self.logger.log_text(
                 "discharge_header",
                 data={
                     "i": level_i + 1,
@@ -449,7 +449,7 @@ class Erosion:
                 },
             )
 
-            log_text("read_q_params", indent="  ")
+            self.logger.log_text("read_q_params", indent="  ")
             # 1) read level-specific parameters
             # read ship_velocity, num_ship, nwave, draught, ship_type, slope, reed, fairway_depth, ... (level specific values)
             level_parameters = self._read_discharge_parameters(
@@ -457,14 +457,14 @@ class Erosion:
             )
 
             # 2) load FM result
-            log_text("-", indent="  ")
-            log_text(
+            self.logger.log_text("-", indent="  ")
+            self.logger.log_text(
                 "read_simdata", data={"file": self.sim_files[level_i]}, indent="  "
             )
             simulation_data = ErosionSimulationData.read(
                 self.sim_files[level_i], indent="  "
             )
-            log_text("bank_erosion", indent="  ")
+            self.logger.log_text("bank_erosion", indent="  ")
 
             if level_i == 0:
                 bank_data = self._calculate_bank_height(bank_data, simulation_data)
@@ -485,7 +485,9 @@ class Erosion:
             error_vol_file = self.config_file.get_str(
                 "Erosion", f"EroVol{level_i + 1}", default=f"erovolQ{level_i + 1}.evo"
             )
-            log_text("save_error_vol", data={"file": error_vol_file}, indent="  ")
+            self.logger.log_text(
+                "save_error_vol", data={"file": error_vol_file}, indent="  "
+            )
             write_km_eroded_volumes(
                 km_mid, dvol_bank, f"{self.river_data.output_dir}/{error_vol_file}"
             )
@@ -530,7 +532,7 @@ class Erosion:
         erosion_results: ErosionResults,
     ) -> Tuple[List[LineString], List[LineString], List[LineString]]:
         """Postprocess the erosion results to get the new bank lines and volumes."""
-        log_text("=")
+        self.logger.log_text("=")
         avg_erosion_rate = np.zeros(bank_data.n_bank_lines)
         dn_max = np.zeros(bank_data.n_bank_lines)
         d_nav_flow = np.zeros(bank_data.n_bank_lines)
@@ -559,12 +561,14 @@ class Erosion:
                 erosion_results.eq_erosion_dist[ib] * single_bank.bank_line_size
             ).sum() / single_bank.bank_line_size.sum()
             dn_max_eq[ib] = erosion_results.eq_erosion_dist[ib].max()
-            log_text("bank_dnav", data={"ib": ib + 1, "v": avg_erosion_rate[ib]})
-            log_text("bank_dnavflow", data={"v": d_nav_flow[ib]})
-            log_text("bank_dnavship", data={"v": d_nav_ship[ib]})
-            log_text("bank_dnmax", data={"v": dn_max[ib]})
-            log_text("bank_dnaveq", data={"v": d_nav_eq[ib]})
-            log_text("bank_dnmaxeq", data={"v": dn_max_eq[ib]})
+            self.logger.log_text(
+                "bank_dnav", data={"ib": ib + 1, "v": avg_erosion_rate[ib]}
+            )
+            self.logger.log_text("bank_dnavflow", data={"v": d_nav_flow[ib]})
+            self.logger.log_text("bank_dnavship", data={"v": d_nav_ship[ib]})
+            self.logger.log_text("bank_dnmax", data={"v": dn_max[ib]})
+            self.logger.log_text("bank_dnaveq", data={"v": d_nav_eq[ib]})
+            self.logger.log_text("bank_dnmaxeq", data={"v": dn_max_eq[ib]})
 
             xy_line_new = move_line(
                 bank_coords,
@@ -597,7 +601,7 @@ class Erosion:
             )
             total_eroded_vol_per_km[:, ib] = dvol_tot
             if ib < bank_data.n_bank_lines - 1:
-                log_text("-")
+                self.logger.log_text("-")
 
         erosion_results.avg_erosion_rate = avg_erosion_rate
         erosion_results.eq_eroded_vol_per_km = eq_eroded_vol_per_km
@@ -823,17 +827,17 @@ class Erosion:
 
     def run(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
-        timed_logger("-- start analysis --")
-        log_text(
+        self.logger.timed_logger("-- start analysis --")
+        self.logger.log_text(
             "header_bankerosion",
             data={
                 "version": __version__,
                 "location": "https://github.com/Deltares/D-FAST_Bank_Erosion",
             },
         )
-        log_text("-")
+        self.logger.log_text("-")
 
-        log_text("derive_topology")
+        self.logger.log_text("derive_topology")
 
         mesh_data = self.simulation_data.compute_mesh_topology()
         river_axis = self._process_river_axis_by_center_line()
@@ -849,7 +853,7 @@ class Erosion:
         fairway_data = self._get_fairway_data(river_axis, mesh_data)
 
         # map bank lines to mesh cells
-        log_text("intersect_bank_mesh")
+        self.logger.log_text("intersect_bank_mesh")
         bank_data = self.bl_processor.intersect_with_mesh(mesh_data)
         # map the bank data to the fairway data (the bank_data and fairway_data will be updated inside the `_map_bank_to_fairway` function)
         self.calculate_fairway_bank_line_distance(
@@ -928,21 +932,21 @@ class Erosion:
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
 
         bank_file = self.river_data.output_dir / f"{bank_name}_new.shp"
-        log_text("save_banklines", data={"file": str(bank_file)})
+        self.logger.log_text("save_banklines", data={"file": str(bank_file)})
         bank_lines_new.to_file(bank_file)
 
         bankline_eq_series = GeoSeries(bankline_eq_list, crs=config_file.crs)
         banklines_eq = GeoDataFrame(geometry=bankline_eq_series)
 
         bank_file = self.river_data.output_dir / f"{bank_name}_eq.shp"
-        log_text("save_banklines", data={"file": str(bank_file)})
+        self.logger.log_text("save_banklines", data={"file": str(bank_file)})
         banklines_eq.to_file(bank_file)
 
     def _write_volume_outputs(self, erosion_results: ErosionResults, km_mid):
         erosion_vol_file = self.config_file.get_str(
             "Erosion", "EroVol", default="erovol.evo"
         )
-        log_text("save_tot_erovol", data={"file": erosion_vol_file})
+        self.logger.log_text("save_tot_erovol", data={"file": erosion_vol_file})
         write_km_eroded_volumes(
             km_mid,
             erosion_results.total_eroded_vol_per_km,
@@ -953,7 +957,7 @@ class Erosion:
         erosion_vol_file = self.config_file.get_str(
             "Erosion", "EroVolEqui", default="erovol_eq.evo"
         )
-        log_text("save_eq_erovol", data={"file": erosion_vol_file})
+        self.logger.log_text("save_eq_erovol", data={"file": erosion_vol_file})
         write_km_eroded_volumes(
             km_mid,
             erosion_results.eq_eroded_vol_per_km,

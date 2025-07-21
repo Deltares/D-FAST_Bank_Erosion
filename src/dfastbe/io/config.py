@@ -186,7 +186,7 @@ class ConfigFile:
 
             ```
         """
-        logger = getLogger("dfastbe")
+        logger: DfastbeLogger = getLogger("dfastbe")
         if not Path(path).exists():
             error = f"The Config-File: {path} does not exist"
             logger.exception(error)
@@ -201,8 +201,8 @@ class ConfigFile:
             config = cls.config_file_callback_parser(path)
 
         # if version != "1.0":
-        config = cls._upgrade(config, logger)
-        return cls(config, logger, path=path)
+        config = cls._upgrade(config)
+        return cls(config, logger=logger, path=path)
 
     @staticmethod
     def config_file_callback_parser(path: str) -> ConfigParser:

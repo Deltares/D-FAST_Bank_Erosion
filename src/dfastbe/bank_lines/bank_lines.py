@@ -141,16 +141,16 @@ class BankLines:
             In the FigureDir directory specified in the .cfg, the following files are created:
             - "1_banklinedetection.png"
         """
-        timed_logger("-- start analysis --")
+        self.logger.timed_logger("-- start analysis --")
 
-        log_text(
+        self.logger.log_text(
             "header_banklines",
             data={
                 "version": __version__,
                 "location": "https://github.com/Deltares/D-FAST_Bank_Erosion",
             },
         )
-        log_text("-")
+        self.logger.log_text("-")
 
         # clip the chainage path to the range of chainages of interest
         river_center_line = self.river_data.river_center_line
@@ -165,15 +165,15 @@ class BankLines:
                 np.array(self.search_lines.values[ib].coords), center_line_arr[:, :2]
             )
 
-        log_text("identify_banklines")
+        self.logger.log_text("identify_banklines")
         banklines = self.detect_bank_lines()
 
         # clip the set of detected bank lines to the bank areas
-        log_text("simplify_banklines")
+        self.logger.log_text("simplify_banklines")
         bank = []
         masked_bank_lines = []
         for ib, bank_area in enumerate(bank_areas):
-            log_text("bank_lines", data={"ib": ib + 1})
+            self.logger.log_text("bank_lines", data={"ib": ib + 1})
             masked_bank_lines.append(self.mask(banklines, bank_area))
             bank.append(sort_connect_bank_lines(masked_bank_lines[ib], river_center_line_values, to_right[ib]))
 
@@ -184,8 +184,8 @@ class BankLines:
             "bank_areas": bank_areas,
         }
 
-        log_text("end_banklines")
-        timed_logger("-- stop analysis --")
+        self.logger.log_text("end_banklines")
+        self.logger.timed_logger("-- stop analysis --")
 
     @staticmethod
     def mask(banklines: GeoSeries, bank_area: Polygon) -> MultiLineString:
@@ -241,7 +241,7 @@ class BankLines:
 
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
         bank_file = self.bank_output_dir / f"{bank_name}{EXTENSION}"
-        log_text("save_banklines", data={"file": bank_file})
+        self.logger.log_text("save_banklines", data={"file": bank_file})
         gpd.GeoSeries(self.results["bank"], crs=self.config_file.crs).to_file(bank_file)
 
         gpd.GeoSeries(self.results["masked_bank_lines"], crs=self.config_file.crs).to_file(
