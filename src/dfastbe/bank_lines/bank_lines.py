@@ -1,6 +1,6 @@
 """Bank line detection module."""
 
-from logging import Logger, getLogger
+from logging import getLogger
 from typing import Any, Dict, List, Tuple
 
 import geopandas as gpd
