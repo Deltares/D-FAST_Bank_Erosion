@@ -1,7 +1,7 @@
 """Bank erosion utilities."""
 
 import math
-from logging import Logger
+from logging import Logger, getLogger
 from typing import Any, Tuple
 
 import numpy as np
@@ -14,7 +14,7 @@ from dfastbe.bank_erosion.mesh_processor import (
     intersect_line_mesh,
 )
 from dfastbe.io.data_models import LineGeometry
-from dfastbe.io.logger import log_text
+from dfastbe.io.logger import DfastbeLogger
 from dfastbe.utils import on_right_side
 
 
@@ -26,6 +26,7 @@ class BankLinesProcessor:
         self.bank_lines = river_data.bank_lines
         self.river_center_line = river_data.river_center_line.as_array()
         self.num_bank_lines = len(self.bank_lines)
+        self.logger: DfastbeLogger = getLogger("dfastbe")
 
     def intersect_with_mesh(self, mesh_data: MeshData) -> BankData:
         """Intersect bank lines with a mesh and return bank data.

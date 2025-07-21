@@ -27,12 +27,12 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 import configparser
-import logging
 import os
 import pathlib
 import subprocess
 import sys
 from functools import partial
+from logging import getLogger
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -45,7 +45,6 @@ from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.file_utils import absolute_path
-from dfastbe.io.logger import get_text
 
 USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
 DialogObject = Dict[str, PyQt5.QtCore.QObject]
@@ -54,7 +53,6 @@ dialog: DialogObject
 
 r_dir = Path(__file__).resolve().parent
 ICONS_DIR = "gui/icons"
-LOGGER = logging.getLogger()
 
 def gui_text(key: str, prefix: str = "gui_", dict: Dict[str, Any] = {}):
     """
@@ -1177,7 +1175,7 @@ def selectFile(key: str) -> None:
                             nr = rkey[-1] + nr
                             fil = fil[:-1]
                         if nr == "" or fil[-1] != "_":
-                            LOGGER.warning(
+                            getLogger("dfastbe").warning(
                                 "Missing bank number(s) at end of file name. Reference not updated."
                             )
                             fil = ""
@@ -1185,14 +1183,14 @@ def selectFile(key: str) -> None:
                             fil = fil[:-1]
                 else:
                     expect_ext = "no extension" if ext == "" else ext
-                    LOGGER.warning(
+                    getLogger("dfastbe").warning(
                         "Unsupported file extension %s while expecting %s. Reference not updated.",
                         fext,
                         expect_ext,
                     )
                     fil = ""
         else:
-            LOGGER.info(key)
+            getLogger("dfastbe").info(key)
             fil = ""
     if fil != "":
         dialog[key].setText(fil)
@@ -1211,7 +1209,7 @@ def run_detection() -> None:
     """
     config = get_configuration()
     rootdir = os.getcwd()
-    config_file = ConfigFile(config, LOGGER)
+    config_file = ConfigFile(config)
     config_file.root_dir = rootdir
     config_file.relative_to(rootdir)
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
@@ -1219,7 +1217,7 @@ def run_detection() -> None:
     # should maybe use a separate thread for this ...
     msg = ""
     try:
-        bank_line = BankLines(config_file, LOGGER, gui=True)
+        bank_line = BankLines(config_file, gui=True)
         bank_line.detect()
         bank_line.plot()
         bank_line.save()
@@ -1227,7 +1225,7 @@ def run_detection() -> None:
         msg = str(Ex)
     dialog["application"].restoreOverrideCursor()
     if msg != "":
-        LOGGER.exception(msg)
+        getLogger("dfastbe").exception(msg)
         showError(msg)
 
 
@@ -1240,12 +1238,12 @@ def run_erosion() -> None:
     """
     config = get_configuration()
     rootdir = os.getcwd()
-    config_file = ConfigFile(config, LOGGER)
+    config_file = ConfigFile(config)
     config_file.root_dir = rootdir
     config_file.relative_to(rootdir)
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
     matplotlib.pyplot.close("all")
-    erosion = Erosion(config_file, LOGGER, gui=True)
+    erosion = Erosion(config_file, gui=True)
     erosion.run()
     erosion.plot()
     erosion.save()
@@ -1298,7 +1296,7 @@ def load_configuration(filename: str) -> None:
         return
     absfilename = absolute_path(os.getcwd(), filename)
     rootdir = os.path.dirname(absfilename)
-    config_file = ConfigFile.read(absfilename, LOGGER)
+    config_file = ConfigFile.read(absfilename)
 
     config_file.path = absfilename
 
@@ -1573,7 +1571,7 @@ def setParam(field: str, config, group: str, key: str, default: str = "??") -> N
         Default string if the group/key pair doesn't exist in the configuration.
 
     """
-    config_file = ConfigFile(config, LOGGER)
+    config_file = ConfigFile(config)
     str = config_file.get_str(group, key, default)
 
     try:
@@ -1607,7 +1605,7 @@ def setFilter(field: str, config, group: str, key: str) -> None:
         Name of the key in the configuration group.
 
     """
-    config_file = ConfigFile(config, LOGGER)
+    config_file = ConfigFile(config)
     val = config_file.get_float(group, key, 0.0)
     if val > 0.0:
         dialog[field + "Active"].setChecked(True)
@@ -1631,7 +1629,7 @@ def setOptParam(field: str, config, group: str, key: str) -> None:
     key : str
         Name of the key in the configuration group.
     """
-    config_file = ConfigFile(config, LOGGER)
+    config_file = ConfigFile(config)
     str = config_file.get_str(group, key, "")
     if str == "":
         dialog[field + "Type"].setCurrentText("Use Default")
@@ -1665,7 +1663,7 @@ def menu_save_configuration() -> None:
     if filename != "":
         config = get_configuration()
         rootdir = os.path.dirname(filename)
-        config_file = ConfigFile(config, LOGGER)
+        config_file = ConfigFile(config)
         config_file.relative_to(rootdir)
         config.write(filename)
 

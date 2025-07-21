@@ -29,7 +29,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from configparser import ConfigParser
 from configparser import Error as ConfigparserError
 from dataclasses import dataclass
-from logging import Logger
+from logging import getLogger
 from pathlib import Path
 from typing import Any, Callable, List, Optional, Tuple, Union
 
@@ -42,7 +42,7 @@ from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
 
 from dfastbe.io.file_utils import absolute_path, relative_path
-from dfastbe.io.logger import log_text
+from dfastbe.io.logger import DfastbeLogger
 
 __all__ = ["ConfigFile", "ConfigFileError", "SimulationFilesError", "PlotProperties"]
 
@@ -86,7 +86,10 @@ class ConfigFile:
     """
 
     def __init__(
-        self, config: ConfigParser, logger: Logger, path: Union[Path, str] = None
+        self,
+        config: ConfigParser,
+        logger: Optional[DfastbeLogger] = None,
+        path: Union[Path, str] = None,
     ):
         """
         Initialize the ConfigFile object.
@@ -122,7 +125,7 @@ class ConfigFile:
         """
         self._config = config
         self.crs = "EPSG:28992"
-        self.logger = logger
+        self.logger: DfastbeLogger = logger or getLogger("dfastbe")
         if path:
             self.path = Path(path)
             self.root_dir = self.path.parent
@@ -157,7 +160,7 @@ class ConfigFile:
         self._root_dir = value
 
     @classmethod
-    def read(cls, path: Union[str, Path], logger: Logger) -> "ConfigFile":
+    def read(cls, path: Union[str, Path]) -> "ConfigFile":
         """Read a configParser object (configuration file).
 
         Reads the config file using the standard `configparser`. Falls back to a
@@ -183,6 +186,7 @@ class ConfigFile:
 
             ```
         """
+        logger = getLogger("dfastbe")
         if not Path(path).exists():
             error = f"The Config-File: {path} does not exist"
             logger.exception(error)
@@ -661,7 +665,9 @@ class ConfigFile:
         line = []
         for b in range(n_bank):
             bankfile = self.config["Detect"][f"Line{b + 1}"]
-            log_text("read_search_line", data={"nr": b + 1, "file": bankfile})
+            self.logger.log_text(
+                "read_search_line", data={"nr": b + 1, "file": bankfile}
+            )
             line.append(XYCModel.read(bankfile))
         return line
 
@@ -677,11 +683,11 @@ class ConfigFile:
         bank_name = self.get_str("General", "BankFile", "bankfile")
         bankfile = Path(bank_dir) / f"{bank_name}.shp"
         if bankfile.exists():
-            log_text("read_banklines", data={"file": str(bankfile)})
+            self.logger.log_text("read_banklines", data={"file": str(bankfile)})
             return gpd.read_file(bankfile)
 
         bankfile = Path(bank_dir) / f"{bank_name}_#.xyc"
-        log_text("read_banklines", data={"file": str(bankfile)})
+        self.logger.log_text("read_banklines", data={"file": str(bankfile)})
         bankline_list = []
         b = 1
         while True:
@@ -862,13 +868,13 @@ class ConfigFile:
 
         except (ValueError, TypeError):
             if onefile:
-                log_text("read_param", data={"param": key, "file": value})
+                self.logger.log_text("read_param", data={"param": key, "file": value})
                 km_thr, val = _get_stations(value, key, positive)
 
             for ib, num_stations in enumerate(num_stations_per_bank):
                 if not onefile:
                     filename_i = f"{value}_{ib + 1}{ext}"
-                    log_text(
+                    self.logger.log_text(
                         "read_param_one_bank",
                         data={"param": key, "i": ib + 1, "file": filename_i},
                     )
@@ -967,7 +973,7 @@ class ConfigFile:
         """
         # get the chainage file
         river_center_line_file = self.get_str("General", "RiverKM")
-        log_text("read_chainage", data={"file": river_center_line_file})
+        self.logger.log_text("read_chainage", data={"file": river_center_line_file})
         river_center_line = XYCModel.read(river_center_line_file, num_columns=3)
 
         # make sure that chainage is increasing with node index
@@ -1201,10 +1207,10 @@ class ConfigFile:
         # as appropriate, check output dir for figures and file format
         if save_plot:
             fig_dir = self.get_str("General", "FigureDir", Path(root_dir) / "figure")
-            log_text("figure_dir", data={"dir": fig_dir})
+            self.logger.log_text("figure_dir", data={"dir": fig_dir})
             path_fig_dir = Path(fig_dir)
             if path_fig_dir.exists():
-                log_text("overwrite_dir", data={"dir": fig_dir})
+                self.logger.log_text("overwrite_dir", data={"dir": fig_dir})
             path_fig_dir.mkdir(parents=True, exist_ok=True)
             plot_ext = self.get_str("General", "FigureExt", ".png")
             data = data | {
@@ -1231,9 +1237,9 @@ class ConfigFile:
             output_dir = self.get_str("Erosion", "OutputDir")
 
         output_dir = Path(output_dir)
-        log_text(f"{option}_out", data={"dir": output_dir})
+        self.logger.log_text(f"{option}_out", data={"dir": output_dir})
         if output_dir.exists():
-            log_text("overwrite_dir", data={"dir": output_dir})
+            self.logger.log_text("overwrite_dir", data={"dir": output_dir})
         else:
             output_dir.mkdir(parents=True, exist_ok=True)
 
