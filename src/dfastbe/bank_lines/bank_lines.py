@@ -408,6 +408,6 @@ class BankLines:
         """
         if current % 100 == 0:
             percent = (current / total) * 100
-            self.logger.info(f"Progress: {percent:.2f}% ({current}/{total})", end="\r")
+            self.logger.info(f"Progress: {percent:.2f}% ({current}/{total})")
         if current == total - 1:
             self.logger.info("Progress: 100.00% (100%)")
