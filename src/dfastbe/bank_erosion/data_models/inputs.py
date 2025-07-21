@@ -363,7 +363,6 @@ class ShipsParameters:
                 "Erosion",
                 f"{param.name}{level_i_str}",
                 num_stations_per_bank,
-                iq_str=level_i_str,
                 default=param.default,
                 valid=param.valid,
                 onefile=param.onefile,
@@ -457,19 +456,19 @@ class ShipsParameters:
         )
 
         mu_slope, mu_reed = self._calculate_ship_derived_parameters(
-            param_resolved["Slope"], param_resolved["Reed"]
+            param_resolved["slope"], param_resolved["reed"]
         )
 
         return SingleLevelParameters.from_column_arrays(
             {
                 "id": level_i,
-                "ship_velocity": param_resolved["VShip"],
-                "num_ship": param_resolved["NShip"],
-                "num_waves_per_ship": param_resolved["NWave"],
-                "ship_draught": param_resolved["Draught"],
-                "ship_type": param_resolved["ShipType"],
-                "par_slope": param_resolved["Slope"],
-                "par_reed": param_resolved["Reed"],
+                "ship_velocity": param_resolved["vship"],
+                "num_ship": param_resolved["nship"],
+                "num_waves_per_ship": param_resolved["nwave"],
+                "ship_draught": param_resolved["draught"],
+                "ship_type": param_resolved["shiptype"],
+                "par_slope": param_resolved["slope"],
+                "par_reed": param_resolved["reed"],
                 "mu_slope": mu_slope,
                 "mu_reed": mu_reed,
             },
