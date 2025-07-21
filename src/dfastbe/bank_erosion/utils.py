@@ -1,7 +1,7 @@
 """Bank erosion utilities."""
 
 import math
-from logging import Logger, getLogger
+from logging import getLogger
 from typing import Any, Tuple
 
 import numpy as np
@@ -38,12 +38,15 @@ class BankLinesProcessor:
             BankData object containing bank line coordinates, face indices, and other bank-related data.
         """
         n_bank_lines = len(self.bank_lines)
+        logger: DfastbeLogger = getLogger("dfastbe")
 
         bank_line_coords = []
         bank_face_indices = []
         for bank_index in range(n_bank_lines):
             line_coords = np.array(self.bank_lines.geometry[bank_index].coords)
-            log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
+            self.logger.log_text(
+                "bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)}
+            )
 
             coords_along_bank, face_indices = intersect_line_mesh(
                 line_coords, mesh_data
@@ -52,7 +55,7 @@ class BankLinesProcessor:
             bank_face_indices.append(face_indices)
 
         # linking bank lines to chainage
-        log_text("chainage_to_banks")
+        self.logger.log_text("chainage_to_banks")
         bank_chainage_midpoints = [None] * n_bank_lines
         is_right_bank = [True] * n_bank_lines
         for bank_index, coords in enumerate(bank_line_coords):
@@ -76,9 +79,9 @@ class BankLinesProcessor:
                 coords, self.river_center_line[:, :2]
             )
             if is_right_bank[bank_index]:
-                log_text("right_side_bank", data={"ib": bank_index + 1})
+                self.logger.log_text("right_side_bank", data={"ib": bank_index + 1})
             else:
-                log_text("left_side_bank", data={"ib": bank_index + 1})
+                self.logger.log_text("left_side_bank", data={"ib": bank_index + 1})
 
         bank_order = tuple("right" if val else "left" for val in is_right_bank)
         data = {
@@ -263,7 +266,7 @@ def write_km_eroded_volumes(stations: np.ndarray, volume: np.ndarray, file_name:
 
 
 def move_line(
-    xylines: np.ndarray, erosion_distance: np.ndarray, right_bank: bool, logger: Logger
+    xylines: np.ndarray, erosion_distance: np.ndarray, right_bank: bool
 ) -> np.ndarray:
     """
     Shift a line of a variable distance sideways (positive shift away from centre line).
@@ -289,18 +292,16 @@ def move_line(
         Nx2 array containing the x- and y-coordinates of the moved line.
     """
     if right_bank:
-        xylines_new = _move_line_right(xylines, erosion_distance, logger)
+        xylines_new = _move_line_right(xylines, erosion_distance)
     else:
         xylines_rev = xylines[::-1, :]
         dn_rev = erosion_distance[::-1]
-        xylines_new_rev = _move_line_right(xylines_rev, dn_rev, logger)
+        xylines_new_rev = _move_line_right(xylines_rev, dn_rev)
         xylines_new = xylines_new_rev[::-1, :]
     return xylines_new
 
 
-def _move_line_right(
-    xylines: np.ndarray, erosion_distance: np.ndarray, logger: Logger
-) -> np.ndarray:
+def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.ndarray:
     """
     Shift a line of a variable distance sideways (positive shift to the right).
 
@@ -317,6 +318,7 @@ def _move_line_right(
     xylines_new : umpy.ndarray
         Nx2 array containing the x- and y-coordinates of the moved line.
     """
+    logger = getLogger("dfastbe")
     nsegments = len(erosion_distance)
     colvec = (nsegments, 1)
 

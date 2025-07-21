@@ -227,7 +227,7 @@ class ConfigFile:
         return config
 
     @staticmethod
-    def _upgrade(config: ConfigParser, logger: Logger) -> ConfigParser:
+    def _upgrade(config: ConfigParser) -> ConfigParser:
         """Upgrade the configuration data structure to version 1.0 format.
 
         Args:
@@ -248,6 +248,7 @@ class ConfigFile:
 
             ```
         """
+        logger = getLogger("dfastbe")
         try:
             version = config["General"]["Version"]
         except KeyError:
