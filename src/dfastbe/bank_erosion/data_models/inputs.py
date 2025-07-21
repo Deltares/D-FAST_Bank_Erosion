@@ -211,10 +211,10 @@ class ErosionRiverData(BaseRiverData):
 
     def __init__(self, config_file: ConfigFile):
         super().__init__(config_file)
+        self.logger: DfastbeLogger = getLogger("dfastbe")
         self.bank_dir = self._get_bank_line_dir()
         self.output_dir = config_file.get_output_dir("erosion")
         self.debug = config_file.debug
-        self.logger: DfastbeLogger = getLogger("dfastbe")
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(config_file.root_dir)
         # get filter settings for bank levels and flow velocities along banks
