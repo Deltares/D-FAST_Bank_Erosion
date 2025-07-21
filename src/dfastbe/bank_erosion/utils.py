@@ -38,7 +38,6 @@ class BankLinesProcessor:
             BankData object containing bank line coordinates, face indices, and other bank-related data.
         """
         n_bank_lines = len(self.bank_lines)
-        logger: DfastbeLogger = getLogger("dfastbe")
 
         bank_line_coords = []
         bank_face_indices = []
