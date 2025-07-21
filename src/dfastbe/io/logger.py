@@ -48,6 +48,8 @@ def configure_logging(debug: bool = False):
         format="%(asctime)s [%(levelname)s] %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
+    custom_logger = DfastbeLogger("dfastbe")
+    logging.Logger.manager.loggerDict["dfastbe"] = custom_logger
 
 
 class DfastbeLogger(logging.Logger):
@@ -59,10 +61,10 @@ class DfastbeLogger(logging.Logger):
     """
 
     def __init__(self, name: str):
-        super().__init__(name)
         self.messages = {}
         self.first_time = None
         self.last_time = None
+        super().__init__(name)
 
     def load_program_texts(self, file_name: str | Path) -> None:
         """Load texts from a configuration file, and store globally for access.
