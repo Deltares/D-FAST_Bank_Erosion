@@ -22,7 +22,7 @@ from dfastbe.io.data_models import (
     _read_fm_map,
 )
 from dfastbe.io.file_utils import absolute_path, relative_path
-from dfastbe.io.logger import get_text, load_program_texts, log_text
+from dfastbe.io.logger import DfastbeLogger, configure_logging
 
 filename = "tests/data/files/e02_f001_c011_simplechannel_map.nc"
 
@@ -42,7 +42,8 @@ def test_load_program_texts_01():
     Testing load_program_texts.
     """
     print("current work directory: ", os.getcwd())
-    assert load_program_texts("tests/data/files/messages.UK.ini") is None
+    logger = DfastbeLogger("test_logger")
+    assert logger.load_program_texts("tests/data/files/messages.UK.ini") is None
 
 
 class TestPlotProperties:
@@ -249,43 +250,52 @@ class TestSimulationData:
         assert simulation_data.chezy_face.size == 0
 
 
+@pytest.fixture
+def logger() -> DfastbeLogger:
+    """Fixture to create a DfastbeLogger instance."""
+    dfast_logger = DfastbeLogger("test_logger")
+    dfast_logger.load_program_texts("tests/data/files/messages.UK.ini")
+    return dfast_logger
+
+
 class TestLogText:
-    def test_log_text_01(self):
+
+    def test_log_text_01(self, logger: DfastbeLogger):
         """
         Testing standard output of a single text without expansion.
         """
         key = "confirm"
         with captured_output() as (out, err):
-            log_text(key)
+            logger.log_text(key)
         outstr = out.getvalue().splitlines()
         strref = ['Confirm using "y" ...', '']
         assert outstr == strref
 
-    def test_log_text_02(self):
+    def test_log_text_02(self, logger: DfastbeLogger):
         """
         Testing standard output of a repeated text without expansion.
         """
         key = ""
         nr = 3
         with captured_output() as (out, err):
-            log_text(key, repeat=nr)
+            logger.log_text(key, repeat=nr)
         outstr = out.getvalue().splitlines()
         strref = ['', '', '']
         assert outstr == strref
 
-    def test_log_text_03(self):
+    def test_log_text_03(self, logger: DfastbeLogger):
         """
         Testing standard output of a text with expansion.
         """
         key = "reach"
         data = {"reach": "ABC"}
         with captured_output() as (out, err):
-            log_text(key, data=data)
+            logger.log_text(key, data=data)
         outstr = out.getvalue().splitlines()
         strref = ['The measure is located on reach ABC']
         assert outstr == strref
 
-    def test_log_text_04(self):
+    def test_log_text_04(self, logger: DfastbeLogger):
         """
         Testing file output of a text with expansion.
         """
@@ -293,30 +303,31 @@ class TestLogText:
         data = {"reach": "ABC"}
         filename = "test.log"
         with open(filename, "w") as f:
-            log_text(key, data=data, file=f)
+            logger.log_text(key, data=data, file=f)
         all_lines = open(filename, "r").read().splitlines()
         strref = ['The measure is located on reach ABC']
         assert all_lines == strref
 
 
 class TestGetText:
-    def test_get_text_01(self):
+
+    def test_get_text_01(self, logger: DfastbeLogger):
         """
         Testing get_text: key not found.
         """
-        assert get_text("@") == ["No message found for @"]
+        assert logger.get_text("@") == ["No message found for @"]
 
-    def test_get_text_02(self):
+    def test_get_text_02(self, logger: DfastbeLogger):
         """
         Testing get_text: empty line key.
         """
-        assert get_text("") == [""]
+        assert logger.get_text("") == [""]
 
-    def test_get_text_03(self):
+    def test_get_text_03(self, logger: DfastbeLogger):
         """
         Testing get_text: "confirm" key.
         """
-        assert get_text("confirm") == ['Confirm using "y" ...', '']
+        assert logger.get_text("confirm") == ['Confirm using "y" ...', '']
 
 
 class TestReadFMMap:
@@ -501,7 +512,7 @@ class TestConfigFile:
     def test_read(self, config_data: str, fs: FakeFilesystem):
         """Test reading a configuration file."""
         fs.create_file("dummy_path.cfg", contents=config_data)
-        config_file = ConfigFile.read("dummy_path.cfg", MagicMock())
+        config_file = ConfigFile.read("dummy_path.cfg")
         assert isinstance(config_file, ConfigFile)
         assert config_file.config["General"]["Version"] == "1.0"
         assert config_file.config["Detect"]["NBank"] == "2"
@@ -552,7 +563,8 @@ class TestConfigFile:
 
     def test_get_search_lines(self):
         """Test retrieving search lines."""
-        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", MagicMock())
+        configure_logging(True)
+        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
         mock_linestring = LineString([(0, 0), (1, 1), (2, 2)])
 
         with patch("dfastio.xyc.models.XYCModel.read", return_value=mock_linestring):
@@ -667,7 +679,8 @@ class TestConfigFile:
 
     def test_get_river_center_line(self):
         """Test retrieving x and y coordinates."""
-        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", MagicMock())
+        configure_logging(True)
+        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
         mock_linestring = LineString([(0, 0, 1), (1, 1, 2), (2, 2, 3)])
 
         with patch("dfastio.xyc.models.XYCModel.read", return_value=mock_linestring):
@@ -777,7 +790,7 @@ class TestConfigFile:
             }
         )
         config_file = ConfigFile(config, MagicMock())
-        config_result = config_file._upgrade(config_file.config, MagicMock())
+        config_result = config_file._upgrade(config_file.config)
         assert config_result["General"]["plotting"] == "yes"
         assert config_result["Detect"]["SimFile"] == "inputs/sim0270/SDS-j19_map.nc"
 
@@ -816,7 +829,7 @@ class TestConfigFile:
 class TestConfigFileE2E:
     def test_initialization(self):
         path = "tests/data/erosion/meuse_manual.cfg"
-        config_file = ConfigFile.read(path, MagicMock())
+        config_file = ConfigFile.read(path)
         river_km = config_file.config["General"]["riverkm"]
         assert Path(river_km).exists()
 
@@ -857,7 +870,8 @@ class TestRiverData:
     @pytest.fixture
     def river_data(self) -> BaseRiverData:
         path = "tests/data/erosion/meuse_manual.cfg"
-        config_file = ConfigFile.read(path, MagicMock())
+        configure_logging(True)
+        config_file = ConfigFile.read(path)
         river_data = BaseRiverData(config_file)
         return river_data
 
