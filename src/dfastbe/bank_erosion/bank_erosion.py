@@ -574,7 +574,6 @@ class Erosion:
                 bank_coords,
                 erosion_results.total_erosion_dist[ib],
                 single_bank.is_right_bank,
-                self.logger,
             )
             xy_line_new_list.append(xy_line_new)
             bankline_new_list.append(LineString(xy_line_new))
@@ -583,7 +582,6 @@ class Erosion:
                 bank_coords,
                 erosion_results.eq_erosion_dist[ib],
                 single_bank.is_right_bank,
-                self.logger,
             )
             xy_line_eq_list.append(xy_line_eq)
             bankline_eq_list.append(LineString(xy_line_eq))
