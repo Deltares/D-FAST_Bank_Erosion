@@ -315,6 +315,9 @@ class ShipsParameters:
     slope: List[np.ndarray]
     reed: List[np.ndarray]
 
+    REED_DAMPING_COEFFICIENT = 8.5e-4
+    REED_DAMPING_EXPONENT = 0.8
+
     @classmethod
     def get_ship_data(
         cls, num_stations_per_bank: List[int], config_file: ConfigFile
@@ -427,7 +430,9 @@ class ShipsParameters:
             mu_slope.append(mus)
 
             # Calculate mu_reed (empirical damping coefficient)
-            mu_reed.append(8.5e-4 * pr**0.8)
+            mu_reed.append(
+                ShipsParameters.REED_DAMPING_COEFFICIENT * pr ** ShipsParameters.REED_DAMPING_EXPONENT
+            )
 
         return mu_slope, mu_reed
 
