@@ -27,7 +27,6 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 
 import os
-from logging import Logger
 from typing import Any, Dict, List, Tuple
 
 import numpy as np
@@ -68,7 +67,7 @@ from dfastbe.bank_erosion.utils import (
 )
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.data_models import LineGeometry
-from dfastbe.io.logger import log_text, timed_logger
+from dfastbe.io.logger import DfastbeLogger
 
 X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
@@ -77,7 +76,9 @@ Y_AXIS_TITLE = "y-coordinate [km]"
 class Erosion:
     """Class to handle the bank erosion calculations."""
 
-    def __init__(self, config_file: ConfigFile, logger: Logger, gui: bool = False):
+    def __init__(
+        self, config_file: ConfigFile, logger: DfastbeLogger, gui: bool = False
+    ):
         """Initialize the Erosion class."""
         self.root_dir = config_file.root_dir
         self._config_file = config_file
