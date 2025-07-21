@@ -2,7 +2,7 @@ import os
 from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar, List, Tuple
+from typing import ClassVar, Dict, List, Tuple
 
 import numpy as np
 from dfastio.xyc.models import XYCModel
@@ -18,7 +18,12 @@ from dfastbe.io.config import ConfigFile
 from dfastbe.io.data_models import BaseRiverData, BaseSimulationData
 from dfastbe.io.logger import log_text
 
-__all__ = ["ErosionSimulationData", "ErosionRiverData", "BankLinesResultsError"]
+__all__ = [
+    "ErosionSimulationData",
+    "ErosionRiverData",
+    "BankLinesResultsError",
+    "ShipsParameters",
+]
 
 class ErosionSimulationData(BaseSimulationData):
 
@@ -327,20 +332,9 @@ class ShipsParameters:
         """
 
         param_defs = cls._get_initial_parameter_definitions()
-        param_resolved = {}
-
-        # Retrieve parameter values
-        for param in param_defs:
-            param_resolved[f"{param.name.lower()}"] = cls._get_param(
-                config_file,
-                param.name,
-                num_stations_per_bank,
-                default=param.default,
-                valid=param.valid,
-                onefile=param.onefile,
-                positive=param.positive,
-                ext=param.ext,
-            )
+        param_resolved = cls._get_parameters(
+            config_file, num_stations_per_bank, param_defs
+        )
 
         param_dict = {
             "velocity": param_resolved["vship"],
@@ -355,31 +349,28 @@ class ShipsParameters:
         return cls(config_file, **param_dict)
 
     @staticmethod
-    def _get_param(
-        config_file: ConfigFile, name: str, num_stations_per_bank, iq_str="", **kwargs
-    ):
-        """Get a parameter from the configuration file.
+    def _get_parameters(
+        config_file: ConfigFile,
+        num_stations_per_bank: List[int],
+        param_defs: List[Parameters],
+        level_i_str: str = "",
+    ) -> Dict[str, np.ndarray]:
+        """Resolve a list of Parameters with values from the configuration file."""
+        param_resolved = {}
 
-        Args:
-            config_file (ConfigFile):
-                Configuration file containing parameters.
-            name (str):
-                Name of the parameter to retrieve.
-            num_stations_per_bank (List[int]):
-                The number of stations per bank.
-            iq_str (str, optional):
-                String to append to the parameter name for specific levels.
-            **kwargs:
-                Additional keyword arguments for parameter retrieval.
-        Returns:
-            np.ndarray: The parameter value as a NumPy array.
-        """
-        return config_file.get_parameter(
-            "Erosion",
-            f"{name}{iq_str}",
-            num_stations_per_bank,
-            **kwargs,
-        )
+        for param in param_defs:
+            param_resolved[f"{param.name.lower()}"] = config_file.get_parameter(
+                "Erosion",
+                f"{param.name}{level_i_str}",
+                num_stations_per_bank,
+                iq_str=level_i_str,
+                default=param.default,
+                valid=param.valid,
+                onefile=param.onefile,
+                positive=param.positive,
+                ext=param.ext,
+            )
+        return param_resolved
 
     @classmethod
     def _get_initial_parameter_definitions(cls) -> List[Parameters]:
@@ -459,44 +450,26 @@ class ShipsParameters:
         Returns:
             SingleLevelParameters: The discharge level parameters.
         """
-        level_i_str = f"{level_i + 1}"
 
-        # Get parameter definitions
         param_defs = self._get_discharge_parameter_definitions()
-
-        # Create a dictionary to store parameter values
-        param_dict = {}
-
-        # Retrieve parameter values
-        for param in param_defs:
-            param_dict[param.name] = self._get_param(
-                self.config_file,
-                param.name,
-                num_stations_per_bank,
-                iq_str=level_i_str,
-                default=param.default,
-                valid=param.valid,
-                onefile=param.onefile,
-                positive=param.positive,
-                ext=param.ext,
-            )
-
-        # Calculate derived parameters
-        mu_slope, mu_reed = self._calculate_ship_derived_parameters(
-            param_dict["Slope"], param_dict["Reed"]
+        param_resolved = self._get_parameters(
+            self.config_file, num_stations_per_bank, param_defs, f"{level_i + 1}"
         )
 
-        # Create and return SingleLevelParameters object
+        mu_slope, mu_reed = self._calculate_ship_derived_parameters(
+            param_resolved["Slope"], param_resolved["Reed"]
+        )
+
         return SingleLevelParameters.from_column_arrays(
             {
                 "id": level_i,
-                "ship_velocity": param_dict["VShip"],
-                "num_ship": param_dict["NShip"],
-                "num_waves_per_ship": param_dict["NWave"],
-                "ship_draught": param_dict["Draught"],
-                "ship_type": param_dict["ShipType"],
-                "par_slope": param_dict["Slope"],
-                "par_reed": param_dict["Reed"],
+                "ship_velocity": param_resolved["VShip"],
+                "num_ship": param_resolved["NShip"],
+                "num_waves_per_ship": param_resolved["NWave"],
+                "ship_draught": param_resolved["Draught"],
+                "ship_type": param_resolved["ShipType"],
+                "par_slope": param_resolved["Slope"],
+                "par_reed": param_resolved["Reed"],
                 "mu_slope": mu_slope,
                 "mu_reed": mu_reed,
             },
