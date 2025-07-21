@@ -21,6 +21,7 @@ from dfastbe.bank_erosion.data_models.inputs import (
     ErosionSimulationData,
 )
 from dfastbe.io.config import ConfigFile
+from dfastbe.io.logger import configure_logging
 
 
 class TestErosionInputs:
@@ -288,7 +289,8 @@ class TestErosionRiverData:
     @pytest.fixture
     def river_data(self) -> ErosionRiverData:
         path = "tests/data/erosion/meuse_manual.cfg"
-        config_file = ConfigFile.read(path, MagicMock())
+        configure_logging(True)
+        config_file = ConfigFile.read(path)
         river_data = ErosionRiverData(config_file)
         return river_data
 
