@@ -1,6 +1,6 @@
 """Bank line detection module."""
 
-from logging import Logger
+from logging import Logger, getLogger
 from typing import Any, Dict, List, Tuple
 
 import geopandas as gpd
@@ -15,8 +15,7 @@ from dfastbe.bank_lines.data_models import BankLinesRiverData
 from dfastbe.bank_lines.plotter import BankLinesPlotter
 from dfastbe.bank_lines.utils import poly_to_line, sort_connect_bank_lines, tri_to_line
 from dfastbe.io.config import ConfigFile
-from dfastbe.io.data_models import BaseSimulationData
-from dfastbe.io.logger import log_text, timed_logger
+from dfastbe.io.logger import DfastbeLogger
 from dfastbe.utils import on_right_side
 
 MAX_RIVER_WIDTH = 1000
@@ -31,7 +30,7 @@ __all__ = ["BankLines"]
 class BankLines:
     """Bank line detection class."""
 
-    def __init__(self, config_file: ConfigFile, logger: Logger, gui: bool = False):
+    def __init__(self, config_file: ConfigFile, gui: bool = False):
         """Bank line initializer.
 
         Args:
@@ -60,7 +59,7 @@ class BankLines:
         self._config_file = config_file
         self.gui = gui
         self.bank_output_dir = config_file.get_output_dir("banklines")
-        self.logger = logger
+        self.logger: DfastbeLogger = getLogger("dfastbe")
 
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)

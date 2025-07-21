@@ -26,6 +26,7 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
+from logging import getLogger
 from pathlib import Path
 
 from dfastbe import __file__
@@ -85,21 +86,21 @@ def run(
     """
     language = language.upper()
     run_mode = run_mode.upper()
-    logger = DfastbeLogger("dfastbe")
+    logger: DfastbeLogger = getLogger("dfastbe")
     logger.load_program_texts(LOG_DATA_DIR / f"messages.{language}.ini")
 
     if run_mode == "GUI":
         main(configfile)
     else:
-        config_file = ConfigFile.read(configfile, logger)
+        config_file = ConfigFile.read(configfile)
 
         if run_mode == "BANKLINES":
-            bank_lines = BankLines(config_file, logger)
+            bank_lines = BankLines(config_file)
             bank_lines.detect()
             bank_lines.plot()
             bank_lines.save()
         elif run_mode == "BANKEROSION":
-            erosion = Erosion(config_file, logger)
+            erosion = Erosion(config_file)
             erosion.run()
             erosion.plot()
             erosion.save()
