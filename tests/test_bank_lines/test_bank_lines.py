@@ -199,10 +199,11 @@ class TestBankLines:
         bank_lines.mask = MagicMock(return_value=MagicMock())
         bank_lines.save = MagicMock()
         bank_lines.plot = MagicMock()
+        bank_lines.logger = MagicMock()
 
         with patch(
             "dfastbe.bank_lines.bank_lines.sort_connect_bank_lines"
-        ) as mock_sort, patch("dfastbe.bank_lines.bank_lines.log_text"):
+        ) as mock_sort:
             mock_sort.return_value = [LineString([(0, 0), (1, 1)])]
             bank_lines.detect()
             bank_lines.plot()
@@ -233,7 +234,9 @@ class TestBankLines:
                 mock_simulation_data,
                 0.3,
             )
-            return BankLines(mock_config_file, MagicMock())
+            bank_lines = BankLines(mock_config_file)
+            bank_lines.logger = MagicMock()
+            return bank_lines
 
     @pytest.mark.unit
     def test_calculate_water_depth_per_node(
@@ -452,7 +455,8 @@ class TestBankLines:
                 MagicMock(),
                 0.3,
             )
-            bank_lines = BankLines(mock_config_file, MagicMock())
+            bank_lines = BankLines(mock_config_file)
+            bank_lines.logger = MagicMock()
         bank_lines.results = {
             "bank": bank,
             "banklines": banklines,
@@ -460,8 +464,7 @@ class TestBankLines:
             "bank_areas": bank_areas,
         }
 
-        with patch("dfastbe.bank_lines.bank_lines.log_text"):
-            bank_lines.save()
+        bank_lines.save()
 
         assert (tmp_path / "bank_file.shp").exists()
         assert (tmp_path / "raw_detected_bankline_fragments.shp").exists()
@@ -514,7 +517,7 @@ class TestBankLines:
                 mock_simulation_data,
                 0.3,
             )
-            bank_lines = BankLines(mock_config_file, MagicMock())
+            bank_lines = BankLines(mock_config_file)
             bank_lines.plot_flags = PlotProperties(
                 plot_data=True,
                 save_plot=True,
@@ -529,13 +532,12 @@ class TestBankLines:
             "matplotlib.pyplot.close"
         ) as mock_close, patch(
             "dfastbe.plotting.Plot._zoom_xy_and_save"
-        ) as mock_zoom_xy_and_save, patch(
-            "dfastbe.bank_lines.plotter.log_text"
-        ):
+        ) as mock_zoom_xy_and_save:
 
             bank_lines_plotter = BankLinesPlotter(
                 False, bank_lines.plot_flags, mock_config_file.crs, mock_simulation_data, xy_km_numpy, km_bounds,
             )
+            bank_lines_plotter.logger = MagicMock()
             bank_lines_plotter.plot(
                 n_search_lines,
                 bank,
