@@ -1839,14 +1839,21 @@ def menu_about_qt():
 
 def menu_open_manual():
     """Open the user manual."""
-    filename = str(r_dir / USER_MANUAL_FILE_NAME)
+    manual_path = r_dir / USER_MANUAL_FILE_NAME
+    filename = str(manual_path)
+    if not os.path.exists(manual_path):
+        showError(f"User manual not found: {filename}")
+        return
 
-    if sys.platform.startswith("win"):
-        os.startfile(filename)
-    elif sys.platform.startswith("darwin"):
-        subprocess.Popen(["open", filename])
-    else:
-        subprocess.Popen(["xdg-open", filename])
+    try:
+        if sys.platform.startswith("win"):
+            os.startfile(filename)
+        elif sys.platform.startswith("darwin"):
+            subprocess.Popen(["open", filename])
+        else:
+            subprocess.Popen(["xdg-open", filename])
+    except OSError as e:
+        showError(f"Failed to open the user manual: {e}")
 
 
 def main(config: Optional[str] = None) -> None:
