@@ -2167,10 +2167,7 @@ Defaults to 'UK'.</p>
 </details>
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/cmd.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 40</span>
-<span class="normal"> 41</span>
-<span class="normal"> 42</span>
-<span class="normal"> 43</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 43</span>
 <span class="normal"> 44</span>
 <span class="normal"> 45</span>
 <span class="normal"> 46</span>
@@ -2233,7 +2230,12 @@ Defaults to 'UK'.</p>
 <span class="normal">103</span>
 <span class="normal">104</span>
 <span class="normal">105</span>
-<span class="normal">106</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span>
     <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;UK&quot;</span><span class="p">,</span>
     <span class="n">run_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;GUI&quot;</span><span class="p">,</span>
     <span class="n">configfile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;dfastbe.cfg&quot;</span><span class="p">,</span>
@@ -2278,8 +2280,10 @@ Defaults to 'UK'.</p>
 <span class="sd">        ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">language</span> <span class="o">=</span> <span class="n">language</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-    <span class="n">load_program_texts</span><span class="p">(</span> <span class="n">LOG_DATA_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;messages.</span><span class="si">{</span><span class="n">language</span><span class="si">}</span><span class="s2">.ini&quot;</span><span class="p">)</span>
     <span class="n">run_mode</span> <span class="o">=</span> <span class="n">run_mode</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">logger</span><span class="p">:</span> <span class="n">DfastbeLogger</span> <span class="o">=</span> <span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;dfastbe&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">load_program_texts</span><span class="p">(</span><span class="n">LOG_DATA_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;messages.</span><span class="si">{</span><span class="n">language</span><span class="si">}</span><span class="s2">.ini&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">log_file</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;dfastbe.log&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;GUI&quot;</span><span class="p">:</span>
         <span class="n">main</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span>
@@ -2296,8 +2300,8 @@ Defaults to 'UK'.</p>
             <span class="n">erosion</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
             <span class="n">erosion</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
             <span class="n">erosion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;end_bankerosion&quot;</span><span class="p">)</span>
-            <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- end analysis --&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;end_bankerosion&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- end analysis --&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid run mode </span><span class="si">{</span><span class="n">run_mode</span><span class="si">}</span><span class="s2"> specified. Should read &#39;BANKLINES&#39;, &#39;BANKEROSION&#39; or &#39;GUI&#39;.&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
