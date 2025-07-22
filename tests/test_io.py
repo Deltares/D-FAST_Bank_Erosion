@@ -259,44 +259,31 @@ def logger() -> DfastbeLogger:
     return dfast_logger
 
 
-class TestLogText:
+class TestDfastbeLogger:
 
-    def test_log_text_01(self, logger: DfastbeLogger):
+    @pytest.mark.parametrize(
+        "key, data, repeat, expected_output",
+        [
+            ("confirm", {}, 1, ['Confirm using "y" ...', '']),
+            ("", {}, 3, ['', '', '']),
+            ("reach", {"reach": "ABC"}, 1, ['The measure is located on reach ABC']),
+        ],
+        ids=[
+            "key without data",
+            "empty key",
+            "key with data",
+        ],
+    )
+    def test_log_text(self, logger: DfastbeLogger, key, data, repeat, expected_output):
         """
         Testing standard output of a single text without expansion.
         """
-        key = "confirm"
-        with captured_output() as (out, err):
-            logger.log_text(key)
-        outstr = out.getvalue().splitlines()
-        strref = ['Confirm using "y" ...', '']
-        assert outstr == strref
+        with patch.object(logger, "info") as mock_info:
+            logger.log_text(key, data=data, repeat=repeat)
+        for entry in expected_output:
+            mock_info.assert_any_call(entry)
 
-    def test_log_text_02(self, logger: DfastbeLogger):
-        """
-        Testing standard output of a repeated text without expansion.
-        """
-        key = ""
-        nr = 3
-        with captured_output() as (out, err):
-            logger.log_text(key, repeat=nr)
-        outstr = out.getvalue().splitlines()
-        strref = ['', '', '']
-        assert outstr == strref
-
-    def test_log_text_03(self, logger: DfastbeLogger):
-        """
-        Testing standard output of a text with expansion.
-        """
-        key = "reach"
-        data = {"reach": "ABC"}
-        with captured_output() as (out, err):
-            logger.log_text(key, data=data)
-        outstr = out.getvalue().splitlines()
-        strref = ['The measure is located on reach ABC']
-        assert outstr == strref
-
-    def test_log_text_04(self, logger: DfastbeLogger, fs: FakeFilesystem):
+    def test_log_text_to_file(self, logger: DfastbeLogger, fs: FakeFilesystem):
         """
         Testing file output of a text with expansion.
         """
@@ -309,26 +296,24 @@ class TestLogText:
         strref = ['The measure is located on reach ABC']
         assert all_lines == strref
 
-
-class TestGetText:
-
-    def test_get_text_01(self, logger: DfastbeLogger):
+    @pytest.mark.parametrize(
+        "key, expected_output",
+        [
+            ("@", ["No message found for @"]),
+            ("", [""]),
+            ("confirm", ['Confirm using "y" ...', '']),
+        ],
+        ids=[
+            "key not found",
+            "empty line key",
+            "confirm key",
+        ],
+    )
+    def test_get_text(self, logger: DfastbeLogger, key, expected_output):
         """
         Testing get_text: key not found.
         """
-        assert logger.get_text("@") == ["No message found for @"]
-
-    def test_get_text_02(self, logger: DfastbeLogger):
-        """
-        Testing get_text: empty line key.
-        """
-        assert logger.get_text("") == [""]
-
-    def test_get_text_03(self, logger: DfastbeLogger):
-        """
-        Testing get_text: "confirm" key.
-        """
-        assert logger.get_text("confirm") == ['Confirm using "y" ...', '']
+        assert logger.get_text(key) == expected_output
 
 
 class TestReadFMMap:
