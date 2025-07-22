@@ -1,12 +1,12 @@
 from pathlib import Path
-from typing import Dict, List
+from typing import List
 from unittest.mock import MagicMock, patch
 
 import matplotlib
 import numpy as np
 import pytest
-from pyfakefs.fake_filesystem import FakeFilesystem
 from matplotlib.testing.compare import compare_images
+from pyfakefs.fake_filesystem import FakeFilesystem
 
 import dfastbe.io.logger
 from dfastbe.bank_erosion.bank_erosion import Erosion, calculate_alpha
@@ -20,7 +20,10 @@ from dfastbe.bank_erosion.data_models.calculation import (
     SingleLevelParameters,
     SingleParameters,
 )
-from dfastbe.bank_erosion.data_models.inputs import ErosionSimulationData
+from dfastbe.bank_erosion.data_models.inputs import (
+    ErosionSimulationData,
+    ShipsParameters,
+)
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.cmd import run
 from dfastbe.io.config import ConfigFile
@@ -73,38 +76,27 @@ def test_bank_erosion(image_list: List[str]):
 class TestErosion:
 
     @pytest.fixture
-    def shipping_data(self) -> Dict[str, list]:
+    def ships_data(self, shipping_dict) -> ShipsParameters:
         """Fixture to create mock shipping data.
 
         Returns:
-            Dict[str, list]: A dictionary with mock shipping data arrays.
-                vship0 (np.array):
+            ShipsParameters: A ShipsParameters instance with mock shipping data arrays.
+                velocity (np.array):
                     initial ship velocities for two banks.
-                Nship0 (np.array):
+                number (np.array):
                     initial number of ships for two banks.
-                nwave0 (np.array):
+                num_waves (np.array):
                     initial amount of waves per ship for two banks.
-                Tship0 (np.array):
-                    initial ship periods for two banks.
-                ship0 (np.array):
-                    initial ship heights for two banks.
-                parslope0 (np.array):
+                draught (np.array):
+                    initial ship draughts for two banks.
+                type (np.array):
+                    initial ship types for two banks.
+                slope (np.array):
                     initial bank slope parameters for two banks.
-                parreed0 (np.array):
+                reed (np.array):
                     initial bank vegetation parameters for two banks.
         """
-        return {
-            "vship0": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
-            "Nship0": [
-                np.array([20912, 20912, 20912]),
-                np.array([20912, 20912, 20912]),
-            ],
-            "nwave0": [np.array([5.0, 5.0, 5.0]), np.array([5.0, 5.0, 5.0])],
-            "Tship0": [np.array([1.2, 1.2, 1.2]), np.array([1.2, 1.2, 1.2])],
-            "ship0": [np.array([2.0, 2.0, 2.0]), np.array([2.0, 2.0, 2.0])],
-            "parslope0": [np.array([20.0, 20.0, 20.0]), np.array([20.0, 20.0, 20.0])],
-            "parreed0": [np.array([0.0, 0.0, 0.0]), np.array([0.0, 0.0, 0.0])],
-        }
+        return ShipsParameters(MagicMock(), **shipping_dict)
 
     @pytest.fixture
     def mock_erosion(self):
@@ -158,56 +150,9 @@ class TestErosion:
         with patch.object(dfastbe.io.logger, "PROGTEXTS", {}, create=True):
             yield
 
-    @pytest.mark.unit
-    def test_get_ship_parameters(self, mock_erosion: Erosion, mock_config_file):
-        """Test the get_ship_parameters method.
-
-        This method retrieves ship parameters based on the number of stations per bank.
-        Leverage the mock_config_file to simulate the configuration file behavior.
-
-        Args:
-            mock_erosion (Erosion): The Erosion instance to test.
-            mock_config_file (MagicMock): A mocked ConfigFile instance.
-
-        Mocks:
-            Erosion:
-                The Erosion instance without executing the original __init__ method.
-            ConfigFile:
-                The behavior of the get_parameter method to return predefined numpy arrays.
-
-        Asserts:
-            The returned ship parameters are a dictionary with expected keys.
-            Each value in the dictionary is a list of numpy arrays,
-                each array's length matches the number of stations per bank.
-        """
-        num_stations_per_bank = [10, 15]
-        mock_erosion._config_file = mock_config_file
-
-        ship_parameters = mock_erosion.get_ship_parameters(num_stations_per_bank)
-
-        expected_keys = [
-            "vship0",
-            "Nship0",
-            "nwave0",
-            "Tship0",
-            "ship0",
-            "parslope0",
-            "parreed0",
-        ]
-        mock_config_file.get_parameter.assert_called()
-        assert isinstance(ship_parameters, dict)
-        assert set(ship_parameters.keys()) == set(expected_keys)
-
-        for key, value in ship_parameters.items():
-            assert isinstance(value, list)
-            assert len(value) == len(num_stations_per_bank)
-            for arr, n in zip(value, num_stations_per_bank):
-                assert isinstance(arr, np.ndarray)
-                assert len(arr) == n
-
     @pytest.mark.integration
     def test_prepare_initial_conditions(
-        self, mock_erosion: Erosion, shipping_data, mock_config_file
+        self, mock_erosion: Erosion, ships_data, mock_config_file
     ):
         """Test the _prepare_initial_conditions method.
 
@@ -216,7 +161,7 @@ class TestErosion:
         Args:
             mock_erosion (Erosion):
                 The Erosion instance to test.
-            shipping_data (Dict[str, list]):
+            ships_data (Dict[str, list]):
                 Mocked shipping data to be used in the test.
             mock_config_file (MagicMock):
                 A mocked ConfigFile instance.
@@ -226,7 +171,7 @@ class TestErosion:
                 A mocked FairwayData instance to simulate fairway data retrieval.
             ConfigFile:
                 A mocked ConfigFile instance to simulate configuration file behavior.
-            get_ship_parameters:
+            get_ship_data:
                 A mocked method to return predefined shipping data.
 
         Asserts:
@@ -262,8 +207,8 @@ class TestErosion:
         mock_erosion._config_file = mock_config_file
 
         with patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters",
-            return_value=shipping_data,
+            "dfastbe.bank_erosion.bank_erosion.ShipsParameters.get_ship_data",
+            return_value=ships_data,
         ):
             erosion_inputs = mock_erosion._prepare_initial_conditions(
                 num_stations_per_bank, mock_fairway_data
@@ -273,7 +218,7 @@ class TestErosion:
         mock_config_file.get_bool.assert_called_once()
 
         assert np.array_equal(
-            erosion_inputs.shipping_data["vship0"][0], np.array([5.0, 5.0, 5.0])
+            erosion_inputs.shipping_data.velocity[0], np.array([5.0, 5.0, 5.0])
         )
         assert np.array_equal(
             erosion_inputs.left.wave_fairway_distance_0, np.array([150, 150, 150])
@@ -356,9 +301,11 @@ class TestErosion:
         """
         mock_erosion.river_data.debug = True
         mock_erosion._config_file = mock_config_file
-        with patch("dfastbe.bank_erosion.data_models.calculation.FairwayData"), patch(
-            "dfastbe.bank_erosion.bank_erosion.intersect_line_mesh"
-        ) as line_mock, patch("dfastbe.io.data_models.GeoDataFrame") as gdf_mock:
+        with (
+            patch("dfastbe.bank_erosion.data_models.calculation.FairwayData"),
+            patch("dfastbe.bank_erosion.bank_erosion.intersect_line_mesh") as line_mock,
+            patch("dfastbe.io.data_models.GeoDataFrame") as gdf_mock,
+        ):
             fairway_intersection_coords = np.array(
                 [
                     [209186.621094, 389659.99609375],
@@ -781,19 +728,26 @@ class TestErosion:
         fairway_data = MagicMock()
         mock_erosion.river_data.erosion_time = 1
 
-        with patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion._read_discharge_parameters"
-        ) as mock_read_discharge_parameters, patch(
-            "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.read"
-        ) as mock_read_data, patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion._calculate_bank_height"
-        ) as mock_calculate_bank_height, patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion.compute_erosion_per_level"
-        ) as mock_compute_erosion, patch(
-            "dfastbe.bank_erosion.bank_erosion.write_km_eroded_volumes"
-        ) as mock_write_km_eroded_volumes, patch(
-            "dfastbe.bank_erosion.bank_erosion.DischargeLevels"
-        ) as mock_discharge_levels:
+        with (
+            patch(
+                "dfastbe.bank_erosion.bank_erosion.ShipsParameters.read_discharge_parameters"
+            ) as mock_read_discharge_parameters,
+            patch(
+                "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.read"
+            ) as mock_read_data,
+            patch(
+                "dfastbe.bank_erosion.bank_erosion.Erosion._calculate_bank_height"
+            ) as mock_calculate_bank_height,
+            patch(
+                "dfastbe.bank_erosion.bank_erosion.Erosion.compute_erosion_per_level"
+            ) as mock_compute_erosion,
+            patch(
+                "dfastbe.bank_erosion.bank_erosion.write_km_eroded_volumes"
+            ) as mock_write_km_eroded_volumes,
+            patch(
+                "dfastbe.bank_erosion.bank_erosion.DischargeLevels"
+            ) as mock_discharge_levels,
+        ):
             flow_erosion_dist = [
                 np.array([7.06542424e-02, 6.75617155e-02, 7.01268742e-02]),
                 np.array([0.10222567, 0.10100284, 0.09953936]),
@@ -845,52 +799,6 @@ class TestErosion:
         assert np.allclose(erosion_results.ship_erosion_dist, ship_erosion_dist)
         assert np.allclose(erosion_results.total_erosion_dist, total_erosion_dist)
         assert np.allclose(erosion_results.total_eroded_vol, total_eroded_vol)
-
-    def test_read_discharge_parameters(self, mock_erosion: Erosion, shipping_data):
-        """Test the _read_discharge_parameters method.
-
-        This method reads discharge parameters for a specific discharge level.
-
-        Args:
-            mock_erosion (Erosion):
-                The Erosion instance to test.
-            shipping_data (dict):
-                The shipping data to use for testing.
-
-        Mocks:
-            Erosion._get_param:
-                Mocks the method to return predefined values for testing.
-            Erosion:
-                The Erosion instance without executing the original __init__ method.
-
-        Asserts:
-            The returned discharge parameters are an instance of SingleLevelParameters.
-            The parameters match the expected values from the shipping data.
-        """
-        with patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion._get_param"
-        ) as mock_get_param:
-            mock_get_param.side_effect = [
-                shipping_data["vship0"],
-                shipping_data["Nship0"],
-                shipping_data["nwave0"],
-                shipping_data["Tship0"],
-                shipping_data["ship0"],
-                shipping_data["parslope0"],
-                shipping_data["parreed0"],
-            ]
-            discharge_parameters = mock_erosion._read_discharge_parameters(
-                1, shipping_data, [13]
-            )
-        assert isinstance(discharge_parameters, SingleLevelParameters)
-        assert discharge_parameters.id == 1
-        assert np.allclose(
-            discharge_parameters.left.ship_velocity, shipping_data["vship0"]
-        )
-        assert np.allclose(discharge_parameters.left.num_ship, shipping_data["Nship0"])
-        assert np.allclose(
-            discharge_parameters.left.num_waves_per_ship, shipping_data["nwave0"]
-        )
 
     def test_compute_erosion_per_level(self, mock_erosion: Erosion, mock_debug):
         """Test the compute_erosion_per_level method.
@@ -962,7 +870,7 @@ class TestErosion:
         mock_erosion: Erosion,
         mock_fairway_data,
         mock_bank_data,
-        shipping_data,
+        ships_data,
         mock_single_level_parameters,
         mock_simulation_data,
         mock_debug,
@@ -982,7 +890,7 @@ class TestErosion:
                 A FairwayData instance.
             mock_bank_data (BankData):
                 A BankData instance.
-            shipping_data (dict):
+            ships_data (dict):
                 A dictionary containing shipping data.
             mock_single_level_parameters (SingleLevelParameters):
                 A SingleLevelParameters instance.
@@ -1002,8 +910,8 @@ class TestErosion:
                 A mocked function to return a predefined array of km midpoints.
             _process_river_axis_by_center_line:
                 Return a mocked center line instead of executing the function.
-            get_ship_parameters:
-                A mocked function to return the shipping_data dictionary.
+            get_ship_data:
+                A mocked function to return the ships_data dictionary.
             _read_discharge_parameters:
                 Return the mock_single_level_parameters instance instead of executing the function.
             ErosionSimulationData.read:
@@ -1051,35 +959,43 @@ class TestErosion:
         center_line_mock = MagicMock(spec=LineGeometry)
         center_line_mock.data["stations"].min.return_value = 123.0
         center_line_mock.data["stations"].max.return_value = 123.61
-        with (patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion._get_fairway_data",
-            return_value=mock_fairway_data,
-        ) as mock_get_fairway_data, patch(
-            "dfastbe.bank_erosion.bank_erosion.get_km_bins", mock_km_mid
-        ) as mock_get_km_bins, patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion._process_river_axis_by_center_line",
-            return_value=center_line_mock,
-        ) as mock_process_river_axis_by_center_line, patch(
-            "dfastbe.io.data_models.LineGeometry.to_file",
-        ), patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion.get_ship_parameters",
-            return_value=shipping_data,
-        ) as mock_get_ship_parameters, patch(
-            "dfastbe.bank_erosion.bank_erosion.Erosion._read_discharge_parameters",
-            return_value=mock_single_level_parameters,
-        ) as mock_read_discharge_parameters, patch(
-            "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.read",
-            return_value=mock_simulation_data,
-        ) as mock_read_simulation_data,
+        with (
             patch(
-            "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.compute_mesh_topology"
-        ) as mock_compute_mesh_topology):
+                "dfastbe.bank_erosion.bank_erosion.Erosion._get_fairway_data",
+                return_value=mock_fairway_data,
+            ) as mock_get_fairway_data,
+            patch(
+                "dfastbe.bank_erosion.bank_erosion.get_km_bins", mock_km_mid
+            ) as mock_get_km_bins,
+            patch(
+                "dfastbe.bank_erosion.bank_erosion.Erosion._process_river_axis_by_center_line",
+                return_value=center_line_mock,
+            ) as mock_process_river_axis_by_center_line,
+            patch(
+                "dfastbe.io.data_models.LineGeometry.to_file",
+            ),
+            patch(
+                "dfastbe.bank_erosion.bank_erosion.ShipsParameters.get_ship_data",
+                return_value=ships_data,
+            ) as mock_get_ship_data,
+            patch(
+                "dfastbe.bank_erosion.bank_erosion.ShipsParameters.read_discharge_parameters",
+                return_value=mock_single_level_parameters,
+            ) as mock_read_discharge_parameters,
+            patch(
+                "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.read",
+                return_value=mock_simulation_data,
+            ) as mock_read_simulation_data,
+            patch(
+                "dfastbe.bank_erosion.bank_erosion.ErosionSimulationData.compute_mesh_topology"
+            ) as mock_compute_mesh_topology,
+        ):
             mock_erosion.run()
 
         mock_get_fairway_data.assert_called_once()
         mock_get_km_bins.assert_called_once()
         mock_process_river_axis_by_center_line.assert_called_once()
-        mock_get_ship_parameters.assert_called_once()
+        mock_get_ship_data.assert_called_once()
         mock_read_discharge_parameters.assert_called()
         mock_read_simulation_data.assert_called()
         mock_compute_mesh_topology.assert_called_once()
