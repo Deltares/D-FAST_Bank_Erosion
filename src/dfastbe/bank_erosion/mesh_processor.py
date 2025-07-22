@@ -265,6 +265,20 @@ def edge_angle(mesh_data: MeshData, edge: int, reverse: bool = False) -> float:
     return math.atan2(dy, dx)
 
 
+def log_mesh_transition(
+    j, index, vindex, transition_type, transition_index, index0, prev_b
+):
+    """
+    Helper to print mesh transition information for debugging.
+    """
+    index_str = "outside" if index == -1 else index
+    if index == -2:
+        index_str = f"edge between {vindex}"
+    print(
+        f"{j}: moving from {index_str} via {transition_type} {transition_index} to {index0} at b = {prev_b}"
+    )
+
+
 def intersect_line_mesh(
     bp: np.ndarray,
     mesh_data: MeshData,
@@ -618,18 +632,9 @@ def intersect_line_mesh(
 
                     if index0 is not None:
                         if verbose:
-                            if index == -1:
-                                print(
-                                    f"{j}: moving from outside via node {node} to {index0} at b = {prev_b}"
-                                )
-                            elif index == -2:
-                                print(
-                                    f"{j}: moving from edge between {vindex} via node {node} to {index0} at b = {prev_b}"
-                                )
-                            else:
-                                print(
-                                    f"{j}: moving from {index} via node {node} to {index0} at b = {prev_b}"
-                                )
+                            log_mesh_transition(
+                                j, index, vindex, "node", node, index0, prev_b
+                            )
 
                         if (
                                 isinstance(index0, int)
@@ -645,14 +650,14 @@ def intersect_line_mesh(
 
                     elif faces[0] == index:
                         if verbose:
-                            print(
-                                f"{j}: moving from {index} via edge {edge} to {faces[1]} at b = {prev_b}"
+                            log_mesh_transition(
+                                j, index, vindex, "edge", edge, faces[1], prev_b
                             )
                         index = faces[1]
                     elif faces[1] == index:
                         if verbose:
-                            print(
-                                f"{j}: moving from {index} via edge {edge} to {faces[0]} at b = {prev_b}"
+                            log_mesh_transition(
+                                j, index, vindex, "edge", edge, faces[0], prev_b
                             )
                         index = faces[0]
                     else:
