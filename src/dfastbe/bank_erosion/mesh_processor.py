@@ -233,6 +233,23 @@ def enlarge(
     return new_array
 
 
+def _get_face_coordinates(mesh_data: MeshData, index: int) -> np.ndarray:
+    """
+    Returns the coordinates of the k-th mesh face as an (N, 2) array.
+
+    Args:
+        mesh_data (MeshData): The mesh data object.
+        k (int): The face index.
+
+    Returns:
+        np.ndarray: Array of shape (n_nodes, 2) with x, y coordinates.
+    """
+    x = mesh_data.x_face_coords[index : index + 1, : mesh_data.n_nodes[index]]
+    y = mesh_data.y_face_coords[index : index + 1, : mesh_data.n_nodes[index]]
+    coords = np.concatenate((x, y), axis=0).T
+    return coords
+
+
 def intersect_line_mesh(
     bp: np.ndarray,
     mesh_data: MeshData,
@@ -303,19 +320,7 @@ def intersect_line_mesh(
                 # a point on the edge of two polygons will thus be considered outside the mesh whereas it actually isn't.
                 pnt = Point(bp[0])
                 for k in possible_cells:
-                    polygon_k = Polygon(
-                        np.concatenate(
-                            (
-                                mesh_data.x_face_coords[
-                                k : k + 1, : mesh_data.n_nodes[k]
-                                ],
-                                mesh_data.y_face_coords[
-                                k : k + 1, : mesh_data.n_nodes[k]
-                                ],
-                            ),
-                            axis=0,
-                        ).T
-                    )
+                    polygon_k = Polygon(_get_face_coordinates(mesh_data, k))
                     if polygon_k.contains(pnt):
                         index = k
                         if verbose:
@@ -324,17 +329,7 @@ def intersect_line_mesh(
                 else:
                     on_edge: List[int] = []
                     for k in possible_cells:
-                        nd = np.concatenate(
-                            (
-                                mesh_data.x_face_coords[
-                                    k : k + 1, : mesh_data.n_nodes[k]
-                                ],
-                                mesh_data.y_face_coords[
-                                    k : k + 1, : mesh_data.n_nodes[k]
-                                ],
-                            ),
-                            axis=0,
-                        ).T
+                        nd = _get_face_coordinates(mesh_data, k)
                         line_k = LineString(np.concatenate(nd, nd[0:1], axis=0))
                         if line_k.contains(pnt):
                             on_edge.append(k)
@@ -407,21 +402,7 @@ def intersect_line_mesh(
                             print(f"{j}: -- no slices along this segment --")
                         if index >= 0:
                             pnt = Point(bpj)
-                            polygon_k = Polygon(
-                                np.concatenate(
-                                    (
-                                        mesh_data.x_face_coords[
-                                        index : index + 1,
-                                        : mesh_data.n_nodes[index],
-                                        ],
-                                        mesh_data.y_face_coords[
-                                        index : index + 1,
-                                        : mesh_data.n_nodes[index],
-                                        ],
-                                    ),
-                                    axis=0,
-                                ).T
-                            )
+                            polygon_k = Polygon(_get_face_coordinates(mesh_data, index))
                             if not polygon_k.contains(pnt):
                                 raise Exception(
                                     f"{j}: ERROR: point actually not contained within {index}!"
