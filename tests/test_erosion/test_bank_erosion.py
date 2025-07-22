@@ -76,7 +76,7 @@ def test_bank_erosion(image_list: List[str]):
 class TestErosion:
 
     @pytest.fixture
-    def shipping_data(self, shipping_dict) -> ShipsParameters:
+    def ships_data(self, shipping_dict) -> ShipsParameters:
         """Fixture to create mock shipping data.
 
         Returns:
@@ -152,7 +152,7 @@ class TestErosion:
 
     @pytest.mark.integration
     def test_prepare_initial_conditions(
-        self, mock_erosion: Erosion, shipping_data, mock_config_file
+        self, mock_erosion: Erosion, ships_data, mock_config_file
     ):
         """Test the _prepare_initial_conditions method.
 
@@ -161,7 +161,7 @@ class TestErosion:
         Args:
             mock_erosion (Erosion):
                 The Erosion instance to test.
-            shipping_data (Dict[str, list]):
+            ships_data (Dict[str, list]):
                 Mocked shipping data to be used in the test.
             mock_config_file (MagicMock):
                 A mocked ConfigFile instance.
@@ -208,7 +208,7 @@ class TestErosion:
 
         with patch(
             "dfastbe.bank_erosion.bank_erosion.ShipsParameters.get_ship_data",
-            return_value=shipping_data,
+            return_value=ships_data,
         ):
             erosion_inputs = mock_erosion._prepare_initial_conditions(
                 num_stations_per_bank, mock_fairway_data
@@ -870,7 +870,7 @@ class TestErosion:
         mock_erosion: Erosion,
         mock_fairway_data,
         mock_bank_data,
-        shipping_data,
+        ships_data,
         mock_single_level_parameters,
         mock_simulation_data,
         mock_debug,
@@ -890,7 +890,7 @@ class TestErosion:
                 A FairwayData instance.
             mock_bank_data (BankData):
                 A BankData instance.
-            shipping_data (dict):
+            ships_data (dict):
                 A dictionary containing shipping data.
             mock_single_level_parameters (SingleLevelParameters):
                 A SingleLevelParameters instance.
@@ -911,7 +911,7 @@ class TestErosion:
             _process_river_axis_by_center_line:
                 Return a mocked center line instead of executing the function.
             get_ship_data:
-                A mocked function to return the shipping_data dictionary.
+                A mocked function to return the ships_data dictionary.
             _read_discharge_parameters:
                 Return the mock_single_level_parameters instance instead of executing the function.
             ErosionSimulationData.read:
@@ -976,7 +976,7 @@ class TestErosion:
             ),
             patch(
                 "dfastbe.bank_erosion.bank_erosion.ShipsParameters.get_ship_data",
-                return_value=shipping_data,
+                return_value=ships_data,
             ) as mock_get_ship_data,
             patch(
                 "dfastbe.bank_erosion.bank_erosion.ShipsParameters.read_discharge_parameters",
