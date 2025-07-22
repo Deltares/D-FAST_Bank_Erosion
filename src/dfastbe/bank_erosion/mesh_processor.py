@@ -266,12 +266,12 @@ def _edge_angle(mesh_data: MeshData, edge: int, reverse: bool = False) -> float:
 
 
 def _log_mesh_transition(
-    j, index, vindex, transition_type, transition_index, index0, prev_b
+    step, index, vindex, transition_type, transition_index, index0, prev_b
 ):
     """Helper to print mesh transition information for debugging.
 
     Args:
-        j (int): The current step or iteration.
+        step (int): The current step or iteration.
         index (int): The current mesh face index.
         vindex (int): The vertex index.
         transition_type (str): The type of transition (e.g., "node", "edge").
@@ -283,7 +283,8 @@ def _log_mesh_transition(
     if index == -2:
         index_str = f"edge between {vindex}"
     print(
-        f"{j}: moving from {index_str} via {transition_type} {transition_index} to {index0} at b = {prev_b}"
+        f"{step}: moving from {index_str} via {transition_type} {transition_index} "
+        f"to {index0} at b = {prev_b}"
     )
 
 
