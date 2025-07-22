@@ -25,6 +25,7 @@ __all__ = [
     "ShipsParameters",
 ]
 
+
 class ErosionSimulationData(BaseSimulationData):
 
     def compute_mesh_topology(self) -> MeshData:
@@ -218,6 +219,7 @@ class ErosionSimulationData(BaseSimulationData):
             "chezy": chezy,
         }
         return data
+
 
 class ErosionRiverData(BaseRiverData):
 
@@ -449,7 +451,6 @@ class ShipsParameters:
         Returns:
             SingleLevelParameters: The discharge level parameters.
         """
-
         param_defs = self._get_discharge_parameter_definitions()
         param_resolved = self._get_parameters(
             self.config_file, num_stations_per_bank, param_defs, f"{level_i + 1}"

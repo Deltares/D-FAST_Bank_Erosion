@@ -769,6 +769,7 @@ class Erosion:
             self.results["erosion_results"],
             self.results["km_mid"]
         )
+
     def _write_bankline_shapefiles(
         self, bankline_new_list, bankline_eq_list, config_file: ConfigFile
     ):
