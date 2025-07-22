@@ -30,12 +30,12 @@ import time
 from logging import DEBUG, INFO, Logger, basicConfig
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Tuple
 
 __all__ = ["configure_logging", "DfastbeLogger"]
 
 
-def configure_logging(debug: bool = False, log_file: Optional[str] = None):
+def configure_logging(debug: bool = False):
     """Configure the logging system.
 
     This routine sets up the logging system to log messages using the python standard logging module.
@@ -51,9 +51,6 @@ def configure_logging(debug: bool = False, log_file: Optional[str] = None):
         datefmt="%Y-%m-%d %H:%M:%S",
     )
     custom_logger = DfastbeLogger("dfastbe")
-    if log_file:
-        handler = RotatingFileHandler(log_file, maxBytes=5_000_000, backupCount=3)
-        custom_logger.addHandler(handler)
     Logger.manager.loggerDict["dfastbe"] = custom_logger
 
 
@@ -70,6 +67,11 @@ class DfastbeLogger(Logger):
         self.first_time = None
         self.last_time = None
         super().__init__(name)
+
+    def log_file(self, file: str | Path):
+        """Set up a file handler for logging."""
+        handler = RotatingFileHandler(file, maxBytes=5_000_000, backupCount=3)
+        self.addHandler(handler)
 
     def load_program_texts(self, file_name: str | Path) -> None:
         """Load texts from a configuration file, and store globally for access.
