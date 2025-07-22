@@ -248,7 +248,7 @@ def _get_face_coordinates(mesh_data: MeshData, index: int) -> np.ndarray:
     return np.concatenate((x, y), axis=0).T
 
 
-def edge_angle(mesh_data: MeshData, edge: int, reverse: bool = False) -> float:
+def _edge_angle(mesh_data: MeshData, edge: int, reverse: bool = False) -> float:
     """Calculate the angle of a mesh edge in radians.
 
     Args:
@@ -265,11 +265,19 @@ def edge_angle(mesh_data: MeshData, edge: int, reverse: bool = False) -> float:
     return math.atan2(dy, dx)
 
 
-def log_mesh_transition(
+def _log_mesh_transition(
     j, index, vindex, transition_type, transition_index, index0, prev_b
 ):
-    """
-    Helper to print mesh transition information for debugging.
+    """Helper to print mesh transition information for debugging.
+
+    Args:
+        j (int): The current step or iteration.
+        index (int): The current mesh face index.
+        vindex (int): The vertex index.
+        transition_type (str): The type of transition (e.g., "node", "edge").
+        transition_index (int): The index of the transition (e.g., the node or edge index).
+        index0 (int): The target mesh face index.
+        prev_b (float): The previous value of b.
     """
     index_str = "outside" if index == -1 else index
     if index == -2:
@@ -509,7 +517,7 @@ def intersect_line_mesh(
                             )
                         for ie in all_node_edges:
                             reverse = not mesh_data.edge_node[ie, 0] == node
-                            theta_edge = edge_angle(mesh_data, ie, reverse=reverse)
+                            theta_edge = _edge_angle(mesh_data, ie, reverse=reverse)
                             if verbose:
                                 print(
                                     f"{j}: edge {ie} connects {mesh_data.edge_node[ie, :]}"
@@ -610,7 +618,7 @@ def intersect_line_mesh(
                             )
                         if verbose:
                             print(f"{j}: moving in direction theta = {theta}")
-                        theta_edge = edge_angle(mesh_data, edge)
+                        theta_edge = _edge_angle(mesh_data, edge)
                         if theta == theta_edge or theta == -theta_edge:
                             # aligned with edge
                             if verbose:
@@ -632,7 +640,7 @@ def intersect_line_mesh(
 
                     if index0 is not None:
                         if verbose:
-                            log_mesh_transition(
+                            _log_mesh_transition(
                                 j, index, vindex, "node", node, index0, prev_b
                             )
 
@@ -650,13 +658,13 @@ def intersect_line_mesh(
 
                     elif faces[0] == index:
                         if verbose:
-                            log_mesh_transition(
+                            _log_mesh_transition(
                                 j, index, vindex, "edge", edge, faces[1], prev_b
                             )
                         index = faces[1]
                     elif faces[1] == index:
                         if verbose:
-                            log_mesh_transition(
+                            _log_mesh_transition(
                                 j, index, vindex, "edge", edge, faces[0], prev_b
                             )
                         index = faces[0]
