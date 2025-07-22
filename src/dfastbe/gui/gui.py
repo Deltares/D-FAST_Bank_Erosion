@@ -1840,9 +1840,6 @@ def menu_about_qt():
 def menu_open_manual():
     """Open the user manual."""
     filename = str(r_dir / USER_MANUAL_FILE_NAME)
-    # Use startfile on Windows, or open with subprocess without shell=True
-    import subprocess
-    import sys
 
     if sys.platform.startswith("win"):
         os.startfile(filename)
