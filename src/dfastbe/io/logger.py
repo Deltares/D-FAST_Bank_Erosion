@@ -25,15 +25,17 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-import logging
+
 import time
+from logging import DEBUG, INFO, Logger, basicConfig
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
-from typing import Any, Dict, List, Optional, TextIO, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 __all__ = ["configure_logging", "DfastbeLogger"]
 
 
-def configure_logging(debug: bool = False):
+def configure_logging(debug: bool = False, log_file: Optional[str] = None):
     """Configure the logging system.
 
     This routine sets up the logging system to log messages using the python standard logging module.
@@ -42,17 +44,20 @@ def configure_logging(debug: bool = False):
     Args:
         debug (bool): If True, set logging level to DEBUG; otherwise, set to INFO.
     """
-    level = logging.DEBUG if debug else logging.INFO
-    logging.basicConfig(
+    level = DEBUG if debug else INFO
+    basicConfig(
         level=level,
         format="%(asctime)s [%(levelname)s] %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
     custom_logger = DfastbeLogger("dfastbe")
-    logging.Logger.manager.loggerDict["dfastbe"] = custom_logger
+    if log_file:
+        handler = RotatingFileHandler(log_file, maxBytes=5_000_000, backupCount=3)
+        custom_logger.addHandler(handler)
+    Logger.manager.loggerDict["dfastbe"] = custom_logger
 
 
-class DfastbeLogger(logging.Logger):
+class DfastbeLogger(Logger):
     """
     Custom logger class for D-FAST Bank Erosion.
 
@@ -131,13 +136,12 @@ class DfastbeLogger(logging.Logger):
     def log_text(
         self,
         key: str,
-        file: Optional[TextIO] = None,
         data: Dict[str, Any] = {},
         repeat: int = 1,
         indent: str = "",
     ) -> None:
         """
-        Write a text to standard out or file.
+        Write a text to the logger.
 
         Arguments
         ---------
@@ -160,10 +164,7 @@ class DfastbeLogger(logging.Logger):
         for _ in range(repeat):
             for s in str_value:
                 sexp = s.format(**data)
-                if file is None:
-                    print(indent + sexp)
-                else:
-                    file.write(indent + sexp + "\n")
+                self.info(indent + sexp)
 
     def timed_logger(self, label: str) -> None:
         """
@@ -175,7 +176,7 @@ class DfastbeLogger(logging.Logger):
             Message string.
         """
         time, diff = self._timer()
-        print(time + diff + label)
+        self.debug(time + diff + label)
 
     def _timer(self) -> Tuple[str, str]:
         """

@@ -4,6 +4,7 @@ import sys
 from configparser import ConfigParser
 from contextlib import contextmanager
 from io import StringIO
+from logging import getLogger
 from pathlib import Path
 from typing import Dict, Tuple
 from unittest.mock import MagicMock, patch
@@ -295,15 +296,18 @@ class TestLogText:
         strref = ['The measure is located on reach ABC']
         assert outstr == strref
 
-    def test_log_text_04(self, logger: DfastbeLogger):
+    def test_log_text_04(self):
         """
         Testing file output of a text with expansion.
         """
+        configure_logging(True, log_file="test.log")
+        logging = getLogger("dfastbe")
+        logging.load_program_texts("tests/data/files/messages.UK.ini")
         key = "reach"
         data = {"reach": "ABC"}
         filename = "test.log"
         with open(filename, "w") as f:
-            logger.log_text(key, data=data, file=f)
+            logging.log_text(key, data=data)
         all_lines = open(filename, "r").read().splitlines()
         strref = ['The measure is located on reach ABC']
         assert all_lines == strref
