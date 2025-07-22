@@ -88,6 +88,7 @@ def run(
     run_mode = run_mode.upper()
     logger: DfastbeLogger = getLogger("dfastbe")
     logger.load_program_texts(LOG_DATA_DIR / f"messages.{language}.ini")
+    logger.log_file(Path(configfile).parent / "dfastbe.log")
 
     if run_mode == "GUI":
         main(configfile)
