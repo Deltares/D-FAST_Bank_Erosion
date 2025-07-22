@@ -13,6 +13,7 @@ from dfastbe.bank_lines.plotter import BankLinesPlotter
 from dfastbe.cmd import run
 from dfastbe.io.config import ConfigFile, PlotProperties
 from dfastbe.io.data_models import BaseSimulationData, LineGeometry
+from dfastbe.io.logger import configure_logging
 
 matplotlib.use('Agg')
 
@@ -40,6 +41,7 @@ def test_bank_lines():
     language = "UK"
     run_mode = "BANKLINES"
     config_file = test_r_dir / "Meuse_manual.cfg"
+    configure_logging(debug=True)
     run(language, run_mode, str(config_file))
 
     # check the detected banklines
