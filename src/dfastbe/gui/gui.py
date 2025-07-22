@@ -26,26 +26,25 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Dict, Any, Optional, Tuple, List
+import configparser
+import os
+import pathlib
+import subprocess
+import sys
+from functools import partial
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
-from PyQt5 import QtWidgets
-from PyQt5 import QtCore
+import matplotlib.pyplot
 import PyQt5.QtGui
+from PyQt5 import QtCore, QtWidgets
 
+from dfastbe import __file__, __version__
+from dfastbe.bank_erosion.bank_erosion import Erosion
+from dfastbe.bank_lines.bank_lines import BankLines
+from dfastbe.io.config import ConfigFile
 from dfastbe.io.file_utils import absolute_path
 from dfastbe.io.logger import get_text
-from dfastbe.io.config import ConfigFile
-import pathlib
-from pathlib import Path
-import sys
-import os
-import configparser
-import matplotlib.pyplot
-import subprocess
-from functools import partial
-from dfastbe import __version__, __file__
-from dfastbe.bank_lines.bank_lines import BankLines
-from dfastbe.bank_erosion.bank_erosion import Erosion
 
 USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
 DialogObject = Dict[str, PyQt5.QtCore.QObject]
@@ -1247,7 +1246,6 @@ def run_erosion() -> None:
     dialog["application"].restoreOverrideCursor()
 
 
-
 def close_dialog() -> None:
     """
     Close the dialog and program.
@@ -1842,7 +1840,16 @@ def menu_about_qt():
 def menu_open_manual():
     """Open the user manual."""
     filename = str(r_dir / USER_MANUAL_FILE_NAME)
-    subprocess.Popen(filename, shell=True)
+    # Use startfile on Windows, or open with subprocess without shell=True
+    import subprocess
+    import sys
+
+    if sys.platform.startswith("win"):
+        os.startfile(filename)
+    elif sys.platform.startswith("darwin"):
+        subprocess.Popen(["open", filename])
+    else:
+        subprocess.Popen(["xdg-open", filename])
 
 
 def main(config: Optional[str] = None) -> None:
