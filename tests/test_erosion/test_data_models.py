@@ -345,6 +345,7 @@ class TestShipsParameters:
         ]
         return config_file
 
+    @pytest.mark.unit
     def test_read_discharge_parameters(self, mock_config_file, shipping_dict):
         """Test the _read_discharge_parameters method.
 
@@ -411,6 +412,7 @@ class TestShipsParameters:
         assert ship_data.slope[0].shape[0] == num_stations_per_bank[0]
         assert ship_data.reed[0].shape[0] == num_stations_per_bank[0]
 
+    @pytest.mark.unit
     def test_calculate_ship_derived_parameters(self, mock_config_file, shipping_dict):
         """Test the ship_derived_parameters method.
 
