@@ -76,7 +76,7 @@ def gui_text(key: str, prefix: str = "gui_", dict: Dict[str, Any] = {}):
     -------
         The first line of the text in the dictionary expanded with the keys.
     """
-    cstr = get_text(prefix + key)
+    cstr = getLogger("dfastbe").get_text(prefix + key)
     str = cstr[0].format(**dict)
     return str
 
