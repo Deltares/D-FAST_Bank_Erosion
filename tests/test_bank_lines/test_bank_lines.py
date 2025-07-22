@@ -13,6 +13,7 @@ from dfastbe.bank_lines.plotter import BankLinesPlotter
 from dfastbe.cmd import run
 from dfastbe.io.config import ConfigFile, PlotProperties
 from dfastbe.io.data_models import BaseSimulationData, LineGeometry
+from dfastbe.io.logger import configure_logging
 
 matplotlib.use('Agg')
 
@@ -40,6 +41,7 @@ def test_bank_lines():
     language = "UK"
     run_mode = "BANKLINES"
     config_file = test_r_dir / "Meuse_manual.cfg"
+    configure_logging(debug=True)
     run(language, run_mode, str(config_file))
 
     # check the detected banklines
@@ -97,16 +99,22 @@ class TestBankLines:
         Returns:
             MagicMock: A mock object simulating BaseSimulationData.
         """
-        mock_data = MagicMock(spec=BaseSimulationData)
-        mock_data.face_node = np.array([[0, 1, 2], [1, 2, 3], [2, 3, 4]])
-        mock_data.x_node = np.array([0, 1, 2, 3, 4, 5, 6, 7])
-        mock_data.y_node = np.array([0, 1, 2, 3, 4, 5, 6, 7])
-        mock_data.water_level_face = np.array([1.0, 2.0, 1.0])
-        mock_data.water_depth_face = np.array([0.1, 0.6, 0.4])
-        mock_data.bed_elevation_values = np.ma.masked_array(
-            [0.9, 0.9, 1.1, 1.1, 1.1, 0.9, 1.1, 0.9]
+        mock_data = BaseSimulationData(
+            face_node=np.array([[0, 1, 2], [1, 2, 3], [2, 3, 4]]),
+            x_node=np.array([0, 1, 2, 3, 4, 5, 6, 7]),
+            y_node=np.array([0, 1, 2, 3, 4, 5, 6, 7]),
+            water_level_face=np.array([1.0, 2.0, 1.0]),
+            water_depth_face=np.array([0.1, 0.6, 0.4]),
+            bed_elevation_values=np.ma.masked_array(
+                [0.9, 0.9, 1.1, 1.1, 1.1, 0.9, 1.1, 0.9]
+            ),
+            n_nodes=np.array([3, 3, 3]),
+            bed_elevation_location="node",
+            velocity_x_face=np.array([0.1, 0.2, 0.3]),
+            velocity_y_face=np.array([0.1, 0.2, 0.3]),
+            chezy_face=np.array([50, 50, 50]),
+            dry_wet_threshold=0.3,
         )
-        mock_data.n_nodes = np.array([3, 3, 3])
         return mock_data
 
     @pytest.fixture
@@ -136,7 +144,7 @@ class TestBankLines:
                 mock_simulation_data,
                 0.3,
             )
-            bank_lines = BankLines(MagicMock())
+            bank_lines = BankLines(MagicMock(), MagicMock())
         assert bank_lines.max_river_width == 1000
 
     @patch("dfastbe.bank_lines.bank_lines.BankLinesRiverData")
@@ -188,30 +196,54 @@ class TestBankLines:
         mock_river_data.simulation_data.return_value = (MagicMock(), 0.8)
         mock_river_data_class.return_value = mock_river_data
 
-        bank_lines = BankLines(mock_config_file)
+        bank_lines = BankLines(mock_config_file, MagicMock())
         bank_lines.detect_bank_lines = MagicMock(return_value=MagicMock())
         bank_lines.mask = MagicMock(return_value=MagicMock())
         bank_lines.save = MagicMock()
         bank_lines.plot = MagicMock()
+        bank_lines.logger = MagicMock()
 
         with patch(
             "dfastbe.bank_lines.bank_lines.sort_connect_bank_lines"
-        ) as mock_sort, patch("dfastbe.bank_lines.bank_lines.log_text"):
+        ) as mock_sort:
             mock_sort.return_value = [LineString([(0, 0), (1, 1)])]
             bank_lines.detect()
             bank_lines.plot()
             bank_lines.save()
 
-        bank_lines.detect_bank_lines.assert_called_once_with(
-            bank_lines.simulation_data,
-            bank_lines.critical_water_depth,
-            mock_config_file,
-        )
+        bank_lines.detect_bank_lines.assert_called_once()
         bank_lines.save.assert_called_once()
         bank_lines.plot.assert_called_once()
 
+    @pytest.fixture
+    def mock_bank_lines(self, mock_config_file, mock_simulation_data):
+        """Fixture to create a mock BankLines object.
+
+        This mock creates a BankLines object with predefined configuration and simulation data.
+        It can be used for testing methods that require a BankLines instance.
+
+        Args:
+            mock_config_file (MagicMock): Mocked ConfigFile object with predefined attributes.
+            mock_simulation_data (MagicMock): Mocked BaseSimulationData object with predefined attributes.
+
+        Returns:
+            BankLines: A mock BankLines object.
+        """
+        with patch(
+            "dfastbe.bank_lines.bank_lines.BankLinesRiverData"
+        ) as mock_river_data:
+            mock_river_data.return_value.simulation_data.return_value = (
+                mock_simulation_data,
+                0.3,
+            )
+            bank_lines = BankLines(mock_config_file)
+            bank_lines.logger = MagicMock()
+            return bank_lines
+
     @pytest.mark.unit
-    def test_calculate_water_depth_per_node(self, mock_simulation_data):
+    def test_calculate_water_depth_per_node(
+        self, mock_bank_lines: BankLines, mock_simulation_data
+    ):
         """Test the calculate_water_depth_per_node method.
 
         This method calculates the water depth at each node based on the face node
@@ -230,7 +262,8 @@ class TestBankLines:
             The shape of the resulting water depth array matches the face_node shape.
             The calculated water depth matches the expected values.
         """
-        h_node = BankLines._calculate_water_depth(mock_simulation_data)
+
+        h_node = mock_bank_lines._calculate_water_depth()
         expected_h_node = np.array(
             [
                 [0.1, 0.6, 0.2333333333],
@@ -242,7 +275,7 @@ class TestBankLines:
         assert np.allclose(h_node, expected_h_node)
 
     @pytest.mark.unit
-    def test_generate_bank_lines(self, mock_simulation_data):
+    def test_generate_bank_lines(self, mock_bank_lines: BankLines):
         """Test the _generate_bank_lines method.
 
         This method generates bank lines based on the wet nodes, number of wet nodes,
@@ -268,11 +301,8 @@ class TestBankLines:
         )
         n_wet_arr = np.ma.masked_array([2, 2, 2])
         h_node = np.array([[0.9, 1.1, 0.9], [0.9, 0.5, 1.1], [0.9, 0.5, 1.1]])
-        h0 = 0.3
 
-        lines = BankLines._generate_bank_lines(
-            mock_simulation_data, wet_node, n_wet_arr, h_node, h0
-        )
+        lines = mock_bank_lines._generate_bank_lines(wet_node, n_wet_arr, h_node)
         expected = [
             LineString([(-2.999999999, -2.999999999), (5.0, 5.0)]),
             LineString([(-4.999999999, -4.999999999), (2.5, 2.5)]),
@@ -348,7 +378,7 @@ class TestBankLines:
     )
     @pytest.mark.unit
     def test_detect_bank_lines(
-        self, mock_simulation_data, mock_config_file, face_node, n_nodes, expected
+        self, mock_bank_lines: BankLines, face_node, n_nodes, expected
     ):
         """Test the detect_bank_lines method.
 
@@ -379,21 +409,19 @@ class TestBankLines:
             The resulting GeoSeries contains the expected LineString or MultiLineString.
             The length of the GeoSeries matches the expected number of bank lines.
         """
-        mock_simulation_data.face_node = face_node
-        mock_simulation_data.n_nodes = n_nodes
-        h0 = 0.3
-        result = BankLines.detect_bank_lines(mock_simulation_data, h0, mock_config_file)
+        mock_bank_lines.simulation_data.face_node = face_node
+        mock_bank_lines.simulation_data.n_nodes = n_nodes
+        result = mock_bank_lines.detect_bank_lines()
         assert isinstance(result, gpd.GeoSeries)
         assert result.iloc[0].equals_exact(expected, tolerance=1e-8)
         assert len(result) == 1
 
-    def test_progress_bar(self, capsys):
+    def test_progress_bar(self, mock_bank_lines: BankLines):
         """Test the _progress_bar method."""
         total = 1000
         for i in range(total):
-            BankLines._progress_bar(i, total)
-        captured = capsys.readouterr()
-        assert "Progress: 100.00%" in captured.out
+            mock_bank_lines._progress_bar(i, total)
+        mock_bank_lines.logger.info.assert_called_with("Progress: 100.00% (100%)")
 
     @pytest.mark.unit
     def test_save(self, mock_config_file, tmp_path: Path):
@@ -430,6 +458,7 @@ class TestBankLines:
                 0.3,
             )
             bank_lines = BankLines(mock_config_file)
+            bank_lines.logger = MagicMock()
         bank_lines.results = {
             "bank": bank,
             "banklines": banklines,
@@ -437,8 +466,7 @@ class TestBankLines:
             "bank_areas": bank_areas,
         }
 
-        with patch("dfastbe.bank_lines.bank_lines.log_text"):
-            bank_lines.save()
+        bank_lines.save()
 
         assert (tmp_path / "bank_file.shp").exists()
         assert (tmp_path / "raw_detected_bankline_fragments.shp").exists()
@@ -506,13 +534,12 @@ class TestBankLines:
             "matplotlib.pyplot.close"
         ) as mock_close, patch(
             "dfastbe.plotting.Plot._zoom_xy_and_save"
-        ) as mock_zoom_xy_and_save, patch(
-            "dfastbe.bank_lines.plotter.log_text"
-        ):
+        ) as mock_zoom_xy_and_save:
 
             bank_lines_plotter = BankLinesPlotter(
                 False, bank_lines.plot_flags, mock_config_file.crs, mock_simulation_data, xy_km_numpy, km_bounds,
             )
+            bank_lines_plotter.logger = MagicMock()
             bank_lines_plotter.plot(
                 n_search_lines,
                 bank,

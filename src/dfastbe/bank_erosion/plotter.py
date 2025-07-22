@@ -1,8 +1,8 @@
-from typing import Any, Dict, List, Tuple
+from logging import getLogger
+from typing import List, Tuple
 
 import matplotlib.pyplot as plt
 import numpy as np
-from geopandas.geodataframe import GeoDataFrame
 from matplotlib.axes import Axes
 from matplotlib.collections import PolyCollection
 from matplotlib.colors import LinearSegmentedColormap
@@ -19,7 +19,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
 from dfastbe.bank_erosion.data_models.inputs import ErosionSimulationData
 from dfastbe.bank_erosion.erosion_calculator import WATER_DENSITY, g
 from dfastbe.io.config import PlotProperties, get_bbox
-from dfastbe.io.logger import log_text
+from dfastbe.io.logger import DfastbeLogger
 from dfastbe.plotting import BasePlot, Plot
 from dfastbe.utils import get_zoom_extends
 
@@ -60,6 +60,7 @@ class ErosionPlotter(BasePlot):
         self._bank_data = bank_data
         self._water_level_data = water_level_data
         self._erosion_inputs = erosion_inputs
+        self.logger: DfastbeLogger = getLogger("dfastbe")
 
     @property
     def erosion_results(self) -> ErosionResults:
@@ -106,8 +107,8 @@ class ErosionPlotter(BasePlot):
             simulation_data (ErosionSimulationData):
                 The simulation data used in the analysis.
         """
-        log_text("=")
-        log_text("create_figures")
+        self.logger.log_text("=")
+        self.logger.log_text("create_figures")
         fig_i = 0
         bbox = get_bbox(river_center_line_arr)
 

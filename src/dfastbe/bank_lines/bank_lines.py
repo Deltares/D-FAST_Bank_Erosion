@@ -1,5 +1,6 @@
 """Bank line detection module."""
 
+from logging import getLogger
 from typing import Any, Dict, List, Tuple
 
 import geopandas as gpd
@@ -14,8 +15,7 @@ from dfastbe.bank_lines.data_models import BankLinesRiverData
 from dfastbe.bank_lines.plotter import BankLinesPlotter
 from dfastbe.bank_lines.utils import poly_to_line, sort_connect_bank_lines, tri_to_line
 from dfastbe.io.config import ConfigFile
-from dfastbe.io.data_models import BaseSimulationData
-from dfastbe.io.logger import log_text, timed_logger
+from dfastbe.io.logger import DfastbeLogger
 from dfastbe.utils import on_right_side
 
 MAX_RIVER_WIDTH = 1000
@@ -43,8 +43,10 @@ class BankLines:
             ```python
             >>> from unittest.mock import patch
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
-            >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)
+            >>> bank_lines = BankLines(config_file, logger)  # doctest: +ELLIPSIS
             N...e
             >>> isinstance(bank_lines, BankLines)
             True
@@ -57,6 +59,7 @@ class BankLines:
         self._config_file = config_file
         self.gui = gui
         self.bank_output_dir = config_file.get_output_dir("banklines")
+        self.logger: DfastbeLogger = getLogger("dfastbe")
 
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(self.root_dir)
@@ -119,8 +122,10 @@ class BankLines:
             >>> import matplotlib
             >>> matplotlib.use('Agg')
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
-            >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)
+            >>> bank_lines = BankLines(config_file, logger)  # doctest: +ELLIPSIS
             N...e
             >>> bank_lines.detect()
             >>> bank_lines.plot()
@@ -136,16 +141,16 @@ class BankLines:
             In the FigureDir directory specified in the .cfg, the following files are created:
             - "1_banklinedetection.png"
         """
-        timed_logger("-- start analysis --")
+        self.logger.timed_logger("-- start analysis --")
 
-        log_text(
+        self.logger.log_text(
             "header_banklines",
             data={
                 "version": __version__,
                 "location": "https://github.com/Deltares/D-FAST_Bank_Erosion",
             },
         )
-        log_text("-")
+        self.logger.log_text("-")
 
         # clip the chainage path to the range of chainages of interest
         river_center_line = self.river_data.river_center_line
@@ -160,17 +165,15 @@ class BankLines:
                 np.array(self.search_lines.values[ib].coords), center_line_arr[:, :2]
             )
 
-        log_text("identify_banklines")
-        banklines = self.detect_bank_lines(
-            self.simulation_data, self.critical_water_depth, self.config_file
-        )
+        self.logger.log_text("identify_banklines")
+        banklines = self.detect_bank_lines()
 
         # clip the set of detected bank lines to the bank areas
-        log_text("simplify_banklines")
+        self.logger.log_text("simplify_banklines")
         bank = []
         masked_bank_lines = []
         for ib, bank_area in enumerate(bank_areas):
-            log_text("bank_lines", data={"ib": ib + 1})
+            self.logger.log_text("bank_lines", data={"ib": ib + 1})
             masked_bank_lines.append(self.mask(banklines, bank_area))
             bank.append(sort_connect_bank_lines(masked_bank_lines[ib], river_center_line_values, to_right[ib]))
 
@@ -181,8 +184,8 @@ class BankLines:
             "bank_areas": bank_areas,
         }
 
-        log_text("end_banklines")
-        timed_logger("-- stop analysis --")
+        self.logger.log_text("end_banklines")
+        self.logger.timed_logger("-- stop analysis --")
 
     @staticmethod
     def mask(banklines: GeoSeries, bank_area: Polygon) -> MultiLineString:
@@ -201,7 +204,9 @@ class BankLines:
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)
             >>> river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
             N...e
             >>> bank_lines = BankLines(config_file)
@@ -236,7 +241,7 @@ class BankLines:
 
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
         bank_file = self.bank_output_dir / f"{bank_name}{EXTENSION}"
-        log_text("save_banklines", data={"file": bank_file})
+        self.logger.log_text("save_banklines", data={"file": bank_file})
         gpd.GeoSeries(self.results["bank"], crs=self.config_file.crs).to_file(bank_file)
 
         gpd.GeoSeries(self.results["masked_bank_lines"], crs=self.config_file.crs).to_file(
@@ -249,12 +254,7 @@ class BankLines:
             self.bank_output_dir / f"{BANK_AREAS_FILE}{EXTENSION}"
         )
 
-    @staticmethod
-    def detect_bank_lines(
-        simulation_data: BaseSimulationData,
-        critical_water_depth: float,
-        config_file: ConfigFile,
-    ) -> gpd.GeoSeries:
+    def detect_bank_lines(self) -> gpd.GeoSeries:
         """Detect all possible bank line segments based on simulation data.
 
         Use a critical water depth critical_water_depth as a water depth threshold for dry/wet boundary.
@@ -271,8 +271,10 @@ class BankLines:
 
         Examples:
             ```python
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
-            >>> river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)
+            >>> river_data = BankLinesRiverData(config_file, logger)  # doctest: +ELLIPSIS
             N...e
             >>> simulation_data, critical_water_depth = river_data.simulation_data()
             N...e
@@ -283,23 +285,18 @@ class BankLines:
 
             ```
         """
-        h_node = BankLines._calculate_water_depth(simulation_data)
+        h_node = self._calculate_water_depth()
 
-        wet_node = h_node > critical_water_depth
+        wet_node = h_node > self.critical_water_depth
         num_wet_arr = wet_node.sum(axis=1)
 
-        lines = BankLines._generate_bank_lines(
-            simulation_data, wet_node, num_wet_arr, h_node, critical_water_depth
-        )
+        lines = self._generate_bank_lines(wet_node, num_wet_arr, h_node)
         multi_line = union_all(lines)
         merged_line = line_merge(multi_line)
 
-        return gpd.GeoSeries(merged_line, crs=config_file.crs)
+        return gpd.GeoSeries(merged_line, crs=self.config_file.crs)
 
-    @staticmethod
-    def _calculate_water_depth(
-        simulation_data: BaseSimulationData,
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    def _calculate_water_depth(self) -> Tuple[np.ndarray, np.ndarray]:
         """Calculate the water depth at each node in the simulation data.
 
         This method computes the water depth for each node by considering the
@@ -314,40 +311,37 @@ class BankLines:
             np.ndarray:
                 An array representing the water depth at each node.
         """
-        face_node = simulation_data.face_node
-        max_num_nodes = simulation_data.face_node.shape[1]
-        num_nodes_total = len(simulation_data.x_node)
+        face_node = self.simulation_data.face_node
+        max_num_nodes = self.simulation_data.face_node.shape[1]
+        num_nodes_total = len(self.simulation_data.x_node)
 
         if hasattr(face_node, "mask"):
             mask = ~face_node.mask
             non_masked = sum(mask.reshape(face_node.size))
             f_nc_m = face_node[mask]
-            zwm = np.repeat(simulation_data.water_level_face, max_num_nodes)[
+            zwm = np.repeat(self.simulation_data.water_level_face, max_num_nodes)[
                 mask.flatten()
             ]
         else:
             non_masked = face_node.size
             f_nc_m = face_node.reshape(non_masked)
-            zwm = np.repeat(simulation_data.water_level_face, max_num_nodes).reshape(
-                non_masked
-            )
+            zwm = np.repeat(
+                self.simulation_data.water_level_face, max_num_nodes
+            ).reshape(non_masked)
 
         zw_node = np.bincount(f_nc_m, weights=zwm, minlength=num_nodes_total)
         num_val = np.bincount(
             f_nc_m, weights=np.ones(non_masked), minlength=num_nodes_total
         )
         zw_node = zw_node / np.maximum(num_val, 1)
-        zw_node[num_val == 0] = simulation_data.bed_elevation_values[num_val == 0]
-        h_node = zw_node[face_node] - simulation_data.bed_elevation_values[face_node]
+        zw_node[num_val == 0] = self.simulation_data.bed_elevation_values[num_val == 0]
+        h_node = (
+            zw_node[face_node] - self.simulation_data.bed_elevation_values[face_node]
+        )
         return h_node
 
-    @staticmethod
     def _generate_bank_lines(
-        simulation_data: BaseSimulationData,
-        wet_node: np.ndarray,
-        num_wet_arr: np.ndarray,
-        h_node: np.ndarray,
-        critical_water_depth: float,
+        self, wet_node: np.ndarray, num_wet_arr: np.ndarray, h_node: np.ndarray
     ) -> List[LineString]:
         """Detect bank lines based on wet/dry nodes.
 
@@ -367,23 +361,27 @@ class BankLines:
             List[LineString or MultiLineString]:
                 List of detected bank lines.
         """
-        num_faces = len(simulation_data.face_node)
-        x_node = simulation_data.x_node[simulation_data.face_node]
-        y_node = simulation_data.y_node[simulation_data.face_node]
+        num_faces = len(self.simulation_data.face_node)
+        x_node = self.simulation_data.x_node[self.simulation_data.face_node]
+        y_node = self.simulation_data.y_node[self.simulation_data.face_node]
         mask = num_wet_arr.mask.size > 1
         lines = []
 
         for i in range(num_faces):
-            BankLines._progress_bar(i, num_faces)
+            self._progress_bar(i, num_faces)
 
             n_wet = num_wet_arr[i]
-            n_node = simulation_data.n_nodes[i]
+            n_node = self.simulation_data.n_nodes[i]
             if (mask and n_wet.mask) or n_wet == 0 or n_wet == n_node:
                 continue
 
             if n_node == 3:
                 line = tri_to_line(
-                    x_node[i], y_node[i], wet_node[i], h_node[i], critical_water_depth
+                    x_node[i],
+                    y_node[i],
+                    wet_node[i],
+                    h_node[i],
+                    self.critical_water_depth,
                 )
             else:
                 line = poly_to_line(
@@ -392,7 +390,7 @@ class BankLines:
                     y_node[i],
                     wet_node[i],
                     h_node[i],
-                    critical_water_depth,
+                    self.critical_water_depth,
                 )
 
             if line is not None:
@@ -400,8 +398,7 @@ class BankLines:
 
         return lines
 
-    @staticmethod
-    def _progress_bar(current: int, total: int) -> None:
+    def _progress_bar(self, current: int, total: int) -> None:
         """Print progress bar.
 
         Args:
@@ -410,6 +407,6 @@ class BankLines:
         """
         if current % 100 == 0:
             percent = (current / total) * 100
-            print(f"Progress: {percent:.2f}% ({current}/{total})", end="\r")
+            self.logger.info(f"Progress: {percent:.2f}% ({current}/{total})")
         if current == total - 1:
-            print("Progress: 100.00% (100%)")
+            self.logger.info("Progress: 100.00% (100%)")

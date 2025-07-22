@@ -15,10 +15,12 @@ with patch("matplotlib.use", lambda *args, **kwargs: None):
 @pytest.mark.parametrize(
     "args, expected",
     [
-        (["prog"], ("UK", "GUI", "dfastbe.cfg")),
-        (["prog", "--language", "NL"], ("NL", "GUI", "dfastbe.cfg")),
-        (["prog", "--mode", "BANKLINES"], ("UK", "BANKLINES", "dfastbe.cfg")),
-        (["prog", "--config", "custom.cfg"], ("UK", "GUI", "custom.cfg")),
+        (["prog"], ("UK", "GUI", "dfastbe.cfg", False)),
+        (["prog", "--language", "NL"], ("NL", "GUI", "dfastbe.cfg", False)),
+        (["prog", "--mode", "BANKLINES"], ("UK", "BANKLINES", "dfastbe.cfg", False)),
+        (["prog", "--config", "custom.cfg"], ("UK", "GUI", "custom.cfg", False)),
+        (["prog", "--debug"], ("UK", "GUI", "dfastbe.cfg", True)),
+        (["prog", "--language", "UK", "--debug"], ("UK", "GUI", "dfastbe.cfg", True)),
         (
             [
                 "prog",
@@ -29,8 +31,17 @@ with patch("matplotlib.use", lambda *args, **kwargs: None):
                 "--config",
                 "custom.cfg",
             ],
-            ("NL", "BANKEROSION", "custom.cfg"),
+            ("NL", "BANKEROSION", "custom.cfg", False),
         ),
+    ],
+    ids=[
+        "default_args",
+        "language_nl",
+        "mode_banklines",
+        "config_custom",
+        "debug",
+        "language_uk_debug",
+        "language_nl_mode_bankerosion_config_custom",
     ],
 )
 def test_parse_arguments_valid(args, expected, monkeypatch):

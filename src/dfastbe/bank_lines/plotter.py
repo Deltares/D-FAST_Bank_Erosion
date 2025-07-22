@@ -1,17 +1,16 @@
+from logging import getLogger
 from typing import List, Optional, Tuple
 
 import geopandas as gpd
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from shapely import LineString, Polygon
 
 from dfastbe.io.config import PlotProperties
 from dfastbe.io.data_models import BaseSimulationData, LineGeometry
-from dfastbe.io.logger import log_text
+from dfastbe.io.logger import DfastbeLogger
 from dfastbe.plotting import BasePlot, Plot
 from dfastbe.utils import get_zoom_extends
 
@@ -54,6 +53,7 @@ class BankLinesPlotter(BasePlot):
         self.river_center_line = river_center_line
         self.bbox = river_center_line.get_bbox()
         self.stations_bounds = stations_bounds
+        self.logger: DfastbeLogger = getLogger("dfastbe")
 
     def _get_zoom_extends(
         self,
@@ -131,8 +131,8 @@ class BankLinesPlotter(BasePlot):
 
             ```
         """
-        log_text("=")
-        log_text("create_figures")
+        self.logger.log_text("=")
+        self.logger.log_text("create_figures")
         fig_i = 0
 
         if self.flags.save_zoomed_plot:

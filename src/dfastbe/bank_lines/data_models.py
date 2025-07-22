@@ -1,10 +1,11 @@
+from logging import getLogger
 from typing import List, Tuple
 
 from shapely.geometry import LineString, MultiLineString, Point
 from shapely.geometry.polygon import Polygon
 
-from dfastbe.io.logger import log_text
 from dfastbe.io.data_models import BaseRiverData, BaseSimulationData, LineGeometry
+from dfastbe.io.logger import DfastbeLogger
 
 MAX_RIVER_WIDTH = 1000
 
@@ -160,6 +161,10 @@ class SearchLines:
 
 class BankLinesRiverData(BaseRiverData):
 
+    def __init__(self, config_file):
+        self.logger: DfastbeLogger = getLogger("dfastbe")
+        super().__init__(config_file)
+
     @property
     def search_lines(self) -> SearchLines:
         """Get search lines for bank lines.
@@ -171,7 +176,9 @@ class BankLinesRiverData(BaseRiverData):
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)
             >>> bank_lines_river_data = BankLinesRiverData(config_file)
             No message found for read_chainage
             No message found for clip_chainage
@@ -195,7 +202,7 @@ class BankLinesRiverData(BaseRiverData):
                 simulation data and critical water depth (h0).
         """
         sim_file = self.config_file.get_sim_file("Detect", "")
-        log_text("read_simdata", data={"file": sim_file})
+        self.logger.log_text("read_simdata", data={"file": sim_file})
         simulation_data = BaseSimulationData.read(sim_file)
         # increase critical water depth h0 by flooding threshold dh0
         # get critical water depth used for defining bank line (default = 0.0 m)
@@ -216,8 +223,10 @@ class BankLinesRiverData(BaseRiverData):
             ```python
             >>> from dfastbe.io.config import ConfigFile
             >>> from unittest.mock import patch
-            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
-            >>> bank_lines_river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg", logger)
+            >>> bank_lines_river_data = BankLinesRiverData(config_file, logger)  # doctest: +ELLIPSIS
             N...e
             >>> simulation_data, h0 = bank_lines_river_data.simulation_data()
             N...e
@@ -228,7 +237,7 @@ class BankLinesRiverData(BaseRiverData):
         """
         simulation_data, h0 = self._get_bank_lines_simulation_data()
         # clip simulation data to boundaries ...
-        log_text("clip_data")
+        self.logger.log_text("clip_data")
         simulation_data.clip(self.river_center_line.values, self.search_lines.max_distance)
 
         return simulation_data, h0

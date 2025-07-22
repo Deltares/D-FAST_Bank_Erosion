@@ -25,16 +25,19 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-from typing import Tuple, List, Dict, Optional
-from pathlib import Path
-import numpy as np
-import netCDF4
-from shapely.geometry import LineString, Point
-from shapely import prepare
-from geopandas.geodataframe import GeoDataFrame
-from dfastbe.io.logger import log_text
-from dfastbe.io.config import SimulationFilesError, ConfigFile, get_bbox
 
+from logging import getLogger
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+import netCDF4
+import numpy as np
+from geopandas.geodataframe import GeoDataFrame
+from shapely import prepare
+from shapely.geometry import LineString, Point
+
+from dfastbe.io.config import ConfigFile, SimulationFilesError, get_bbox
+from dfastbe.io.logger import DfastbeLogger
 
 __all__ = ["BaseSimulationData", "BaseRiverData", "LineGeometry"]
 
@@ -69,6 +72,7 @@ class LineGeometry:
         self.station_bounds = mask
         self.crs = crs
         self._data = {}
+        self.logger: DfastbeLogger = getLogger("dfastbe")
         if isinstance(line, np.ndarray):
             line = LineString(line)
         if mask is None:
@@ -76,8 +80,9 @@ class LineGeometry:
         else:
             self.values: LineString = self.mask(line, mask)
 
-            log_text(
-                "clip_chainage", data={"low": self.station_bounds[0], "high": self.station_bounds[1]}
+            self.logger.log_text(
+                "clip_chainage",
+                data={"low": self.station_bounds[0], "high": self.station_bounds[1]},
             )
 
     @property
@@ -487,9 +492,10 @@ class BaseSimulationData:
 
             ```
         """
+        logger: DfastbeLogger = getLogger("dfastbe")
         name = Path(file_name).name
         if name.endswith("map.nc"):
-            log_text("read_grid", indent=indent)
+            logger.log_text("read_grid", indent=indent)
             x_node = _read_fm_map(file_name, "x", location="node")
             y_node = _read_fm_map(file_name, "y", location="node")
             f_nc = _read_fm_map(file_name, "face_node_connectivity")
@@ -502,22 +508,22 @@ class BaseSimulationData:
             f_nc.data[f_nc.mask] = 0
 
             face_node = f_nc
-            log_text("read_bathymetry", indent=indent)
+            logger.log_text("read_bathymetry", indent=indent)
             bed_elevation_location = "node"
             bed_elevation_values = _read_fm_map(file_name, "altitude", location="node")
-            log_text("read_water_level", indent=indent)
+            logger.log_text("read_water_level", indent=indent)
             water_level_face = _read_fm_map(file_name, "Water level")
-            log_text("read_water_depth", indent=indent)
+            logger.log_text("read_water_depth", indent=indent)
             water_depth_face = np.maximum(
                 _read_fm_map(file_name, "sea_floor_depth_below_sea_surface"), 0.0
             )
-            log_text("read_velocity", indent=indent)
+            logger.log_text("read_velocity", indent=indent)
             velocity_x_face = _read_fm_map(file_name, "sea_water_x_velocity")
             velocity_y_face = _read_fm_map(file_name, "sea_water_y_velocity")
-            log_text("read_chezy", indent=indent)
+            logger.log_text("read_chezy", indent=indent)
             chezy_face = _read_fm_map(file_name, "Chezy roughness")
 
-            log_text("read_drywet", indent=indent)
+            logger.log_text("read_drywet", indent=indent)
             root_group = netCDF4.Dataset(file_name)
             try:
                 file_source = root_group.converted_from
@@ -646,7 +652,9 @@ class BaseRiverData:
         Examples:
             ```python
             >>> from dfastbe.io.data_models import ConfigFile, BaseRiverData
-            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+            >>> import logging
+            >>> logger = logging.getLogger("test_logger")
+            >>> config_file = ConfigFile.read("tests/data/erosion/meuse_manual.cfg", logger)
             >>> river_data = BaseRiverData(config_file)
             No message found for read_chainage
             No message found for clip_chainage

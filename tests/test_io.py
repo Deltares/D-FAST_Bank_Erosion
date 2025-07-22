@@ -4,6 +4,7 @@ import sys
 from configparser import ConfigParser
 from contextlib import contextmanager
 from io import StringIO
+from logging import getLogger
 from pathlib import Path
 from typing import Dict, Tuple
 from unittest.mock import MagicMock, patch
@@ -22,7 +23,7 @@ from dfastbe.io.data_models import (
     _read_fm_map,
 )
 from dfastbe.io.file_utils import absolute_path, relative_path
-from dfastbe.io.logger import get_text, load_program_texts, log_text
+from dfastbe.io.logger import DfastbeLogger, configure_logging
 
 filename = "tests/data/files/e02_f001_c011_simplechannel_map.nc"
 
@@ -42,7 +43,8 @@ def test_load_program_texts_01():
     Testing load_program_texts.
     """
     print("current work directory: ", os.getcwd())
-    assert load_program_texts("tests/data/files/messages.UK.ini") is None
+    logger = DfastbeLogger("test_logger")
+    assert logger.load_program_texts("tests/data/files/messages.UK.ini") is None
 
 
 class TestPlotProperties:
@@ -249,74 +251,69 @@ class TestSimulationData:
         assert simulation_data.chezy_face.size == 0
 
 
-class TestLogText:
-    def test_log_text_01(self):
+@pytest.fixture
+def logger() -> DfastbeLogger:
+    """Fixture to create a DfastbeLogger instance."""
+    dfast_logger = DfastbeLogger("test_logger")
+    dfast_logger.load_program_texts("tests/data/files/messages.UK.ini")
+    return dfast_logger
+
+
+class TestDfastbeLogger:
+
+    @pytest.mark.parametrize(
+        "key, data, repeat, expected_output",
+        [
+            ("confirm", {}, 1, ['Confirm using "y" ...', '']),
+            ("", {}, 3, ['', '', '']),
+            ("reach", {"reach": "ABC"}, 1, ['The measure is located on reach ABC']),
+        ],
+        ids=[
+            "key without data",
+            "empty key",
+            "key with data",
+        ],
+    )
+    def test_log_text(self, logger: DfastbeLogger, key, data, repeat, expected_output):
         """
         Testing standard output of a single text without expansion.
         """
-        key = "confirm"
-        with captured_output() as (out, err):
-            log_text(key)
-        outstr = out.getvalue().splitlines()
-        strref = ['Confirm using "y" ...', '']
-        assert outstr == strref
+        with patch.object(logger, "info") as mock_info:
+            logger.log_text(key, data=data, repeat=repeat)
+        for entry in expected_output:
+            mock_info.assert_any_call(entry)
 
-    def test_log_text_02(self):
-        """
-        Testing standard output of a repeated text without expansion.
-        """
-        key = ""
-        nr = 3
-        with captured_output() as (out, err):
-            log_text(key, repeat=nr)
-        outstr = out.getvalue().splitlines()
-        strref = ['', '', '']
-        assert outstr == strref
-
-    def test_log_text_03(self):
-        """
-        Testing standard output of a text with expansion.
-        """
-        key = "reach"
-        data = {"reach": "ABC"}
-        with captured_output() as (out, err):
-            log_text(key, data=data)
-        outstr = out.getvalue().splitlines()
-        strref = ['The measure is located on reach ABC']
-        assert outstr == strref
-
-    def test_log_text_04(self):
+    def test_log_text_to_file(self, logger: DfastbeLogger, fs: FakeFilesystem):
         """
         Testing file output of a text with expansion.
         """
         key = "reach"
         data = {"reach": "ABC"}
         filename = "test.log"
-        with open(filename, "w") as f:
-            log_text(key, data=data, file=f)
+        logger.log_file(filename)
+        logger.log_text(key, data=data)
         all_lines = open(filename, "r").read().splitlines()
         strref = ['The measure is located on reach ABC']
         assert all_lines == strref
 
-
-class TestGetText:
-    def test_get_text_01(self):
+    @pytest.mark.parametrize(
+        "key, expected_output",
+        [
+            ("@", ["No message found for @"]),
+            ("", [""]),
+            ("confirm", ['Confirm using "y" ...', '']),
+        ],
+        ids=[
+            "key not found",
+            "empty line key",
+            "confirm key",
+        ],
+    )
+    def test_get_text(self, logger: DfastbeLogger, key, expected_output):
         """
         Testing get_text: key not found.
         """
-        assert get_text("@") == ["No message found for @"]
-
-    def test_get_text_02(self):
-        """
-        Testing get_text: empty line key.
-        """
-        assert get_text("") == [""]
-
-    def test_get_text_03(self):
-        """
-        Testing get_text: "confirm" key.
-        """
-        assert get_text("confirm") == ['Confirm using "y" ...', '']
+        assert logger.get_text(key) == expected_output
 
 
 class TestReadFMMap:
@@ -495,7 +492,7 @@ class TestConfigFile:
 
     def test_init(self, config: ConfigParser):
         """Test initialization of ConfigFile."""
-        config_file = ConfigFile(config=config)
+        config_file = ConfigFile(config, MagicMock())
         assert isinstance(config_file, ConfigFile)
 
     def test_read(self, config_data: str, fs: FakeFilesystem):
@@ -508,29 +505,29 @@ class TestConfigFile:
 
     def test_write(self, config: ConfigParser, config_data: str, fs: FakeFilesystem):
         """Test writing a configuration file."""
-        config_file = ConfigFile(config=config)
+        config_file = ConfigFile(config, MagicMock())
         config_file.write("test_output.cfg")
         with open("test_output.cfg", "r") as file:
             assert file.read() == config_data
 
     def test_get_str(self, config: ConfigParser):
         """Test retrieving a string value."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock, "tests/data/erosion/test.cfg")
         assert config_file.get_str("General", "Version") == "1.0"
 
     def test_get_int(self, config: ConfigParser):
         """Test retrieving an integer value."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         assert config_file.get_int("Detect", "NBank") == 2
 
     def test_get_bool(self, config: ConfigParser):
         """Test retrieving a boolean value."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         assert config_file.get_bool("General", "plotting") is True
 
     def test_get_float(self, config: ConfigParser):
         """Test retrieving a float value."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         assert config_file.get_float("General", "ZoomStepKM") == pytest.approx(
             0.1, rel=1e-6
         )
@@ -538,20 +535,21 @@ class TestConfigFile:
     def test_get_sim_file(self, config: ConfigParser):
         """Test retrieving a simulation file."""
         path = Path("tests/data/erosion")
-        config_file = ConfigFile(config, str(path / "test.cfg"))
+        config_file = ConfigFile(config, MagicMock(), str(path / "test.cfg"))
         assert config_file.get_sim_file("Detect", "") == str(
             path.resolve() / "test_sim.nc"
         )
 
     def test_get_start_end_stations(self, config: ConfigParser):
         """Test retrieving km bounds."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         start, end = config_file.get_start_end_stations()
         assert start == pytest.approx(123.0, rel=1e-6)
         assert end == pytest.approx(128.0, rel=1e-6)
 
     def test_get_search_lines(self):
         """Test retrieving search lines."""
+        configure_logging(True)
         config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
         mock_linestring = LineString([(0, 0), (1, 1), (2, 2)])
 
@@ -564,7 +562,7 @@ class TestConfigFile:
     def test_read_bank_lines(self, config: ConfigParser, fs: FakeFilesystem):
         """Test retrieving bank lines."""
         config["General"]["BankLine"] = "bankfile"
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
 
         fs.create_file(
             "inputs/bankfile_1.xyc",
@@ -618,7 +616,7 @@ class TestConfigFile:
         self, key, value, default, valid, expected, config: ConfigParser
     ):
         """Test retrieving a parameter field."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5, 6, 7])]
         num_stations_per_bank = [len(bank_i) for bank_i in bank_km]
         if value:
@@ -643,7 +641,7 @@ class TestConfigFile:
         self, key, value, positive, valid, expected, config: ConfigParser
     ):
         """Test retrieving a parameter field."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5])]
 
         # Case 5: Parameter does not match valid values
@@ -655,7 +653,7 @@ class TestConfigFile:
 
     def test_get_bank_search_distances(self, config: ConfigParser):
         """Test retrieving bank search distances."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
 
         # Case 1: Bank search distances exist in the configuration
         result = config_file.get_bank_search_distances(2)
@@ -667,6 +665,7 @@ class TestConfigFile:
 
     def test_get_river_center_line(self):
         """Test retrieving x and y coordinates."""
+        configure_logging(True)
         config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
         mock_linestring = LineString([(0, 0, 1), (1, 1, 2), (2, 2, 3)])
 
@@ -690,7 +689,7 @@ class TestConfigFile:
         """Test resolving paths in the configuration."""
         config = ConfigParser()
         config.read_dict(path_dict)
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         config_file.resolve("tests/data/erosion")
         assert config_file.config["General"]["RiverKM"] == str(
             Path("tests/data/erosion").resolve() / "inputs/rivkm_20m.xyc"
@@ -700,7 +699,7 @@ class TestConfigFile:
         """Test converting paths to relative paths."""
         config = ConfigParser()
         config.read_dict(path_dict)
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         config_file.relative_to("tests/data")
         assert config_file.config["General"]["RiverKM"] == str(
             Path("erosion") / "inputs/rivkm_20m.xyc"
@@ -711,7 +710,7 @@ class TestConfigFile:
         cwd = Path("tests/data/erosion").resolve()
         config = ConfigParser()
         config.read_dict(path_dict)
-        config_file = ConfigFile(config, cwd / "test.cfg")
+        config_file = ConfigFile(config, MagicMock(), cwd / "test.cfg")
 
         with patch("dfastbe.io.config.Path.cwd", return_value=str(cwd)):
             rootdir = config_file.make_paths_absolute()
@@ -776,7 +775,7 @@ class TestConfigFile:
                 }
             }
         )
-        config_file = ConfigFile(config=config)
+        config_file = ConfigFile(config, MagicMock())
         config_result = config_file._upgrade(config_file.config)
         assert config_result["General"]["plotting"] == "yes"
         assert config_result["Detect"]["SimFile"] == "inputs/sim0270/SDS-j19_map.nc"
@@ -800,7 +799,7 @@ class TestConfigFile:
         """Test the get_plotting_flags method."""
         config = ConfigParser()
         config.read_dict(plotting_data)
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, MagicMock(), "tests/data/erosion/test.cfg")
         root_dir = Path("tests/data/erosion").resolve()
         plotting_flags = config_file.get_plotting_flags(str(root_dir))
 
@@ -834,7 +833,7 @@ class TestConfigFileE2E:
         config.add_section("Group 3")
         config["Group 3"]["LongKey"] = "3"
 
-        config = ConfigFile(config)
+        config = ConfigFile(config, MagicMock())
         config.write(filename)
         all_lines = open(filename, "r").read().splitlines()
         all_lines_ref = [
@@ -857,6 +856,7 @@ class TestRiverData:
     @pytest.fixture
     def river_data(self) -> BaseRiverData:
         path = "tests/data/erosion/meuse_manual.cfg"
+        configure_logging(True)
         config_file = ConfigFile.read(path)
         river_data = BaseRiverData(config_file)
         return river_data

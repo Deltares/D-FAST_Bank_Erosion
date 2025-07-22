@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 import matplotlib
 import numpy as np
 import pytest
-from pyfakefs.fake_filesystem import FakeFilesystem
 from matplotlib.testing.compare import compare_images
+from pyfakefs.fake_filesystem import FakeFilesystem
 
 import dfastbe.io.logger
 from dfastbe.bank_erosion.bank_erosion import Erosion, calculate_alpha
@@ -25,6 +25,7 @@ from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.cmd import run
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.data_models import LineGeometry
+from dfastbe.io.logger import configure_logging
 
 matplotlib.use('Agg')
 
@@ -54,6 +55,7 @@ def test_bank_erosion(image_list: List[str]):
     file = "erosion"
     language = "UK"
     config_file = f"tests/data/{file}/meuse_manual.cfg"
+    configure_logging(True)
     run(language, "BANKLINES", config_file)
     print("Banklines done")
     run(language, "BANKEROSION", config_file)
@@ -119,9 +121,10 @@ class TestErosion:
         with patch(
             "dfastbe.bank_erosion.bank_erosion.Erosion.__init__", return_value=None
         ):
-            erosion_instance = Erosion(MagicMock())
+            erosion_instance = Erosion(MagicMock(), MagicMock())
 
             erosion_instance.root_dir = Path("mock_root_dir")
+            erosion_instance.logger = MagicMock()
             erosion_instance._config_file = MagicMock()
             erosion_instance.gui = False
             erosion_instance.river_data = MagicMock()
@@ -152,11 +155,6 @@ class TestErosion:
         )
         mock_config.crs = "EPSG:28992"
         return mock_config
-
-    @pytest.fixture
-    def mock_debug(self):
-        with patch.object(dfastbe.io.logger, "PROGTEXTS", {}, create=True):
-            yield
 
     @pytest.mark.unit
     def test_get_ship_parameters(self, mock_erosion: Erosion, mock_config_file):
@@ -289,7 +287,7 @@ class TestErosion:
         assert len(erosion_inputs.bank_type) == 4
 
     @pytest.mark.unit
-    def test_process_river_axis_by_center_line(self, mock_erosion: Erosion, mock_debug):
+    def test_process_river_axis_by_center_line(self, mock_erosion: Erosion):
         """Test the _process_river_axis_by_center_line method.
 
         This method processes the river axis based on the center line of the river.
@@ -332,9 +330,7 @@ class TestErosion:
         mock_line_geometry.return_value.intersect_with_line.assert_called_once()
         river_axis.add_data.assert_called_with(data={"stations": np.array([128.0])})
 
-    def test_get_fairway_data(
-        self, mock_erosion: Erosion, mock_config_file, mock_debug
-    ):
+    def test_get_fairway_data(self, mock_erosion: Erosion, mock_config_file):
         """Test the _get_fairway_data method.
 
         This method retrieves fairway data by intersecting the river center line with the mesh.
@@ -634,7 +630,6 @@ class TestErosion:
         mock_bank_data,
         mock_fairway_data,
         mock_simulation_data,
-        mock_debug,
     ):
         """Test the calculate_fairway_bank_line_distance method.
 
@@ -744,7 +739,7 @@ class TestErosion:
         )
 
     @pytest.mark.unit
-    def test_process_discharge_levels(self, mock_erosion: Erosion, mock_debug):
+    def test_process_discharge_levels(self, mock_erosion: Erosion):
         """Test the _process_discharge_levels method.
 
         This method processes discharge levels and calculates erosion results.
@@ -892,7 +887,7 @@ class TestErosion:
             discharge_parameters.left.num_waves_per_ship, shipping_data["nwave0"]
         )
 
-    def test_compute_erosion_per_level(self, mock_erosion: Erosion, mock_debug):
+    def test_compute_erosion_per_level(self, mock_erosion: Erosion):
         """Test the compute_erosion_per_level method.
 
         This method computes the erosion for a specific discharge level.
@@ -965,7 +960,6 @@ class TestErosion:
         shipping_data,
         mock_single_level_parameters,
         mock_simulation_data,
-        mock_debug,
         fs: FakeFilesystem,
     ):
         """Test the run method.

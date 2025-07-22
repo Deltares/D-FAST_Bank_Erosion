@@ -25,14 +25,17 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
+
+from logging import getLogger
 from pathlib import Path
-from dfastbe.io.logger import load_program_texts
-from dfastbe.io.config import ConfigFile
+
+from dfastbe import __file__
 from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_lines.bank_lines import BankLines
-from dfastbe.io.logger import log_text, timed_logger
 from dfastbe.gui.gui import main
-from dfastbe import __file__
+from dfastbe.io.config import ConfigFile
+from dfastbe.io.logger import DfastbeLogger
+
 R_DIR = Path(__file__).resolve().parent
 LOG_DATA_DIR = R_DIR / "io/log_data"
 
@@ -82,8 +85,10 @@ def run(
         ```
     """
     language = language.upper()
-    load_program_texts( LOG_DATA_DIR / f"messages.{language}.ini")
     run_mode = run_mode.upper()
+    logger: DfastbeLogger = getLogger("dfastbe")
+    logger.load_program_texts(LOG_DATA_DIR / f"messages.{language}.ini")
+    logger.log_file(Path(configfile).parent / "dfastbe.log")
 
     if run_mode == "GUI":
         main(configfile)
@@ -100,7 +105,7 @@ def run(
             erosion.run()
             erosion.plot()
             erosion.save()
-            log_text("end_bankerosion")
-            timed_logger("-- end analysis --")
+            logger.log_text("end_bankerosion")
+            logger.timed_logger("-- end analysis --")
         else:
             raise ValueError(f"Invalid run mode {run_mode} specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'.")

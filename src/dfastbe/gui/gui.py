@@ -26,26 +26,25 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Dict, Any, Optional, Tuple, List
-
-from PyQt5 import QtWidgets
-from PyQt5 import QtCore
-import PyQt5.QtGui
-
-from dfastbe.io.file_utils import absolute_path
-from dfastbe.io.logger import get_text
-from dfastbe.io.config import ConfigFile
-import pathlib
-from pathlib import Path
-import sys
-import os
 import configparser
-import matplotlib.pyplot
+import os
+import pathlib
 import subprocess
+import sys
 from functools import partial
-from dfastbe import __version__, __file__
-from dfastbe.bank_lines.bank_lines import BankLines
+from logging import getLogger
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import matplotlib.pyplot
+import PyQt5.QtGui
+from PyQt5 import QtCore, QtWidgets
+
+from dfastbe import __file__, __version__
 from dfastbe.bank_erosion.bank_erosion import Erosion
+from dfastbe.bank_lines.bank_lines import BankLines
+from dfastbe.io.config import ConfigFile
+from dfastbe.io.file_utils import absolute_path
 
 USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
 DialogObject = Dict[str, PyQt5.QtCore.QObject]
@@ -77,7 +76,7 @@ def gui_text(key: str, prefix: str = "gui_", dict: Dict[str, Any] = {}):
     -------
         The first line of the text in the dictionary expanded with the keys.
     """
-    cstr = get_text(prefix + key)
+    cstr = getLogger("dfastbe").get_text(prefix + key)
     str = cstr[0].format(**dict)
     return str
 
@@ -1173,21 +1172,25 @@ def selectFile(key: str) -> None:
                         # file should end on _<nr>
                         nr = ""
                         while fil[-1] in "1234567890":
-                             nr = rkey[-1] + nr
-                             fil = fil[:-1]
+                            nr = rkey[-1] + nr
+                            fil = fil[:-1]
                         if nr == "" or fil[-1] != "_":
-                            print("Missing bank number(s) at end of file name. Reference not updated.")
+                            getLogger("dfastbe").warning(
+                                "Missing bank number(s) at end of file name. Reference not updated."
+                            )
                             fil = ""
                         else:
                             fil = fil[:-1]
                 else:
-                    if ext == "":
-                        print("Unsupported file extension {} while expecting no extension. Reference not updated.".format(fext))
-                    else:
-                        print("Unsupported file extension {} while expecting {}. Reference not updated.".format(fext,ext))
+                    expect_ext = "no extension" if ext == "" else ext
+                    getLogger("dfastbe").warning(
+                        "Unsupported file extension %s while expecting %s. Reference not updated.",
+                        fext,
+                        expect_ext,
+                    )
                     fil = ""
         else:
-            print(key)
+            getLogger("dfastbe").info(key)
             fil = ""
     if fil != "":
         dialog[key].setText(fil)
@@ -1222,7 +1225,7 @@ def run_detection() -> None:
         msg = str(Ex)
     dialog["application"].restoreOverrideCursor()
     if msg != "":
-        print(msg)
+        getLogger("dfastbe").exception(msg)
         showError(msg)
 
 
@@ -1245,7 +1248,6 @@ def run_erosion() -> None:
     erosion.plot()
     erosion.save()
     dialog["application"].restoreOverrideCursor()
-
 
 
 def close_dialog() -> None:

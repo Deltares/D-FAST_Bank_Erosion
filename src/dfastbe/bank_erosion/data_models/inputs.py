@@ -1,4 +1,5 @@
 import os
+from logging import getLogger
 from pathlib import Path
 
 import numpy as np
@@ -8,7 +9,7 @@ from shapely.geometry import LineString
 from dfastbe.bank_erosion.data_models.calculation import MeshData, SingleBank
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.data_models import BaseRiverData, BaseSimulationData
-from dfastbe.io.logger import log_text
+from dfastbe.io.logger import DfastbeLogger
 
 __all__ = ["ErosionSimulationData", "ErosionRiverData", "BankLinesResultsError"]
 
@@ -210,6 +211,7 @@ class ErosionRiverData(BaseRiverData):
 
     def __init__(self, config_file: ConfigFile):
         super().__init__(config_file)
+        self.logger: DfastbeLogger = getLogger("dfastbe")
         self.bank_dir = self._get_bank_line_dir()
         self.output_dir = config_file.get_output_dir("erosion")
         self.debug = config_file.debug
@@ -218,7 +220,7 @@ class ErosionRiverData(BaseRiverData):
         # get filter settings for bank levels and flow velocities along banks
         self.zb_dx = config_file.get_float("Erosion", "BedFilterDist", 0.0, positive=True)
         self.vel_dx = config_file.get_float("Erosion", "VelFilterDist", 0.0, positive=True)
-        log_text("get_levels")
+        self.logger.log_text("get_levels")
         self.num_discharge_levels = config_file.get_int("Erosion", "NLevel")
         self.output_intervals = config_file.get_float("Erosion", "OutputInterval", 1.0)
         self.bank_lines = config_file.read_bank_lines(str(self.bank_dir))
@@ -230,18 +232,18 @@ class ErosionRiverData(BaseRiverData):
         ref_level = self.config_file.get_int("Erosion", "RefLevel") - 1
         # read simulation data (get_sim_data)
         sim_file = self.config_file.get_sim_file("Erosion", str(ref_level + 1))
-        log_text("-")
-        log_text("read_simdata", data={"file": sim_file})
-        log_text("-")
+        self.logger.log_text("-")
+        self.logger.log_text("read_simdata", data={"file": sim_file})
+        self.logger.log_text("-")
         simulation_data = ErosionSimulationData.read(sim_file)
 
         return simulation_data
 
     def _get_bank_output_dir(self) -> Path:
         bank_output_dir = self.config_file.get_str("General", "BankDir")
-        log_text("bank_dir_out", data={"dir": bank_output_dir})
+        self.logger.log_text("bank_dir_out", data={"dir": bank_output_dir})
         if os.path.exists(bank_output_dir):
-            log_text("overwrite_dir", data={"dir": bank_output_dir})
+            self.logger.log_text("overwrite_dir", data={"dir": bank_output_dir})
         else:
             os.makedirs(bank_output_dir)
 
@@ -249,10 +251,10 @@ class ErosionRiverData(BaseRiverData):
 
     def _get_bank_line_dir(self) -> Path:
         bank_dir = self.config_file.get_str("General", "BankDir")
-        log_text("bank_dir_in", data={"dir": bank_dir})
+        self.logger.log_text("bank_dir_in", data={"dir": bank_dir})
         bank_dir = Path(bank_dir)
         if not bank_dir.exists():
-            log_text("missing_dir", data={"dir": bank_dir})
+            self.logger.log_text("missing_dir", data={"dir": bank_dir})
             raise BankLinesResultsError(
                 f"Required bank line directory:{bank_dir} does not exist. please use the banklines command to run the "
                 "bankline detection tool first it."
@@ -263,7 +265,7 @@ class ErosionRiverData(BaseRiverData):
     def _read_river_axis(self) -> LineString:
         """Get the river axis from the analysis settings."""
         river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
-        log_text("read_river_axis", data={"file": river_axis_file})
+        self.logger.log_text("read_river_axis", data={"file": river_axis_file})
         river_axis = XYCModel.read(river_axis_file)
         return river_axis
 

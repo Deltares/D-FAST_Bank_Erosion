@@ -5,18 +5,23 @@ import numpy as np
 import pytest
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
-from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData, ErosionSimulationData
+
 from dfastbe.bank_erosion.data_models.calculation import (
-    ErosionInputs,
-    WaterLevelData,
-    MeshData,
     BankData,
-    FairwayData,
+    ErosionInputs,
     ErosionResults,
+    FairwayData,
+    MeshData,
     SingleBank,
-    SingleErosion
+    SingleErosion,
+    WaterLevelData,
+)
+from dfastbe.bank_erosion.data_models.inputs import (
+    ErosionRiverData,
+    ErosionSimulationData,
 )
 from dfastbe.io.config import ConfigFile
+from dfastbe.io.logger import configure_logging
 
 
 class TestErosionInputs:
@@ -284,6 +289,7 @@ class TestErosionRiverData:
     @pytest.fixture
     def river_data(self) -> ErosionRiverData:
         path = "tests/data/erosion/meuse_manual.cfg"
+        configure_logging(True)
         config_file = ConfigFile.read(path)
         river_data = ErosionRiverData(config_file)
         return river_data
