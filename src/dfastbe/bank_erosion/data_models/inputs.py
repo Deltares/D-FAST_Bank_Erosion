@@ -1,16 +1,30 @@
 import os
+from collections import namedtuple
+from dataclasses import dataclass
 from pathlib import Path
+from typing import ClassVar, Dict, List, Tuple
 
 import numpy as np
 from dfastio.xyc.models import XYCModel
 from shapely.geometry import LineString
 
-from dfastbe.bank_erosion.data_models.calculation import MeshData, SingleBank
+from dfastbe.bank_erosion.data_models.calculation import (
+    MeshData,
+    SingleBank,
+    SingleLevelParameters,
+    SingleParameters,
+)
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.data_models import BaseRiverData, BaseSimulationData
 from dfastbe.io.logger import log_text
 
-__all__ = ["ErosionSimulationData", "ErosionRiverData", "BankLinesResultsError"]
+__all__ = [
+    "ErosionSimulationData",
+    "ErosionRiverData",
+    "BankLinesResultsError",
+    "ShipsParameters",
+]
+
 
 class ErosionSimulationData(BaseSimulationData):
 
@@ -206,6 +220,7 @@ class ErosionSimulationData(BaseSimulationData):
         }
         return data
 
+
 class ErosionRiverData(BaseRiverData):
 
     def __init__(self, config_file: ConfigFile):
@@ -266,6 +281,205 @@ class ErosionRiverData(BaseRiverData):
         log_text("read_river_axis", data={"file": river_axis_file})
         river_axis = XYCModel.read(river_axis_file)
         return river_axis
+
+
+@dataclass
+class ShipsParameters:
+    """Data for ships going through the fairway for bank erosion simulation.
+
+    Args:
+        config_file (ConfigFile):
+            Configuration file containing parameters.
+        velocity (List[np.ndarray]):
+            Ship velocities for each bank.
+        number (List[np.ndarray]):
+            Number of ships for each bank.
+        num_waves (List[np.ndarray]):
+            Number of waves per ship for each bank.
+        draught (List[np.ndarray]):
+            Draught of ships for each bank.
+        type (List[np.ndarray]):
+            Type of ships for each bank.
+        slope (List[np.ndarray]):
+            Slope values for each bank.
+        reed (List[np.ndarray]):
+            Reed values for each bank.
+    """
+    Parameters: ClassVar["Parameters"] = namedtuple(
+        "Parameters", "name default valid onefile positive ext"
+    )
+    config_file: ConfigFile
+    velocity: List[np.ndarray]
+    number: List[np.ndarray]
+    num_waves: List[np.ndarray]
+    draught: List[np.ndarray]
+    type: List[np.ndarray]
+    slope: List[np.ndarray]
+    reed: List[np.ndarray]
+
+    REED_DAMPING_COEFFICIENT = 8.5e-4
+    REED_DAMPING_EXPONENT = 0.8
+
+    @classmethod
+    def get_ship_data(
+        cls, num_stations_per_bank: List[int], config_file: ConfigFile
+    ) -> "ShipsParameters":
+        """Get ship parameters from the configuration file.
+
+        Args:
+            num_stations_per_bank (List[int]):
+                The number of stations per bank.
+            config_file (ConfigFile):
+                Configuration file containing parameters.
+
+        Returns:
+            ShipsParameters: An instance of ShipsParameters with parameters read from the config file.
+        """
+
+        param_defs = cls._get_initial_parameter_definitions()
+        param_resolved = cls._get_parameters(
+            config_file, num_stations_per_bank, param_defs
+        )
+
+        param_dict = {
+            "velocity": param_resolved["vship"],
+            "number": param_resolved["nship"],
+            "num_waves": param_resolved["nwave"],
+            "draught": param_resolved["draught"],
+            "type": param_resolved["shiptype"],
+            "slope": param_resolved["slope"],
+            "reed": param_resolved["reed"],
+        }
+
+        return cls(config_file, **param_dict)
+
+    @staticmethod
+    def _get_parameters(
+        config_file: ConfigFile,
+        num_stations_per_bank: List[int],
+        param_defs: List[Parameters],
+        level_i_str: str = "",
+    ) -> Dict[str, np.ndarray]:
+        """Resolve a list of Parameters with values from the configuration file."""
+        param_resolved = {}
+
+        for param in param_defs:
+            param_resolved[f"{param.name.lower()}"] = config_file.get_parameter(
+                "Erosion",
+                f"{param.name}{level_i_str}",
+                num_stations_per_bank,
+                default=param.default,
+                valid=param.valid,
+                onefile=param.onefile,
+                positive=param.positive,
+                ext=param.ext,
+            )
+        return param_resolved
+
+    @classmethod
+    def _get_initial_parameter_definitions(cls) -> List[Parameters]:
+        """Get parameter definitions for discharge parameters.
+
+        Returns:
+            List[namedtuple]: List of parameter definitions.
+        """
+        return [
+            cls.Parameters("VShip", None, None, True, True, None),
+            cls.Parameters("NShip", None, None, True, True, None),
+            cls.Parameters("NWave", 5, None, True, True, None),
+            cls.Parameters("Draught", None, None, True, True, None),
+            cls.Parameters("ShipType", None, [1, 2, 3], True, None, None),
+            cls.Parameters("Slope", 20, None, None, True, "slp"),
+            cls.Parameters("Reed", 0, None, None, True, "rdd"),
+        ]
+
+    def _get_discharge_parameter_definitions(self) -> List[Parameters]:
+        """Get parameter definitions for discharge parameters.
+
+        Returns:
+            List[namedtuple]: List of parameter definitions.
+        """
+        return [
+            self.Parameters("VShip", self.velocity, None, None, None, None),
+            self.Parameters("NShip", self.number, None, None, None, None),
+            self.Parameters("NWave", self.num_waves, None, None, None, None),
+            self.Parameters("Draught", self.draught, None, None, None, None),
+            self.Parameters("ShipType", self.type, [1, 2, 3], True, None, None),
+            self.Parameters("Slope", self.slope, None, None, True, "slp"),
+            self.Parameters("Reed", self.reed, None, None, True, "rdd"),
+        ]
+
+    @staticmethod
+    def _calculate_ship_derived_parameters(
+        slope_values: List[np.ndarray], reed_values: List[np.ndarray]
+    ) -> Tuple[List[np.ndarray], List[np.ndarray]]:
+        """Calculate derived parameters from slope and reed values.
+
+        Args:
+            slope_values (List[np.ndarray]): Slope values for each bank.
+            reed_values (List[np.ndarray]): Reed values for each bank.
+
+        Returns:
+            Tuple[List[np.ndarray], List[np.ndarray]]: Calculated mu_slope and mu_reed values.
+        """
+        mu_slope = []
+        mu_reed = []
+
+        for ps, pr in zip(slope_values, reed_values):
+            # Calculate mu_slope (inverse of slope for non-zero values)
+            mus = ps.copy()
+            mus[mus > 0] = 1.0 / mus[mus > 0]
+            mu_slope.append(mus)
+
+            # Calculate mu_reed (empirical damping coefficient)
+            mu_reed.append(
+                ShipsParameters.REED_DAMPING_COEFFICIENT * pr ** ShipsParameters.REED_DAMPING_EXPONENT
+            )
+
+        return mu_slope, mu_reed
+
+    def read_discharge_parameters(
+        self,
+        level_i: int,
+        num_stations_per_bank: List[int],
+    ) -> SingleLevelParameters:
+        """Read Discharge level parameters.
+
+        Read all discharge-specific input arrays for level_i.
+
+        Args:
+            level_i (int):
+                The index of the discharge level.
+            num_stations_per_bank (List[int]):
+                The number of stations per bank.
+
+        Returns:
+            SingleLevelParameters: The discharge level parameters.
+        """
+        param_defs = self._get_discharge_parameter_definitions()
+        param_resolved = self._get_parameters(
+            self.config_file, num_stations_per_bank, param_defs, f"{level_i + 1}"
+        )
+
+        mu_slope, mu_reed = self._calculate_ship_derived_parameters(
+            param_resolved["slope"], param_resolved["reed"]
+        )
+
+        return SingleLevelParameters.from_column_arrays(
+            {
+                "id": level_i,
+                "ship_velocity": param_resolved["vship"],
+                "num_ship": param_resolved["nship"],
+                "num_waves_per_ship": param_resolved["nwave"],
+                "ship_draught": param_resolved["draught"],
+                "ship_type": param_resolved["shiptype"],
+                "par_slope": param_resolved["slope"],
+                "par_reed": param_resolved["reed"],
+                "mu_slope": mu_slope,
+                "mu_reed": mu_reed,
+            },
+            SingleParameters,
+        )
 
 
 class BankLinesResultsError(Exception):
