@@ -1,8 +1,10 @@
 """module for processing mesh-related operations."""
-from typing import Tuple, List
-import numpy as np
 import math
+from typing import List, Tuple
+
+import numpy as np
 from shapely.geometry import LineString, Point, Polygon
+
 from dfastbe.bank_erosion.data_models.calculation import MeshData
 
 __all__ = ["get_slices_ab", "enlarge", "intersect_line_mesh"]
@@ -276,7 +278,7 @@ def intersect_line_mesh(
     vindex: np.ndarray
     for j, bpj in enumerate(bp):
         if verbose:
-            print("Current location: {}, {}".format(bpj[0], bpj[1]))
+            print(f"Current location: {bpj[0]}, {bpj[1]}")
         if j == 0:
             # first bp inside or outside?
             dx = mesh_data.x_face_coords - bpj[0]
@@ -317,7 +319,7 @@ def intersect_line_mesh(
                     if polygon_k.contains(pnt):
                         index = k
                         if verbose:
-                            print("starting in {}".format(index))
+                            print(f"starting in {index}")
                         break
                 else:
                     on_edge: List[int] = []
@@ -325,10 +327,10 @@ def intersect_line_mesh(
                         nd = np.concatenate(
                             (
                                 mesh_data.x_face_coords[
-                                k : k + 1, : mesh_data.n_nodes[k]
+                                    k : k + 1, : mesh_data.n_nodes[k]
                                 ],
                                 mesh_data.y_face_coords[
-                                k : k + 1, : mesh_data.n_nodes[k]
+                                    k : k + 1, : mesh_data.n_nodes[k]
                                 ],
                             ),
                             axis=0,
@@ -347,7 +349,7 @@ def intersect_line_mesh(
                             index = -2
                             vindex = on_edge
                         if verbose:
-                            print("starting on edge of {}".format(on_edge))
+                            print(f"starting on edge of {on_edge}")
                         raise Exception("determine direction!")
             crds[ind] = bpj
             if index == -2:
@@ -400,13 +402,9 @@ def intersect_line_mesh(
                     # rest of segment associated with same face
                     if verbose:
                         if prev_b > 0:
-                            print(
-                                "{}: -- no further slices along this segment --".format(
-                                    j
-                                )
-                            )
+                            print(f"{j}: -- no further slices along this segment --")
                         else:
-                            print("{}: -- no slices along this segment --".format(j))
+                            print(f"{j}: -- no slices along this segment --")
                         if index >= 0:
                             pnt = Point(bpj)
                             polygon_k = Polygon(
@@ -426,9 +424,7 @@ def intersect_line_mesh(
                             )
                             if not polygon_k.contains(pnt):
                                 raise Exception(
-                                    "{}: ERROR: point actually not contained within {}!".format(
-                                        j, index
-                                    )
+                                    f"{j}: ERROR: point actually not contained within {index}!"
                                 )
                     if ind == crds.shape[0]:
                         crds = enlarge(crds, (2 * ind, 2))
@@ -459,9 +455,7 @@ def intersect_line_mesh(
                         # if we slice at a node ...
                         if verbose:
                             print(
-                                "{}: moving via node {} on edges {} at {}".format(
-                                    j, node, edges, b[0]
-                                )
+                                f"{j}: moving via node {node} on edges {edges} at {b[0]}"
                             )
                         # figure out where we will be heading afterwards ...
                         all_node_edges = np.nonzero(
@@ -475,7 +469,7 @@ def intersect_line_mesh(
                             if b[0] == 1.0 and j == len(bp) - 1:
                                 # catch case of last segment
                                 if verbose:
-                                    print("{}: last point ends in a node".format(j))
+                                    print(f"{j}: last point ends in a node")
                                 if ind == crds.shape[0]:
                                     crds = enlarge(crds, (ind + 1, 2))
                                     idx = enlarge(idx, (ind + 1,))
@@ -493,7 +487,7 @@ def intersect_line_mesh(
                                     bp[j + 1][1] - bpj[1], bp[j + 1][0] - bp[j][0]
                                 )
                         if verbose:
-                            print("{}: moving in direction theta = {}".format(j, theta))
+                            print(f"{j}: moving in direction theta = {theta}")
                         twopi = 2 * math.pi
                         left_edge = -1
                         left_dtheta = twopi
@@ -501,9 +495,7 @@ def intersect_line_mesh(
                         right_dtheta = twopi
                         if verbose:
                             print(
-                                "{}: the edges connected to node {} are {}".format(
-                                    j, node, all_node_edges
-                                )
+                                f"{j}: the edges connected to node {node} are {all_node_edges}"
                             )
                         for ie in all_node_edges:
                             if mesh_data.edge_node[ie, 0] == node:
@@ -522,13 +514,9 @@ def intersect_line_mesh(
                                     )
                             if verbose:
                                 print(
-                                    "{}: edge {} connects {}".format(
-                                        j, ie, mesh_data.edge_node[ie, :]
-                                    )
+                                    f"{j}: edge {ie} connects {mesh_data.edge_node[ie, :]}"
                                 )
-                                print(
-                                    "{}: edge {} theta is {}".format(j, ie, theta_edge)
-                                )
+                                print(f"{j}: edge {ie} theta is {theta_edge}")
                             dtheta = theta_edge - theta
                             if dtheta > 0:
                                 if dtheta < left_dtheta:
@@ -548,33 +536,21 @@ def intersect_line_mesh(
                             else:
                                 # aligned with edge
                                 if verbose:
-                                    print(
-                                        "{}: line is aligned with edge {}".format(j, ie)
-                                    )
+                                    print(f"{j}: line is aligned with edge {ie}")
                                 left_edge = ie
                                 right_edge = ie
                                 break
                         if verbose:
-                            print(
-                                "{}: the edge to the left is edge {}".format(
-                                    j, left_edge
-                                )
-                            )
-                            print(
-                                "{}: the edge to the right is edge {}".format(
-                                    j, left_edge
-                                )
-                            )
+                            print(f"{j}: the edge to the left is edge {left_edge}")
+                            print(f"{j}: the edge to the right is edge {right_edge}")
                         if left_edge == right_edge:
                             if verbose:
-                                print("{}: continue along edge {}".format(j, left_edge))
+                                print(f"{j}: continue along edge {left_edge}")
                             index0 = mesh_data.edge_face_connectivity[left_edge, :]
                         else:
                             if verbose:
                                 print(
-                                    "{}: continue between edges {} on the left and {} on the right".format(
-                                        j, left_edge, right_edge
-                                    )
+                                    f"{j}: continue between edges {left_edge} on the left and {right_edge} on the right"
                                 )
                             left_faces = mesh_data.edge_face_connectivity[left_edge, :]
                             right_faces = mesh_data.edge_face_connectivity[
@@ -589,20 +565,10 @@ def intersect_line_mesh(
                                 fe1 = mesh_data.face_edge_connectivity[left_faces[0]]
                                 if verbose:
                                     print(
-                                        "{}: those edges are shared by two faces: {}".format(
-                                            j, left_faces
-                                        )
+                                        f"{j}: those edges are shared by two faces: {left_faces}"
                                     )
-                                    print(
-                                        "{}: face {} has nodes: {}".format(
-                                            j, left_faces[0], fn1
-                                        )
-                                    )
-                                    print(
-                                        "{}: face {} has edges: {}".format(
-                                            j, left_faces[0], fe1
-                                        )
-                                    )
+                                    print(f"{j}: face {left_faces[0]} has nodes: {fn1}")
+                                    print(f"{j}: face {left_faces[0]} has edges: {fe1}")
                                 # here we need that the nodes of the face are listed in clockwise order
                                 # and that edges[i] is the edge connecting node[i-1] with node[i]
                                 # the latter is guaranteed by batch.derive_topology_arrays
@@ -616,20 +582,18 @@ def intersect_line_mesh(
                                 index0 = left_faces[1]
                             else:
                                 raise Exception(
-                                    "Shouldn't come here .... left edge {} and right edge {} don't share any face".format(
-                                        left_edge, right_edge
-                                    )
+                                    f"Shouldn't come here .... left edge {left_edge} and right edge {right_edge} don't share any face"
                                 )
 
                     elif b[0] == 1:
                         # ending at slice point, so ending on an edge ...
                         if verbose:
-                            print("{}: ending on edge {} at {}".format(j, edge, b[0]))
+                            print(f"{j}: ending on edge {edge} at {b[0]}")
                         # figure out where we will be heading afterwards ...
                         if j == len(bp) - 1:
                             # catch case of last segment
                             if verbose:
-                                print("{}: last point ends on an edge".format(j))
+                                print(f"{j}: last point ends on an edge")
                             if ind == crds.shape[0]:
                                 crds = enlarge(crds, (ind + 1, 2))
                                 idx = enlarge(idx, (ind + 1,))
@@ -647,7 +611,7 @@ def intersect_line_mesh(
                                 bp[j + 1][1] - bpj[1], bp[j + 1][0] - bp[j][0]
                             )
                         if verbose:
-                            print("{}: moving in direction theta = {}".format(j, theta))
+                            print(f"{j}: moving in direction theta = {theta}")
                         theta_edge = math.atan2(
                             mesh_data.y_edge_coords[edge, 1]
                             - mesh_data.y_edge_coords[edge, 0],
@@ -657,7 +621,7 @@ def intersect_line_mesh(
                         if theta == theta_edge or theta == -theta_edge:
                             # aligned with edge
                             if verbose:
-                                print("{}: continue along edge {}".format(j, edge))
+                                print(f"{j}: continue along edge {edge}")
                             index0 = faces
                         else:
                             # check whether the (extended) segment slices any edge of faces[0]
@@ -677,21 +641,15 @@ def intersect_line_mesh(
                         if verbose:
                             if index == -1:
                                 print(
-                                    "{}: moving from outside via node {} to {} at b = {}".format(
-                                        j, node, index0, prev_b
-                                    )
+                                    f"{j}: moving from outside via node {node} to {index0} at b = {prev_b}"
                                 )
                             elif index == -2:
                                 print(
-                                    "{}: moving from edge between {} via node {} to {} at b = {}".format(
-                                        j, vindex, node, index0, prev_b
-                                    )
+                                    f"{j}: moving from edge between {vindex} via node {node} to {index0} at b = {prev_b}"
                                 )
                             else:
                                 print(
-                                    "{}: moving from {} via node {} to {} at b = {}".format(
-                                        j, index, node, index0, prev_b
-                                    )
+                                    f"{j}: moving from {index} via node {node} to {index0} at b = {prev_b}"
                                 )
 
                         if (
@@ -709,24 +667,19 @@ def intersect_line_mesh(
                     elif faces[0] == index:
                         if verbose:
                             print(
-                                "{}: moving from {} via edge {} to {} at b = {}".format(
-                                    j, index, edge, faces[1], prev_b
-                                )
+                                f"{j}: moving from {index} via edge {edge} to {faces[1]} at b = {prev_b}"
                             )
                         index = faces[1]
                     elif faces[1] == index:
                         if verbose:
                             print(
-                                "{}: moving from {} via edge {} to {} at b = {}".format(
-                                    j, index, edge, faces[0], prev_b
-                                )
+                                f"{j}: moving from {index} via edge {edge} to {faces[0]} at b = {prev_b}"
                             )
                         index = faces[0]
                     else:
                         raise Exception(
-                            "Shouldn't come here .... index {} differs from both faces {} and {} associated with slicing edge {}".format(
-                                index, faces[0], faces[1], edge
-                            )
+                            f"Shouldn't come here .... index {index} differs from both faces "
+                            f"{faces[0]} and {faces[1]} associated with slicing edge {edge}"
                         )
                     if ind == crds.shape[0]:
                         crds = enlarge(crds, (2 * ind, 2))
