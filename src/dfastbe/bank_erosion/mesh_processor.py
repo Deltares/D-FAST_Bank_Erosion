@@ -234,8 +234,7 @@ def enlarge(
 
 
 def _get_face_coordinates(mesh_data: MeshData, index: int) -> np.ndarray:
-    """
-    Returns the coordinates of the k-th mesh face as an (N, 2) array.
+    """Returns the coordinates of the k-th mesh face as an (N, 2) array.
 
     Args:
         mesh_data (MeshData): The mesh data object.
@@ -246,8 +245,24 @@ def _get_face_coordinates(mesh_data: MeshData, index: int) -> np.ndarray:
     """
     x = mesh_data.x_face_coords[index : index + 1, : mesh_data.n_nodes[index]]
     y = mesh_data.y_face_coords[index : index + 1, : mesh_data.n_nodes[index]]
-    coords = np.concatenate((x, y), axis=0).T
-    return coords
+    return np.concatenate((x, y), axis=0).T
+
+
+def edge_angle(mesh_data: MeshData, edge: int, reverse: bool = False) -> float:
+    """Calculate the angle of a mesh edge in radians.
+
+    Args:
+        mesh_data (MeshData): The mesh data object.
+        edge (int): The edge index.
+        reverse (bool): If True, computes the angle from end to start.
+
+    Returns:
+        float: The angle of the edge in radians.
+    """
+    start, end = (1, 0) if reverse else (0, 1)
+    dx = mesh_data.x_edge_coords[edge, end] - mesh_data.x_edge_coords[edge, start]
+    dy = mesh_data.y_edge_coords[edge, end] - mesh_data.y_edge_coords[edge, start]
+    return math.atan2(dy, dx)
 
 
 def intersect_line_mesh(
@@ -479,20 +494,8 @@ def intersect_line_mesh(
                                 f"{j}: the edges connected to node {node} are {all_node_edges}"
                             )
                         for ie in all_node_edges:
-                            if mesh_data.edge_node[ie, 0] == node:
-                                theta_edge = math.atan2(
-                                    mesh_data.y_edge_coords[ie, 1]
-                                    - mesh_data.y_edge_coords[ie, 0],
-                                    mesh_data.x_edge_coords[ie, 1]
-                                    - mesh_data.x_edge_coords[ie, 0],
-                                    )
-                            else:
-                                theta_edge = math.atan2(
-                                    mesh_data.y_edge_coords[ie, 0]
-                                    - mesh_data.y_edge_coords[ie, 1],
-                                    mesh_data.x_edge_coords[ie, 0]
-                                    - mesh_data.x_edge_coords[ie, 1],
-                                    )
+                            reverse = not mesh_data.edge_node[ie, 0] == node
+                            theta_edge = edge_angle(mesh_data, ie, reverse=reverse)
                             if verbose:
                                 print(
                                     f"{j}: edge {ie} connects {mesh_data.edge_node[ie, :]}"
@@ -593,12 +596,7 @@ def intersect_line_mesh(
                             )
                         if verbose:
                             print(f"{j}: moving in direction theta = {theta}")
-                        theta_edge = math.atan2(
-                            mesh_data.y_edge_coords[edge, 1]
-                            - mesh_data.y_edge_coords[edge, 0],
-                            mesh_data.x_edge_coords[edge, 1]
-                            - mesh_data.x_edge_coords[edge, 0],
-                            )
+                        theta_edge = edge_angle(mesh_data, edge)
                         if theta == theta_edge or theta == -theta_edge:
                             # aligned with edge
                             if verbose:
