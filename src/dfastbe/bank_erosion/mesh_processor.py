@@ -456,51 +456,6 @@ def _finalize_segment(crds, idx, ind, bpj, index, vindex):
     return crds, idx, ind
 
 
-def _resolve_next_face_from_edges(
-    node, left_edge, right_edge, mesh_data, j=None, verbose=False
-):
-    """
-    Helper to resolve the next face index when traversing between two edges at a node.
-
-    Args:
-        node (int): The node index.
-        left_edge (int): The edge index to the left.
-        right_edge (int): The edge index to the right.
-        mesh_data (MeshData): The mesh data object.
-        j (int, optional): Step index for verbose output.
-        verbose (bool): If True, prints debug information.
-
-    Returns:
-        int: The next face index.
-    """
-    left_faces = mesh_data.edge_face_connectivity[left_edge, :]
-    right_faces = mesh_data.edge_face_connectivity[right_edge, :]
-
-    if left_faces[0] in right_faces and left_faces[1] in right_faces:
-        fn1 = mesh_data.face_node[left_faces[0]]
-        fe1 = mesh_data.face_edge_connectivity[left_faces[0]]
-        if verbose and j is not None:
-            print(f"{j}: those edges are shared by two faces: {left_faces}")
-            print(f"{j}: face {left_faces[0]} has nodes: {fn1}")
-            print(f"{j}: face {left_faces[0]} has edges: {fe1}")
-        # nodes of the face should be listed in clockwise order
-        # edges[i] is the edge connecting node[i-1] with node[i]
-        # the latter is guaranteed by batch.derive_topology_arrays
-        if fe1[fn1 == node] == right_edge:
-            index = left_faces[0]
-        else:
-            index = left_faces[1]
-    elif left_faces[0] in right_faces:
-        index = left_faces[0]
-    elif left_faces[1] in right_faces:
-        index = left_faces[1]
-    else:
-        raise ValueError(
-            f"Shouldn't come here .... left edge {left_edge} and right edge {right_edge} don't share any face"
-        )
-    return index
-
-
 class MeshProcessor:
     """A class for processing mesh-related operations."""
 
@@ -542,11 +497,8 @@ class MeshProcessor:
 
         Args:
             theta (float): Direction angle of the segment.
-            all_node_edges (np.ndarray): Array of edge indices connected to the node.
-            mesh_data (MeshData): Mesh data object.
             node (int): The node index.
             j (int, optional): Step index for verbose output.
-            verbose (bool): If True, prints debug information.
 
         Returns:
             Tuple[int, int]: Indices of the left and right edges.
@@ -596,6 +548,46 @@ class MeshProcessor:
             print(f"{j}: the edge to the right is edge {right_edge}")
 
         return left_edge, right_edge
+
+    def _resolve_next_face_from_edges(self, node, left_edge, right_edge, j=None):
+        """
+        Helper to resolve the next face index when traversing between two edges at a node.
+
+        Args:
+            node (int): The node index.
+            left_edge (int): The edge index to the left.
+            right_edge (int): The edge index to the right.
+            j (int, optional): Step index for verbose output.
+
+        Returns:
+            int: The next face index.
+        """
+        left_faces = self.mesh_data.edge_face_connectivity[left_edge, :]
+        right_faces = self.mesh_data.edge_face_connectivity[right_edge, :]
+
+        if left_faces[0] in right_faces and left_faces[1] in right_faces:
+            fn1 = self.mesh_data.face_node[left_faces[0]]
+            fe1 = self.mesh_data.face_edge_connectivity[left_faces[0]]
+            if self.verbose and j is not None:
+                print(f"{j}: those edges are shared by two faces: {left_faces}")
+                print(f"{j}: face {left_faces[0]} has nodes: {fn1}")
+                print(f"{j}: face {left_faces[0]} has edges: {fe1}")
+            # nodes of the face should be listed in clockwise order
+            # edges[i] is the edge connecting node[i-1] with node[i]
+            # the latter is guaranteed by batch.derive_topology_arrays
+            if fe1[fn1 == node] == right_edge:
+                index = left_faces[0]
+            else:
+                index = left_faces[1]
+        elif left_faces[0] in right_faces:
+            index = left_faces[0]
+        elif left_faces[1] in right_faces:
+            index = left_faces[1]
+        else:
+            raise ValueError(
+                f"Shouldn't come here .... left edge {left_edge} and right edge {right_edge} don't share any face"
+            )
+        return index
 
     def intersect_line_mesh(self) -> Tuple[np.ndarray, np.ndarray]:
         """Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.
@@ -724,10 +716,7 @@ class MeshProcessor:
                             if self.verbose:
                                 print(f"{j}: moving in direction theta = {theta}")
                             left_edge, right_edge = self._find_left_right_edges(
-                                theta,
-                                node,
-                                j,
-                                self.verbose,
+                                theta, node, j
                             )
                             if self.verbose:
                                 print(f"{j}: the edge to the left is edge {left_edge}")
@@ -745,13 +734,8 @@ class MeshProcessor:
                                     print(
                                         f"{j}: continue between edges {left_edge} on the left and {right_edge} on the right"
                                     )
-                                index0 = _resolve_next_face_from_edges(
-                                    node,
-                                    left_edge,
-                                    right_edge,
-                                    self.mesh_data,
-                                    j,
-                                    self.verbose,
+                                index0 = self._resolve_next_face_from_edges(
+                                    node, left_edge, right_edge, j
                                 )
 
                         elif b[0] == 1:
