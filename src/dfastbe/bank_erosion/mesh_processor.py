@@ -288,63 +288,6 @@ def _log_mesh_transition(
     )
 
 
-def _find_starting_face(
-    possible_cells: np.ndarray,
-    bp: np.ndarray,
-    mesh_data: MeshData,
-    verbose: bool = False,
-) -> Tuple[int, Optional[List[int]]]:
-    """Find the starting face for a bank line segment.
-
-    This function determines the face index and vertex indices of the mesh
-    that the first point of a bank line segment is associated with.
-
-    Args:
-        possible_cells (np.ndarray): Array of possible cell indices.
-        bp (np.ndarray): A 2D array of shape (N, 2) containing the x, y coordinates of the bank line segment.
-        mesh_data (MeshData): An instance of the `MeshData` class containing mesh-related data.
-        verbose (bool, optional): If True, prints additional debug information. Defaults to False.
-
-    Returns:
-        Tuple[int, np.ndarray]: A tuple containing:
-            - The index of the starting face (-2 if multiple faces are found).
-            - An array of vertex indices associated with the starting face.
-    """
-    result_index = -1
-    result_vindex = None
-    if len(possible_cells) == 0:
-        if verbose:
-            print("starting outside mesh")
-        return result_index, result_vindex
-
-    pnt = Point(bp[0])
-    on_edge = []
-    for k in possible_cells:
-        polygon_k = Polygon(_get_face_coordinates(mesh_data, k))
-        if polygon_k.contains(pnt):
-            if verbose:
-                print(f"starting in {k}")
-            result_index = k
-            result_vindex = None
-            break
-        nd = _get_face_coordinates(mesh_data, k)
-        line_k = LineString(np.concatenate([nd, nd[0:1]], axis=0))
-        if line_k.contains(pnt):
-            on_edge.append(k)
-
-    if result_index == -1:
-        if on_edge:
-            if verbose:
-                print(f"starting on edge of {on_edge}")
-            result_index = -2 if len(on_edge) > 1 else on_edge[0]
-            result_vindex = on_edge if len(on_edge) > 1 else None
-        else:
-            if verbose:
-                print("starting outside mesh")
-
-    return result_index, result_vindex
-
-
 class MeshProcessor:
     """A class for processing mesh-related operations."""
 
@@ -370,15 +313,60 @@ class MeshProcessor:
                 | (dy > 0).all(axis=1)
             )
         )[0]
-        self.index, self.vindex = _find_starting_face(
-            possible_cells, self.bp, self.mesh_data, self.verbose
-        )
+        self._find_starting_face(possible_cells)
         self.crds[self.ind] = bpj
         if self.index == -2:
             self.idx[self.ind] = self.vindex[0]
         else:
             self.idx[self.ind] = self.index
         self.ind += 1
+
+    def _find_starting_face(self, possible_cells: np.ndarray):
+        """Find the starting face for a bank line segment.
+
+        This function determines the face index and vertex indices of the mesh
+        that the first point of a bank line segment is associated with.
+
+        Args:
+            possible_cells (np.ndarray): Array of possible cell indices.
+            bp (np.ndarray): A 2D array of shape (N, 2) containing the x, y coordinates of the bank line segment.
+            mesh_data (MeshData): An instance of the `MeshData` class containing mesh-related data.
+            verbose (bool, optional): If True, prints additional debug information. Defaults to False.
+
+        Returns:
+            Tuple[int, np.ndarray]: A tuple containing:
+                - The index of the starting face (-2 if multiple faces are found).
+                - An array of vertex indices associated with the starting face.
+        """
+        self.index = -1
+        if len(possible_cells) == 0:
+            if self.verbose:
+                print("starting outside mesh")
+            self.index = -1
+
+        pnt = Point(self.bp[0])
+        on_edge = []
+        for k in possible_cells:
+            polygon_k = Polygon(_get_face_coordinates(self.mesh_data, k))
+            if polygon_k.contains(pnt):
+                if self.verbose:
+                    print(f"starting in {k}")
+                self.index = k
+                break
+            nd = _get_face_coordinates(self.mesh_data, k)
+            line_k = LineString(np.concatenate([nd, nd[0:1]], axis=0))
+            if line_k.contains(pnt):
+                on_edge.append(k)
+
+        if self.index == -1:
+            if on_edge:
+                if self.verbose:
+                    print(f"starting on edge of {on_edge}")
+                self.index = -2 if len(on_edge) > 1 else on_edge[0]
+                self.vindex = on_edge if len(on_edge) > 1 else None
+            else:
+                if self.verbose:
+                    print("starting outside mesh")
 
     def _find_left_right_edges(self, theta, node, j=None):
         """
