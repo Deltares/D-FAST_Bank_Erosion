@@ -29,7 +29,6 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 import configparser
 import os
 import pathlib
-import subprocess
 import sys
 from functools import partial
 from pathlib import Path
@@ -1841,17 +1840,13 @@ def menu_open_manual():
     """Open the user manual."""
     manual_path = r_dir / USER_MANUAL_FILE_NAME
     filename = str(manual_path)
-    if not os.path.exists(manual_path):
+    if not manual_path.exists():
         showError(f"User manual not found: {filename}")
         return
 
     try:
         if sys.platform.startswith("win"):
             os.startfile(filename)
-        elif sys.platform.startswith("darwin"):
-            subprocess.Popen(["open", filename])
-        else:
-            subprocess.Popen(["xdg-open", filename])
     except OSError as e:
         showError(f"Failed to open the user manual: {e}")
 
