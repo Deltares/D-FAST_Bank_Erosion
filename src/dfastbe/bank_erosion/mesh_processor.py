@@ -345,7 +345,7 @@ def _find_starting_face(
     return result_index, result_vindex
 
 
-def resolve_ambiguous_edge_transition(vindex, prev_b, bpj, bpj1, mesh_data):
+def _resolve_ambiguous_edge_transition(vindex, prev_b, bpj, bpj1, mesh_data):
     """Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces."""
     b = np.zeros(0)
     edges = np.zeros(0, dtype=np.int64)
@@ -389,7 +389,7 @@ def _log_slice_status(j, prev_b, index, bpj, mesh_data):
             )
 
 
-def update_mesh_index_and_log(
+def _update_mesh_index_and_log(
     j, index, vindex, node, edge, faces, index0, prev_b, verbose
 ):
     """
@@ -419,7 +419,7 @@ def update_mesh_index_and_log(
         )
 
 
-def determine_next_face_on_edge(bp, bpj, j, edge, faces, mesh_data, verbose):
+def _determine_next_face_on_edge(bp, bpj, j, edge, faces, mesh_data, verbose):
     """Determine the next face to continue along an edge based on the segment direction."""
     theta = math.atan2(bp[j + 1][1] - bpj[1], bp[j + 1][0] - bp[j][0])
     if verbose:
@@ -527,7 +527,7 @@ def intersect_line_mesh(
             prev_b = 0
             while True:
                 if index == -2:
-                    index, vindex, b, edges, nodes = resolve_ambiguous_edge_transition(
+                    index, vindex, b, edges, nodes = _resolve_ambiguous_edge_transition(
                         vindex, prev_b, bpj, bpj1, mesh_data
                     )
                 elif (bpj == bpj1).all():
@@ -700,11 +700,11 @@ def intersect_line_mesh(
                                 crds, idx, ind, bpj, index, vindex
                             )
                             break
-                        index0 = determine_next_face_on_edge(
+                        index0 = _determine_next_face_on_edge(
                             bp, bpj, j, edge, faces, mesh_data, verbose
                         )
 
-                    index, vindex = update_mesh_index_and_log(
+                    index, vindex = _update_mesh_index_and_log(
                         j, index, vindex, node, edge, faces, index0, prev_b, verbose
                     )
                     if ind == crds.shape[0]:
