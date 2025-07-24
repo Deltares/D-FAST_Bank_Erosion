@@ -288,6 +288,58 @@ def _log_mesh_transition(
     )
 
 
+def _find_starting_face(
+    possible_cells: np.ndarray,
+    bp: np.ndarray,
+    mesh_data: MeshData,
+    verbose: bool = False,
+) -> Tuple[int, np.ndarray]:
+    """Find the starting face for a bank line segment.
+
+    This function determines the face index and vertex indices of the mesh
+    that the first point of a bank line segment is associated with.
+
+    Args:
+        possible_cells (np.ndarray): Array of possible cell indices.
+        bp (np.ndarray): A 2D array of shape (N, 2) containing the x, y coordinates of the bank line segment.
+        mesh_data (MeshData): An instance of the `MeshData` class containing mesh-related data.
+        verbose (bool, optional): If True, prints additional debug information. Defaults to False.
+
+    Returns:
+        Tuple[int, np.ndarray]: A tuple containing:
+            - The index of the starting face (-2 if multiple faces are found).
+            - An array of vertex indices associated with the starting face.
+    """
+    if len(possible_cells) == 0:
+        if verbose:
+            print("starting outside mesh")
+        return -1, None
+    pnt = Point(bp[0])
+    for k in possible_cells:
+        polygon_k = Polygon(_get_face_coordinates(mesh_data, k))
+        if polygon_k.contains(pnt):
+            if verbose:
+                print(f"starting in {k}")
+            return k, None
+    on_edge = []
+    for k in possible_cells:
+        nd = _get_face_coordinates(mesh_data, k)
+        line_k = LineString(np.concatenate([nd, nd[0:1]], axis=0))
+        if line_k.contains(pnt):
+            on_edge.append(k)
+    if not on_edge:
+        if verbose:
+            print("starting outside mesh")
+        return -1, None
+    else:
+        if verbose:
+            print(f"starting on edge of {on_edge}")
+        # Ambiguous: on edge of multiple cells
+        return (-2 if len(on_edge) > 1 else on_edge[0]), (
+            on_edge if len(on_edge) > 1 else None
+        )
+
+
 def intersect_line_mesh(
     bp: np.ndarray,
     mesh_data: MeshData,
@@ -340,50 +392,13 @@ def intersect_line_mesh(
             dy = mesh_data.y_face_coords - bpj[1]
             possible_cells = np.nonzero(
                 ~(
-                        (dx < 0).all(axis=1)
-                        | (dx > 0).all(axis=1)
-                        | (dy < 0).all(axis=1)
-                        | (dy > 0).all(axis=1)
+                    (dx < 0).all(axis=1)
+                    | (dx > 0).all(axis=1)
+                    | (dy < 0).all(axis=1)
+                    | (dy > 0).all(axis=1)
                 )
             )[0]
-            if len(possible_cells) == 0:
-                # no cells found ... it must be outside
-                index = -1
-                if verbose:
-                    print("starting outside mesh")
-            else:
-                # one or more possible cells, check whether it's really inside one of them
-                # using np math might be faster, but since it's should only be for a few points let's use Shapely
-                # a point on the edge of a polygon is not contained in the polygon.
-                # a point on the edge of two polygons will thus be considered outside the mesh whereas it actually isn't.
-                pnt = Point(bp[0])
-                for k in possible_cells:
-                    polygon_k = Polygon(_get_face_coordinates(mesh_data, k))
-                    if polygon_k.contains(pnt):
-                        index = k
-                        if verbose:
-                            print(f"starting in {index}")
-                        break
-                else:
-                    on_edge: List[int] = []
-                    for k in possible_cells:
-                        nd = _get_face_coordinates(mesh_data, k)
-                        line_k = LineString(np.concatenate(nd, nd[0:1], axis=0))
-                        if line_k.contains(pnt):
-                            on_edge.append(k)
-                    if not on_edge:
-                        index = -1
-                        if verbose:
-                            print("starting outside mesh")
-                    else:
-                        if len(on_edge) == 1:
-                            index = on_edge[0]
-                        else:
-                            index = -2
-                            vindex = on_edge
-                        if verbose:
-                            print(f"starting on edge of {on_edge}")
-                        raise Exception("determine direction!")
+            index, vindex = _find_starting_face(possible_cells, bp, mesh_data, verbose)
             crds[ind] = bpj
             if index == -2:
                 idx[ind] = vindex[0]
