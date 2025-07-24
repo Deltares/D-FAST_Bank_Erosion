@@ -440,22 +440,6 @@ def _determine_next_face_on_edge(bp, bpj, j, edge, faces, mesh_data, verbose):
     return index0
 
 
-def _finalize_segment(crds, idx, ind, bpj, index, vindex):
-    """
-    Helper to finalize a segment: enlarge arrays if needed, set coordinates and index, and increment ind.
-    """
-    if ind == crds.shape[0]:
-        crds = enlarge(crds, (ind + 1, 2))
-        idx = enlarge(idx, (ind + 1,))
-    crds[ind] = bpj
-    if index == -2:
-        idx[ind] = vindex[0]
-    else:
-        idx[ind] = index
-    ind += 1
-    return crds, idx, ind
-
-
 class MeshProcessor:
     """A class for processing mesh-related operations."""
 
@@ -588,6 +572,20 @@ class MeshProcessor:
                 f"Shouldn't come here .... left edge {left_edge} and right edge {right_edge} don't share any face"
             )
         return index
+
+    def _finalize_segment(self, bpj):
+        """
+        Helper to finalize a segment: enlarge arrays if needed, set coordinates and index, and increment ind.
+        """
+        if self.ind == self.crds.shape[0]:
+            self.crds = enlarge(self.crds, (self.ind + 1, 2))
+            self.idx = enlarge(self.idx, (self.ind + 1,))
+        self.crds[self.ind] = bpj
+        if self.index == -2:
+            self.idx[self.ind] = self.vindex[0]
+        else:
+            self.idx[self.ind] = self.index
+        self.ind += 1
 
     def intersect_line_mesh(self) -> Tuple[np.ndarray, np.ndarray]:
         """Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.
@@ -747,14 +745,7 @@ class MeshProcessor:
                                 # catch case of last segment
                                 if self.verbose:
                                     print(f"{j}: last point ends on an edge")
-                                self.crds, self.idx, self.ind = _finalize_segment(
-                                    self.crds,
-                                    self.idx,
-                                    self.ind,
-                                    bpj,
-                                    self.index,
-                                    self.vindex,
-                                )
+                                self._finalize_segment(bpj)
                                 break
                             index0 = _determine_next_face_on_edge(
                                 self.bp,
