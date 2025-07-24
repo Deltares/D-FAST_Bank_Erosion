@@ -340,6 +340,39 @@ def _find_starting_face(
         )
 
 
+def resolve_ambiguous_edge_transition(vindex, prev_b, bpj, bpj1, mesh_data):
+    """
+    Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces.
+    Returns updated index, vindex, b, edges, nodes, index_src.
+    """
+    b = np.zeros(0)
+    edges = np.zeros(0, dtype=np.int64)
+    nodes = np.zeros(0, dtype=np.int64)
+    index_src = np.zeros(0, dtype=np.int64)
+    for i in vindex:
+        b1, edges1, nodes1 = _get_slices(
+            i,
+            prev_b,
+            bpj,
+            bpj1,
+            mesh_data,
+        )
+        b = np.concatenate((b, b1), axis=0)
+        edges = np.concatenate((edges, edges1), axis=0)
+        nodes = np.concatenate((nodes, nodes1), axis=0)
+        index_src = np.concatenate((index_src, i + 0 * edges1), axis=0)
+    edges, id_edges = np.unique(edges, return_index=True)
+    b = b[id_edges]
+    nodes = nodes[id_edges]
+    index_src = index_src[id_edges]
+    if len(index_src) == 1:
+        index = index_src[0]
+        vindex = index_src[0:1]
+    else:
+        index = -2
+    return index, vindex, b, edges, nodes
+
+
 def intersect_line_mesh(
     bp: np.ndarray,
     mesh_data: MeshData,
@@ -411,29 +444,9 @@ def intersect_line_mesh(
             prev_b = 0
             while True:
                 if index == -2:
-                    b = np.zeros(0)
-                    edges = np.zeros(0, dtype=np.int64)
-                    nodes = np.zeros(0, dtype=np.int64)
-                    index_src = np.zeros(0, dtype=np.int64)
-                    for i in vindex:
-                        b1, edges1, nodes1 = _get_slices(
-                            i,
-                            prev_b,
-                            bpj,
-                            bpj1,
-                            mesh_data,
-                        )
-                        b = np.concatenate((b, b1), axis=0)
-                        edges = np.concatenate((edges, edges1), axis=0)
-                        nodes = np.concatenate((nodes, nodes1), axis=0)
-                        index_src = np.concatenate((index_src, i + 0 * edges1), axis=0)
-                    edges, id_edges = np.unique(edges, return_index=True)
-                    b = b[id_edges]
-                    nodes = nodes[id_edges]
-                    index_src = index_src[id_edges]
-                    if len(index_src) == 1:
-                        index = index_src[0]
-                        vindex = index_src[0:1]
+                    index, vindex, b, edges, nodes = resolve_ambiguous_edge_transition(
+                        vindex, prev_b, bpj, bpj1, mesh_data
+                    )
                 elif (bpj == bpj1).all():
                     # this is a segment of length 0, skip it since it takes us nowhere
                     break
