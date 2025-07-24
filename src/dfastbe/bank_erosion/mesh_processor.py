@@ -1,6 +1,6 @@
 """module for processing mesh-related operations."""
 import math
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import numpy as np
 from shapely.geometry import LineString, Point, Polygon
@@ -293,7 +293,7 @@ def _find_starting_face(
     bp: np.ndarray,
     mesh_data: MeshData,
     verbose: bool = False,
-) -> Tuple[int, np.ndarray]:
+) -> Tuple[int, Optional[List[int]]]:
     """Find the starting face for a bank line segment.
 
     This function determines the face index and vertex indices of the mesh
