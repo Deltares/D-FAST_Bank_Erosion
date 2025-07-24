@@ -310,34 +310,39 @@ def _find_starting_face(
             - The index of the starting face (-2 if multiple faces are found).
             - An array of vertex indices associated with the starting face.
     """
+    result_index = -1
+    result_vindex = None
     if len(possible_cells) == 0:
         if verbose:
             print("starting outside mesh")
-        return -1, None
+        return result_index, result_vindex
+
     pnt = Point(bp[0])
+    on_edge = []
     for k in possible_cells:
         polygon_k = Polygon(_get_face_coordinates(mesh_data, k))
         if polygon_k.contains(pnt):
             if verbose:
                 print(f"starting in {k}")
-            return k, None
-    on_edge = []
-    for k in possible_cells:
+            result_index = k
+            result_vindex = None
+            break
         nd = _get_face_coordinates(mesh_data, k)
         line_k = LineString(np.concatenate([nd, nd[0:1]], axis=0))
         if line_k.contains(pnt):
             on_edge.append(k)
-    if not on_edge:
-        if verbose:
-            print("starting outside mesh")
-        return -1, None
-    else:
-        if verbose:
-            print(f"starting on edge of {on_edge}")
-        # Ambiguous: on edge of multiple cells
-        return (-2 if len(on_edge) > 1 else on_edge[0]), (
-            on_edge if len(on_edge) > 1 else None
-        )
+
+    if result_index == -1:
+        if on_edge:
+            if verbose:
+                print(f"starting on edge of {on_edge}")
+            result_index = -2 if len(on_edge) > 1 else on_edge[0]
+            result_vindex = on_edge if len(on_edge) > 1 else None
+        else:
+            if verbose:
+                print("starting outside mesh")
+
+    return result_index, result_vindex
 
 
 def resolve_ambiguous_edge_transition(vindex, prev_b, bpj, bpj1, mesh_data):
