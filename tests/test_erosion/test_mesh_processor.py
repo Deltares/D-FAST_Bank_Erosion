@@ -3,11 +3,11 @@ import pytest
 
 from dfastbe.bank_erosion.data_models.calculation import MeshData
 from dfastbe.bank_erosion.mesh_processor import (
+    MeshProcessor,
     _get_slices,
     _get_slices_core,
     enlarge,
     get_slices_ab,
-    intersect_line_mesh,
 )
 
 
@@ -273,7 +273,7 @@ class TestMeshProcessor:
         Asserts:
             The coordinates and indices of the intersection match the expected values.
         """
-        crds, idx = intersect_line_mesh(line, mesh_data)
+        crds, idx = MeshProcessor(line, mesh_data).intersect_line_mesh()
         assert np.allclose(crds, expected_coords)
         assert np.array_equal(idx, expected_idx)
 

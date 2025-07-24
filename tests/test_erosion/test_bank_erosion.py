@@ -303,7 +303,7 @@ class TestErosion:
         mock_erosion._config_file = mock_config_file
         with (
             patch("dfastbe.bank_erosion.data_models.calculation.FairwayData"),
-            patch("dfastbe.bank_erosion.bank_erosion.intersect_line_mesh") as line_mock,
+            patch("dfastbe.bank_erosion.bank_erosion.MeshProcessor") as processor_mock,
             patch("dfastbe.io.data_models.GeoDataFrame") as gdf_mock,
         ):
             fairway_intersection_coords = np.array(
@@ -318,7 +318,10 @@ class TestErosion:
                 ]
             )
             fairway_face_indices = np.array([59166, 59167, 62557, 62557, 62557, 62557])
-            line_mock.return_value = (fairway_intersection_coords, fairway_face_indices)
+            processor_mock.intersect_line_mesh.return_value = (
+                fairway_intersection_coords,
+                fairway_face_indices,
+            )
             fairway_data = mock_erosion._get_fairway_data(MagicMock(), MagicMock())
             gdf_mock.return_value.to_file.assert_called_once()
         assert np.allclose(fairway_data.fairway_face_indices, fairway_face_indices)
