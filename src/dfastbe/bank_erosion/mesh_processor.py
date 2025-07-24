@@ -233,61 +233,6 @@ def enlarge(
     return new_array
 
 
-def _get_face_coordinates(mesh_data: MeshData, index: int) -> np.ndarray:
-    """Returns the coordinates of the k-th mesh face as an (N, 2) array.
-
-    Args:
-        mesh_data (MeshData): The mesh data object.
-        k (int): The face index.
-
-    Returns:
-        np.ndarray: Array of shape (n_nodes, 2) with x, y coordinates.
-    """
-    x = mesh_data.x_face_coords[index : index + 1, : mesh_data.n_nodes[index]]
-    y = mesh_data.y_face_coords[index : index + 1, : mesh_data.n_nodes[index]]
-    return np.concatenate((x, y), axis=0).T
-
-
-def _edge_angle(mesh_data: MeshData, edge: int, reverse: bool = False) -> float:
-    """Calculate the angle of a mesh edge in radians.
-
-    Args:
-        mesh_data (MeshData): The mesh data object.
-        edge (int): The edge index.
-        reverse (bool): If True, computes the angle from end to start.
-
-    Returns:
-        float: The angle of the edge in radians.
-    """
-    start, end = (1, 0) if reverse else (0, 1)
-    dx = mesh_data.x_edge_coords[edge, end] - mesh_data.x_edge_coords[edge, start]
-    dy = mesh_data.y_edge_coords[edge, end] - mesh_data.y_edge_coords[edge, start]
-    return math.atan2(dy, dx)
-
-
-def _log_mesh_transition(
-    step, index, vindex, transition_type, transition_index, index0, prev_b
-):
-    """Helper to print mesh transition information for debugging.
-
-    Args:
-        step (int): The current step or iteration.
-        index (int): The current mesh face index.
-        vindex (int): The vertex index.
-        transition_type (str): The type of transition (e.g., "node", "edge").
-        transition_index (int): The index of the transition (e.g., the node or edge index).
-        index0 (int): The target mesh face index.
-        prev_b (float): The previous value of b.
-    """
-    index_str = "outside" if index == -1 else index
-    if index == -2:
-        index_str = f"edge between {vindex}"
-    print(
-        f"{step}: moving from {index_str} via {transition_type} {transition_index} "
-        f"to {index0} at b = {prev_b}"
-    )
-
-
 class MeshProcessor:
     """A class for processing mesh-related operations."""
 
@@ -321,6 +266,44 @@ class MeshProcessor:
             self.idx[self.ind] = self.index
         self.ind += 1
 
+    def _get_face_coordinates(self, index: int) -> np.ndarray:
+        """Returns the coordinates of the k-th mesh face as an (N, 2) array.
+
+        Args:
+            k (int): The face index.
+
+        Returns:
+            np.ndarray: Array of shape (n_nodes, 2) with x, y coordinates.
+        """
+        x = self.mesh_data.x_face_coords[
+            index : index + 1, : self.mesh_data.n_nodes[index]
+        ]
+        y = self.mesh_data.y_face_coords[
+            index : index + 1, : self.mesh_data.n_nodes[index]
+        ]
+        return np.concatenate((x, y), axis=0).T
+
+    def _edge_angle(self, edge: int, reverse: bool = False) -> float:
+        """Calculate the angle of a mesh edge in radians.
+
+        Args:
+            edge (int): The edge index.
+            reverse (bool): If True, computes the angle from end to start.
+
+        Returns:
+            float: The angle of the edge in radians.
+        """
+        start, end = (1, 0) if reverse else (0, 1)
+        dx = (
+            self.mesh_data.x_edge_coords[edge, end]
+            - self.mesh_data.x_edge_coords[edge, start]
+        )
+        dy = (
+            self.mesh_data.y_edge_coords[edge, end]
+            - self.mesh_data.y_edge_coords[edge, start]
+        )
+        return math.atan2(dy, dx)
+
     def _find_starting_face(self, possible_cells: np.ndarray):
         """Find the starting face for a bank line segment.
 
@@ -347,13 +330,13 @@ class MeshProcessor:
         pnt = Point(self.bp[0])
         on_edge = []
         for k in possible_cells:
-            polygon_k = Polygon(_get_face_coordinates(self.mesh_data, k))
+            polygon_k = Polygon(self._get_face_coordinates(k))
             if polygon_k.contains(pnt):
                 if self.verbose:
                     print(f"starting in {k}")
                 self.index = k
                 break
-            nd = _get_face_coordinates(self.mesh_data, k)
+            nd = self._get_face_coordinates(k)
             line_k = LineString(np.concatenate([nd, nd[0:1]], axis=0))
             if line_k.contains(pnt):
                 on_edge.append(k)
@@ -385,10 +368,10 @@ class MeshProcessor:
         left_dtheta = twopi
         right_edge = -1
         right_dtheta = twopi
+        all_node_edges = np.nonzero((self.mesh_data.edge_node == node).any(axis=1))[0]
 
         if self.verbose and j is not None:
             print(f"{j}: the edges connected to node {node} are {all_node_edges}")
-        all_node_edges = np.nonzero((self.mesh_data.edge_node == node).any(axis=1))[0]
 
         for ie in all_node_edges:
             reverse = self.mesh_data.edge_node[ie, 0] != node
@@ -532,15 +515,35 @@ class MeshProcessor:
             index0 = faces[0] if len(edges) > 0 else faces[1]
         return index0
 
+    def _log_mesh_transition(
+        self, step, transition_type, transition_index, index0, prev_b
+    ):
+        """Helper to print mesh transition information for debugging.
+
+        Args:
+            step (int): The current step or iteration.
+            index (int): The current mesh face index.
+            vindex (int): The vertex index.
+            transition_type (str): The type of transition (e.g., "node", "edge").
+            transition_index (int): The index of the transition (e.g., the node or edge index).
+            index0 (int): The target mesh face index.
+            prev_b (float): The previous value of b.
+        """
+        index_str = "outside" if self.index == -1 else self.index
+        if self.index == -2:
+            index_str = f"edge between {self.vindex}"
+        print(
+            f"{step}: moving from {index_str} via {transition_type} {transition_index} "
+            f"to {index0} at b = {prev_b}"
+        )
+
     def _update_mesh_index_and_log(self, j, node, edge, faces, index0, prev_b):
         """
         Helper to update mesh index and log transitions for intersect_line_mesh.
         """
         if index0 is not None:
             if self.verbose:
-                _log_mesh_transition(
-                    j, self.index, self.vindex, "node", node, index0, prev_b
-                )
+                self._log_mesh_transition(j, "node", node, index0, prev_b)
             if isinstance(index0, (int, np.integer)):
                 self.index = index0
             elif hasattr(index0, "__len__") and len(index0) == 1:
@@ -554,9 +557,7 @@ class MeshProcessor:
             if face == self.index:
                 other_face = faces[1 - i]
                 if self.verbose:
-                    _log_mesh_transition(
-                        j, self.index, self.vindex, "edge", edge, other_face, prev_b
-                    )
+                    self._log_mesh_transition(j, "edge", edge, other_face, prev_b)
                 self.index = other_face
                 return
 
