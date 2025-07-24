@@ -7,7 +7,7 @@ from shapely.geometry import LineString, Point, Polygon
 
 from dfastbe.bank_erosion.data_models.calculation import MeshData
 
-__all__ = ["get_slices_ab", "enlarge", "intersect_line_mesh"]
+__all__ = ["get_slices_ab", "enlarge", "MeshProcessor"]
 
 
 def _get_slices(
@@ -587,198 +587,253 @@ def _handle_first_point(
     return crds, idx, ind, vindex, index
 
 
-def intersect_line_mesh(
-    bp: np.ndarray,
-    mesh_data: MeshData,
-    d_thresh: float = 0.001,
-) -> Tuple[np.ndarray, np.ndarray]:
-    """Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.
+class MeshProcessor:
+    """A class for processing mesh-related operations."""
 
-    This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.
-    It calculates the intersection points and identifies the mesh faces corresponding to each segment of the line.
+    def __init__(self, bank_points, mesh_data: MeshData, d_thresh: float = 0.001):
+        self.bp = bank_points
+        self.mesh_data = mesh_data
+        self.d_thresh = d_thresh
+        self.crds = np.zeros((len(bank_points), 2))
+        self.idx = np.zeros(len(bank_points), dtype=np.int64)
+        self.verbose = False
+        self.ind = 0
+        self.index: int
+        self.vindex: np.ndarray
 
-    Args:
-        bp (np.ndarray):
-            A 2D array of shape (N, 2) containing the x, y coordinates of the line to be intersected with the mesh.
-        mesh_data (MeshData):
-            An instance of the `MeshData` class containing mesh-related data, such as face coordinates, edge coordinates,
-            and connectivity information.
-        d_thresh (float, optional):
-            A distance threshold for filtering out very small segments. Segments shorter than this threshold will be removed.
-            Defaults to 0.001.
+    def intersect_line_mesh(self) -> Tuple[np.ndarray, np.ndarray]:
+        """Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.
 
-    Returns:
-        Tuple[np.ndarray, np.ndarray]:
-            A tuple containing:
-            - `crds` (np.ndarray): A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.
-            - `idx` (np.ndarray): A 1D array of shape (M-1,) containing the indices of the mesh faces corresponding to
-              each segment of the intersected line.
+        This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.
+        It calculates the intersection points and identifies the mesh faces corresponding to each segment of the line.
 
-    Raises:
-        Exception:
-            If the line starts outside the mesh and cannot be associated with any mesh face, or if the line crosses
-            ambiguous regions (e.g., edges shared by multiple faces).
+        Args:
+            bp (np.ndarray):
+                A 2D array of shape (N, 2) containing the x, y coordinates of the line to be intersected with the mesh.
+            mesh_data (MeshData):
+                An instance of the `MeshData` class containing mesh-related data, such as face coordinates, edge coordinates,
+                and connectivity information.
+            d_thresh (float, optional):
+                A distance threshold for filtering out very small segments. Segments shorter than this threshold will be removed.
+                Defaults to 0.001.
 
-    Notes:
-        - The function uses Shapely geometry operations to determine whether points are inside polygons or on edges.
-        - The function handles cases where the line starts outside the mesh, crosses multiple edges, or ends on a node.
-        - Tiny segments shorter than `d_thresh` are removed from the output.
-    """
-    crds = np.zeros((len(bp), 2))
-    idx = np.zeros(len(bp), dtype=np.int64)
-    verbose = False
-    ind = 0
-    index: int
-    vindex: np.ndarray
-    for j, bpj in enumerate(bp):
-        if verbose:
-            print(f"Current location: {bpj[0]}, {bpj[1]}")
-        if j == 0:
-            # first bp inside or outside?
-            crds, idx, ind, vindex, index = _handle_first_point(
-                ind, crds, idx, mesh_data, bpj, bp, verbose
-            )
-        else:
-            # second or later point
-            bpj1 = bp[j - 1]
-            prev_b = 0
-            while True:
-                if index == -2:
-                    index, vindex, b, edges, nodes = _resolve_ambiguous_edge_transition(
-                        vindex, prev_b, bpj, bpj1, mesh_data
-                    )
-                elif (bpj == bpj1).all():
-                    # this is a segment of length 0, skip it since it takes us nowhere
-                    break
-                else:
-                    b, edges, nodes = _get_slices(
-                        index,
-                        prev_b,
+        Returns:
+            Tuple[np.ndarray, np.ndarray]:
+                A tuple containing:
+                - `crds` (np.ndarray): A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.
+                - `idx` (np.ndarray): A 1D array of shape (M-1,) containing the indices of the mesh faces corresponding to
+                each segment of the intersected line.
+
+        Raises:
+            Exception:
+                If the line starts outside the mesh and cannot be associated with any mesh face, or if the line crosses
+                ambiguous regions (e.g., edges shared by multiple faces).
+
+        Notes:
+            - The function uses Shapely geometry operations to determine whether points are inside polygons or on edges.
+            - The function handles cases where the line starts outside the mesh, crosses multiple edges, or ends on a node.
+            - Tiny segments shorter than `d_thresh` are removed from the output.
+        """
+        for j, bpj in enumerate(self.bp):
+            if self.verbose:
+                print(f"Current location: {bpj[0]}, {bpj[1]}")
+            if j == 0:
+                # first bp inside or outside?
+                self.crds, self.idx, self.ind, self.vindex, self.index = (
+                    _handle_first_point(
+                        self.ind,
+                        self.crds,
+                        self.idx,
+                        self.mesh_data,
                         bpj,
-                        bpj1,
-                        mesh_data,
+                        self.bp,
+                        self.verbose,
                     )
-
-                if len(edges) == 0:
-                    # rest of segment associated with same face
-                    if verbose:
-                        _log_slice_status(j, prev_b, index, bpj, mesh_data)
-                    if ind == crds.shape[0]:
-                        crds = enlarge(crds, (2 * ind, 2))
-                        idx = enlarge(idx, (2 * ind,))
-                    crds[ind] = bpj
-                    idx[ind] = index
-                    ind += 1
-                    break
-                else:
-                    index0 = None
-                    if len(edges) > 1:
-                        # line segment crosses the edge list multiple times
-                        # - moving out of a cell at a corner node
-                        # - moving into and out of the mesh from outside
-                        # select first crossing ...
-                        bmin = b == np.amin(b)
-                        b = b[bmin]
-                        edges = edges[bmin]
-                        nodes = nodes[bmin]
-
-                    # slice location identified ...
-                    node = nodes[0]
-                    edge = edges[0]
-                    faces = mesh_data.edge_face_connectivity[edge]
-                    prev_b = b[0]
-
-                    if node >= 0:
-                        # if we slice at a node ...
-                        if verbose:
-                            print(
-                                f"{j}: moving via node {node} on edges {edges} at {b[0]}"
+                )
+            else:
+                # second or later point
+                bpj1 = self.bp[j - 1]
+                prev_b = 0
+                while True:
+                    if self.index == -2:
+                        self.index, self.vindex, b, edges, nodes = (
+                            _resolve_ambiguous_edge_transition(
+                                self.vindex, prev_b, bpj, bpj1, self.mesh_data
                             )
-                        # figure out where we will be heading afterwards ...
-                        all_node_edges = np.nonzero(
-                            (mesh_data.edge_node == node).any(axis=1)
-                        )[0]
-                        if b[0] < 1.0:
-                            # segment passes through node and enter non-neighbouring cell ...
-                            # direction of current segment from bpj1 to bpj
-                            theta = math.atan2(bpj[1] - bpj1[1], bpj[0] - bpj1[0])
-                        else:
-                            if b[0] == 1.0 and j == len(bp) - 1:
+                        )
+                    elif (bpj == bpj1).all():
+                        # this is a segment of length 0, skip it since it takes us nowhere
+                        break
+                    else:
+                        b, edges, nodes = _get_slices(
+                            self.index,
+                            prev_b,
+                            bpj,
+                            bpj1,
+                            self.mesh_data,
+                        )
+
+                    if len(edges) == 0:
+                        # rest of segment associated with same face
+                        if self.verbose:
+                            _log_slice_status(
+                                j, prev_b, self.index, bpj, self.mesh_data
+                            )
+                        if self.ind == self.crds.shape[0]:
+                            self.crds = enlarge(self.crds, (2 * self.ind, 2))
+                            self.idx = enlarge(self.idx, (2 * self.ind,))
+                        self.crds[self.ind] = bpj
+                        self.idx[self.ind] = self.index
+                        self.ind += 1
+                        break
+                    else:
+                        index0 = None
+                        if len(edges) > 1:
+                            # line segment crosses the edge list multiple times
+                            # - moving out of a cell at a corner node
+                            # - moving into and out of the mesh from outside
+                            # select first crossing ...
+                            bmin = b == np.amin(b)
+                            b = b[bmin]
+                            edges = edges[bmin]
+                            nodes = nodes[bmin]
+
+                        # slice location identified ...
+                        node = nodes[0]
+                        edge = edges[0]
+                        faces = self.mesh_data.edge_face_connectivity[edge]
+                        prev_b = b[0]
+
+                        if node >= 0:
+                            # if we slice at a node ...
+                            if self.verbose:
+                                print(
+                                    f"{j}: moving via node {node} on edges {edges} at {b[0]}"
+                                )
+                            # figure out where we will be heading afterwards ...
+                            all_node_edges = np.nonzero(
+                                (self.mesh_data.edge_node == node).any(axis=1)
+                            )[0]
+                            if b[0] < 1.0:
+                                # segment passes through node and enter non-neighbouring cell ...
+                                # direction of current segment from bpj1 to bpj
+                                theta = math.atan2(bpj[1] - bpj1[1], bpj[0] - bpj1[0])
+                            else:
+                                if b[0] == 1.0 and j == len(self.bp) - 1:
+                                    # catch case of last segment
+                                    if self.verbose:
+                                        print(f"{j}: last point ends in a node")
+                                    self.crds, self.idx, self.ind = _finalize_segment(
+                                        self.crds,
+                                        self.idx,
+                                        self.ind,
+                                        bpj,
+                                        self.index,
+                                        self.vindex,
+                                    )
+                                    break
+                                else:
+                                    # this segment ends in the node, so check next segment ...
+                                    # direction of next segment from bpj to bp[j+1]
+                                    theta = math.atan2(
+                                        self.bp[j + 1][1] - bpj[1],
+                                        self.bp[j + 1][0] - self.bp[j][0],
+                                    )
+                            if self.verbose:
+                                print(f"{j}: moving in direction theta = {theta}")
+                            left_edge, right_edge = _find_left_right_edges(
+                                theta,
+                                all_node_edges,
+                                self.mesh_data,
+                                node,
+                                j,
+                                self.verbose,
+                            )
+                            if self.verbose:
+                                print(f"{j}: the edge to the left is edge {left_edge}")
+                                print(
+                                    f"{j}: the edge to the right is edge {right_edge}"
+                                )
+                            if left_edge == right_edge:
+                                if self.verbose:
+                                    print(f"{j}: continue along edge {left_edge}")
+                                index0 = self.mesh_data.edge_face_connectivity[
+                                    left_edge, :
+                                ]
+                            else:
+                                if self.verbose:
+                                    print(
+                                        f"{j}: continue between edges {left_edge} on the left and {right_edge} on the right"
+                                    )
+                                index0 = _resolve_next_face_from_edges(
+                                    node,
+                                    left_edge,
+                                    right_edge,
+                                    self.mesh_data,
+                                    j,
+                                    self.verbose,
+                                )
+
+                        elif b[0] == 1:
+                            # ending at slice point, so ending on an edge ...
+                            if self.verbose:
+                                print(f"{j}: ending on edge {edge} at {b[0]}")
+                            # figure out where we will be heading afterwards ...
+                            if j == len(self.bp) - 1:
                                 # catch case of last segment
-                                if verbose:
-                                    print(f"{j}: last point ends in a node")
-                                crds, idx, ind = _finalize_segment(
-                                    crds, idx, ind, bpj, index, vindex
+                                if self.verbose:
+                                    print(f"{j}: last point ends on an edge")
+                                self.crds, self.idx, self.ind = _finalize_segment(
+                                    self.crds,
+                                    self.idx,
+                                    self.ind,
+                                    bpj,
+                                    self.index,
+                                    self.vindex,
                                 )
                                 break
-                            else:
-                                # this segment ends in the node, so check next segment ...
-                                # direction of next segment from bpj to bp[j+1]
-                                theta = math.atan2(
-                                    bp[j + 1][1] - bpj[1], bp[j + 1][0] - bp[j][0]
-                                )
-                        if verbose:
-                            print(f"{j}: moving in direction theta = {theta}")
-                        left_edge, right_edge = _find_left_right_edges(
-                            theta, all_node_edges, mesh_data, node, j, verbose
+                            index0 = _determine_next_face_on_edge(
+                                self.bp,
+                                bpj,
+                                j,
+                                edge,
+                                faces,
+                                self.mesh_data,
+                                self.verbose,
+                            )
+
+                        self.index, self.vindex = _update_mesh_index_and_log(
+                            j,
+                            self.index,
+                            self.vindex,
+                            node,
+                            edge,
+                            faces,
+                            index0,
+                            prev_b,
+                            self.verbose,
                         )
-                        if verbose:
-                            print(f"{j}: the edge to the left is edge {left_edge}")
-                            print(f"{j}: the edge to the right is edge {right_edge}")
-                        if left_edge == right_edge:
-                            if verbose:
-                                print(f"{j}: continue along edge {left_edge}")
-                            index0 = mesh_data.edge_face_connectivity[left_edge, :]
+                        if self.ind == self.crds.shape[0]:
+                            self.crds = enlarge(self.crds, (2 * self.ind, 2))
+                            self.idx = enlarge(self.idx, (2 * self.ind,))
+                        self.crds[self.ind] = bpj1 + prev_b * (bpj - bpj1)
+                        if self.index == -2:
+                            self.idx[self.ind] = self.vindex[0]
                         else:
-                            if verbose:
-                                print(
-                                    f"{j}: continue between edges {left_edge} on the left and {right_edge} on the right"
-                                )
-                            index0 = _resolve_next_face_from_edges(
-                                node, left_edge, right_edge, mesh_data, j, verbose
-                            )
-
-                    elif b[0] == 1:
-                        # ending at slice point, so ending on an edge ...
-                        if verbose:
-                            print(f"{j}: ending on edge {edge} at {b[0]}")
-                        # figure out where we will be heading afterwards ...
-                        if j == len(bp) - 1:
-                            # catch case of last segment
-                            if verbose:
-                                print(f"{j}: last point ends on an edge")
-                            crds, idx, ind = _finalize_segment(
-                                crds, idx, ind, bpj, index, vindex
-                            )
+                            self.idx[self.ind] = self.index
+                        self.ind += 1
+                        if prev_b == 1:
                             break
-                        index0 = _determine_next_face_on_edge(
-                            bp, bpj, j, edge, faces, mesh_data, verbose
-                        )
 
-                    index, vindex = _update_mesh_index_and_log(
-                        j, index, vindex, node, edge, faces, index0, prev_b, verbose
-                    )
-                    if ind == crds.shape[0]:
-                        crds = enlarge(crds, (2 * ind, 2))
-                        idx = enlarge(idx, (2 * ind,))
-                    crds[ind] = bpj1 + prev_b * (bpj - bpj1)
-                    if index == -2:
-                        idx[ind] = vindex[0]
-                    else:
-                        idx[ind] = index
-                    ind += 1
-                    if prev_b == 1:
-                        break
+        # clip to actual length (idx refers to segments, so we can ignore the last value)
+        self.crds = self.crds[: self.ind]
+        self.idx = self.idx[: self.ind - 1]
 
-    # clip to actual length (idx refers to segments, so we can ignore the last value)
-    crds = crds[:ind]
-    idx = idx[: ind - 1]
+        # remove tiny segments
+        d = np.sqrt((np.diff(self.crds, axis=0) ** 2).sum(axis=1))
+        mask = np.concatenate((np.ones((1), dtype="bool"), d > self.d_thresh))
+        self.crds = self.crds[mask, :]
+        self.idx = self.idx[mask[1:]]
 
-    # remove tiny segments
-    d = np.sqrt((np.diff(crds, axis=0) ** 2).sum(axis=1))
-    mask = np.concatenate((np.ones((1), dtype="bool"), d > d_thresh))
-    crds = crds[mask, :]
-    idx = idx[mask[1:]]
-
-    # since index refers to segments, don't return the first one
-    return crds, idx
+        # since index refers to segments, don't return the first one
+        return self.crds, self.idx

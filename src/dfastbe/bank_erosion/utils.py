@@ -15,11 +15,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
     SingleParameters,
 )
 from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData
-from dfastbe.bank_erosion.mesh_processor import (
-    enlarge,
-    get_slices_ab,
-    intersect_line_mesh,
-)
+from dfastbe.bank_erosion.mesh_processor import MeshProcessor, enlarge, get_slices_ab
 from dfastbe.io.data_models import LineGeometry
 from dfastbe.io.logger import log_text
 from dfastbe.utils import on_right_side
@@ -51,9 +47,9 @@ class BankLinesProcessor:
             line_coords = np.array(self.bank_lines.geometry[bank_index].coords)
             log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
 
-            coords_along_bank, face_indices = intersect_line_mesh(
+            coords_along_bank, face_indices = MeshProcessor(
                 line_coords, mesh_data
-            )
+            ).intersect_line_mesh()
             bank_line_coords.append(coords_along_bank)
             bank_face_indices.append(face_indices)
 
