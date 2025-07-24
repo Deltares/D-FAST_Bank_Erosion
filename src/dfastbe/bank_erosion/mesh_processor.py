@@ -379,7 +379,9 @@ def _log_slice_status(j, prev_b, index, bpj, mesh_data):
         pnt = Point(bpj)
         polygon_k = Polygon(_get_face_coordinates(mesh_data, index))
         if not polygon_k.contains(pnt):
-            raise Exception(f"{j}: ERROR: point actually not contained within {index}!")
+            raise ValueError(
+                f"{j}: ERROR: point actually not contained within {index}!"
+            )
 
 
 def update_mesh_index_and_log(
@@ -406,7 +408,7 @@ def update_mesh_index_and_log(
             _log_mesh_transition(j, index, vindex, "edge", edge, faces[0], prev_b)
         return faces[0], vindex
     else:
-        raise Exception(
+        raise ValueError(
             f"Shouldn't come here .... index {index} differs from both faces "
             f"{faces[0]} and {faces[1]} associated with slicing edge {edge}"
         )
