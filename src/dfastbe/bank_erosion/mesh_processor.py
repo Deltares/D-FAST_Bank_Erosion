@@ -1,6 +1,6 @@
 """module for processing mesh-related operations."""
 import math
-from typing import List, Optional, Tuple
+from typing import Tuple
 
 import numpy as np
 from shapely.geometry import LineString, Point, Polygon
@@ -267,10 +267,10 @@ class MeshProcessor:
         self.ind += 1
 
     def _get_face_coordinates(self, index: int) -> np.ndarray:
-        """Returns the coordinates of the k-th mesh face as an (N, 2) array.
+        """Returns the coordinates of the index-th mesh face as an (N, 2) array.
 
         Args:
-            k (int): The face index.
+            index (int): The face index.
 
         Returns:
             np.ndarray: Array of shape (n_nodes, 2) with x, y coordinates.
@@ -375,7 +375,7 @@ class MeshProcessor:
 
         for ie in all_node_edges:
             reverse = self.mesh_data.edge_node[ie, 0] != node
-            theta_edge = _edge_angle(self.mesh_data, ie, reverse=reverse)
+            theta_edge = self._edge_angle(ie, reverse=reverse)
             if self.verbose and j is not None:
                 print(f"{j}: edge {ie} connects {self.mesh_data.edge_node[ie, :]}")
                 print(f"{j}: edge {ie} theta is {theta_edge}")
@@ -498,7 +498,7 @@ class MeshProcessor:
         theta = math.atan2(self.bp[j + 1][1] - bpj[1], self.bp[j + 1][0] - bpj[0])
         if self.verbose:
             print(f"{j}: moving in direction theta = {theta}")
-        theta_edge = _edge_angle(self.mesh_data, edge)
+        theta_edge = self._edge_angle(edge)
         if theta == theta_edge or theta == -theta_edge:
             if self.verbose:
                 print(f"{j}: continue along edge {edge}")
@@ -573,7 +573,7 @@ class MeshProcessor:
             print(f"{j}: -- no slices along this segment --")
         if self.index >= 0:
             pnt = Point(bpj)
-            polygon_k = Polygon(_get_face_coordinates(self.mesh_data, self.index))
+            polygon_k = Polygon(self._get_face_coordinates(self.index))
             if not polygon_k.contains(pnt):
                 raise ValueError(
                     f"{j}: ERROR: point actually not contained within {self.index}!"
