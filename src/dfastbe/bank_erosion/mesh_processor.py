@@ -456,6 +456,51 @@ def _finalize_segment(crds, idx, ind, bpj, index, vindex):
     return crds, idx, ind
 
 
+def _resolve_next_face_from_edges(
+    node, left_edge, right_edge, mesh_data, j=None, verbose=False
+):
+    """
+    Helper to resolve the next face index when traversing between two edges at a node.
+
+    Args:
+        node (int): The node index.
+        left_edge (int): The edge index to the left.
+        right_edge (int): The edge index to the right.
+        mesh_data (MeshData): The mesh data object.
+        j (int, optional): Step index for verbose output.
+        verbose (bool): If True, prints debug information.
+
+    Returns:
+        int: The next face index.
+    """
+    left_faces = mesh_data.edge_face_connectivity[left_edge, :]
+    right_faces = mesh_data.edge_face_connectivity[right_edge, :]
+
+    if left_faces[0] in right_faces and left_faces[1] in right_faces:
+        fn1 = mesh_data.face_node[left_faces[0]]
+        fe1 = mesh_data.face_edge_connectivity[left_faces[0]]
+        if verbose and j is not None:
+            print(f"{j}: those edges are shared by two faces: {left_faces}")
+            print(f"{j}: face {left_faces[0]} has nodes: {fn1}")
+            print(f"{j}: face {left_faces[0]} has edges: {fe1}")
+        # nodes of the face should be listed in clockwise order
+        # edges[i] is the edge connecting node[i-1] with node[i]
+        # the latter is guaranteed by batch.derive_topology_arrays
+        if fe1[fn1 == node] == right_edge:
+            index = left_faces[0]
+        else:
+            index = left_faces[1]
+    elif left_faces[0] in right_faces:
+        index = left_faces[0]
+    elif left_faces[1] in right_faces:
+        index = left_faces[1]
+    else:
+        raise ValueError(
+            f"Shouldn't come here .... left edge {left_edge} and right edge {right_edge} don't share any face"
+        )
+    return index
+
+
 def intersect_line_mesh(
     bp: np.ndarray,
     mesh_data: MeshData,
@@ -654,38 +699,9 @@ def intersect_line_mesh(
                                 print(
                                     f"{j}: continue between edges {left_edge} on the left and {right_edge} on the right"
                                 )
-                            left_faces = mesh_data.edge_face_connectivity[left_edge, :]
-                            right_faces = mesh_data.edge_face_connectivity[
-                                          right_edge, :
-                                          ]
-                            if (
-                                    left_faces[0] in right_faces
-                                    and left_faces[1] in right_faces
-                            ):
-                                # the two edges are shared by two faces ... check first face
-                                fn1 = mesh_data.face_node[left_faces[0]]
-                                fe1 = mesh_data.face_edge_connectivity[left_faces[0]]
-                                if verbose:
-                                    print(
-                                        f"{j}: those edges are shared by two faces: {left_faces}"
-                                    )
-                                    print(f"{j}: face {left_faces[0]} has nodes: {fn1}")
-                                    print(f"{j}: face {left_faces[0]} has edges: {fe1}")
-                                # here we need that the nodes of the face are listed in clockwise order
-                                # and that edges[i] is the edge connecting node[i-1] with node[i]
-                                # the latter is guaranteed by batch.derive_topology_arrays
-                                if fe1[fn1 == node] == right_edge:
-                                    index0 = left_faces[0]
-                                else:
-                                    index0 = left_faces[1]
-                            elif left_faces[0] in right_faces:
-                                index0 = left_faces[0]
-                            elif left_faces[1] in right_faces:
-                                index0 = left_faces[1]
-                            else:
-                                raise Exception(
-                                    f"Shouldn't come here .... left edge {left_edge} and right edge {right_edge} don't share any face"
-                                )
+                            index0 = _resolve_next_face_from_edges(
+                                node, left_edge, right_edge, mesh_data, j, verbose
+                            )
 
                     elif b[0] == 1:
                         # ending at slice point, so ending on an edge ...
