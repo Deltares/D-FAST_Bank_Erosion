@@ -501,69 +501,6 @@ def _resolve_next_face_from_edges(
     return index
 
 
-def _find_left_right_edges(
-    theta, all_node_edges, mesh_data, node, j=None, verbose=False
-):
-    """
-    Helper to find the left and right edges at a node based on the direction theta.
-
-    Args:
-        theta (float): Direction angle of the segment.
-        all_node_edges (np.ndarray): Array of edge indices connected to the node.
-        mesh_data (MeshData): Mesh data object.
-        node (int): The node index.
-        j (int, optional): Step index for verbose output.
-        verbose (bool): If True, prints debug information.
-
-    Returns:
-        Tuple[int, int]: Indices of the left and right edges.
-    """
-    twopi = 2 * math.pi
-    left_edge = -1
-    left_dtheta = twopi
-    right_edge = -1
-    right_dtheta = twopi
-
-    if verbose and j is not None:
-        print(f"{j}: the edges connected to node {node} are {all_node_edges}")
-
-    for ie in all_node_edges:
-        reverse = mesh_data.edge_node[ie, 0] != node
-        theta_edge = _edge_angle(mesh_data, ie, reverse=reverse)
-        if verbose and j is not None:
-            print(f"{j}: edge {ie} connects {mesh_data.edge_node[ie, :]}")
-            print(f"{j}: edge {ie} theta is {theta_edge}")
-        dtheta = theta_edge - theta
-        if dtheta > 0:
-            if dtheta < left_dtheta:
-                left_edge = ie
-                left_dtheta = dtheta
-            if twopi - dtheta < right_dtheta:
-                right_edge = ie
-                right_dtheta = twopi - dtheta
-        elif dtheta < 0:
-            dtheta = -dtheta
-            if twopi - dtheta < left_dtheta:
-                left_edge = ie
-                left_dtheta = twopi - dtheta
-            if dtheta < right_dtheta:
-                right_edge = ie
-                right_dtheta = dtheta
-        else:
-            # aligned with edge
-            if verbose and j is not None:
-                print(f"{j}: line is aligned with edge {ie}")
-            left_edge = ie
-            right_edge = ie
-            break
-
-    if verbose and j is not None:
-        print(f"{j}: the edge to the left is edge {left_edge}")
-        print(f"{j}: the edge to the right is edge {right_edge}")
-
-    return left_edge, right_edge
-
-
 class MeshProcessor:
     """A class for processing mesh-related operations."""
 
@@ -598,6 +535,67 @@ class MeshProcessor:
         else:
             self.idx[self.ind] = self.index
         self.ind += 1
+
+    def _find_left_right_edges(self, theta, node, j=None):
+        """
+        Helper to find the left and right edges at a node based on the direction theta.
+
+        Args:
+            theta (float): Direction angle of the segment.
+            all_node_edges (np.ndarray): Array of edge indices connected to the node.
+            mesh_data (MeshData): Mesh data object.
+            node (int): The node index.
+            j (int, optional): Step index for verbose output.
+            verbose (bool): If True, prints debug information.
+
+        Returns:
+            Tuple[int, int]: Indices of the left and right edges.
+        """
+        twopi = 2 * math.pi
+        left_edge = -1
+        left_dtheta = twopi
+        right_edge = -1
+        right_dtheta = twopi
+
+        if self.verbose and j is not None:
+            print(f"{j}: the edges connected to node {node} are {all_node_edges}")
+        all_node_edges = np.nonzero((self.mesh_data.edge_node == node).any(axis=1))[0]
+
+        for ie in all_node_edges:
+            reverse = self.mesh_data.edge_node[ie, 0] != node
+            theta_edge = _edge_angle(self.mesh_data, ie, reverse=reverse)
+            if self.verbose and j is not None:
+                print(f"{j}: edge {ie} connects {self.mesh_data.edge_node[ie, :]}")
+                print(f"{j}: edge {ie} theta is {theta_edge}")
+            dtheta = theta_edge - theta
+            if dtheta > 0:
+                if dtheta < left_dtheta:
+                    left_edge = ie
+                    left_dtheta = dtheta
+                if twopi - dtheta < right_dtheta:
+                    right_edge = ie
+                    right_dtheta = twopi - dtheta
+            elif dtheta < 0:
+                dtheta = -dtheta
+                if twopi - dtheta < left_dtheta:
+                    left_edge = ie
+                    left_dtheta = twopi - dtheta
+                if dtheta < right_dtheta:
+                    right_edge = ie
+                    right_dtheta = dtheta
+            else:
+                # aligned with edge
+                if self.verbose and j is not None:
+                    print(f"{j}: line is aligned with edge {ie}")
+                left_edge = ie
+                right_edge = ie
+                break
+
+        if self.verbose and j is not None:
+            print(f"{j}: the edge to the left is edge {left_edge}")
+            print(f"{j}: the edge to the right is edge {right_edge}")
+
+        return left_edge, right_edge
 
     def intersect_line_mesh(self) -> Tuple[np.ndarray, np.ndarray]:
         """Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.
@@ -698,9 +696,6 @@ class MeshProcessor:
                                     f"{j}: moving via node {node} on edges {edges} at {b[0]}"
                                 )
                             # figure out where we will be heading afterwards ...
-                            all_node_edges = np.nonzero(
-                                (self.mesh_data.edge_node == node).any(axis=1)
-                            )[0]
                             if b[0] < 1.0:
                                 # segment passes through node and enter non-neighbouring cell ...
                                 # direction of current segment from bpj1 to bpj
@@ -728,10 +723,8 @@ class MeshProcessor:
                                     )
                             if self.verbose:
                                 print(f"{j}: moving in direction theta = {theta}")
-                            left_edge, right_edge = _find_left_right_edges(
+                            left_edge, right_edge = self._find_left_right_edges(
                                 theta,
-                                all_node_edges,
-                                self.mesh_data,
                                 node,
                                 j,
                                 self.verbose,
