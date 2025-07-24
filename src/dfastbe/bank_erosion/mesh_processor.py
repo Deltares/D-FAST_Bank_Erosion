@@ -721,7 +721,9 @@ class MeshProcessor:
 
                     if node >= 0:
                         # if we slice at a node ...
-                        end, index0 = self._handle_node_transition()
+                        end, index0 = self._handle_node_transition(
+                            j, bpj, bpj1, b, edges, node
+                        )
                         if end:
                             break
 
