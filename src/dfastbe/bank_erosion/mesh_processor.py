@@ -564,6 +564,29 @@ def _find_left_right_edges(
     return left_edge, right_edge
 
 
+def _handle_first_point(
+    ind, crds, idx, mesh_data: MeshData, bpj: np.ndarray, bp, verbose
+) -> Tuple[np.ndarray, np.ndarray, int, np.ndarray]:
+    dx = mesh_data.x_face_coords - bpj[0]
+    dy = mesh_data.y_face_coords - bpj[1]
+    possible_cells = np.nonzero(
+        ~(
+            (dx < 0).all(axis=1)
+            | (dx > 0).all(axis=1)
+            | (dy < 0).all(axis=1)
+            | (dy > 0).all(axis=1)
+        )
+    )[0]
+    index, vindex = _find_starting_face(possible_cells, bp, mesh_data, verbose)
+    crds[ind] = bpj
+    if index == -2:
+        idx[ind] = vindex[0]
+    else:
+        idx[ind] = index
+    ind += 1
+    return crds, idx, ind, vindex, index
+
+
 def intersect_line_mesh(
     bp: np.ndarray,
     mesh_data: MeshData,
@@ -612,23 +635,9 @@ def intersect_line_mesh(
             print(f"Current location: {bpj[0]}, {bpj[1]}")
         if j == 0:
             # first bp inside or outside?
-            dx = mesh_data.x_face_coords - bpj[0]
-            dy = mesh_data.y_face_coords - bpj[1]
-            possible_cells = np.nonzero(
-                ~(
-                    (dx < 0).all(axis=1)
-                    | (dx > 0).all(axis=1)
-                    | (dy < 0).all(axis=1)
-                    | (dy > 0).all(axis=1)
-                )
-            )[0]
-            index, vindex = _find_starting_face(possible_cells, bp, mesh_data, verbose)
-            crds[ind] = bpj
-            if index == -2:
-                idx[ind] = vindex[0]
-            else:
-                idx[ind] = index
-            ind += 1
+            crds, idx, ind, vindex, index = _handle_first_point(
+                ind, crds, idx, mesh_data, bpj, bp, verbose
+            )
         else:
             # second or later point
             bpj1 = bp[j - 1]
