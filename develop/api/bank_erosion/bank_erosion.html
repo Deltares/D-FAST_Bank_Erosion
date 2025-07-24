@@ -1495,24 +1495,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dfastbe.bank_erosion.mesh_processor.resolve_ambiguous_edge_transition" class="md-nav__link">
-    <span class="md-ellipsis">
-      resolve_ambiguous_edge_transition
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dfastbe.bank_erosion.mesh_processor.update_mesh_index_and_log" class="md-nav__link">
-    <span class="md-ellipsis">
-      update_mesh_index_and_log
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#debugging-utilities" class="md-nav__link">
     <span class="md-ellipsis">
       Debugging Utilities
@@ -2595,24 +2577,6 @@
   <a href="#dfastbe.bank_erosion.mesh_processor.intersect_line_mesh" class="md-nav__link">
     <span class="md-ellipsis">
       intersect_line_mesh
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dfastbe.bank_erosion.mesh_processor.resolve_ambiguous_edge_transition" class="md-nav__link">
-    <span class="md-ellipsis">
-      resolve_ambiguous_edge_transition
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dfastbe.bank_erosion.mesh_processor.update_mesh_index_and_log" class="md-nav__link">
-    <span class="md-ellipsis">
-      update_mesh_index_and_log
     </span>
   </a>
   
@@ -6203,33 +6167,7 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 </details>
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/mesh_processor.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">433</span>
-<span class="normal">434</span>
-<span class="normal">435</span>
-<span class="normal">436</span>
-<span class="normal">437</span>
-<span class="normal">438</span>
-<span class="normal">439</span>
-<span class="normal">440</span>
-<span class="normal">441</span>
-<span class="normal">442</span>
-<span class="normal">443</span>
-<span class="normal">444</span>
-<span class="normal">445</span>
-<span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span>
-<span class="normal">451</span>
-<span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span>
-<span class="normal">455</span>
-<span class="normal">456</span>
-<span class="normal">457</span>
-<span class="normal">458</span>
-<span class="normal">459</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">459</span>
 <span class="normal">460</span>
 <span class="normal">461</span>
 <span class="normal">462</span>
@@ -6501,7 +6439,9 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 <span class="normal">728</span>
 <span class="normal">729</span>
 <span class="normal">730</span>
-<span class="normal">731</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_line_mesh</span><span class="p">(</span>
+<span class="normal">731</span>
+<span class="normal">732</span>
+<span class="normal">733</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_line_mesh</span><span class="p">(</span>
     <span class="n">bp</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">mesh_data</span><span class="p">:</span> <span class="n">MeshData</span><span class="p">,</span>
     <span class="n">d_thresh</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span><span class="p">,</span>
@@ -6572,7 +6512,7 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
             <span class="n">prev_b</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span>
-                    <span class="n">index</span><span class="p">,</span> <span class="n">vindex</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">resolve_ambiguous_edge_transition</span><span class="p">(</span>
+                    <span class="n">index</span><span class="p">,</span> <span class="n">vindex</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">_resolve_ambiguous_edge_transition</span><span class="p">(</span>
                         <span class="n">vindex</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">,</span> <span class="n">bpj</span><span class="p">,</span> <span class="n">bpj1</span><span class="p">,</span> <span class="n">mesh_data</span>
                     <span class="p">)</span>
                 <span class="k">elif</span> <span class="p">(</span><span class="n">bpj</span> <span class="o">==</span> <span class="n">bpj1</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
@@ -6745,35 +6685,11 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
                                 <span class="n">crds</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">ind</span><span class="p">,</span> <span class="n">bpj</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">vindex</span>
                             <span class="p">)</span>
                             <span class="k">break</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="c1"># this segment ends on the edge, so check next segment ...</span>
-                            <span class="c1"># direction of next segment from bpj to bp[j+1]</span>
-                            <span class="n">theta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span>
-                                <span class="n">bp</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">bpj</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bp</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">bp</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
-                            <span class="p">)</span>
-                        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: moving in direction theta = </span><span class="si">{</span><span class="n">theta</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                        <span class="n">theta_edge</span> <span class="o">=</span> <span class="n">_edge_angle</span><span class="p">(</span><span class="n">mesh_data</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">theta</span> <span class="o">==</span> <span class="n">theta_edge</span> <span class="ow">or</span> <span class="n">theta</span> <span class="o">==</span> <span class="o">-</span><span class="n">theta_edge</span><span class="p">:</span>
-                            <span class="c1"># aligned with edge</span>
-                            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-                                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: continue along edge </span><span class="si">{</span><span class="n">edge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                            <span class="n">index0</span> <span class="o">=</span> <span class="n">faces</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="c1"># check whether the (extended) segment slices any edge of faces[0]</span>
-                            <span class="n">fe1</span> <span class="o">=</span> <span class="n">mesh_data</span><span class="o">.</span><span class="n">face_edge_connectivity</span><span class="p">[</span><span class="n">faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-                            <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">_get_slices_core</span><span class="p">(</span>
-                                <span class="n">fe1</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">,</span> <span class="n">bpj</span><span class="p">,</span> <span class="n">bp</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">False</span>
-                            <span class="p">)</span>
-                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                                <span class="c1"># yes, a slice (typically 1, but could be 2 if it slices at a node</span>
-                                <span class="c1"># but that doesn&#39;t matter) ... so, we continue towards faces[0]</span>
-                                <span class="n">index0</span> <span class="o">=</span> <span class="n">faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                            <span class="k">else</span><span class="p">:</span>
-                                <span class="c1"># no slice for faces[0], so we must be going in the other direction</span>
-                                <span class="n">index0</span> <span class="o">=</span> <span class="n">faces</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="n">index0</span> <span class="o">=</span> <span class="n">_determine_next_face_on_edge</span><span class="p">(</span>
+                            <span class="n">bp</span><span class="p">,</span> <span class="n">bpj</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">,</span> <span class="n">verbose</span>
+                        <span class="p">)</span>
 
-                    <span class="n">index</span><span class="p">,</span> <span class="n">vindex</span> <span class="o">=</span> <span class="n">update_mesh_index_and_log</span><span class="p">(</span>
+                    <span class="n">index</span><span class="p">,</span> <span class="n">vindex</span> <span class="o">=</span> <span class="n">_update_mesh_index_and_log</span><span class="p">(</span>
                         <span class="n">j</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">vindex</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">index0</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">,</span> <span class="n">verbose</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">ind</span> <span class="o">==</span> <span class="n">crds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
@@ -6800,158 +6716,6 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 
     <span class="c1"># since index refers to segments, don&#39;t return the first one</span>
     <span class="k">return</span> <span class="n">crds</span><span class="p">,</span> <span class="n">idx</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="dfastbe.bank_erosion.mesh_processor.resolve_ambiguous_edge_transition" class="doc doc-heading"><a href="#dfastbe.bank_erosion.mesh_processor.resolve_ambiguous_edge_transition" class="toclink">
-            <code class="highlight language-python"><span class="n">resolve_ambiguous_edge_transition</span><span class="p">(</span><span class="n">vindex</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">,</span> <span class="n">bpj</span><span class="p">,</span> <span class="n">bpj1</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">)</span></code>
-
-</a><a href="#dfastbe.bank_erosion.mesh_processor.resolve_ambiguous_edge_transition" class="headerlink" title="Permanent link">#</a></h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces.</p>
-
-            <details class="quote">
-              <summary>Source code in <code>src/dfastbe/bank_erosion/mesh_processor.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
-<span class="normal">346</span>
-<span class="normal">347</span>
-<span class="normal">348</span>
-<span class="normal">349</span>
-<span class="normal">350</span>
-<span class="normal">351</span>
-<span class="normal">352</span>
-<span class="normal">353</span>
-<span class="normal">354</span>
-<span class="normal">355</span>
-<span class="normal">356</span>
-<span class="normal">357</span>
-<span class="normal">358</span>
-<span class="normal">359</span>
-<span class="normal">360</span>
-<span class="normal">361</span>
-<span class="normal">362</span>
-<span class="normal">363</span>
-<span class="normal">364</span>
-<span class="normal">365</span>
-<span class="normal">366</span>
-<span class="normal">367</span>
-<span class="normal">368</span>
-<span class="normal">369</span>
-<span class="normal">370</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">resolve_ambiguous_edge_transition</span><span class="p">(</span><span class="n">vindex</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">,</span> <span class="n">bpj</span><span class="p">,</span> <span class="n">bpj1</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces.&quot;&quot;&quot;</span>
-    <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-    <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-    <span class="n">index_src</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">vindex</span><span class="p">:</span>
-        <span class="n">b1</span><span class="p">,</span> <span class="n">edges1</span><span class="p">,</span> <span class="n">nodes1</span> <span class="o">=</span> <span class="n">_get_slices</span><span class="p">(</span>
-            <span class="n">i</span><span class="p">,</span>
-            <span class="n">prev_b</span><span class="p">,</span>
-            <span class="n">bpj</span><span class="p">,</span>
-            <span class="n">bpj1</span><span class="p">,</span>
-            <span class="n">mesh_data</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">b</span><span class="p">,</span> <span class="n">b1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">edges</span><span class="p">,</span> <span class="n">edges1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">nodes</span><span class="p">,</span> <span class="n">nodes1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">index_src</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">index_src</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">0</span> <span class="o">*</span> <span class="n">edges1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-    <span class="n">edges</span><span class="p">,</span> <span class="n">id_edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="n">return_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="n">id_edges</span><span class="p">]</span>
-    <span class="n">nodes</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">id_edges</span><span class="p">]</span>
-    <span class="n">index_src</span> <span class="o">=</span> <span class="n">index_src</span><span class="p">[</span><span class="n">id_edges</span><span class="p">]</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">index_src</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="n">index_src</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">vindex</span> <span class="o">=</span> <span class="n">index_src</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span>
-    <span class="k">return</span> <span class="n">index</span><span class="p">,</span> <span class="n">vindex</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">nodes</span>
-</code></pre></div></td></tr></table></div>
-            </details>
-    </div>
-
-</div>
-
-<div class="doc doc-object doc-function">
-
-
-<h3 id="dfastbe.bank_erosion.mesh_processor.update_mesh_index_and_log" class="doc doc-heading"><a href="#dfastbe.bank_erosion.mesh_processor.update_mesh_index_and_log" class="toclink">
-            <code class="highlight language-python"><span class="n">update_mesh_index_and_log</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">vindex</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">index0</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">,</span> <span class="n">verbose</span><span class="p">)</span></code>
-
-</a><a href="#dfastbe.bank_erosion.mesh_processor.update_mesh_index_and_log" class="headerlink" title="Permanent link">#</a></h3>
-
-
-    <div class="doc doc-contents ">
-
-        <p>Helper to update mesh index and log transitions for intersect_line_mesh.</p>
-
-            <details class="quote">
-              <summary>Source code in <code>src/dfastbe/bank_erosion/mesh_processor.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span>
-<span class="normal">394</span>
-<span class="normal">395</span>
-<span class="normal">396</span>
-<span class="normal">397</span>
-<span class="normal">398</span>
-<span class="normal">399</span>
-<span class="normal">400</span>
-<span class="normal">401</span>
-<span class="normal">402</span>
-<span class="normal">403</span>
-<span class="normal">404</span>
-<span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span>
-<span class="normal">410</span>
-<span class="normal">411</span>
-<span class="normal">412</span>
-<span class="normal">413</span>
-<span class="normal">414</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_mesh_index_and_log</span><span class="p">(</span>
-    <span class="n">j</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">vindex</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">index0</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">,</span> <span class="n">verbose</span>
-<span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Helper to update mesh index and log transitions for intersect_line_mesh.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">index0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="n">_log_mesh_transition</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">vindex</span><span class="p">,</span> <span class="s2">&quot;node&quot;</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">index0</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index0</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
-            <span class="k">return</span> <span class="n">index0</span><span class="p">,</span> <span class="n">vindex</span>
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">index0</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">index0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">index0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vindex</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="n">index0</span>
-    <span class="k">elif</span> <span class="n">faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">index</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="n">_log_mesh_transition</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">vindex</span><span class="p">,</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">faces</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">prev_b</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">faces</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">vindex</span>
-    <span class="k">elif</span> <span class="n">faces</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">index</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
-            <span class="n">_log_mesh_transition</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">vindex</span><span class="p">,</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">faces</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">prev_b</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">faces</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">vindex</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Shouldn&#39;t come here .... index </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2"> differs from both faces &quot;</span>
-            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">faces</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2"> associated with slicing edge </span><span class="si">{</span><span class="n">edge</span><span class="si">}</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
