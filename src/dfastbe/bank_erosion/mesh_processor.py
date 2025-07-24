@@ -341,10 +341,7 @@ def _find_starting_face(
 
 
 def resolve_ambiguous_edge_transition(vindex, prev_b, bpj, bpj1, mesh_data):
-    """
-    Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces.
-    Returns updated index, vindex, b, edges, nodes, index_src.
-    """
+    """Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces."""
     b = np.zeros(0)
     edges = np.zeros(0, dtype=np.int64)
     nodes = np.zeros(0, dtype=np.int64)
@@ -371,6 +368,18 @@ def resolve_ambiguous_edge_transition(vindex, prev_b, bpj, bpj1, mesh_data):
     else:
         index = -2
     return index, vindex, b, edges, nodes
+
+
+def _log_slice_status(j, prev_b, index, bpj, mesh_data):
+    if prev_b > 0:
+        print(f"{j}: -- no further slices along this segment --")
+    else:
+        print(f"{j}: -- no slices along this segment --")
+    if index >= 0:
+        pnt = Point(bpj)
+        polygon_k = Polygon(_get_face_coordinates(mesh_data, index))
+        if not polygon_k.contains(pnt):
+            raise Exception(f"{j}: ERROR: point actually not contained within {index}!")
 
 
 def intersect_line_mesh(
@@ -462,17 +471,7 @@ def intersect_line_mesh(
                 if len(edges) == 0:
                     # rest of segment associated with same face
                     if verbose:
-                        if prev_b > 0:
-                            print(f"{j}: -- no further slices along this segment --")
-                        else:
-                            print(f"{j}: -- no slices along this segment --")
-                        if index >= 0:
-                            pnt = Point(bpj)
-                            polygon_k = Polygon(_get_face_coordinates(mesh_data, index))
-                            if not polygon_k.contains(pnt):
-                                raise Exception(
-                                    f"{j}: ERROR: point actually not contained within {index}!"
-                                )
+                        _log_slice_status(j, prev_b, index, bpj, mesh_data)
                     if ind == crds.shape[0]:
                         crds = enlarge(crds, (2 * ind, 2))
                         idx = enlarge(idx, (2 * ind,))
