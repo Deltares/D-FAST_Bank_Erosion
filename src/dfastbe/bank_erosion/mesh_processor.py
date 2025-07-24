@@ -419,27 +419,6 @@ def _update_mesh_index_and_log(
         )
 
 
-def _determine_next_face_on_edge(bp, bpj, j, edge, faces, mesh_data, verbose):
-    """Determine the next face to continue along an edge based on the segment direction."""
-    theta = math.atan2(bp[j + 1][1] - bpj[1], bp[j + 1][0] - bp[j][0])
-    if verbose:
-        print(f"{j}: moving in direction theta = {theta}")
-    theta_edge = _edge_angle(mesh_data, edge)
-    if theta == theta_edge or theta == -theta_edge:
-        if verbose:
-            print(f"{j}: continue along edge {edge}")
-        index0 = faces
-    else:
-        # check whether the (extended) segment slices any edge of faces[0]
-        fe1 = mesh_data.face_edge_connectivity[faces[0]]
-        a, b, edges = _get_slices_core(fe1, mesh_data, bpj, bp[j + 1], 0.0, False)
-        # yes, a slice (typically 1, but could be 2 if it slices at a node
-        # but that doesn't matter) ... so, we continue towards faces[0]
-        # if there are no slices for faces[0], we continue towards faces[1]
-        index0 = faces[0] if len(edges) > 0 else faces[1]
-    return index0
-
-
 class MeshProcessor:
     """A class for processing mesh-related operations."""
 
@@ -574,8 +553,9 @@ class MeshProcessor:
         return index
 
     def _finalize_segment(self, bpj):
-        """
-        Helper to finalize a segment: enlarge arrays if needed, set coordinates and index, and increment ind.
+        """Finalize a segment
+
+        Enlarge arrays if needed, set coordinates and index, and increment ind.
         """
         if self.ind == self.crds.shape[0]:
             self.crds = enlarge(self.crds, (self.ind + 1, 2))
@@ -586,6 +566,28 @@ class MeshProcessor:
         else:
             self.idx[self.ind] = self.index
         self.ind += 1
+
+    def _determine_next_face_on_edge(self, bpj, j, edge, faces):
+        """Determine the next face to continue along an edge based on the segment direction."""
+        theta = math.atan2(self.bp[j + 1][1] - bpj[1], self.bp[j + 1][0] - bpj[0])
+        if self.verbose:
+            print(f"{j}: moving in direction theta = {theta}")
+        theta_edge = _edge_angle(self.mesh_data, edge)
+        if theta == theta_edge or theta == -theta_edge:
+            if self.verbose:
+                print(f"{j}: continue along edge {edge}")
+            index0 = faces
+        else:
+            # check whether the (extended) segment slices any edge of faces[0]
+            fe1 = self.mesh_data.face_edge_connectivity[faces[0]]
+            a, b, edges = _get_slices_core(
+                fe1, self.mesh_data, bpj, self.bp[j + 1], 0.0, False
+            )
+            # yes, a slice (typically 1, but could be 2 if it slices at a node
+            # but that doesn't matter) ... so, we continue towards faces[0]
+            # if there are no slices for faces[0], we continue towards faces[1]
+            index0 = faces[0] if len(edges) > 0 else faces[1]
+        return index0
 
     def intersect_line_mesh(self) -> Tuple[np.ndarray, np.ndarray]:
         """Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.
@@ -695,14 +697,7 @@ class MeshProcessor:
                                     # catch case of last segment
                                     if self.verbose:
                                         print(f"{j}: last point ends in a node")
-                                    self.crds, self.idx, self.ind = _finalize_segment(
-                                        self.crds,
-                                        self.idx,
-                                        self.ind,
-                                        bpj,
-                                        self.index,
-                                        self.vindex,
-                                    )
+                                    self._finalize_segment(bpj)
                                     break
                                 else:
                                     # this segment ends in the node, so check next segment ...
@@ -747,14 +742,8 @@ class MeshProcessor:
                                     print(f"{j}: last point ends on an edge")
                                 self._finalize_segment(bpj)
                                 break
-                            index0 = _determine_next_face_on_edge(
-                                self.bp,
-                                bpj,
-                                j,
-                                edge,
-                                faces,
-                                self.mesh_data,
-                                self.verbose,
+                            index0 = self._determine_next_face_on_edge(
+                                bpj, j, edge, faces
                             )
 
                         self.index, self.vindex = _update_mesh_index_and_log(
