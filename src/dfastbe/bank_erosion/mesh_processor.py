@@ -564,29 +564,6 @@ def _find_left_right_edges(
     return left_edge, right_edge
 
 
-def _handle_first_point(
-    ind, crds, idx, mesh_data: MeshData, bpj: np.ndarray, bp, verbose
-) -> Tuple[np.ndarray, np.ndarray, int, np.ndarray]:
-    dx = mesh_data.x_face_coords - bpj[0]
-    dy = mesh_data.y_face_coords - bpj[1]
-    possible_cells = np.nonzero(
-        ~(
-            (dx < 0).all(axis=1)
-            | (dx > 0).all(axis=1)
-            | (dy < 0).all(axis=1)
-            | (dy > 0).all(axis=1)
-        )
-    )[0]
-    index, vindex = _find_starting_face(possible_cells, bp, mesh_data, verbose)
-    crds[ind] = bpj
-    if index == -2:
-        idx[ind] = vindex[0]
-    else:
-        idx[ind] = index
-    ind += 1
-    return crds, idx, ind, vindex, index
-
-
 class MeshProcessor:
     """A class for processing mesh-related operations."""
 
@@ -600,6 +577,27 @@ class MeshProcessor:
         self.ind = 0
         self.index: int
         self.vindex: np.ndarray
+
+    def _handle_first_point(self, bpj: np.ndarray):
+        dx = self.mesh_data.x_face_coords - bpj[0]
+        dy = self.mesh_data.y_face_coords - bpj[1]
+        possible_cells = np.nonzero(
+            ~(
+                (dx < 0).all(axis=1)
+                | (dx > 0).all(axis=1)
+                | (dy < 0).all(axis=1)
+                | (dy > 0).all(axis=1)
+            )
+        )[0]
+        self.index, self.vindex = _find_starting_face(
+            possible_cells, self.bp, self.mesh_data, self.verbose
+        )
+        self.crds[self.ind] = bpj
+        if self.index == -2:
+            self.idx[self.ind] = self.vindex[0]
+        else:
+            self.idx[self.ind] = self.index
+        self.ind += 1
 
     def intersect_line_mesh(self) -> Tuple[np.ndarray, np.ndarray]:
         """Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.
@@ -638,18 +636,7 @@ class MeshProcessor:
             if self.verbose:
                 print(f"Current location: {bpj[0]}, {bpj[1]}")
             if j == 0:
-                # first bp inside or outside?
-                self.crds, self.idx, self.ind, self.vindex, self.index = (
-                    _handle_first_point(
-                        self.ind,
-                        self.crds,
-                        self.idx,
-                        self.mesh_data,
-                        bpj,
-                        self.bp,
-                        self.verbose,
-                    )
-                )
+                self._handle_first_point(bpj)
             else:
                 # second or later point
                 bpj1 = self.bp[j - 1]
