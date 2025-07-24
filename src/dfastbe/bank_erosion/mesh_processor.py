@@ -569,23 +569,24 @@ class MeshProcessor:
                     j, self.index, self.vindex, "node", node, index0, prev_b
                 )
             if isinstance(index0, (int, np.integer)):
-                return index0, self.vindex
+                self.index = index0
             elif hasattr(index0, "__len__") and len(index0) == 1:
-                return index0[0], self.vindex
+                self.index = index0[0]
             else:
-                return -2, index0
+                self.index = -2
+                self.vindex = index0
         elif faces[0] == self.index:
             if self.verbose:
                 _log_mesh_transition(
                     j, self.index, self.vindex, "edge", edge, faces[1], prev_b
                 )
-            return faces[1], self.vindex
+            self.index = faces[1]
         elif faces[1] == self.index:
             if self.verbose:
                 _log_mesh_transition(
                     j, self.index, self.vindex, "edge", edge, faces[0], prev_b
                 )
-            return faces[0], self.vindex
+            self.index = faces[0]
         else:
             raise ValueError(
                 f"Shouldn't come here .... index {self.index} differs from both faces "
@@ -749,7 +750,7 @@ class MeshProcessor:
                                 bpj, j, edge, faces
                             )
 
-                        self.index, self.vindex = self._update_mesh_index_and_log(
+                        self._update_mesh_index_and_log(
                             j,
                             node,
                             edge,
