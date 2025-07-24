@@ -382,6 +382,36 @@ def _log_slice_status(j, prev_b, index, bpj, mesh_data):
             raise Exception(f"{j}: ERROR: point actually not contained within {index}!")
 
 
+def update_mesh_index_and_log(
+    j, index, vindex, node, edge, faces, index0, prev_b, verbose
+):
+    """
+    Helper to update mesh index and log transitions for intersect_line_mesh.
+    """
+    if index0 is not None:
+        if verbose:
+            _log_mesh_transition(j, index, vindex, "node", node, index0, prev_b)
+        if isinstance(index0, (int, np.integer)):
+            return index0, vindex
+        elif hasattr(index0, "__len__") and len(index0) == 1:
+            return index0[0], vindex
+        else:
+            return -2, index0
+    elif faces[0] == index:
+        if verbose:
+            _log_mesh_transition(j, index, vindex, "edge", edge, faces[1], prev_b)
+        return faces[1], vindex
+    elif faces[1] == index:
+        if verbose:
+            _log_mesh_transition(j, index, vindex, "edge", edge, faces[0], prev_b)
+        return faces[0], vindex
+    else:
+        raise Exception(
+            f"Shouldn't come here .... index {index} differs from both faces "
+            f"{faces[0]} and {faces[1]} associated with slicing edge {edge}"
+        )
+
+
 def intersect_line_mesh(
     bp: np.ndarray,
     mesh_data: MeshData,
@@ -666,41 +696,9 @@ def intersect_line_mesh(
                                 # no slice for faces[0], so we must be going in the other direction
                                 index0 = faces[1]
 
-                    if index0 is not None:
-                        if verbose:
-                            _log_mesh_transition(
-                                j, index, vindex, "node", node, index0, prev_b
-                            )
-
-                        if (
-                                isinstance(index0, int)
-                                or isinstance(index0, np.int32)
-                                or isinstance(index0, np.int64)
-                        ):
-                            index = index0
-                        elif len(index0) == 1:
-                            index = index0[0]
-                        else:
-                            index = -2
-                            vindex = index0
-
-                    elif faces[0] == index:
-                        if verbose:
-                            _log_mesh_transition(
-                                j, index, vindex, "edge", edge, faces[1], prev_b
-                            )
-                        index = faces[1]
-                    elif faces[1] == index:
-                        if verbose:
-                            _log_mesh_transition(
-                                j, index, vindex, "edge", edge, faces[0], prev_b
-                            )
-                        index = faces[0]
-                    else:
-                        raise Exception(
-                            f"Shouldn't come here .... index {index} differs from both faces "
-                            f"{faces[0]} and {faces[1]} associated with slicing edge {edge}"
-                        )
+                    index, vindex = update_mesh_index_and_log(
+                        j, index, vindex, node, edge, faces, index0, prev_b, verbose
+                    )
                     if ind == crds.shape[0]:
                         crds = enlarge(crds, (2 * ind, 2))
                         idx = enlarge(idx, (2 * ind,))
