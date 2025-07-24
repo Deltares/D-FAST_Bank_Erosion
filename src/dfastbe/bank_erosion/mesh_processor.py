@@ -345,50 +345,6 @@ def _find_starting_face(
     return result_index, result_vindex
 
 
-def _resolve_ambiguous_edge_transition(vindex, prev_b, bpj, bpj1, mesh_data):
-    """Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces."""
-    b = np.zeros(0)
-    edges = np.zeros(0, dtype=np.int64)
-    nodes = np.zeros(0, dtype=np.int64)
-    index_src = np.zeros(0, dtype=np.int64)
-    for i in vindex:
-        b1, edges1, nodes1 = _get_slices(
-            i,
-            prev_b,
-            bpj,
-            bpj1,
-            mesh_data,
-        )
-        b = np.concatenate((b, b1), axis=0)
-        edges = np.concatenate((edges, edges1), axis=0)
-        nodes = np.concatenate((nodes, nodes1), axis=0)
-        index_src = np.concatenate((index_src, i + 0 * edges1), axis=0)
-    edges, id_edges = np.unique(edges, return_index=True)
-    b = b[id_edges]
-    nodes = nodes[id_edges]
-    index_src = index_src[id_edges]
-    if len(index_src) == 1:
-        index = index_src[0]
-        vindex = index_src[0:1]
-    else:
-        index = -2
-    return index, vindex, b, edges, nodes
-
-
-def _log_slice_status(j, prev_b, index, bpj, mesh_data):
-    if prev_b > 0:
-        print(f"{j}: -- no further slices along this segment --")
-    else:
-        print(f"{j}: -- no slices along this segment --")
-    if index >= 0:
-        pnt = Point(bpj)
-        polygon_k = Polygon(_get_face_coordinates(mesh_data, index))
-        if not polygon_k.contains(pnt):
-            raise ValueError(
-                f"{j}: ERROR: point actually not contained within {index}!"
-            )
-
-
 class MeshProcessor:
     """A class for processing mesh-related operations."""
 
@@ -522,6 +478,35 @@ class MeshProcessor:
             )
         return index
 
+    def _resolve_ambiguous_edge_transition(self, prev_b, bpj, bpj1):
+        """Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces."""
+        b = np.zeros(0)
+        edges = np.zeros(0, dtype=np.int64)
+        nodes = np.zeros(0, dtype=np.int64)
+        index_src = np.zeros(0, dtype=np.int64)
+        for i in self.vindex:
+            b1, edges1, nodes1 = _get_slices(
+                i,
+                prev_b,
+                bpj,
+                bpj1,
+                self.mesh_data,
+            )
+            b = np.concatenate((b, b1), axis=0)
+            edges = np.concatenate((edges, edges1), axis=0)
+            nodes = np.concatenate((nodes, nodes1), axis=0)
+            index_src = np.concatenate((index_src, i + 0 * edges1), axis=0)
+        edges, id_edges = np.unique(edges, return_index=True)
+        b = b[id_edges]
+        nodes = nodes[id_edges]
+        index_src = index_src[id_edges]
+        if len(index_src) == 1:
+            self.index = index_src[0]
+            self.vindex = index_src[0:1]
+        else:
+            self.index = -2
+        return b, edges, nodes
+
     def _finalize_segment(self, bpj):
         """Finalize a segment
 
@@ -592,6 +577,19 @@ class MeshProcessor:
             f"{faces[0]} and {faces[1]} associated with slicing edge {edge}"
         )
 
+    def _log_slice_status(self, j, prev_b, bpj):
+        if prev_b > 0:
+            print(f"{j}: -- no further slices along this segment --")
+        else:
+            print(f"{j}: -- no slices along this segment --")
+        if self.index >= 0:
+            pnt = Point(bpj)
+            polygon_k = Polygon(_get_face_coordinates(self.mesh_data, self.index))
+            if not polygon_k.contains(pnt):
+                raise ValueError(
+                    f"{j}: ERROR: point actually not contained within {self.index}!"
+                )
+
     def intersect_line_mesh(self) -> Tuple[np.ndarray, np.ndarray]:
         """Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.
 
@@ -636,10 +634,8 @@ class MeshProcessor:
                 prev_b = 0
                 while True:
                     if self.index == -2:
-                        self.index, self.vindex, b, edges, nodes = (
-                            _resolve_ambiguous_edge_transition(
-                                self.vindex, prev_b, bpj, bpj1, self.mesh_data
-                            )
+                        b, edges, nodes = self._resolve_ambiguous_edge_transition(
+                            prev_b, bpj, bpj1
                         )
                     elif (bpj == bpj1).all():
                         # this is a segment of length 0, skip it since it takes us nowhere
@@ -656,9 +652,7 @@ class MeshProcessor:
                     if len(edges) == 0:
                         # rest of segment associated with same face
                         if self.verbose:
-                            _log_slice_status(
-                                j, prev_b, self.index, bpj, self.mesh_data
-                            )
+                            self._log_slice_status(j, prev_b, bpj)
                         if self.ind == self.crds.shape[0]:
                             self.crds = enlarge(self.crds, (2 * self.ind, 2))
                             self.idx = enlarge(self.idx, (2 * self.ind,))
