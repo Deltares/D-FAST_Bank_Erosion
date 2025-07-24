@@ -2081,7 +2081,89 @@
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/mesh_processor.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">504</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">422</span>
+<span class="normal">423</span>
+<span class="normal">424</span>
+<span class="normal">425</span>
+<span class="normal">426</span>
+<span class="normal">427</span>
+<span class="normal">428</span>
+<span class="normal">429</span>
+<span class="normal">430</span>
+<span class="normal">431</span>
+<span class="normal">432</span>
+<span class="normal">433</span>
+<span class="normal">434</span>
+<span class="normal">435</span>
+<span class="normal">436</span>
+<span class="normal">437</span>
+<span class="normal">438</span>
+<span class="normal">439</span>
+<span class="normal">440</span>
+<span class="normal">441</span>
+<span class="normal">442</span>
+<span class="normal">443</span>
+<span class="normal">444</span>
+<span class="normal">445</span>
+<span class="normal">446</span>
+<span class="normal">447</span>
+<span class="normal">448</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span>
+<span class="normal">452</span>
+<span class="normal">453</span>
+<span class="normal">454</span>
+<span class="normal">455</span>
+<span class="normal">456</span>
+<span class="normal">457</span>
+<span class="normal">458</span>
+<span class="normal">459</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span>
+<span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
 <span class="normal">505</span>
 <span class="normal">506</span>
 <span class="normal">507</span>
@@ -2360,43 +2442,7 @@
 <span class="normal">780</span>
 <span class="normal">781</span>
 <span class="normal">782</span>
-<span class="normal">783</span>
-<span class="normal">784</span>
-<span class="normal">785</span>
-<span class="normal">786</span>
-<span class="normal">787</span>
-<span class="normal">788</span>
-<span class="normal">789</span>
-<span class="normal">790</span>
-<span class="normal">791</span>
-<span class="normal">792</span>
-<span class="normal">793</span>
-<span class="normal">794</span>
-<span class="normal">795</span>
-<span class="normal">796</span>
-<span class="normal">797</span>
-<span class="normal">798</span>
-<span class="normal">799</span>
-<span class="normal">800</span>
-<span class="normal">801</span>
-<span class="normal">802</span>
-<span class="normal">803</span>
-<span class="normal">804</span>
-<span class="normal">805</span>
-<span class="normal">806</span>
-<span class="normal">807</span>
-<span class="normal">808</span>
-<span class="normal">809</span>
-<span class="normal">810</span>
-<span class="normal">811</span>
-<span class="normal">812</span>
-<span class="normal">813</span>
-<span class="normal">814</span>
-<span class="normal">815</span>
-<span class="normal">816</span>
-<span class="normal">817</span>
-<span class="normal">818</span>
-<span class="normal">819</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
+<span class="normal">783</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for processing mesh-related operations.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bank_points</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">:</span> <span class="n">MeshData</span><span class="p">,</span> <span class="n">d_thresh</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span><span class="p">):</span>
@@ -2437,11 +2483,8 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            theta (float): Direction angle of the segment.</span>
-<span class="sd">            all_node_edges (np.ndarray): Array of edge indices connected to the node.</span>
-<span class="sd">            mesh_data (MeshData): Mesh data object.</span>
 <span class="sd">            node (int): The node index.</span>
 <span class="sd">            j (int, optional): Step index for verbose output.</span>
-<span class="sd">            verbose (bool): If True, prints debug information.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Tuple[int, int]: Indices of the left and right edges.</span>
@@ -2491,6 +2534,83 @@
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: the edge to the right is edge </span><span class="si">{</span><span class="n">right_edge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">left_edge</span><span class="p">,</span> <span class="n">right_edge</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_next_face_from_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">left_edge</span><span class="p">,</span> <span class="n">right_edge</span><span class="p">,</span> <span class="n">j</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Helper to resolve the next face index when traversing between two edges at a node.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            node (int): The node index.</span>
+<span class="sd">            left_edge (int): The edge index to the left.</span>
+<span class="sd">            right_edge (int): The edge index to the right.</span>
+<span class="sd">            j (int, optional): Step index for verbose output.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: The next face index.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">left_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">edge_face_connectivity</span><span class="p">[</span><span class="n">left_edge</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">right_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">edge_face_connectivity</span><span class="p">[</span><span class="n">right_edge</span><span class="p">,</span> <span class="p">:]</span>
+
+        <span class="k">if</span> <span class="n">left_faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">right_faces</span> <span class="ow">and</span> <span class="n">left_faces</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">right_faces</span><span class="p">:</span>
+            <span class="n">fn1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">face_node</span><span class="p">[</span><span class="n">left_faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">fe1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">face_edge_connectivity</span><span class="p">[</span><span class="n">left_faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">and</span> <span class="n">j</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: those edges are shared by two faces: </span><span class="si">{</span><span class="n">left_faces</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: face </span><span class="si">{</span><span class="n">left_faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> has nodes: </span><span class="si">{</span><span class="n">fn1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: face </span><span class="si">{</span><span class="n">left_faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> has edges: </span><span class="si">{</span><span class="n">fe1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="c1"># nodes of the face should be listed in clockwise order</span>
+            <span class="c1"># edges[i] is the edge connecting node[i-1] with node[i]</span>
+            <span class="c1"># the latter is guaranteed by batch.derive_topology_arrays</span>
+            <span class="k">if</span> <span class="n">fe1</span><span class="p">[</span><span class="n">fn1</span> <span class="o">==</span> <span class="n">node</span><span class="p">]</span> <span class="o">==</span> <span class="n">right_edge</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">left_faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="n">left_faces</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">left_faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">right_faces</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">left_faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">left_faces</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">right_faces</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">left_faces</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Shouldn&#39;t come here .... left edge </span><span class="si">{</span><span class="n">left_edge</span><span class="si">}</span><span class="s2"> and right edge </span><span class="si">{</span><span class="n">right_edge</span><span class="si">}</span><span class="s2"> don&#39;t share any face&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">index</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_finalize_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bpj</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Finalize a segment</span>
+
+<span class="sd">        Enlarge arrays if needed, set coordinates and index, and increment ind.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">crds</span> <span class="o">=</span> <span class="n">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">idx</span> <span class="o">=</span> <span class="n">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">bpj</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_determine_next_face_on_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bpj</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine the next face to continue along an edge based on the segment direction.&quot;&quot;&quot;</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">bpj</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">bpj</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: moving in direction theta = </span><span class="si">{</span><span class="n">theta</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">theta_edge</span> <span class="o">=</span> <span class="n">_edge_angle</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="p">,</span> <span class="n">edge</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">theta</span> <span class="o">==</span> <span class="n">theta_edge</span> <span class="ow">or</span> <span class="n">theta</span> <span class="o">==</span> <span class="o">-</span><span class="n">theta_edge</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: continue along edge </span><span class="si">{</span><span class="n">edge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">index0</span> <span class="o">=</span> <span class="n">faces</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># check whether the (extended) segment slices any edge of faces[0]</span>
+            <span class="n">fe1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">face_edge_connectivity</span><span class="p">[</span><span class="n">faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">_get_slices_core</span><span class="p">(</span>
+                <span class="n">fe1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="p">,</span> <span class="n">bpj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">False</span>
+            <span class="p">)</span>
+            <span class="c1"># yes, a slice (typically 1, but could be 2 if it slices at a node</span>
+            <span class="c1"># but that doesn&#39;t matter) ... so, we continue towards faces[0]</span>
+            <span class="c1"># if there are no slices for faces[0], we continue towards faces[1]</span>
+            <span class="n">index0</span> <span class="o">=</span> <span class="n">faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">faces</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">index0</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">intersect_line_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.</span>
@@ -2600,14 +2720,7 @@
                                     <span class="c1"># catch case of last segment</span>
                                     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                                         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: last point ends in a node&quot;</span><span class="p">)</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">=</span> <span class="n">_finalize_segment</span><span class="p">(</span>
-                                        <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">,</span>
-                                        <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span>
-                                        <span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">,</span>
-                                        <span class="n">bpj</span><span class="p">,</span>
-                                        <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
-                                        <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span><span class="p">,</span>
-                                    <span class="p">)</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_segment</span><span class="p">(</span><span class="n">bpj</span><span class="p">)</span>
                                     <span class="k">break</span>
                                 <span class="k">else</span><span class="p">:</span>
                                     <span class="c1"># this segment ends in the node, so check next segment ...</span>
@@ -2619,10 +2732,7 @@
                             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: moving in direction theta = </span><span class="si">{</span><span class="n">theta</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                             <span class="n">left_edge</span><span class="p">,</span> <span class="n">right_edge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_left_right_edges</span><span class="p">(</span>
-                                <span class="n">theta</span><span class="p">,</span>
-                                <span class="n">node</span><span class="p">,</span>
-                                <span class="n">j</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+                                <span class="n">theta</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">j</span>
                             <span class="p">)</span>
                             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: the edge to the left is edge </span><span class="si">{</span><span class="n">left_edge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -2640,13 +2750,8 @@
                                     <span class="nb">print</span><span class="p">(</span>
                                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: continue between edges </span><span class="si">{</span><span class="n">left_edge</span><span class="si">}</span><span class="s2"> on the left and </span><span class="si">{</span><span class="n">right_edge</span><span class="si">}</span><span class="s2"> on the right&quot;</span>
                                     <span class="p">)</span>
-                                <span class="n">index0</span> <span class="o">=</span> <span class="n">_resolve_next_face_from_edges</span><span class="p">(</span>
-                                    <span class="n">node</span><span class="p">,</span>
-                                    <span class="n">left_edge</span><span class="p">,</span>
-                                    <span class="n">right_edge</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="p">,</span>
-                                    <span class="n">j</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+                                <span class="n">index0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_next_face_from_edges</span><span class="p">(</span>
+                                    <span class="n">node</span><span class="p">,</span> <span class="n">left_edge</span><span class="p">,</span> <span class="n">right_edge</span><span class="p">,</span> <span class="n">j</span>
                                 <span class="p">)</span>
 
                         <span class="k">elif</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -2658,23 +2763,10 @@
                                 <span class="c1"># catch case of last segment</span>
                                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: last point ends on an edge&quot;</span><span class="p">)</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">=</span> <span class="n">_finalize_segment</span><span class="p">(</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">,</span>
-                                    <span class="n">bpj</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span><span class="p">,</span>
-                                <span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_segment</span><span class="p">(</span><span class="n">bpj</span><span class="p">)</span>
                                 <span class="k">break</span>
-                            <span class="n">index0</span> <span class="o">=</span> <span class="n">_determine_next_face_on_edge</span><span class="p">(</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">,</span>
-                                <span class="n">bpj</span><span class="p">,</span>
-                                <span class="n">j</span><span class="p">,</span>
-                                <span class="n">edge</span><span class="p">,</span>
-                                <span class="n">faces</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+                            <span class="n">index0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_determine_next_face_on_edge</span><span class="p">(</span>
+                                <span class="n">bpj</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">faces</span>
                             <span class="p">)</span>
 
                         <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span> <span class="o">=</span> <span class="n">_update_mesh_index_and_log</span><span class="p">(</span>
@@ -2869,7 +2961,15 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 </details>
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/mesh_processor.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">600</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">592</span>
+<span class="normal">593</span>
+<span class="normal">594</span>
+<span class="normal">595</span>
+<span class="normal">596</span>
+<span class="normal">597</span>
+<span class="normal">598</span>
+<span class="normal">599</span>
+<span class="normal">600</span>
 <span class="normal">601</span>
 <span class="normal">602</span>
 <span class="normal">603</span>
@@ -3052,43 +3152,7 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 <span class="normal">780</span>
 <span class="normal">781</span>
 <span class="normal">782</span>
-<span class="normal">783</span>
-<span class="normal">784</span>
-<span class="normal">785</span>
-<span class="normal">786</span>
-<span class="normal">787</span>
-<span class="normal">788</span>
-<span class="normal">789</span>
-<span class="normal">790</span>
-<span class="normal">791</span>
-<span class="normal">792</span>
-<span class="normal">793</span>
-<span class="normal">794</span>
-<span class="normal">795</span>
-<span class="normal">796</span>
-<span class="normal">797</span>
-<span class="normal">798</span>
-<span class="normal">799</span>
-<span class="normal">800</span>
-<span class="normal">801</span>
-<span class="normal">802</span>
-<span class="normal">803</span>
-<span class="normal">804</span>
-<span class="normal">805</span>
-<span class="normal">806</span>
-<span class="normal">807</span>
-<span class="normal">808</span>
-<span class="normal">809</span>
-<span class="normal">810</span>
-<span class="normal">811</span>
-<span class="normal">812</span>
-<span class="normal">813</span>
-<span class="normal">814</span>
-<span class="normal">815</span>
-<span class="normal">816</span>
-<span class="normal">817</span>
-<span class="normal">818</span>
-<span class="normal">819</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_line_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="normal">783</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_line_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.</span>
 
 <span class="sd">    This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.</span>
@@ -3196,14 +3260,7 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
                                 <span class="c1"># catch case of last segment</span>
                                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: last point ends in a node&quot;</span><span class="p">)</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">=</span> <span class="n">_finalize_segment</span><span class="p">(</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">,</span>
-                                    <span class="n">bpj</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span><span class="p">,</span>
-                                <span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_segment</span><span class="p">(</span><span class="n">bpj</span><span class="p">)</span>
                                 <span class="k">break</span>
                             <span class="k">else</span><span class="p">:</span>
                                 <span class="c1"># this segment ends in the node, so check next segment ...</span>
@@ -3215,10 +3272,7 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: moving in direction theta = </span><span class="si">{</span><span class="n">theta</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                         <span class="n">left_edge</span><span class="p">,</span> <span class="n">right_edge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_left_right_edges</span><span class="p">(</span>
-                            <span class="n">theta</span><span class="p">,</span>
-                            <span class="n">node</span><span class="p">,</span>
-                            <span class="n">j</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+                            <span class="n">theta</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">j</span>
                         <span class="p">)</span>
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: the edge to the left is edge </span><span class="si">{</span><span class="n">left_edge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -3236,13 +3290,8 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
                                 <span class="nb">print</span><span class="p">(</span>
                                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: continue between edges </span><span class="si">{</span><span class="n">left_edge</span><span class="si">}</span><span class="s2"> on the left and </span><span class="si">{</span><span class="n">right_edge</span><span class="si">}</span><span class="s2"> on the right&quot;</span>
                                 <span class="p">)</span>
-                            <span class="n">index0</span> <span class="o">=</span> <span class="n">_resolve_next_face_from_edges</span><span class="p">(</span>
-                                <span class="n">node</span><span class="p">,</span>
-                                <span class="n">left_edge</span><span class="p">,</span>
-                                <span class="n">right_edge</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="p">,</span>
-                                <span class="n">j</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+                            <span class="n">index0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_next_face_from_edges</span><span class="p">(</span>
+                                <span class="n">node</span><span class="p">,</span> <span class="n">left_edge</span><span class="p">,</span> <span class="n">right_edge</span><span class="p">,</span> <span class="n">j</span>
                             <span class="p">)</span>
 
                     <span class="k">elif</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -3254,23 +3303,10 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
                             <span class="c1"># catch case of last segment</span>
                             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: last point ends on an edge&quot;</span><span class="p">)</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">=</span> <span class="n">_finalize_segment</span><span class="p">(</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">,</span>
-                                <span class="n">bpj</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
-                                <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span><span class="p">,</span>
-                            <span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_finalize_segment</span><span class="p">(</span><span class="n">bpj</span><span class="p">)</span>
                             <span class="k">break</span>
-                        <span class="n">index0</span> <span class="o">=</span> <span class="n">_determine_next_face_on_edge</span><span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">,</span>
-                            <span class="n">bpj</span><span class="p">,</span>
-                            <span class="n">j</span><span class="p">,</span>
-                            <span class="n">edge</span><span class="p">,</span>
-                            <span class="n">faces</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="p">,</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span>
+                        <span class="n">index0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_determine_next_face_on_edge</span><span class="p">(</span>
+                            <span class="n">bpj</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">faces</span>
                         <span class="p">)</span>
 
                     <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span> <span class="o">=</span> <span class="n">_update_mesh_index_and_log</span><span class="p">(</span>
