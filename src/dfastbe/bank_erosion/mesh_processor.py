@@ -501,6 +501,69 @@ def _resolve_next_face_from_edges(
     return index
 
 
+def _find_left_right_edges(
+    theta, all_node_edges, mesh_data, node, j=None, verbose=False
+):
+    """
+    Helper to find the left and right edges at a node based on the direction theta.
+
+    Args:
+        theta (float): Direction angle of the segment.
+        all_node_edges (np.ndarray): Array of edge indices connected to the node.
+        mesh_data (MeshData): Mesh data object.
+        node (int): The node index.
+        j (int, optional): Step index for verbose output.
+        verbose (bool): If True, prints debug information.
+
+    Returns:
+        Tuple[int, int]: Indices of the left and right edges.
+    """
+    twopi = 2 * math.pi
+    left_edge = -1
+    left_dtheta = twopi
+    right_edge = -1
+    right_dtheta = twopi
+
+    if verbose and j is not None:
+        print(f"{j}: the edges connected to node {node} are {all_node_edges}")
+
+    for ie in all_node_edges:
+        reverse = mesh_data.edge_node[ie, 0] != node
+        theta_edge = _edge_angle(mesh_data, ie, reverse=reverse)
+        if verbose and j is not None:
+            print(f"{j}: edge {ie} connects {mesh_data.edge_node[ie, :]}")
+            print(f"{j}: edge {ie} theta is {theta_edge}")
+        dtheta = theta_edge - theta
+        if dtheta > 0:
+            if dtheta < left_dtheta:
+                left_edge = ie
+                left_dtheta = dtheta
+            if twopi - dtheta < right_dtheta:
+                right_edge = ie
+                right_dtheta = twopi - dtheta
+        elif dtheta < 0:
+            dtheta = -dtheta
+            if twopi - dtheta < left_dtheta:
+                left_edge = ie
+                left_dtheta = twopi - dtheta
+            if dtheta < right_dtheta:
+                right_edge = ie
+                right_dtheta = dtheta
+        else:
+            # aligned with edge
+            if verbose and j is not None:
+                print(f"{j}: line is aligned with edge {ie}")
+            left_edge = ie
+            right_edge = ie
+            break
+
+    if verbose and j is not None:
+        print(f"{j}: the edge to the left is edge {left_edge}")
+        print(f"{j}: the edge to the right is edge {right_edge}")
+
+    return left_edge, right_edge
+
+
 def intersect_line_mesh(
     bp: np.ndarray,
     mesh_data: MeshData,
@@ -647,46 +710,9 @@ def intersect_line_mesh(
                                 )
                         if verbose:
                             print(f"{j}: moving in direction theta = {theta}")
-                        twopi = 2 * math.pi
-                        left_edge = -1
-                        left_dtheta = twopi
-                        right_edge = -1
-                        right_dtheta = twopi
-                        if verbose:
-                            print(
-                                f"{j}: the edges connected to node {node} are {all_node_edges}"
-                            )
-                        for ie in all_node_edges:
-                            reverse = mesh_data.edge_node[ie, 0] != node
-                            theta_edge = _edge_angle(mesh_data, ie, reverse=reverse)
-                            if verbose:
-                                print(
-                                    f"{j}: edge {ie} connects {mesh_data.edge_node[ie, :]}"
-                                )
-                                print(f"{j}: edge {ie} theta is {theta_edge}")
-                            dtheta = theta_edge - theta
-                            if dtheta > 0:
-                                if dtheta < left_dtheta:
-                                    left_edge = ie
-                                    left_dtheta = dtheta
-                                if twopi - dtheta < right_dtheta:
-                                    right_edge = ie
-                                    right_dtheta = twopi - dtheta
-                            elif dtheta < 0:
-                                dtheta = -dtheta
-                                if twopi - dtheta < left_dtheta:
-                                    left_edge = ie
-                                    left_dtheta = twopi - dtheta
-                                if dtheta < right_dtheta:
-                                    right_edge = ie
-                                    right_dtheta = dtheta
-                            else:
-                                # aligned with edge
-                                if verbose:
-                                    print(f"{j}: line is aligned with edge {ie}")
-                                left_edge = ie
-                                right_edge = ie
-                                break
+                        left_edge, right_edge = _find_left_right_edges(
+                            theta, all_node_edges, mesh_data, node, j, verbose
+                        )
                         if verbose:
                             print(f"{j}: the edge to the left is edge {left_edge}")
                             print(f"{j}: the edge to the right is edge {right_edge}")
