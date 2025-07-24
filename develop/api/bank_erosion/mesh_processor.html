@@ -2614,7 +2614,9 @@
 <span class="normal">769</span>
 <span class="normal">770</span>
 <span class="normal">771</span>
-<span class="normal">772</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
+<span class="normal">772</span>
+<span class="normal">773</span>
+<span class="normal">774</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for processing mesh-related operations.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bank_points</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">:</span> <span class="n">MeshData</span><span class="p">,</span> <span class="n">d_thresh</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span><span class="p">):</span>
@@ -3099,7 +3101,9 @@
 
                     <span class="k">if</span> <span class="n">node</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="c1"># if we slice at a node ...</span>
-                        <span class="n">end</span><span class="p">,</span> <span class="n">index0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_node_transition</span><span class="p">()</span>
+                        <span class="n">end</span><span class="p">,</span> <span class="n">index0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_node_transition</span><span class="p">(</span>
+                            <span class="n">j</span><span class="p">,</span> <span class="n">bpj</span><span class="p">,</span> <span class="n">bpj1</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">node</span>
+                        <span class="p">)</span>
                         <span class="k">if</span> <span class="n">end</span><span class="p">:</span>
                             <span class="k">break</span>
 
@@ -3428,7 +3432,9 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 <span class="normal">769</span>
 <span class="normal">770</span>
 <span class="normal">771</span>
-<span class="normal">772</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_line_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="normal">772</span>
+<span class="normal">773</span>
+<span class="normal">774</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_line_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.</span>
 
 <span class="sd">    This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.</span>
@@ -3503,7 +3509,9 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 
                 <span class="k">if</span> <span class="n">node</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="c1"># if we slice at a node ...</span>
-                    <span class="n">end</span><span class="p">,</span> <span class="n">index0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_node_transition</span><span class="p">()</span>
+                    <span class="n">end</span><span class="p">,</span> <span class="n">index0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle_node_transition</span><span class="p">(</span>
+                        <span class="n">j</span><span class="p">,</span> <span class="n">bpj</span><span class="p">,</span> <span class="n">bpj1</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">node</span>
+                    <span class="p">)</span>
                     <span class="k">if</span> <span class="n">end</span><span class="p">:</span>
                         <span class="k">break</span>
 
