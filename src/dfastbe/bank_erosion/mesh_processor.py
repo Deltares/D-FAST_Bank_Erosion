@@ -575,23 +575,22 @@ class MeshProcessor:
             else:
                 self.index = -2
                 self.vindex = index0
-        elif faces[0] == self.index:
-            if self.verbose:
-                _log_mesh_transition(
-                    j, self.index, self.vindex, "edge", edge, faces[1], prev_b
-                )
-            self.index = faces[1]
-        elif faces[1] == self.index:
-            if self.verbose:
-                _log_mesh_transition(
-                    j, self.index, self.vindex, "edge", edge, faces[0], prev_b
-                )
-            self.index = faces[0]
-        else:
-            raise ValueError(
-                f"Shouldn't come here .... index {self.index} differs from both faces "
-                f"{faces[0]} and {faces[1]} associated with slicing edge {edge}"
-            )
+            return
+
+        for i, face in enumerate(faces):
+            if face == self.index:
+                other_face = faces[1 - i]
+                if self.verbose:
+                    _log_mesh_transition(
+                        j, self.index, self.vindex, "edge", edge, other_face, prev_b
+                    )
+                self.index = other_face
+                return
+
+        raise ValueError(
+            f"Shouldn't come here .... index {self.index} differs from both faces "
+            f"{faces[0]} and {faces[1]} associated with slicing edge {edge}"
+        )
 
     def intersect_line_mesh(self) -> Tuple[np.ndarray, np.ndarray]:
         """Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.
