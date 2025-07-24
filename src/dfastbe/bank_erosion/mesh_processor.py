@@ -414,6 +414,22 @@ def update_mesh_index_and_log(
         )
 
 
+def _finalize_segment(crds, idx, ind, bpj, index, vindex):
+    """
+    Helper to finalize a segment: enlarge arrays if needed, set coordinates and index, and increment ind.
+    """
+    if ind == crds.shape[0]:
+        crds = enlarge(crds, (ind + 1, 2))
+        idx = enlarge(idx, (ind + 1,))
+    crds[ind] = bpj
+    if index == -2:
+        idx[ind] = vindex[0]
+    else:
+        idx[ind] = index
+    ind += 1
+    return crds, idx, ind
+
+
 def intersect_line_mesh(
     bp: np.ndarray,
     mesh_data: MeshData,
@@ -548,15 +564,9 @@ def intersect_line_mesh(
                                 # catch case of last segment
                                 if verbose:
                                     print(f"{j}: last point ends in a node")
-                                if ind == crds.shape[0]:
-                                    crds = enlarge(crds, (ind + 1, 2))
-                                    idx = enlarge(idx, (ind + 1,))
-                                crds[ind] = bpj
-                                if index == -2:
-                                    idx[ind] = vindex[0]
-                                else:
-                                    idx[ind] = index
-                                ind += 1
+                                crds, idx, ind = _finalize_segment(
+                                    crds, idx, ind, bpj, index, vindex
+                                )
                                 break
                             else:
                                 # this segment ends in the node, so check next segment ...
@@ -576,7 +586,7 @@ def intersect_line_mesh(
                                 f"{j}: the edges connected to node {node} are {all_node_edges}"
                             )
                         for ie in all_node_edges:
-                            reverse = not mesh_data.edge_node[ie, 0] == node
+                            reverse = mesh_data.edge_node[ie, 0] != node
                             theta_edge = _edge_angle(mesh_data, ie, reverse=reverse)
                             if verbose:
                                 print(
@@ -660,15 +670,9 @@ def intersect_line_mesh(
                             # catch case of last segment
                             if verbose:
                                 print(f"{j}: last point ends on an edge")
-                            if ind == crds.shape[0]:
-                                crds = enlarge(crds, (ind + 1, 2))
-                                idx = enlarge(idx, (ind + 1,))
-                            crds[ind] = bpj
-                            if index == -2:
-                                idx[ind] = vindex[0]
-                            else:
-                                idx[ind] = index
-                            ind += 1
+                            crds, idx, ind = _finalize_segment(
+                                crds, idx, ind, bpj, index, vindex
+                            )
                             break
                         else:
                             # this segment ends on the edge, so check next segment ...
