@@ -389,36 +389,6 @@ def _log_slice_status(j, prev_b, index, bpj, mesh_data):
             )
 
 
-def _update_mesh_index_and_log(
-    j, index, vindex, node, edge, faces, index0, prev_b, verbose
-):
-    """
-    Helper to update mesh index and log transitions for intersect_line_mesh.
-    """
-    if index0 is not None:
-        if verbose:
-            _log_mesh_transition(j, index, vindex, "node", node, index0, prev_b)
-        if isinstance(index0, (int, np.integer)):
-            return index0, vindex
-        elif hasattr(index0, "__len__") and len(index0) == 1:
-            return index0[0], vindex
-        else:
-            return -2, index0
-    elif faces[0] == index:
-        if verbose:
-            _log_mesh_transition(j, index, vindex, "edge", edge, faces[1], prev_b)
-        return faces[1], vindex
-    elif faces[1] == index:
-        if verbose:
-            _log_mesh_transition(j, index, vindex, "edge", edge, faces[0], prev_b)
-        return faces[0], vindex
-    else:
-        raise ValueError(
-            f"Shouldn't come here .... index {index} differs from both faces "
-            f"{faces[0]} and {faces[1]} associated with slicing edge {edge}"
-        )
-
-
 class MeshProcessor:
     """A class for processing mesh-related operations."""
 
@@ -589,6 +559,39 @@ class MeshProcessor:
             index0 = faces[0] if len(edges) > 0 else faces[1]
         return index0
 
+    def _update_mesh_index_and_log(self, j, node, edge, faces, index0, prev_b):
+        """
+        Helper to update mesh index and log transitions for intersect_line_mesh.
+        """
+        if index0 is not None:
+            if self.verbose:
+                _log_mesh_transition(
+                    j, self.index, self.vindex, "node", node, index0, prev_b
+                )
+            if isinstance(index0, (int, np.integer)):
+                return index0, self.vindex
+            elif hasattr(index0, "__len__") and len(index0) == 1:
+                return index0[0], self.vindex
+            else:
+                return -2, index0
+        elif faces[0] == self.index:
+            if self.verbose:
+                _log_mesh_transition(
+                    j, self.index, self.vindex, "edge", edge, faces[1], prev_b
+                )
+            return faces[1], self.vindex
+        elif faces[1] == self.index:
+            if self.verbose:
+                _log_mesh_transition(
+                    j, self.index, self.vindex, "edge", edge, faces[0], prev_b
+                )
+            return faces[0], self.vindex
+        else:
+            raise ValueError(
+                f"Shouldn't come here .... index {self.index} differs from both faces "
+                f"{faces[0]} and {faces[1]} associated with slicing edge {edge}"
+            )
+
     def intersect_line_mesh(self) -> Tuple[np.ndarray, np.ndarray]:
         """Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.
 
@@ -746,16 +749,13 @@ class MeshProcessor:
                                 bpj, j, edge, faces
                             )
 
-                        self.index, self.vindex = _update_mesh_index_and_log(
+                        self.index, self.vindex = self._update_mesh_index_and_log(
                             j,
-                            self.index,
-                            self.vindex,
                             node,
                             edge,
                             faces,
                             index0,
                             prev_b,
-                            self.verbose,
                         )
                         if self.ind == self.crds.shape[0]:
                             self.crds = enlarge(self.crds, (2 * self.ind, 2))
