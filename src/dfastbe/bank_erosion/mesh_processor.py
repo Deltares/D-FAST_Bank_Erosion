@@ -419,6 +419,27 @@ def update_mesh_index_and_log(
         )
 
 
+def determine_next_face_on_edge(bp, bpj, j, edge, faces, mesh_data, verbose):
+    """Determine the next face to continue along an edge based on the segment direction."""
+    theta = math.atan2(bp[j + 1][1] - bpj[1], bp[j + 1][0] - bp[j][0])
+    if verbose:
+        print(f"{j}: moving in direction theta = {theta}")
+    theta_edge = _edge_angle(mesh_data, edge)
+    if theta == theta_edge or theta == -theta_edge:
+        if verbose:
+            print(f"{j}: continue along edge {edge}")
+        index0 = faces
+    else:
+        # check whether the (extended) segment slices any edge of faces[0]
+        fe1 = mesh_data.face_edge_connectivity[faces[0]]
+        a, b, edges = _get_slices_core(fe1, mesh_data, bpj, bp[j + 1], 0.0, False)
+        # yes, a slice (typically 1, but could be 2 if it slices at a node
+        # but that doesn't matter) ... so, we continue towards faces[0]
+        # if there are no slices for faces[0], we continue towards faces[1]
+        index0 = faces[0] if len(edges) > 0 else faces[1]
+    return index0
+
+
 def _finalize_segment(crds, idx, ind, bpj, index, vindex):
     """
     Helper to finalize a segment: enlarge arrays if needed, set coordinates and index, and increment ind.
@@ -679,33 +700,9 @@ def intersect_line_mesh(
                                 crds, idx, ind, bpj, index, vindex
                             )
                             break
-                        else:
-                            # this segment ends on the edge, so check next segment ...
-                            # direction of next segment from bpj to bp[j+1]
-                            theta = math.atan2(
-                                bp[j + 1][1] - bpj[1], bp[j + 1][0] - bp[j][0]
-                            )
-                        if verbose:
-                            print(f"{j}: moving in direction theta = {theta}")
-                        theta_edge = _edge_angle(mesh_data, edge)
-                        if theta == theta_edge or theta == -theta_edge:
-                            # aligned with edge
-                            if verbose:
-                                print(f"{j}: continue along edge {edge}")
-                            index0 = faces
-                        else:
-                            # check whether the (extended) segment slices any edge of faces[0]
-                            fe1 = mesh_data.face_edge_connectivity[faces[0]]
-                            a, b, edges = _get_slices_core(
-                                fe1, mesh_data, bpj, bp[j + 1], 0.0, False
-                            )
-                            if len(edges) > 0:
-                                # yes, a slice (typically 1, but could be 2 if it slices at a node
-                                # but that doesn't matter) ... so, we continue towards faces[0]
-                                index0 = faces[0]
-                            else:
-                                # no slice for faces[0], so we must be going in the other direction
-                                index0 = faces[1]
+                        index0 = determine_next_face_on_edge(
+                            bp, bpj, j, edge, faces, mesh_data, verbose
+                        )
 
                     index, vindex = update_mesh_index_and_log(
                         j, index, vindex, node, edge, faces, index0, prev_b, verbose
