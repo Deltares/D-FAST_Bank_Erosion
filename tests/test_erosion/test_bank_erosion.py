@@ -318,7 +318,7 @@ class TestErosion:
                 ]
             )
             fairway_face_indices = np.array([59166, 59167, 62557, 62557, 62557, 62557])
-            processor_mock.intersect_line_mesh.return_value = (
+            processor_mock.return_value.intersect_line_mesh.return_value = (
                 fairway_intersection_coords,
                 fairway_face_indices,
             )
