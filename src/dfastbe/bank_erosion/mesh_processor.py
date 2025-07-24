@@ -9,6 +9,9 @@ from dfastbe.bank_erosion.data_models.calculation import MeshData
 
 __all__ = ["get_slices_ab", "enlarge", "MeshProcessor"]
 
+ATOL = 1e-8
+RTOL = 1e-8
+
 
 def _get_slices(
     index: int,
@@ -679,7 +682,10 @@ class MeshProcessor:
                                 # direction of current segment from bpj1 to bpj
                                 theta = math.atan2(bpj[1] - bpj1[1], bpj[0] - bpj1[0])
                             else:
-                                if b[0] == 1.0 and j == len(self.bp) - 1:
+                                if (
+                                    np.isclose(b[0], 1.0, rtol=RTOL, atol=ATOL)
+                                    and j == len(self.bp) - 1
+                                ):
                                     # catch case of last segment
                                     if self.verbose:
                                         print(f"{j}: last point ends in a node")
