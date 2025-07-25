@@ -532,16 +532,16 @@ class MeshProcessor:
             self.index = -2
         return b, edges, nodes
 
-    def _store_segment_point(self, current_bank_point, shape=None):
+    def _store_segment_point(self, current_bank_point, shape_length=None):
         """Finalize a segment
 
         Enlarge arrays if needed, set coordinates and index, and increment ind.
         """
-        if shape is None:
-            shape = (self.ind + 1, 2)
+        if shape_length is None:
+            shape_length = self.ind + 1
         if self.ind == self.coords.shape[0]:
-            self.coords = enlarge(self.coords, (shape, 2))
-            self.face_indexes = enlarge(self.face_indexes, (shape,))
+            self.coords = enlarge(self.coords, (shape_length, 2))
+            self.face_indexes = enlarge(self.face_indexes, (shape_length,))
         self.coords[self.ind] = current_bank_point
         if self.index == -2:
             self.face_indexes[self.ind] = self.vindex[0]
@@ -750,8 +750,8 @@ class MeshProcessor:
 
             if len(edges) == 0:
                 # rest of segment associated with same face
-                shape = self.ind * shape_multiplier
-                self._store_segment_point(bpj, shape=shape)
+                shape_length = self.ind * shape_multiplier
+                self._store_segment_point(bpj, shape_length=shape_length)
                 break
             index0 = None
             if len(edges) > 1:
@@ -778,8 +778,8 @@ class MeshProcessor:
                 prev_b,
             )
             segment = bpj1 + prev_b * (bpj - bpj1)
-            shape = self.ind * shape_multiplier
-            self._store_segment_point(segment, shape=shape)
+            shape_length = self.ind * shape_multiplier
+            self._store_segment_point(segment, shape_length=shape_length)
             if prev_b == 1:
                 break
 
