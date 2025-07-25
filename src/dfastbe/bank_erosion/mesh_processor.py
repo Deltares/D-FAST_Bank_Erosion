@@ -349,7 +349,7 @@ class MeshProcessor:
                 if self.verbose:
                     print("starting outside mesh")
 
-    def _update_left_right_edges(
+    def _update_candidate_edges_by_angle(
         self, ie, dtheta, left_edge, left_dtheta, right_edge, right_dtheta, j
     ):
         """Update the left and right edges based on the angle difference."""
@@ -408,7 +408,7 @@ class MeshProcessor:
                 print(f"{j}: edge {ie} theta is {theta_edge}")
             dtheta = theta_edge - theta
             finished, left_edge, left_dtheta, right_edge, right_dtheta = (
-                self._update_left_right_edges(
+                self._update_candidate_edges_by_angle(
                     ie, dtheta, left_edge, left_dtheta, right_edge, right_dtheta, j
                 )
             )
