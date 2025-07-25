@@ -612,6 +612,7 @@ class MeshProcessor:
 
     def _handle_node_transition(self, j, bpj, bpj1, b, edges, node):
         """Handle the transition at a node when a segment ends or continues."""
+        finished = False
         if self.verbose:
             print(f"{j}: moving via node {node} on edges {edges} at {b[0]}")
         # figure out where we will be heading afterwards ...
@@ -625,7 +626,7 @@ class MeshProcessor:
                 if self.verbose:
                     print(f"{j}: last point ends in a node")
                 self._store_segment_point(bpj)
-                return True, None
+                finished = True
             else:
                 # this segment ends in the node, so check next segment ...
                 # direction of next segment from bpj to bp[j+1]
@@ -633,6 +634,12 @@ class MeshProcessor:
                     self.bp[j + 1][1] - bpj[1],
                     self.bp[j + 1][0] - self.bp[j][0],
                 )
+        index0 = None
+        if not finished:
+            index0 = self._resolve_next_face_by_direction(theta, node, j)
+        return False, index0
+
+    def _resolve_next_face_by_direction(self, theta, node, j):
         if self.verbose:
             print(f"{j}: moving in direction theta = {theta}")
         left_edge, right_edge = self._find_left_right_edges(theta, node, j)
@@ -649,7 +656,7 @@ class MeshProcessor:
                     f"{j}: continue between edges {left_edge} on the left and {right_edge} on the right"
                 )
             index0 = self._resolve_next_face_from_edges(node, left_edge, right_edge, j)
-        return False, index0
+        return index0
 
     def _process_segment(self, j, bpj):
         bpj1 = self.bp[j - 1]
