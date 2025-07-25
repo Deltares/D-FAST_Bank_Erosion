@@ -243,7 +243,7 @@ class EdgeCandidates:
     left_dtheta: float
     right_edge: int
     right_dtheta: float
-    finished: bool = False
+    found: bool = False
 
 
 class MeshProcessor:
@@ -373,34 +373,36 @@ class MeshProcessor:
             if self.verbose:
                 print("starting outside mesh")
 
-    def _update_candidate_edges_by_angle(self, ie, dtheta, candidates, j):
+    def _update_candidate_edges_by_angle(
+        self, edge_index: int, dtheta: float, candidates: EdgeCandidates, j
+    ):
         """Update the left and right edges based on the angle difference."""
         twopi = 2 * math.pi
         if dtheta > 0:
             if dtheta < candidates.left_dtheta:
-                candidates.left_edge = ie
+                candidates.left_edge = edge_index
                 candidates.left_dtheta = dtheta
             if twopi - dtheta < candidates.right_dtheta:
-                candidates.right_edge = ie
+                candidates.right_edge = edge_index
                 candidates.right_dtheta = twopi - dtheta
         elif dtheta < 0:
             dtheta = -dtheta
             if twopi - dtheta < candidates.left_dtheta:
-                candidates.left_edge = ie
+                candidates.left_edge = edge_index
                 candidates.left_dtheta = twopi - dtheta
             if dtheta < candidates.right_dtheta:
-                candidates.right_edge = ie
+                candidates.right_edge = edge_index
                 candidates.right_dtheta = dtheta
         else:
             # aligned with edge
             if self.verbose and j is not None:
-                print(f"{j}: line is aligned with edge {ie}")
-            candidates.left_edge = ie
-            candidates.right_edge = ie
-            candidates.finished = True
+                print(f"{j}: line is aligned with edge {edge_index}")
+            candidates.left_edge = edge_index
+            candidates.right_edge = edge_index
+            candidates.found = True
         return candidates
 
-    def _find_left_right_edges(self, theta, node, j=None):
+    def _find_left_right_edges(self, theta, node, j=None) -> EdgeCandidates:
         """
         Helper to find the left and right edges at a node based on the direction theta.
 
@@ -410,14 +412,14 @@ class MeshProcessor:
             j (int, optional): Step index for verbose output.
 
         Returns:
-            Tuple[int, int]: Indices of the left and right edges.
+            EdgeCandidates: A dataclass containing the left and right edge indices,
+                            their angle differences, and a found flag.
         """
-        left_edge = -1
-        left_dtheta = 2 * math.pi
-        right_edge = -1
-        right_dtheta = 2 * math.pi
+        two_pi = 2 * math.pi
+        candidates = EdgeCandidates(
+            left_edge=-1, left_dtheta=two_pi, right_edge=-1, right_dtheta=two_pi
+        )
         all_node_edges = np.nonzero((self.mesh_data.edge_node == node).any(axis=1))[0]
-        candidates = EdgeCandidates(left_edge, left_dtheta, right_edge, right_dtheta)
 
         if self.verbose and j is not None:
             print(f"{j}: the edges connected to node {node} are {all_node_edges}")
@@ -430,16 +432,18 @@ class MeshProcessor:
                 print(f"{j}: edge {ie} theta is {theta_edge}")
             dtheta = theta_edge - theta
             self._update_candidate_edges_by_angle(ie, dtheta, candidates, j)
-            if candidates.finished:
+            if candidates.found:
                 break
 
         if self.verbose and j is not None:
-            print(f"{j}: the edge to the left is edge {left_edge}")
-            print(f"{j}: the edge to the right is edge {right_edge}")
+            print(f"{j}: the edge to the left is edge {candidates.left_edge}")
+            print(f"{j}: the edge to the right is edge {candidates.right_edge}")
 
-        return left_edge, right_edge
+        return candidates
 
-    def _resolve_next_face_from_edges(self, node, left_edge, right_edge, j=None):
+    def _resolve_next_face_from_edges(
+        self, node, candidates: EdgeCandidates, j=None
+    ) -> int:
         """
         Helper to resolve the next face index when traversing between two edges at a node.
 
@@ -452,8 +456,8 @@ class MeshProcessor:
         Returns:
             int: The next face index.
         """
-        left_faces = self.mesh_data.edge_face_connectivity[left_edge, :]
-        right_faces = self.mesh_data.edge_face_connectivity[right_edge, :]
+        left_faces = self.mesh_data.edge_face_connectivity[candidates.left_edge, :]
+        right_faces = self.mesh_data.edge_face_connectivity[candidates.right_edge, :]
 
         if left_faces[0] in right_faces and left_faces[1] in right_faces:
             fn1 = self.mesh_data.face_node[left_faces[0]]
@@ -465,7 +469,7 @@ class MeshProcessor:
             # nodes of the face should be listed in clockwise order
             # edges[i] is the edge connecting node[i-1] with node[i]
             # the latter is guaranteed by batch.derive_topology_arrays
-            if fe1[fn1 == node] == right_edge:
+            if fe1[fn1 == node] == candidates.right_edge:
                 index = left_faces[0]
             else:
                 index = left_faces[1]
@@ -475,7 +479,8 @@ class MeshProcessor:
             index = left_faces[1]
         else:
             raise ValueError(
-                f"Shouldn't come here .... left edge {left_edge} and right edge {right_edge} don't share any face"
+                f"Shouldn't come here .... left edge {candidates.left_edge}"
+                f" and right edge {candidates.right_edge} don't share any face"
             )
         return index
 
@@ -662,20 +667,21 @@ class MeshProcessor:
     def _resolve_next_face_by_direction(self, theta, node, j):
         if self.verbose:
             print(f"{j}: moving in direction theta = {theta}")
-        left_edge, right_edge = self._find_left_right_edges(theta, node, j)
+        candidates = self._find_left_right_edges(theta, node, j)
         if self.verbose:
-            print(f"{j}: the edge to the left is edge {left_edge}")
-            print(f"{j}: the edge to the right is edge {right_edge}")
-        if left_edge == right_edge:
+            print(f"{j}: the edge to the left is edge {candidates.left_edge}")
+            print(f"{j}: the edge to the right is edge {candidates.right_edge}")
+        if candidates.left_edge == candidates.right_edge:
             if self.verbose:
-                print(f"{j}: continue along edge {left_edge}")
-            index0 = self.mesh_data.edge_face_connectivity[left_edge, :]
+                print(f"{j}: continue along edge {candidates.left_edge}")
+            index0 = self.mesh_data.edge_face_connectivity[candidates.left_edge, :]
         else:
             if self.verbose:
                 print(
-                    f"{j}: continue between edges {left_edge} on the left and {right_edge} on the right"
+                    f"{j}: continue between edges {candidates.left_edge}"
+                    f" on the left and {candidates.right_edge} on the right"
                 )
-            index0 = self._resolve_next_face_from_edges(node, left_edge, right_edge, j)
+            index0 = self._resolve_next_face_from_edges(node, candidates, j)
         return index0
 
     def _slice_by_node_or_edge(self, j, bpj, bpj1, b, edges, node, edge, faces):
