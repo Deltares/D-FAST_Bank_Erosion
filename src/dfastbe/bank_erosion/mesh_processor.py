@@ -240,19 +240,19 @@ class MeshProcessor:
     """A class for processing mesh-related operations."""
 
     def __init__(self, bank_points, mesh_data: MeshData, d_thresh: float = 0.001):
-        self.bp = bank_points
+        self.bank_points = bank_points
         self.mesh_data = mesh_data
         self.d_thresh = d_thresh
-        self.crds = np.zeros((len(bank_points), 2))
+        self.coords = np.zeros((len(bank_points), 2))
         self.idx = np.zeros(len(bank_points), dtype=np.int64)
         self.verbose = False
         self.ind = 0
         self.index: int
         self.vindex: np.ndarray
 
-    def _handle_first_point(self, bpj: np.ndarray):
-        dx = self.mesh_data.x_face_coords - bpj[0]
-        dy = self.mesh_data.y_face_coords - bpj[1]
+    def _handle_first_point(self, current_bank_point: np.ndarray):
+        dx = self.mesh_data.x_face_coords - current_bank_point[0]
+        dy = self.mesh_data.y_face_coords - current_bank_point[1]
         possible_cells = np.nonzero(
             ~(
                 (dx < 0).all(axis=1)
@@ -262,7 +262,7 @@ class MeshProcessor:
             )
         )[0]
         self._find_starting_face(possible_cells)
-        self._store_segment_point(bpj)
+        self._store_segment_point(current_bank_point)
 
     def _get_face_coordinates(self, index: int) -> np.ndarray:
         """Returns the coordinates of the index-th mesh face as an (N, 2) array.
@@ -303,7 +303,7 @@ class MeshProcessor:
         return math.atan2(dy, dx)
 
     def _get_faces_on_edge(self, possible_cells) -> List[int]:
-        pnt = Point(self.bp[0])
+        pnt = Point(self.bank_points[0])
         on_edge = []
         for k in possible_cells:
             polygon_k = Polygon(self._get_face_coordinates(k))
@@ -494,17 +494,17 @@ class MeshProcessor:
             self.index = -2
         return b, edges, nodes
 
-    def _store_segment_point(self, bpj, shape=None):
+    def _store_segment_point(self, current_bank_point, shape=None):
         """Finalize a segment
 
         Enlarge arrays if needed, set coordinates and index, and increment ind.
         """
         if shape is None:
             shape = (self.ind + 1, 2)
-        if self.ind == self.crds.shape[0]:
-            self.crds = enlarge(self.crds, (shape, 2))
+        if self.ind == self.coords.shape[0]:
+            self.coords = enlarge(self.coords, (shape, 2))
             self.idx = enlarge(self.idx, (shape,))
-        self.crds[self.ind] = bpj
+        self.coords[self.ind] = current_bank_point
         if self.index == -2:
             self.idx[self.ind] = self.vindex[0]
         else:
@@ -513,7 +513,9 @@ class MeshProcessor:
 
     def _determine_next_face_on_edge(self, bpj, j, edge, faces):
         """Determine the next face to continue along an edge based on the segment direction."""
-        theta = math.atan2(self.bp[j + 1][1] - bpj[1], self.bp[j + 1][0] - bpj[0])
+        theta = math.atan2(
+            self.bank_points[j + 1][1] - bpj[1], self.bank_points[j + 1][0] - bpj[0]
+        )
         if self.verbose:
             print(f"{j}: moving in direction theta = {theta}")
         theta_edge = self._edge_angle(edge)
@@ -525,7 +527,7 @@ class MeshProcessor:
             # check whether the (extended) segment slices any edge of faces[0]
             fe1 = self.mesh_data.face_edge_connectivity[faces[0]]
             a, b, edges = _get_slices_core(
-                fe1, self.mesh_data, bpj, self.bp[j + 1], 0.0, False
+                fe1, self.mesh_data, bpj, self.bank_points[j + 1], 0.0, False
             )
             # yes, a slice (typically 1, but could be 2 if it slices at a node
             # but that doesn't matter) ... so, we continue towards faces[0]
@@ -621,7 +623,10 @@ class MeshProcessor:
             # direction of current segment from bpj1 to bpj
             theta = math.atan2(bpj[1] - bpj1[1], bpj[0] - bpj1[0])
         else:
-            if np.isclose(b[0], 1.0, rtol=RTOL, atol=ATOL) and j == len(self.bp) - 1:
+            if (
+                np.isclose(b[0], 1.0, rtol=RTOL, atol=ATOL)
+                and j == len(self.bank_points) - 1
+            ):
                 # catch case of last segment
                 if self.verbose:
                     print(f"{j}: last point ends in a node")
@@ -632,8 +637,8 @@ class MeshProcessor:
                 # this segment ends in the node, so check next segment ...
                 # direction of next segment from bpj to bp[j+1]
                 theta = math.atan2(
-                    self.bp[j + 1][1] - bpj[1],
-                    self.bp[j + 1][0] - bpj[0],
+                    self.bank_points[j + 1][1] - bpj[1],
+                    self.bank_points[j + 1][0] - bpj[0],
                 )
         index0 = None
         if not finished:
@@ -673,7 +678,7 @@ class MeshProcessor:
             if self.verbose:
                 print(f"{j}: ending on edge {edge} at {b[0]}")
             # figure out where we will be heading afterwards ...
-            if j == len(self.bp) - 1:
+            if j == len(self.bank_points) - 1:
                 # catch case of last segment
                 if self.verbose:
                     print(f"{j}: last point ends on an edge")
@@ -684,7 +689,7 @@ class MeshProcessor:
         return finished, index0
 
     def _process_segment(self, j, bpj):
-        bpj1 = self.bp[j - 1]
+        bpj1 = self.bank_points[j - 1]
         prev_b = 0
         shape_multiplier = 2
         while True:
@@ -772,23 +777,25 @@ class MeshProcessor:
             - The function handles cases where the line starts outside the mesh, crosses multiple edges, or ends on a node.
             - Tiny segments shorter than `d_thresh` are removed from the output.
         """
-        for j, bpj in enumerate(self.bp):
+        for j, current_bank_point in enumerate(self.bank_points):
             if self.verbose:
-                print(f"Current location: {bpj[0]}, {bpj[1]}")
+                print(
+                    f"Current location: {current_bank_point[0]}, {current_bank_point[1]}"
+                )
             if j == 0:
-                self._handle_first_point(bpj)
+                self._handle_first_point(current_bank_point)
             else:
-                self._process_segment(j, bpj)  # second or later point
+                self._process_segment(j, current_bank_point)  # second or later point
 
         # clip to actual length (idx refers to segments, so we can ignore the last value)
-        self.crds = self.crds[: self.ind]
+        self.coords = self.coords[: self.ind]
         self.idx = self.idx[: self.ind - 1]
 
         # remove tiny segments
-        d = np.sqrt((np.diff(self.crds, axis=0) ** 2).sum(axis=1))
+        d = np.sqrt((np.diff(self.coords, axis=0) ** 2).sum(axis=1))
         mask = np.concatenate((np.ones((1), dtype="bool"), d > self.d_thresh))
-        self.crds = self.crds[mask, :]
+        self.coords = self.coords[mask, :]
         self.idx = self.idx[mask[1:]]
 
         # since index refers to segments, don't return the first one
-        return self.crds, self.idx
+        return self.coords, self.idx
