@@ -345,7 +345,8 @@ class MeshProcessor:
 
         on_edge = self._get_faces_on_edge(possible_cells)
 
-        self._handle_starting_face_on_edge(on_edge)
+        if self.index == -1:
+            self._handle_starting_face_on_edge(on_edge)
 
     def _handle_starting_face_on_edge(self, on_edge):
         """Handle the case where the first bank point is on the edge of a mesh face.
@@ -353,15 +354,14 @@ class MeshProcessor:
         Args:
             on_edge (List[int]): List of face indices where the first bank point is located on the edge.
         """
-        if self.index == -1:
-            if on_edge:
-                if self.verbose:
-                    print(f"starting on edge of {on_edge}")
-                self.index = -2 if len(on_edge) > 1 else on_edge[0]
-                self.vindex = on_edge if len(on_edge) > 1 else None
-            else:
-                if self.verbose:
-                    print("starting outside mesh")
+        if on_edge:
+            if self.verbose:
+                print(f"starting on edge of {on_edge}")
+            self.index = -2 if len(on_edge) > 1 else on_edge[0]
+            self.vindex = on_edge if len(on_edge) > 1 else None
+        else:
+            if self.verbose:
+                print("starting outside mesh")
 
     def _update_candidate_edges_by_angle(
         self, ie, dtheta, left_edge, left_dtheta, right_edge, right_dtheta, j
