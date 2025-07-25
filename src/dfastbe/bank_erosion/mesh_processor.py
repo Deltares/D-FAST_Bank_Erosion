@@ -239,6 +239,20 @@ def enlarge(
 
 @dataclass
 class EdgeCandidates:
+    """Dataclass to hold edge candidates for left and right edges.
+
+    Args:
+        left_edge (int):
+            Index of the left edge.
+        left_dtheta (float):
+            Angle of the left edge in radians.
+        right_edge (int):
+            Index of the right edge.
+        right_dtheta (float):
+            Angle of the right edge in radians.
+        found (bool):
+            Flag indicating whether a valid edge pair was found.
+    """
     left_edge: int
     left_dtheta: float
     right_edge: int
@@ -297,8 +311,10 @@ class MeshProcessor:
         """Calculate the angle of a mesh edge in radians.
 
         Args:
-            edge (int): The edge index.
-            reverse (bool): If True, computes the angle from end to start.
+            edge (int):
+                The edge index.
+            reverse (bool):
+                If True, computes the angle from end to start.
 
         Returns:
             float: The angle of the edge in radians.
@@ -320,7 +336,8 @@ class MeshProcessor:
         This function checks if the first bank point is inside or on the edge of any mesh face.
 
         Args:
-            possible_cells (np.ndarray): Array of possible cell indices where the first bank point might be located.
+            possible_cells (np.ndarray):
+                Array of possible cell indices where the first bank point might be located.
 
         Returns:
             List[int]: A list of face indices where the first bank point is located.
@@ -810,5 +827,4 @@ class MeshProcessor:
         self.face_indexes = self.face_indexes[mask[1:]]
 
         # since index refers to segments, don't return the first one
-        return self.coords, self.face_indexes
         return self.coords, self.face_indexes
