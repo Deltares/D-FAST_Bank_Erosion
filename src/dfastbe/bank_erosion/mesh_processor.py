@@ -302,7 +302,7 @@ class MeshProcessor:
         )
         return math.atan2(dy, dx)
 
-    def _get_faces_on_edge(self, possible_cells) -> List[int]:
+    def _find_faces_containing_point_on_edge(self, possible_cells) -> List[int]:
         """Get the faces that contain the first bank point on the edge of the mesh.
 
         This function checks if the first bank point is inside or on the edge of any mesh face.
@@ -343,7 +343,7 @@ class MeshProcessor:
                 print("starting outside mesh")
             self.index = -1
 
-        on_edge = self._get_faces_on_edge(possible_cells)
+        on_edge = self._find_faces_containing_point_on_edge(possible_cells)
 
         if self.index == -1:
             self._handle_starting_face_on_edge(on_edge)
@@ -622,8 +622,8 @@ class MeshProcessor:
         nodes = nodes[bmin]
         return b, edges, nodes
 
-    def _handle_node_transition(self, j, bpj, bpj1, b, edges, node):
-        """Handle the transition at a node when a segment ends or continues."""
+    def _process_node_transition(self, j, bpj, bpj1, b, edges, node):
+        """Process the transition at a node when a segment ends or continues."""
         finished = False
         if self.verbose:
             print(f"{j}: moving via node {node} on edges {edges} at {b[0]}")
@@ -698,7 +698,7 @@ class MeshProcessor:
                 index0 = self._determine_next_face_on_edge(bpj, j, edge, faces)
         return finished, index0
 
-    def _process_segment(self, j, bpj):
+    def _process_bank_segment(self, j, bpj):
         bpj1 = self.bank_points[j - 1]
         prev_b = 0
         shape_multiplier = 2
@@ -785,7 +785,7 @@ class MeshProcessor:
             if j == 0:
                 self._handle_first_point(current_bank_point)
             else:
-                self._process_segment(j, current_bank_point)  # second or later point
+                self._process_bank_segment(j, current_bank_point)
 
         # clip to actual length (idx refers to segments, so we can ignore the last value)
         self.coords = self.coords[: self.ind]
