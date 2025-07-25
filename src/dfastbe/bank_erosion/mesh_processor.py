@@ -1,6 +1,6 @@
 """module for processing mesh-related operations."""
 import math
-from typing import Tuple
+from typing import List, Tuple
 
 import numpy as np
 from shapely.geometry import LineString, Point, Polygon
@@ -302,6 +302,22 @@ class MeshProcessor:
         )
         return math.atan2(dy, dx)
 
+    def _get_faces_on_edge(self, possible_cells) -> List[int]:
+        pnt = Point(self.bp[0])
+        on_edge = []
+        for k in possible_cells:
+            polygon_k = Polygon(self._get_face_coordinates(k))
+            if polygon_k.contains(pnt):
+                if self.verbose:
+                    print(f"starting in {k}")
+                self.index = k
+                break
+            nd = self._get_face_coordinates(k)
+            line_k = LineString(np.vstack([nd, nd[0]]))
+            if line_k.contains(pnt):
+                on_edge.append(k)
+        return on_edge
+
     def _find_starting_face(self, possible_cells: np.ndarray):
         """Find the starting face for a bank line segment.
 
@@ -325,19 +341,7 @@ class MeshProcessor:
                 print("starting outside mesh")
             self.index = -1
 
-        pnt = Point(self.bp[0])
-        on_edge = []
-        for k in possible_cells:
-            polygon_k = Polygon(self._get_face_coordinates(k))
-            if polygon_k.contains(pnt):
-                if self.verbose:
-                    print(f"starting in {k}")
-                self.index = k
-                break
-            nd = self._get_face_coordinates(k)
-            line_k = LineString(np.vstack([nd, nd[0]]))
-            if line_k.contains(pnt):
-                on_edge.append(k)
+        on_edge = self._get_faces_on_edge(possible_cells)
 
         if self.index == -1:
             if on_edge:
