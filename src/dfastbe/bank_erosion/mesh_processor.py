@@ -244,7 +244,7 @@ class MeshProcessor:
         self.mesh_data = mesh_data
         self.d_thresh = d_thresh
         self.coords = np.zeros((len(bank_points), 2))
-        self.idx = np.zeros(len(bank_points), dtype=np.int64)
+        self.face_indexes = np.zeros(len(bank_points), dtype=np.int64)
         self.verbose = False
         self.ind = 0
         self.index: int
@@ -303,6 +303,16 @@ class MeshProcessor:
         return math.atan2(dy, dx)
 
     def _get_faces_on_edge(self, possible_cells) -> List[int]:
+        """Get the faces that contain the first bank point on the edge of the mesh.
+
+        This function checks if the first bank point is inside or on the edge of any mesh face.
+
+        Args:
+            possible_cells (np.ndarray): Array of possible cell indices where the first bank point might be located.
+
+        Returns:
+            List[int]: A list of face indices where the first bank point is located.
+        """
         pnt = Point(self.bank_points[0])
         on_edge = []
         for k in possible_cells:
@@ -326,14 +336,6 @@ class MeshProcessor:
 
         Args:
             possible_cells (np.ndarray): Array of possible cell indices.
-            bp (np.ndarray): A 2D array of shape (N, 2) containing the x, y coordinates of the bank line segment.
-            mesh_data (MeshData): An instance of the `MeshData` class containing mesh-related data.
-            verbose (bool, optional): If True, prints additional debug information. Defaults to False.
-
-        Returns:
-            Tuple[int, np.ndarray]: A tuple containing:
-                - The index of the starting face (-2 if multiple faces are found).
-                - An array of vertex indices associated with the starting face.
         """
         self.index = -1
         if len(possible_cells) == 0:
@@ -343,6 +345,14 @@ class MeshProcessor:
 
         on_edge = self._get_faces_on_edge(possible_cells)
 
+        self._handle_starting_face_on_edge(on_edge)
+
+    def _handle_starting_face_on_edge(self, on_edge):
+        """Handle the case where the first bank point is on the edge of a mesh face.
+
+        Args:
+            on_edge (List[int]): List of face indices where the first bank point is located on the edge.
+        """
         if self.index == -1:
             if on_edge:
                 if self.verbose:
@@ -503,12 +513,12 @@ class MeshProcessor:
             shape = (self.ind + 1, 2)
         if self.ind == self.coords.shape[0]:
             self.coords = enlarge(self.coords, (shape, 2))
-            self.idx = enlarge(self.idx, (shape,))
+            self.face_indexes = enlarge(self.face_indexes, (shape,))
         self.coords[self.ind] = current_bank_point
         if self.index == -2:
-            self.idx[self.ind] = self.vindex[0]
+            self.face_indexes[self.ind] = self.vindex[0]
         else:
-            self.idx[self.ind] = self.index
+            self.face_indexes[self.ind] = self.index
         self.ind += 1
 
     def _determine_next_face_on_edge(self, bpj, j, edge, faces):
@@ -750,20 +760,10 @@ class MeshProcessor:
         This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.
         It calculates the intersection points and identifies the mesh faces corresponding to each segment of the line.
 
-        Args:
-            bp (np.ndarray):
-                A 2D array of shape (N, 2) containing the x, y coordinates of the line to be intersected with the mesh.
-            mesh_data (MeshData):
-                An instance of the `MeshData` class containing mesh-related data, such as face coordinates, edge coordinates,
-                and connectivity information.
-            d_thresh (float, optional):
-                A distance threshold for filtering out very small segments. Segments shorter than this threshold will be removed.
-                Defaults to 0.001.
-
         Returns:
             Tuple[np.ndarray, np.ndarray]:
                 A tuple containing:
-                - `crds` (np.ndarray): A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.
+                - `coords` (np.ndarray): A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.
                 - `idx` (np.ndarray): A 1D array of shape (M-1,) containing the indices of the mesh faces corresponding to
                 each segment of the intersected line.
 
@@ -789,13 +789,13 @@ class MeshProcessor:
 
         # clip to actual length (idx refers to segments, so we can ignore the last value)
         self.coords = self.coords[: self.ind]
-        self.idx = self.idx[: self.ind - 1]
+        self.face_indexes = self.face_indexes[: self.ind - 1]
 
         # remove tiny segments
         d = np.sqrt((np.diff(self.coords, axis=0) ** 2).sum(axis=1))
         mask = np.concatenate((np.ones((1), dtype="bool"), d > self.d_thresh))
         self.coords = self.coords[mask, :]
-        self.idx = self.idx[mask[1:]]
+        self.face_indexes = self.face_indexes[mask[1:]]
 
         # since index refers to segments, don't return the first one
-        return self.coords, self.idx
+        return self.coords, self.face_indexes
