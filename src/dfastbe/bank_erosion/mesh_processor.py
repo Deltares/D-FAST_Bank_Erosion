@@ -262,12 +262,7 @@ class MeshProcessor:
             )
         )[0]
         self._find_starting_face(possible_cells)
-        self.crds[self.ind] = bpj
-        if self.index == -2:
-            self.idx[self.ind] = self.vindex[0]
-        else:
-            self.idx[self.ind] = self.index
-        self.ind += 1
+        self._finalize_segment(bpj)
 
     def _get_face_coordinates(self, index: int) -> np.ndarray:
         """Returns the coordinates of the index-th mesh face as an (N, 2) array.
