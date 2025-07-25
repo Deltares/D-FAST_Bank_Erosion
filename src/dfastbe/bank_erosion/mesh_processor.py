@@ -349,6 +349,36 @@ class MeshProcessor:
                 if self.verbose:
                     print("starting outside mesh")
 
+    def _update_left_right_edges(
+        self, ie, dtheta, left_edge, left_dtheta, right_edge, right_dtheta, j
+    ):
+        """Update the left and right edges based on the angle difference."""
+        finished = False
+        twopi = 2 * math.pi
+        if dtheta > 0:
+            if dtheta < left_dtheta:
+                left_edge = ie
+                left_dtheta = dtheta
+            if twopi - dtheta < right_dtheta:
+                right_edge = ie
+                right_dtheta = twopi - dtheta
+        elif dtheta < 0:
+            dtheta = -dtheta
+            if twopi - dtheta < left_dtheta:
+                left_edge = ie
+                left_dtheta = twopi - dtheta
+            if dtheta < right_dtheta:
+                right_edge = ie
+                right_dtheta = dtheta
+        else:
+            # aligned with edge
+            if self.verbose and j is not None:
+                print(f"{j}: line is aligned with edge {ie}")
+            left_edge = ie
+            right_edge = ie
+            finished = True
+        return finished, left_edge, left_dtheta, right_edge, right_dtheta
+
     def _find_left_right_edges(self, theta, node, j=None):
         """
         Helper to find the left and right edges at a node based on the direction theta.
@@ -361,11 +391,10 @@ class MeshProcessor:
         Returns:
             Tuple[int, int]: Indices of the left and right edges.
         """
-        twopi = 2 * math.pi
         left_edge = -1
-        left_dtheta = twopi
+        left_dtheta = 2 * math.pi
         right_edge = -1
-        right_dtheta = twopi
+        right_dtheta = 2 * math.pi
         all_node_edges = np.nonzero((self.mesh_data.edge_node == node).any(axis=1))[0]
 
         if self.verbose and j is not None:
@@ -378,27 +407,12 @@ class MeshProcessor:
                 print(f"{j}: edge {ie} connects {self.mesh_data.edge_node[ie, :]}")
                 print(f"{j}: edge {ie} theta is {theta_edge}")
             dtheta = theta_edge - theta
-            if dtheta > 0:
-                if dtheta < left_dtheta:
-                    left_edge = ie
-                    left_dtheta = dtheta
-                if twopi - dtheta < right_dtheta:
-                    right_edge = ie
-                    right_dtheta = twopi - dtheta
-            elif dtheta < 0:
-                dtheta = -dtheta
-                if twopi - dtheta < left_dtheta:
-                    left_edge = ie
-                    left_dtheta = twopi - dtheta
-                if dtheta < right_dtheta:
-                    right_edge = ie
-                    right_dtheta = dtheta
-            else:
-                # aligned with edge
-                if self.verbose and j is not None:
-                    print(f"{j}: line is aligned with edge {ie}")
-                left_edge = ie
-                right_edge = ie
+            finished, left_edge, left_dtheta, right_edge, right_dtheta = (
+                self._update_left_right_edges(
+                    ie, dtheta, left_edge, left_dtheta, right_edge, right_dtheta, j
+                )
+            )
+            if finished:
                 break
 
         if self.verbose and j is not None:
