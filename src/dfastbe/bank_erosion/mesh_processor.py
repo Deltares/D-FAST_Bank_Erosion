@@ -655,6 +655,79 @@ class MeshProcessor:
             index0 = self._resolve_next_face_from_edges(node, left_edge, right_edge, j)
         return False, index0
 
+    def _handle_points(self, j, bpj):
+        bpj1 = self.bp[j - 1]
+        prev_b = 0
+        while True:
+            if self.index == -2:
+                b, edges, nodes = self._resolve_ambiguous_edge_transition(
+                    prev_b, bpj, bpj1
+                )
+            elif (bpj == bpj1).all():
+                # this is a segment of length 0, skip it since it takes us nowhere
+                break
+            else:
+                b, edges, nodes = _get_slices(
+                    self.index,
+                    prev_b,
+                    bpj,
+                    bpj1,
+                    self.mesh_data,
+                )
+
+            if len(edges) == 0:
+                # rest of segment associated with same face
+                self._handle_no_edge_transition(j, prev_b, bpj)
+                break
+            index0 = None
+            if len(edges) > 1:
+                b, edges, nodes = self._select_first_crossing(b, edges, nodes)
+
+            # slice location identified ...
+            node = nodes[0]
+            edge = edges[0]
+            faces = self.mesh_data.edge_face_connectivity[edge]
+            prev_b = b[0]
+
+            if node >= 0:
+                # if we slice at a node ...
+                end, index0 = self._handle_node_transition(j, bpj, bpj1, b, edges, node)
+                if end:
+                    break
+
+            elif b[0] == 1:
+                # ending at slice point, so ending on an edge ...
+                if self.verbose:
+                    print(f"{j}: ending on edge {edge} at {b[0]}")
+                # figure out where we will be heading afterwards ...
+                if j == len(self.bp) - 1:
+                    # catch case of last segment
+                    if self.verbose:
+                        print(f"{j}: last point ends on an edge")
+                    self._finalize_segment(bpj)
+                    break
+                index0 = self._determine_next_face_on_edge(bpj, j, edge, faces)
+
+            self._update_mesh_index_and_log(
+                j,
+                node,
+                edge,
+                faces,
+                index0,
+                prev_b,
+            )
+            if self.ind == self.crds.shape[0]:
+                self.crds = enlarge(self.crds, (2 * self.ind, 2))
+                self.idx = enlarge(self.idx, (2 * self.ind,))
+            self.crds[self.ind] = bpj1 + prev_b * (bpj - bpj1)
+            if self.index == -2:
+                self.idx[self.ind] = self.vindex[0]
+            else:
+                self.idx[self.ind] = self.index
+            self.ind += 1
+            if prev_b == 1:
+                break
+
     def intersect_line_mesh(self) -> Tuple[np.ndarray, np.ndarray]:
         """Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.
 
@@ -694,80 +767,7 @@ class MeshProcessor:
             if j == 0:
                 self._handle_first_point(bpj)
             else:
-                # second or later point
-                bpj1 = self.bp[j - 1]
-                prev_b = 0
-                while True:
-                    if self.index == -2:
-                        b, edges, nodes = self._resolve_ambiguous_edge_transition(
-                            prev_b, bpj, bpj1
-                        )
-                    elif (bpj == bpj1).all():
-                        # this is a segment of length 0, skip it since it takes us nowhere
-                        break
-                    else:
-                        b, edges, nodes = _get_slices(
-                            self.index,
-                            prev_b,
-                            bpj,
-                            bpj1,
-                            self.mesh_data,
-                        )
-
-                    if len(edges) == 0:
-                        # rest of segment associated with same face
-                        self._handle_no_edge_transition(j, prev_b, bpj)
-                        break
-                    index0 = None
-                    if len(edges) > 1:
-                        b, edges, nodes = self._select_first_crossing(b, edges, nodes)
-
-                    # slice location identified ...
-                    node = nodes[0]
-                    edge = edges[0]
-                    faces = self.mesh_data.edge_face_connectivity[edge]
-                    prev_b = b[0]
-
-                    if node >= 0:
-                        # if we slice at a node ...
-                        end, index0 = self._handle_node_transition(
-                            j, bpj, bpj1, b, edges, node
-                        )
-                        if end:
-                            break
-
-                    elif b[0] == 1:
-                        # ending at slice point, so ending on an edge ...
-                        if self.verbose:
-                            print(f"{j}: ending on edge {edge} at {b[0]}")
-                        # figure out where we will be heading afterwards ...
-                        if j == len(self.bp) - 1:
-                            # catch case of last segment
-                            if self.verbose:
-                                print(f"{j}: last point ends on an edge")
-                            self._finalize_segment(bpj)
-                            break
-                        index0 = self._determine_next_face_on_edge(bpj, j, edge, faces)
-
-                    self._update_mesh_index_and_log(
-                        j,
-                        node,
-                        edge,
-                        faces,
-                        index0,
-                        prev_b,
-                    )
-                    if self.ind == self.crds.shape[0]:
-                        self.crds = enlarge(self.crds, (2 * self.ind, 2))
-                        self.idx = enlarge(self.idx, (2 * self.ind,))
-                    self.crds[self.ind] = bpj1 + prev_b * (bpj - bpj1)
-                    if self.index == -2:
-                        self.idx[self.ind] = self.vindex[0]
-                    else:
-                        self.idx[self.ind] = self.index
-                    self.ind += 1
-                    if prev_b == 1:
-                        break
+                self._handle_points(j, bpj)  # second or later point
 
         # clip to actual length (idx refers to segments, so we can ignore the last value)
         self.crds = self.crds[: self.ind]
