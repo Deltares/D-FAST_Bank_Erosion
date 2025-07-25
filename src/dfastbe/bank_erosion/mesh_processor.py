@@ -249,7 +249,9 @@ class EdgeCandidates:
 class MeshProcessor:
     """A class for processing mesh-related operations."""
 
-    def __init__(self, bank_points, mesh_data: MeshData, d_thresh: float = 0.001):
+    def __init__(
+        self, bank_points: np.ndarray, mesh_data: MeshData, d_thresh: float = 0.001
+    ):
         self.bank_points = bank_points
         self.mesh_data = mesh_data
         self.d_thresh = d_thresh
@@ -258,7 +260,7 @@ class MeshProcessor:
         self.verbose = False
         self.ind = 0
         self.index: int
-        self.vindex: np.ndarray
+        self.vindex: np.ndarray | int
 
     def _handle_first_point(self, current_bank_point: np.ndarray):
         dx = self.mesh_data.x_face_coords - current_bank_point[0]
@@ -689,7 +691,7 @@ class MeshProcessor:
         index0 = None
         if node >= 0:
             # if we slice at a node ...
-            finished, index0 = self._handle_node_transition(
+            finished, index0 = self._process_node_transition(
                 j, bpj, bpj1, b, edges, node
             )
 
