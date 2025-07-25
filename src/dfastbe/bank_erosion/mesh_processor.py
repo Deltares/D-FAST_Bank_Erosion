@@ -657,7 +657,7 @@ class MeshProcessor:
             index0 = self._resolve_next_face_from_edges(node, left_edge, right_edge, j)
         return False, index0
 
-    def _handle_points(self, j, bpj):
+    def _process_segment(self, j, bpj):
         bpj1 = self.bp[j - 1]
         prev_b = 0
         while True:
@@ -763,7 +763,7 @@ class MeshProcessor:
             if j == 0:
                 self._handle_first_point(bpj)
             else:
-                self._handle_points(j, bpj)  # second or later point
+                self._process_segment(j, bpj)  # second or later point
 
         # clip to actual length (idx refers to segments, so we can ignore the last value)
         self.crds = self.crds[: self.ind]
