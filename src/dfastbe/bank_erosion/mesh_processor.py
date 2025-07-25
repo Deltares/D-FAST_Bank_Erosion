@@ -593,16 +593,6 @@ class MeshProcessor:
                     f"{j}: ERROR: point actually not contained within {self.index}!"
                 )
 
-    def _handle_no_edge_transition(self, j, prev_b, bpj):
-        if self.verbose:
-            self._log_slice_status(j, prev_b, bpj)
-        if self.ind == self.crds.shape[0]:
-            self.crds = enlarge(self.crds, (2 * self.ind, 2))
-            self.idx = enlarge(self.idx, (2 * self.ind,))
-        self.crds[self.ind] = bpj
-        self.idx[self.ind] = self.index
-        self.ind += 1
-
     def _select_first_crossing(self, b, edges, nodes):
         """Select the first crossing from a set of edges and their associated distances.
 
@@ -679,7 +669,8 @@ class MeshProcessor:
 
             if len(edges) == 0:
                 # rest of segment associated with same face
-                self._handle_no_edge_transition(j, prev_b, bpj)
+                shape = 2 * self.ind
+                self._store_segment_point(bpj, shape=shape)
                 break
             index0 = None
             if len(edges) > 1:
@@ -693,8 +684,10 @@ class MeshProcessor:
 
             if node >= 0:
                 # if we slice at a node ...
-                end, index0 = self._handle_node_transition(j, bpj, bpj1, b, edges, node)
-                if end:
+                finished, index0 = self._handle_node_transition(
+                    j, bpj, bpj1, b, edges, node
+                )
+                if finished:
                     break
 
             elif b[0] == 1:
