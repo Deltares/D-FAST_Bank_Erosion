@@ -686,6 +686,7 @@ class MeshProcessor:
     def _process_segment(self, j, bpj):
         bpj1 = self.bp[j - 1]
         prev_b = 0
+        shape_multiplier = 2
         while True:
             if self.index == -2:
                 b, edges, nodes = self._resolve_ambiguous_edge_transition(
@@ -705,7 +706,7 @@ class MeshProcessor:
 
             if len(edges) == 0:
                 # rest of segment associated with same face
-                shape = 2 * self.ind
+                shape = self.ind * shape_multiplier
                 self._store_segment_point(bpj, shape=shape)
                 break
             index0 = None
@@ -733,7 +734,7 @@ class MeshProcessor:
                 prev_b,
             )
             segment = bpj1 + prev_b * (bpj - bpj1)
-            shape = self.ind * 2
+            shape = self.ind * shape_multiplier
             self._store_segment_point(segment, shape=shape)
             if prev_b == 1:
                 break
