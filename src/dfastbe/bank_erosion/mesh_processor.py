@@ -335,7 +335,7 @@ class MeshProcessor:
                 self.index = k
                 break
             nd = self._get_face_coordinates(k)
-            line_k = LineString(np.concatenate([nd, nd[0:1]], axis=0))
+            line_k = LineString(np.vstack([nd, nd[0]]))
             if line_k.contains(pnt):
                 on_edge.append(k)
 
