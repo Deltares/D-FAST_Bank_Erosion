@@ -262,7 +262,7 @@ class MeshProcessor:
             )
         )[0]
         self._find_starting_face(possible_cells)
-        self._finalize_segment(bpj)
+        self._store_segment_point(bpj)
 
     def _get_face_coordinates(self, index: int) -> np.ndarray:
         """Returns the coordinates of the index-th mesh face as an (N, 2) array.
@@ -490,7 +490,7 @@ class MeshProcessor:
             self.index = -2
         return b, edges, nodes
 
-    def _finalize_segment(self, bpj, shape=None):
+    def _store_segment_point(self, bpj, shape=None):
         """Finalize a segment
 
         Enlarge arrays if needed, set coordinates and index, and increment ind.
@@ -630,7 +630,7 @@ class MeshProcessor:
                 # catch case of last segment
                 if self.verbose:
                     print(f"{j}: last point ends in a node")
-                self._finalize_segment(bpj)
+                self._store_segment_point(bpj)
                 return True, None
             else:
                 # this segment ends in the node, so check next segment ...
@@ -706,7 +706,7 @@ class MeshProcessor:
                     # catch case of last segment
                     if self.verbose:
                         print(f"{j}: last point ends on an edge")
-                    self._finalize_segment(bpj)
+                    self._store_segment_point(bpj)
                     break
                 index0 = self._determine_next_face_on_edge(bpj, j, edge, faces)
 
@@ -720,7 +720,7 @@ class MeshProcessor:
             )
             segment = bpj1 + prev_b * (bpj - bpj1)
             shape = self.ind * 2
-            self._finalize_segment(segment, shape=shape)
+            self._store_segment_point(segment, shape=shape)
             if prev_b == 1:
                 break
 
