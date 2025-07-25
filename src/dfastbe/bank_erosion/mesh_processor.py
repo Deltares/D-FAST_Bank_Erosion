@@ -1,5 +1,6 @@
 """module for processing mesh-related operations."""
 import math
+from dataclasses import dataclass
 from typing import List, Tuple
 
 import numpy as np
@@ -236,6 +237,15 @@ def enlarge(
     return new_array
 
 
+@dataclass
+class EdgeCandidates:
+    left_edge: int
+    left_dtheta: float
+    right_edge: int
+    right_dtheta: float
+    finished: bool = False
+
+
 class MeshProcessor:
     """A class for processing mesh-related operations."""
 
@@ -363,35 +373,32 @@ class MeshProcessor:
             if self.verbose:
                 print("starting outside mesh")
 
-    def _update_candidate_edges_by_angle(
-        self, ie, dtheta, left_edge, left_dtheta, right_edge, right_dtheta, j
-    ):
+    def _update_candidate_edges_by_angle(self, ie, dtheta, candidates, j):
         """Update the left and right edges based on the angle difference."""
-        finished = False
         twopi = 2 * math.pi
         if dtheta > 0:
-            if dtheta < left_dtheta:
-                left_edge = ie
-                left_dtheta = dtheta
-            if twopi - dtheta < right_dtheta:
-                right_edge = ie
-                right_dtheta = twopi - dtheta
+            if dtheta < candidates.left_dtheta:
+                candidates.left_edge = ie
+                candidates.left_dtheta = dtheta
+            if twopi - dtheta < candidates.right_dtheta:
+                candidates.right_edge = ie
+                candidates.right_dtheta = twopi - dtheta
         elif dtheta < 0:
             dtheta = -dtheta
-            if twopi - dtheta < left_dtheta:
-                left_edge = ie
-                left_dtheta = twopi - dtheta
-            if dtheta < right_dtheta:
-                right_edge = ie
-                right_dtheta = dtheta
+            if twopi - dtheta < candidates.left_dtheta:
+                candidates.left_edge = ie
+                candidates.left_dtheta = twopi - dtheta
+            if dtheta < candidates.right_dtheta:
+                candidates.right_edge = ie
+                candidates.right_dtheta = dtheta
         else:
             # aligned with edge
             if self.verbose and j is not None:
                 print(f"{j}: line is aligned with edge {ie}")
-            left_edge = ie
-            right_edge = ie
-            finished = True
-        return finished, left_edge, left_dtheta, right_edge, right_dtheta
+            candidates.left_edge = ie
+            candidates.right_edge = ie
+            candidates.finished = True
+        return candidates
 
     def _find_left_right_edges(self, theta, node, j=None):
         """
@@ -410,6 +417,7 @@ class MeshProcessor:
         right_edge = -1
         right_dtheta = 2 * math.pi
         all_node_edges = np.nonzero((self.mesh_data.edge_node == node).any(axis=1))[0]
+        candidates = EdgeCandidates(left_edge, left_dtheta, right_edge, right_dtheta)
 
         if self.verbose and j is not None:
             print(f"{j}: the edges connected to node {node} are {all_node_edges}")
@@ -421,12 +429,8 @@ class MeshProcessor:
                 print(f"{j}: edge {ie} connects {self.mesh_data.edge_node[ie, :]}")
                 print(f"{j}: edge {ie} theta is {theta_edge}")
             dtheta = theta_edge - theta
-            finished, left_edge, left_dtheta, right_edge, right_dtheta = (
-                self._update_candidate_edges_by_angle(
-                    ie, dtheta, left_edge, left_dtheta, right_edge, right_dtheta, j
-                )
-            )
-            if finished:
+            self._update_candidate_edges_by_angle(ie, dtheta, candidates, j)
+            if candidates.finished:
                 break
 
         if self.verbose and j is not None:
@@ -798,4 +802,5 @@ class MeshProcessor:
         self.face_indexes = self.face_indexes[mask[1:]]
 
         # since index refers to segments, don't return the first one
+        return self.coords, self.face_indexes
         return self.coords, self.face_indexes
