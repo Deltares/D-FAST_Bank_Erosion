@@ -633,7 +633,7 @@ class MeshProcessor:
                 # direction of next segment from bpj to bp[j+1]
                 theta = math.atan2(
                     self.bp[j + 1][1] - bpj[1],
-                    self.bp[j + 1][0] - self.bp[j][0],
+                    self.bp[j + 1][0] - bpj[0],
                 )
         index0 = None
         if not finished:
