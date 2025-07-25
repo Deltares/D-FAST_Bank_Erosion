@@ -626,6 +626,7 @@ class MeshProcessor:
                 if self.verbose:
                     print(f"{j}: last point ends in a node")
                 self._store_segment_point(bpj)
+                theta = 0.0
                 finished = True
             else:
                 # this segment ends in the node, so check next segment ...
