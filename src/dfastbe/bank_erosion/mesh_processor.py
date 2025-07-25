@@ -658,6 +658,30 @@ class MeshProcessor:
             index0 = self._resolve_next_face_from_edges(node, left_edge, right_edge, j)
         return index0
 
+    def _slice_by_node_or_edge(self, j, bpj, bpj1, b, edges, node, edge, faces):
+        finished = False
+        index0 = None
+        if node >= 0:
+            # if we slice at a node ...
+            finished, index0 = self._handle_node_transition(
+                j, bpj, bpj1, b, edges, node
+            )
+
+        elif b[0] == 1:
+            # ending at slice point, so ending on an edge ...
+            if self.verbose:
+                print(f"{j}: ending on edge {edge} at {b[0]}")
+            # figure out where we will be heading afterwards ...
+            if j == len(self.bp) - 1:
+                # catch case of last segment
+                if self.verbose:
+                    print(f"{j}: last point ends on an edge")
+                self._store_segment_point(bpj)
+                finished = True
+            else:
+                index0 = self._determine_next_face_on_edge(bpj, j, edge, faces)
+        return finished, index0
+
     def _process_segment(self, j, bpj):
         bpj1 = self.bp[j - 1]
         prev_b = 0
@@ -693,26 +717,11 @@ class MeshProcessor:
             faces = self.mesh_data.edge_face_connectivity[edge]
             prev_b = b[0]
 
-            if node >= 0:
-                # if we slice at a node ...
-                finished, index0 = self._handle_node_transition(
-                    j, bpj, bpj1, b, edges, node
-                )
-                if finished:
-                    break
-
-            elif b[0] == 1:
-                # ending at slice point, so ending on an edge ...
-                if self.verbose:
-                    print(f"{j}: ending on edge {edge} at {b[0]}")
-                # figure out where we will be heading afterwards ...
-                if j == len(self.bp) - 1:
-                    # catch case of last segment
-                    if self.verbose:
-                        print(f"{j}: last point ends on an edge")
-                    self._store_segment_point(bpj)
-                    break
-                index0 = self._determine_next_face_on_edge(bpj, j, edge, faces)
+            finished, index0 = self._slice_by_node_or_edge(
+                j, bpj, bpj1, b, edges, node, edge, faces
+            )
+            if finished:
+                break
 
             self._update_mesh_index_and_log(
                 j,
