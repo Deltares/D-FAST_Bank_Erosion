@@ -490,14 +490,16 @@ class MeshProcessor:
             self.index = -2
         return b, edges, nodes
 
-    def _finalize_segment(self, bpj):
+    def _finalize_segment(self, bpj, shape=None):
         """Finalize a segment
 
         Enlarge arrays if needed, set coordinates and index, and increment ind.
         """
+        if shape is None:
+            shape = (self.ind + 1, 2)
         if self.ind == self.crds.shape[0]:
-            self.crds = enlarge(self.crds, (self.ind + 1, 2))
-            self.idx = enlarge(self.idx, (self.ind + 1,))
+            self.crds = enlarge(self.crds, (shape, 2))
+            self.idx = enlarge(self.idx, (shape,))
         self.crds[self.ind] = bpj
         if self.index == -2:
             self.idx[self.ind] = self.vindex[0]
@@ -716,15 +718,9 @@ class MeshProcessor:
                 index0,
                 prev_b,
             )
-            if self.ind == self.crds.shape[0]:
-                self.crds = enlarge(self.crds, (2 * self.ind, 2))
-                self.idx = enlarge(self.idx, (2 * self.ind,))
-            self.crds[self.ind] = bpj1 + prev_b * (bpj - bpj1)
-            if self.index == -2:
-                self.idx[self.ind] = self.vindex[0]
-            else:
-                self.idx[self.ind] = self.index
-            self.ind += 1
+            segment = bpj1 + prev_b * (bpj - bpj1)
+            shape = self.ind * 2
+            self._finalize_segment(segment, shape=shape)
             if prev_b == 1:
                 break
 
