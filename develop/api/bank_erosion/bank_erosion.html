@@ -6370,23 +6370,30 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">791</span>
 <span class="normal">792</span>
 <span class="normal">793</span>
-<span class="normal">794</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
+<span class="normal">794</span>
+<span class="normal">795</span>
+<span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span>
+<span class="normal">799</span>
+<span class="normal">800</span>
+<span class="normal">801</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for processing mesh-related operations.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bank_points</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">:</span> <span class="n">MeshData</span><span class="p">,</span> <span class="n">d_thresh</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">bp</span> <span class="o">=</span> <span class="n">bank_points</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bank_points</span> <span class="o">=</span> <span class="n">bank_points</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span> <span class="o">=</span> <span class="n">mesh_data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">d_thresh</span> <span class="o">=</span> <span class="n">d_thresh</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">crds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">bank_points</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bank_points</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">bank_points</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">bank_points</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">:</span> <span class="nb">int</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_handle_first_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bpj</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-        <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">x_face_coords</span> <span class="o">-</span> <span class="n">bpj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">y_face_coords</span> <span class="o">-</span> <span class="n">bpj</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_handle_first_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_bank_point</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">x_face_coords</span> <span class="o">-</span> <span class="n">current_bank_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">y_face_coords</span> <span class="o">-</span> <span class="n">current_bank_point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">possible_cells</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span>
             <span class="o">~</span><span class="p">(</span>
                 <span class="p">(</span><span class="n">dx</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -6396,7 +6403,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="p">)</span>
         <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_find_starting_face</span><span class="p">(</span><span class="n">possible_cells</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_store_segment_point</span><span class="p">(</span><span class="n">bpj</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_store_segment_point</span><span class="p">(</span><span class="n">current_bank_point</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_face_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the coordinates of the index-th mesh face as an (N, 2) array.</span>
@@ -6437,7 +6444,17 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">dy</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_faces_on_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">possible_cells</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-        <span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the faces that contain the first bank point on the edge of the mesh.</span>
+
+<span class="sd">        This function checks if the first bank point is inside or on the edge of any mesh face.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            possible_cells (np.ndarray): Array of possible cell indices where the first bank point might be located.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[int]: A list of face indices where the first bank point is located.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_points</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">on_edge</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">possible_cells</span><span class="p">:</span>
             <span class="n">polygon_k</span> <span class="o">=</span> <span class="n">Polygon</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_face_coordinates</span><span class="p">(</span><span class="n">k</span><span class="p">))</span>
@@ -6460,14 +6477,6 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
 <span class="sd">        Args:</span>
 <span class="sd">            possible_cells (np.ndarray): Array of possible cell indices.</span>
-<span class="sd">            bp (np.ndarray): A 2D array of shape (N, 2) containing the x, y coordinates of the bank line segment.</span>
-<span class="sd">            mesh_data (MeshData): An instance of the `MeshData` class containing mesh-related data.</span>
-<span class="sd">            verbose (bool, optional): If True, prints additional debug information. Defaults to False.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            Tuple[int, np.ndarray]: A tuple containing:</span>
-<span class="sd">                - The index of the starting face (-2 if multiple faces are found).</span>
-<span class="sd">                - An array of vertex indices associated with the starting face.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_cells</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -6477,6 +6486,14 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
         <span class="n">on_edge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_faces_on_edge</span><span class="p">(</span><span class="n">possible_cells</span><span class="p">)</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_handle_starting_face_on_edge</span><span class="p">(</span><span class="n">on_edge</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_handle_starting_face_on_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">on_edge</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Handle the case where the first bank point is on the edge of a mesh face.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            on_edge (List[int]): List of face indices where the first bank point is located on the edge.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">on_edge</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
@@ -6628,26 +6645,28 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span>
         <span class="k">return</span> <span class="n">b</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">nodes</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_store_segment_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bpj</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_store_segment_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_bank_point</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Finalize a segment</span>
 
 <span class="sd">        Enlarge arrays if needed, set coordinates and index, and increment ind.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">crds</span> <span class="o">=</span> <span class="n">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">,</span> <span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">idx</span> <span class="o">=</span> <span class="n">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">shape</span><span class="p">,))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">bpj</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="n">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">,</span> <span class="p">(</span><span class="n">shape</span><span class="p">,))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_bank_point</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_determine_next_face_on_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bpj</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">faces</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Determine the next face to continue along an edge based on the segment direction.&quot;&quot;&quot;</span>
-        <span class="n">theta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">bpj</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">bpj</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">bank_points</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">bpj</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">bank_points</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">bpj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: moving in direction theta = </span><span class="si">{</span><span class="n">theta</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">theta_edge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_angle</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
@@ -6659,7 +6678,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="c1"># check whether the (extended) segment slices any edge of faces[0]</span>
             <span class="n">fe1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">face_edge_connectivity</span><span class="p">[</span><span class="n">faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
             <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="n">_get_slices_core</span><span class="p">(</span>
-                <span class="n">fe1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="p">,</span> <span class="n">bpj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">False</span>
+                <span class="n">fe1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="p">,</span> <span class="n">bpj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bank_points</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">,</span> <span class="kc">False</span>
             <span class="p">)</span>
             <span class="c1"># yes, a slice (typically 1, but could be 2 if it slices at a node</span>
             <span class="c1"># but that doesn&#39;t matter) ... so, we continue towards faces[0]</span>
@@ -6755,7 +6774,10 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="c1"># direction of current segment from bpj1 to bpj</span>
             <span class="n">theta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">bpj</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">bpj1</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">bpj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">bpj1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="n">RTOL</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">ATOL</span><span class="p">)</span> <span class="ow">and</span> <span class="n">j</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="n">RTOL</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">ATOL</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="n">j</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_points</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+            <span class="p">):</span>
                 <span class="c1"># catch case of last segment</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: last point ends in a node&quot;</span><span class="p">)</span>
@@ -6766,8 +6788,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                 <span class="c1"># this segment ends in the node, so check next segment ...</span>
                 <span class="c1"># direction of next segment from bpj to bp[j+1]</span>
                 <span class="n">theta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">bpj</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">bpj</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">bank_points</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">bpj</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">bank_points</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">bpj</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
                 <span class="p">)</span>
         <span class="n">index0</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">finished</span><span class="p">:</span>
@@ -6807,7 +6829,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: ending on edge </span><span class="si">{</span><span class="n">edge</span><span class="si">}</span><span class="s2"> at </span><span class="si">{</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="c1"># figure out where we will be heading afterwards ...</span>
-            <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_points</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="c1"># catch case of last segment</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: last point ends on an edge&quot;</span><span class="p">)</span>
@@ -6818,7 +6840,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="k">return</span> <span class="n">finished</span><span class="p">,</span> <span class="n">index0</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">bpj</span><span class="p">):</span>
-        <span class="n">bpj1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">bpj1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bank_points</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
         <span class="n">prev_b</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">shape_multiplier</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
@@ -6879,20 +6901,10 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="sd">        This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.</span>
 <span class="sd">        It calculates the intersection points and identifies the mesh faces corresponding to each segment of the line.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            bp (np.ndarray):</span>
-<span class="sd">                A 2D array of shape (N, 2) containing the x, y coordinates of the line to be intersected with the mesh.</span>
-<span class="sd">            mesh_data (MeshData):</span>
-<span class="sd">                An instance of the `MeshData` class containing mesh-related data, such as face coordinates, edge coordinates,</span>
-<span class="sd">                and connectivity information.</span>
-<span class="sd">            d_thresh (float, optional):</span>
-<span class="sd">                A distance threshold for filtering out very small segments. Segments shorter than this threshold will be removed.</span>
-<span class="sd">                Defaults to 0.001.</span>
-
 <span class="sd">        Returns:</span>
 <span class="sd">            Tuple[np.ndarray, np.ndarray]:</span>
 <span class="sd">                A tuple containing:</span>
-<span class="sd">                - `crds` (np.ndarray): A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.</span>
+<span class="sd">                - `coords` (np.ndarray): A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.</span>
 <span class="sd">                - `idx` (np.ndarray): A 1D array of shape (M-1,) containing the indices of the mesh faces corresponding to</span>
 <span class="sd">                each segment of the intersected line.</span>
 
@@ -6906,26 +6918,28 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="sd">            - The function handles cases where the line starts outside the mesh, crosses multiple edges, or ends on a node.</span>
 <span class="sd">            - Tiny segments shorter than `d_thresh` are removed from the output.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">bpj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">current_bank_point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_points</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current location: </span><span class="si">{</span><span class="n">bpj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">bpj</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Current location: </span><span class="si">{</span><span class="n">current_bank_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">current_bank_point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_handle_first_point</span><span class="p">(</span><span class="n">bpj</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_handle_first_point</span><span class="p">(</span><span class="n">current_bank_point</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_process_segment</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">bpj</span><span class="p">)</span>  <span class="c1"># second or later point</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_process_segment</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">current_bank_point</span><span class="p">)</span>  <span class="c1"># second or later point</span>
 
         <span class="c1"># clip to actual length (idx refers to segments, so we can ignore the last value)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">crds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
 
         <span class="c1"># remove tiny segments</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span> <span class="n">d</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_thresh</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">crds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">[</span><span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[</span><span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
 
         <span class="c1"># since index refers to segments, don&#39;t return the first one</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">idx</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -6957,71 +6971,6 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 It calculates the intersection points and identifies the mesh faces corresponding to each segment of the line.</p>
 
 
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>bp</code>
-            </td>
-            <td>
-                  <code><span title="numpy.ndarray">ndarray</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A 2D array of shape (N, 2) containing the x, y coordinates of the line to be intersected with the mesh.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>mesh_data</code>
-            </td>
-            <td>
-                  <code><a class="autorefs autorefs-internal" title="MeshData (&lt;code&gt;dfastbe.bank_erosion.data_models.calculation.MeshData&lt;/code&gt;)" href="#dfastbe.bank_erosion.data_models.calculation.MeshData">MeshData</a></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>An instance of the <code>MeshData</code> class containing mesh-related data, such as face coordinates, edge coordinates,
-and connectivity information.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>d_thresh</code>
-            </td>
-            <td>
-                  <code><span title="float">float</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>A distance threshold for filtering out very small segments. Segments shorter than this threshold will be removed.
-Defaults to 0.001.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
-
-
     <p><span class="doc-section-title">Returns:</span></p>
     <table>
       <thead>
@@ -7039,7 +6988,7 @@ Defaults to 0.001.</p>
               <div class="doc-md-description">
                 <p>Tuple[np.ndarray, np.ndarray]:
 A tuple containing:
-- <code>crds</code> (np.ndarray): A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.
+- <code>coords</code> (np.ndarray): A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.
 - <code>idx</code> (np.ndarray): A 1D array of shape (M-1,) containing the indices of the mesh faces corresponding to
 each segment of the intersected line.</p>
               </div>
@@ -7083,22 +7032,7 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 </details>
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/mesh_processor.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">742</span>
-<span class="normal">743</span>
-<span class="normal">744</span>
-<span class="normal">745</span>
-<span class="normal">746</span>
-<span class="normal">747</span>
-<span class="normal">748</span>
-<span class="normal">749</span>
-<span class="normal">750</span>
-<span class="normal">751</span>
-<span class="normal">752</span>
-<span class="normal">753</span>
-<span class="normal">754</span>
-<span class="normal">755</span>
-<span class="normal">756</span>
-<span class="normal">757</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">757</span>
 <span class="normal">758</span>
 <span class="normal">759</span>
 <span class="normal">760</span>
@@ -7135,26 +7069,23 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 <span class="normal">791</span>
 <span class="normal">792</span>
 <span class="normal">793</span>
-<span class="normal">794</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_line_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="normal">794</span>
+<span class="normal">795</span>
+<span class="normal">796</span>
+<span class="normal">797</span>
+<span class="normal">798</span>
+<span class="normal">799</span>
+<span class="normal">800</span>
+<span class="normal">801</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_line_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.</span>
 
 <span class="sd">    This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.</span>
 <span class="sd">    It calculates the intersection points and identifies the mesh faces corresponding to each segment of the line.</span>
 
-<span class="sd">    Args:</span>
-<span class="sd">        bp (np.ndarray):</span>
-<span class="sd">            A 2D array of shape (N, 2) containing the x, y coordinates of the line to be intersected with the mesh.</span>
-<span class="sd">        mesh_data (MeshData):</span>
-<span class="sd">            An instance of the `MeshData` class containing mesh-related data, such as face coordinates, edge coordinates,</span>
-<span class="sd">            and connectivity information.</span>
-<span class="sd">        d_thresh (float, optional):</span>
-<span class="sd">            A distance threshold for filtering out very small segments. Segments shorter than this threshold will be removed.</span>
-<span class="sd">            Defaults to 0.001.</span>
-
 <span class="sd">    Returns:</span>
 <span class="sd">        Tuple[np.ndarray, np.ndarray]:</span>
 <span class="sd">            A tuple containing:</span>
-<span class="sd">            - `crds` (np.ndarray): A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.</span>
+<span class="sd">            - `coords` (np.ndarray): A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.</span>
 <span class="sd">            - `idx` (np.ndarray): A 1D array of shape (M-1,) containing the indices of the mesh faces corresponding to</span>
 <span class="sd">            each segment of the intersected line.</span>
 
@@ -7168,26 +7099,28 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 <span class="sd">        - The function handles cases where the line starts outside the mesh, crosses multiple edges, or ends on a node.</span>
 <span class="sd">        - Tiny segments shorter than `d_thresh` are removed from the output.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">bpj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bp</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">current_bank_point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_points</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Current location: </span><span class="si">{</span><span class="n">bpj</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">bpj</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Current location: </span><span class="si">{</span><span class="n">current_bank_point</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">current_bank_point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_handle_first_point</span><span class="p">(</span><span class="n">bpj</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_handle_first_point</span><span class="p">(</span><span class="n">current_bank_point</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_process_segment</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">bpj</span><span class="p">)</span>  <span class="c1"># second or later point</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_process_segment</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">current_bank_point</span><span class="p">)</span>  <span class="c1"># second or later point</span>
 
     <span class="c1"># clip to actual length (idx refers to segments, so we can ignore the last value)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">crds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ind</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
 
     <span class="c1"># remove tiny segments</span>
-    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span> <span class="n">d</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_thresh</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">crds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">idx</span><span class="p">[</span><span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[</span><span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
 
     <span class="c1"># since index refers to segments, don&#39;t return the first one</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">crds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">idx</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
