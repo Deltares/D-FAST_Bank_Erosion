@@ -560,23 +560,33 @@ class MeshProcessor:
             self.face_indexes[self.ind] = self.index
         self.ind += 1
 
-    def _determine_next_face_on_edge(self, bpj, j, edge, faces):
+    def _determine_next_face_on_edge(
+        self, segment_state: SegmentTraversalState, edge, faces
+    ):
         """Determine the next face to continue along an edge based on the segment direction."""
         theta = math.atan2(
-            self.bank_points[j + 1][1] - bpj[1], self.bank_points[j + 1][0] - bpj[0]
+            self.bank_points[segment_state.index + 1][1]
+            - segment_state.current_bank_point[1],
+            self.bank_points[segment_state.index + 1][0]
+            - segment_state.current_bank_point[0],
         )
         if self.verbose:
-            print(f"{j}: moving in direction theta = {theta}")
+            print(f"{segment_state.index}: moving in direction theta = {theta}")
         theta_edge = self._edge_angle(edge)
         if theta == theta_edge or theta == -theta_edge:
             if self.verbose:
-                print(f"{j}: continue along edge {edge}")
+                print(f"{segment_state.index}: continue along edge {edge}")
             index0 = faces
         else:
             # check whether the (extended) segment slices any edge of faces[0]
             fe1 = self.mesh_data.face_edge_connectivity[faces[0]]
             a, b, edges = _get_slices_core(
-                fe1, self.mesh_data, bpj, self.bank_points[j + 1], 0.0, False
+                fe1,
+                self.mesh_data,
+                segment_state.current_bank_point,
+                self.bank_points[segment_state.index + 1],
+                0.0,
+                False,
             )
             # yes, a slice (typically 1, but could be 2 if it slices at a node
             # but that doesn't matter) ... so, we continue towards faces[0]
@@ -747,9 +757,7 @@ class MeshProcessor:
                 self._store_segment_point(segment_state.current_bank_point)
                 finished = True
             else:
-                index0 = self._determine_next_face_on_edge(
-                    segment_state.current_bank_point, segment_state.index, edge, faces
-                )
+                index0 = self._determine_next_face_on_edge(segment_state, edge, faces)
         return finished, index0
 
     def _process_bank_segment(self, j, bpj):
