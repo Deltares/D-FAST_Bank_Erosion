@@ -2,6 +2,7 @@
 
 import math
 import sys
+from dataclasses import dataclass
 from typing import Any, Tuple
 
 import numpy as np
@@ -306,6 +307,25 @@ def move_line(
     return xylines_new
 
 
+@dataclass
+class ErodedBankLineSegment:
+    """Class to represent a segment of an eroded bank line.
+
+    Args:
+        x0 (np.ndarray): x-coordinates of the segment start.
+        y0 (np.ndarray): y-coordinates of the segment start.
+        x1 (np.ndarray): x-coordinates of the segment end.
+        y1 (np.ndarray): y-coordinates of the segment end.
+        ixy0 (int): Index of the segment start in the eroded bank line.
+    """
+
+    x0: np.ndarray
+    y0: np.ndarray
+    x1: np.ndarray
+    y1: np.ndarray
+    ixy0: int
+
+
 class ErodedBankLine:
     """Class to calculate an eroded bank line with its segments and erosion data."""
 
@@ -415,6 +435,28 @@ class ErodedBankLine:
             poly = self._construct_bend_polygon(index, include_wedge=True)
         return poly
 
+    def _get_recent_shifted_bankline_segments(self) -> ErodedBankLineSegment:
+        """Get the recent segments of the shifted bankline for intersection checks.
+
+        Returns:
+            ErodedBankLineSegment:
+                A dataclass containing the coordinates of the segments
+                and the index of the first segment.
+        """
+        if self.ixy > 20:
+            X0 = self.xylines_new[(self.ixy - 20) : self.ixy, 0].copy()
+            Y0 = self.xylines_new[(self.ixy - 20) : self.ixy, 1].copy()
+            X1 = self.xylines_new[(self.ixy - 19) : (self.ixy + 1), 0].copy()
+            Y1 = self.xylines_new[(self.ixy - 19) : (self.ixy + 1), 1].copy()
+            ixy0 = self.ixy - 20
+        else:
+            X0 = self.xylines_new[: self.ixy, 0].copy()
+            Y0 = self.xylines_new[: self.ixy, 1].copy()
+            X1 = self.xylines_new[1 : self.ixy + 1, 0].copy()
+            Y1 = self.xylines_new[1 : self.ixy + 1, 1].copy()
+            ixy0 = 0
+        return ErodedBankLineSegment(x0=X0, y0=Y0, x1=X1, y1=Y1, ixy0=ixy0)
+
     def move_line_right(self) -> np.ndarray:
         """Shift a line using the erosion distance.
 
@@ -436,18 +478,7 @@ class ErodedBankLine:
             nedges = poly.shape[0] - 1
 
             # make a temporary copy of the last 20 nodes of the already shifted bankline
-            if self.ixy > 20:
-                X0 = self.xylines_new[(self.ixy - 20) : self.ixy, 0].copy()
-                Y0 = self.xylines_new[(self.ixy - 20) : self.ixy, 1].copy()
-                X1 = self.xylines_new[(self.ixy - 19) : (self.ixy + 1), 0].copy()
-                Y1 = self.xylines_new[(self.ixy - 19) : (self.ixy + 1), 1].copy()
-                self.ixy0 = self.ixy - 20
-            else:
-                X0 = self.xylines_new[: self.ixy, 0].copy()
-                Y0 = self.xylines_new[: self.ixy, 1].copy()
-                X1 = self.xylines_new[1 : self.ixy + 1, 0].copy()
-                Y1 = self.xylines_new[1 : self.ixy + 1, 1].copy()
-                self.ixy0 = 0
+            eroded_segment = self._get_recent_shifted_bankline_segments()
 
             a = []
             b = []
@@ -462,10 +493,10 @@ class ErodedBankLine:
                 else:
                     # check for intersection
                     a2, b2, slices2 = get_slices_ab(
-                        X0,
-                        Y0,
-                        X1,
-                        Y1,
+                        eroded_segment.x0,
+                        eroded_segment.y0,
+                        eroded_segment.x1,
+                        eroded_segment.y1,
                         poly[i, 0],
                         poly[i, 1],
                         poly[i + 1, 0],
@@ -544,7 +575,7 @@ class ErodedBankLine:
                 # sort the intersections by distance along the already shifted bank line
                 d = s + a
                 sorted = np.argsort(d)
-                s = s[sorted] + self.ixy0
+                s = s[sorted] + eroded_segment.ixy0
                 a = a[sorted]
                 b = b[sorted]
                 d = d[sorted]
@@ -598,19 +629,19 @@ class ErodedBankLine:
                         if a[i] < self.prec:
                             dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
                             dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
-                            s2 = s_current - self.ixy0
-                            dBy = Y1[s2] - Y0[s2]
-                            dBx = X1[s2] - X0[s2]
+                            s2 = s_current - eroded_segment.ixy0
+                            dBy = eroded_segment.y1[s2] - eroded_segment.y0[s2]
+                            dBx = eroded_segment.x1[s2] - eroded_segment.x0[s2]
                             inside = dPy * dBx - dPx * dBy > 0
                         elif a[i] > 1 - self.prec:
                             dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
                             dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
-                            s2 = s_current - self.ixy0 + 1
-                            if s2 > len(X0) - 1:
+                            s2 = s_current - eroded_segment.ixy0 + 1
+                            if s2 > len(eroded_segment.x0) - 1:
                                 inside = True
                             else:
-                                dBy = Y1[s2] - Y0[s2]
-                                dBx = X1[s2] - X0[s2]
+                                dBy = eroded_segment.y1[s2] - eroded_segment.y0[s2]
+                                dBx = eroded_segment.x1[s2] - eroded_segment.x0[s2]
                                 inside = dPy * dBx - dPx * dBy > 0
                         else:
                             # line segment slices the edge somewhere in the middle
