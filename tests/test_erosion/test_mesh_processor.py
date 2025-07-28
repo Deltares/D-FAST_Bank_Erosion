@@ -8,6 +8,7 @@ from dfastbe.bank_erosion.mesh_processor import (
     _get_slices_core,
     enlarge,
     calculate_segment_edge_intersections,
+    RiverSegment
 )
 
 
@@ -347,9 +348,15 @@ class TestMeshProcessor:
         """
         index = 1
         prev_b = 0.0
-        bpj = np.array([209266.44709443, 389670.16238121])
-        bpj1 = np.array([209266.44709443, 389651.16238121])
-        b, edges, nodes = _get_slices(index, prev_b, bpj, bpj1, mesh_data)
+        current_point = np.array([209266.44709443, 389670.16238121])
+        previous_point = np.array([209266.44709443, 389651.16238121])
+        segment = RiverSegment(
+            index=index,
+            prev_distance=prev_b,
+            previous_point=previous_point,
+            current_point=current_point,
+        )
+        b, edges, nodes = _get_slices(index, segment, mesh_data)
         assert np.allclose(b, np.array([0.6845984]))
         assert np.array_equal(edges, np.array([2]))
         assert np.array_equal(nodes, np.array([-1]))
