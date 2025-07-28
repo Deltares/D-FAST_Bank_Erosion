@@ -740,23 +740,27 @@ class MeshProcessor:
         return finished, index0
 
     def _process_bank_segment(self, j, bpj):
-        bpj1 = self.bank_points[j - 1]
-        prev_b = 0
         shape_multiplier = 2
+        segment_state = SegmentTraversalState(
+            index=j,
+            prev_distance=0,
+            current_bank_point=bpj,
+            previous_bank_point=self.bank_points[j - 1],
+        )
         while True:
             if self.index == -2:
                 b, edges, nodes = self._resolve_ambiguous_edge_transition(
-                    prev_b, bpj, bpj1
+                    segment_state.prev_distance, bpj, segment_state.previous_bank_point
                 )
-            elif (bpj == bpj1).all():
+            elif (bpj == segment_state.previous_bank_point).all():
                 # this is a segment of length 0, skip it since it takes us nowhere
                 break
             else:
                 b, edges, nodes = _get_slices(
                     self.index,
-                    prev_b,
+                    segment_state.prev_distance,
                     bpj,
-                    bpj1,
+                    segment_state.previous_bank_point,
                     self.mesh_data,
                 )
 
@@ -773,10 +777,10 @@ class MeshProcessor:
             node = nodes[0]
             edge = edges[0]
             faces = self.mesh_data.edge_face_connectivity[edge]
-            prev_b = b[0]
+            segment_state.prev_distance = b[0]
 
             finished, index0 = self._slice_by_node_or_edge(
-                j, bpj, bpj1, b, edges, node, edge, faces
+                j, bpj, segment_state.previous_bank_point, b, edges, node, edge, faces
             )
             if finished:
                 break
@@ -787,12 +791,16 @@ class MeshProcessor:
                 edge,
                 faces,
                 index0,
-                prev_b,
+                segment_state.prev_distance,
             )
-            segment = bpj1 + prev_b * (bpj - bpj1)
+            segment = (
+                segment_state.previous_bank_point
+                + segment_state.prev_distance
+                * (bpj - segment_state.previous_bank_point)
+            )
             shape_length = self.ind * shape_multiplier
             self._store_segment_point(segment, shape_length=shape_length)
-            if prev_b == 1:
+            if segment_state.prev_distance == 1:
                 break
 
     def intersect_line_mesh(self) -> Tuple[np.ndarray, np.ndarray]:
