@@ -351,7 +351,6 @@ class IntersectionContext(PolylineIntersections):
     xytmp: np.ndarray
     ixytmp: int
     nedges: int
-    s_last: int
 
 
 class ErodedBankLine:
@@ -593,14 +592,8 @@ class ErodedBankLine:
         self,
         i: int,
         s_current: int,
-        a: np.ndarray,
-        b: np.ndarray,
-        n: np.ndarray,
-        nedges: int,
-        poly: np.ndarray,
-        xytmp: np.ndarray,
-        ixytmp: int,
         eroded_segment: ErodedBankLineSegment,
+        intersection_context: IntersectionContext,
         inside: bool,
         s_last: int,
         n_last: int,
@@ -617,43 +610,66 @@ class ErodedBankLine:
         """
         if self.verbose:
             print(
-                f"- intersection {i}: new polyline edge {n[i]} crosses segment {s_current} at {a[i]}"
+                f"- intersection {i}: new polyline edge {intersection_context.n[i]} crosses segment {s_current} at {intersection_context.a[i]}"
             )
-        if i == 0 or n[i] != nedges - 1:
+        if i == 0 or intersection_context.n[i] != intersection_context.nedges - 1:
             if inside:
                 if self.verbose:
                     print("  existing line is inside the new polygon")
-                for n2 in range(n_last, n[i], -1):
+                for n2 in range(n_last, intersection_context.n[i], -1):
                     if self.verbose:
-                        print(f"  adding new point {poly[n2]}")
+                        print(f"  adding new point {intersection_context.poly[n2]}")
                     ixy1, self.xylines_new = _add_point(
-                        ixy1, self.xylines_new, poly[n2]
+                        ixy1, self.xylines_new, intersection_context.poly[n2]
                     )
             else:
                 if self.verbose:
                     print("  existing line is outside the new polygon")
                 for s2 in range(s_last, s_current):
                     if self.verbose:
-                        print(f"  re-adding old point {xytmp[s2 - ixytmp + 1]}")
+                        print(
+                            f"  re-adding old point {intersection_context.xytmp[s2 - intersection_context.ixytmp + 1]}"
+                        )
                     ixy1, self.xylines_new = _add_point(
-                        ixy1, self.xylines_new, xytmp[s2 - ixytmp + 1]
+                        ixy1,
+                        self.xylines_new,
+                        intersection_context.xytmp[
+                            s2 - intersection_context.ixytmp + 1
+                        ],
                     )
-            pnt_intersect = poly[n[i]] + b[i] * (poly[n[i] + 1] - poly[n[i]])
+            pnt_intersect = intersection_context.poly[
+                intersection_context.n[i]
+            ] + intersection_context.b[i] * (
+                intersection_context.poly[intersection_context.n[i] + 1]
+                - intersection_context.poly[intersection_context.n[i]]
+            )
             if self.verbose:
                 print(f"  adding intersection point {pnt_intersect}")
             ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, pnt_intersect)
-            n_last = n[i]
+            n_last = intersection_context.n[i]
             s_last = s_current
-            if a[i] < self.prec:
-                dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
-                dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
+            if intersection_context.a[i] < self.prec:
+                dPy = (
+                    intersection_context.poly[intersection_context.n[i] + 1, 1]
+                    - intersection_context.poly[intersection_context.n[i], 1]
+                )
+                dPx = (
+                    intersection_context.poly[intersection_context.n[i] + 1, 0]
+                    - intersection_context.poly[intersection_context.n[i], 0]
+                )
                 s2 = s_current - eroded_segment.ixy0
                 dBy = eroded_segment.y1[s2] - eroded_segment.y0[s2]
                 dBx = eroded_segment.x1[s2] - eroded_segment.x0[s2]
                 inside = dPy * dBx - dPx * dBy > 0
-            elif a[i] > 1 - self.prec:
-                dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
-                dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
+            elif intersection_context.a[i] > 1 - self.prec:
+                dPy = (
+                    intersection_context.poly[intersection_context.n[i] + 1, 1]
+                    - intersection_context.poly[intersection_context.n[i], 1]
+                )
+                dPx = (
+                    intersection_context.poly[intersection_context.n[i] + 1, 0]
+                    - intersection_context.poly[intersection_context.n[i], 0]
+                )
                 s2 = s_current - eroded_segment.ixy0 + 1
                 if s2 > len(eroded_segment.x0) - 1:
                     inside = True
@@ -767,20 +783,13 @@ class ErodedBankLine:
             xytmp=xytmp,
             ixytmp=ixytmp,
             nedges=nedges,
-            s_last=s_last,
         )
         for i, s_current in enumerate(s):
             inside, s_last, n_last, ixy1 = self._process_single_intersection(
                 i,
                 s_current,
-                a,
-                b,
-                n,
-                nedges,
-                poly,
-                xytmp,
-                ixytmp,
                 eroded_segment,
+                intersection_context,
                 inside,
                 s_last,
                 n_last,
