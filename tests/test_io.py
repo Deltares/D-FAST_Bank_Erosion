@@ -10,7 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
-from dfastcommons.io.xyc import XYCModel
+from dfastio.xyc.models import XYCModel
 from geopandas import GeoDataFrame
 from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry import LineString
@@ -254,8 +254,8 @@ class TestSimulationData:
             simulation_data = BaseSimulationData.read(
                 "tests/data/erosion/meuse_6gen/inputfiles/sim1300/Maas_merged.dfast.map.nc"
             )
-            river_center_line = XYCModel.read_xyc(
-                "tests/data/erosion/meuse_6gen/inputfiles/rivkm_20m.xyc", ncol=3
+            river_center_line = XYCModel.read(
+                "tests/data/erosion/meuse_6gen/inputfiles/rivkm_20m.xyc", num_columns=3
             )
             station_bounds = (123.0, 128.0)
             LineGeometry(river_center_line, station_bounds)
