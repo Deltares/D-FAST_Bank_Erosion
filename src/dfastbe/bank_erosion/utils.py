@@ -526,6 +526,27 @@ class ErodedBankLine:
             erosion_index, 0
         ]
 
+    def _should_add_right_bend_segment(self, erosion_index: int) -> bool:
+        """
+        Determine if the right bend segment should be added based on the cross product.
+
+        Args:
+            erosion_index (int): Index of the current erosion segment.
+
+        Returns:
+            bool: True if the segment should be added, False if it should be ignored.
+        """
+        add = True
+        if self.erosion_distance[erosion_index] > 0:
+            cross = self._calculate_cross_product(erosion_index, shifted=True)
+        else:
+            cross = self._calculate_cross_product(erosion_index)
+        if cross > 0.0:
+            if self.verbose:
+                print(f"{erosion_index}: ignoring segment")
+            add = False
+        return add
+
     def move_line_right(self) -> np.ndarray:
         """Shift a line using the erosion distance.
 
@@ -559,27 +580,9 @@ class ErodedBankLine:
             if len(s) == 0:
                 # no intersections found
                 if dtheta < 0:
-                    # right bend (not straight)
-                    if self.erosion_distance[erosion_index] > 0:
-                        cross = self._calculate_cross_product(
-                            erosion_index, shifted=True
-                        )
-                    else:
-                        cross = self._calculate_cross_product(erosion_index)
-                    if cross <= 0.0:
-                        # extended path turns right ... always add
-                        pass
-                    else:
-                        # extended path turns left
-                        # we can probably ignore it, let's do so...
-                        # the only exception would be an eroded patch encompassing
-                        # all of the eroded bank line
-                        if self.verbose:
-                            print(f"{erosion_index}: ignoring segment")
+                    if not self._should_add_right_bend_segment(erosion_index):
                         continue
-                else:
-                    # left bend or straight: always add ... just the rectangle of eroded material
-                    pass
+
                 ixy1 = self.ixy
                 for n2 in range(min(nedges, 2), -1, -1):
                     if self.verbose:
