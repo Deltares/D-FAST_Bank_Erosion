@@ -1,7 +1,7 @@
 """Bank erosion utilities."""
 
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, List, Tuple
 
 import numpy as np
@@ -330,8 +330,28 @@ class PolylineIntersections:
 
     a: List[np.ndarray]
     b: List[np.ndarray]
-    slices: List[np.ndarray]
     n: List[np.ndarray]
+    slices: List[np.ndarray]
+
+
+@dataclass
+class IntersectionContext(PolylineIntersections):
+    """Context for polyline intersection processing.
+
+    Args:
+        intersections (PolylineIntersections): Intersections data.
+        poly (np.ndarray): Polygon coordinates.
+        xytmp (np.ndarray): Temporary coordinates for intersection processing.
+        ixytmp (int): Temporary index for intersection processing.
+        nedges (int): Number of edges in the polygon.
+        s_last (int): Last segment index processed.
+    """
+
+    poly: np.ndarray
+    xytmp: np.ndarray
+    ixytmp: int
+    nedges: int
+    s_last: int
 
 
 class ErodedBankLine:
@@ -738,6 +758,17 @@ class ErodedBankLine:
         inside = False
         s_last = s[0]
         n_last = nedges
+        intersection_context = IntersectionContext(
+            a=a,
+            b=b,
+            n=n,
+            slices=None,
+            poly=poly,
+            xytmp=xytmp,
+            ixytmp=ixytmp,
+            nedges=nedges,
+            s_last=s_last,
+        )
         for i, s_current in enumerate(s):
             inside, s_last, n_last, ixy1 = self._process_single_intersection(
                 i,
