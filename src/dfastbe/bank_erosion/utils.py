@@ -1,20 +1,12 @@
 """Bank erosion utilities."""
 
 import math
-import sys
 from dataclasses import dataclass
-from typing import Any, Tuple
+from typing import Any, List, Tuple
 
 import numpy as np
 
-from dfastbe.bank_erosion.data_models.calculation import (
-    BankData,
-    MeshData,
-    SingleBank,
-    SingleCalculation,
-    SingleErosion,
-    SingleParameters,
-)
+from dfastbe.bank_erosion.data_models.calculation import BankData, MeshData, SingleBank
 from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData
 from dfastbe.bank_erosion.mesh_processor import (
     enlarge,
@@ -318,12 +310,28 @@ class ErodedBankLineSegment:
         y1 (np.ndarray): y-coordinates of the segment end.
         ixy0 (int): Index of the segment start in the eroded bank line.
     """
-
     x0: np.ndarray
     y0: np.ndarray
     x1: np.ndarray
     y1: np.ndarray
     ixy0: int
+
+
+@dataclass
+class PolylineIntersections:
+    """Class to hold the results of polyline intersections.
+
+    Args:
+        a (List[np.ndarray]): List of intersection x-coordinates.
+        b (List[np.ndarray]): List of intersection y-coordinates.
+        slices (List[np.ndarray]): List of slices for each intersection.
+        n (List[np.ndarray]): List of segment indices for each intersection.
+    """
+
+    a: List[np.ndarray]
+    b: List[np.ndarray]
+    slices: List[np.ndarray]
+    n: List[np.ndarray]
 
 
 class ErodedBankLine:
