@@ -17,7 +17,7 @@ from typing import (
 import numpy as np
 from geopandas import GeoDataFrame
 from geopandas.geoseries import GeoSeries
-from shapely.geometry import Point
+from shapely.geometry import Point, Polygon
 
 
 GenericType = TypeVar("GenericType")
@@ -219,6 +219,31 @@ class MeshData:
     edge_face_connectivity: np.ndarray
     face_edge_connectivity: np.ndarray
     boundary_edge_nrs: np.ndarray
+
+    def get_face(self, index: int, as_polygon: bool = False) -> np.ndarray:
+        """Returns the coordinates of the index-th mesh face as an (N, 2) array.
+
+        Args:
+            index:
+                The face index.
+            as_polygon:
+                whither to return the face as a shapely polygon or not. Default is False
+
+        Returns:
+            np.ndarray:
+                Array of shape (n_nodes, 2) with x, y coordinates.
+        """
+        x = self.x_face_coords[
+            index : index + 1, : self.n_nodes[index]
+            ]
+        y = self.y_face_coords[
+            index : index + 1, : self.n_nodes[index]
+            ]
+        face = np.concatenate((x, y), axis=0).T
+
+        if as_polygon:
+            face = Polygon(face)
+        return face
 
 
 @dataclass

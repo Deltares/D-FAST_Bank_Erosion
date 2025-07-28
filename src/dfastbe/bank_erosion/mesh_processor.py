@@ -289,9 +289,10 @@ class MeshProcessor:
         self.vindex: np.ndarray | int
 
     def _handle_first_point(self, current_bank_point: np.ndarray):
+        # get the point on the mesh face that is closest to the first bank point
         dx = self.mesh_data.x_face_coords - current_bank_point[0]
         dy = self.mesh_data.y_face_coords - current_bank_point[1]
-        possible_cells = np.nonzero(
+        closest_cell_ind = np.nonzero(
             ~(
                 (dx < 0).all(axis=1)
                 | (dx > 0).all(axis=1)
@@ -299,25 +300,8 @@ class MeshProcessor:
                 | (dy > 0).all(axis=1)
             )
         )[0]
-        self._find_starting_face(possible_cells)
+        self._find_starting_face(closest_cell_ind)
         self._store_segment_point(current_bank_point)
-
-    def _get_face_coordinates(self, index: int) -> np.ndarray:
-        """Returns the coordinates of the index-th mesh face as an (N, 2) array.
-
-        Args:
-            index (int): The face index.
-
-        Returns:
-            np.ndarray: Array of shape (n_nodes, 2) with x, y coordinates.
-        """
-        x = self.mesh_data.x_face_coords[
-            index : index + 1, : self.mesh_data.n_nodes[index]
-        ]
-        y = self.mesh_data.y_face_coords[
-            index : index + 1, : self.mesh_data.n_nodes[index]
-        ]
-        return np.concatenate((x, y), axis=0).T
 
     def _edge_angle(self, edge: int, reverse: bool = False) -> float:
         """Calculate the angle of a mesh edge in radians.
@@ -342,31 +326,32 @@ class MeshProcessor:
         )
         return math.atan2(dy, dx)
 
-    def _find_faces_containing_point_on_edge(self, possible_cells) -> List[int]:
+    def _find_faces_containing_point_on_edge(self, cells_indexes) -> List[int]:
         """Get the faces that contain the first bank point on the edge of the mesh.
 
         This function checks if the first bank point is inside or on the edge of any mesh face.
 
         Args:
-            possible_cells (np.ndarray):
+            cells_indexes (np.ndarray):
                 Array of possible cell indices where the first bank point might be located.
 
         Returns:
             List[int]: A list of face indices where the first bank point is located.
         """
-        pnt = Point(self.bank_points[0])
+        bank_coord = Point(self.bank_points[0])
         on_edge = []
-        for k in possible_cells:
-            polygon_k = Polygon(self._get_face_coordinates(k))
-            if polygon_k.contains(pnt):
+        for ind in cells_indexes:
+            cell_coords = self.mesh_data.get_face(ind)
+            cell = Polygon(cell_coords)
+            if cell.contains(bank_coord):
                 if self.verbose:
-                    print(f"starting in {k}")
-                self.index = k
+                    print(f"starting in {ind}")
+                self.index = ind
                 break
-            nd = self._get_face_coordinates(k)
-            line_k = LineString(np.vstack([nd, nd[0]]))
-            if line_k.contains(pnt):
-                on_edge.append(k)
+
+            line_k = LineString(np.vstack([cell_coords, cell_coords[0]]))
+            if line_k.contains(bank_coord):
+                on_edge.append(ind)
         return on_edge
 
     def _find_starting_face(self, possible_cells: np.ndarray):
@@ -652,7 +637,7 @@ class MeshProcessor:
             print(f"{j}: -- no slices along this segment --")
         if self.index >= 0:
             pnt = Point(bpj)
-            polygon_k = Polygon(self._get_face_coordinates(self.index))
+            polygon_k = Polygon(self.mesh_data.get_face(self.index))
             if not polygon_k.contains(pnt):
                 raise ValueError(
                     f"{j}: ERROR: point actually not contained within {self.index}!"
