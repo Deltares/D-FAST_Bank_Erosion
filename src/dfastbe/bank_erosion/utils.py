@@ -457,6 +457,58 @@ class ErodedBankLine:
             ixy0 = 0
         return ErodedBankLineSegment(x0=X0, y0=Y0, x1=X1, y1=Y1, ixy0=ixy0)
 
+    def _collect_polyline_intersections(
+        self,
+        eroded_segment: ErodedBankLineSegment,
+        poly: np.ndarray,
+        nedges: int,
+    ) -> tuple[list[np.ndarray], list[np.ndarray], list[np.ndarray], list[np.ndarray]]:
+        """
+        For each edge of the new polyline, collect all intersections with the already shifted bankline.
+
+        Args:
+            eroded_segment: ErodedBankLineSegment containing x0, y0, x1, y1, ixy0.
+            poly: Nx2 array of polygon coordinates.
+            nedges: Number of edges in the polygon (poly.shape[0] - 1).
+            get_slices_ab_func: Function to compute intersections (e.g., get_slices_ab).
+            prec: Precision threshold for filtering intersections.
+
+        Returns:
+            a, b, slices, n: Lists of intersection data for each edge.
+        """
+        a = []
+        b = []
+        slices = []
+        n = []
+        for i in range(nedges):
+            if (poly[i + 1] == poly[i]).all():
+                # polyline segment has no actual length, so skip it
+                continue
+            # check for intersection
+            a2, b2, slices2 = get_slices_ab(
+                eroded_segment.x0,
+                eroded_segment.y0,
+                eroded_segment.x1,
+                eroded_segment.y1,
+                poly[i, 0],
+                poly[i, 1],
+                poly[i + 1, 0],
+                poly[i + 1, 1],
+                0,
+                True,
+            )
+            # exclude the intersection if it's only at the very last point of the last segment
+            if i == nedges - 1:
+                keep_mask = a2 < 1 - self.prec
+                a2 = a2[keep_mask]
+                b2 = b2[keep_mask]
+                slices2 = slices2[keep_mask]
+            a.append(a2)
+            b.append(b2)
+            slices.append(slices2)
+            n.append(slices2 * 0 + i)
+        return a, b, slices, n
+
     def move_line_right(self) -> np.ndarray:
         """Shift a line using the erosion distance.
 
@@ -480,41 +532,9 @@ class ErodedBankLine:
             # make a temporary copy of the last 20 nodes of the already shifted bankline
             eroded_segment = self._get_recent_shifted_bankline_segments()
 
-            a = []
-            b = []
-            slices = []
-            n = []
-            # for each edge of the new polyline collect all intersections with the
-            # already shifted bankline ...
-            for i in range(nedges):
-                if (poly[i + 1] == poly[i]).all():
-                    # polyline segment has no actual length, so skip it
-                    pass
-                else:
-                    # check for intersection
-                    a2, b2, slices2 = get_slices_ab(
-                        eroded_segment.x0,
-                        eroded_segment.y0,
-                        eroded_segment.x1,
-                        eroded_segment.y1,
-                        poly[i, 0],
-                        poly[i, 1],
-                        poly[i + 1, 0],
-                        poly[i + 1, 1],
-                        0,
-                        True,
-                    )
-                    # exclude the intersection if it's only at the very last point
-                    # of the last segment
-                    if i == nedges - 1:
-                        keep_mask = a2 < 1 - self.prec
-                        a2 = a2[keep_mask]
-                        b2 = b2[keep_mask]
-                        slices2 = slices2[keep_mask]
-                    a.append(a2)
-                    b.append(b2)
-                    slices.append(slices2)
-                    n.append(slices2 * 0 + i)
+            a, b, slices, n = self._collect_polyline_intersections(
+                eroded_segment, poly, nedges
+            )
 
             s = np.concatenate(slices)
             if self.verbose:
