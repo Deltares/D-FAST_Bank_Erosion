@@ -1,6 +1,6 @@
 """module for processing mesh-related operations."""
 import math
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Tuple
 
 import numpy as np
@@ -12,6 +12,41 @@ __all__ = ["get_slices_ab", "enlarge", "MeshProcessor"]
 
 ATOL = 1e-8
 RTOL = 1e-8
+
+
+@dataclass
+class EdgeCandidates:
+    """Dataclass to hold edge candidates for left and right edges.
+
+    Args:
+        left_edge (int):
+            Index of the left edge.
+        left_dtheta (float):
+            Angle of the left edge in radians.
+        right_edge (int):
+            Index of the right edge.
+        right_dtheta (float):
+            Angle of the right edge in radians.
+        found (bool):
+            Flag indicating whether a valid edge pair was found.
+    """
+
+    left_edge: int
+    left_dtheta: float
+    right_edge: int
+    right_dtheta: float
+    found: bool = False
+
+
+@dataclass
+class SegmentTraversalState:
+    index: int
+    prev_distance: float
+    current_bank_point: np.ndarray
+    previous_bank_point: np.ndarray
+    distances: np.ndarray = field(default_factory=lambda: np.zeros(0))
+    edges: np.ndarray = field(default_factory=lambda: np.zeros(0, dtype=np.int64))
+    nodes: np.ndarray = field(default_factory=lambda: np.zeros(0, dtype=np.int64))
 
 
 def _get_slices(
@@ -235,29 +270,6 @@ def enlarge(
     elif len(new_shape)==2:
         new_array[:old_shape[0], :old_shape[1]] = old_array
     return new_array
-
-
-@dataclass
-class EdgeCandidates:
-    """Dataclass to hold edge candidates for left and right edges.
-
-    Args:
-        left_edge (int):
-            Index of the left edge.
-        left_dtheta (float):
-            Angle of the left edge in radians.
-        right_edge (int):
-            Index of the right edge.
-        right_dtheta (float):
-            Angle of the right edge in radians.
-        found (bool):
-            Flag indicating whether a valid edge pair was found.
-    """
-    left_edge: int
-    left_dtheta: float
-    right_edge: int
-    right_dtheta: float
-    found: bool = False
 
 
 class MeshProcessor:
