@@ -691,11 +691,9 @@ class ErodedBankLine:
         self,
         inside: bool,
         n_last: int,
-        poly: np.ndarray,
         ixy1: int,
-        xytmp: np.ndarray,
-        ixytmp: int,
         s_last: int,
+        intersection_context: IntersectionContext,
     ) -> int:
         """
         Finalize the shifted bankline after processing all intersections.
@@ -719,16 +717,25 @@ class ErodedBankLine:
                 print("  existing line is inside the new polygon")
             for n2 in range(n_last, -1, -1):
                 if self.verbose:
-                    print(f"  adding new point {poly[n2]}")
-                ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, poly[n2])
+                    print(f"  adding new point {intersection_context.poly[n2]}")
+                ixy1, self.xylines_new = _add_point(
+                    ixy1, self.xylines_new, intersection_context.poly[n2]
+                )
         else:
             if self.verbose:
                 print("  existing line is inside the new polygon")
-            for s2 in range(s_last, len(xytmp) + ixytmp - 1):
+            for s2 in range(
+                s_last,
+                len(intersection_context.xytmp) + intersection_context.ixytmp - 1,
+            ):
                 if self.verbose:
-                    print(f"  re-adding old point {xytmp[s2 - ixytmp + 1]}")
+                    print(
+                        f"  re-adding old point {intersection_context.xytmp[s2 - intersection_context.ixytmp + 1]}"
+                    )
                 ixy1, self.xylines_new = _add_point(
-                    ixy1, self.xylines_new, xytmp[s2 - ixytmp + 1]
+                    ixy1,
+                    self.xylines_new,
+                    intersection_context.xytmp[s2 - intersection_context.ixytmp + 1],
                 )
         return ixy1
 
@@ -797,7 +804,7 @@ class ErodedBankLine:
             )
 
         self.ixy = self._finalize_bankline_after_intersections(
-            inside, n_last, poly, ixy1, xytmp, ixytmp, s_last
+            inside, n_last, ixy1, s_last, intersection_context
         )
 
     def move_line_right(self) -> np.ndarray:
