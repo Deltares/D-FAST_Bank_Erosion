@@ -260,6 +260,7 @@ class TestSimulationData:
             station_bounds = (123.0, 128.0)
             LineGeometry(river_center_line, station_bounds)
             simulation_data.clip(river_center_line, max_distance=98.11176516320512)
+        mock_line_log.assert_any_call
 
 
 class TestLogText:
