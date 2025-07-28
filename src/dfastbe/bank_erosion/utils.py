@@ -304,6 +304,46 @@ def move_line(
     return xylines_new
 
 
+def _construct_slight_right_bend_polygon(
+    xylines: np.ndarray, nxy: np.ndarray, iseg: int
+) -> np.ndarray:
+    return np.row_stack(
+        [
+            xylines[iseg + 1],
+            xylines[iseg + 1] + nxy[iseg],
+            xylines[iseg] + nxy[iseg],
+            xylines[iseg] + nxy[iseg - 1],
+            xylines[iseg - 1],
+        ]
+    )
+
+
+def _construct_slight_right_bend_polygon_no_wedge(
+    xylines: np.ndarray, nxy: np.ndarray, iseg: int
+) -> np.ndarray:
+    return np.row_stack(
+        [
+            xylines[iseg + 1],
+            xylines[iseg + 1] + nxy[iseg],
+            xylines[iseg] + nxy[iseg],
+            xylines[iseg - 1],
+        ]
+    )
+
+
+def _construct_significant_right_bend_polygon(
+    xylines: np.ndarray, nxy: np.ndarray, iseg: int
+) -> np.ndarray:
+    return np.row_stack(
+        [
+            xylines[iseg + 1],
+            xylines[iseg + 1] + nxy[iseg],
+            xylines[iseg] + nxy[iseg],
+            xylines[iseg],
+        ]
+    )
+
+
 def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.ndarray:
     """
     Shift a line of a variable distance sideways (positive shift to the right).
@@ -364,61 +404,26 @@ def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.nd
                 if verbose:
                     print(f"{iseg}: slight bend to right")
                 if erosion_distance[iseg] > erosion_distance[iseg]:
-                    poly = np.row_stack(
-                        [
-                            xylines[iseg + 1],
-                            xylines[iseg + 1] + nxy[iseg],
-                            xylines[iseg] + nxy[iseg],
-                            xylines[iseg] + nxy[iseg - 1],
-                            xylines[iseg - 1],
-                            ]
-                    )
+                    poly = _construct_slight_right_bend_polygon(xylines, nxy, iseg)
                 else:
-                    poly = np.row_stack(
-                        [
-                            xylines[iseg + 1],
-                            xylines[iseg + 1] + nxy[iseg],
-                            xylines[iseg] + nxy[iseg],
-                            xylines[iseg - 1],
-                            ]
+                    poly = _construct_slight_right_bend_polygon_no_wedge(
+                        xylines, nxy, iseg
                     )
             else:
                 # more significant bend
                 if verbose:
                     print(f"{iseg}: bend to right")
-                poly = np.row_stack(
-                    [
-                        xylines[iseg + 1],
-                        xylines[iseg + 1] + nxy[iseg],
-                        xylines[iseg] + nxy[iseg],
-                        xylines[iseg],
-                        ]
-                )
+                poly = _construct_significant_right_bend_polygon(xylines, nxy, iseg)
         elif erosion_distance[iseg - 1] < prec:
             # left bend: previous segment isn't eroded, so nothing to connect to
             if verbose:
                 print(f"{iseg}: bend to left")
-            poly = np.row_stack(
-                [
-                    xylines[iseg + 1],
-                    xylines[iseg + 1] + nxy[iseg],
-                    xylines[iseg] + nxy[iseg],
-                    xylines[iseg],
-                    ]
-            )
+            poly = _construct_significant_right_bend_polygon(xylines, nxy, iseg)
         else:
             # left bend: connect it to the previous segment to avoid non eroded wedges
             if verbose:
                 print(f"{iseg}: bend to left")
-            poly = np.row_stack(
-                [
-                    xylines[iseg + 1],
-                    xylines[iseg + 1] + nxy[iseg],
-                    xylines[iseg] + nxy[iseg],
-                    xylines[iseg] + nxy[iseg - 1],
-                    xylines[iseg - 1],
-                    ]
-            )
+            poly = _construct_slight_right_bend_polygon(xylines, nxy, iseg)
 
         nedges = poly.shape[0] - 1
 
