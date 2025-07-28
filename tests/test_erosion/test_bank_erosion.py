@@ -54,7 +54,7 @@ def image_list() -> List[str]:
 
 @pytest.mark.e2e
 def test_bank_erosion(image_list: List[str]):
-    file = "erosion"
+    file = "erosion/meuse_manual"
     language = "UK"
     config_file = f"tests/data/{file}/meuse_manual.cfg"
     run(language, "BANKLINES", config_file)
