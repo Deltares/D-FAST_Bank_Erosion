@@ -352,7 +352,7 @@ class TestMeshProcessor:
         previous_point = np.array([209266.44709443, 389651.16238121])
         segment = RiverSegment(
             index=index,
-            prev_distance=prev_b,
+            min_relative_distance=prev_b,
             previous_point=previous_point,
             current_point=current_point,
         )
@@ -379,7 +379,7 @@ class TestMeshProcessor:
             index=0,
             current_point=current_point,
             previous_point=previous_point,
-            prev_distance=0.0,
+            min_relative_distance=0.0,
         )
         b, edges, nodes = _get_slices_core(edges, mesh_data, segment)
         assert np.allclose(b, np.array([0.71466942]))

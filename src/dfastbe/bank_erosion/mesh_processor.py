@@ -42,7 +42,7 @@ class EdgeCandidates:
 class RiverSegment:
     """
     Args:
-        prev_distance (float):
+        min_relative_distance (float):
             The relative distance along the previous segment where the last intersection occurred. Used to filter
             intersections along the current segment.
         current_point (np.ndarray):
@@ -51,7 +51,7 @@ class RiverSegment:
             A 1D array of shape (2,) containing the x, y coordinates of the previous point of the line segment.
     """
     index: int
-    prev_distance: float
+    min_relative_distance: float
     current_point: np.ndarray
     previous_point: np.ndarray
     distances: np.ndarray = field(default_factory=lambda: np.zeros(0))
@@ -124,15 +124,6 @@ def _get_slices_core(
         mesh_data (MeshData):
             An instance of the `MeshData` class containing mesh-related data,
             such as edge coordinates and connectivity information.
-        prev_point (np.ndarray):
-            A 1D array of shape (2,) containing the x, y coordinates of the
-            starting point of the line segment.
-        current_point (np.ndarray):
-            A 1D array of shape (2,) containing the x, y coordinates of the
-            ending point of the line segment.
-        min_relative_dist (float):
-            Minimum relative distance along the segment `bpj1-bpj` at which
-            intersections should be considered valid.
         bmax1 (bool, optional):
             If True, limits the relative distance along the segment `bpj1-bpj`
             to a maximum of 1. Defaults to True.
@@ -168,7 +159,7 @@ def _get_slices_core(
         segment.previous_point[1],
         segment.current_point[0],
         segment.current_point[1],
-        segment.prev_distance,
+        segment.min_relative_distance,
         bmax1,
     )
     edges = edges[valid_intersections]
@@ -548,7 +539,7 @@ class MeshProcessor:
                 index=segment.index,
                 previous_point=segment.current_point,
                 current_point=self.bank_points[segment.index + 1],
-                prev_distance=0
+                min_relative_distance=0
             )
             _, _, edges = _get_slices_core(
                 fe1,
@@ -762,7 +753,7 @@ class MeshProcessor:
             node = segment.nodes[0]
             edge = segment.edges[0]
             faces = self.mesh_data.edge_face_connectivity[edge]
-            segment.prev_distance = segment.distances[0]
+            segment.min_relative_distance = segment.distances[0]
 
             finished, index0 = self._slice_by_node_or_edge(
                 segment,
@@ -779,16 +770,16 @@ class MeshProcessor:
                 edge,
                 faces,
                 index0,
-                segment.prev_distance,
+                segment.min_relative_distance,
             )
             segment_x = (
                     segment.previous_point
-                    + segment.prev_distance
+                    + segment.min_relative_distance
                     * (segment.current_point - segment.previous_point)
             )
             shape_length = self.point_index * shape_multiplier
             self._store_segment_point(segment_x, shape_length=shape_length)
-            if segment.prev_distance == 1:
+            if segment.min_relative_distance == 1:
                 break
 
     def intersect_line_mesh(self) -> Tuple[np.ndarray, np.ndarray]:
@@ -824,7 +815,7 @@ class MeshProcessor:
             else:
                 segment = RiverSegment(
                     index=point_index,
-                    prev_distance=0,
+                    min_relative_distance=0,
                     current_point=current_bank_point,
                     previous_point=self.bank_points[point_index - 1],
                 )
