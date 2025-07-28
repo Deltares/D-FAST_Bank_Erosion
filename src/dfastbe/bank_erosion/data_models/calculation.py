@@ -17,7 +17,7 @@ from typing import (
 import numpy as np
 from geopandas import GeoDataFrame
 from geopandas.geoseries import GeoSeries
-from shapely.geometry import Point, Polygon
+from shapely.geometry import Point, Polygon, LineString
 
 
 GenericType = TypeVar("GenericType")

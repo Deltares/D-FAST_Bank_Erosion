@@ -326,34 +326,6 @@ class MeshProcessor:
         )
         return math.atan2(dy, dx)
 
-    def _find_faces_containing_point_on_edge(self, cells_indexes) -> List[int]:
-        """Get the faces that contain the first bank point on the edge of the mesh.
-
-        This function checks if the first bank point is inside or on the edge of any mesh face.
-
-        Args:
-            cells_indexes (np.ndarray):
-                Array of possible cell indices where the first bank point might be located.
-
-        Returns:
-            List[int]: A list of face indices where the first bank point is located.
-        """
-        bank_coord = Point(self.bank_points[0])
-        on_edge = []
-        for ind in cells_indexes:
-            cell_coords = self.mesh_data.get_face_by_index(ind)
-            cell = Polygon(cell_coords)
-            if cell.contains(bank_coord):
-                if self.verbose:
-                    print(f"starting in {ind}")
-                self.index = ind
-                break
-
-            line_k = LineString(np.vstack([cell_coords, cell_coords[0]]))
-            if line_k.contains(bank_coord):
-                on_edge.append(ind)
-        return on_edge
-
     def _find_starting_face(self, possible_cells: np.ndarray):
         """Find the starting face for a bank line segment.
 
@@ -369,7 +341,9 @@ class MeshProcessor:
                 print("starting outside mesh")
             self.index = -1
 
-        on_edge = self._find_faces_containing_point_on_edge(possible_cells)
+        on_edge = self.mesh_data.locate_point(self.bank_points[0], possible_cells)
+        if not isinstance(on_edge, list):
+            self.index = on_edge
 
         if self.index == -1:
             self._handle_starting_face_on_edge(on_edge)
