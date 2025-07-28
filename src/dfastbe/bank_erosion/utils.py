@@ -569,6 +569,88 @@ class ErodedBankLine:
             ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, poly[n2])
         self.ixy = ixy1
 
+    def _process_single_intersection(
+        self,
+        i: int,
+        s_current: int,
+        a: np.ndarray,
+        b: np.ndarray,
+        n: np.ndarray,
+        nedges: int,
+        poly: np.ndarray,
+        xytmp: np.ndarray,
+        ixytmp: int,
+        eroded_segment: ErodedBankLineSegment,
+        inside: bool,
+        s_last: int,
+        n_last: int,
+        ixy1: int,
+    ) -> tuple[bool, int, int, int]:
+        """
+        Process a single intersection and update the shifted bankline accordingly.
+
+        Returns:
+            inside (bool): Updated inside flag.
+            s_last (int): Updated last segment index.
+            n_last (int): Updated last edge index.
+            ixy1 (int): Updated index in shifted bankline.
+        """
+        if self.verbose:
+            print(
+                f"- intersection {i}: new polyline edge {n[i]} crosses segment {s_current} at {a[i]}"
+            )
+        if i == 0 or n[i] != nedges - 1:
+            if inside:
+                if self.verbose:
+                    print("  existing line is inside the new polygon")
+                for n2 in range(n_last, n[i], -1):
+                    if self.verbose:
+                        print(f"  adding new point {poly[n2]}")
+                    ixy1, self.xylines_new = _add_point(
+                        ixy1, self.xylines_new, poly[n2]
+                    )
+            else:
+                if self.verbose:
+                    print("  existing line is outside the new polygon")
+                for s2 in range(s_last, s_current):
+                    if self.verbose:
+                        print(f"  re-adding old point {xytmp[s2 - ixytmp + 1]}")
+                    ixy1, self.xylines_new = _add_point(
+                        ixy1, self.xylines_new, xytmp[s2 - ixytmp + 1]
+                    )
+            pnt_intersect = poly[n[i]] + b[i] * (poly[n[i] + 1] - poly[n[i]])
+            if self.verbose:
+                print(f"  adding intersection point {pnt_intersect}")
+            ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, pnt_intersect)
+            n_last = n[i]
+            s_last = s_current
+            if a[i] < self.prec:
+                dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
+                dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
+                s2 = s_current - eroded_segment.ixy0
+                dBy = eroded_segment.y1[s2] - eroded_segment.y0[s2]
+                dBx = eroded_segment.x1[s2] - eroded_segment.x0[s2]
+                inside = dPy * dBx - dPx * dBy > 0
+            elif a[i] > 1 - self.prec:
+                dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
+                dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
+                s2 = s_current - eroded_segment.ixy0 + 1
+                if s2 > len(eroded_segment.x0) - 1:
+                    inside = True
+                else:
+                    dBy = eroded_segment.y1[s2] - eroded_segment.y0[s2]
+                    dBx = eroded_segment.x1[s2] - eroded_segment.x0[s2]
+                    inside = dPy * dBx - dPx * dBy > 0
+            else:
+                # line segment slices the edge somewhere in the middle
+                inside = not inside
+            if self.verbose:
+                if inside:
+                    print("  existing line continues inside")
+                else:
+                    print("  existing line continues outside")
+        return inside, s_last, n_last, ixy1
+
     def _finalize_bankline_after_intersections(
         self,
         inside: bool,
@@ -657,62 +739,22 @@ class ErodedBankLine:
         s_last = s[0]
         n_last = nedges
         for i, s_current in enumerate(s):
-            if self.verbose:
-                print(
-                    f"- intersection {i}: new polyline edge {n[i]} crosses segment {s_current} at {a[i]}"
-                )
-            if i == 0 or n[i] != nedges - 1:
-                if inside:
-                    if self.verbose:
-                        print("  existing line is inside the new polygon")
-                    for n2 in range(n_last, n[i], -1):
-                        if self.verbose:
-                            print(f"  adding new point {poly[n2]}")
-                        ixy1, self.xylines_new = _add_point(
-                            ixy1, self.xylines_new, poly[n2]
-                        )
-                else:
-                    if self.verbose:
-                        print("  existing line is outside the new polygon")
-                    for s2 in range(s_last, s_current):
-                        if self.verbose:
-                            print(f"  re-adding old point {xytmp[s2 - ixytmp + 1]}")
-                        ixy1, self.xylines_new = _add_point(
-                            ixy1, self.xylines_new, xytmp[s2 - ixytmp + 1]
-                        )
-                pnt_intersect = poly[n[i]] + b[i] * (poly[n[i] + 1] - poly[n[i]])
-                if self.verbose:
-                    print(f"  adding intersection point {pnt_intersect}")
-                ixy1, self.xylines_new = _add_point(
-                    ixy1, self.xylines_new, pnt_intersect
-                )
-                n_last = n[i]
-                s_last = s_current
-                if a[i] < self.prec:
-                    dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
-                    dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
-                    s2 = s_current - eroded_segment.ixy0
-                    dBy = eroded_segment.y1[s2] - eroded_segment.y0[s2]
-                    dBx = eroded_segment.x1[s2] - eroded_segment.x0[s2]
-                    inside = dPy * dBx - dPx * dBy > 0
-                elif a[i] > 1 - self.prec:
-                    dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
-                    dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
-                    s2 = s_current - eroded_segment.ixy0 + 1
-                    if s2 > len(eroded_segment.x0) - 1:
-                        inside = True
-                    else:
-                        dBy = eroded_segment.y1[s2] - eroded_segment.y0[s2]
-                        dBx = eroded_segment.x1[s2] - eroded_segment.x0[s2]
-                        inside = dPy * dBx - dPx * dBy > 0
-                else:
-                    # line segment slices the edge somewhere in the middle
-                    inside = not inside
-                if self.verbose:
-                    if inside:
-                        print("  existing line continues inside")
-                    else:
-                        print("  existing line continues outside")
+            inside, s_last, n_last, ixy1 = self._process_single_intersection(
+                i,
+                s_current,
+                a,
+                b,
+                n,
+                nedges,
+                poly,
+                xytmp,
+                ixytmp,
+                eroded_segment,
+                inside,
+                s_last,
+                n_last,
+                ixy1,
+            )
 
         self.ixy = self._finalize_bankline_after_intersections(
             inside, n_last, poly, ixy1, xytmp, ixytmp, s_last
