@@ -7,7 +7,7 @@ from dfastbe.bank_erosion.mesh_processor import (
     _get_slices,
     _get_slices_core,
     enlarge,
-    get_slices_ab,
+    calculate_segment_edge_intersections,
 )
 
 
@@ -326,7 +326,7 @@ class TestMeshProcessor:
         xi1 = 209189.367188
         yi0 = 389659.99609375
         yi1 = 389673.75
-        a, b, slices = get_slices_ab(X0, Y0, X1, Y1, xi0, yi0, xi1, yi1, 0)
+        a, b, slices = calculate_segment_edge_intersections(X0, Y0, X1, Y1, xi0, yi0, xi1, yi1, 0)
         expected_a = np.ma.array([0.9207387758922553])
         expected_b = np.ma.array([0.3921626068608838])
         expected_slices = np.array([2])

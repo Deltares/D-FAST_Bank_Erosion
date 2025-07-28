@@ -15,7 +15,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
     SingleParameters,
 )
 from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData
-from dfastbe.bank_erosion.mesh_processor import MeshProcessor, enlarge, get_slices_ab
+from dfastbe.bank_erosion.mesh_processor import MeshProcessor, enlarge, calculate_segment_edge_intersections
 from dfastbe.io.data_models import LineGeometry
 from dfastbe.io.logger import log_text
 from dfastbe.utils import on_right_side
@@ -446,7 +446,7 @@ def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.nd
                 pass
             else:
                 # check for intersection
-                a2, b2, slices2 = get_slices_ab(
+                a2, b2, slices2 = calculate_segment_edge_intersections(
                     X0,
                     Y0,
                     X1,

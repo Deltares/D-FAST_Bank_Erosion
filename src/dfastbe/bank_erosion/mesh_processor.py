@@ -8,7 +8,7 @@ from shapely.geometry import LineString, Point, Polygon
 
 from dfastbe.bank_erosion.data_models.calculation import MeshData
 
-__all__ = ["get_slices_ab", "enlarge", "MeshProcessor"]
+__all__ = ["calculate_segment_edge_intersections", "enlarge", "MeshProcessor"]
 
 ATOL = 1e-8
 RTOL = 1e-8
@@ -52,8 +52,8 @@ class SegmentTraversalState:
 def _get_slices(
     index: int,
     prev_b: float,
-    bpj: np.ndarray,
-    bpj1: np.ndarray,
+    current_point: np.ndarray,
+    prev_point: np.ndarray,
     mesh_data: MeshData,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Calculate the intersection of a line segment with the edges of a mesh face.
@@ -69,9 +69,9 @@ def _get_slices(
         prev_b (float):
             The relative distance along the previous segment where the last intersection occurred. Used to filter
             intersections along the current segment.
-        bpj (np.ndarray):
+        current_point (np.ndarray):
             A 1D array of shape (2,) containing the x, y coordinates of the current point of the line segment.
-        bpj1 (np.ndarray):
+        prev_point (np.ndarray):
             A 1D array of shape (2,) containing the x, y coordinates of the previous point of the line segment.
         mesh_data (MeshData):
             An instance of the `MeshData` class containing mesh-related data, such as edge coordinates, face-edge
@@ -99,7 +99,7 @@ def _get_slices(
         edges = mesh_data.boundary_edge_nrs
     else:
         edges = mesh_data.face_edge_connectivity[index, : mesh_data.n_nodes[index]]
-    a, b, edges = _get_slices_core(edges, mesh_data, bpj1, bpj, prev_b, True)
+    a, b, edges = _get_slices_core(edges, mesh_data, prev_point, current_point, prev_b, True)
     nodes = -np.ones(a.shape, dtype=np.int64)
     nodes[a == 0] = mesh_data.edge_node[edges[a == 0], 0]
     nodes[a == 1] = mesh_data.edge_node[edges[a == 1], 1]
@@ -108,9 +108,9 @@ def _get_slices(
 def _get_slices_core(
     edges: np.ndarray,
     mesh_data: MeshData,
-    bpj1: np.ndarray,
-    bpj: np.ndarray,
-    bmin: float,
+    prev_point: np.ndarray,
+    current_point: np.ndarray,
+    min_relative_dist: float,
     bmax1: bool = True,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Calculate the intersection of a line segment with multiple mesh edges.
@@ -125,13 +125,13 @@ def _get_slices_core(
         mesh_data (MeshData):
             An instance of the `MeshData` class containing mesh-related data,
             such as edge coordinates and connectivity information.
-        bpj1 (np.ndarray):
+        prev_point (np.ndarray):
             A 1D array of shape (2,) containing the x, y coordinates of the
             starting point of the line segment.
-        bpj (np.ndarray):
+        current_point (np.ndarray):
             A 1D array of shape (2,) containing the x, y coordinates of the
             ending point of the line segment.
-        bmin (float):
+        min_relative_dist (float):
             Minimum relative distance along the segment `bpj1-bpj` at which
             intersections should be considered valid.
         bmax1 (bool, optional):
@@ -160,32 +160,32 @@ def _get_slices_core(
         - If `bmax1` is True, intersections beyond the endpoint of the segment
           are ignored.
     """
-    a, b, slices = get_slices_ab(
+    edge_relative_dist, segment_relative_dist, valid_intersections = calculate_segment_edge_intersections(
         mesh_data.x_edge_coords[edges, 0],
         mesh_data.y_edge_coords[edges, 0],
         mesh_data.x_edge_coords[edges, 1],
         mesh_data.y_edge_coords[edges, 1],
-        bpj1[0],
-        bpj1[1],
-        bpj[0],
-        bpj[1],
-        bmin,
+        prev_point[0],
+        prev_point[1],
+        current_point[0],
+        current_point[1],
+        min_relative_dist,
         bmax1,
     )
-    edges = edges[slices]
-    return a, b, edges
+    edges = edges[valid_intersections]
+    return edge_relative_dist, segment_relative_dist, edges
 
 
-def get_slices_ab(
-    X0: np.ndarray,
-    Y0: np.ndarray,
-    X1: np.ndarray,
-    Y1: np.ndarray,
-    xi0: float,
-    yi0: float,
-    xi1: float,
-    yi1: float,
-    bmin: float,
+def calculate_segment_edge_intersections(
+    x_edge_coords_prev_point: np.ndarray,
+    y_edge_coords_prev_point: np.ndarray,
+    x_edge_coords_current_point: np.ndarray,
+    y_edge_coords_current_point: np.ndarray,
+    prev_point_x: float,
+    prev_point_y: float,
+    current_point_x: float,
+    current_point_y: float,
+    min_relative_dist: float,
     bmax1: bool = True,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
@@ -193,51 +193,60 @@ def get_slices_ab(
 
     Arguments
     ---------
-    X0 : np.ndarray
+    x_edge_coords_prev_point : np.ndarray
         Array containing the x-coordinates of the start point of each edge.
-    X1 : np.ndarray
+    x_edge_coords_current_point : np.ndarray
         Array containing the x-coordinates of the end point of each edge.
-    Y0 : np.ndarray
+    y_edge_coords_prev_point : np.ndarray
         Array containing the y-coordinates of the start point of each edge.
-    Y1 : np.ndarray
+    y_edge_coords_current_point : np.ndarray
         Array containing the y-coordinates of the end point of each edge.
-    xi0 : float
+    prev_point_x : float
         x-coordinate of start point of the segment.
-    xi1 : float
+    current_point_x : float
         x-coordinate of end point of the segment.
-    yi0 : float
+    prev_point_y : float
         y-coordinate of start point of the segment.
-    yi1 : float
+    current_point_y : float
         y-coordinate of end point of the segment.
-    bmin : float
+    min_relative_dist : float
         Minimum relative distance from bpj1 at which slice should occur.
     bmax1 : bool
         Flag indicating whether the the relative distance along the segment bpj1-bpj should be limited to 1.
 
     Returns
     -------
-    a : np.ndarray
+    edge_relative_dist : np.ndarray
         Array containing relative distance along each edge.
-    b : np.ndarray
+    segment_relative_dist : np.ndarray
         Array containing relative distance along the segment for each edge.
-    slices : np.ndarray
+    valid_intersections : np.ndarray
         Array containing a flag indicating whether the edge is sliced at a valid location.
     """
-    dX = X1 - X0
-    dY = Y1 - Y0
-    dxi = xi1 - xi0
-    dyi = yi1 - yi0
-    det = dX * dyi - dY * dxi
-    det[det == 0] = 1e-10
-    a = (dyi * (xi0 - X0) - dxi * (yi0 - Y0)) / det  # along mesh edge
-    b = (dY * (xi0 - X0) - dX * (yi0 - Y0)) / det  # along bank line
+    # difference between edges
+    dx_edge = x_edge_coords_current_point - x_edge_coords_prev_point
+    dy_edge = y_edge_coords_current_point - y_edge_coords_prev_point
+    # difference between the two points themselves
+    dx_segment = current_point_x - prev_point_x
+    dy_segment = current_point_y - prev_point_y
+    # check if the line and the edge are parallel
+    determinant = dx_edge * dy_segment - dy_edge * dx_segment
+    # if determinant is zero, the line and edge are parallel, so we set it to a small value
+    determinant[determinant == 0] = 1e-10
+
+    # calculate the relative distances along the edge where the intersection occur
+    edge_relative_dist = (dy_segment * (prev_point_x - x_edge_coords_prev_point) - dx_segment * (prev_point_y - y_edge_coords_prev_point)) / determinant  # along mesh edge
+    # calculate the relative distances along the segment where the intersection occur
+    segment_relative_dist = (dy_edge * (prev_point_x - x_edge_coords_prev_point) - dx_edge * (prev_point_y - y_edge_coords_prev_point)) / determinant  # along bank line
+
     if bmax1:
-        slices = np.nonzero((b > bmin) & (b <= 1) & (a >= 0) & (a <= 1))[0]
+        valid_intersections = np.nonzero((segment_relative_dist > min_relative_dist) & (segment_relative_dist <= 1) & (edge_relative_dist >= 0) & (edge_relative_dist <= 1))[0]
     else:
-        slices = np.nonzero((b > bmin) & (a >= 0) & (a <= 1))[0]
-    a = a[slices]
-    b = b[slices]
-    return a, b, slices
+        valid_intersections = np.nonzero((segment_relative_dist > min_relative_dist) & (edge_relative_dist >= 0) & (edge_relative_dist <= 1))[0]
+
+    edge_relative_dist = edge_relative_dist[valid_intersections]
+    segment_relative_dist = segment_relative_dist[valid_intersections]
+    return edge_relative_dist, segment_relative_dist, valid_intersections
 
 
 def enlarge(
@@ -284,7 +293,7 @@ class MeshProcessor:
         self.coords = np.zeros((len(bank_points), 2))
         self.face_indexes = np.zeros(len(bank_points), dtype=np.int64)
         self.verbose = False
-        self.ind = 0
+        self.point_index = 0
         self.index: int
         self.vindex: np.ndarray | int
 
@@ -326,22 +335,21 @@ class MeshProcessor:
         )
         return math.atan2(dy, dx)
 
-    def _find_starting_face(self, possible_cells: np.ndarray):
+    def _find_starting_face(self, face_indexes: np.ndarray):
         """Find the starting face for a bank line segment.
 
         This function determines the face index and vertex indices of the mesh
         that the first point of a bank line segment is associated with.
 
         Args:
-            possible_cells (np.ndarray): Array of possible cell indices.
+            face_indexes (np.ndarray): Array of possible cell indices.
         """
         self.index = -1
-        if len(possible_cells) == 0:
+        if len(face_indexes) == 0:
             if self.verbose:
                 print("starting outside mesh")
-            self.index = -1
 
-        on_edge = self.mesh_data.locate_point(self.bank_points[0], possible_cells)
+        on_edge = self.mesh_data.locate_point(self.bank_points[0], face_indexes)
         if not isinstance(on_edge, list):
             self.index = on_edge
 
@@ -508,16 +516,17 @@ class MeshProcessor:
         Enlarge arrays if needed, set coordinates and index, and increment ind.
         """
         if shape_length is None:
-            shape_length = self.ind + 1
-        if self.ind == self.coords.shape[0]:
+            shape_length = self.point_index + 1
+        if self.point_index == self.coords.shape[0]:
+            # last coordinate reached, so enlarge arrays
             self.coords = enlarge(self.coords, (shape_length, 2))
             self.face_indexes = enlarge(self.face_indexes, (shape_length,))
-        self.coords[self.ind] = current_bank_point
+        self.coords[self.point_index] = current_bank_point
         if self.index == -2:
-            self.face_indexes[self.ind] = self.vindex[0]
+            self.face_indexes[self.point_index] = self.vindex[0]
         else:
-            self.face_indexes[self.ind] = self.index
-        self.ind += 1
+            self.face_indexes[self.point_index] = self.index
+        self.point_index += 1
 
     def _determine_next_face_on_edge(
         self, segment_state: SegmentTraversalState, edge, faces
@@ -719,12 +728,12 @@ class MeshProcessor:
                 index0 = self._determine_next_face_on_edge(segment_state, edge, faces)
         return finished, index0
 
-    def _process_bank_segment(self, j, bpj):
+    def _process_bank_segment(self, j, point_coords):
         shape_multiplier = 2
         segment_state = SegmentTraversalState(
             index=j,
             prev_distance=0,
-            current_bank_point=bpj,
+            current_bank_point=point_coords,
             previous_bank_point=self.bank_points[j - 1],
         )
         while True:
@@ -748,12 +757,12 @@ class MeshProcessor:
 
             if len(segment_state.edges) == 0:
                 # rest of segment associated with same face
-                shape_length = self.ind * shape_multiplier
+                shape_length = self.point_index * shape_multiplier
                 self._store_segment_point(
                     segment_state.current_bank_point, shape_length=shape_length
                 )
                 break
-            index0 = None
+            # index0 = None
             if len(segment_state.edges) > 1:
                 self._select_first_crossing(segment_state)
 
@@ -783,9 +792,9 @@ class MeshProcessor:
             segment = (
                 segment_state.previous_bank_point
                 + segment_state.prev_distance
-                * (bpj - segment_state.previous_bank_point)
+                * (point_coords - segment_state.previous_bank_point)
             )
-            shape_length = self.ind * shape_multiplier
+            shape_length = self.point_index * shape_multiplier
             self._store_segment_point(segment, shape_length=shape_length)
             if segment_state.prev_distance == 1:
                 break
@@ -824,8 +833,8 @@ class MeshProcessor:
                 self._process_bank_segment(j, current_bank_point)
 
         # clip to actual length (idx refers to segments, so we can ignore the last value)
-        self.coords = self.coords[: self.ind]
-        self.face_indexes = self.face_indexes[: self.ind - 1]
+        self.coords = self.coords[: self.point_index]
+        self.face_indexes = self.face_indexes[: self.point_index - 1]
 
         # remove tiny segments
         d = np.sqrt((np.diff(self.coords, axis=0) ** 2).sum(axis=1))

@@ -256,7 +256,8 @@ class MeshData:
 
         Returns:
             indexes (int|list[int]):
-                True if the point is inside the face, False otherwise.
+                index if the face that the point is located in, or a list of indexes if the point is on the edge of
+                multiple faces.
         """
         if not isinstance(point, Point) and isinstance(point, (list, tuple, np.ndarray)):
             point = Point(point)
