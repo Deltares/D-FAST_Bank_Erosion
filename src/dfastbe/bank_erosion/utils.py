@@ -416,21 +416,10 @@ class ErodedBankLine:
         return poly
 
     def move_line_right(self) -> np.ndarray:
-        """
-        Shift a line of a variable distance sideways (positive shift to the right).
-
-        Arguments
-        ---------
-        xylines : np.ndarray
-            Nx2 array containing the x- and y-coordinates of the line to be moved.
-        dn0 : np.ndarray
-            Distance over which to move the line sideways. A positive shift is
-            defined towards the right when looking along the line.
+        """Shift a line using the erosion distance.
 
         Returns
-        -------
-        xylines_new : umpy.ndarray
-            Nx2 array containing the x- and y-coordinates of the moved line.
+            np.ndarray: Nx2 array containing the x- and y-coordinates of the moved line.
         """
         ixy1: int
         for erosion_index, eroded_distance in enumerate(self.erosion_distance):
