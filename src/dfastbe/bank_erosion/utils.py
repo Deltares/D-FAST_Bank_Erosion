@@ -482,7 +482,7 @@ class ErodedBankLine:
             prec: Precision threshold for filtering intersections.
 
         Returns:
-            a, b, slices, n: Lists of intersection data for each edge.
+            PolylineIntersections: A dataclass containing lists of intersection data.
         """
         intersections = PolylineIntersections(a=[], b=[], slices=[], n=[])
         for i in range(nedges):
@@ -517,6 +517,14 @@ class ErodedBankLine:
     def _calculate_cross_product(
         self, erosion_index: int, shifted: bool = False
     ) -> float:
+        """Calculate the cross product for the current erosion segment.
+
+        Args:
+            erosion_index (int): Index of the current erosion segment.
+            shifted (bool): If True, use the shifted coordinates for the calculation.
+        Returns:
+            float: The cross product value.
+        """
         multiply_array = self.nxy if shifted else self.dxy
         return (
             self.xylines_new[self.ixy, 0] - self.xylines_new[self.ixy - 1, 0]
