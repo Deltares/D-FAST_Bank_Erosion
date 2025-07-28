@@ -547,6 +547,21 @@ class ErodedBankLine:
             add = False
         return add
 
+    def _add_right_bend_segment_points(self, poly: np.ndarray, nedges: int) -> None:
+        """
+        Add the first three points of the polygon to the shifted bankline for a right bend segment.
+
+        Args:
+            poly (np.ndarray): Polygon coordinates for the current segment.
+            nedges (int): Number of edges in the polygon.
+        """
+        ixy1 = self.ixy
+        for n2 in range(min(nedges, 2), -1, -1):
+            if self.verbose:
+                print(f"  adding point {poly[n2]}")
+            ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, poly[n2])
+        self.ixy = ixy1
+
     def _process_intersections_and_update_bankline(
         self,
         intersections: PolylineIntersections,
@@ -673,7 +688,6 @@ class ErodedBankLine:
         Returns
             np.ndarray: Nx2 array containing the x- and y-coordinates of the moved line.
         """
-        ixy1: int
         for erosion_index, eroded_distance in enumerate(self.erosion_distance):
             dtheta = self.theta[erosion_index] - self.theta[erosion_index - 1]
             if dtheta > math.pi:
@@ -687,7 +701,6 @@ class ErodedBankLine:
             poly = self._create_segment_outline_polygon(erosion_index, dtheta)
             nedges = poly.shape[0] - 1
 
-            # make a temporary copy of the last 20 nodes of the already shifted bankline
             eroded_segment = self._get_recent_shifted_bankline_segments()
 
             intersections = self._collect_polyline_intersections(
@@ -702,16 +715,7 @@ class ErodedBankLine:
                     erosion_index
                 ):
                     continue
-
-                ixy1 = self.ixy
-                for n2 in range(min(nedges, 2), -1, -1):
-                    if self.verbose:
-                        print(f"  adding point {poly[n2]}")
-                    ixy1, self.xylines_new = _add_point(
-                        ixy1, self.xylines_new, poly[n2]
-                    )
-                self.ixy = ixy1
-
+                self._add_right_bend_segment_points(poly, nedges)
             else:
                 self._process_intersections_and_update_bankline(
                     intersections, poly, nedges, eroded_segment
