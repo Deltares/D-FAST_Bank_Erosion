@@ -515,7 +515,7 @@ class MeshProcessor:
             )
         return index
 
-    def _resolve_ambiguous_edge_transition(self, prev_b, bpj, bpj1):
+    def _resolve_ambiguous_edge_transition(self, segment_state: SegmentTraversalState):
         """Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces."""
         b = np.zeros(0)
         edges = np.zeros(0, dtype=np.int64)
@@ -524,25 +524,24 @@ class MeshProcessor:
         for i in self.vindex:
             b1, edges1, nodes1 = _get_slices(
                 i,
-                prev_b,
-                bpj,
-                bpj1,
+                segment_state.prev_distance,
+                segment_state.current_bank_point,
+                segment_state.previous_bank_point,
                 self.mesh_data,
             )
             b = np.concatenate((b, b1), axis=0)
             edges = np.concatenate((edges, edges1), axis=0)
             nodes = np.concatenate((nodes, nodes1), axis=0)
             index_src = np.concatenate((index_src, i + 0 * edges1), axis=0)
-        edges, id_edges = np.unique(edges, return_index=True)
-        b = b[id_edges]
-        nodes = nodes[id_edges]
+        segment_state.edges, id_edges = np.unique(edges, return_index=True)
+        segment_state.distances = b[id_edges]
+        segment_state.nodes = nodes[id_edges]
         index_src = index_src[id_edges]
         if len(index_src) == 1:
             self.index = index_src[0]
             self.vindex = index_src[0:1]
         else:
             self.index = -2
-        return b, edges, nodes
 
     def _store_segment_point(self, current_bank_point, shape_length=None):
         """Finalize a segment
@@ -749,38 +748,51 @@ class MeshProcessor:
         )
         while True:
             if self.index == -2:
-                b, edges, nodes = self._resolve_ambiguous_edge_transition(
-                    segment_state.prev_distance, bpj, segment_state.previous_bank_point
-                )
+                self._resolve_ambiguous_edge_transition(segment_state)
             elif (bpj == segment_state.previous_bank_point).all():
                 # this is a segment of length 0, skip it since it takes us nowhere
                 break
             else:
-                b, edges, nodes = _get_slices(
-                    self.index,
-                    segment_state.prev_distance,
-                    bpj,
-                    segment_state.previous_bank_point,
-                    self.mesh_data,
+                segment_state.distances, segment_state.edges, segment_state.nodes = (
+                    _get_slices(
+                        self.index,
+                        segment_state.prev_distance,
+                        segment_state.current_bank_point,
+                        segment_state.previous_bank_point,
+                        self.mesh_data,
+                    )
                 )
 
-            if len(edges) == 0:
+            if len(segment_state.edges) == 0:
                 # rest of segment associated with same face
                 shape_length = self.ind * shape_multiplier
                 self._store_segment_point(bpj, shape_length=shape_length)
                 break
             index0 = None
-            if len(edges) > 1:
-                b, edges, nodes = self._select_first_crossing(b, edges, nodes)
+            if len(segment_state.edges) > 1:
+                segment_state.distances, segment_state.edges, segment_state.nodes = (
+                    self._select_first_crossing(
+                        segment_state.distances,
+                        segment_state.edges,
+                        segment_state.nodes,
+                    )
+                )
 
             # slice location identified ...
-            node = nodes[0]
-            edge = edges[0]
+            node = segment_state.nodes[0]
+            edge = segment_state.edges[0]
             faces = self.mesh_data.edge_face_connectivity[edge]
-            segment_state.prev_distance = b[0]
+            segment_state.prev_distance = segment_state.distances[0]
 
             finished, index0 = self._slice_by_node_or_edge(
-                j, bpj, segment_state.previous_bank_point, b, edges, node, edge, faces
+                j,
+                bpj,
+                segment_state.previous_bank_point,
+                segment_state.distances,
+                segment_state.edges,
+                node,
+                edge,
+                faces,
             )
             if finished:
                 break
