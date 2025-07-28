@@ -470,7 +470,7 @@ class ErodedBankLine:
         eroded_segment: ErodedBankLineSegment,
         poly: np.ndarray,
         nedges: int,
-    ) -> tuple[list[np.ndarray], list[np.ndarray], list[np.ndarray], list[np.ndarray]]:
+    ) -> PolylineIntersections:
         """
         For each edge of the new polyline, collect all intersections with the already shifted bankline.
 
@@ -484,10 +484,7 @@ class ErodedBankLine:
         Returns:
             a, b, slices, n: Lists of intersection data for each edge.
         """
-        a = []
-        b = []
-        slices = []
-        n = []
+        intersections = PolylineIntersections(a=[], b=[], slices=[], n=[])
         for i in range(nedges):
             if (poly[i + 1] == poly[i]).all():
                 # polyline segment has no actual length, so skip it
@@ -511,11 +508,11 @@ class ErodedBankLine:
                 a2 = a2[keep_mask]
                 b2 = b2[keep_mask]
                 slices2 = slices2[keep_mask]
-            a.append(a2)
-            b.append(b2)
-            slices.append(slices2)
-            n.append(slices2 * 0 + i)
-        return a, b, slices, n
+            intersections.a.append(a2)
+            intersections.b.append(b2)
+            intersections.slices.append(slices2)
+            intersections.n.append(slices2 * 0 + i)
+        return intersections
 
     def move_line_right(self) -> np.ndarray:
         """Shift a line using the erosion distance.
@@ -540,11 +537,11 @@ class ErodedBankLine:
             # make a temporary copy of the last 20 nodes of the already shifted bankline
             eroded_segment = self._get_recent_shifted_bankline_segments()
 
-            a, b, slices, n = self._collect_polyline_intersections(
+            intersections = self._collect_polyline_intersections(
                 eroded_segment, poly, nedges
             )
 
-            s = np.concatenate(slices)
+            s = np.concatenate(intersections.slices)
             if self.verbose:
                 print(f"{erosion_index}: {len(s)} intersections detected")
             if len(s) == 0:
@@ -596,9 +593,9 @@ class ErodedBankLine:
 
             else:
                 # one or more intersections found
-                a = np.concatenate(a)
-                b = np.concatenate(b)
-                n = np.concatenate(n)
+                a = np.concatenate(intersections.a)
+                b = np.concatenate(intersections.b)
+                n = np.concatenate(intersections.n)
 
                 # sort the intersections by distance along the already shifted bank line
                 d = s + a
