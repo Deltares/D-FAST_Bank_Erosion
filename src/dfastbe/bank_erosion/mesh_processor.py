@@ -648,18 +648,17 @@ class MeshProcessor:
                     f"{j}: ERROR: point actually not contained within {self.index}!"
                 )
 
-    def _select_first_crossing(self, b, edges, nodes):
+    def _select_first_crossing(self, segment_state: SegmentTraversalState):
         """Select the first crossing from a set of edges and their associated distances.
 
         line segment crosses the edge list multiple times
         - moving out of a cell at a corner node
         - moving into and out of the mesh from outside
         """
-        bmin = b == np.amin(b)
-        b = b[bmin]
-        edges = edges[bmin]
-        nodes = nodes[bmin]
-        return b, edges, nodes
+        bmin = segment_state.distances == np.amin(segment_state.distances)
+        segment_state.distances = segment_state.distances[bmin]
+        segment_state.edges = segment_state.edges[bmin]
+        segment_state.nodes = segment_state.nodes[bmin]
 
     def _process_node_transition(self, j, bpj, bpj1, b, edges, node):
         """Process the transition at a node when a segment ends or continues."""
@@ -714,28 +713,39 @@ class MeshProcessor:
             index0 = self._resolve_next_face_from_edges(node, candidates, j)
         return index0
 
-    def _slice_by_node_or_edge(self, j, bpj, bpj1, b, edges, node, edge, faces):
+    def _slice_by_node_or_edge(
+        self, segment_state: SegmentTraversalState, node, edge, faces
+    ):
         finished = False
         index0 = None
         if node >= 0:
             # if we slice at a node ...
             finished, index0 = self._process_node_transition(
-                j, bpj, bpj1, b, edges, node
+                segment_state.index,
+                segment_state.current_bank_point,
+                segment_state.previous_bank_point,
+                segment_state.distances,
+                segment_state.edges,
+                node,
             )
 
-        elif b[0] == 1:
+        elif segment_state.distances[0] == 1:
             # ending at slice point, so ending on an edge ...
             if self.verbose:
-                print(f"{j}: ending on edge {edge} at {b[0]}")
+                print(
+                    f"{segment_state.index}: ending on edge {edge} at {segment_state.distances[0]}"
+                )
             # figure out where we will be heading afterwards ...
-            if j == len(self.bank_points) - 1:
+            if segment_state.index == len(self.bank_points) - 1:
                 # catch case of last segment
                 if self.verbose:
-                    print(f"{j}: last point ends on an edge")
-                self._store_segment_point(bpj)
+                    print(f"{segment_state.index}: last point ends on an edge")
+                self._store_segment_point(segment_state.current_bank_point)
                 finished = True
             else:
-                index0 = self._determine_next_face_on_edge(bpj, j, edge, faces)
+                index0 = self._determine_next_face_on_edge(
+                    segment_state.current_bank_point, segment_state.index, edge, faces
+                )
         return finished, index0
 
     def _process_bank_segment(self, j, bpj):
@@ -749,7 +759,9 @@ class MeshProcessor:
         while True:
             if self.index == -2:
                 self._resolve_ambiguous_edge_transition(segment_state)
-            elif (bpj == segment_state.previous_bank_point).all():
+            elif (
+                segment_state.current_bank_point == segment_state.previous_bank_point
+            ).all():
                 # this is a segment of length 0, skip it since it takes us nowhere
                 break
             else:
@@ -766,17 +778,13 @@ class MeshProcessor:
             if len(segment_state.edges) == 0:
                 # rest of segment associated with same face
                 shape_length = self.ind * shape_multiplier
-                self._store_segment_point(bpj, shape_length=shape_length)
+                self._store_segment_point(
+                    segment_state.current_bank_point, shape_length=shape_length
+                )
                 break
             index0 = None
             if len(segment_state.edges) > 1:
-                segment_state.distances, segment_state.edges, segment_state.nodes = (
-                    self._select_first_crossing(
-                        segment_state.distances,
-                        segment_state.edges,
-                        segment_state.nodes,
-                    )
-                )
+                self._select_first_crossing(segment_state)
 
             # slice location identified ...
             node = segment_state.nodes[0]
@@ -785,11 +793,7 @@ class MeshProcessor:
             segment_state.prev_distance = segment_state.distances[0]
 
             finished, index0 = self._slice_by_node_or_edge(
-                j,
-                bpj,
-                segment_state.previous_bank_point,
-                segment_state.distances,
-                segment_state.edges,
+                segment_state,
                 node,
                 edge,
                 faces,
