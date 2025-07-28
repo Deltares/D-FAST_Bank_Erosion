@@ -40,6 +40,16 @@ class EdgeCandidates:
 
 @dataclass
 class RiverSegment:
+    """
+    Args:
+        prev_distance (float):
+            The relative distance along the previous segment where the last intersection occurred. Used to filter
+            intersections along the current segment.
+        current_point (np.ndarray):
+            A 1D array of shape (2,) containing the x, y coordinates of the current point of the line segment.
+        previous_point (np.ndarray):
+            A 1D array of shape (2,) containing the x, y coordinates of the previous point of the line segment.
+    """
     index: int
     prev_distance: float
     current_point: np.ndarray
@@ -51,9 +61,7 @@ class RiverSegment:
 
 def _get_slices(
     index: int,
-    prev_b: float,
-    current_point: np.ndarray,
-    prev_point: np.ndarray,
+    segment: RiverSegment,
     mesh_data: MeshData,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Calculate the intersection of a line segment with the edges of a mesh face.
@@ -66,13 +74,6 @@ def _get_slices(
         index (int):
             Index of the current mesh face. If `index` is negative, the function assumes the segment intersects
             the boundary edges of the mesh.
-        prev_b (float):
-            The relative distance along the previous segment where the last intersection occurred. Used to filter
-            intersections along the current segment.
-        current_point (np.ndarray):
-            A 1D array of shape (2,) containing the x, y coordinates of the current point of the line segment.
-        prev_point (np.ndarray):
-            A 1D array of shape (2,) containing the x, y coordinates of the previous point of the line segment.
         mesh_data (MeshData):
             An instance of the `MeshData` class containing mesh-related data, such as edge coordinates, face-edge
             connectivity, and edge-node connectivity.
@@ -99,7 +100,9 @@ def _get_slices(
         edges = mesh_data.boundary_edge_nrs
     else:
         edges = mesh_data.face_edge_connectivity[index, : mesh_data.n_nodes[index]]
-    a, b, edges = _get_slices_core(edges, mesh_data, prev_point, current_point, prev_b, True)
+    a, b, edges = _get_slices_core(
+        edges, mesh_data, segment.previous_point, segment.current_point, segment.prev_distance, True
+    )
     nodes = -np.ones(a.shape, dtype=np.int64)
     nodes[a == 0] = mesh_data.edge_node[edges[a == 0], 0]
     nodes[a == 1] = mesh_data.edge_node[edges[a == 1], 1]
@@ -491,9 +494,7 @@ class MeshProcessor:
         for i in self.vindex:
             b1, edges1, nodes1 = _get_slices(
                 i,
-                segment.prev_distance,
-                segment.current_point,
-                segment.previous_point,
+                segment,
                 self.mesh_data,
             )
             b = np.concatenate((b, b1), axis=0)
@@ -742,9 +743,7 @@ class MeshProcessor:
                 segment.distances, segment.edges, segment.nodes = (
                     _get_slices(
                         self.index,
-                        segment.prev_distance,
-                        segment.current_point,
-                        segment.previous_point,
+                        segment,
                         self.mesh_data,
                     )
                 )
