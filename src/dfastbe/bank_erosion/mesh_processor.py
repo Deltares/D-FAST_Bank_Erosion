@@ -39,7 +39,7 @@ class EdgeCandidates:
 
 
 @dataclass
-class SegmentTraversalState:
+class RiverSegment:
     index: int
     prev_distance: float
     current_bank_point: np.ndarray
@@ -482,7 +482,7 @@ class MeshProcessor:
             )
         return index
 
-    def _resolve_ambiguous_edge_transition(self, segment_state: SegmentTraversalState):
+    def _resolve_ambiguous_edge_transition(self, segment_state: RiverSegment):
         """Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces."""
         b = np.zeros(0)
         edges = np.zeros(0, dtype=np.int64)
@@ -529,7 +529,7 @@ class MeshProcessor:
         self.point_index += 1
 
     def _determine_next_face_on_edge(
-        self, segment_state: SegmentTraversalState, edge, faces
+        self, segment_state: RiverSegment, edge, faces
     ):
         """Determine the next face to continue along an edge based on the segment direction."""
         theta = math.atan2(
@@ -626,7 +626,7 @@ class MeshProcessor:
                     f"{j}: ERROR: point actually not contained within {self.index}!"
                 )
 
-    def _select_first_crossing(self, segment_state: SegmentTraversalState):
+    def _select_first_crossing(self, segment_state: RiverSegment):
         """Select the first crossing from a set of edges and their associated distances.
 
         line segment crosses the edge list multiple times
@@ -638,7 +638,7 @@ class MeshProcessor:
         segment_state.edges = segment_state.edges[bmin]
         segment_state.nodes = segment_state.nodes[bmin]
 
-    def _process_node_transition(self, segment_state: SegmentTraversalState, node):
+    def _process_node_transition(self, segment_state: RiverSegment, node):
         """Process the transition at a node when a segment ends or continues."""
         finished = False
         if self.verbose:
@@ -703,7 +703,7 @@ class MeshProcessor:
         return index0
 
     def _slice_by_node_or_edge(
-        self, segment_state: SegmentTraversalState, node, edge, faces
+        self, segment_state: RiverSegment, node, edge, faces
     ):
         finished = False
         index0 = None
@@ -728,13 +728,13 @@ class MeshProcessor:
                 index0 = self._determine_next_face_on_edge(segment_state, edge, faces)
         return finished, index0
 
-    def _process_bank_segment(self, j, point_coords):
+    def _process_bank_segment(self, point_index, point_coords):
         shape_multiplier = 2
-        segment_state = SegmentTraversalState(
-            index=j,
+        segment_state = RiverSegment(
+            index=point_index,
             prev_distance=0,
             current_bank_point=point_coords,
-            previous_bank_point=self.bank_points[j - 1],
+            previous_bank_point=self.bank_points[point_index - 1],
         )
         while True:
             if self.index == -2:
@@ -782,7 +782,7 @@ class MeshProcessor:
                 break
 
             self._update_mesh_index_and_log(
-                j,
+                point_index,
                 node,
                 edge,
                 faces,
@@ -822,15 +822,15 @@ class MeshProcessor:
             - The function handles cases where the line starts outside the mesh, crosses multiple edges, or ends on a node.
             - Tiny segments shorter than `d_thresh` are removed from the output.
         """
-        for j, current_bank_point in enumerate(self.bank_points):
+        for point_index, current_bank_point in enumerate(self.bank_points):
             if self.verbose:
                 print(
                     f"Current location: {current_bank_point[0]}, {current_bank_point[1]}"
                 )
-            if j == 0:
+            if point_index == 0:
                 self._handle_first_point(current_bank_point)
             else:
-                self._process_bank_segment(j, current_bank_point)
+                self._process_bank_segment(point_index, current_bank_point)
 
         # clip to actual length (idx refers to segments, so we can ignore the last value)
         self.coords = self.coords[: self.point_index]
