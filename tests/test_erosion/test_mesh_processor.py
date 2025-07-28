@@ -373,9 +373,15 @@ class TestMeshProcessor:
             The computed nodes match expected values.
         """
         edges = np.array([5, 6, 7, 2])
-        bpj = np.array([209266.44709443, 389670.16238121])
-        bpj1 = np.array([209266.44709443, 389651.16238121])
-        b, edges, nodes = _get_slices_core(edges, mesh_data, bpj1, bpj, 0.0)
+        current_point = np.array([209266.44709443, 389670.16238121])
+        previous_point = np.array([209266.44709443, 389651.16238121])
+        segment = RiverSegment(
+            index=0,
+            current_point=current_point,
+            previous_point=previous_point,
+            prev_distance=0.0,
+        )
+        b, edges, nodes = _get_slices_core(edges, mesh_data, segment)
         assert np.allclose(b, np.array([0.71466942]))
         assert np.allclose(edges, np.array([0.6845984]))
         assert np.array_equal(nodes, np.array([2]))

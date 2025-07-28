@@ -100,9 +100,7 @@ def _get_slices(
         edges = mesh_data.boundary_edge_nrs
     else:
         edges = mesh_data.face_edge_connectivity[index, : mesh_data.n_nodes[index]]
-    a, b, edges = _get_slices_core(
-        edges, mesh_data, segment.previous_point, segment.current_point, segment.prev_distance, True
-    )
+    a, b, edges = _get_slices_core(edges, mesh_data, segment, True)
     nodes = -np.ones(a.shape, dtype=np.int64)
     nodes[a == 0] = mesh_data.edge_node[edges[a == 0], 0]
     nodes[a == 1] = mesh_data.edge_node[edges[a == 1], 1]
@@ -111,9 +109,7 @@ def _get_slices(
 def _get_slices_core(
     edges: np.ndarray,
     mesh_data: MeshData,
-    prev_point: np.ndarray,
-    current_point: np.ndarray,
-    min_relative_dist: float,
+    segment: RiverSegment,
     bmax1: bool = True,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Calculate the intersection of a line segment with multiple mesh edges.
@@ -168,11 +164,11 @@ def _get_slices_core(
         mesh_data.y_edge_coords[edges, 0],
         mesh_data.x_edge_coords[edges, 1],
         mesh_data.y_edge_coords[edges, 1],
-        prev_point[0],
-        prev_point[1],
-        current_point[0],
-        current_point[1],
-        min_relative_dist,
+        segment.previous_point[0],
+        segment.previous_point[1],
+        segment.current_point[0],
+        segment.current_point[1],
+        segment.prev_distance,
         bmax1,
     )
     edges = edges[valid_intersections]
@@ -348,9 +344,8 @@ class MeshProcessor:
             face_indexes (np.ndarray): Array of possible cell indices.
         """
         self.index = -1
-        if len(face_indexes) == 0:
-            if self.verbose:
-                print("starting outside mesh")
+        if len(face_indexes) == 0 and self.verbose:
+            print("starting outside mesh")
 
         on_edge = self.mesh_data.locate_point(self.bank_points[0], face_indexes)
         if not isinstance(on_edge, list):
@@ -549,12 +544,16 @@ class MeshProcessor:
         else:
             # check whether the (extended) segment slices any edge of faces[0]
             fe1 = self.mesh_data.face_edge_connectivity[faces[0]]
-            a, b, edges = _get_slices_core(
+            reversed_segment = RiverSegment(
+                index=segment.index,
+                previous_point=segment.current_point,
+                current_point=self.bank_points[segment.index + 1],
+                prev_distance=0
+            )
+            _, _, edges = _get_slices_core(
                 fe1,
                 self.mesh_data,
-                segment.current_point,
-                self.bank_points[segment.index + 1],
-                0.0,
+                reversed_segment,
                 False,
             )
             # yes, a slice (typically 1, but could be 2 if it slices at a node
@@ -755,7 +754,7 @@ class MeshProcessor:
                     segment.current_point, shape_length=shape_length
                 )
                 break
-            # index0 = None
+
             if len(segment.edges) > 1:
                 self._select_first_crossing(segment)
 
