@@ -245,6 +245,39 @@ class MeshData:
             face = Polygon(face)
         return face
 
+    def locate_point(self, point: Point | np.ndarray | list | Tuple, face_index: int | np.ndarray) -> int | List[int]:
+        """locate a point in the mesh faces.
+
+        Args:
+            point:
+                The point to check.
+            face_index:
+                The index of the mesh face.
+
+        Returns:
+            indexes (int|list[int]):
+                True if the point is inside the face, False otherwise.
+        """
+        if not isinstance(point, Point) and isinstance(point, (list, tuple, np.ndarray)):
+            point = Point(point)
+        else:
+            raise TypeError("point must be a Point object or a list/tuple of coordinates")
+
+        index_list = []
+        for ind in face_index:
+            face = self.get_face_by_index(ind)
+            face_polygon = Polygon(face)
+            if face_polygon.contains(point):
+                # TODO: check why it skip the rest of the loop
+                return ind
+            else:
+                # create a closed line string from the face coordinates
+                closed_line = LineString(np.vstack([face, face[0]]))
+                if closed_line.contains(point):
+                    index_list.append(ind)
+
+        return index_list
+
 
 @dataclass
 class SingleBank:
