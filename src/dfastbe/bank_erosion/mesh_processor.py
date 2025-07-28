@@ -341,7 +341,7 @@ class MeshProcessor:
         bank_coord = Point(self.bank_points[0])
         on_edge = []
         for ind in cells_indexes:
-            cell_coords = self.mesh_data.get_face(ind)
+            cell_coords = self.mesh_data.get_face_by_index(ind)
             cell = Polygon(cell_coords)
             if cell.contains(bank_coord):
                 if self.verbose:
@@ -637,7 +637,7 @@ class MeshProcessor:
             print(f"{j}: -- no slices along this segment --")
         if self.index >= 0:
             pnt = Point(bpj)
-            polygon_k = Polygon(self.mesh_data.get_face(self.index))
+            polygon_k = Polygon(self.mesh_data.get_face_by_index(self.index))
             if not polygon_k.contains(pnt):
                 raise ValueError(
                     f"{j}: ERROR: point actually not contained within {self.index}!"

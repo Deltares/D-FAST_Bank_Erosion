@@ -220,7 +220,7 @@ class MeshData:
     face_edge_connectivity: np.ndarray
     boundary_edge_nrs: np.ndarray
 
-    def get_face(self, index: int, as_polygon: bool = False) -> np.ndarray:
+    def get_face_by_index(self, index: int, as_polygon: bool = False) -> np.ndarray:
         """Returns the coordinates of the index-th mesh face as an (N, 2) array.
 
         Args:
