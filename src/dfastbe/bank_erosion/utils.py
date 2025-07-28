@@ -478,8 +478,6 @@ class ErodedBankLine:
             eroded_segment: ErodedBankLineSegment containing x0, y0, x1, y1, ixy0.
             poly: Nx2 array of polygon coordinates.
             nedges: Number of edges in the polygon (poly.shape[0] - 1).
-            get_slices_ab_func: Function to compute intersections (e.g., get_slices_ab).
-            prec: Precision threshold for filtering intersections.
 
         Returns:
             PolylineIntersections: A dataclass containing lists of intersection data.
@@ -522,6 +520,7 @@ class ErodedBankLine:
         Args:
             erosion_index (int): Index of the current erosion segment.
             shifted (bool): If True, use the shifted coordinates for the calculation.
+
         Returns:
             float: The cross product value.
         """
@@ -569,6 +568,51 @@ class ErodedBankLine:
                 print(f"  adding point {poly[n2]}")
             ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, poly[n2])
         self.ixy = ixy1
+
+    def _finalize_bankline_after_intersections(
+        self,
+        inside: bool,
+        n_last: int,
+        poly: np.ndarray,
+        ixy1: int,
+        xytmp: np.ndarray,
+        ixytmp: int,
+        s_last: int,
+    ) -> int:
+        """
+        Finalize the shifted bankline after processing all intersections.
+
+        Args:
+            inside (bool): Whether the current path is inside the new polygon.
+            n_last (int): Last polygon edge index processed.
+            poly (np.ndarray): Polygon coordinates for the current segment.
+            ixy1 (int): Current index in the shifted bankline.
+            xytmp (np.ndarray): Temporary array of old bankline points.
+            ixytmp (int): Starting index for xytmp.
+            s_last (int): Last segment index processed.
+
+        Returns:
+            int: Updated index in the shifted bankline.
+        """
+        if self.verbose:
+            print("- wrapping up after last intersection")
+        if inside:
+            if self.verbose:
+                print("  existing line is inside the new polygon")
+            for n2 in range(n_last, -1, -1):
+                if self.verbose:
+                    print(f"  adding new point {poly[n2]}")
+                ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, poly[n2])
+        else:
+            if self.verbose:
+                print("  existing line is inside the new polygon")
+            for s2 in range(s_last, len(xytmp) + ixytmp - 1):
+                if self.verbose:
+                    print(f"  re-adding old point {xytmp[s2 - ixytmp + 1]}")
+                ixy1, self.xylines_new = _add_point(
+                    ixy1, self.xylines_new, xytmp[s2 - ixytmp + 1]
+                )
+        return ixy1
 
     def _process_intersections_and_update_bankline(
         self,
@@ -670,25 +714,9 @@ class ErodedBankLine:
                     else:
                         print("  existing line continues outside")
 
-        if self.verbose:
-            print("- wrapping up after last intersection")
-        if inside:
-            if self.verbose:
-                print("  existing line is inside the new polygon")
-            for n2 in range(n_last, -1, -1):
-                if self.verbose:
-                    print(f"  adding new point {poly[n2]}")
-                ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, poly[n2])
-        else:
-            if self.verbose:
-                print("  existing line is inside the new polygon")
-            for s2 in range(s_last, len(xytmp) + ixytmp - 1):
-                if self.verbose:
-                    print(f"  re-adding old point {xytmp[s2 - ixytmp + 1]}")
-                ixy1, self.xylines_new = _add_point(
-                    ixy1, self.xylines_new, xytmp[s2 - ixytmp + 1]
-                )
-        self.ixy = ixy1
+        self.ixy = self._finalize_bankline_after_intersections(
+            inside, n_last, poly, ixy1, xytmp, ixytmp, s_last
+        )
 
     def move_line_right(self) -> np.ndarray:
         """Shift a line using the erosion distance.
