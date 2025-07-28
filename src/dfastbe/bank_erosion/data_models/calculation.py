@@ -174,7 +174,6 @@ class WaterLevelData:
         vol_per_discharge (List[List[np.ndarray]]):
             Eroded volume per discharge level for each bank line.
     """
-
     hfw_max: float
     water_level: List[List[np.ndarray]]
     ship_wave_max: List[List[np.ndarray]]
@@ -210,7 +209,6 @@ class MeshData:
         boundary_edge_nrs (np.ndarray):
             List of edge indices that together form the boundary of the whole mesh.
     """
-
     x_face_coords: np.ndarray
     y_face_coords: np.ndarray
     x_edge_coords: np.ndarray
@@ -380,7 +378,6 @@ class FairwayData:
         fairway_initial_water_levels (List[np.ndarray]):
             Reference water level at the fairway
     """
-
     fairway_face_indices: np.ndarray
     intersection_coords: np.ndarray
     fairway_initial_water_levels: List[np.ndarray] = field(default_factory=list)
