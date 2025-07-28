@@ -73,6 +73,15 @@ def test_bank_erosion(image_list: List[str]):
         assert compare_images(str(output_img), str(reference_img), 0.0001) is None
 
 
+@pytest.mark.e2e
+def test_bank_erosion_with_unstructured_tile():
+    file = "erosion/meuse_6gen"
+    language = "UK"
+    config_file = f"tests/data/{file}/Test_Meuse_6gen_km144-247.cfg"
+    run(language, "BANKLINES", config_file)
+    run(language, "BANKEROSION", config_file)
+
+
 class TestErosion:
 
     @pytest.fixture
