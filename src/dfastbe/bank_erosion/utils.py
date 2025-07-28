@@ -532,10 +532,10 @@ def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.nd
             inside = False
             s_last = s[0]
             n_last = nedges
-            for i in range(len(s)):
+            for i, s_current in enumerate(s):
                 if verbose:
                     print(
-                        f"- intersection {i}: new polyline edge {n[i]} crosses segment {s[i]} at {a[i]}"
+                        f"- intersection {i}: new polyline edge {n[i]} crosses segment {s_current} at {a[i]}"
                     )
                 if i == 0 or n[i] != nedges - 1:
                     if inside:
@@ -548,7 +548,7 @@ def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.nd
                     else:
                         if verbose:
                             print("  existing line is outside the new polygon")
-                        for s2 in range(s_last, s[i]):
+                        for s2 in range(s_last, s_current):
                             if verbose:
                                 print(f"  re-adding old point {xytmp[s2 - ixytmp + 1]}")
                             ixy1, xylines_new = _add_point(
@@ -559,18 +559,18 @@ def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.nd
                         print(f"  adding intersection point {pnt_intersect}")
                     ixy1, xylines_new = _add_point(ixy1, xylines_new, pnt_intersect)
                     n_last = n[i]
-                    s_last = s[i]
+                    s_last = s_current
                     if a[i] < prec:
                         dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
                         dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
-                        s2 = s[i] - ixy0
+                        s2 = s_current - ixy0
                         dBy = Y1[s2] - Y0[s2]
                         dBx = X1[s2] - X0[s2]
                         inside = dPy * dBx - dPx * dBy > 0
                     elif a[i] > 1 - prec:
                         dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
                         dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
-                        s2 = s[i] - ixy0 + 1
+                        s2 = s_current - ixy0 + 1
                         if s2 > len(X0) - 1:
                             inside = True
                         else:
