@@ -660,37 +660,48 @@ class MeshProcessor:
         segment_state.edges = segment_state.edges[bmin]
         segment_state.nodes = segment_state.nodes[bmin]
 
-    def _process_node_transition(self, j, bpj, bpj1, b, edges, node):
+    def _process_node_transition(self, segment_state: SegmentTraversalState, node):
         """Process the transition at a node when a segment ends or continues."""
         finished = False
         if self.verbose:
-            print(f"{j}: moving via node {node} on edges {edges} at {b[0]}")
+            print(
+                f"{segment_state.index}: moving via node {node} on edges {segment_state.edges} at {segment_state.distances[0]}"
+            )
         # figure out where we will be heading afterwards ...
-        if b[0] < 1.0:
+        if segment_state.distances[0] < 1.0:
             # segment passes through node and enter non-neighbouring cell ...
             # direction of current segment from bpj1 to bpj
-            theta = math.atan2(bpj[1] - bpj1[1], bpj[0] - bpj1[0])
+            theta = math.atan2(
+                segment_state.current_bank_point[1]
+                - segment_state.previous_bank_point[1],
+                segment_state.current_bank_point[0]
+                - segment_state.previous_bank_point[0],
+            )
         else:
             if (
-                np.isclose(b[0], 1.0, rtol=RTOL, atol=ATOL)
-                and j == len(self.bank_points) - 1
+                np.isclose(segment_state.distances[0], 1.0, rtol=RTOL, atol=ATOL)
+                and segment_state.index == len(self.bank_points) - 1
             ):
                 # catch case of last segment
                 if self.verbose:
-                    print(f"{j}: last point ends in a node")
-                self._store_segment_point(bpj)
+                    print(f"{segment_state.index}: last point ends in a node")
+                self._store_segment_point(segment_state.current_bank_point)
                 theta = 0.0
                 finished = True
             else:
                 # this segment ends in the node, so check next segment ...
                 # direction of next segment from bpj to bp[j+1]
                 theta = math.atan2(
-                    self.bank_points[j + 1][1] - bpj[1],
-                    self.bank_points[j + 1][0] - bpj[0],
+                    self.bank_points[segment_state.index + 1][1]
+                    - segment_state.current_bank_point[1],
+                    self.bank_points[segment_state.index + 1][0]
+                    - segment_state.current_bank_point[0],
                 )
         index0 = None
         if not finished:
-            index0 = self._resolve_next_face_by_direction(theta, node, j)
+            index0 = self._resolve_next_face_by_direction(
+                theta, node, segment_state.index
+            )
         return False, index0
 
     def _resolve_next_face_by_direction(self, theta, node, j):
@@ -720,14 +731,7 @@ class MeshProcessor:
         index0 = None
         if node >= 0:
             # if we slice at a node ...
-            finished, index0 = self._process_node_transition(
-                segment_state.index,
-                segment_state.current_bank_point,
-                segment_state.previous_bank_point,
-                segment_state.distances,
-                segment_state.edges,
-                node,
-            )
+            finished, index0 = self._process_node_transition(segment_state, node)
 
         elif segment_state.distances[0] == 1:
             # ending at slice point, so ending on an edge ...
