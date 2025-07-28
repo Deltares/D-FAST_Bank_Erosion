@@ -340,10 +340,7 @@ class ErodedBankLine:
         self.ixy1: int
 
     def _construct_bend_polygon(
-        self,
-        index: int,
-        include_wedge: bool = False,
-        include_current: bool = False,
+        self, index: int, include_wedge: bool = False, include_current: bool = False
     ) -> np.ndarray:
         """
         Construct a polygon for a bank bend segment.
@@ -369,67 +366,53 @@ class ErodedBankLine:
             points.append(self.xylines[index - 1])
         return np.row_stack(points)
 
-    def _create_segment_outline_polygon(
-        self,
-        xylines: np.ndarray,
-        nxy: np.ndarray,
-        iseg: int,
-        dtheta: float,
-        erosion_distance: np.ndarray,
-        prec: float,
-        verbose: bool = False,
-    ) -> np.ndarray:
+    def _create_segment_outline_polygon(self, index: int, dtheta: float) -> np.ndarray:
         """
         Create a polyline for the outline of the new segment based on bend type and erosion distance.
 
         Args:
-            xylines: Nx2 array of line coordinates.
-            nxy: (N-1)x2 array of normal vectors for each segment.
-            iseg: Current segment index.
+            index: Current segment index.
             dtheta: Change in direction at the segment.
-            erosion_distance: Array of erosion distances for each segment.
-            prec: Precision threshold for erosion.
-            verbose: If True, print debug information.
 
         Returns:
             np.ndarray: Polygon coordinates for the segment outline.
         """
         # create a polyline for the outline of the new segment
-        if erosion_distance[iseg] < prec:
+        if self.erosion_distance[index] < self.prec:
             # no erosion, so just a linear extension
-            if verbose:
-                print(f"{iseg}: no shifting, just linear extension")
+            if self.verbose:
+                print(f"{index}: no shifting, just linear extension")
             poly = np.row_stack(
                 [
-                    xylines[iseg + 1],
-                    xylines[iseg],
+                    self.xylines[index + 1],
+                    self.xylines[index],
                 ]
             )
         elif dtheta <= 0:
             # right bend
             if -0.001 * math.pi < dtheta:
                 # almost straight
-                if verbose:
-                    print(f"{iseg}: slight bend to right")
-                if erosion_distance[iseg] > erosion_distance[iseg]:
-                    poly = self._construct_bend_polygon(iseg, include_wedge=True)
+                if self.verbose:
+                    print(f"{index}: slight bend to right")
+                if self.erosion_distance[index] > self.erosion_distance[index]:
+                    poly = self._construct_bend_polygon(index, include_wedge=True)
                 else:
-                    poly = self._construct_bend_polygon(iseg)
+                    poly = self._construct_bend_polygon(index)
             else:
                 # more significant bend
-                if verbose:
-                    print(f"{iseg}: bend to right")
-                poly = self._construct_bend_polygon(iseg, include_current=True)
-        elif erosion_distance[iseg - 1] < prec:
+                if self.verbose:
+                    print(f"{index}: bend to right")
+                poly = self._construct_bend_polygon(index, include_current=True)
+        elif self.erosion_distance[index - 1] < self.prec:
             # left bend: previous segment isn't eroded, so nothing to connect to
-            if verbose:
-                print(f"{iseg}: bend to left")
-            poly = self._construct_bend_polygon(iseg, include_current=True)
+            if self.verbose:
+                print(f"{index}: bend to left")
+            poly = self._construct_bend_polygon(index, include_current=True)
         else:
             # left bend: connect it to the previous segment to avoid non eroded wedges
-            if verbose:
-                print(f"{iseg}: bend to left")
-            poly = self._construct_bend_polygon(iseg, include_wedge=True)
+            if self.verbose:
+                print(f"{index}: bend to left")
+            poly = self._construct_bend_polygon(index, include_wedge=True)
         return poly
 
     def move_line_right(self) -> np.ndarray:
@@ -460,15 +443,7 @@ class ErodedBankLine:
                     f"{erosion_index}: segment starting at {self.xylines[erosion_index]} to be shifted by {eroded_distance}"
                 )
                 print(f"{erosion_index}: change in direction quantified as {dtheta}")
-            poly = self._create_segment_outline_polygon(
-                self.xylines,
-                self.nxy,
-                erosion_index,
-                dtheta,
-                self.erosion_distance,
-                self.prec,
-                verbose=self.verbose,
-            )
+            poly = self._create_segment_outline_polygon(erosion_index, dtheta)
             nedges = poly.shape[0] - 1
 
             # make a temporary copy of the last 20 nodes of the already shifted bankline
