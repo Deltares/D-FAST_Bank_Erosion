@@ -304,44 +304,38 @@ def move_line(
     return xylines_new
 
 
-def _construct_slight_right_bend_polygon(
-    xylines: np.ndarray, nxy: np.ndarray, iseg: int
+def _construct_bend_polygon(
+    xylines: np.ndarray,
+    nxy: np.ndarray,
+    index: int,
+    include_wedge: bool = False,
+    include_current: bool = False,
 ) -> np.ndarray:
-    return np.row_stack(
-        [
-            xylines[iseg + 1],
-            xylines[iseg + 1] + nxy[iseg],
-            xylines[iseg] + nxy[iseg],
-            xylines[iseg] + nxy[iseg - 1],
-            xylines[iseg - 1],
-        ]
-    )
+    """
+    Construct a polygon for a bank bend segment.
 
+    Args:
+        xylines: Nx2 array of line coordinates.
+        nxy: (N-1)x2 array of normal vectors for each segment.
+        index: Current segment index.
+        include_wedge: If True, include the wedge (shifted previous point).
+        include_current: If True, include the current point (not shifted).
 
-def _construct_slight_right_bend_polygon_no_wedge(
-    xylines: np.ndarray, nxy: np.ndarray, iseg: int
-) -> np.ndarray:
-    return np.row_stack(
-        [
-            xylines[iseg + 1],
-            xylines[iseg + 1] + nxy[iseg],
-            xylines[iseg] + nxy[iseg],
-            xylines[iseg - 1],
-        ]
-    )
-
-
-def _construct_significant_right_bend_polygon(
-    xylines: np.ndarray, nxy: np.ndarray, iseg: int
-) -> np.ndarray:
-    return np.row_stack(
-        [
-            xylines[iseg + 1],
-            xylines[iseg + 1] + nxy[iseg],
-            xylines[iseg] + nxy[iseg],
-            xylines[iseg],
-        ]
-    )
+    Returns:
+        np.ndarray: Polygon coordinates.
+    """
+    points = [
+        xylines[index + 1],
+        xylines[index + 1] + nxy[index],
+        xylines[index] + nxy[index],
+    ]
+    if include_wedge:
+        points.append(xylines[index] + nxy[index - 1])
+    if include_current:
+        points.append(xylines[index])
+    else:
+        points.append(xylines[index - 1])
+    return np.row_stack(points)
 
 
 def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.ndarray:
@@ -404,26 +398,26 @@ def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.nd
                 if verbose:
                     print(f"{iseg}: slight bend to right")
                 if erosion_distance[iseg] > erosion_distance[iseg]:
-                    poly = _construct_slight_right_bend_polygon(xylines, nxy, iseg)
-                else:
-                    poly = _construct_slight_right_bend_polygon_no_wedge(
-                        xylines, nxy, iseg
+                    poly = _construct_bend_polygon(
+                        xylines, nxy, iseg, include_wedge=True
                     )
+                else:
+                    poly = _construct_bend_polygon(xylines, nxy, iseg)
             else:
                 # more significant bend
                 if verbose:
                     print(f"{iseg}: bend to right")
-                poly = _construct_significant_right_bend_polygon(xylines, nxy, iseg)
+                poly = _construct_bend_polygon(xylines, nxy, iseg, include_current=True)
         elif erosion_distance[iseg - 1] < prec:
             # left bend: previous segment isn't eroded, so nothing to connect to
             if verbose:
                 print(f"{iseg}: bend to left")
-            poly = _construct_significant_right_bend_polygon(xylines, nxy, iseg)
+            poly = _construct_bend_polygon(xylines, nxy, iseg, include_current=True)
         else:
             # left bend: connect it to the previous segment to avoid non eroded wedges
             if verbose:
                 print(f"{iseg}: bend to left")
-            poly = _construct_slight_right_bend_polygon(xylines, nxy, iseg)
+            poly = _construct_bend_polygon(xylines, nxy, iseg, include_wedge=True)
 
         nedges = poly.shape[0] - 1
 
