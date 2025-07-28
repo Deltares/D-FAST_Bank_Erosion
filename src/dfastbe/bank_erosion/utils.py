@@ -514,6 +514,18 @@ class ErodedBankLine:
             intersections.n.append(slices2 * 0 + i)
         return intersections
 
+    def _calculate_cross_product(
+        self, erosion_index: int, shifted: bool = False
+    ) -> float:
+        multiply_array = self.nxy if shifted else self.dxy
+        return (
+            self.xylines_new[self.ixy, 0] - self.xylines_new[self.ixy - 1, 0]
+        ) * multiply_array[erosion_index, 1] - (
+            self.xylines_new[self.ixy, 1] - self.xylines_new[self.ixy - 1, 1]
+        ) * multiply_array[
+            erosion_index, 0
+        ]
+
     def move_line_right(self) -> np.ndarray:
         """Shift a line using the erosion distance.
 
@@ -549,25 +561,11 @@ class ErodedBankLine:
                 if dtheta < 0:
                     # right bend (not straight)
                     if self.erosion_distance[erosion_index] > 0:
-                        cross = (
-                            self.xylines_new[self.ixy, 0]
-                            - self.xylines_new[self.ixy - 1, 0]
-                        ) * self.nxy[erosion_index, 1] - (
-                            self.xylines_new[self.ixy, 1]
-                            - self.xylines_new[self.ixy - 1, 1]
-                        ) * self.nxy[
-                            erosion_index, 0
-                        ]
+                        cross = self._calculate_cross_product(
+                            erosion_index, shifted=True
+                        )
                     else:
-                        cross = (
-                            self.xylines_new[self.ixy, 0]
-                            - self.xylines_new[self.ixy - 1, 0]
-                        ) * self.dxy[erosion_index, 1] - (
-                            self.xylines_new[self.ixy, 1]
-                            - self.xylines_new[self.ixy - 1, 1]
-                        ) * self.dxy[
-                            erosion_index, 0
-                        ]
+                        cross = self._calculate_cross_product(erosion_index)
                     if cross <= 0.0:
                         # extended path turns right ... always add
                         pass
