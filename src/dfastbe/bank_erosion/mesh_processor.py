@@ -42,8 +42,8 @@ class EdgeCandidates:
 class RiverSegment:
     index: int
     prev_distance: float
-    current_bank_point: np.ndarray
-    previous_bank_point: np.ndarray
+    current_point: np.ndarray
+    previous_point: np.ndarray
     distances: np.ndarray = field(default_factory=lambda: np.zeros(0))
     edges: np.ndarray = field(default_factory=lambda: np.zeros(0, dtype=np.int64))
     nodes: np.ndarray = field(default_factory=lambda: np.zeros(0, dtype=np.int64))
@@ -482,7 +482,7 @@ class MeshProcessor:
             )
         return index
 
-    def _resolve_ambiguous_edge_transition(self, segment_state: RiverSegment):
+    def _resolve_ambiguous_edge_transition(self, segment: RiverSegment):
         """Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces."""
         b = np.zeros(0)
         edges = np.zeros(0, dtype=np.int64)
@@ -491,18 +491,18 @@ class MeshProcessor:
         for i in self.vindex:
             b1, edges1, nodes1 = _get_slices(
                 i,
-                segment_state.prev_distance,
-                segment_state.current_bank_point,
-                segment_state.previous_bank_point,
+                segment.prev_distance,
+                segment.current_point,
+                segment.previous_point,
                 self.mesh_data,
             )
             b = np.concatenate((b, b1), axis=0)
             edges = np.concatenate((edges, edges1), axis=0)
             nodes = np.concatenate((nodes, nodes1), axis=0)
             index_src = np.concatenate((index_src, i + 0 * edges1), axis=0)
-        segment_state.edges, id_edges = np.unique(edges, return_index=True)
-        segment_state.distances = b[id_edges]
-        segment_state.nodes = nodes[id_edges]
+        segment.edges, id_edges = np.unique(edges, return_index=True)
+        segment.distances = b[id_edges]
+        segment.nodes = nodes[id_edges]
         index_src = index_src[id_edges]
         if len(index_src) == 1:
             self.index = index_src[0]
@@ -529,21 +529,21 @@ class MeshProcessor:
         self.point_index += 1
 
     def _determine_next_face_on_edge(
-        self, segment_state: RiverSegment, edge, faces
+        self, segment: RiverSegment, edge, faces
     ):
         """Determine the next face to continue along an edge based on the segment direction."""
         theta = math.atan2(
-            self.bank_points[segment_state.index + 1][1]
-            - segment_state.current_bank_point[1],
-            self.bank_points[segment_state.index + 1][0]
-            - segment_state.current_bank_point[0],
+            self.bank_points[segment.index + 1][1]
+            - segment.current_point[1],
+            self.bank_points[segment.index + 1][0]
+            - segment.current_point[0],
         )
         if self.verbose:
-            print(f"{segment_state.index}: moving in direction theta = {theta}")
+            print(f"{segment.index}: moving in direction theta = {theta}")
         theta_edge = self._edge_angle(edge)
         if theta == theta_edge or theta == -theta_edge:
             if self.verbose:
-                print(f"{segment_state.index}: continue along edge {edge}")
+                print(f"{segment.index}: continue along edge {edge}")
             index0 = faces
         else:
             # check whether the (extended) segment slices any edge of faces[0]
@@ -551,8 +551,8 @@ class MeshProcessor:
             a, b, edges = _get_slices_core(
                 fe1,
                 self.mesh_data,
-                segment_state.current_bank_point,
-                self.bank_points[segment_state.index + 1],
+                segment.current_point,
+                self.bank_points[segment.index + 1],
                 0.0,
                 False,
             )
@@ -638,47 +638,47 @@ class MeshProcessor:
         segment_state.edges = segment_state.edges[bmin]
         segment_state.nodes = segment_state.nodes[bmin]
 
-    def _process_node_transition(self, segment_state: RiverSegment, node):
+    def _process_node_transition(self, segment: RiverSegment, node):
         """Process the transition at a node when a segment ends or continues."""
         finished = False
         if self.verbose:
             print(
-                f"{segment_state.index}: moving via node {node} on edges {segment_state.edges} at {segment_state.distances[0]}"
+                f"{segment.index}: moving via node {node} on edges {segment.edges} at {segment.distances[0]}"
             )
         # figure out where we will be heading afterwards ...
-        if segment_state.distances[0] < 1.0:
+        if segment.distances[0] < 1.0:
             # segment passes through node and enter non-neighbouring cell ...
             # direction of current segment from bpj1 to bpj
             theta = math.atan2(
-                segment_state.current_bank_point[1]
-                - segment_state.previous_bank_point[1],
-                segment_state.current_bank_point[0]
-                - segment_state.previous_bank_point[0],
+                segment.current_point[1]
+                - segment.previous_point[1],
+                segment.current_point[0]
+                - segment.previous_point[0],
             )
         else:
             if (
-                np.isclose(segment_state.distances[0], 1.0, rtol=RTOL, atol=ATOL)
-                and segment_state.index == len(self.bank_points) - 1
+                np.isclose(segment.distances[0], 1.0, rtol=RTOL, atol=ATOL)
+                and segment.index == len(self.bank_points) - 1
             ):
                 # catch case of last segment
                 if self.verbose:
-                    print(f"{segment_state.index}: last point ends in a node")
-                self._store_segment_point(segment_state.current_bank_point)
+                    print(f"{segment.index}: last point ends in a node")
+                self._store_segment_point(segment.current_point)
                 theta = 0.0
                 finished = True
             else:
                 # this segment ends in the node, so check next segment ...
                 # direction of next segment from bpj to bp[j+1]
                 theta = math.atan2(
-                    self.bank_points[segment_state.index + 1][1]
-                    - segment_state.current_bank_point[1],
-                    self.bank_points[segment_state.index + 1][0]
-                    - segment_state.current_bank_point[0],
+                    self.bank_points[segment.index + 1][1]
+                    - segment.current_point[1],
+                    self.bank_points[segment.index + 1][0]
+                    - segment.current_point[0],
                 )
         index0 = None
         if not finished:
             index0 = self._resolve_next_face_by_direction(
-                theta, node, segment_state.index
+                theta, node, segment.index
             )
         return False, index0
 
@@ -722,58 +722,52 @@ class MeshProcessor:
                 # catch case of last segment
                 if self.verbose:
                     print(f"{segment_state.index}: last point ends on an edge")
-                self._store_segment_point(segment_state.current_bank_point)
+                self._store_segment_point(segment_state.current_point)
                 finished = True
             else:
                 index0 = self._determine_next_face_on_edge(segment_state, edge, faces)
         return finished, index0
 
-    def _process_bank_segment(self, point_index, point_coords):
+    def _process_bank_segment(self, segment: RiverSegment):
         shape_multiplier = 2
-        segment_state = RiverSegment(
-            index=point_index,
-            prev_distance=0,
-            current_bank_point=point_coords,
-            previous_bank_point=self.bank_points[point_index - 1],
-        )
         while True:
             if self.index == -2:
-                self._resolve_ambiguous_edge_transition(segment_state)
+                self._resolve_ambiguous_edge_transition(segment)
             elif (
-                segment_state.current_bank_point == segment_state.previous_bank_point
+                    segment.current_point == segment.previous_point
             ).all():
                 # this is a segment of length 0, skip it since it takes us nowhere
                 break
             else:
-                segment_state.distances, segment_state.edges, segment_state.nodes = (
+                segment.distances, segment.edges, segment.nodes = (
                     _get_slices(
                         self.index,
-                        segment_state.prev_distance,
-                        segment_state.current_bank_point,
-                        segment_state.previous_bank_point,
+                        segment.prev_distance,
+                        segment.current_point,
+                        segment.previous_point,
                         self.mesh_data,
                     )
                 )
 
-            if len(segment_state.edges) == 0:
+            if len(segment.edges) == 0:
                 # rest of segment associated with same face
                 shape_length = self.point_index * shape_multiplier
                 self._store_segment_point(
-                    segment_state.current_bank_point, shape_length=shape_length
+                    segment.current_point, shape_length=shape_length
                 )
                 break
             # index0 = None
-            if len(segment_state.edges) > 1:
-                self._select_first_crossing(segment_state)
+            if len(segment.edges) > 1:
+                self._select_first_crossing(segment)
 
             # slice location identified ...
-            node = segment_state.nodes[0]
-            edge = segment_state.edges[0]
+            node = segment.nodes[0]
+            edge = segment.edges[0]
             faces = self.mesh_data.edge_face_connectivity[edge]
-            segment_state.prev_distance = segment_state.distances[0]
+            segment.prev_distance = segment.distances[0]
 
             finished, index0 = self._slice_by_node_or_edge(
-                segment_state,
+                segment,
                 node,
                 edge,
                 faces,
@@ -782,21 +776,21 @@ class MeshProcessor:
                 break
 
             self._update_mesh_index_and_log(
-                point_index,
+                segment.index,
                 node,
                 edge,
                 faces,
                 index0,
-                segment_state.prev_distance,
+                segment.prev_distance,
             )
-            segment = (
-                segment_state.previous_bank_point
-                + segment_state.prev_distance
-                * (point_coords - segment_state.previous_bank_point)
+            segment_x = (
+                    segment.previous_point
+                    + segment.prev_distance
+                    * (segment.current_point - segment.previous_point)
             )
             shape_length = self.point_index * shape_multiplier
-            self._store_segment_point(segment, shape_length=shape_length)
-            if segment_state.prev_distance == 1:
+            self._store_segment_point(segment_x, shape_length=shape_length)
+            if segment.prev_distance == 1:
                 break
 
     def intersect_line_mesh(self) -> Tuple[np.ndarray, np.ndarray]:
@@ -830,7 +824,13 @@ class MeshProcessor:
             if point_index == 0:
                 self._handle_first_point(current_bank_point)
             else:
-                self._process_bank_segment(point_index, current_bank_point)
+                segment = RiverSegment(
+                    index=point_index,
+                    prev_distance=0,
+                    current_point=current_bank_point,
+                    previous_point=self.bank_points[point_index - 1],
+                )
+                self._process_bank_segment(segment)
 
         # clip to actual length (idx refers to segments, so we can ignore the last value)
         self.coords = self.coords[: self.point_index]
