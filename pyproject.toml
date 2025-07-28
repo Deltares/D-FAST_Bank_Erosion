@@ -14,6 +14,7 @@ pandas = "^1.5.3"
 matplotlib = "3.8.4"
 geopandas = "^0.14.4"
 shapely = "^2.1.0"
+Pillow = "<11.2.0 || >=11.3.0"  # Allow only Pillow versions below 11.2.0 or 11.3.0 and above to avoid CWE-122 vulnerability
 dfastio = { git = "https://github.com/Deltares/D-FAST_Commons.git", tag = "0.1.0-alpha.2" }
 certifi = "2025.1.31"
 
