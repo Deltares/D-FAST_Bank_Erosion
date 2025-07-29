@@ -399,7 +399,7 @@ class ErodedBankLine:
             self.point_index, self.xylines_new, self.xylines[1]
         )
 
-        self.verbose = True
+        self.verbose = verbose
         self.prec = 0.000001
 
     def _construct_bend_polygon(
