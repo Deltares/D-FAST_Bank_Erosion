@@ -339,16 +339,19 @@ class IntersectionContext(PolylineIntersections):
     """Describes part of the polyline with intersections and the polygon it intersects.
 
     Args:
-        intersections (PolylineIntersections): Intersections data.
-        poly (np.ndarray): Polygon coordinates.
-        xytmp (np.ndarray): Temporary coordinates for intersection processing.
-        ixytmp (int): Temporary index for intersection processing.
-        num_edges (int): Number of edges in the polygon.
+        poly (np.ndarray):
+            Polygon coordinates.
+        recent_bankline_points (np.ndarray):
+            Points of the recent bank line.
+        bankline_start_index (int):
+            Start index of the recent bank line.
+        num_edges (int):
+            Number of edges in the polygon.
     """
 
     poly: np.ndarray
-    xytmp: np.ndarray
-    ixytmp: int
+    recent_bankline_points: np.ndarray
+    bankline_start_index: int
     num_edges: int
 
     def get_delta(self, current_intersection: int) -> Tuple[float, float]:
@@ -622,14 +625,14 @@ class ErodedBankLine:
         inside: bool = True,
     ) -> int:
         """
-        Add or re-add points between segments, using either poly or xytmp from intersection_context.
+        Add or re-add points between segments, using either poly or recent_bankline_points from intersection_context.
 
         Args:
             ixy1 (int): Current index in the shifted bankline.
             start (int): Start index for the points to add.
             end (int): End index for the points to add.
-            intersection_context (IntersectionContext): Context containing poly and xytmp.
-            inside (bool): If True, use poly; if False, use xytmp.
+            intersection_context (IntersectionContext): Context containing poly and recent_bankline_points.
+            inside (bool): If True, use poly; if False, use recent_bankline_points.
 
         Returns:
             int: Updated index in the shifted bankline.
@@ -645,8 +648,8 @@ class ErodedBankLine:
                 if self.verbose:
                     print(f"  adding new point {point}")
             else:
-                point = intersection_context.xytmp[
-                    idx - intersection_context.ixytmp + 1
+                point = intersection_context.recent_bankline_points[
+                    idx - intersection_context.bankline_start_index + 1
                 ]
                 if self.verbose:
                     print(f"  re-adding old point {point}")
@@ -804,8 +807,8 @@ class ErodedBankLine:
             n_last (int): Last polygon edge index processed.
             poly (np.ndarray): Polygon coordinates for the current segment.
             ixy1 (int): Current index in the shifted bankline.
-            xytmp (np.ndarray): Temporary array of old bankline points.
-            ixytmp (int): Starting index for xytmp.
+            recent_bankline_points (np.ndarray): Temporary array of old bankline points.
+            bankline_start_index (int): Starting index for recent_bankline_points.
             s_last (int): Last segment index processed.
 
         Returns:
@@ -816,7 +819,11 @@ class ErodedBankLine:
             end = -1
         else:
             start = last_segment
-            end = len(intersection_context.xytmp) + intersection_context.ixytmp - 1
+            end = (
+                len(intersection_context.recent_bankline_points)
+                + intersection_context.bankline_start_index
+                - 1
+            )
         ixy1 = self._update_points_between_segments(
             ixy1, start, end, intersection_context, inside=inside
         )
@@ -857,8 +864,10 @@ class ErodedBankLine:
         segment_index = sorted_segment_indices[0]
         if self.verbose:
             print(f"continuing new path at point {segment_index}")
-        xytmp = self.xylines_new[segment_index : self.point_index + 1].copy()
-        ixytmp = segment_index
+        recent_bankline_points = self.xylines_new[
+            segment_index : self.point_index + 1
+        ].copy()
+        bankline_start_index = segment_index
 
         inside = False
         last_segment = sorted_segment_indices[0]
@@ -869,8 +878,8 @@ class ErodedBankLine:
             segment_indices=sorted_segment_indices,
             polygon_edge_indices=sorted_polygon_edge_indices,
             poly=poly,
-            xytmp=xytmp,
-            ixytmp=ixytmp,
+            recent_bankline_points=recent_bankline_points,
+            bankline_start_index=bankline_start_index,
             num_edges=num_edges,
         )
         for i, current_segment in enumerate(sorted_segment_indices):
