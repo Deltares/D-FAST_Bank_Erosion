@@ -507,7 +507,7 @@ class ErodedBankLine:
         Returns:
             PolylineIntersections: A dataclass containing lists of intersection data.
         """
-        intersections = PolylineIntersections(a=[], b=[], slices=[], n=[])
+        a, b, slices, n = [], [], [], []
         for i in range(nedges):
             if (poly[i + 1] == poly[i]).all():
                 # polyline segment has no actual length, so skip it
@@ -531,11 +531,11 @@ class ErodedBankLine:
                 a2 = a2[keep_mask]
                 b2 = b2[keep_mask]
                 slices2 = slices2[keep_mask]
-            intersections.a.append(a2)
-            intersections.b.append(b2)
-            intersections.slices.append(slices2)
-            intersections.n.append(slices2 * 0 + i)
-        return intersections
+            a.append(a2)
+            b.append(b2)
+            slices.append(slices2)
+            n.append(slices2 * 0 + i)
+        return PolylineIntersections(a=a, b=b, slices=slices, n=n)
 
     def _calculate_cross_product(
         self, erosion_index: int, shifted: bool = False
