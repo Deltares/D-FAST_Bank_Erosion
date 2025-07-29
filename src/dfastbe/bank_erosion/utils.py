@@ -343,13 +343,13 @@ class IntersectionContext(PolylineIntersections):
         poly (np.ndarray): Polygon coordinates.
         xytmp (np.ndarray): Temporary coordinates for intersection processing.
         ixytmp (int): Temporary index for intersection processing.
-        nedges (int): Number of edges in the polygon.
+        num_edges (int): Number of edges in the polygon.
     """
 
     poly: np.ndarray
     xytmp: np.ndarray
     ixytmp: int
-    nedges: int
+    num_edges: int
 
     def get_delta(self, i: int) -> Tuple[float, float]:
         """Get the x, y-delta for the current intersection."""
@@ -514,14 +514,14 @@ class ErodedBankLine:
         self,
         eroded_segment: ErodedBankLineSegment,
         poly: np.ndarray,
-        nedges: int,
+        num_edges: int,
     ) -> PolylineIntersections:
         """For each edge of the new polyline, collect all intersections with the already shifted bankline.
 
         Args:
             eroded_segment: ErodedBankLineSegment containing x0, y0, x1, y1, ixy0.
             poly: Nx2 array of polygon coordinates.
-            nedges: Number of edges in the polygon (poly.shape[0] - 1).
+            num_edges: Number of edges in the polygon (poly.shape[0] - 1).
 
         Returns:
             PolylineIntersections: A dataclass containing lists of intersection data.
@@ -530,7 +530,7 @@ class ErodedBankLine:
         polygon_alphas = []
         segment_indices = []
         polygon_edge_indices = []
-        for i in range(nedges):
+        for i in range(num_edges):
             if (poly[i + 1] == poly[i]).all():
                 # polyline segment has no actual length, so skip it
                 continue
@@ -548,7 +548,7 @@ class ErodedBankLine:
                 True,
             )
             # exclude the intersection if it's only at the very last point of the last segment
-            if i == nedges - 1:
+            if i == num_edges - 1:
                 keep_mask = a2 < 1 - self.prec
                 a2 = a2[keep_mask]
                 b2 = b2[keep_mask]
@@ -608,16 +608,16 @@ class ErodedBankLine:
             add = False
         return add
 
-    def _add_right_bend_segment_points(self, poly: np.ndarray, nedges: int) -> None:
+    def _add_right_bend_segment_points(self, poly: np.ndarray, num_edges: int) -> None:
         """
         Add the first three points of the polygon to the shifted bankline for a right bend segment.
 
         Args:
             poly (np.ndarray): Polygon coordinates for the current segment.
-            nedges (int): Number of edges in the polygon.
+            num_edges (int): Number of edges in the polygon.
         """
         ixy1 = self.point_index
-        for n2 in range(min(nedges, 2), -1, -1):
+        for n2 in range(min(num_edges, 2), -1, -1):
             if self.verbose:
                 print(f"  adding point {poly[n2]}")
             ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, poly[n2])
@@ -735,7 +735,7 @@ class ErodedBankLine:
         if (
             i == 0
             or intersection_context.polygon_edge_indices[i]
-            != intersection_context.nedges - 1
+            != intersection_context.num_edges - 1
         ):
             if inside:
                 start = n_last
@@ -822,7 +822,7 @@ class ErodedBankLine:
         self,
         intersections: PolylineIntersections,
         poly: np.ndarray,
-        nedges: int,
+        num_edges: int,
         eroded_segment: ErodedBankLineSegment,
     ) -> None:
         """
@@ -831,7 +831,7 @@ class ErodedBankLine:
         Args:
             intersections: PolylineIntersections object with intersection data.
             poly: Polygon coordinates for the current segment.
-            nedges: Number of edges in the polygon.
+            num_edges: Number of edges in the polygon.
             eroded_segment: ErodedBankLineSegment with recent shifted bankline segments.
 
         Modifies:
@@ -858,7 +858,7 @@ class ErodedBankLine:
 
         inside = False
         s_last = sorted_segment_indices[0]
-        n_last = nedges
+        n_last = num_edges
         intersection_context = IntersectionContext(
             intersection_alphas=sorted_intersection_alphas,
             polygon_alphas=sorted_polygon_alphas,
@@ -867,7 +867,7 @@ class ErodedBankLine:
             poly=poly,
             xytmp=xytmp,
             ixytmp=ixytmp,
-            nedges=nedges,
+            num_edges=num_edges,
         )
         for i, s_current in enumerate(sorted_segment_indices):
             inside, s_last, n_last, segment_index = self._process_single_intersection(
@@ -904,12 +904,12 @@ class ErodedBankLine:
                 )
                 print(f"{erosion_index}: change in direction quantified as {dtheta}")
             poly = self._create_segment_outline_polygon(erosion_index, dtheta)
-            nedges = poly.shape[0] - 1
+            num_edges = poly.shape[0] - 1
 
             eroded_segment = self._get_recent_shifted_bankline_segments()
 
             intersections = self._collect_polyline_intersections(
-                eroded_segment, poly, nedges
+                eroded_segment, poly, num_edges
             )
 
             s = np.concatenate(intersections.segment_indices)
@@ -920,10 +920,10 @@ class ErodedBankLine:
                     erosion_index
                 ):
                     continue
-                self._add_right_bend_segment_points(poly, nedges)
+                self._add_right_bend_segment_points(poly, num_edges)
             else:
                 self._process_intersections_and_update_bankline(
-                    intersections, poly, nedges, eroded_segment
+                    intersections, poly, num_edges, eroded_segment
                 )
             # if iseg == isegstop:
             #     break
