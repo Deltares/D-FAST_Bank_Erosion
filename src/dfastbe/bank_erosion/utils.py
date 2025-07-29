@@ -351,8 +351,8 @@ class IntersectionContext(PolylineIntersections):
     ixytmp: int
     nedges: int
 
-    def get_difference(self, i: int) -> Tuple[float, float]:
-        """Get the x, y-difference for the current intersection."""
+    def get_delta(self, i: int) -> Tuple[float, float]:
+        """Get the x, y-delta for the current intersection."""
         return (
             self.poly[self.polygon_edge_indices[i] + 1, 0]
             - self.poly[self.polygon_edge_indices[i], 0],
@@ -688,15 +688,21 @@ class ErodedBankLine:
         offset = 1 if is_end else 0
         if is_start or is_end:
             # intersection is at the start or end of the segment
-            dPx, dPy = intersection_context.get_difference(i)
+            delta_intersection_x, delta_intersection_y = intersection_context.get_delta(
+                i
+            )
             s2 = s_current - eroded_segment.ixy0 + offset
             if is_end and s2 > len(eroded_segment.x0) - 1:
                 # if the end is beyond the last segment, consider it inside
                 inside = True
             else:
-                dBy = eroded_segment.y1[s2] - eroded_segment.y0[s2]
-                dBx = eroded_segment.x1[s2] - eroded_segment.x0[s2]
-                inside = dPy * dBx - dPx * dBy > 0
+                delta_bankline_y = eroded_segment.y1[s2] - eroded_segment.y0[s2]
+                delta_bankline_x = eroded_segment.x1[s2] - eroded_segment.x0[s2]
+                inside = (
+                    delta_intersection_y * delta_bankline_x
+                    - delta_intersection_x * delta_bankline_y
+                    > 0
+                )
         else:
             # line segment slices the edge somewhere in the middle
             inside = not inside
