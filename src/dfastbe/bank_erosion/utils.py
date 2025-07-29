@@ -392,10 +392,10 @@ class ErodedBankLine:
 
         self.xylines_new = np.zeros((100, 2))
         self.xylines_new[0] = xylines[0] + self.nxy[0]
-        self.point_index, self.xylines_new = _add_point(
+        self.point_index, self.xylines_new = self._add_point(
             0, self.xylines_new, self.xylines[1] + self.nxy[0]
         )
-        self.point_index, self.xylines_new = _add_point(
+        self.point_index, self.xylines_new = self._add_point(
             self.point_index, self.xylines_new, self.xylines[1]
         )
 
@@ -610,7 +610,7 @@ class ErodedBankLine:
         for n2 in range(min(num_edges, 2), -1, -1):
             if self.verbose:
                 print(f"  adding point {poly[n2]}")
-            ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, poly[n2])
+            ixy1, self.xylines_new = self._add_point(ixy1, self.xylines_new, poly[n2])
         self.point_index = ixy1
 
     def _update_points_between_segments(
@@ -650,7 +650,7 @@ class ErodedBankLine:
                 ]
                 if self.verbose:
                     print(f"  re-adding old point {point}")
-            ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, point)
+            ixy1, self.xylines_new = self._add_point(ixy1, self.xylines_new, point)
         return ixy1
 
     def _update_inside_flag_for_intersection(
@@ -743,7 +743,9 @@ class ErodedBankLine:
             pnt_intersect = intersection_context.get_intersection_point(i)
             if self.verbose:
                 print(f"  adding intersection point {pnt_intersect}")
-            ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, pnt_intersect)
+            ixy1, self.xylines_new = self._add_point(
+                ixy1, self.xylines_new, pnt_intersect
+            )
             n_last = intersection_context.polygon_edge_indices[i]
             s_last = s_current
             inside = self._update_inside_flag_for_intersection(
