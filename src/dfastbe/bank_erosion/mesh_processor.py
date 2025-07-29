@@ -518,29 +518,29 @@ class MeshProcessor:
         return index0
 
     def _slice_by_node_or_edge(
-        self, segment_state: RiverSegment, node, edge, faces
+        self, segment: RiverSegment, node, edge, faces
     ):
         finished = False
         index0 = None
         if node >= 0:
             # if we slice at a node ...
-            finished, index0 = self._process_node_transition(segment_state, node)
+            finished, index0 = self._process_node_transition(segment, node)
 
-        elif segment_state.distances[0] == 1:
+        elif segment.distances[0] == 1:
             # ending at slice point, so ending on an edge ...
             if self.verbose:
                 print(
-                    f"{segment_state.index}: ending on edge {edge} at {segment_state.distances[0]}"
+                    f"{segment.index}: ending on edge {edge} at {segment.distances[0]}"
                 )
             # figure out where we will be heading afterwards ...
-            if segment_state.index == len(self.bank_points) - 1:
+            if segment.index == len(self.bank_points) - 1:
                 # catch case of last segment
                 if self.verbose:
-                    print(f"{segment_state.index}: last point ends on an edge")
-                self._store_segment_point(segment_state.current_point)
+                    print(f"{segment.index}: last point ends on an edge")
+                self._store_segment_point(segment.current_point)
                 finished = True
             else:
-                index0 = self._determine_next_face_on_edge(segment_state, edge, faces)
+                index0 = self._determine_next_face_on_edge(segment, edge, faces)
         return finished, index0
 
     def _process_bank_segment(self, segment: RiverSegment):
