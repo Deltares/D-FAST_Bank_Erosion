@@ -544,7 +544,7 @@ class MeshProcessor:
         return finished, index0
 
     def _process_bank_segment(self, segment: RiverSegment):
-        shape_multiplier = 2
+
         while True:
             if self.index == -2:
                 self._resolve_ambiguous_edge_transition(segment)
