@@ -361,6 +361,7 @@ class IntersectionContext(PolylineIntersections):
         )
 
     def get_intersection_point(self, i: int) -> np.ndarray:
+        """Get the intersection point for the current index."""
         return self.poly[self.polygon_edge_indices[i]] + self.polygon_alphas[i] * (
             self.poly[self.polygon_edge_indices[i] + 1]
             - self.poly[self.polygon_edge_indices[i]]
@@ -389,16 +390,15 @@ class ErodedBankLine:
 
         self.xylines_new = np.zeros((100, 2))
         self.xylines_new[0] = xylines[0] + self.nxy[0]
-        self.ixy, self.xylines_new = _add_point(
+        self.point_index, self.xylines_new = _add_point(
             0, self.xylines_new, self.xylines[1] + self.nxy[0]
         )
-        self.ixy, self.xylines_new = _add_point(
-            self.ixy, self.xylines_new, self.xylines[1]
+        self.point_index, self.xylines_new = _add_point(
+            self.point_index, self.xylines_new, self.xylines[1]
         )
 
         self.verbose = verbose
         self.prec = 0.000001
-        self.ixy1: int
 
     def _construct_bend_polygon(
         self, index: int, include_wedge: bool = False, include_current: bool = False
@@ -484,17 +484,21 @@ class ErodedBankLine:
                 A dataclass containing the coordinates of the segments
                 and the index of the first segment.
         """
-        if self.ixy > 20:
-            X0 = self.xylines_new[(self.ixy - 20) : self.ixy, 0].copy()
-            Y0 = self.xylines_new[(self.ixy - 20) : self.ixy, 1].copy()
-            X1 = self.xylines_new[(self.ixy - 19) : (self.ixy + 1), 0].copy()
-            Y1 = self.xylines_new[(self.ixy - 19) : (self.ixy + 1), 1].copy()
-            ixy0 = self.ixy - 20
+        if self.point_index > 20:
+            X0 = self.xylines_new[(self.point_index - 20) : self.point_index, 0].copy()
+            Y0 = self.xylines_new[(self.point_index - 20) : self.point_index, 1].copy()
+            X1 = self.xylines_new[
+                (self.point_index - 19) : (self.point_index + 1), 0
+            ].copy()
+            Y1 = self.xylines_new[
+                (self.point_index - 19) : (self.point_index + 1), 1
+            ].copy()
+            ixy0 = self.point_index - 20
         else:
-            X0 = self.xylines_new[: self.ixy, 0].copy()
-            Y0 = self.xylines_new[: self.ixy, 1].copy()
-            X1 = self.xylines_new[1 : self.ixy + 1, 0].copy()
-            Y1 = self.xylines_new[1 : self.ixy + 1, 1].copy()
+            X0 = self.xylines_new[: self.point_index, 0].copy()
+            Y0 = self.xylines_new[: self.point_index, 1].copy()
+            X1 = self.xylines_new[1 : self.point_index + 1, 0].copy()
+            Y1 = self.xylines_new[1 : self.point_index + 1, 1].copy()
             ixy0 = 0
         return ErodedBankLineSegment(x0=X0, y0=Y0, x1=X1, y1=Y1, ixy0=ixy0)
 
@@ -514,7 +518,10 @@ class ErodedBankLine:
         Returns:
             PolylineIntersections: A dataclass containing lists of intersection data.
         """
-        a, b, slices, n = [], [], [], []
+        intersection_alphas = []
+        polygon_alphas = []
+        segment_indices = []
+        polygon_edge_indices = []
         for i in range(nedges):
             if (poly[i + 1] == poly[i]).all():
                 # polyline segment has no actual length, so skip it
@@ -538,15 +545,15 @@ class ErodedBankLine:
                 a2 = a2[keep_mask]
                 b2 = b2[keep_mask]
                 slices2 = slices2[keep_mask]
-            a.append(a2)
-            b.append(b2)
-            slices.append(slices2)
-            n.append(slices2 * 0 + i)
+            intersection_alphas.append(a2)
+            polygon_alphas.append(b2)
+            segment_indices.append(slices2)
+            polygon_edge_indices.append(slices2 * 0 + i)
         return PolylineIntersections(
-            intersection_alphas=a,
-            polygon_alphas=b,
-            segment_indices=slices,
-            polygon_edge_indices=n,
+            intersection_alphas=intersection_alphas,
+            polygon_alphas=polygon_alphas,
+            segment_indices=segment_indices,
+            polygon_edge_indices=polygon_edge_indices,
         )
 
     def _calculate_cross_product(
@@ -563,9 +570,11 @@ class ErodedBankLine:
         """
         multiply_array = self.nxy if shifted else self.dxy
         return (
-            self.xylines_new[self.ixy, 0] - self.xylines_new[self.ixy - 1, 0]
+            self.xylines_new[self.point_index, 0]
+            - self.xylines_new[self.point_index - 1, 0]
         ) * multiply_array[erosion_index, 1] - (
-            self.xylines_new[self.ixy, 1] - self.xylines_new[self.ixy - 1, 1]
+            self.xylines_new[self.point_index, 1]
+            - self.xylines_new[self.point_index - 1, 1]
         ) * multiply_array[
             erosion_index, 0
         ]
@@ -599,12 +608,12 @@ class ErodedBankLine:
             poly (np.ndarray): Polygon coordinates for the current segment.
             nedges (int): Number of edges in the polygon.
         """
-        ixy1 = self.ixy
+        ixy1 = self.point_index
         for n2 in range(min(nedges, 2), -1, -1):
             if self.verbose:
                 print(f"  adding point {poly[n2]}")
             ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, poly[n2])
-        self.ixy = ixy1
+        self.point_index = ixy1
 
     def _update_points_between_segments(
         self,
@@ -812,7 +821,7 @@ class ErodedBankLine:
             eroded_segment: ErodedBankLineSegment with recent shifted bankline segments.
 
         Modifies:
-            self.xylines_new and self.ixy in place.
+            self.xylines_new and self.point_index in place.
         """
         s = np.concatenate(intersections.segment_indices)
         a = np.concatenate(intersections.intersection_alphas)
@@ -831,7 +840,7 @@ class ErodedBankLine:
         ixy1 = s[0]
         if self.verbose:
             print(f"continuing new path at point {ixy1}")
-        xytmp = self.xylines_new[ixy1 : self.ixy + 1].copy()
+        xytmp = self.xylines_new[ixy1 : self.point_index + 1].copy()
         ixytmp = ixy1
 
         inside = False
@@ -859,7 +868,7 @@ class ErodedBankLine:
                 ixy1,
             )
 
-        self.ixy = self._finalize_bankline_after_intersections(
+        self.point_index = self._finalize_bankline_after_intersections(
             inside, n_last, ixy1, s_last, intersection_context
         )
 
@@ -874,7 +883,9 @@ class ErodedBankLine:
             if dtheta > math.pi:
                 dtheta = dtheta - 2 * math.pi
             if self.verbose:
-                print(f"{erosion_index}: current length of new bankline is {self.ixy}")
+                print(
+                    f"{erosion_index}: current length of new bankline is {self.point_index}"
+                )
                 print(
                     f"{erosion_index}: segment starting at {self.xylines[erosion_index]} to be shifted by {eroded_distance}"
                 )
@@ -903,7 +914,7 @@ class ErodedBankLine:
                 )
             # if iseg == isegstop:
             #     break
-        self.xylines_new = self.xylines_new[: self.ixy, :]
+        self.xylines_new = self.xylines_new[: self.point_index, :]
 
         return self.xylines_new
 
