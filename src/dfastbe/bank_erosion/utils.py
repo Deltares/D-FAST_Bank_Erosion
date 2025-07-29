@@ -699,21 +699,18 @@ class ErodedBankLine:
             )
         if i == 0 or intersection_context.n[i] != intersection_context.nedges - 1:
             if inside:
-                ixy1 = self._update_points_between_segments(
-                    ixy1,
-                    n_last,
-                    intersection_context.n[i],
-                    intersection_context,
-                    inside=True,
-                )
+                start = n_last
+                end = intersection_context.n[i]
             else:
-                ixy1 = self._update_points_between_segments(
-                    ixy1,
-                    s_last,
-                    s_current,
-                    intersection_context,
-                    inside=False,
-                )
+                start = s_last
+                end = s_current
+            ixy1 = self._update_points_between_segments(
+                ixy1,
+                start,
+                end,
+                intersection_context,
+                inside=inside,
+            )
             pnt_intersect = intersection_context.poly[
                 intersection_context.n[i]
             ] + intersection_context.b[i] * (
