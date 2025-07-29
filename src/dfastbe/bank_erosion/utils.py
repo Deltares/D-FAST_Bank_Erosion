@@ -1,7 +1,6 @@
 """Bank erosion utilities."""
 
 import math
-import sys
 from typing import Any, Tuple
 
 import numpy as np
@@ -10,12 +9,9 @@ from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     MeshData,
     SingleBank,
-    SingleCalculation,
-    SingleErosion,
-    SingleParameters,
 )
 from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData
-from dfastbe.bank_erosion.mesh_processor import MeshProcessor, enlarge, calculate_segment_edge_intersections
+from dfastbe.bank_erosion.mesh_processor import MeshProcessor, enlarge
 from dfastbe.io.data_models import LineGeometry
 from dfastbe.io.logger import log_text
 from dfastbe.utils import on_right_side
@@ -661,3 +657,76 @@ def calculate_alpha(coords: np.ndarray, ind_1: int, ind_2: int, bp: Tuple[int, A
             )
 
     return alpha
+
+
+def calculate_segment_edge_intersections(
+        x_edge_coords_prev_point: np.ndarray,
+        y_edge_coords_prev_point: np.ndarray,
+        x_edge_coords_current_point: np.ndarray,
+        y_edge_coords_current_point: np.ndarray,
+        prev_point_x: float,
+        prev_point_y: float,
+        current_point_x: float,
+        current_point_y: float,
+        min_relative_dist: float,
+        bmax1: bool = True,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Get the relative locations a and b at which a segment intersects/slices a number of edges.
+
+    Arguments
+    ---------
+    x_edge_coords_prev_point : np.ndarray
+        Array containing the x-coordinates of the start point of each edge.
+    x_edge_coords_current_point : np.ndarray
+        Array containing the x-coordinates of the end point of each edge.
+    y_edge_coords_prev_point : np.ndarray
+        Array containing the y-coordinates of the start point of each edge.
+    y_edge_coords_current_point : np.ndarray
+        Array containing the y-coordinates of the end point of each edge.
+    prev_point_x : float
+        x-coordinate of start point of the segment.
+    current_point_x : float
+        x-coordinate of end point of the segment.
+    prev_point_y : float
+        y-coordinate of start point of the segment.
+    current_point_y : float
+        y-coordinate of end point of the segment.
+    min_relative_dist : float
+        Minimum relative distance from bpj1 at which slice should occur.
+    bmax1 : bool
+        Flag indicating whether the the relative distance along the segment bpj1-bpj should be limited to 1.
+
+    Returns
+    -------
+    edge_relative_dist : np.ndarray
+        Array containing relative distance along each edge.
+    segment_relative_dist : np.ndarray
+        Array containing relative distance along the segment for each edge.
+    valid_intersections : np.ndarray
+        Array containing a flag indicating whether the edge is sliced at a valid location.
+    """
+    # difference between edges
+    dx_edge = x_edge_coords_current_point - x_edge_coords_prev_point
+    dy_edge = y_edge_coords_current_point - y_edge_coords_prev_point
+    # difference between the two points themselves
+    dx_segment = current_point_x - prev_point_x
+    dy_segment = current_point_y - prev_point_y
+    # check if the line and the edge are parallel
+    determinant = dx_edge * dy_segment - dy_edge * dx_segment
+    # if determinant is zero, the line and edge are parallel, so we set it to a small value
+    determinant[determinant == 0] = 1e-10
+
+    # calculate the relative distances along the edge where the intersection occur
+    edge_relative_dist = (dy_segment * (prev_point_x - x_edge_coords_prev_point) - dx_segment * (prev_point_y - y_edge_coords_prev_point)) / determinant  # along mesh edge
+    # calculate the relative distances along the segment where the intersection occur
+    segment_relative_dist = (dy_edge * (prev_point_x - x_edge_coords_prev_point) - dx_edge * (prev_point_y - y_edge_coords_prev_point)) / determinant  # along bank line
+
+    if bmax1:
+        valid_intersections = np.nonzero((segment_relative_dist > min_relative_dist) & (segment_relative_dist <= 1) & (edge_relative_dist >= 0) & (edge_relative_dist <= 1))[0]
+    else:
+        valid_intersections = np.nonzero((segment_relative_dist > min_relative_dist) & (edge_relative_dist >= 0) & (edge_relative_dist <= 1))[0]
+
+    edge_relative_dist = edge_relative_dist[valid_intersections]
+    segment_relative_dist = segment_relative_dist[valid_intersections]
+    return edge_relative_dist, segment_relative_dist, valid_intersections
