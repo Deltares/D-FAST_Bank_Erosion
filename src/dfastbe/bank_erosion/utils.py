@@ -352,6 +352,13 @@ class IntersectionContext(PolylineIntersections):
     ixytmp: int
     nedges: int
 
+    def get_difference(self, i: int) -> Tuple[float, float]:
+        """Get the x, y-difference for the current intersection."""
+        return (
+            self.poly[self.n[i] + 1, 0] - self.poly[self.n[i], 0],
+            self.poly[self.n[i] + 1, 1] - self.poly[self.n[i], 1],
+        )
+
 
 class ErodedBankLine:
     """Class to calculate an eroded bank line with its segments and erosion data."""
@@ -649,27 +656,13 @@ class ErodedBankLine:
             n_last = intersection_context.n[i]
             s_last = s_current
             if intersection_context.a[i] < self.prec:
-                dPy = (
-                    intersection_context.poly[intersection_context.n[i] + 1, 1]
-                    - intersection_context.poly[intersection_context.n[i], 1]
-                )
-                dPx = (
-                    intersection_context.poly[intersection_context.n[i] + 1, 0]
-                    - intersection_context.poly[intersection_context.n[i], 0]
-                )
+                dPx, dPy = intersection_context.get_difference(i)
                 s2 = s_current - eroded_segment.ixy0
                 dBy = eroded_segment.y1[s2] - eroded_segment.y0[s2]
                 dBx = eroded_segment.x1[s2] - eroded_segment.x0[s2]
                 inside = dPy * dBx - dPx * dBy > 0
             elif intersection_context.a[i] > 1 - self.prec:
-                dPy = (
-                    intersection_context.poly[intersection_context.n[i] + 1, 1]
-                    - intersection_context.poly[intersection_context.n[i], 1]
-                )
-                dPx = (
-                    intersection_context.poly[intersection_context.n[i] + 1, 0]
-                    - intersection_context.poly[intersection_context.n[i], 0]
-                )
+                dPx, dPy = intersection_context.get_difference(i)
                 s2 = s_current - eroded_segment.ixy0 + 1
                 if s2 > len(eroded_segment.x0) - 1:
                     inside = True
