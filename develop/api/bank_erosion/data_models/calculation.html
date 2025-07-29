@@ -2849,8 +2849,7 @@
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">454</span>
-<span class="normal">455</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">455</span>
 <span class="normal">456</span>
 <span class="normal">457</span>
 <span class="normal">458</span>
@@ -2922,7 +2921,8 @@
 <span class="normal">524</span>
 <span class="normal">525</span>
 <span class="normal">526</span>
-<span class="normal">527</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">527</span>
+<span class="normal">528</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BankData</span><span class="p">(</span><span class="n">BaseBank</span><span class="p">[</span><span class="n">SingleBank</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to hold bank-related data.</span>
 
@@ -3314,8 +3314,7 @@
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">684</span>
-<span class="normal">685</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">685</span>
 <span class="normal">686</span>
 <span class="normal">687</span>
 <span class="normal">688</span>
@@ -3385,7 +3384,8 @@
 <span class="normal">752</span>
 <span class="normal">753</span>
 <span class="normal">754</span>
-<span class="normal">755</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DischargeLevels</span><span class="p">:</span>
+<span class="normal">755</span>
+<span class="normal">756</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DischargeLevels</span><span class="p">:</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">levels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SingleDischargeLevel</span><span class="p">]):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">levels</span> <span class="o">=</span> <span class="n">levels</span>
@@ -3487,9 +3487,9 @@
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">742</span>
-<span class="normal">743</span>
-<span class="normal">744</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_attr_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">743</span>
+<span class="normal">744</span>
+<span class="normal">745</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_attr_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the attributes of the levels for both left and right bank.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_attr_both_sides_level</span><span class="p">(</span><span class="n">attribute_name</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span> <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">levels</span><span class="p">))]</span>
 </code></pre></div></td></tr></table></div>
@@ -4109,8 +4109,7 @@ can be set to empty arrays if not needed.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">547</span>
-<span class="normal">548</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">548</span>
 <span class="normal">549</span>
 <span class="normal">550</span>
 <span class="normal">551</span>
@@ -4187,7 +4186,8 @@ can be set to empty arrays if not needed.</p>
 <span class="normal">622</span>
 <span class="normal">623</span>
 <span class="normal">624</span>
-<span class="normal">625</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">625</span>
+<span class="normal">626</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ErosionResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to hold erosion results.</span>
 
@@ -4379,8 +4379,7 @@ can be set to empty arrays if not needed.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">530</span>
-<span class="normal">531</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">531</span>
 <span class="normal">532</span>
 <span class="normal">533</span>
 <span class="normal">534</span>
@@ -4393,7 +4392,8 @@ can be set to empty arrays if not needed.</p>
 <span class="normal">541</span>
 <span class="normal">542</span>
 <span class="normal">543</span>
-<span class="normal">544</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">544</span>
+<span class="normal">545</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">FairwayData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to hold fairway-related data.</span>
 
@@ -4829,7 +4829,8 @@ can be set to empty arrays if not needed.</p>
 <span class="normal">379</span>
 <span class="normal">380</span>
 <span class="normal">381</span>
-<span class="normal">382</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">382</span>
+<span class="normal">383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MeshData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to hold mesh-related data.</span>
 
@@ -4965,11 +4966,12 @@ can be set to empty arrays if not needed.</p>
             <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundary_edge_nrs</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_edge_connectivity</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span>
-        <span class="n">a</span><span class="p">,</span> <span class="n">distances</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_edge_intersections</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="n">segment</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="n">nodes</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-        <span class="n">nodes</span><span class="p">[</span><span class="n">a</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_node</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="n">a</span> <span class="o">==</span> <span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span>
-        <span class="n">nodes</span><span class="p">[</span><span class="n">a</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_node</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="n">a</span> <span class="o">==</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">distances</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">nodes</span>
+        <span class="n">edge_relative_dist</span><span class="p">,</span> <span class="n">segment_relative_dist</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_edge_intersections</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="n">segment</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="n">is_intersected_at_node</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">edge_relative_dist</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="n">is_intersected_at_node</span><span class="p">[</span><span class="n">edge_relative_dist</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_node</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="n">edge_relative_dist</span> <span class="o">==</span> <span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">is_intersected_at_node</span><span class="p">[</span><span class="n">edge_relative_dist</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_node</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="n">edge_relative_dist</span> <span class="o">==</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">segment_relative_dist</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">is_intersected_at_node</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_edge_intersections</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -5171,8 +5173,7 @@ to a maximum of 1. Defaults to True.</p>
 </details>
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">328</span>
-<span class="normal">329</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">329</span>
 <span class="normal">330</span>
 <span class="normal">331</span>
 <span class="normal">332</span>
@@ -5225,7 +5226,8 @@ to a maximum of 1. Defaults to True.</p>
 <span class="normal">379</span>
 <span class="normal">380</span>
 <span class="normal">381</span>
-<span class="normal">382</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_edge_intersections</span><span class="p">(</span>
+<span class="normal">382</span>
+<span class="normal">383</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_edge_intersections</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">edges</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">segment</span><span class="p">:</span> <span class="s2">&quot;RiverSegment&quot;</span><span class="p">,</span>
@@ -5442,7 +5444,8 @@ the boundary edges of the mesh.</p>
 <span class="normal">323</span>
 <span class="normal">324</span>
 <span class="normal">325</span>
-<span class="normal">326</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">find_segment_intersections</span><span class="p">(</span>
+<span class="normal">326</span>
+<span class="normal">327</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">find_segment_intersections</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">segment</span><span class="p">:</span> <span class="s2">&quot;RiverSegment&quot;</span><span class="p">,</span>
@@ -5482,11 +5485,12 @@ the boundary edges of the mesh.</p>
         <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundary_edge_nrs</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_edge_connectivity</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">[</span><span class="n">index</span><span class="p">]]</span>
-    <span class="n">a</span><span class="p">,</span> <span class="n">distances</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_edge_intersections</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="n">segment</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-    <span class="n">nodes</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">a</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
-    <span class="n">nodes</span><span class="p">[</span><span class="n">a</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_node</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="n">a</span> <span class="o">==</span> <span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span>
-    <span class="n">nodes</span><span class="p">[</span><span class="n">a</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_node</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="n">a</span> <span class="o">==</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">distances</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">nodes</span>
+    <span class="n">edge_relative_dist</span><span class="p">,</span> <span class="n">segment_relative_dist</span><span class="p">,</span> <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_edge_intersections</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="n">segment</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">is_intersected_at_node</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">edge_relative_dist</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="n">is_intersected_at_node</span><span class="p">[</span><span class="n">edge_relative_dist</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_node</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="n">edge_relative_dist</span> <span class="o">==</span> <span class="mi">0</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">is_intersected_at_node</span><span class="p">[</span><span class="n">edge_relative_dist</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edge_node</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="n">edge_relative_dist</span> <span class="o">==</span> <span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">segment_relative_dist</span><span class="p">,</span> <span class="n">edges</span><span class="p">,</span> <span class="n">is_intersected_at_node</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5822,8 +5826,7 @@ multiple faces.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">385</span>
-<span class="normal">386</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">386</span>
 <span class="normal">387</span>
 <span class="normal">388</span>
 <span class="normal">389</span>
@@ -5888,7 +5891,8 @@ multiple faces.</p>
 <span class="normal">448</span>
 <span class="normal">449</span>
 <span class="normal">450</span>
-<span class="normal">451</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">451</span>
+<span class="normal">452</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SingleBank</span><span class="p">:</span>
     <span class="n">is_right_bank</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">bank_line_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
@@ -5985,12 +5989,12 @@ multiple faces.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">403</span>
-<span class="normal">404</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">404</span>
 <span class="normal">405</span>
 <span class="normal">406</span>
 <span class="normal">407</span>
-<span class="normal">408</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">408</span>
+<span class="normal">409</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Post-initialization to ensure bank_line_coords is a list of numpy arrays.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">segment_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_length</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span><span class="p">()</span>
@@ -6066,8 +6070,7 @@ multiple faces.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">434</span>
-<span class="normal">435</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">435</span>
 <span class="normal">436</span>
 <span class="normal">437</span>
 <span class="normal">438</span>
@@ -6083,7 +6086,8 @@ multiple faces.</p>
 <span class="normal">448</span>
 <span class="normal">449</span>
 <span class="normal">450</span>
-<span class="normal">451</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_mid_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_geo_series</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">GeoSeries</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="normal">451</span>
+<span class="normal">452</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_mid_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_geo_series</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">GeoSeries</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Band line midpoints.</span>
 
 <span class="sd">    Args:</span>
