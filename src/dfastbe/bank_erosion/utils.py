@@ -322,10 +322,10 @@ class PolylineIntersections:
     """Class to hold the results of polyline intersections.
 
     Args:
-        a (List[np.ndarray]): List of intersection x-coordinates.
-        b (List[np.ndarray]): List of intersection y-coordinates.
-        slices (List[np.ndarray]): List of slices for each intersection.
-        n (List[np.ndarray]): List of segment indices for each intersection.
+        intersection_alphas (List[np.ndarray]): List of alphas for intersections with segments.
+        polygon_alphas (List[np.ndarray]): List of alphas for intersections with polygons.
+        polygon_edge_indices (List[np.ndarray]): List of indices for polygon edges.
+        segment_indices (List[np.ndarray]): List of indices for segments intersected.
     """
 
     intersection_alphas: List[np.ndarray]
