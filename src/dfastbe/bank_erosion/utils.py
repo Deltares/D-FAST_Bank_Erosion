@@ -837,41 +837,40 @@ class ErodedBankLine:
         Modifies:
             self.xylines_new and self.point_index in place.
         """
-        s = np.concatenate(intersections.segment_indices)
-        a = np.concatenate(intersections.intersection_alphas)
-        b = np.concatenate(intersections.polygon_alphas)
-        n = np.concatenate(intersections.polygon_edge_indices)
+        segment_indices = np.concatenate(intersections.segment_indices)
+        intersection_alphas = np.concatenate(intersections.intersection_alphas)
+        polygon_alphas = np.concatenate(intersections.polygon_alphas)
+        polygon_edge_indices = np.concatenate(intersections.polygon_edge_indices)
 
         # sort the intersections by distance along the already shifted bank line
-        d = s + a
-        sorted_idx = np.argsort(d)
-        s = s[sorted_idx] + eroded_segment.ixy0
-        a = a[sorted_idx]
-        b = b[sorted_idx]
-        d = d[sorted_idx]
-        n = n[sorted_idx]
+        segment_intersection_distance = segment_indices + intersection_alphas
+        sorted_idx = np.argsort(segment_intersection_distance)
+        sorted_segment_indices = segment_indices[sorted_idx] + eroded_segment.ixy0
+        sorted_intersection_alphas = intersection_alphas[sorted_idx]
+        sorted_polygon_alphas = polygon_alphas[sorted_idx]
+        sorted_polygon_edge_indices = polygon_edge_indices[sorted_idx]
 
-        ixy1 = s[0]
+        segment_index = sorted_segment_indices[0]
         if self.verbose:
-            print(f"continuing new path at point {ixy1}")
-        xytmp = self.xylines_new[ixy1 : self.point_index + 1].copy()
-        ixytmp = ixy1
+            print(f"continuing new path at point {segment_index}")
+        xytmp = self.xylines_new[segment_index : self.point_index + 1].copy()
+        ixytmp = segment_index
 
         inside = False
-        s_last = s[0]
+        s_last = sorted_segment_indices[0]
         n_last = nedges
         intersection_context = IntersectionContext(
-            intersection_alphas=a,
-            polygon_alphas=b,
-            segment_indices=None,
-            polygon_edge_indices=n,
+            intersection_alphas=sorted_intersection_alphas,
+            polygon_alphas=sorted_polygon_alphas,
+            segment_indices=sorted_segment_indices,
+            polygon_edge_indices=sorted_polygon_edge_indices,
             poly=poly,
             xytmp=xytmp,
             ixytmp=ixytmp,
             nedges=nedges,
         )
-        for i, s_current in enumerate(s):
-            inside, s_last, n_last, ixy1 = self._process_single_intersection(
+        for i, s_current in enumerate(sorted_segment_indices):
+            inside, s_last, n_last, segment_index = self._process_single_intersection(
                 i,
                 s_current,
                 eroded_segment,
@@ -879,11 +878,11 @@ class ErodedBankLine:
                 inside,
                 s_last,
                 n_last,
-                ixy1,
+                segment_index,
             )
 
         self.point_index = self._finalize_bankline_after_intersections(
-            inside, n_last, ixy1, s_last, intersection_context
+            inside, n_last, segment_index, s_last, intersection_context
         )
 
     def move_line_right(self) -> np.ndarray:
