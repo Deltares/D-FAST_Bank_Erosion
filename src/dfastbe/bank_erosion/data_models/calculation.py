@@ -294,9 +294,6 @@ class MeshData:
             index (int):
                 Index of the current mesh face. If `index` is negative, the function assumes the segment intersects
                 the boundary edges of the mesh.
-            mesh_data (MeshData):
-                An instance of the `MeshData` class containing mesh-related data, such as edge coordinates, face-edge
-                connectivity, and edge-node connectivity.
 
         Returns:
             Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -341,9 +338,6 @@ class MeshData:
         Args:
             edges (np.ndarray):
                 Array containing the indices of the edges to check for intersections.
-            mesh_data (MeshData):
-                An instance of the `MeshData` class containing mesh-related data,
-                such as edge coordinates and connectivity information.
             bmax1 (bool, optional):
                 If True, limits the relative distance along the segment `bpj1-bpj`
                 to a maximum of 1. Defaults to True.
