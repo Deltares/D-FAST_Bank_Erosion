@@ -653,6 +653,29 @@ class ErodedBankLine:
             ixy1, self.xylines_new = self._add_point(ixy1, self.xylines_new, point)
         return ixy1
 
+    def _add_intersection_point_to_bankline(
+        self,
+        ixy1: int,
+        intersection_context: IntersectionContext,
+        intersection_index: int,
+    ) -> int:
+        """
+        Add the intersection point for the given index to the shifted bankline.
+
+        Args:
+            ixy1 (int): Current index in the shifted bankline.
+            intersection_context (IntersectionContext): Context containing intersection data.
+            intersection_index (int): Index of the current intersection.
+
+        Returns:
+            int: Updated index in the shifted bankline.
+        """
+        pnt_intersect = intersection_context.get_intersection_point(intersection_index)
+        if self.verbose:
+            print(f"  adding intersection point {pnt_intersect}")
+        ixy1, self.xylines_new = self._add_point(ixy1, self.xylines_new, pnt_intersect)
+        return ixy1
+
     def _update_inside_flag_for_intersection(
         self,
         intersection_context: IntersectionContext,
@@ -700,7 +723,7 @@ class ErodedBankLine:
 
     def _process_single_intersection(
         self,
-        i: int,
+        intersection_index: int,
         s_current: int,
         eroded_segment: ErodedBankLineSegment,
         intersection_context: IntersectionContext,
@@ -720,16 +743,16 @@ class ErodedBankLine:
         """
         if self.verbose:
             print(
-                f"- intersection {i}: new polyline edge {intersection_context.polygon_edge_indices[i]} crosses segment {s_current} at {intersection_context.intersection_alphas[i]}"
+                f"- intersection {intersection_index}: new polyline edge {intersection_context.polygon_edge_indices[intersection_index]} crosses segment {s_current} at {intersection_context.intersection_alphas[intersection_index]}"
             )
         if (
-            i == 0
-            or intersection_context.polygon_edge_indices[i]
+            intersection_index == 0
+            or intersection_context.polygon_edge_indices[intersection_index]
             != intersection_context.num_edges - 1
         ):
             if inside:
                 start = n_last
-                end = intersection_context.polygon_edge_indices[i]
+                end = intersection_context.polygon_edge_indices[intersection_index]
             else:
                 start = s_last
                 end = s_current
@@ -740,16 +763,17 @@ class ErodedBankLine:
                 intersection_context,
                 inside=inside,
             )
-            pnt_intersect = intersection_context.get_intersection_point(i)
-            if self.verbose:
-                print(f"  adding intersection point {pnt_intersect}")
-            ixy1, self.xylines_new = self._add_point(
-                ixy1, self.xylines_new, pnt_intersect
+            ixy1 = self._add_intersection_point_to_bankline(
+                ixy1, intersection_context, intersection_index
             )
-            n_last = intersection_context.polygon_edge_indices[i]
+            n_last = intersection_context.polygon_edge_indices[intersection_index]
             s_last = s_current
             inside = self._update_inside_flag_for_intersection(
-                intersection_context, i, s_current, eroded_segment, inside
+                intersection_context,
+                intersection_index,
+                s_current,
+                eroded_segment,
+                inside,
             )
             if self.verbose:
                 if inside:
