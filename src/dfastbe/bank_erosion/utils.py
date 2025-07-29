@@ -328,10 +328,10 @@ class PolylineIntersections:
         n (List[np.ndarray]): List of segment indices for each intersection.
     """
 
-    a: List[np.ndarray]
-    b: List[np.ndarray]
-    n: List[np.ndarray]
-    slices: List[np.ndarray]
+    intersection_alphas: List[np.ndarray]
+    polygon_alphas: List[np.ndarray]
+    polygon_edge_indices: List[np.ndarray]
+    segment_indices: List[np.ndarray]
 
 
 @dataclass
@@ -354,8 +354,10 @@ class IntersectionContext(PolylineIntersections):
     def get_difference(self, i: int) -> Tuple[float, float]:
         """Get the x, y-difference for the current intersection."""
         return (
-            self.poly[self.n[i] + 1, 0] - self.poly[self.n[i], 0],
-            self.poly[self.n[i] + 1, 1] - self.poly[self.n[i], 1],
+            self.poly[self.polygon_edge_indices[i] + 1, 0]
+            - self.poly[self.polygon_edge_indices[i], 0],
+            self.poly[self.polygon_edge_indices[i] + 1, 1]
+            - self.poly[self.polygon_edge_indices[i], 1],
         )
 
 
@@ -535,7 +537,12 @@ class ErodedBankLine:
             b.append(b2)
             slices.append(slices2)
             n.append(slices2 * 0 + i)
-        return PolylineIntersections(a=a, b=b, slices=slices, n=n)
+        return PolylineIntersections(
+            intersection_alphas=a,
+            polygon_alphas=b,
+            segment_indices=slices,
+            polygon_edge_indices=n,
+        )
 
     def _calculate_cross_product(
         self, erosion_index: int, shifted: bool = False
@@ -654,8 +661,8 @@ class ErodedBankLine:
         Returns:
             bool: Updated inside flag.
         """
-        is_start = intersection_context.a[i] < self.prec
-        is_end = intersection_context.a[i] > 1 - self.prec
+        is_start = intersection_context.intersection_alphas[i] < self.prec
+        is_end = intersection_context.intersection_alphas[i] > 1 - self.prec
         offset = 1 if is_end else 0
         if is_start or is_end:
             # intersection is at the start or end of the segment
@@ -695,12 +702,16 @@ class ErodedBankLine:
         """
         if self.verbose:
             print(
-                f"- intersection {i}: new polyline edge {intersection_context.n[i]} crosses segment {s_current} at {intersection_context.a[i]}"
+                f"- intersection {i}: new polyline edge {intersection_context.polygon_edge_indices[i]} crosses segment {s_current} at {intersection_context.intersection_alphas[i]}"
             )
-        if i == 0 or intersection_context.n[i] != intersection_context.nedges - 1:
+        if (
+            i == 0
+            or intersection_context.polygon_edge_indices[i]
+            != intersection_context.nedges - 1
+        ):
             if inside:
                 start = n_last
-                end = intersection_context.n[i]
+                end = intersection_context.polygon_edge_indices[i]
             else:
                 start = s_last
                 end = s_current
@@ -712,15 +723,19 @@ class ErodedBankLine:
                 inside=inside,
             )
             pnt_intersect = intersection_context.poly[
-                intersection_context.n[i]
-            ] + intersection_context.b[i] * (
-                intersection_context.poly[intersection_context.n[i] + 1]
-                - intersection_context.poly[intersection_context.n[i]]
+                intersection_context.polygon_edge_indices[i]
+            ] + intersection_context.polygon_alphas[i] * (
+                intersection_context.poly[
+                    intersection_context.polygon_edge_indices[i] + 1
+                ]
+                - intersection_context.poly[
+                    intersection_context.polygon_edge_indices[i]
+                ]
             )
             if self.verbose:
                 print(f"  adding intersection point {pnt_intersect}")
             ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, pnt_intersect)
-            n_last = intersection_context.n[i]
+            n_last = intersection_context.polygon_edge_indices[i]
             s_last = s_current
             inside = self._update_inside_flag_for_intersection(
                 intersection_context, i, s_current, eroded_segment, inside
@@ -803,10 +818,10 @@ class ErodedBankLine:
         Modifies:
             self.xylines_new and self.ixy in place.
         """
-        s = np.concatenate(intersections.slices)
-        a = np.concatenate(intersections.a)
-        b = np.concatenate(intersections.b)
-        n = np.concatenate(intersections.n)
+        s = np.concatenate(intersections.segment_indices)
+        a = np.concatenate(intersections.intersection_alphas)
+        b = np.concatenate(intersections.polygon_alphas)
+        n = np.concatenate(intersections.polygon_edge_indices)
 
         # sort the intersections by distance along the already shifted bank line
         d = s + a
@@ -827,10 +842,10 @@ class ErodedBankLine:
         s_last = s[0]
         n_last = nedges
         intersection_context = IntersectionContext(
-            a=a,
-            b=b,
-            n=n,
-            slices=None,
+            intersection_alphas=a,
+            polygon_alphas=b,
+            segment_indices=None,
+            polygon_edge_indices=n,
             poly=poly,
             xytmp=xytmp,
             ixytmp=ixytmp,
@@ -877,7 +892,7 @@ class ErodedBankLine:
                 eroded_segment, poly, nedges
             )
 
-            s = np.concatenate(intersections.slices)
+            s = np.concatenate(intersections.segment_indices)
             if self.verbose:
                 print(f"{erosion_index}: {len(s)} intersections detected")
             if len(s) == 0:
