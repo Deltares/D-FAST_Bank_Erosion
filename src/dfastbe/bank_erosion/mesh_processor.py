@@ -294,14 +294,14 @@ class MeshProcessor:
             )
         return index
 
-    def _resolve_ambiguous_edge_transition(self, segment: RiverSegment):
+    def _resolve_ambiguous_edge_transition(self, segment: RiverSegment, vindex):
         """Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces."""
         b = np.zeros(0)
         edges = np.zeros(0, dtype=np.int64)
         nodes = np.zeros(0, dtype=np.int64)
         index_src = np.zeros(0, dtype=np.int64)
 
-        for i in self.vindex:
+        for i in vindex:
             b1, edges1, nodes1 = self.mesh_data.find_segment_intersections(
                 i,
                 segment,
@@ -316,11 +316,7 @@ class MeshProcessor:
         segment.nodes = nodes[id_edges]
         index_src = index_src[id_edges]
 
-        if len(index_src) == 1:
-            self.index = index_src[0]
-            self.vindex = index_src[0:1]
-        else:
-            self.index = -2
+        return index_src
 
     def _store_segment_point(self, current_bank_point, shape_length=None):
         """Finalize a segment
@@ -547,9 +543,14 @@ class MeshProcessor:
 
         while True:
             if self.index == -2:
-                self._resolve_ambiguous_edge_transition(segment)
+                index_src = self._resolve_ambiguous_edge_transition(segment)
+                if len(index_src) == 1:
+                    self.index = index_src[0]
+                    self.vindex = index_src[0:1]
+                else:
+                    self.index = -2
             elif segment.is_length_zero():
-                # this is a segment of length 0, skip it since it takes us nowhere
+                # segment has zero length
                 break
             else:
                 segment.distances, segment.edges, segment.nodes = (
