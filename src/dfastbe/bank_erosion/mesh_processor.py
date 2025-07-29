@@ -519,7 +519,8 @@ class MeshProcessor:
 
         while True:
             if self.index == -2:
-                index_src = self.mesh_data.resolve_ambiguous_edge_transition(segment)
+                index_src = self.mesh_data.resolve_ambiguous_edge_transition(segment, self.vindex)
+
                 if len(index_src) == 1:
                     self.index = index_src[0]
                     self.vindex = index_src[0:1]
@@ -547,7 +548,7 @@ class MeshProcessor:
             if len(segment.edges) > 1:
                 self._select_first_crossing(segment)
 
-            # slice location identified ...
+            # slice location identified ...   (number of edges should be 1)
             node = segment.nodes[0]
             edge = segment.edges[0]
             faces = self.mesh_data.edge_face_connectivity[edge]
