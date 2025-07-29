@@ -660,16 +660,16 @@ def calculate_alpha(coords: np.ndarray, ind_1: int, ind_2: int, bp: Tuple[int, A
 
 
 def calculate_segment_edge_intersections(
-        x_edge_coords_prev_point: np.ndarray,
-        y_edge_coords_prev_point: np.ndarray,
-        x_edge_coords_current_point: np.ndarray,
-        y_edge_coords_current_point: np.ndarray,
-        prev_point_x: float,
-        prev_point_y: float,
-        current_point_x: float,
-        current_point_y: float,
-        min_relative_dist: float,
-        bmax1: bool = True,
+    x_edge_coords_prev_point: np.ndarray,
+    y_edge_coords_prev_point: np.ndarray,
+    x_edge_coords_current_point: np.ndarray,
+    y_edge_coords_current_point: np.ndarray,
+    prev_point_x: float,
+    prev_point_y: float,
+    current_point_x: float,
+    current_point_y: float,
+    min_relative_dist: float,
+    limit_relative_distance: bool = True,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     Get the relative locations a and b at which a segment intersects/slices a number of edges.
@@ -694,7 +694,7 @@ def calculate_segment_edge_intersections(
         y-coordinate of end point of the segment.
     min_relative_dist : float
         Minimum relative distance from bpj1 at which slice should occur.
-    bmax1 : bool
+    limit_relative_distance : bool
         Flag indicating whether the the relative distance along the segment bpj1-bpj should be limited to 1.
 
     Returns
@@ -722,7 +722,7 @@ def calculate_segment_edge_intersections(
     # calculate the relative distances along the segment where the intersection occur
     segment_relative_dist = (dy_edge * (prev_point_x - x_edge_coords_prev_point) - dx_edge * (prev_point_y - y_edge_coords_prev_point)) / determinant  # along bank line
 
-    if bmax1:
+    if limit_relative_distance:
         valid_intersections = np.nonzero((segment_relative_dist > min_relative_dist) & (segment_relative_dist <= 1) & (edge_relative_dist >= 0) & (edge_relative_dist <= 1))[0]
     else:
         valid_intersections = np.nonzero((segment_relative_dist > min_relative_dist) & (edge_relative_dist >= 0) & (edge_relative_dist <= 1))[0]
