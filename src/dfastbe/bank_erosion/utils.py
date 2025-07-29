@@ -791,33 +791,15 @@ class ErodedBankLine:
         Returns:
             int: Updated index in the shifted bankline.
         """
-        if self.verbose:
-            print("- wrapping up after last intersection")
         if inside:
-            if self.verbose:
-                print("  existing line is inside the new polygon")
-            for n2 in range(n_last, -1, -1):
-                if self.verbose:
-                    print(f"  adding new point {intersection_context.poly[n2]}")
-                ixy1, self.xylines_new = _add_point(
-                    ixy1, self.xylines_new, intersection_context.poly[n2]
-                )
+            start = n_last
+            end = -1
         else:
-            if self.verbose:
-                print("  existing line is inside the new polygon")
-            for s2 in range(
-                s_last,
-                len(intersection_context.xytmp) + intersection_context.ixytmp - 1,
-            ):
-                if self.verbose:
-                    print(
-                        f"  re-adding old point {intersection_context.xytmp[s2 - intersection_context.ixytmp + 1]}"
-                    )
-                ixy1, self.xylines_new = _add_point(
-                    ixy1,
-                    self.xylines_new,
-                    intersection_context.xytmp[s2 - intersection_context.ixytmp + 1],
-                )
+            start = s_last
+            end = len(intersection_context.xytmp) + intersection_context.ixytmp - 1
+        ixy1 = self._update_points_between_segments(
+            ixy1, start, end, intersection_context, inside=inside
+        )
         return ixy1
 
     def _process_intersections_and_update_bankline(
