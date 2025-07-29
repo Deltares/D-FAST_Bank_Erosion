@@ -27,6 +27,7 @@ class TestErodedBankLine:
         """Fixture to provide the expected moved lines data."""
         return np.loadtxt(f"{folder_path}/moved_lines.txt", delimiter=",")
 
+    @pytest.mark.integration
     def test_move_line_right(self, xylines, erosion_distance, expected_moved_lines):
         """Test the move_line_right method of ErodedBankLine.
 
