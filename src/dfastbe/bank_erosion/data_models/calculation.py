@@ -297,11 +297,13 @@ class MeshData:
 
         Returns:
             Tuple[np.ndarray, np.ndarray, np.ndarray]:
-                A tuple containing:
-                - `b` (np.ndarray): Relative distances along the segment `bpj1-bpj` where the intersections occur.
-                - `edges` (np.ndarray): Indices of the edges that are intersected by the segment.
-                - `nodes` (np.ndarray): Flags indicating whether the intersections occur at nodes. A value of `-1`
-                  indicates no intersection at a node, while other values correspond to node indices.
+                - b (np.ndarray):
+                    Relative distances along the segment `bpj1-bpj` where the intersections occur.
+                - edges (np.ndarray):
+                    Indices of the edges that are intersected by the segment.
+                - nodes (np.ndarray):
+                    Flags indicating whether the intersections occur at nodes. A value of `-1` indicates no
+                    intersection at a node, while other values correspond to node indices.
 
         Raises:
             ValueError:
@@ -327,7 +329,7 @@ class MeshData:
         self,
         edges: np.ndarray,
         segment: "RiverSegment",
-        bmax1: bool = True,
+        limit_relative_distance: bool = True,
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Calculate the intersection of a line segment with multiple mesh edges.
 
@@ -338,7 +340,7 @@ class MeshData:
         Args:
             edges (np.ndarray):
                 Array containing the indices of the edges to check for intersections.
-            bmax1 (bool, optional):
+            limit_relative_distance (bool, optional):
                 If True, limits the relative distance along the segment `bpj1-bpj`
                 to a maximum of 1. Defaults to True.
 
@@ -360,7 +362,7 @@ class MeshData:
               relative distances `a` and `b` for each edge.
             - The `bmin` parameter is used to filter out intersections that occur
               too close to the starting point of the segment.
-            - If `bmax1` is True, intersections beyond the endpoint of the segment
+            - If `limit_relative_distance` is True, intersections beyond the endpoint of the segment
               are ignored.
         """
         from dfastbe.bank_erosion.utils import calculate_segment_edge_intersections
@@ -374,7 +376,7 @@ class MeshData:
             segment.current_point[0],
             segment.current_point[1],
             segment.min_relative_distance,
-            bmax1,
+            limit_relative_distance,
         )
         edges = edges[valid_intersections]
         return edge_relative_dist, segment_relative_dist, edges
