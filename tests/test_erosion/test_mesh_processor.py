@@ -7,10 +7,10 @@ from dfastbe.bank_erosion.mesh_processor import (
     _get_slices,
     _get_slices_core,
     enlarge,
-    calculate_segment_edge_intersections,
     RiverSegment
 )
 
+from dfastbe.bank_erosion.utils import calculate_segment_edge_intersections
 
 class TestMeshProcessor:
 
