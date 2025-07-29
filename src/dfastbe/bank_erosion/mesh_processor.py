@@ -11,7 +11,7 @@ __all__ = ["enlarge", "MeshProcessor"]
 
 ATOL = 1e-8
 RTOL = 1e-8
-
+SHAPE_MULTIPLIER = 2
 
 @dataclass
 class EdgeCandidates:
@@ -561,7 +561,7 @@ class MeshProcessor:
 
             if len(segment.edges) == 0:
                 # rest of segment associated with same face
-                shape_length = self.point_index * shape_multiplier
+                shape_length = self.point_index * SHAPE_MULTIPLIER
                 self._store_segment_point(
                     segment.current_point, shape_length=shape_length
                 )
@@ -598,7 +598,7 @@ class MeshProcessor:
                     + segment.min_relative_distance
                     * (segment.current_point - segment.previous_point)
             )
-            shape_length = self.point_index * shape_multiplier
+            shape_length = self.point_index * SHAPE_MULTIPLIER
             self._store_segment_point(segment_x, shape_length=shape_length)
             if segment.min_relative_distance == 1:
                 break
