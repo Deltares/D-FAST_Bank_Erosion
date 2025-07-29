@@ -344,7 +344,6 @@ class IntersectionContext(PolylineIntersections):
         xytmp (np.ndarray): Temporary coordinates for intersection processing.
         ixytmp (int): Temporary index for intersection processing.
         nedges (int): Number of edges in the polygon.
-        s_last (int): Last segment index processed.
     """
 
     poly: np.ndarray
@@ -635,6 +634,45 @@ class ErodedBankLine:
             ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, point)
         return ixy1
 
+    def _update_inside_flag_for_intersection(
+        self,
+        intersection_context: IntersectionContext,
+        i: int,
+        s_current: int,
+        eroded_segment: ErodedBankLineSegment,
+        inside: bool,
+    ) -> bool:
+        """
+        Update the 'inside' flag after processing an intersection point.
+
+        Args:
+            intersection_context (IntersectionContext): Context containing intersection data.
+            i (int): Index of the current intersection.
+            s_current (int): Current segment index.
+            eroded_segment (ErodedBankLineSegment): Segment data for the eroded bankline.
+
+        Returns:
+            bool: Updated inside flag.
+        """
+        is_start = intersection_context.a[i] < self.prec
+        is_end = intersection_context.a[i] > 1 - self.prec
+        offset = 1 if is_end else 0
+        if is_start or is_end:
+            # intersection is at the start or end of the segment
+            dPx, dPy = intersection_context.get_difference(i)
+            s2 = s_current - eroded_segment.ixy0 + offset
+            if is_end and s2 > len(eroded_segment.x0) - 1:
+                # if the end is beyond the last segment, consider it inside
+                inside = True
+            else:
+                dBy = eroded_segment.y1[s2] - eroded_segment.y0[s2]
+                dBx = eroded_segment.x1[s2] - eroded_segment.x0[s2]
+                inside = dPy * dBx - dPx * dBy > 0
+        else:
+            # line segment slices the edge somewhere in the middle
+            inside = not inside
+        return inside
+
     def _process_single_intersection(
         self,
         i: int,
@@ -687,24 +725,9 @@ class ErodedBankLine:
             ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, pnt_intersect)
             n_last = intersection_context.n[i]
             s_last = s_current
-            if intersection_context.a[i] < self.prec:
-                dPx, dPy = intersection_context.get_difference(i)
-                s2 = s_current - eroded_segment.ixy0
-                dBy = eroded_segment.y1[s2] - eroded_segment.y0[s2]
-                dBx = eroded_segment.x1[s2] - eroded_segment.x0[s2]
-                inside = dPy * dBx - dPx * dBy > 0
-            elif intersection_context.a[i] > 1 - self.prec:
-                dPx, dPy = intersection_context.get_difference(i)
-                s2 = s_current - eroded_segment.ixy0 + 1
-                if s2 > len(eroded_segment.x0) - 1:
-                    inside = True
-                else:
-                    dBy = eroded_segment.y1[s2] - eroded_segment.y0[s2]
-                    dBx = eroded_segment.x1[s2] - eroded_segment.x0[s2]
-                    inside = dPy * dBx - dPx * dBy > 0
-            else:
-                # line segment slices the edge somewhere in the middle
-                inside = not inside
+            inside = self._update_inside_flag_for_intersection(
+                intersection_context, i, s_current, eroded_segment, inside
+            )
             if self.verbose:
                 if inside:
                     print("  existing line continues inside")
