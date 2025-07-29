@@ -738,7 +738,7 @@ class ErodedBankLine:
         last_segment: int,
         last_edge_index: int,
         ixy1: int,
-    ) -> tuple[bool, int, int, int]:
+    ) -> Tuple[bool, int, int, int]:
         """
         Process a single intersection and update the shifted bankline accordingly.
 
@@ -750,7 +750,7 @@ class ErodedBankLine:
         """
         if self.verbose:
             print(
-                f"- intersection {intersection_index}: new polyline edge {intersection_context.polygon_edge_indices[intersection_index]} crosses segment {s_current} at {intersection_context.intersection_alphas[intersection_index]}"
+                f"- intersection {intersection_index}: new polyline edge {intersection_context.polygon_edge_indices[intersection_index]} crosses segment {current_segment} at {intersection_context.intersection_alphas[intersection_index]}"
             )
         if (
             intersection_index == 0
