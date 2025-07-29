@@ -279,7 +279,7 @@ class MeshData:
 
         return index_list
 
-    def _get_slices(
+    def find_segment_intersections(
         self,
         index: int,
         segment: "RiverSegment",
@@ -317,13 +317,13 @@ class MeshData:
             edges = self.boundary_edge_nrs
         else:
             edges = self.face_edge_connectivity[index, : self.n_nodes[index]]
-        a, b, edges = self._get_slices_core(edges, segment, True)
+        a, distances, edges = self.calculate_edge_intersections(edges, segment, True)
         nodes = -np.ones(a.shape, dtype=np.int64)
         nodes[a == 0] = self.edge_node[edges[a == 0], 0]
         nodes[a == 1] = self.edge_node[edges[a == 1], 1]
-        return b, edges, nodes
+        return distances, edges, nodes
 
-    def _get_slices_core(
+    def calculate_edge_intersections(
         self,
         edges: np.ndarray,
         segment: "RiverSegment",
@@ -344,12 +344,11 @@ class MeshData:
 
         Returns:
             Tuple[np.ndarray, np.ndarray, np.ndarray]:
-                A tuple containing:
-                - `a` (np.ndarray): Relative distances along the edges where the
+                - a (np.ndarray): Relative distances along the edges where the
                   intersections occur.
-                - `b` (np.ndarray): Relative distances along the segment `bpj1-bpj`
+                - b (np.ndarray): Relative distances along the segment `bpj1-bpj`
                   where the intersections occur.
-                - `edges` (np.ndarray): Indices of the edges that are intersected
+                - edges (np.ndarray): Indices of the edges that are intersected
                   by the segment.
 
         Raises:
@@ -379,6 +378,7 @@ class MeshData:
         )
         edges = edges[valid_intersections]
         return edge_relative_dist, segment_relative_dist, edges
+
 
 @dataclass
 class SingleBank:

@@ -302,7 +302,7 @@ class MeshProcessor:
         index_src = np.zeros(0, dtype=np.int64)
 
         for i in self.vindex:
-            b1, edges1, nodes1 = self.mesh_data._get_slices(
+            b1, edges1, nodes1 = self.mesh_data.find_segment_intersections(
                 i,
                 segment,
             )
@@ -366,7 +366,7 @@ class MeshProcessor:
                 current_point=self.bank_points[segment.index + 1],
                 min_relative_distance=0
             )
-            _, _, edges = self.mesh_data._get_slices_core(
+            _, _, edges = self.mesh_data.calculate_edge_intersections(
                 fe1,
                 reversed_segment,
                 False,
@@ -553,7 +553,7 @@ class MeshProcessor:
                 break
             else:
                 segment.distances, segment.edges, segment.nodes = (
-                    self.mesh_data._get_slices(
+                    self.mesh_data.find_segment_intersections(
                         self.index,
                         segment,
                     )
