@@ -903,36 +903,29 @@ class ErodedBankLine:
 
         return self.xylines_new
 
+    def _add_point(
+        self, ixy1: int, xy_in: np.ndarray, point: np.ndarray
+    ) -> Tuple[int, np.ndarray]:
+        """Add the x,y-coordinates of a point to an array of x,y-coordinates if it differs from the last point.
 
-def _add_point(
-    ixy1: int, xy_in: np.ndarray, point: np.ndarray
-) -> Tuple[int, np.ndarray]:
-    """
-    Add the x,y-coordinates of a point to an array of x,y-coordinates if it differs from the last point.
+        Args:
+            ixy1 (int):
+                Index of last point in xy_in array
+            xy_in (np.ndarray):
+                N x 2 array containing the x- and y-coordinates of points (partially filled)
+            point (np.ndarray):
+                1 x 2 array containing the x- and y-coordinates of one point
 
-    Arguments
-    ---------
-    ixy1 : int
-        Index of last point in xy_in array
-    xy_in : np.ndarray
-        N x 2 array containing the x- and y-coordinates of points (partially filled)
-    point : np.ndarray
-        1 x 2 array containing the x- and y-coordinates of one point
-
-    Results
-    -------
-    ixy1 : int
-        Index of the new point in the xy_out array
-    xy_out : np.ndarray
-        Possibly extended copy of xy_in that includes the coordinates of point at ixy1
-    """
-    if (xy_in[ixy1] - point != 0).any():
-        ixy1 = ixy1 + 1
-        if ixy1 >= len(xy_in):
-            xy_out = enlarge(xy_in, (2 * ixy1, 2))
+        Returns:
+            Tuple[int, np.ndarray]: The updated index and the array of coordinates.
+        """
+        if (xy_in[ixy1] - point != 0).any():
+            ixy1 = ixy1 + 1
+            if ixy1 >= len(xy_in):
+                xy_out = enlarge(xy_in, (2 * ixy1, 2))
+            else:
+                xy_out = xy_in
+            xy_out[ixy1] = point
         else:
             xy_out = xy_in
-        xy_out[ixy1] = point
-    else:
-        xy_out = xy_in
-    return ixy1, xy_out
+        return ixy1, xy_out
