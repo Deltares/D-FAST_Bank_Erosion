@@ -279,6 +279,112 @@ class MeshData:
 
         return index_list
 
+    def _get_slices(
+        self,
+        index: int,
+        segment: "RiverSegment",
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Calculate the intersection of a line segment with the edges of a mesh face.
+
+        This function determines where a line segment (defined by two points) intersects the edges of a mesh face.
+        It returns the relative distances along the segment and the edges where the intersections occur, as well as
+        flags indicating whether the intersections occur at nodes.
+
+        Args:
+            index (int):
+                Index of the current mesh face. If `index` is negative, the function assumes the segment intersects
+                the boundary edges of the mesh.
+            mesh_data (MeshData):
+                An instance of the `MeshData` class containing mesh-related data, such as edge coordinates, face-edge
+                connectivity, and edge-node connectivity.
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray, np.ndarray]:
+                A tuple containing:
+                - `b` (np.ndarray): Relative distances along the segment `bpj1-bpj` where the intersections occur.
+                - `edges` (np.ndarray): Indices of the edges that are intersected by the segment.
+                - `nodes` (np.ndarray): Flags indicating whether the intersections occur at nodes. A value of `-1`
+                  indicates no intersection at a node, while other values correspond to node indices.
+
+        Raises:
+            ValueError:
+                If the input data is invalid or inconsistent.
+
+        Notes:
+            - If `index` is negative, the function assumes the segment intersects the boundary edges of the mesh.
+            - The function uses the `get_slices_core` helper function to calculate the intersections.
+            - Intersections at nodes are flagged in the `nodes` array, with the corresponding node indices.
+
+        """
+        if index < 0:
+            edges = self.boundary_edge_nrs
+        else:
+            edges = self.face_edge_connectivity[index, : self.n_nodes[index]]
+        a, b, edges = self._get_slices_core(edges, segment, True)
+        nodes = -np.ones(a.shape, dtype=np.int64)
+        nodes[a == 0] = self.edge_node[edges[a == 0], 0]
+        nodes[a == 1] = self.edge_node[edges[a == 1], 1]
+        return b, edges, nodes
+
+    def _get_slices_core(
+        self,
+        edges: np.ndarray,
+        segment: "RiverSegment",
+        bmax1: bool = True,
+    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Calculate the intersection of a line segment with multiple mesh edges.
+
+        This function determines where a line segment intersects a set of mesh edges.
+        It calculates the relative distances along the segment and the edges where
+        the intersections occur, and returns the indices of the intersected edges.
+
+        Args:
+            edges (np.ndarray):
+                Array containing the indices of the edges to check for intersections.
+            mesh_data (MeshData):
+                An instance of the `MeshData` class containing mesh-related data,
+                such as edge coordinates and connectivity information.
+            bmax1 (bool, optional):
+                If True, limits the relative distance along the segment `bpj1-bpj`
+                to a maximum of 1. Defaults to True.
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray, np.ndarray]:
+                A tuple containing:
+                - `a` (np.ndarray): Relative distances along the edges where the
+                  intersections occur.
+                - `b` (np.ndarray): Relative distances along the segment `bpj1-bpj`
+                  where the intersections occur.
+                - `edges` (np.ndarray): Indices of the edges that are intersected
+                  by the segment.
+
+        Raises:
+            ValueError:
+                If the input data is invalid or inconsistent.
+
+        Notes:
+            - The function uses the `get_slices_ab` helper function to calculate the
+              relative distances `a` and `b` for each edge.
+            - The `bmin` parameter is used to filter out intersections that occur
+              too close to the starting point of the segment.
+            - If `bmax1` is True, intersections beyond the endpoint of the segment
+              are ignored.
+        """
+        from dfastbe.bank_erosion.utils import calculate_segment_edge_intersections
+        edge_relative_dist, segment_relative_dist, valid_intersections = calculate_segment_edge_intersections(
+            self.x_edge_coords[edges, 0],
+            self.y_edge_coords[edges, 0],
+            self.x_edge_coords[edges, 1],
+            self.y_edge_coords[edges, 1],
+            segment.previous_point[0],
+            segment.previous_point[1],
+            segment.current_point[0],
+            segment.current_point[1],
+            segment.min_relative_distance,
+            bmax1,
+        )
+        edges = edges[valid_intersections]
+        return edge_relative_dist, segment_relative_dist, edges
 
 @dataclass
 class SingleBank:

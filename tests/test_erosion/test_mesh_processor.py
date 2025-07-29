@@ -4,8 +4,6 @@ import pytest
 from dfastbe.bank_erosion.data_models.calculation import MeshData
 from dfastbe.bank_erosion.mesh_processor import (
     MeshProcessor,
-    _get_slices,
-    _get_slices_core,
     enlarge,
     RiverSegment
 )
@@ -356,7 +354,7 @@ class TestMeshProcessor:
             previous_point=previous_point,
             current_point=current_point,
         )
-        b, edges, nodes = _get_slices(index, segment, mesh_data)
+        b, edges, nodes = mesh_data._get_slices(index, segment)
         assert np.allclose(b, np.array([0.6845984]))
         assert np.array_equal(edges, np.array([2]))
         assert np.array_equal(nodes, np.array([-1]))
@@ -381,7 +379,7 @@ class TestMeshProcessor:
             previous_point=previous_point,
             min_relative_distance=0.0,
         )
-        b, edges, nodes = _get_slices_core(edges, mesh_data, segment)
+        b, edges, nodes = mesh_data._get_slices_core(edges, segment)
         assert np.allclose(b, np.array([0.71466942]))
         assert np.allclose(edges, np.array([0.6845984]))
         assert np.array_equal(nodes, np.array([2]))
