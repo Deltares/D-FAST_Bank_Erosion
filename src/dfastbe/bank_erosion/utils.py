@@ -336,7 +336,7 @@ class PolylineIntersections:
 
 @dataclass
 class IntersectionContext(PolylineIntersections):
-    """Context for polyline intersection processing.
+    """Describes part of the polyline with intersections and the polygon it intersects.
 
     Args:
         intersections (PolylineIntersections): Intersections data.
@@ -358,6 +358,12 @@ class IntersectionContext(PolylineIntersections):
             - self.poly[self.polygon_edge_indices[i], 0],
             self.poly[self.polygon_edge_indices[i] + 1, 1]
             - self.poly[self.polygon_edge_indices[i], 1],
+        )
+
+    def get_intersection_point(self, i: int) -> np.ndarray:
+        return self.poly[self.polygon_edge_indices[i]] + self.polygon_alphas[i] * (
+            self.poly[self.polygon_edge_indices[i] + 1]
+            - self.poly[self.polygon_edge_indices[i]]
         )
 
 
@@ -498,8 +504,7 @@ class ErodedBankLine:
         poly: np.ndarray,
         nedges: int,
     ) -> PolylineIntersections:
-        """
-        For each edge of the new polyline, collect all intersections with the already shifted bankline.
+        """For each edge of the new polyline, collect all intersections with the already shifted bankline.
 
         Args:
             eroded_segment: ErodedBankLineSegment containing x0, y0, x1, y1, ixy0.
@@ -722,16 +727,7 @@ class ErodedBankLine:
                 intersection_context,
                 inside=inside,
             )
-            pnt_intersect = intersection_context.poly[
-                intersection_context.polygon_edge_indices[i]
-            ] + intersection_context.polygon_alphas[i] * (
-                intersection_context.poly[
-                    intersection_context.polygon_edge_indices[i] + 1
-                ]
-                - intersection_context.poly[
-                    intersection_context.polygon_edge_indices[i]
-                ]
-            )
+            pnt_intersect = intersection_context.get_intersection_point(i)
             if self.verbose:
                 print(f"  adding intersection point {pnt_intersect}")
             ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, pnt_intersect)
