@@ -8478,9 +8478,7 @@ new_shape : Tuple
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">454</span>
 <span class="normal">455</span>
 <span class="normal">456</span>
 <span class="normal">457</span>
@@ -8551,7 +8549,9 @@ new_shape : Tuple
 <span class="normal">522</span>
 <span class="normal">523</span>
 <span class="normal">524</span>
-<span class="normal">525</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">BankData</span><span class="p">(</span><span class="n">BaseBank</span><span class="p">[</span><span class="n">SingleBank</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to hold bank-related data.</span>
 
@@ -8943,9 +8943,7 @@ new_shape : Tuple
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">682</span>
-<span class="normal">683</span>
-<span class="normal">684</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">684</span>
 <span class="normal">685</span>
 <span class="normal">686</span>
 <span class="normal">687</span>
@@ -9014,7 +9012,9 @@ new_shape : Tuple
 <span class="normal">750</span>
 <span class="normal">751</span>
 <span class="normal">752</span>
-<span class="normal">753</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DischargeLevels</span><span class="p">:</span>
+<span class="normal">753</span>
+<span class="normal">754</span>
+<span class="normal">755</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">DischargeLevels</span><span class="p">:</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">levels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">SingleDischargeLevel</span><span class="p">]):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">levels</span> <span class="o">=</span> <span class="n">levels</span>
@@ -9116,9 +9116,9 @@ new_shape : Tuple
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">740</span>
-<span class="normal">741</span>
-<span class="normal">742</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_attr_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">742</span>
+<span class="normal">743</span>
+<span class="normal">744</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_attr_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the attributes of the levels for both left and right bank.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_attr_both_sides_level</span><span class="p">(</span><span class="n">attribute_name</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span> <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">levels</span><span class="p">))]</span>
 </code></pre></div></td></tr></table></div>
@@ -9738,9 +9738,7 @@ can be set to empty arrays if not needed.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">545</span>
-<span class="normal">546</span>
-<span class="normal">547</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">547</span>
 <span class="normal">548</span>
 <span class="normal">549</span>
 <span class="normal">550</span>
@@ -9816,7 +9814,9 @@ can be set to empty arrays if not needed.</p>
 <span class="normal">620</span>
 <span class="normal">621</span>
 <span class="normal">622</span>
-<span class="normal">623</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">623</span>
+<span class="normal">624</span>
+<span class="normal">625</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ErosionResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to hold erosion results.</span>
 
@@ -10008,9 +10008,7 @@ can be set to empty arrays if not needed.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">528</span>
-<span class="normal">529</span>
-<span class="normal">530</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">530</span>
 <span class="normal">531</span>
 <span class="normal">532</span>
 <span class="normal">533</span>
@@ -10022,7 +10020,9 @@ can be set to empty arrays if not needed.</p>
 <span class="normal">539</span>
 <span class="normal">540</span>
 <span class="normal">541</span>
-<span class="normal">542</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">FairwayData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to hold fairway-related data.</span>
 
@@ -10456,7 +10456,9 @@ can be set to empty arrays if not needed.</p>
 <span class="normal">377</span>
 <span class="normal">378</span>
 <span class="normal">379</span>
-<span class="normal">380</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">MeshData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to hold mesh-related data.</span>
 
@@ -10570,11 +10572,13 @@ can be set to empty arrays if not needed.</p>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Tuple[np.ndarray, np.ndarray, np.ndarray]:</span>
-<span class="sd">                A tuple containing:</span>
-<span class="sd">                - `b` (np.ndarray): Relative distances along the segment `bpj1-bpj` where the intersections occur.</span>
-<span class="sd">                - `edges` (np.ndarray): Indices of the edges that are intersected by the segment.</span>
-<span class="sd">                - `nodes` (np.ndarray): Flags indicating whether the intersections occur at nodes. A value of `-1`</span>
-<span class="sd">                  indicates no intersection at a node, while other values correspond to node indices.</span>
+<span class="sd">                - b (np.ndarray):</span>
+<span class="sd">                    Relative distances along the segment `bpj1-bpj` where the intersections occur.</span>
+<span class="sd">                - edges (np.ndarray):</span>
+<span class="sd">                    Indices of the edges that are intersected by the segment.</span>
+<span class="sd">                - nodes (np.ndarray):</span>
+<span class="sd">                    Flags indicating whether the intersections occur at nodes. A value of `-1` indicates no</span>
+<span class="sd">                    intersection at a node, while other values correspond to node indices.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError:</span>
@@ -10600,7 +10604,7 @@ can be set to empty arrays if not needed.</p>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">edges</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">segment</span><span class="p">:</span> <span class="s2">&quot;RiverSegment&quot;</span><span class="p">,</span>
-        <span class="n">bmax1</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">limit_relative_distance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the intersection of a line segment with multiple mesh edges.</span>
 
@@ -10611,7 +10615,7 @@ can be set to empty arrays if not needed.</p>
 <span class="sd">        Args:</span>
 <span class="sd">            edges (np.ndarray):</span>
 <span class="sd">                Array containing the indices of the edges to check for intersections.</span>
-<span class="sd">            bmax1 (bool, optional):</span>
+<span class="sd">            limit_relative_distance (bool, optional):</span>
 <span class="sd">                If True, limits the relative distance along the segment `bpj1-bpj`</span>
 <span class="sd">                to a maximum of 1. Defaults to True.</span>
 
@@ -10633,7 +10637,7 @@ can be set to empty arrays if not needed.</p>
 <span class="sd">              relative distances `a` and `b` for each edge.</span>
 <span class="sd">            - The `bmin` parameter is used to filter out intersections that occur</span>
 <span class="sd">              too close to the starting point of the segment.</span>
-<span class="sd">            - If `bmax1` is True, intersections beyond the endpoint of the segment</span>
+<span class="sd">            - If `limit_relative_distance` is True, intersections beyond the endpoint of the segment</span>
 <span class="sd">              are ignored.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.bank_erosion.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">calculate_segment_edge_intersections</span>
@@ -10647,7 +10651,7 @@ can be set to empty arrays if not needed.</p>
             <span class="n">segment</span><span class="o">.</span><span class="n">current_point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
             <span class="n">segment</span><span class="o">.</span><span class="n">current_point</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
             <span class="n">segment</span><span class="o">.</span><span class="n">min_relative_distance</span><span class="p">,</span>
-            <span class="n">bmax1</span><span class="p">,</span>
+            <span class="n">limit_relative_distance</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">edges</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="n">valid_intersections</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">edge_relative_dist</span><span class="p">,</span> <span class="n">segment_relative_dist</span><span class="p">,</span> <span class="n">edges</span>
@@ -10670,7 +10674,7 @@ can be set to empty arrays if not needed.</p>
 
 
 <h4 id="dfastbe.bank_erosion.data_models.calculation.MeshData.calculate_edge_intersections" class="doc doc-heading"><a href="#dfastbe.bank_erosion.data_models.calculation.MeshData.calculate_edge_intersections" class="toclink">
-            <code class="highlight language-python"><span class="n">calculate_edge_intersections</span><span class="p">(</span><span class="n">edges</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">segment</span><span class="p">:</span> <span class="n">RiverSegment</span><span class="p">,</span> <span class="n">bmax1</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span></code>
+            <code class="highlight language-python"><span class="n">calculate_edge_intersections</span><span class="p">(</span><span class="n">edges</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">segment</span><span class="p">:</span> <span class="n">RiverSegment</span><span class="p">,</span> <span class="n">limit_relative_distance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span></code>
 
 </a><a href="#dfastbe.bank_erosion.data_models.calculation.MeshData.calculate_edge_intersections" class="headerlink" title="Permanent link">#</a></h4>
 
@@ -10712,7 +10716,7 @@ the intersections occur, and returns the indices of the intersected edges.</p>
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>bmax1</code>
+                <code>limit_relative_distance</code>
             </td>
             <td>
                   <code><span title="bool">bool</span></code>
@@ -10790,15 +10794,13 @@ to a maximum of 1. Defaults to True.</p>
   relative distances <code>a</code> and <code>b</code> for each edge.</li>
 <li>The <code>bmin</code> parameter is used to filter out intersections that occur
   too close to the starting point of the segment.</li>
-<li>If <code>bmax1</code> is True, intersections beyond the endpoint of the segment
+<li>If <code>limit_relative_distance</code> is True, intersections beyond the endpoint of the segment
   are ignored.</li>
 </ul>
 </details>
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">328</span>
 <span class="normal">329</span>
 <span class="normal">330</span>
 <span class="normal">331</span>
@@ -10850,11 +10852,13 @@ to a maximum of 1. Defaults to True.</p>
 <span class="normal">377</span>
 <span class="normal">378</span>
 <span class="normal">379</span>
-<span class="normal">380</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_edge_intersections</span><span class="p">(</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_edge_intersections</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">edges</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
     <span class="n">segment</span><span class="p">:</span> <span class="s2">&quot;RiverSegment&quot;</span><span class="p">,</span>
-    <span class="n">bmax1</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">limit_relative_distance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the intersection of a line segment with multiple mesh edges.</span>
 
@@ -10865,7 +10869,7 @@ to a maximum of 1. Defaults to True.</p>
 <span class="sd">    Args:</span>
 <span class="sd">        edges (np.ndarray):</span>
 <span class="sd">            Array containing the indices of the edges to check for intersections.</span>
-<span class="sd">        bmax1 (bool, optional):</span>
+<span class="sd">        limit_relative_distance (bool, optional):</span>
 <span class="sd">            If True, limits the relative distance along the segment `bpj1-bpj`</span>
 <span class="sd">            to a maximum of 1. Defaults to True.</span>
 
@@ -10887,7 +10891,7 @@ to a maximum of 1. Defaults to True.</p>
 <span class="sd">          relative distances `a` and `b` for each edge.</span>
 <span class="sd">        - The `bmin` parameter is used to filter out intersections that occur</span>
 <span class="sd">          too close to the starting point of the segment.</span>
-<span class="sd">        - If `bmax1` is True, intersections beyond the endpoint of the segment</span>
+<span class="sd">        - If `limit_relative_distance` is True, intersections beyond the endpoint of the segment</span>
 <span class="sd">          are ignored.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.bank_erosion.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">calculate_segment_edge_intersections</span>
@@ -10901,7 +10905,7 @@ to a maximum of 1. Defaults to True.</p>
         <span class="n">segment</span><span class="o">.</span><span class="n">current_point</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
         <span class="n">segment</span><span class="o">.</span><span class="n">current_point</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
         <span class="n">segment</span><span class="o">.</span><span class="n">min_relative_distance</span><span class="p">,</span>
-        <span class="n">bmax1</span><span class="p">,</span>
+        <span class="n">limit_relative_distance</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">edges</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="n">valid_intersections</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">edge_relative_dist</span><span class="p">,</span> <span class="n">segment_relative_dist</span><span class="p">,</span> <span class="n">edges</span>
@@ -10976,11 +10980,13 @@ the boundary edges of the mesh.</p>
             <td>
               <div class="doc-md-description">
                 <p>Tuple[np.ndarray, np.ndarray, np.ndarray]:
-A tuple containing:
-- <code>b</code> (np.ndarray): Relative distances along the segment <code>bpj1-bpj</code> where the intersections occur.
-- <code>edges</code> (np.ndarray): Indices of the edges that are intersected by the segment.
-- <code>nodes</code> (np.ndarray): Flags indicating whether the intersections occur at nodes. A value of <code>-1</code>
-  indicates no intersection at a node, while other values correspond to node indices.</p>
+- b (np.ndarray):
+    Relative distances along the segment <code>bpj1-bpj</code> where the intersections occur.
+- edges (np.ndarray):
+    Indices of the edges that are intersected by the segment.
+- nodes (np.ndarray):
+    Flags indicating whether the intersections occur at nodes. A value of <code>-1</code> indicates no
+    intersection at a node, while other values correspond to node indices.</p>
               </div>
             </td>
           </tr>
@@ -11063,7 +11069,9 @@ A tuple containing:
 <span class="normal">321</span>
 <span class="normal">322</span>
 <span class="normal">323</span>
-<span class="normal">324</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">find_segment_intersections</span><span class="p">(</span>
+<span class="normal">324</span>
+<span class="normal">325</span>
+<span class="normal">326</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">find_segment_intersections</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">segment</span><span class="p">:</span> <span class="s2">&quot;RiverSegment&quot;</span><span class="p">,</span>
@@ -11081,11 +11089,13 @@ A tuple containing:
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Tuple[np.ndarray, np.ndarray, np.ndarray]:</span>
-<span class="sd">            A tuple containing:</span>
-<span class="sd">            - `b` (np.ndarray): Relative distances along the segment `bpj1-bpj` where the intersections occur.</span>
-<span class="sd">            - `edges` (np.ndarray): Indices of the edges that are intersected by the segment.</span>
-<span class="sd">            - `nodes` (np.ndarray): Flags indicating whether the intersections occur at nodes. A value of `-1`</span>
-<span class="sd">              indicates no intersection at a node, while other values correspond to node indices.</span>
+<span class="sd">            - b (np.ndarray):</span>
+<span class="sd">                Relative distances along the segment `bpj1-bpj` where the intersections occur.</span>
+<span class="sd">            - edges (np.ndarray):</span>
+<span class="sd">                Indices of the edges that are intersected by the segment.</span>
+<span class="sd">            - nodes (np.ndarray):</span>
+<span class="sd">                Flags indicating whether the intersections occur at nodes. A value of `-1` indicates no</span>
+<span class="sd">                intersection at a node, while other values correspond to node indices.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError:</span>
@@ -11441,9 +11451,7 @@ multiple faces.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">385</span>
 <span class="normal">386</span>
 <span class="normal">387</span>
 <span class="normal">388</span>
@@ -11507,7 +11515,9 @@ multiple faces.</p>
 <span class="normal">446</span>
 <span class="normal">447</span>
 <span class="normal">448</span>
-<span class="normal">449</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">SingleBank</span><span class="p">:</span>
     <span class="n">is_right_bank</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">bank_line_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
@@ -11604,12 +11614,12 @@ multiple faces.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">401</span>
-<span class="normal">402</span>
-<span class="normal">403</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">403</span>
 <span class="normal">404</span>
 <span class="normal">405</span>
-<span class="normal">406</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Post-initialization to ensure bank_line_coords is a list of numpy arrays.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">segment_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_length</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">dx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span><span class="p">()</span>
@@ -11685,9 +11695,7 @@ multiple faces.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/calculation.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">432</span>
-<span class="normal">433</span>
-<span class="normal">434</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">434</span>
 <span class="normal">435</span>
 <span class="normal">436</span>
 <span class="normal">437</span>
@@ -11702,7 +11710,9 @@ multiple faces.</p>
 <span class="normal">446</span>
 <span class="normal">447</span>
 <span class="normal">448</span>
-<span class="normal">449</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_mid_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_geo_series</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">GeoSeries</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="normal">449</span>
+<span class="normal">450</span>
+<span class="normal">451</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_mid_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">as_geo_series</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">crs</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">GeoSeries</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Band line midpoints.</span>
 
 <span class="sd">    Args:</span>
