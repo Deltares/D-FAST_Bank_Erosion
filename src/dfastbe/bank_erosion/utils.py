@@ -595,6 +595,46 @@ class ErodedBankLine:
             ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, poly[n2])
         self.ixy = ixy1
 
+    def _update_points_between_segments(
+        self,
+        ixy1: int,
+        start: int,
+        end: int,
+        intersection_context: IntersectionContext,
+        inside: bool = True,
+    ) -> int:
+        """
+        Add or re-add points between segments, using either poly or xytmp from intersection_context.
+
+        Args:
+            ixy1 (int): Current index in the shifted bankline.
+            start (int): Start index for the points to add.
+            end (int): End index for the points to add.
+            intersection_context (IntersectionContext): Context containing poly and xytmp.
+            inside (bool): If True, use poly; if False, use xytmp.
+
+        Returns:
+            int: Updated index in the shifted bankline.
+        """
+        modifier = -1 if inside else 1
+        if self.verbose:
+            print(
+                f"  existing line is {'inside' if inside else 'outside'} the new polygon"
+            )
+        for idx in range(start, end, modifier):
+            if inside:
+                point = intersection_context.poly[idx]
+                if self.verbose:
+                    print(f"  adding new point {point}")
+            else:
+                point = intersection_context.xytmp[
+                    idx - intersection_context.ixytmp + 1
+                ]
+                if self.verbose:
+                    print(f"  re-adding old point {point}")
+            ixy1, self.xylines_new = _add_point(ixy1, self.xylines_new, point)
+        return ixy1
+
     def _process_single_intersection(
         self,
         i: int,
@@ -621,29 +661,21 @@ class ErodedBankLine:
             )
         if i == 0 or intersection_context.n[i] != intersection_context.nedges - 1:
             if inside:
-                if self.verbose:
-                    print("  existing line is inside the new polygon")
-                for n2 in range(n_last, intersection_context.n[i], -1):
-                    if self.verbose:
-                        print(f"  adding new point {intersection_context.poly[n2]}")
-                    ixy1, self.xylines_new = _add_point(
-                        ixy1, self.xylines_new, intersection_context.poly[n2]
-                    )
+                ixy1 = self._update_points_between_segments(
+                    ixy1,
+                    n_last,
+                    intersection_context.n[i],
+                    intersection_context,
+                    inside=True,
+                )
             else:
-                if self.verbose:
-                    print("  existing line is outside the new polygon")
-                for s2 in range(s_last, s_current):
-                    if self.verbose:
-                        print(
-                            f"  re-adding old point {intersection_context.xytmp[s2 - intersection_context.ixytmp + 1]}"
-                        )
-                    ixy1, self.xylines_new = _add_point(
-                        ixy1,
-                        self.xylines_new,
-                        intersection_context.xytmp[
-                            s2 - intersection_context.ixytmp + 1
-                        ],
-                    )
+                ixy1 = self._update_points_between_segments(
+                    ixy1,
+                    s_last,
+                    s_current,
+                    intersection_context,
+                    inside=False,
+                )
             pnt_intersect = intersection_context.poly[
                 intersection_context.n[i]
             ] + intersection_context.b[i] * (
