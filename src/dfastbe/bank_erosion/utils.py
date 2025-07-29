@@ -351,20 +351,22 @@ class IntersectionContext(PolylineIntersections):
     ixytmp: int
     num_edges: int
 
-    def get_delta(self, i: int) -> Tuple[float, float]:
+    def get_delta(self, current_intersection: int) -> Tuple[float, float]:
         """Get the x, y-delta for the current intersection."""
         return (
-            self.poly[self.polygon_edge_indices[i] + 1, 0]
-            - self.poly[self.polygon_edge_indices[i], 0],
-            self.poly[self.polygon_edge_indices[i] + 1, 1]
-            - self.poly[self.polygon_edge_indices[i], 1],
+            self.poly[self.polygon_edge_indices[current_intersection] + 1, 0]
+            - self.poly[self.polygon_edge_indices[current_intersection], 0],
+            self.poly[self.polygon_edge_indices[current_intersection] + 1, 1]
+            - self.poly[self.polygon_edge_indices[current_intersection], 1],
         )
 
-    def get_intersection_point(self, i: int) -> np.ndarray:
+    def get_intersection_point(self, current_intersection: int) -> np.ndarray:
         """Get the intersection point for the current index."""
-        return self.poly[self.polygon_edge_indices[i]] + self.polygon_alphas[i] * (
-            self.poly[self.polygon_edge_indices[i] + 1]
-            - self.poly[self.polygon_edge_indices[i]]
+        return self.poly[
+            self.polygon_edge_indices[current_intersection]
+        ] + self.polygon_alphas[current_intersection] * (
+            self.poly[self.polygon_edge_indices[current_intersection] + 1]
+            - self.poly[self.polygon_edge_indices[current_intersection]]
         )
 
 
@@ -397,7 +399,7 @@ class ErodedBankLine:
             self.point_index, self.xylines_new, self.xylines[1]
         )
 
-        self.verbose = verbose
+        self.verbose = True
         self.prec = 0.000001
 
     def _construct_bend_polygon(
