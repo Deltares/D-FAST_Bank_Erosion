@@ -679,8 +679,8 @@ class ErodedBankLine:
     def _update_inside_flag_for_intersection(
         self,
         intersection_context: IntersectionContext,
-        i: int,
-        s_current: int,
+        intersection_index: int,
+        current_segment: int,
         eroded_segment: ErodedBankLineSegment,
         inside: bool,
     ) -> bool:
@@ -690,21 +690,25 @@ class ErodedBankLine:
         Args:
             intersection_context (IntersectionContext): Context containing intersection data.
             i (int): Index of the current intersection.
-            s_current (int): Current segment index.
+            current_segment (int): Current segment index.
             eroded_segment (ErodedBankLineSegment): Segment data for the eroded bankline.
 
         Returns:
             bool: Updated inside flag.
         """
-        is_start = intersection_context.intersection_alphas[i] < self.prec
-        is_end = intersection_context.intersection_alphas[i] > 1 - self.prec
+        is_start = (
+            intersection_context.intersection_alphas[intersection_index] < self.prec
+        )
+        is_end = (
+            intersection_context.intersection_alphas[intersection_index] > 1 - self.prec
+        )
         offset = 1 if is_end else 0
         if is_start or is_end:
             # intersection is at the start or end of the segment
             delta_intersection_x, delta_intersection_y = intersection_context.get_delta(
-                i
+                intersection_index
             )
-            s2 = s_current - eroded_segment.ixy0 + offset
+            s2 = current_segment - eroded_segment.ixy0 + offset
             if is_end and s2 > len(eroded_segment.x0) - 1:
                 # if the end is beyond the last segment, consider it inside
                 inside = True
@@ -724,12 +728,12 @@ class ErodedBankLine:
     def _process_single_intersection(
         self,
         intersection_index: int,
-        s_current: int,
+        current_segment: int,
         eroded_segment: ErodedBankLineSegment,
         intersection_context: IntersectionContext,
         inside: bool,
-        s_last: int,
-        n_last: int,
+        last_segment: int,
+        last_edge_index: int,
         ixy1: int,
     ) -> tuple[bool, int, int, int]:
         """
@@ -751,11 +755,11 @@ class ErodedBankLine:
             != intersection_context.num_edges - 1
         ):
             if inside:
-                start = n_last
+                start = last_edge_index
                 end = intersection_context.polygon_edge_indices[intersection_index]
             else:
-                start = s_last
-                end = s_current
+                start = last_segment
+                end = current_segment
             ixy1 = self._update_points_between_segments(
                 ixy1,
                 start,
@@ -766,12 +770,14 @@ class ErodedBankLine:
             ixy1 = self._add_intersection_point_to_bankline(
                 ixy1, intersection_context, intersection_index
             )
-            n_last = intersection_context.polygon_edge_indices[intersection_index]
-            s_last = s_current
+            last_edge_index = intersection_context.polygon_edge_indices[
+                intersection_index
+            ]
+            last_segment = current_segment
             inside = self._update_inside_flag_for_intersection(
                 intersection_context,
                 intersection_index,
-                s_current,
+                current_segment,
                 eroded_segment,
                 inside,
             )
@@ -780,14 +786,14 @@ class ErodedBankLine:
                     print("  existing line continues inside")
                 else:
                     print("  existing line continues outside")
-        return inside, s_last, n_last, ixy1
+        return inside, last_segment, last_edge_index, ixy1
 
     def _finalize_bankline_after_intersections(
         self,
         inside: bool,
-        n_last: int,
+        last_edge_index: int,
         ixy1: int,
-        s_last: int,
+        last_segment: int,
         intersection_context: IntersectionContext,
     ) -> int:
         """
@@ -806,10 +812,10 @@ class ErodedBankLine:
             int: Updated index in the shifted bankline.
         """
         if inside:
-            start = n_last
+            start = last_edge_index
             end = -1
         else:
-            start = s_last
+            start = last_segment
             end = len(intersection_context.xytmp) + intersection_context.ixytmp - 1
         ixy1 = self._update_points_between_segments(
             ixy1, start, end, intersection_context, inside=inside
@@ -855,8 +861,8 @@ class ErodedBankLine:
         ixytmp = segment_index
 
         inside = False
-        s_last = sorted_segment_indices[0]
-        n_last = num_edges
+        last_segment = sorted_segment_indices[0]
+        last_edge_index = num_edges
         intersection_context = IntersectionContext(
             intersection_alphas=sorted_intersection_alphas,
             polygon_alphas=sorted_polygon_alphas,
@@ -867,20 +873,22 @@ class ErodedBankLine:
             ixytmp=ixytmp,
             num_edges=num_edges,
         )
-        for i, s_current in enumerate(sorted_segment_indices):
-            inside, s_last, n_last, segment_index = self._process_single_intersection(
-                i,
-                s_current,
-                eroded_segment,
-                intersection_context,
-                inside,
-                s_last,
-                n_last,
-                segment_index,
+        for i, current_segment in enumerate(sorted_segment_indices):
+            inside, last_segment, last_edge_index, segment_index = (
+                self._process_single_intersection(
+                    i,
+                    current_segment,
+                    eroded_segment,
+                    intersection_context,
+                    inside,
+                    last_segment,
+                    last_edge_index,
+                    segment_index,
+                )
             )
 
         self.point_index = self._finalize_bankline_after_intersections(
-            inside, n_last, segment_index, s_last, intersection_context
+            inside, last_edge_index, segment_index, last_segment, intersection_context
         )
 
     def move_line_right(self) -> np.ndarray:
