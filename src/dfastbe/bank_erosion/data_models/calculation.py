@@ -319,11 +319,12 @@ class MeshData:
             edges = self.boundary_edge_nrs
         else:
             edges = self.face_edge_connectivity[index, : self.n_nodes[index]]
-        a, distances, edges = self.calculate_edge_intersections(edges, segment, True)
-        nodes = -np.ones(a.shape, dtype=np.int64)
-        nodes[a == 0] = self.edge_node[edges[a == 0], 0]
-        nodes[a == 1] = self.edge_node[edges[a == 1], 1]
-        return distances, edges, nodes
+        edge_relative_dist, segment_relative_dist, edges = self.calculate_edge_intersections(edges, segment, True)
+        is_intersected_at_node = -np.ones(edge_relative_dist.shape, dtype=np.int64)
+        is_intersected_at_node[edge_relative_dist == 0] = self.edge_node[edges[edge_relative_dist == 0], 0]
+        is_intersected_at_node[edge_relative_dist == 1] = self.edge_node[edges[edge_relative_dist == 1], 1]
+
+        return segment_relative_dist, edges, is_intersected_at_node
 
     def calculate_edge_intersections(
         self,
