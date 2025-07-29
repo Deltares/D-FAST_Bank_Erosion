@@ -58,7 +58,6 @@ from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.utils import (
     BankLinesProcessor,
-    calculate_alpha,
     get_km_bins,
     get_km_eroded_volume,
     intersect_line_mesh,
