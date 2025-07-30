@@ -95,22 +95,16 @@ class MeshProcessor:
             self.index = on_edge
 
         if self.index == -1:
-            self._handle_starting_face_on_edge(on_edge)
 
-    def _handle_starting_face_on_edge(self, on_edge):
-        """Handle the case where the first bank point is on the edge of a mesh face.
+            if on_edge:
+                if self.verbose:
+                    print(f"starting on edge of {on_edge}")
 
-        Args:
-            on_edge (List[int]): List of face indices where the first bank point is located on the edge.
-        """
-        if on_edge:
-            if self.verbose:
-                print(f"starting on edge of {on_edge}")
-            self.index = -2 if len(on_edge) > 1 else on_edge[0]
-            self.vindex = on_edge if len(on_edge) > 1 else None
-        else:
-            if self.verbose:
-                print("starting outside mesh")
+                self.index = -2 if len(on_edge) > 1 else on_edge[0]
+                self.vindex = on_edge if len(on_edge) > 1 else None
+            else:
+                if self.verbose:
+                    print("starting outside mesh")
 
 
     def _store_segment_point(self, current_bank_point, shape_length: bool = None):
