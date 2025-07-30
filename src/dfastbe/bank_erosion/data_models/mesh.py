@@ -392,6 +392,8 @@ class MeshData:
                 f"{verbose_index}: the edges connected to node {node} are {all_node_edges}"
             )
 
+        edges = Edges(left=-1, left_theta=TWO_PI, right=-1, right_theta=TWO_PI)
+
         for ie in all_node_edges:
             reverse = self.edge_node[ie, 0] != node
             theta_edge = self.calculate_edge_angle(ie, reverse=reverse)
@@ -401,8 +403,6 @@ class MeshData:
                 print(f"{verbose_index}: edge {ie} theta is {theta_edge}")
 
             dtheta = theta_edge - theta
-
-            edges = Edges(left=-1, left_theta=TWO_PI, right=-1, right_theta=TWO_PI)
 
             edges.update_edges_by_angle(ie, dtheta, verbose_index)
             if edges.found:
