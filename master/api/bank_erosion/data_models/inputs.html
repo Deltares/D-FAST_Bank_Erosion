@@ -2463,7 +2463,8 @@
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/inputs.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 29</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 28</span>
+<span class="normal"> 29</span>
 <span class="normal"> 30</span>
 <span class="normal"> 31</span>
 <span class="normal"> 32</span>
@@ -2657,7 +2658,7 @@
 <span class="normal">220</span>
 <span class="normal">221</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ErosionSimulationData</span><span class="p">(</span><span class="n">BaseSimulationData</span><span class="p">):</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">compute_mesh_topology</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MeshData</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">compute_mesh_topology</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MeshData</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Derive secondary topology arrays from the face-node connectivity of the mesh.</span>
 
 <span class="sd">        This function computes the edge-node, edge-face, and face-edge connectivity arrays,</span>
@@ -2770,6 +2771,7 @@
             <span class="n">edge_face_connectivity</span><span class="o">=</span><span class="n">edge_face</span><span class="p">,</span>
             <span class="n">face_edge_connectivity</span><span class="o">=</span><span class="n">face_edge_connectivity</span><span class="p">,</span>
             <span class="n">boundary_edge_nrs</span><span class="o">=</span><span class="n">boundary_edge_nrs</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
         <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
@@ -3004,7 +3006,7 @@ An array with same shape as idx, with mask.</p>
 
 
 <h4 id="dfastbe.bank_erosion.data_models.inputs.ErosionSimulationData.compute_mesh_topology" class="doc doc-heading"><a href="#dfastbe.bank_erosion.data_models.inputs.ErosionSimulationData.compute_mesh_topology" class="toclink">
-            <code class="highlight language-python"><span class="n">compute_mesh_topology</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">MeshData</span></code>
+            <code class="highlight language-python"><span class="n">compute_mesh_topology</span><span class="p">(</span><span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MeshData</span></code>
 
 </a><a href="#dfastbe.bank_erosion.data_models.inputs.ErosionSimulationData.compute_mesh_topology" class="headerlink" title="Permanent link">#</a></h4>
 
@@ -3028,7 +3030,7 @@ in the simulation data.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>MeshData</code></td>            <td>
-                  <code><a class="autorefs autorefs-internal" title="MeshData (&lt;code&gt;dfastbe.bank_erosion.data_models.calculation.MeshData&lt;/code&gt;)" href="../bank_erosion.html#dfastbe.bank_erosion.data_models.calculation.MeshData">MeshData</a></code>
+                  <code><span title="dfastbe.bank_erosion.data_models.mesh.MeshData">MeshData</span></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3083,7 +3085,8 @@ in the simulation data.</p>
 </details>
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/inputs.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 31</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 30</span>
+<span class="normal"> 31</span>
 <span class="normal"> 32</span>
 <span class="normal"> 33</span>
 <span class="normal"> 34</span>
@@ -3196,7 +3199,7 @@ in the simulation data.</p>
 <span class="normal">141</span>
 <span class="normal">142</span>
 <span class="normal">143</span>
-<span class="normal">144</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">compute_mesh_topology</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MeshData</span><span class="p">:</span>
+<span class="normal">144</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">compute_mesh_topology</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MeshData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Derive secondary topology arrays from the face-node connectivity of the mesh.</span>
 
 <span class="sd">    This function computes the edge-node, edge-face, and face-edge connectivity arrays,</span>
@@ -3309,6 +3312,7 @@ in the simulation data.</p>
         <span class="n">edge_face_connectivity</span><span class="o">=</span><span class="n">edge_face</span><span class="p">,</span>
         <span class="n">face_edge_connectivity</span><span class="o">=</span><span class="n">face_edge_connectivity</span><span class="p">,</span>
         <span class="n">boundary_edge_nrs</span><span class="o">=</span><span class="n">boundary_edge_nrs</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
