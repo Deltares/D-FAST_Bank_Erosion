@@ -35,13 +35,13 @@ from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
 
 from dfastbe import __version__
+from dfastbe.bank_erosion.data_models.mesh import MeshData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     DischargeLevels,
     ErosionInputs,
     ErosionResults,
     FairwayData,
-    MeshData,
     SingleCalculation,
     SingleDischargeLevel,
     SingleErosion,
@@ -58,10 +58,9 @@ from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.utils import (
     BankLinesProcessor,
-    calculate_alpha,
+    MeshProcessor,
     get_km_bins,
     get_km_eroded_volume,
-    intersect_line_mesh,
     move_line,
     write_km_eroded_volumes,
 )
@@ -160,9 +159,9 @@ class Erosion:
         # map km to fairway points, further using axis
         log_text("chainage_to_fairway")
         # intersect fairway and mesh
-        fairway_intersection_coords, fairway_face_indices = intersect_line_mesh(
+        fairway_intersection_coords, fairway_face_indices = MeshProcessor(
             river_axis.as_array(), mesh_data
-        )
+        ).intersect_line_mesh()
         if self.river_data.debug:
             arr = (
                 fairway_intersection_coords[:-1] + fairway_intersection_coords[1:]
@@ -684,7 +683,7 @@ class Erosion:
 
         log_text("derive_topology")
 
-        mesh_data = self.simulation_data.compute_mesh_topology()
+        mesh_data = self.simulation_data.compute_mesh_topology(verbose=False)
         river_axis = self._process_river_axis_by_center_line()
 
         # map to the output interval

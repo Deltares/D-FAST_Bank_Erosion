@@ -7,9 +7,8 @@ from typing import ClassVar, Dict, List, Tuple
 import numpy as np
 from dfastio.xyc.models import XYCModel
 from shapely.geometry import LineString
-
+from dfastbe.bank_erosion.data_models.mesh import MeshData
 from dfastbe.bank_erosion.data_models.calculation import (
-    MeshData,
     SingleBank,
     SingleLevelParameters,
     SingleParameters,
@@ -28,7 +27,7 @@ __all__ = [
 
 class ErosionSimulationData(BaseSimulationData):
 
-    def compute_mesh_topology(self) -> MeshData:
+    def compute_mesh_topology(self, verbose: bool = False) -> MeshData:
         """Derive secondary topology arrays from the face-node connectivity of the mesh.
 
         This function computes the edge-node, edge-face, and face-edge connectivity arrays,
@@ -141,6 +140,7 @@ class ErosionSimulationData(BaseSimulationData):
             edge_face_connectivity=edge_face,
             face_edge_connectivity=face_edge_connectivity,
             boundary_edge_nrs=boundary_edge_nrs,
+            verbose=verbose
         )
 
     @staticmethod
