@@ -300,6 +300,7 @@ class MeshProcessor:
                 # catch case of last segment
                 if self.verbose:
                     print(f"{segment.index}: last point ends in a node")
+
                 self._store_segment_point(segment.current_point)
                 theta = 0.0
                 finished = True
@@ -312,35 +313,12 @@ class MeshProcessor:
                     self.bank_points[segment.index + 1][0]
                     - segment.current_point[0],
                 )
-        index0 = None
+        next_face_index = None
         if not finished:
-            index0 = self._resolve_next_face_by_direction(
-                theta, node, segment.index
+            next_face_index = self.mesh_data.resolve_next_face_by_direction(
+                theta, node, {"is_verbose": self.verbose, "verbose_index": segment.index}
             )
-        return False, index0
-
-    def _resolve_next_face_by_direction(self, theta, node, j):
-        if self.verbose:
-            print(f"{j}: moving in direction theta = {theta}")
-
-        edges = self.mesh_data.find_edges(theta, node, {"is_verbose": self.verbose, "verbose_index": j})
-
-        if self.verbose:
-            print(f"{j}: the edge to the left is edge {edges.left}")
-            print(f"{j}: the edge to the right is edge {edges.right}")
-
-        if edges.left == edges.right:
-            if self.verbose:
-                print(f"{j}: continue along edge {edges.left}")
-            next_face_index = self.mesh_data.edge_face_connectivity[edges.left, :]
-        else:
-            if self.verbose:
-                print(
-                    f"{j}: continue between edges {edges.left}"
-                    f" on the left and {edges.right} on the right"
-                )
-            next_face_index = self.mesh_data.resolve_next_face_from_edges(node, edges, {"is_verbose": self.verbose, "verbose_index": j})
-        return next_face_index
+        return False, next_face_index
 
     def _slice_by_node_or_edge(
         self, segment: RiverSegment, node, edge, faces

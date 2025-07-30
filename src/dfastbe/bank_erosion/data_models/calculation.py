@@ -583,6 +583,32 @@ class MeshData:
             )
         return next_face_index
 
+    def resolve_next_face_by_direction(self, theta: float, node, verbose: Dict[str, Any] = None):
+        is_verbose = verbose.get("is_verbose") if verbose is not None and "is_verbose" in verbose.keys() else False
+        verbose_index = verbose.get("verbose_index") if verbose is not None and "verbose_index" in verbose.keys() else None
+
+        if is_verbose:
+            print(f"{verbose_index}: moving in direction theta = {theta}")
+
+        edges = self.find_edges(theta, node, {"is_verbose": is_verbose, "verbose_index": verbose_index})
+
+        if is_verbose:
+            print(f"{verbose_index}: the edge to the left is edge {edges.left}")
+            print(f"{verbose_index}: the edge to the right is edge {edges.right}")
+
+        if edges.left == edges.right:
+            if is_verbose:
+                print(f"{verbose_index}: continue along edge {edges.left}")
+
+            next_face_index = self.edge_face_connectivity[edges.left, :]
+        else:
+            if is_verbose:
+                print(
+                    f"{verbose_index}: continue between edges {edges.left}"
+                    f" on the left and {edges.right} on the right"
+                )
+            next_face_index = self.resolve_next_face_from_edges(node, edges, {"is_verbose": is_verbose, "verbose_index": verbose_index})
+        return next_face_index
 
 @dataclass
 class SingleBank:
