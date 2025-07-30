@@ -92,6 +92,7 @@ class MeshProcessor:
         if not isinstance(edges_indexes, list):
             # A single index was returned
             index = edges_indexes
+            vindex = None
         else:
             # A list of indices is expected
             if edges_indexes:
@@ -99,13 +100,15 @@ class MeshProcessor:
                     print(f"starting on edge of {edges_indexes}")
 
                 index = -2 if len(edges_indexes) > 1 else edges_indexes[0]
-                self.vindex = edges_indexes if len(edges_indexes) > 1 else None
+                vindex = edges_indexes if len(edges_indexes) > 1 else None
             else:
                 if self.verbose:
                     print("starting outside mesh")
                 index = -1
+                vindex = None
 
         self.index = index
+        self.vindex = vindex
 
 
     def _store_segment_point(self, current_bank_point, shape_length: bool = None):
