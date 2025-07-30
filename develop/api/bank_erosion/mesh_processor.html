@@ -2834,27 +2834,7 @@
 <span class="normal">611</span>
 <span class="normal">612</span>
 <span class="normal">613</span>
-<span class="normal">614</span>
-<span class="normal">615</span>
-<span class="normal">616</span>
-<span class="normal">617</span>
-<span class="normal">618</span>
-<span class="normal">619</span>
-<span class="normal">620</span>
-<span class="normal">621</span>
-<span class="normal">622</span>
-<span class="normal">623</span>
-<span class="normal">624</span>
-<span class="normal">625</span>
-<span class="normal">626</span>
-<span class="normal">627</span>
-<span class="normal">628</span>
-<span class="normal">629</span>
-<span class="normal">630</span>
-<span class="normal">631</span>
-<span class="normal">632</span>
-<span class="normal">633</span>
-<span class="normal">634</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
+<span class="normal">614</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for processing mesh-related operations.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -2885,28 +2865,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_find_starting_face</span><span class="p">(</span><span class="n">closest_cell_ind</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_store_segment_point</span><span class="p">(</span><span class="n">current_bank_point</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_edge_angle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">reverse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the angle of a mesh edge in radians.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            edge (int):</span>
-<span class="sd">                The edge index.</span>
-<span class="sd">            reverse (bool):</span>
-<span class="sd">                If True, computes the angle from end to start.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            float: The angle of the edge in radians.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">reverse</span> <span class="k">else</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">dx</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">x_edge_coords</span><span class="p">[</span><span class="n">edge</span><span class="p">,</span> <span class="n">end</span><span class="p">]</span>
-            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">x_edge_coords</span><span class="p">[</span><span class="n">edge</span><span class="p">,</span> <span class="n">start</span><span class="p">]</span>
-        <span class="p">)</span>
-        <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">y_edge_coords</span><span class="p">[</span><span class="n">edge</span><span class="p">,</span> <span class="n">end</span><span class="p">]</span>
-            <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">y_edge_coords</span><span class="p">[</span><span class="n">edge</span><span class="p">,</span> <span class="n">start</span><span class="p">]</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">dy</span><span class="p">,</span> <span class="n">dx</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_find_starting_face</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">face_indexes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Find the starting face for a bank line segment.</span>
@@ -2996,7 +2954,7 @@
 
         <span class="k">for</span> <span class="n">ie</span> <span class="ow">in</span> <span class="n">all_node_edges</span><span class="p">:</span>
             <span class="n">reverse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">edge_node</span><span class="p">[</span><span class="n">ie</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">node</span>
-            <span class="n">theta_edge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_angle</span><span class="p">(</span><span class="n">ie</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)</span>
+            <span class="n">theta_edge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">calculate_edge_angle</span><span class="p">(</span><span class="n">ie</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="n">reverse</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="ow">and</span> <span class="n">j</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: edge </span><span class="si">{</span><span class="n">ie</span><span class="si">}</span><span class="s2"> connects </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">edge_node</span><span class="p">[</span><span class="n">ie</span><span class="p">,</span><span class="w"> </span><span class="p">:]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: edge </span><span class="si">{</span><span class="n">ie</span><span class="si">}</span><span class="s2"> theta is </span><span class="si">{</span><span class="n">theta_edge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -3059,13 +3017,15 @@
 
 <span class="sd">        Enlarge arrays if needed, set coordinates and index, and increment ind.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">shape_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">shape_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">shape_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">shape_length</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">shape_length</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
             <span class="c1"># last coordinate reached, so enlarge arrays</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="p">(</span><span class="n">shape_length</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="n">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">,</span> <span class="p">(</span><span class="n">shape_length</span><span class="p">,))</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">point_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_bank_point</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">point_index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -3084,7 +3044,7 @@
         <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">segment</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s2">: moving in direction theta = </span><span class="si">{</span><span class="n">theta</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="n">theta_edge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_edge_angle</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
+        <span class="n">theta_edge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">calculate_edge_angle</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">theta</span> <span class="o">==</span> <span class="n">theta_edge</span> <span class="ow">or</span> <span class="n">theta</span> <span class="o">==</span> <span class="o">-</span><span class="n">theta_edge</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">segment</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s2">: continue along edge </span><span class="si">{</span><span class="n">edge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -3484,7 +3444,27 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 </details>
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/mesh_processor.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">584</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">564</span>
+<span class="normal">565</span>
+<span class="normal">566</span>
+<span class="normal">567</span>
+<span class="normal">568</span>
+<span class="normal">569</span>
+<span class="normal">570</span>
+<span class="normal">571</span>
+<span class="normal">572</span>
+<span class="normal">573</span>
+<span class="normal">574</span>
+<span class="normal">575</span>
+<span class="normal">576</span>
+<span class="normal">577</span>
+<span class="normal">578</span>
+<span class="normal">579</span>
+<span class="normal">580</span>
+<span class="normal">581</span>
+<span class="normal">582</span>
+<span class="normal">583</span>
+<span class="normal">584</span>
 <span class="normal">585</span>
 <span class="normal">586</span>
 <span class="normal">587</span>
@@ -3514,27 +3494,7 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 <span class="normal">611</span>
 <span class="normal">612</span>
 <span class="normal">613</span>
-<span class="normal">614</span>
-<span class="normal">615</span>
-<span class="normal">616</span>
-<span class="normal">617</span>
-<span class="normal">618</span>
-<span class="normal">619</span>
-<span class="normal">620</span>
-<span class="normal">621</span>
-<span class="normal">622</span>
-<span class="normal">623</span>
-<span class="normal">624</span>
-<span class="normal">625</span>
-<span class="normal">626</span>
-<span class="normal">627</span>
-<span class="normal">628</span>
-<span class="normal">629</span>
-<span class="normal">630</span>
-<span class="normal">631</span>
-<span class="normal">632</span>
-<span class="normal">633</span>
-<span class="normal">634</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_line_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="normal">614</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_line_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.</span>
 
 <span class="sd">    This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.</span>
