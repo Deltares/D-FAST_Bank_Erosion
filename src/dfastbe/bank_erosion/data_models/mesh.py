@@ -195,7 +195,7 @@ class MeshData:
             point = Point(point)
         else:
             raise TypeError(
-                "point must be a Point object or a list/tuple of coordinates"
+                "point must be a Point object, a list, a tuple, or an np.ndarray of coordinates"
             )
 
         index_list = []
