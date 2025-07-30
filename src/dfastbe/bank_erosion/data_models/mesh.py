@@ -108,11 +108,6 @@ class Edges:
             self.found = True
 
 
-candidates = Edges(
-    left=-1, left_theta=TWO_PI, right=-1, right_theta=TWO_PI
-)
-
-
 @dataclass
 class MeshData:
     """Class to hold mesh-related data.
@@ -373,8 +368,6 @@ class MeshData:
             Edges:
                 A dataclass containing the left and right edge indices, their angle differences, and a found flag.
         """
-
-
         all_node_edges = np.nonzero((self.edge_node == node).any(axis=1))[0]
 
         if self.verbose and verbose_index is not None:
@@ -390,15 +383,19 @@ class MeshData:
 
             dtheta = theta_edge - theta
 
-            candidates.update_edges_by_angle(ie, dtheta, verbose_index)
-            if candidates.found:
+            edges = Edges(
+                left=-1, left_theta=TWO_PI, right=-1, right_theta=TWO_PI
+            )
+
+            edges.update_edges_by_angle(ie, dtheta, verbose_index)
+            if edges.found:
                 break
 
         if self.verbose and verbose_index is not None:
-            print(f"{verbose_index}: the edge to the left is edge {candidates.left}")
-            print(f"{verbose_index}: the edge to the right is edge {candidates.right}")
+            print(f"{verbose_index}: the edge to the left is edge {edges.left}")
+            print(f"{verbose_index}: the edge to the right is edge {edges.right}")
 
-        return candidates
+        return edges
 
     def resolve_next_face_from_edges(
         self, node, edges: Edges, verbose_index: int = None
