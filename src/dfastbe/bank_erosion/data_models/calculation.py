@@ -211,7 +211,7 @@ class Edges:
     found: bool = False
 
     def update_edges_by_angle(
-        self, edge_index: int, dtheta: float, j, verbose=False
+        self, edge_index: int, dtheta: float, j, verbose: bool = False
     ):
         """Update the left and right edges based on the angle difference."""
 
@@ -234,10 +234,10 @@ class Edges:
             # aligned with edge
             if verbose and j is not None:
                 print(f"{j}: line is aligned with edge {edge_index}")
+
             self.left = edge_index
             self.right = edge_index
             self.found = True
-        return self
 
 
 candidates = Edges(
