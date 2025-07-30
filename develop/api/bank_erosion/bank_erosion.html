@@ -6560,8 +6560,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="sd">        Returns:</span>
 <span class="sd">            int: The next face index.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">left_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">edge_face_connectivity</span><span class="p">[</span><span class="n">candidates</span><span class="o">.</span><span class="n">left_edge</span><span class="p">,</span> <span class="p">:]</span>
-        <span class="n">right_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">edge_face_connectivity</span><span class="p">[</span><span class="n">candidates</span><span class="o">.</span><span class="n">right_edge</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">left_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">edge_face_connectivity</span><span class="p">[</span><span class="n">candidates</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">right_faces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">edge_face_connectivity</span><span class="p">[</span><span class="n">candidates</span><span class="o">.</span><span class="n">right</span><span class="p">,</span> <span class="p">:]</span>
 
         <span class="k">if</span> <span class="n">left_faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">right_faces</span> <span class="ow">and</span> <span class="n">left_faces</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">right_faces</span><span class="p">:</span>
             <span class="n">fn1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">face_node</span><span class="p">[</span><span class="n">left_faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
@@ -6573,7 +6573,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="c1"># nodes of the face should be listed in clockwise order</span>
             <span class="c1"># edges[i] is the edge connecting node[i-1] with node[i]</span>
             <span class="c1"># the latter is guaranteed by batch.derive_topology_arrays</span>
-            <span class="k">if</span> <span class="n">fe1</span><span class="p">[</span><span class="n">fn1</span> <span class="o">==</span> <span class="n">node</span><span class="p">]</span> <span class="o">==</span> <span class="n">candidates</span><span class="o">.</span><span class="n">right_edge</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fe1</span><span class="p">[</span><span class="n">fn1</span> <span class="o">==</span> <span class="n">node</span><span class="p">]</span> <span class="o">==</span> <span class="n">candidates</span><span class="o">.</span><span class="n">right</span><span class="p">:</span>
                 <span class="n">index</span> <span class="o">=</span> <span class="n">left_faces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">index</span> <span class="o">=</span> <span class="n">left_faces</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -6583,8 +6583,8 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="n">index</span> <span class="o">=</span> <span class="n">left_faces</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Shouldn&#39;t come here .... left edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">left_edge</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; and right edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">right_edge</span><span class="si">}</span><span class="s2"> don&#39;t share any face&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Shouldn&#39;t come here .... left edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; and right edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">right</span><span class="si">}</span><span class="s2"> don&#39;t share any face&quot;</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">index</span>
 
@@ -6767,18 +6767,18 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">candidates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">find_edges</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;is_verbose&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">,</span> <span class="s2">&quot;verbose_index&quot;</span><span class="p">:</span> <span class="n">j</span><span class="p">})</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: the edge to the left is edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">left_edge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: the edge to the right is edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">right_edge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: the edge to the left is edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: the edge to the right is edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">right</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">candidates</span><span class="o">.</span><span class="n">left_edge</span> <span class="o">==</span> <span class="n">candidates</span><span class="o">.</span><span class="n">right_edge</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">candidates</span><span class="o">.</span><span class="n">left</span> <span class="o">==</span> <span class="n">candidates</span><span class="o">.</span><span class="n">right</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: continue along edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">left_edge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="n">index0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">edge_face_connectivity</span><span class="p">[</span><span class="n">candidates</span><span class="o">.</span><span class="n">left_edge</span><span class="p">,</span> <span class="p">:]</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: continue along edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">index0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">edge_face_connectivity</span><span class="p">[</span><span class="n">candidates</span><span class="o">.</span><span class="n">left</span><span class="p">,</span> <span class="p">:]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: continue between edges </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">left_edge</span><span class="si">}</span><span class="s2">&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; on the left and </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">right_edge</span><span class="si">}</span><span class="s2"> on the right&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: continue between edges </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; on the left and </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">right</span><span class="si">}</span><span class="s2"> on the right&quot;</span>
                 <span class="p">)</span>
             <span class="n">index0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_next_face_from_edges</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">candidates</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">index0</span>
@@ -8857,7 +8857,7 @@ new_shape : Tuple
       <tbody>
           <tr class="doc-section-item">
             <td>
-                <code>left_edge</code>
+                <code>left</code>
             </td>
             <td>
                   <code><span title="int">int</span></code>
@@ -8873,7 +8873,7 @@ new_shape : Tuple
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>left_dtheta</code>
+                <code>left_theta</code>
             </td>
             <td>
                   <code><span title="float">float</span></code>
@@ -8889,7 +8889,7 @@ new_shape : Tuple
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>right_edge</code>
+                <code>right</code>
             </td>
             <td>
                   <code><span title="int">int</span></code>
@@ -8905,7 +8905,7 @@ new_shape : Tuple
           </tr>
           <tr class="doc-section-item">
             <td>
-                <code>right_dtheta</code>
+                <code>right_theta</code>
             </td>
             <td>
                   <code><span title="float">float</span></code>
@@ -8999,51 +8999,51 @@ new_shape : Tuple
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Dataclass to hold edge candidates for left and right edges.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        left_edge (int):</span>
+<span class="sd">        left (int):</span>
 <span class="sd">            Index of the left edge.</span>
-<span class="sd">        left_dtheta (float):</span>
+<span class="sd">        left_theta (float):</span>
 <span class="sd">            Angle of the left edge in radians.</span>
-<span class="sd">        right_edge (int):</span>
+<span class="sd">        right (int):</span>
 <span class="sd">            Index of the right edge.</span>
-<span class="sd">        right_dtheta (float):</span>
+<span class="sd">        right_theta (float):</span>
 <span class="sd">            Angle of the right edge in radians.</span>
 <span class="sd">        found (bool):</span>
 <span class="sd">            Flag indicating whether a valid edge pair was found.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">left_edge</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="n">left_dtheta</span><span class="p">:</span> <span class="nb">float</span>
-    <span class="n">right_edge</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="n">right_dtheta</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">left</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">left_theta</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">right</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">right_theta</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">found</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">update_edges_by_angle</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtheta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtheta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update the left and right edges based on the angle difference.&quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">dtheta</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">left_dtheta</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">left_edge</span> <span class="o">=</span> <span class="n">edge_index</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">left_dtheta</span> <span class="o">=</span> <span class="n">dtheta</span>
-            <span class="k">if</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_dtheta</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">right_edge</span> <span class="o">=</span> <span class="n">edge_index</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">right_dtheta</span> <span class="o">=</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span>
+            <span class="k">if</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">left_theta</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">edge_index</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">left_theta</span> <span class="o">=</span> <span class="n">dtheta</span>
+            <span class="k">if</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_theta</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">edge_index</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">right_theta</span> <span class="o">=</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span>
         <span class="k">elif</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">dtheta</span> <span class="o">=</span> <span class="o">-</span><span class="n">dtheta</span>
-            <span class="k">if</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">left_dtheta</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">left_edge</span> <span class="o">=</span> <span class="n">edge_index</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">left_dtheta</span> <span class="o">=</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span>
-            <span class="k">if</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_dtheta</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">right_edge</span> <span class="o">=</span> <span class="n">edge_index</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">right_dtheta</span> <span class="o">=</span> <span class="n">dtheta</span>
+            <span class="k">if</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">left_theta</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">edge_index</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">left_theta</span> <span class="o">=</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span>
+            <span class="k">if</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_theta</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">edge_index</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">right_theta</span> <span class="o">=</span> <span class="n">dtheta</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># aligned with edge</span>
             <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">j</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: line is aligned with edge </span><span class="si">{</span><span class="n">edge_index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">left_edge</span> <span class="o">=</span> <span class="n">edge_index</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">right_edge</span> <span class="o">=</span> <span class="n">edge_index</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">edge_index</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">edge_index</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -9063,7 +9063,7 @@ new_shape : Tuple
 
 
 <h4 id="dfastbe.bank_erosion.data_models.calculation.Edges.update_edges_by_angle" class="doc doc-heading"><a href="#dfastbe.bank_erosion.data_models.calculation.Edges.update_edges_by_angle" class="toclink">
-            <code class="highlight language-python"><span class="n">update_edges_by_angle</span><span class="p">(</span><span class="n">edge_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtheta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+            <code class="highlight language-python"><span class="n">update_edges_by_angle</span><span class="p">(</span><span class="n">edge_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtheta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span></code>
 
 </a><a href="#dfastbe.bank_erosion.data_models.calculation.Edges.update_edges_by_angle" class="headerlink" title="Permanent link">#</a></h4>
 
@@ -9102,33 +9102,33 @@ new_shape : Tuple
 <span class="normal">238</span>
 <span class="normal">239</span>
 <span class="normal">240</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update_edges_by_angle</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtheta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">edge_index</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">dtheta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Update the left and right edges based on the angle difference.&quot;&quot;&quot;</span>
 
     <span class="k">if</span> <span class="n">dtheta</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">left_dtheta</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">left_edge</span> <span class="o">=</span> <span class="n">edge_index</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">left_dtheta</span> <span class="o">=</span> <span class="n">dtheta</span>
-        <span class="k">if</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_dtheta</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">right_edge</span> <span class="o">=</span> <span class="n">edge_index</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">right_dtheta</span> <span class="o">=</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span>
+        <span class="k">if</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">left_theta</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">edge_index</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">left_theta</span> <span class="o">=</span> <span class="n">dtheta</span>
+        <span class="k">if</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_theta</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">edge_index</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">right_theta</span> <span class="o">=</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span>
     <span class="k">elif</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">dtheta</span> <span class="o">=</span> <span class="o">-</span><span class="n">dtheta</span>
-        <span class="k">if</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">left_dtheta</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">left_edge</span> <span class="o">=</span> <span class="n">edge_index</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">left_dtheta</span> <span class="o">=</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span>
-        <span class="k">if</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_dtheta</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">right_edge</span> <span class="o">=</span> <span class="n">edge_index</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">right_dtheta</span> <span class="o">=</span> <span class="n">dtheta</span>
+        <span class="k">if</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">left_theta</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">edge_index</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">left_theta</span> <span class="o">=</span> <span class="n">TWO_PI</span> <span class="o">-</span> <span class="n">dtheta</span>
+        <span class="k">if</span> <span class="n">dtheta</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">right_theta</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">edge_index</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">right_theta</span> <span class="o">=</span> <span class="n">dtheta</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># aligned with edge</span>
         <span class="k">if</span> <span class="n">verbose</span> <span class="ow">and</span> <span class="n">j</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: line is aligned with edge </span><span class="si">{</span><span class="n">edge_index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">left_edge</span> <span class="o">=</span> <span class="n">edge_index</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">right_edge</span> <span class="o">=</span> <span class="n">edge_index</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">left</span> <span class="o">=</span> <span class="n">edge_index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">right</span> <span class="o">=</span> <span class="n">edge_index</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">return</span> <span class="bp">self</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -10833,8 +10833,8 @@ can be set to empty arrays if not needed.</p>
                 <span class="k">break</span>
 
         <span class="k">if</span> <span class="n">is_verbose</span> <span class="ow">and</span> <span class="n">verbose_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">verbose_index</span><span class="si">}</span><span class="s2">: the edge to the left is edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">left_edge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">verbose_index</span><span class="si">}</span><span class="s2">: the edge to the right is edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">right_edge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">verbose_index</span><span class="si">}</span><span class="s2">: the edge to the left is edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">verbose_index</span><span class="si">}</span><span class="s2">: the edge to the right is edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">right</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">candidates</span>
 </code></pre></div></td></tr></table></div>
@@ -11412,8 +11412,8 @@ verbose_index (int, optional):
             <span class="k">break</span>
 
     <span class="k">if</span> <span class="n">is_verbose</span> <span class="ow">and</span> <span class="n">verbose_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">verbose_index</span><span class="si">}</span><span class="s2">: the edge to the left is edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">left_edge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">verbose_index</span><span class="si">}</span><span class="s2">: the edge to the right is edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">right_edge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">verbose_index</span><span class="si">}</span><span class="s2">: the edge to the left is edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">left</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">verbose_index</span><span class="si">}</span><span class="s2">: the edge to the right is edge </span><span class="si">{</span><span class="n">candidates</span><span class="o">.</span><span class="n">right</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">candidates</span>
 </code></pre></div></td></tr></table></div>
