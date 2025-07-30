@@ -134,14 +134,12 @@ class MeshProcessor:
         self.point_index += 1
 
     def _determine_next_face_on_edge(
-        self, segment: RiverSegment, edge, faces
+        self, segment: RiverSegment, next_point: List[float], edge, faces
     ):
         """Determine the next face to continue along an edge based on the segment direction."""
         theta = math.atan2(
-            self.bank_points[segment.index + 1][1]
-            - segment.current_point[1],
-            self.bank_points[segment.index + 1][0]
-            - segment.current_point[0],
+            next_point[1] - segment.current_point[1],
+            next_point[0] - segment.current_point[0],
         )
         if self.verbose:
             print(f"{segment.index}: moving in direction theta = {theta}")
@@ -309,7 +307,8 @@ class MeshProcessor:
                 self._store_segment_point(segment.current_point)
                 finished = True
             else:
-                index0 = self._determine_next_face_on_edge(segment, edge, faces)
+                next_point = [self.bank_points[segment.index + 1][0], self.bank_points[segment.index + 1][1]]
+                index0 = self._determine_next_face_on_edge(segment, next_point, edge, faces)
         return finished, index0
 
     def _process_bank_segment(self, segment: RiverSegment):
