@@ -76,7 +76,6 @@ class MeshProcessor:
         self._find_starting_face(closest_cell_ind)
         self._store_segment_point(current_bank_point)
 
-
     def _find_starting_face(self, face_indexes: np.ndarray):
         """Find the starting face for a bank line segment.
 
@@ -86,25 +85,27 @@ class MeshProcessor:
         Args:
             face_indexes (np.ndarray): Array of possible cell indices.
         """
-        self.index = -1
         if len(face_indexes) == 0 and self.verbose:
             print("starting outside mesh")
 
-        on_edge = self.mesh_data.locate_point(self.bank_points[0], face_indexes)
-        if not isinstance(on_edge, list):
-            self.index = on_edge
-
-        if self.index == -1:
-
-            if on_edge:
+        edges_indexes = self.mesh_data.locate_point(self.bank_points[0], face_indexes)
+        if not isinstance(edges_indexes, list):
+            # A single index was returned
+            index = edges_indexes
+        else:
+            # A list of indices is expected
+            if edges_indexes:
                 if self.verbose:
-                    print(f"starting on edge of {on_edge}")
+                    print(f"starting on edge of {edges_indexes}")
 
-                self.index = -2 if len(on_edge) > 1 else on_edge[0]
-                self.vindex = on_edge if len(on_edge) > 1 else None
+                index = -2 if len(edges_indexes) > 1 else edges_indexes[0]
+                self.vindex = edges_indexes if len(edges_indexes) > 1 else None
             else:
                 if self.verbose:
                     print("starting outside mesh")
+                index = -1
+
+        self.index = index
 
 
     def _store_segment_point(self, current_bank_point, shape_length: bool = None):
