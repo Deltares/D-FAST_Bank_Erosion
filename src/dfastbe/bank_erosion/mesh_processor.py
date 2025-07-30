@@ -161,8 +161,8 @@ class MeshProcessor:
         Returns:
             int: The next face index.
         """
-        left_faces = self.mesh_data.edge_face_connectivity[candidates.left_edge, :]
-        right_faces = self.mesh_data.edge_face_connectivity[candidates.right_edge, :]
+        left_faces = self.mesh_data.edge_face_connectivity[candidates.left, :]
+        right_faces = self.mesh_data.edge_face_connectivity[candidates.right, :]
 
         if left_faces[0] in right_faces and left_faces[1] in right_faces:
             fn1 = self.mesh_data.face_node[left_faces[0]]
@@ -174,7 +174,7 @@ class MeshProcessor:
             # nodes of the face should be listed in clockwise order
             # edges[i] is the edge connecting node[i-1] with node[i]
             # the latter is guaranteed by batch.derive_topology_arrays
-            if fe1[fn1 == node] == candidates.right_edge:
+            if fe1[fn1 == node] == candidates.right:
                 index = left_faces[0]
             else:
                 index = left_faces[1]
@@ -184,8 +184,8 @@ class MeshProcessor:
             index = left_faces[1]
         else:
             raise ValueError(
-                f"Shouldn't come here .... left edge {candidates.left_edge}"
-                f" and right edge {candidates.right_edge} don't share any face"
+                f"Shouldn't come here .... left edge {candidates.left}"
+                f" and right edge {candidates.right} don't share any face"
             )
         return index
 
@@ -368,18 +368,18 @@ class MeshProcessor:
         candidates = self.mesh_data.find_edges(theta, node, {"is_verbose": self.verbose, "verbose_index": j})
 
         if self.verbose:
-            print(f"{j}: the edge to the left is edge {candidates.left_edge}")
-            print(f"{j}: the edge to the right is edge {candidates.right_edge}")
+            print(f"{j}: the edge to the left is edge {candidates.left}")
+            print(f"{j}: the edge to the right is edge {candidates.right}")
 
-        if candidates.left_edge == candidates.right_edge:
+        if candidates.left == candidates.right:
             if self.verbose:
-                print(f"{j}: continue along edge {candidates.left_edge}")
-            index0 = self.mesh_data.edge_face_connectivity[candidates.left_edge, :]
+                print(f"{j}: continue along edge {candidates.left}")
+            index0 = self.mesh_data.edge_face_connectivity[candidates.left, :]
         else:
             if self.verbose:
                 print(
-                    f"{j}: continue between edges {candidates.left_edge}"
-                    f" on the left and {candidates.right_edge} on the right"
+                    f"{j}: continue between edges {candidates.left}"
+                    f" on the left and {candidates.right} on the right"
                 )
             index0 = self._resolve_next_face_from_edges(node, candidates, j)
         return index0

@@ -193,21 +193,21 @@ class Edges:
     """Dataclass to hold edge candidates for left and right edges.
 
     Args:
-        left_edge (int):
+        left (int):
             Index of the left edge.
-        left_dtheta (float):
+        left_theta (float):
             Angle of the left edge in radians.
-        right_edge (int):
+        right (int):
             Index of the right edge.
-        right_dtheta (float):
+        right_theta (float):
             Angle of the right edge in radians.
         found (bool):
             Flag indicating whether a valid edge pair was found.
     """
-    left_edge: int
-    left_dtheta: float
-    right_edge: int
-    right_dtheta: float
+    left: int
+    left_theta: float
+    right: int
+    right_theta: float
     found: bool = False
 
     def update_edges_by_angle(
@@ -216,32 +216,32 @@ class Edges:
         """Update the left and right edges based on the angle difference."""
 
         if dtheta > 0:
-            if dtheta < self.left_dtheta:
-                self.left_edge = edge_index
-                self.left_dtheta = dtheta
-            if TWO_PI - dtheta < self.right_dtheta:
-                self.right_edge = edge_index
-                self.right_dtheta = TWO_PI - dtheta
+            if dtheta < self.left_theta:
+                self.left = edge_index
+                self.left_theta = dtheta
+            if TWO_PI - dtheta < self.right_theta:
+                self.right = edge_index
+                self.right_theta = TWO_PI - dtheta
         elif dtheta < 0:
             dtheta = -dtheta
-            if TWO_PI - dtheta < self.left_dtheta:
-                self.left_edge = edge_index
-                self.left_dtheta = TWO_PI - dtheta
-            if dtheta < self.right_dtheta:
-                self.right_edge = edge_index
-                self.right_dtheta = dtheta
+            if TWO_PI - dtheta < self.left_theta:
+                self.left = edge_index
+                self.left_theta = TWO_PI - dtheta
+            if dtheta < self.right_theta:
+                self.right = edge_index
+                self.right_theta = dtheta
         else:
             # aligned with edge
             if verbose and j is not None:
                 print(f"{j}: line is aligned with edge {edge_index}")
-            self.left_edge = edge_index
-            self.right_edge = edge_index
+            self.left = edge_index
+            self.right = edge_index
             self.found = True
         return self
 
 
 candidates = Edges(
-    left_edge=-1, left_dtheta=TWO_PI, right_edge=-1, right_dtheta=TWO_PI
+    left=-1, left_theta=TWO_PI, right=-1, right_theta=TWO_PI
 )
 
 
@@ -525,8 +525,8 @@ class MeshData:
                 break
 
         if is_verbose and verbose_index is not None:
-            print(f"{verbose_index}: the edge to the left is edge {candidates.left_edge}")
-            print(f"{verbose_index}: the edge to the right is edge {candidates.right_edge}")
+            print(f"{verbose_index}: the edge to the left is edge {candidates.left}")
+            print(f"{verbose_index}: the edge to the right is edge {candidates.right}")
 
         return candidates
 
