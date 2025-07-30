@@ -67,6 +67,10 @@ class EdgeCandidates:
         return self
 
 
+candidates = EdgeCandidates(
+    left_edge=-1, left_dtheta=TWO_PI, right_edge=-1, right_dtheta=TWO_PI
+)
+
 @dataclass
 class RiverSegment:
     """
@@ -204,17 +208,17 @@ class MeshProcessor:
         Helper to find the left and right edges at a node based on the direction theta.
 
         Args:
-            theta (float): Direction angle of the segment.
-            node (int): The node index.
-            j (int, optional): Step index for verbose output.
+            theta (float):
+                Direction angle of the segment.
+            node (int):
+                The node index.
+            j (int, optional):
+                Step index for verbose output.
 
         Returns:
-            EdgeCandidates: A dataclass containing the left and right edge indices,
-                            their angle differences, and a found flag.
+            EdgeCandidates:
+                A dataclass containing the left and right edge indices, their angle differences, and a found flag.
         """
-        candidates = EdgeCandidates(
-            left_edge=-1, left_dtheta=TWO_PI, right_edge=-1, right_dtheta=TWO_PI
-        )
         all_node_edges = np.nonzero((self.mesh_data.edge_node == node).any(axis=1))[0]
 
         if self.verbose and j is not None:
