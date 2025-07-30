@@ -245,7 +245,7 @@ class MeshProcessor:
         next_face_index = None
         if not finished:
             next_face_index = self.mesh_data.resolve_next_face_by_direction(
-                theta, node, {"is_verbose": self.verbose, "verbose_index": segment.index}
+                theta, node, segment.index
             )
         return False, next_face_index
 

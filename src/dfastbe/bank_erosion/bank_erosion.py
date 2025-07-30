@@ -684,7 +684,7 @@ class Erosion:
 
         log_text("derive_topology")
 
-        mesh_data = self.simulation_data.compute_mesh_topology()
+        mesh_data = self.simulation_data.compute_mesh_topology(verbose=False)
         river_axis = self._process_river_axis_by_center_line()
 
         # map to the output interval

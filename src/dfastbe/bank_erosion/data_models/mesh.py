@@ -137,6 +137,7 @@ class MeshData:
     edge_face_connectivity: np.ndarray
     face_edge_connectivity: np.ndarray
     boundary_edge_nrs: np.ndarray
+    verbose: bool = False
 
     def get_face_by_index(self, index: int, as_polygon: bool = False) -> np.ndarray:
         """Returns the coordinates of the index-th mesh face as an (N, 2) array.
@@ -211,6 +212,9 @@ class MeshData:
             index (int):
                 Index of the current mesh face. If `index` is negative, the function assumes the segment intersects
                 the boundary edges of the mesh.
+            segment (RiverSegment):
+                A `RiverSegment` object containing the previous and current points of the segment, as well as the
+                minimum relative distance along the segment where the last intersection occurred.
 
         Returns:
             Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -258,6 +262,9 @@ class MeshData:
         Args:
             edges (np.ndarray):
                 Array containing the indices of the edges to check for intersections.
+            segment (RiverSegment):
+                A `RiverSegment` object containing the previous and current points of the segment, as well as the
+                minimum relative distance along the segment where the last intersection occurred.
             limit_relative_distance (bool, optional):
                 If True, limits the relative distance along the segment `bpj1-bpj`
                 to a maximum of 1. Defaults to True.
@@ -299,7 +306,7 @@ class MeshData:
         edges = edges[valid_intersections]
         return edge_relative_dist, segment_relative_dist, edges
 
-    def resolve_ambiguous_edge_transition(self, segment: "RiverSegment", vindex):
+    def resolve_ambiguous_edge_transition(self, segment: RiverSegment, vindex):
         """Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces."""
         b = np.zeros(0)
         edges = np.zeros(0, dtype=np.int64)
@@ -338,7 +345,7 @@ class MeshData:
 
         return math.atan2(dy, dx)
 
-    def find_edges(self, theta, node, verbose: Dict[str, Any] = None) -> Edges:
+    def find_edges(self, theta, node, verbose_index: int = None) -> Edges:
         """
         Helper to find the left and right edges at a node based on the direction theta.
 
@@ -347,29 +354,25 @@ class MeshData:
                 Direction angle of the segment.
             node (int):
                 The node index.
-            verbose (Union[str, Any], optional):
-                verbose (bool):
-                    True if verbose output is desired, False otherwise.
-                verbose_index (int, optional):
-                    Step index for verbose output.
+            verbose_index (int, optional):
+                Step index for verbose output.
 
         Returns:
             Edges:
                 A dataclass containing the left and right edge indices, their angle differences, and a found flag.
         """
-        is_verbose = verbose.get("is_verbose") if verbose is not None and "is_verbose" in verbose.keys() else False
-        verbose_index = verbose.get("verbose_index") if verbose is not None and "verbose_index" in verbose.keys() else None
+
 
         all_node_edges = np.nonzero((self.edge_node == node).any(axis=1))[0]
 
-        if is_verbose and verbose_index is not None:
+        if self.verbose and verbose_index is not None:
             print(f"{verbose_index}: the edges connected to node {node} are {all_node_edges}")
 
         for ie in all_node_edges:
             reverse = self.edge_node[ie, 0] != node
             theta_edge = self.calculate_edge_angle(ie, reverse=reverse)
 
-            if is_verbose and verbose_index is not None:
+            if self.verbose and verbose_index is not None:
                 print(f"{verbose_index}: edge {ie} connects {self.edge_node[ie, :]}")
                 print(f"{verbose_index}: edge {ie} theta is {theta_edge}")
 
@@ -379,14 +382,14 @@ class MeshData:
             if candidates.found:
                 break
 
-        if is_verbose and verbose_index is not None:
+        if self.verbose and verbose_index is not None:
             print(f"{verbose_index}: the edge to the left is edge {candidates.left}")
             print(f"{verbose_index}: the edge to the right is edge {candidates.right}")
 
         return candidates
 
     def resolve_next_face_from_edges(
-        self, node, edges: Edges, verbose: Dict[str, Any] = None
+        self, node, edges: Edges, verbose_index: int = None
     ) -> int:
         """
         Helper to resolve the next face index when traversing between two edges at a node.
@@ -395,19 +398,13 @@ class MeshData:
             node (int): The node index.
             edges (Edges):
                 The edges connecting the node, containing left and right edge indices.
-            verbose (Dict[str, Any], optional):
-                is_verbose (bool):
-                    True if verbose output is desired, False otherwise.
-                verbose_index (int, optional):
-                    Step index for verbose output.
+            verbose_index (int, optional):
+                Step index for verbose output.
 
         Returns:
             next_face_index (int):
                 The next face index.
         """
-        is_verbose = verbose.get("is_verbose") if verbose is not None and "is_verbose" in verbose.keys() else False
-        verbose_index = verbose.get("verbose_index") if verbose is not None and "verbose_index" in verbose.keys() else None
-
         left_faces = self.edge_face_connectivity[edges.left, :]
         right_faces = self.edge_face_connectivity[edges.right, :]
 
@@ -415,7 +412,7 @@ class MeshData:
             fn1 = self.face_node[left_faces[0]]
             fe1 = self.face_edge_connectivity[left_faces[0]]
 
-            if is_verbose and verbose_index is not None:
+            if self.verbose and verbose_index is not None:
                 print(f"{verbose_index}: those edges are shared by two faces: {left_faces}")
                 print(f"{verbose_index}: face {left_faces[0]} has nodes: {fn1}")
                 print(f"{verbose_index}: face {left_faces[0]} has edges: {fe1}")
@@ -439,31 +436,29 @@ class MeshData:
             )
         return next_face_index
 
-    def resolve_next_face_by_direction(self, theta: float, node, verbose: Dict[str, Any] = None):
-        is_verbose = verbose.get("is_verbose") if verbose is not None and "is_verbose" in verbose.keys() else False
-        verbose_index = verbose.get("verbose_index") if verbose is not None and "verbose_index" in verbose.keys() else None
+    def resolve_next_face_by_direction(self, theta: float, node, verbose_index: int = None):
 
-        if is_verbose:
+        if self.verbose:
             print(f"{verbose_index}: moving in direction theta = {theta}")
 
-        edges = self.find_edges(theta, node, {"is_verbose": is_verbose, "verbose_index": verbose_index})
+        edges = self.find_edges(theta, node, verbose_index)
 
-        if is_verbose:
+        if self.verbose:
             print(f"{verbose_index}: the edge to the left is edge {edges.left}")
             print(f"{verbose_index}: the edge to the right is edge {edges.right}")
 
         if edges.left == edges.right:
-            if is_verbose:
+            if self.verbose:
                 print(f"{verbose_index}: continue along edge {edges.left}")
 
             next_face_index = self.edge_face_connectivity[edges.left, :]
         else:
-            if is_verbose:
+            if self.verbose:
                 print(
                     f"{verbose_index}: continue between edges {edges.left}"
                     f" on the left and {edges.right} on the right"
                 )
-            next_face_index = self.resolve_next_face_from_edges(node, edges, {"is_verbose": is_verbose, "verbose_index": verbose_index})
+            next_face_index = self.resolve_next_face_from_edges(node, edges, verbose_index)
         return next_face_index
 
     def determine_next_face_on_edge(
