@@ -12,7 +12,7 @@ The Bank Erosion Mesh Processor module consists of the following components:
 
 ### Mesh Processing Functions
 
-::: dfastbe.bank_erosion.mesh_processor
+::: dfastbe.bank_erosion.mesh.processor
 
 The mesh processing component provides functions for processing mesh data, such as:
 
@@ -25,8 +25,8 @@ The mesh processing component provides functions for processing mesh data, such 
 ## Usage Example
 
 ```python
-from dfastbe.bank_erosion.mesh_processor import intersect_line_mesh
-from dfastbe.bank_erosion.data_models.calculation import MeshData
+from dfastbe.bank_erosion.mesh.processor import MeshProcessor
+from dfastbe.bank_erosion.mesh.data_models import MeshData
 from dfastbe.io.config import ConfigFile
 from dfastbe.bank_erosion.bank_erosion import Erosion
 
@@ -41,7 +41,7 @@ mesh_data = erosion.simulation_data.compute_mesh_topology()
 
 # Intersect a bank line with the mesh
 bank_line_coords = erosion.river_data.bank_lines.geometry[0].coords
-coords_along_bank, face_indices = intersect_line_mesh(bank_line_coords, mesh_data)
+coords_along_bank, face_indices = MeshProcessor(bank_line_coords, mesh_data).intersect_line_mesh()
 
 # Print results
 print(f"Number of intersection points: {len(coords_along_bank)}")
