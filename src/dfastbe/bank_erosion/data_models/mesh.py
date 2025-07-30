@@ -1,4 +1,6 @@
-from typing import List, Tuple, Dict, Any
+"""This module defines data structures and methods for handling mesh data and river segments."""
+
+from typing import List, Tuple
 import numpy as np
 import math
 from dataclasses import dataclass, field
@@ -6,14 +8,13 @@ from shapely.geometry import Point, Polygon, LineString
 
 TWO_PI = 2 * math.pi
 
-__all__ = [
-    "MeshData",
-    "RiverSegment"
-]
+__all__ = ["MeshData", "RiverSegment"]
+
 
 @dataclass
 class RiverSegment:
-    """
+    """Represents a segment of a river line.
+
     Args:
         min_relative_distance (float):
             The relative distance along the previous segment where the last intersection occurred. Used to filter
@@ -23,6 +24,7 @@ class RiverSegment:
         previous_point (np.ndarray):
             A 1D array of shape (2,) containing the x, y coordinates of the previous point of the line segment.
     """
+
     index: int
     min_relative_distance: float
     current_point: np.ndarray
@@ -37,9 +39,10 @@ class RiverSegment:
 
     @property
     def theta(self):
+        """Calculate the angle of the segment in radians."""
         theta = math.atan2(
-            self.current_point[1]- self.previous_point[1],
-            self.current_point[0] - self.previous_point[0]
+            self.current_point[1] - self.previous_point[1],
+            self.current_point[0] - self.previous_point[0],
         )
         return theta
 
@@ -55,6 +58,7 @@ class RiverSegment:
         self.distances = self.distances[min_distance_indices]
         self.edges = self.edges[min_distance_indices]
         self.nodes = self.nodes[min_distance_indices]
+
 
 @dataclass
 class Edges:
@@ -72,6 +76,7 @@ class Edges:
         found (bool):
             Flag indicating whether a valid edge pair was found.
     """
+
     left: int
     left_theta: float
     right: int
@@ -134,6 +139,7 @@ class MeshData:
         boundary_edge_nrs (np.ndarray):
             List of edge indices that together form the boundary of the whole mesh.
     """
+
     x_face_coords: np.ndarray
     y_face_coords: np.ndarray
     x_edge_coords: np.ndarray
@@ -159,20 +165,18 @@ class MeshData:
             np.ndarray:
                 Array of shape (n_nodes, 2) with x, y coordinates.
         """
-        x = self.x_face_coords[
-            index : index + 1, : self.n_nodes[index]
-            ]
-        y = self.y_face_coords[
-            index : index + 1, : self.n_nodes[index]
-            ]
+        x = self.x_face_coords[index : index + 1, : self.n_nodes[index]]
+        y = self.y_face_coords[index : index + 1, : self.n_nodes[index]]
         face = np.concatenate((x, y), axis=0).T
 
         if as_polygon:
             face = Polygon(face)
         return face
 
-    def locate_point(self, point: Point | np.ndarray | list | Tuple, face_index: int | np.ndarray) -> int | List[int]:
-        """locate a point in the mesh faces.
+    def locate_point(
+        self, point: Point | np.ndarray | list | Tuple, face_index: int | np.ndarray
+    ) -> int | List[int]:
+        """Locate a point in the mesh faces.
 
         Args:
             point:
@@ -185,10 +189,14 @@ class MeshData:
                 index if the face that the point is located in, or a list of indexes if the point is on the edge of
                 multiple faces.
         """
-        if not isinstance(point, Point) and isinstance(point, (list, tuple, np.ndarray)):
+        if not isinstance(point, Point) and isinstance(
+            point, (list, tuple, np.ndarray)
+        ):
             point = Point(point)
         else:
-            raise TypeError("point must be a Point object or a list/tuple of coordinates")
+            raise TypeError(
+                "point must be a Point object or a list/tuple of coordinates"
+            )
 
         index_list = []
         for ind in face_index:
@@ -247,10 +255,16 @@ class MeshData:
             edges = self.boundary_edge_nrs
         else:
             edges = self.face_edge_connectivity[index, : self.n_nodes[index]]
-        edge_relative_dist, segment_relative_dist, edges = self.calculate_edge_intersections(edges, segment, True)
+        edge_relative_dist, segment_relative_dist, edges = (
+            self.calculate_edge_intersections(edges, segment, True)
+        )
         is_intersected_at_node = -np.ones(edge_relative_dist.shape, dtype=np.int64)
-        is_intersected_at_node[edge_relative_dist == 0] = self.edge_node[edges[edge_relative_dist == 0], 0]
-        is_intersected_at_node[edge_relative_dist == 1] = self.edge_node[edges[edge_relative_dist == 1], 1]
+        is_intersected_at_node[edge_relative_dist == 0] = self.edge_node[
+            edges[edge_relative_dist == 0], 0
+        ]
+        is_intersected_at_node[edge_relative_dist == 1] = self.edge_node[
+            edges[edge_relative_dist == 1], 1
+        ]
 
         return segment_relative_dist, edges, is_intersected_at_node
 
@@ -298,17 +312,20 @@ class MeshData:
               are ignored.
         """
         from dfastbe.bank_erosion.utils import calculate_segment_edge_intersections
-        edge_relative_dist, segment_relative_dist, valid_intersections = calculate_segment_edge_intersections(
-            self.x_edge_coords[edges, 0],
-            self.y_edge_coords[edges, 0],
-            self.x_edge_coords[edges, 1],
-            self.y_edge_coords[edges, 1],
-            segment.previous_point[0],
-            segment.previous_point[1],
-            segment.current_point[0],
-            segment.current_point[1],
-            segment.min_relative_distance,
-            limit_relative_distance,
+
+        edge_relative_dist, segment_relative_dist, valid_intersections = (
+            calculate_segment_edge_intersections(
+                self.x_edge_coords[edges, 0],
+                self.y_edge_coords[edges, 0],
+                self.x_edge_coords[edges, 1],
+                self.y_edge_coords[edges, 1],
+                segment.previous_point[0],
+                segment.previous_point[1],
+                segment.current_point[0],
+                segment.current_point[1],
+                segment.min_relative_distance,
+                limit_relative_distance,
+            )
         )
         edges = edges[valid_intersections]
         return edge_relative_dist, segment_relative_dist, edges
@@ -371,7 +388,9 @@ class MeshData:
         all_node_edges = np.nonzero((self.edge_node == node).any(axis=1))[0]
 
         if self.verbose and verbose_index is not None:
-            print(f"{verbose_index}: the edges connected to node {node} are {all_node_edges}")
+            print(
+                f"{verbose_index}: the edges connected to node {node} are {all_node_edges}"
+            )
 
         for ie in all_node_edges:
             reverse = self.edge_node[ie, 0] != node
@@ -383,9 +402,7 @@ class MeshData:
 
             dtheta = theta_edge - theta
 
-            edges = Edges(
-                left=-1, left_theta=TWO_PI, right=-1, right_theta=TWO_PI
-            )
+            edges = Edges(left=-1, left_theta=TWO_PI, right=-1, right_theta=TWO_PI)
 
             edges.update_edges_by_angle(ie, dtheta, verbose_index)
             if edges.found:
@@ -422,7 +439,9 @@ class MeshData:
             fe1 = self.face_edge_connectivity[left_faces[0]]
 
             if self.verbose and verbose_index is not None:
-                print(f"{verbose_index}: those edges are shared by two faces: {left_faces}")
+                print(
+                    f"{verbose_index}: those edges are shared by two faces: {left_faces}"
+                )
                 print(f"{verbose_index}: face {left_faces[0]} has nodes: {fn1}")
                 print(f"{verbose_index}: face {left_faces[0]} has edges: {fe1}")
 
@@ -445,7 +464,10 @@ class MeshData:
             )
         return next_face_index
 
-    def resolve_next_face_by_direction(self, theta: float, node, verbose_index: int = None):
+    def resolve_next_face_by_direction(
+        self, theta: float, node, verbose_index: int = None
+    ):
+        """Helper to resolve the next face index based on the direction theta at a node."""
 
         if self.verbose:
             print(f"{verbose_index}: moving in direction theta = {theta}")
@@ -467,7 +489,9 @@ class MeshData:
                     f"{verbose_index}: continue between edges {edges.left}"
                     f" on the left and {edges.right} on the right"
                 )
-            next_face_index = self.resolve_next_face_from_edges(node, edges, verbose_index)
+            next_face_index = self.resolve_next_face_from_edges(
+                node, edges, verbose_index
+            )
         return next_face_index
 
     def determine_next_face_on_edge(
@@ -477,7 +501,7 @@ class MeshData:
         theta = math.atan2(
             next_point[1] - segment.current_point[1],
             next_point[0] - segment.current_point[0],
-            )
+        )
         if verbose:
             print(f"{segment.index}: moving in direction theta = {theta}")
 
@@ -493,7 +517,7 @@ class MeshData:
                 index=segment.index,
                 previous_point=segment.current_point,
                 current_point=next_point,
-                min_relative_distance=0
+                min_relative_distance=0,
             )
             _, _, edges = self.calculate_edge_intersections(
                 fe1,
