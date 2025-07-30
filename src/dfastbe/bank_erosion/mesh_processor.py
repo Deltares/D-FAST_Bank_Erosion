@@ -195,10 +195,12 @@ class MeshProcessor:
     def _process_node_transition(self, segment: RiverSegment, node):
         """Process the transition at a node when a segment ends or continues."""
         finished = False
+
         if self.verbose:
             print(
                 f"{segment.index}: moving via node {node} on edges {segment.edges} at {segment.distances[0]}"
             )
+        
         # figure out where we will be heading afterwards ...
         if segment.distances[0] < 1.0:
             # segment passes through node and enter non-neighbouring cell ...
@@ -236,10 +238,10 @@ class MeshProcessor:
         self, segment: RiverSegment, node, edge, faces
     ):
         finished = False
-        index0 = None
+        next_face_index = None
         if node >= 0:
             # if we slice at a node ...
-            finished, index0 = self._process_node_transition(segment, node)
+            finished, next_face_index = self._process_node_transition(segment, node)
 
         elif segment.distances[0] == 1:
             # ending at slice point, so ending on an edge ...
@@ -256,8 +258,9 @@ class MeshProcessor:
                 finished = True
             else:
                 next_point = [self.bank_points[segment.index + 1][0], self.bank_points[segment.index + 1][1]]
-                index0 = self.mesh_data.determine_next_face_on_edge(segment, next_point, edge, faces, self.verbose)
-        return finished, index0
+                next_face_index = self.mesh_data.determine_next_face_on_edge(segment, next_point, edge, faces, self.verbose)
+
+        return finished, next_face_index
 
     def _process_bank_segment(self, segment: RiverSegment):
 

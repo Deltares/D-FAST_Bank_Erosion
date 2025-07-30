@@ -477,7 +477,6 @@ class MeshData:
         self, segment: RiverSegment, next_point: List[float], edge, faces, verbose: bool
     ):
         """Determine the next face to continue along an edge based on the segment direction."""
-
         theta = math.atan2(
             next_point[1] - segment.current_point[1],
             next_point[0] - segment.current_point[0],
@@ -489,7 +488,7 @@ class MeshData:
         if theta == theta_edge or theta == -theta_edge:
             if verbose:
                 print(f"{segment.index}: continue along edge {edge}")
-            index0 = faces
+            next_face_index = faces
         else:
             # check whether the (extended) segment slices any edge of faces[0]
             fe1 = self.face_edge_connectivity[faces[0]]
@@ -507,5 +506,5 @@ class MeshData:
             # yes, a slice (typically 1, but could be 2 if it slices at a node
             # but that doesn't matter) ... so, we continue towards faces[0]
             # if there are no slices for faces[0], we continue towards faces[1]
-            index0 = faces[0] if len(edges) > 0 else faces[1]
-        return index0
+            next_face_index = faces[0] if len(edges) > 0 else faces[1]
+        return next_face_index
