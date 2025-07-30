@@ -378,7 +378,7 @@ class TestMeshProcessor:
             previous_point=previous_point,
             min_relative_distance=0.0,
         )
-        b, edges, nodes = mesh_data.calculate_edge_intersections(edges, segment)
+        b, edges, nodes = mesh_data._calculate_edge_intersections(edges, segment)
         assert np.allclose(b, np.array([0.71466942]))
         assert np.allclose(edges, np.array([0.6845984]))
         assert np.array_equal(nodes, np.array([2]))
