@@ -152,21 +152,24 @@ class MeshProcessor:
             f"{step}: moving from {index_str} via {transition_type} {transition_index} "
             f"to {index0} at b = {prev_b}"
         )
+    def _update_main_attributes(self, face_indexes, node, prev_b, j):
+        if self.verbose:
+            self._log_mesh_transition(j, "node", node, face_indexes, prev_b)
 
-    def _update_mesh_index_and_log(self, j, node, edge, faces, index0, prev_b):
+        if isinstance(face_indexes, (int, np.integer)):
+            self.index = face_indexes
+        elif hasattr(face_indexes, "__len__") and len(face_indexes) == 1:
+            self.index = face_indexes[0]
+        else:
+            self.index = -2
+            self.vindex = face_indexes
+
+    def _update_mesh_index_and_log(self, j, node, edge, faces, face_indexes, prev_b):
         """
         Helper to update mesh index and log transitions for intersect_line_mesh.
         """
-        if index0 is not None:
-            if self.verbose:
-                self._log_mesh_transition(j, "node", node, index0, prev_b)
-            if isinstance(index0, (int, np.integer)):
-                self.index = index0
-            elif hasattr(index0, "__len__") and len(index0) == 1:
-                self.index = index0[0]
-            else:
-                self.index = -2
-                self.vindex = index0
+        if face_indexes is not None:
+            self._update_main_attributes(face_indexes, node, prev_b, j)
             return
 
         for i, face in enumerate(faces):
