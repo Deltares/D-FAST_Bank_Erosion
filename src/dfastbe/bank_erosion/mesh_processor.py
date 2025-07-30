@@ -299,13 +299,15 @@ class MeshProcessor:
 
         Enlarge arrays if needed, set coordinates and index, and increment ind.
         """
-        if shape_length is None:
-            shape_length = self.point_index + 1
+        shape_length = self.point_index + 1 if shape_length is None else shape_length
+
         if self.point_index == self.coords.shape[0]:
             # last coordinate reached, so enlarge arrays
             self.coords = enlarge(self.coords, (shape_length, 2))
             self.face_indexes = enlarge(self.face_indexes, (shape_length,))
+
         self.coords[self.point_index] = current_bank_point
+
         if self.index == -2:
             self.face_indexes[self.point_index] = self.vindex[0]
         else:
