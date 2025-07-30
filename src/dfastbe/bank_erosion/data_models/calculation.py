@@ -37,6 +37,8 @@ __all__ = [
     "SingleCalculation",
     "SingleDischargeLevel",
     "DischargeLevels",
+    "Edges",
+    "candidates",
 ]
 
 @dataclass
@@ -181,6 +183,66 @@ class WaterLevelData:
     velocity: List[List[np.ndarray]]
     chezy: List[List[np.ndarray]]
     vol_per_discharge: List[List[np.ndarray]]
+
+
+TWO_PI = 2 * math.pi
+
+
+@dataclass
+class Edges:
+    """Dataclass to hold edge candidates for left and right edges.
+
+    Args:
+        left_edge (int):
+            Index of the left edge.
+        left_dtheta (float):
+            Angle of the left edge in radians.
+        right_edge (int):
+            Index of the right edge.
+        right_dtheta (float):
+            Angle of the right edge in radians.
+        found (bool):
+            Flag indicating whether a valid edge pair was found.
+    """
+    left_edge: int
+    left_dtheta: float
+    right_edge: int
+    right_dtheta: float
+    found: bool = False
+
+    def update_edges_by_angle(
+        self, edge_index: int, dtheta: float, j, verbose=False
+    ):
+        """Update the left and right edges based on the angle difference."""
+
+        if dtheta > 0:
+            if dtheta < self.left_dtheta:
+                self.left_edge = edge_index
+                self.left_dtheta = dtheta
+            if TWO_PI - dtheta < self.right_dtheta:
+                self.right_edge = edge_index
+                self.right_dtheta = TWO_PI - dtheta
+        elif dtheta < 0:
+            dtheta = -dtheta
+            if TWO_PI - dtheta < self.left_dtheta:
+                self.left_edge = edge_index
+                self.left_dtheta = TWO_PI - dtheta
+            if dtheta < self.right_dtheta:
+                self.right_edge = edge_index
+                self.right_dtheta = dtheta
+        else:
+            # aligned with edge
+            if verbose and j is not None:
+                print(f"{j}: line is aligned with edge {edge_index}")
+            self.left_edge = edge_index
+            self.right_edge = edge_index
+            self.found = True
+        return self
+
+
+candidates = Edges(
+    left_edge=-1, left_dtheta=TWO_PI, right_edge=-1, right_dtheta=TWO_PI
+)
 
 
 @dataclass
@@ -420,6 +482,54 @@ class MeshData:
         dy = self.y_edge_coords[edge, end] - self.y_edge_coords[edge, start]
 
         return math.atan2(dy, dx)
+
+    def find_edges(self, theta, node, verbose: Dict[str, Any] = None) -> Edges:
+        """
+        Helper to find the left and right edges at a node based on the direction theta.
+
+        Args:
+            theta (float):
+                Direction angle of the segment.
+            node (int):
+                The node index.
+            verbose (Union[str, Any], optional):
+                verbose (bool):
+                    True if verbose output is desired, False otherwise.
+                verbose_index (int, optional):
+                    Step index for verbose output.
+
+        Returns:
+            Edges:
+                A dataclass containing the left and right edge indices, their angle differences, and a found flag.
+        """
+        is_verbose = verbose.get("is_verbose") if verbose is not None and "is_verbose" in verbose.keys() else False
+        verbose_index = verbose.get("verbose_index") if verbose is not None and "verbose_index" in verbose.keys() else None
+
+        all_node_edges = np.nonzero((self.edge_node == node).any(axis=1))[0]
+
+        if is_verbose and verbose_index is not None:
+            print(f"{verbose_index}: the edges connected to node {node} are {all_node_edges}")
+
+        for ie in all_node_edges:
+            reverse = self.edge_node[ie, 0] != node
+            theta_edge = self.calculate_edge_angle(ie, reverse=reverse)
+
+            if is_verbose and verbose_index is not None:
+                print(f"{verbose_index}: edge {ie} connects {self.edge_node[ie, :]}")
+                print(f"{verbose_index}: edge {ie} theta is {theta_edge}")
+
+            dtheta = theta_edge - theta
+
+            candidates.update_edges_by_angle(ie, dtheta, verbose_index)
+            if candidates.found:
+                break
+
+        if is_verbose and verbose_index is not None:
+            print(f"{verbose_index}: the edge to the left is edge {candidates.left_edge}")
+            print(f"{verbose_index}: the edge to the right is edge {candidates.right_edge}")
+
+        return candidates
+
 
 @dataclass
 class SingleBank:

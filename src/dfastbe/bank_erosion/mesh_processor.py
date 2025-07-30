@@ -6,70 +6,13 @@ from typing import List, Tuple
 import numpy as np
 from shapely.geometry import LineString, Point, Polygon
 
-from dfastbe.bank_erosion.data_models.calculation import MeshData
+from dfastbe.bank_erosion.data_models.calculation import MeshData, Edges
 __all__ = ["enlarge", "MeshProcessor"]
 
 ATOL = 1e-8
 RTOL = 1e-8
 SHAPE_MULTIPLIER = 2
-TWO_PI = 2 * math.pi
 
-
-@dataclass
-class EdgeCandidates:
-    """Dataclass to hold edge candidates for left and right edges.
-
-    Args:
-        left_edge (int):
-            Index of the left edge.
-        left_dtheta (float):
-            Angle of the left edge in radians.
-        right_edge (int):
-            Index of the right edge.
-        right_dtheta (float):
-            Angle of the right edge in radians.
-        found (bool):
-            Flag indicating whether a valid edge pair was found.
-    """
-    left_edge: int
-    left_dtheta: float
-    right_edge: int
-    right_dtheta: float
-    found: bool = False
-
-    def update_edges_by_angle(
-        self, edge_index: int, dtheta: float, j, verbose=False
-    ):
-        """Update the left and right edges based on the angle difference."""
-        twopi = 2 * math.pi
-        if dtheta > 0:
-            if dtheta < self.left_dtheta:
-                self.left_edge = edge_index
-                self.left_dtheta = dtheta
-            if twopi - dtheta < self.right_dtheta:
-                self.right_edge = edge_index
-                self.right_dtheta = twopi - dtheta
-        elif dtheta < 0:
-            dtheta = -dtheta
-            if twopi - dtheta < self.left_dtheta:
-                self.left_edge = edge_index
-                self.left_dtheta = twopi - dtheta
-            if dtheta < self.right_dtheta:
-                self.right_edge = edge_index
-                self.right_dtheta = dtheta
-        else:
-            # aligned with edge
-            if verbose and j is not None:
-                print(f"{j}: line is aligned with edge {edge_index}")
-            self.left_edge = edge_index
-            self.right_edge = edge_index
-            self.found = True
-        return self
-
-
-candidates = EdgeCandidates(
-    left_edge=-1, left_dtheta=TWO_PI, right_edge=-1, right_dtheta=TWO_PI
-)
 
 @dataclass
 class RiverSegment:
@@ -203,49 +146,8 @@ class MeshProcessor:
             if self.verbose:
                 print("starting outside mesh")
 
-    def _find_left_right_edges(self, theta, node, j=None) -> EdgeCandidates:
-        """
-        Helper to find the left and right edges at a node based on the direction theta.
-
-        Args:
-            theta (float):
-                Direction angle of the segment.
-            node (int):
-                The node index.
-            j (int, optional):
-                Step index for verbose output.
-
-        Returns:
-            EdgeCandidates:
-                A dataclass containing the left and right edge indices, their angle differences, and a found flag.
-        """
-        all_node_edges = np.nonzero((self.mesh_data.edge_node == node).any(axis=1))[0]
-
-        if self.verbose and j is not None:
-            print(f"{j}: the edges connected to node {node} are {all_node_edges}")
-
-        for ie in all_node_edges:
-            reverse = self.mesh_data.edge_node[ie, 0] != node
-            theta_edge = self.mesh_data.calculate_edge_angle(ie, reverse=reverse)
-
-            if self.verbose and j is not None:
-                print(f"{j}: edge {ie} connects {self.mesh_data.edge_node[ie, :]}")
-                print(f"{j}: edge {ie} theta is {theta_edge}")
-
-            dtheta = theta_edge - theta
-
-            candidates.update_edges_by_angle(ie, dtheta, j)
-            if candidates.found:
-                break
-
-        if self.verbose and j is not None:
-            print(f"{j}: the edge to the left is edge {candidates.left_edge}")
-            print(f"{j}: the edge to the right is edge {candidates.right_edge}")
-
-        return candidates
-
     def _resolve_next_face_from_edges(
-        self, node, candidates: EdgeCandidates, j=None
+        self, node, candidates: Edges, j=None
     ) -> int:
         """
         Helper to resolve the next face index when traversing between two edges at a node.
@@ -463,7 +365,7 @@ class MeshProcessor:
         if self.verbose:
             print(f"{j}: moving in direction theta = {theta}")
 
-        candidates = self._find_left_right_edges(theta, node, j)
+        candidates = self.mesh_data.find_edges(theta, node, {"is_verbose": self.verbose, "verbose_index": j})
 
         if self.verbose:
             print(f"{j}: the edge to the left is edge {candidates.left_edge}")
