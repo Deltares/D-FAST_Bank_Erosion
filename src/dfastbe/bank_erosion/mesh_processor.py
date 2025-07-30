@@ -29,12 +29,40 @@ class EdgeCandidates:
         found (bool):
             Flag indicating whether a valid edge pair was found.
     """
-
     left_edge: int
     left_dtheta: float
     right_edge: int
     right_dtheta: float
     found: bool = False
+
+    def update_edges_by_angle(
+        self, edge_index: int, dtheta: float, j, verbose=False
+    ):
+        """Update the left and right edges based on the angle difference."""
+        twopi = 2 * math.pi
+        if dtheta > 0:
+            if dtheta < self.left_dtheta:
+                self.left_edge = edge_index
+                self.left_dtheta = dtheta
+            if twopi - dtheta < self.right_dtheta:
+                self.right_edge = edge_index
+                self.right_dtheta = twopi - dtheta
+        elif dtheta < 0:
+            dtheta = -dtheta
+            if twopi - dtheta < self.left_dtheta:
+                self.left_edge = edge_index
+                self.left_dtheta = twopi - dtheta
+            if dtheta < self.right_dtheta:
+                self.right_edge = edge_index
+                self.right_dtheta = dtheta
+        else:
+            # aligned with edge
+            if verbose and j is not None:
+                print(f"{j}: line is aligned with edge {edge_index}")
+            self.left_edge = edge_index
+            self.right_edge = edge_index
+            self.found = True
+        return self
 
 
 @dataclass
@@ -169,35 +197,6 @@ class MeshProcessor:
             if self.verbose:
                 print("starting outside mesh")
 
-    def _update_candidate_edges_by_angle(
-        self, edge_index: int, dtheta: float, candidates: EdgeCandidates, j
-    ):
-        """Update the left and right edges based on the angle difference."""
-        twopi = 2 * math.pi
-        if dtheta > 0:
-            if dtheta < candidates.left_dtheta:
-                candidates.left_edge = edge_index
-                candidates.left_dtheta = dtheta
-            if twopi - dtheta < candidates.right_dtheta:
-                candidates.right_edge = edge_index
-                candidates.right_dtheta = twopi - dtheta
-        elif dtheta < 0:
-            dtheta = -dtheta
-            if twopi - dtheta < candidates.left_dtheta:
-                candidates.left_edge = edge_index
-                candidates.left_dtheta = twopi - dtheta
-            if dtheta < candidates.right_dtheta:
-                candidates.right_edge = edge_index
-                candidates.right_dtheta = dtheta
-        else:
-            # aligned with edge
-            if self.verbose and j is not None:
-                print(f"{j}: line is aligned with edge {edge_index}")
-            candidates.left_edge = edge_index
-            candidates.right_edge = edge_index
-            candidates.found = True
-        return candidates
-
     def _find_left_right_edges(self, theta, node, j=None) -> EdgeCandidates:
         """
         Helper to find the left and right edges at a node based on the direction theta.
@@ -223,11 +222,14 @@ class MeshProcessor:
         for ie in all_node_edges:
             reverse = self.mesh_data.edge_node[ie, 0] != node
             theta_edge = self.mesh_data.calculate_edge_angle(ie, reverse=reverse)
+
             if self.verbose and j is not None:
                 print(f"{j}: edge {ie} connects {self.mesh_data.edge_node[ie, :]}")
                 print(f"{j}: edge {ie} theta is {theta_edge}")
+
             dtheta = theta_edge - theta
-            self._update_candidate_edges_by_angle(ie, dtheta, candidates, j)
+
+            candidates.update_edges_by_angle(ie, dtheta, j)
             if candidates.found:
                 break
 
@@ -455,10 +457,13 @@ class MeshProcessor:
     def _resolve_next_face_by_direction(self, theta, node, j):
         if self.verbose:
             print(f"{j}: moving in direction theta = {theta}")
+
         candidates = self._find_left_right_edges(theta, node, j)
+
         if self.verbose:
             print(f"{j}: the edge to the left is edge {candidates.left_edge}")
             print(f"{j}: the edge to the right is edge {candidates.right_edge}")
+
         if candidates.left_edge == candidates.right_edge:
             if self.verbose:
                 print(f"{j}: continue along edge {candidates.left_edge}")
