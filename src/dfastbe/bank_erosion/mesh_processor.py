@@ -61,6 +61,14 @@ class RiverSegment:
         """Check if the segment has zero length."""
         return np.array_equal(self.current_point, self.previous_point)
 
+    @property
+    def theta(self):
+        theta = math.atan2(
+            self.current_point[1]- self.previous_point[1],
+            self.current_point[0] - self.previous_point[0]
+        )
+        return theta
+
 
 def enlarge(
     old_array: np.ndarray,
@@ -416,12 +424,7 @@ class MeshProcessor:
         if segment.distances[0] < 1.0:
             # segment passes through node and enter non-neighbouring cell ...
             # direction of current segment from bpj1 to bpj
-            theta = math.atan2(
-                segment.current_point[1]
-                - segment.previous_point[1],
-                segment.current_point[0]
-                - segment.previous_point[0],
-            )
+            theta = segment.theta
         else:
             if (
                 np.isclose(segment.distances[0], 1.0, rtol=RTOL, atol=ATOL)
