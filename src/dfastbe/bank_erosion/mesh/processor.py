@@ -262,7 +262,7 @@ class MeshProcessor:
                 finished = True
             else:
                 next_point = [self.bank_points[segment.index + 1][0], self.bank_points[segment.index + 1][1]]
-                next_face_index = self.mesh_data.determine_next_face_on_edge(segment, next_point, edge, faces, self.verbose)
+                next_face_index = self.mesh_data.determine_next_face_on_edge(segment, next_point, edge, faces)
 
         return finished, next_face_index
 
