@@ -6,7 +6,7 @@ import pytest
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
 
-from dfastbe.bank_erosion.data_models.mesh import MeshData
+from dfastbe.bank_erosion.mesh import MeshData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     ErosionInputs,

@@ -1,10 +1,9 @@
 """module for processing mesh-related operations."""
 import math
 from typing import Tuple
-from dataclasses import dataclass
 import numpy as np
-from shapely.geometry import Point, Polygon
-from dfastbe.bank_erosion.data_models.mesh import MeshData, RiverSegment
+from shapely.geometry import Point
+from dfastbe.bank_erosion.mesh import MeshData, RiverSegment
 
 __all__ = ["enlarge", "MeshProcessor"]
 
