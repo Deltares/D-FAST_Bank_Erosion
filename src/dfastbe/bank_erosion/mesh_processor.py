@@ -1,7 +1,7 @@
 """module for processing mesh-related operations."""
 import math
-from typing import List, Tuple
-
+from typing import Tuple
+from dataclasses import dataclass
 import numpy as np
 from shapely.geometry import Point, Polygon
 from dfastbe.bank_erosion.data_models.mesh import MeshData, RiverSegment
@@ -188,9 +188,10 @@ class MeshProcessor:
             print(f"{j}: -- no further slices along this segment --")
         else:
             print(f"{j}: -- no slices along this segment --")
+
         if self.index >= 0:
             pnt = Point(bpj)
-            polygon_k = Polygon(self.mesh_data.get_face_by_index(self.index))
+            polygon_k = self.mesh_data.get_face_by_index(self.index, as_polygon=True)
             if not polygon_k.contains(pnt):
                 raise ValueError(
                     f"{j}: ERROR: point actually not contained within {self.index}!"
