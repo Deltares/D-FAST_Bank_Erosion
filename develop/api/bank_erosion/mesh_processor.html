@@ -2393,18 +2393,7 @@
 <span class="normal">375</span>
 <span class="normal">376</span>
 <span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
+<span class="normal">378</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for processing mesh-related operations.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -2435,7 +2424,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_find_starting_face</span><span class="p">(</span><span class="n">closest_cell_ind</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_store_segment_point</span><span class="p">(</span><span class="n">current_bank_point</span><span class="p">)</span>
 
-
     <span class="k">def</span><span class="w"> </span><span class="nf">_find_starting_face</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">face_indexes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Find the starting face for a bank line segment.</span>
 
@@ -2445,25 +2433,27 @@
 <span class="sd">        Args:</span>
 <span class="sd">            face_indexes (np.ndarray): Array of possible cell indices.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">face_indexes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;starting outside mesh&quot;</span><span class="p">)</span>
 
-        <span class="n">on_edge</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">locate_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_points</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">face_indexes</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">on_edge</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">on_edge</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-
-            <span class="k">if</span> <span class="n">on_edge</span><span class="p">:</span>
+        <span class="n">edges_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">locate_point</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_points</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">face_indexes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">edges_indexes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="c1"># A single index was returned</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">edges_indexes</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># A list of indices is expected</span>
+            <span class="k">if</span> <span class="n">edges_indexes</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;starting on edge of </span><span class="si">{</span><span class="n">on_edge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;starting on edge of </span><span class="si">{</span><span class="n">edges_indexes</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">on_edge</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">on_edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span> <span class="o">=</span> <span class="n">on_edge</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">on_edge</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges_indexes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">edges_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span> <span class="o">=</span> <span class="n">edges_indexes</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges_indexes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;starting outside mesh&quot;</span><span class="p">)</span>
+                <span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_store_segment_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_bank_point</span><span class="p">,</span> <span class="n">shape_length</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
@@ -2549,18 +2539,6 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: ERROR: point actually not contained within </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s2">!&quot;</span>
                 <span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="nf">_select_first_crossing</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segment_state</span><span class="p">:</span> <span class="n">RiverSegment</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Select the first crossing from a set of edges and their associated distances.</span>
-
-<span class="sd">        line segment crosses the edge list multiple times</span>
-<span class="sd">        - moving out of a cell at a corner node</span>
-<span class="sd">        - moving into and out of the mesh from outside</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">bmin</span> <span class="o">=</span> <span class="n">segment_state</span><span class="o">.</span><span class="n">distances</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">segment_state</span><span class="o">.</span><span class="n">distances</span><span class="p">)</span>
-        <span class="n">segment_state</span><span class="o">.</span><span class="n">distances</span> <span class="o">=</span> <span class="n">segment_state</span><span class="o">.</span><span class="n">distances</span><span class="p">[</span><span class="n">bmin</span><span class="p">]</span>
-        <span class="n">segment_state</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="n">segment_state</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">bmin</span><span class="p">]</span>
-        <span class="n">segment_state</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="n">segment_state</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">bmin</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_node_transition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segment</span><span class="p">:</span> <span class="n">RiverSegment</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Process the transition at a node when a segment ends or continues.&quot;&quot;&quot;</span>
@@ -2660,7 +2638,7 @@
                 <span class="k">break</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_select_first_crossing</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
+                <span class="n">segment</span><span class="o">.</span><span class="n">select_first_intersection</span><span class="p">()</span>
 
             <span class="c1"># slice location identified ...   (number of edges should be 1)</span>
             <span class="n">node</span> <span class="o">=</span> <span class="n">segment</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -2838,7 +2816,18 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 </details>
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/mesh_processor.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">339</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">328</span>
+<span class="normal">329</span>
+<span class="normal">330</span>
+<span class="normal">331</span>
+<span class="normal">332</span>
+<span class="normal">333</span>
+<span class="normal">334</span>
+<span class="normal">335</span>
+<span class="normal">336</span>
+<span class="normal">337</span>
+<span class="normal">338</span>
+<span class="normal">339</span>
 <span class="normal">340</span>
 <span class="normal">341</span>
 <span class="normal">342</span>
@@ -2877,18 +2866,7 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 <span class="normal">375</span>
 <span class="normal">376</span>
 <span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_line_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="normal">378</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_line_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.</span>
 
 <span class="sd">    This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.</span>
