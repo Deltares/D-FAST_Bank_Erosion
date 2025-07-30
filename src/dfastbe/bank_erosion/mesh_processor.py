@@ -12,6 +12,8 @@ __all__ = ["enlarge", "MeshProcessor"]
 ATOL = 1e-8
 RTOL = 1e-8
 SHAPE_MULTIPLIER = 2
+TWO_PI = 2 * math.pi
+
 
 @dataclass
 class EdgeCandidates:
@@ -210,9 +212,8 @@ class MeshProcessor:
             EdgeCandidates: A dataclass containing the left and right edge indices,
                             their angle differences, and a found flag.
         """
-        two_pi = 2 * math.pi
         candidates = EdgeCandidates(
-            left_edge=-1, left_dtheta=two_pi, right_edge=-1, right_dtheta=two_pi
+            left_edge=-1, left_dtheta=TWO_PI, right_edge=-1, right_dtheta=TWO_PI
         )
         all_node_edges = np.nonzero((self.mesh_data.edge_node == node).any(axis=1))[0]
 
