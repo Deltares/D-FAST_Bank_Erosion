@@ -495,19 +495,19 @@ class MeshData:
         return next_face_index
 
     def determine_next_face_on_edge(
-        self, segment: RiverSegment, next_point: List[float], edge, faces, verbose: bool
+        self, segment: RiverSegment, next_point: List[float], edge, faces,
     ):
         """Determine the next face to continue along an edge based on the segment direction."""
         theta = math.atan2(
             next_point[1] - segment.current_point[1],
             next_point[0] - segment.current_point[0],
         )
-        if verbose:
+        if self.verbose:
             print(f"{segment.index}: moving in direction theta = {theta}")
 
         theta_edge = self._calculate_edge_angle(edge)
         if theta == theta_edge or theta == -theta_edge:
-            if verbose:
+            if self.verbose:
                 print(f"{segment.index}: continue along edge {edge}")
             next_face_index = faces
         else:

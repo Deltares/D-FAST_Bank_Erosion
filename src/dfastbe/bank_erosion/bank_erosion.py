@@ -35,7 +35,7 @@ from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
 
 from dfastbe import __version__
-from dfastbe.bank_erosion.data_models.mesh import MeshData
+from dfastbe.bank_erosion.mesh.data_models import MeshData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     DischargeLevels,
@@ -56,9 +56,9 @@ from dfastbe.bank_erosion.data_models.inputs import (
 from dfastbe.bank_erosion.debugger import Debugger
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.bank_erosion.plotter import ErosionPlotter
+from dfastbe.bank_erosion.mesh.processor import MeshProcessor
 from dfastbe.bank_erosion.utils import (
     BankLinesProcessor,
-    MeshProcessor,
     get_km_bins,
     get_km_eroded_volume,
     move_line,

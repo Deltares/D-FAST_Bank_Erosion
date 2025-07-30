@@ -312,9 +312,13 @@ The Bank Erosion module consists of the following components:
 
 ::: dfastbe.bank_erosion.bank_erosion
 
+### Mesh data models
+
+::: dfastbe.bank_erosion.mesh.data_models
+
 ### Mesh Processing
 
-::: dfastbe.bank_erosion.mesh_processor
+::: dfastbe.bank_erosion.mesh.processor
 
 For more details, see [Bank Erosion Mesh Processor](mesh_processor.md).
 
