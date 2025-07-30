@@ -73,7 +73,7 @@ class MeshProcessor:
                 | (dy > 0).all(axis=1)
             )
         )[0]
-        self._find_starting_face(closest_cell_ind)
+        self.index, self.vindex = self._find_starting_face(closest_cell_ind)
         self._store_segment_point(current_bank_point)
 
     def _find_starting_face(self, face_indexes: np.ndarray):
@@ -107,9 +107,7 @@ class MeshProcessor:
                 index = -1
                 vindex = None
 
-        self.index = index
-        self.vindex = vindex
-
+        return index, vindex
 
     def _store_segment_point(self, current_bank_point, shape_length: bool = None):
         """Finalize a segment
