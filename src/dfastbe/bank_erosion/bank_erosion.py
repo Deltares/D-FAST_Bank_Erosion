@@ -35,7 +35,7 @@ from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
 
 from dfastbe import __version__
-from dfastbe.bank_erosion.mesh.mesh_data import MeshData
+from dfastbe.bank_erosion.mesh.data_models import MeshData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     DischargeLevels,

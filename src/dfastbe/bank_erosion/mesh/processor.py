@@ -3,7 +3,7 @@ import math
 from typing import Tuple
 import numpy as np
 from shapely.geometry import Point
-from dfastbe.bank_erosion.mesh.mesh_data import MeshData, RiverSegment
+from dfastbe.bank_erosion.mesh.data_models import MeshData, RiverSegment
 
 __all__ = ["enlarge", "MeshProcessor"]
 

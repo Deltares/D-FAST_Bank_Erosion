@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from dfastbe.bank_erosion.mesh.mesh_data import MeshData, RiverSegment
+from dfastbe.bank_erosion.mesh.data_models import MeshData, RiverSegment
 from dfastbe.bank_erosion.mesh.processor import (
     MeshProcessor,
     enlarge,
