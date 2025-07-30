@@ -13,7 +13,7 @@ from typing import (
     TypeVar,
     Union,
 )
-
+import math
 import numpy as np
 from geopandas import GeoDataFrame
 from geopandas.geoseries import GeoSeries
@@ -402,6 +402,24 @@ class MeshData:
         index_src = index_src[id_edges]
 
         return index_src
+
+    def calculate_edge_angle(self, edge: int, reverse: bool = False) -> float:
+        """Calculate the angle of a mesh edge in radians.
+
+        Args:
+            edge (int):
+                The edge index.
+            reverse (bool):
+                If True, computes the angle from end to start.
+
+        Returns:
+            float: The angle of the edge in radians.
+        """
+        start, end = (1, 0) if reverse else (0, 1)
+        dx = self.x_edge_coords[edge, end] - self.x_edge_coords[edge, start]
+        dy = self.y_edge_coords[edge, end] - self.y_edge_coords[edge, start]
+
+        return math.atan2(dy, dx)
 
 @dataclass
 class SingleBank:

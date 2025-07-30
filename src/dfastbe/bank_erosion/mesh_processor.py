@@ -125,28 +125,6 @@ class MeshProcessor:
         self._find_starting_face(closest_cell_ind)
         self._store_segment_point(current_bank_point)
 
-    def _edge_angle(self, edge: int, reverse: bool = False) -> float:
-        """Calculate the angle of a mesh edge in radians.
-
-        Args:
-            edge (int):
-                The edge index.
-            reverse (bool):
-                If True, computes the angle from end to start.
-
-        Returns:
-            float: The angle of the edge in radians.
-        """
-        start, end = (1, 0) if reverse else (0, 1)
-        dx = (
-            self.mesh_data.x_edge_coords[edge, end]
-            - self.mesh_data.x_edge_coords[edge, start]
-        )
-        dy = (
-            self.mesh_data.y_edge_coords[edge, end]
-            - self.mesh_data.y_edge_coords[edge, start]
-        )
-        return math.atan2(dy, dx)
 
     def _find_starting_face(self, face_indexes: np.ndarray):
         """Find the starting face for a bank line segment.
@@ -236,7 +214,7 @@ class MeshProcessor:
 
         for ie in all_node_edges:
             reverse = self.mesh_data.edge_node[ie, 0] != node
-            theta_edge = self._edge_angle(ie, reverse=reverse)
+            theta_edge = self.mesh_data.calculate_edge_angle(ie, reverse=reverse)
             if self.verbose and j is not None:
                 print(f"{j}: edge {ie} connects {self.mesh_data.edge_node[ie, :]}")
                 print(f"{j}: edge {ie} theta is {theta_edge}")
@@ -326,7 +304,7 @@ class MeshProcessor:
         )
         if self.verbose:
             print(f"{segment.index}: moving in direction theta = {theta}")
-        theta_edge = self._edge_angle(edge)
+        theta_edge = self.mesh_data.calculate_edge_angle(edge)
         if theta == theta_edge or theta == -theta_edge:
             if self.verbose:
                 print(f"{segment.index}: continue along edge {edge}")
