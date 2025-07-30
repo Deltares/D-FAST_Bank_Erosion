@@ -146,48 +146,6 @@ class MeshProcessor:
             if self.verbose:
                 print("starting outside mesh")
 
-    def _resolve_next_face_from_edges(
-        self, node, candidates: Edges, j=None
-    ) -> int:
-        """
-        Helper to resolve the next face index when traversing between two edges at a node.
-
-        Args:
-            node (int): The node index.
-            left_edge (int): The edge index to the left.
-            right_edge (int): The edge index to the right.
-            j (int, optional): Step index for verbose output.
-
-        Returns:
-            int: The next face index.
-        """
-        left_faces = self.mesh_data.edge_face_connectivity[candidates.left, :]
-        right_faces = self.mesh_data.edge_face_connectivity[candidates.right, :]
-
-        if left_faces[0] in right_faces and left_faces[1] in right_faces:
-            fn1 = self.mesh_data.face_node[left_faces[0]]
-            fe1 = self.mesh_data.face_edge_connectivity[left_faces[0]]
-            if self.verbose and j is not None:
-                print(f"{j}: those edges are shared by two faces: {left_faces}")
-                print(f"{j}: face {left_faces[0]} has nodes: {fn1}")
-                print(f"{j}: face {left_faces[0]} has edges: {fe1}")
-            # nodes of the face should be listed in clockwise order
-            # edges[i] is the edge connecting node[i-1] with node[i]
-            # the latter is guaranteed by batch.derive_topology_arrays
-            if fe1[fn1 == node] == candidates.right:
-                index = left_faces[0]
-            else:
-                index = left_faces[1]
-        elif left_faces[0] in right_faces:
-            index = left_faces[0]
-        elif left_faces[1] in right_faces:
-            index = left_faces[1]
-        else:
-            raise ValueError(
-                f"Shouldn't come here .... left edge {candidates.left}"
-                f" and right edge {candidates.right} don't share any face"
-            )
-        return index
 
     def _store_segment_point(self, current_bank_point, shape_length=None):
         """Finalize a segment
@@ -374,15 +332,15 @@ class MeshProcessor:
         if edges.left == edges.right:
             if self.verbose:
                 print(f"{j}: continue along edge {edges.left}")
-            index0 = self.mesh_data.edge_face_connectivity[edges.left, :]
+            next_face_index = self.mesh_data.edge_face_connectivity[edges.left, :]
         else:
             if self.verbose:
                 print(
                     f"{j}: continue between edges {edges.left}"
                     f" on the left and {edges.right} on the right"
                 )
-            index0 = self._resolve_next_face_from_edges(node, edges, j)
-        return index0
+            next_face_index = self.mesh_data.resolve_next_face_from_edges(node, edges, {"is_verbose": self.verbose, "verbose_index": j})
+        return next_face_index
 
     def _slice_by_node_or_edge(
         self, segment: RiverSegment, node, edge, faces

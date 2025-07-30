@@ -331,7 +331,6 @@ class MeshData:
             face = self.get_face_by_index(ind)
             face_polygon = Polygon(face)
             if face_polygon.contains(point):
-                # TODO: check why it skip the rest of the loop
                 return ind
             else:
                 # create a closed line string from the face coordinates
@@ -529,6 +528,60 @@ class MeshData:
             print(f"{verbose_index}: the edge to the right is edge {candidates.right}")
 
         return candidates
+
+    def resolve_next_face_from_edges(
+        self, node, edges: Edges, verbose: Dict[str, Any] = None
+    ) -> int:
+        """
+        Helper to resolve the next face index when traversing between two edges at a node.
+
+        Args:
+            node (int): The node index.
+            edges (Edges):
+                The edges connecting the node, containing left and right edge indices.
+            verbose (Dict[str, Any], optional):
+                is_verbose (bool):
+                    True if verbose output is desired, False otherwise.
+                verbose_index (int, optional):
+                    Step index for verbose output.
+
+        Returns:
+            next_face_index (int):
+                The next face index.
+        """
+        is_verbose = verbose.get("is_verbose") if verbose is not None and "is_verbose" in verbose.keys() else False
+        verbose_index = verbose.get("verbose_index") if verbose is not None and "verbose_index" in verbose.keys() else None
+
+        left_faces = self.edge_face_connectivity[edges.left, :]
+        right_faces = self.edge_face_connectivity[edges.right, :]
+
+        if left_faces[0] in right_faces and left_faces[1] in right_faces:
+            fn1 = self.face_node[left_faces[0]]
+            fe1 = self.face_edge_connectivity[left_faces[0]]
+
+            if is_verbose and verbose_index is not None:
+                print(f"{verbose_index}: those edges are shared by two faces: {left_faces}")
+                print(f"{verbose_index}: face {left_faces[0]} has nodes: {fn1}")
+                print(f"{verbose_index}: face {left_faces[0]} has edges: {fe1}")
+
+            # nodes of the face should be listed in clockwise order
+            # edges[i] is the edge connecting node[i-1] with node[i]
+            # the latter is guaranteed by batch.derive_topology_arrays
+            if fe1[fn1 == node] == edges.right:
+                next_face_index = left_faces[0]
+            else:
+                next_face_index = left_faces[1]
+
+        elif left_faces[0] in right_faces:
+            next_face_index = left_faces[0]
+        elif left_faces[1] in right_faces:
+            next_face_index = left_faces[1]
+        else:
+            raise ValueError(
+                f"Shouldn't come here .... left edge {edges.left}"
+                f" and right edge {edges.right} don't share any face"
+            )
+        return next_face_index
 
 
 @dataclass
