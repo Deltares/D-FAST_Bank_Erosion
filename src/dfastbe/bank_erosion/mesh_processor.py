@@ -1,50 +1,16 @@
 """module for processing mesh-related operations."""
 import math
-from dataclasses import dataclass, field
 from typing import List, Tuple
 
 import numpy as np
-from shapely.geometry import LineString, Point, Polygon
+from shapely.geometry import Point, Polygon
+from dfastbe.bank_erosion.data_models.mesh import MeshData, RiverSegment
 
-from dfastbe.bank_erosion.data_models.calculation import MeshData, Edges
 __all__ = ["enlarge", "MeshProcessor"]
 
 ATOL = 1e-8
 RTOL = 1e-8
 SHAPE_MULTIPLIER = 2
-
-
-@dataclass
-class RiverSegment:
-    """
-    Args:
-        min_relative_distance (float):
-            The relative distance along the previous segment where the last intersection occurred. Used to filter
-            intersections along the current segment.
-        current_point (np.ndarray):
-            A 1D array of shape (2,) containing the x, y coordinates of the current point of the line segment.
-        previous_point (np.ndarray):
-            A 1D array of shape (2,) containing the x, y coordinates of the previous point of the line segment.
-    """
-    index: int
-    min_relative_distance: float
-    current_point: np.ndarray
-    previous_point: np.ndarray
-    distances: np.ndarray = field(default_factory=lambda: np.zeros(0))
-    edges: np.ndarray = field(default_factory=lambda: np.zeros(0, dtype=np.int64))
-    nodes: np.ndarray = field(default_factory=lambda: np.zeros(0, dtype=np.int64))
-
-    def is_length_zero(self) -> bool:
-        """Check if the segment has zero length."""
-        return np.array_equal(self.current_point, self.previous_point)
-
-    @property
-    def theta(self):
-        theta = math.atan2(
-            self.current_point[1]- self.previous_point[1],
-            self.current_point[0] - self.previous_point[0]
-        )
-        return theta
 
 
 def enlarge(
@@ -147,7 +113,7 @@ class MeshProcessor:
                 print("starting outside mesh")
 
 
-    def _store_segment_point(self, current_bank_point, shape_length=None):
+    def _store_segment_point(self, current_bank_point, shape_length: bool = None):
         """Finalize a segment
 
         Enlarge arrays if needed, set coordinates and index, and increment ind.

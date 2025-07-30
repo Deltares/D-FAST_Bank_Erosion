@@ -6,12 +6,12 @@ import pytest
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
 
+from dfastbe.bank_erosion.data_models.mesh import MeshData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     ErosionInputs,
     ErosionResults,
     FairwayData,
-    MeshData,
     SingleBank,
     SingleErosion,
     SingleLevelParameters,
@@ -38,12 +38,12 @@ class TestErosionInputs:
         """Test instantiation of the ErosionInputs dataclass."""
         shipping_data = {"ship1": [np.array([1.0, 1.0])]}
         bank_type = np.array([1.0, 1.0])
-        data = dict(
-            wave_fairway_distance_0=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
-            wave_fairway_distance_1=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
-            bank_protection_level=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
-            tauc=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
-        )
+        data = {
+            'wave_fairway_distance_0': [np.array([1.0, 1.0]), np.array([2.0, 2.0])],
+            'wave_fairway_distance_1': [np.array([1.0, 1.0]), np.array([2.0, 2.0])],
+            'bank_protection_level': [np.array([1.0, 1.0]), np.array([2.0, 2.0])],
+            'tauc': [np.array([1.0, 1.0]), np.array([2.0, 2.0])]
+        }
         erosion_inputs = ErosionInputs.from_column_arrays(
             data,
             SingleErosion,
@@ -111,18 +111,17 @@ class TestBankData:
         """Test instantiation of the BankData dataclass."""
         bank_lines = GeoDataFrame(geometry=[LineString([(0, 0), (1, 1)])])
         n_bank_lines = 1
-        bank_data = dict(
-            is_right_bank=[True, False],
-            bank_line_coords=[
+        bank_data = {
+            'is_right_bank': [True, False], 'bank_line_coords': [
                 np.array([[1.0, 1.0], [1.0, 1.0]]),
                 np.array([[2.0, 2.0], [2.0, 2.0]]),
             ],
-            bank_face_indices=[np.array([1, 1]), np.array([2, 2])],
-            bank_line_size=[np.array([1.0, 1.0]), np.array([2, 2])],
-            fairway_distances=[np.array([1.0, 1.0]), np.array([2, 2])],
-            fairway_face_indices=[np.array([1, 1]), np.array([2, 2])],
-            bank_chainage_midpoints=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
-        )
+            'bank_face_indices': [np.array([1, 1]), np.array([2, 2])],
+             'bank_line_size': [np.array([1.0, 1.0]), np.array([2, 2])],
+             'fairway_distances': [np.array([1.0, 1.0]), np.array([2, 2])],
+             'fairway_face_indices': [np.array([1, 1]), np.array([2, 2])],
+             'bank_chainage_midpoints': [np.array([1.0, 1.0]), np.array([2.0, 2.0])]
+        }
         bank_data = BankData.from_column_arrays(
             bank_data,
             SingleBank,

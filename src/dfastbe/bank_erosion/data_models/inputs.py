@@ -7,9 +7,8 @@ from typing import ClassVar, Dict, List, Tuple
 import numpy as np
 from dfastio.xyc.models import XYCModel
 from shapely.geometry import LineString
-
+from dfastbe.bank_erosion.data_models.mesh import MeshData
 from dfastbe.bank_erosion.data_models.calculation import (
-    MeshData,
     SingleBank,
     SingleLevelParameters,
     SingleParameters,

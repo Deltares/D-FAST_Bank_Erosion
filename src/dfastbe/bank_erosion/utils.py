@@ -5,9 +5,9 @@ from typing import Any, Tuple
 
 import numpy as np
 
+from dfastbe.bank_erosion.data_models.mesh import MeshData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
-    MeshData,
     SingleBank,
 )
 from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData
