@@ -365,23 +365,23 @@ class MeshProcessor:
         if self.verbose:
             print(f"{j}: moving in direction theta = {theta}")
 
-        candidates = self.mesh_data.find_edges(theta, node, {"is_verbose": self.verbose, "verbose_index": j})
+        edges = self.mesh_data.find_edges(theta, node, {"is_verbose": self.verbose, "verbose_index": j})
 
         if self.verbose:
-            print(f"{j}: the edge to the left is edge {candidates.left}")
-            print(f"{j}: the edge to the right is edge {candidates.right}")
+            print(f"{j}: the edge to the left is edge {edges.left}")
+            print(f"{j}: the edge to the right is edge {edges.right}")
 
-        if candidates.left == candidates.right:
+        if edges.left == edges.right:
             if self.verbose:
-                print(f"{j}: continue along edge {candidates.left}")
-            index0 = self.mesh_data.edge_face_connectivity[candidates.left, :]
+                print(f"{j}: continue along edge {edges.left}")
+            index0 = self.mesh_data.edge_face_connectivity[edges.left, :]
         else:
             if self.verbose:
                 print(
-                    f"{j}: continue between edges {candidates.left}"
-                    f" on the left and {candidates.right} on the right"
+                    f"{j}: continue between edges {edges.left}"
+                    f" on the left and {edges.right} on the right"
                 )
-            index0 = self._resolve_next_face_from_edges(node, candidates, j)
+            index0 = self._resolve_next_face_from_edges(node, edges, j)
         return index0
 
     def _slice_by_node_or_edge(
