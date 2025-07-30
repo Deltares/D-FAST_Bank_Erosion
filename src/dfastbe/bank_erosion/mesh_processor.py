@@ -192,18 +192,6 @@ class MeshProcessor:
                     f"{j}: ERROR: point actually not contained within {self.index}!"
                 )
 
-    def _select_first_crossing(self, segment_state: RiverSegment):
-        """Select the first crossing from a set of edges and their associated distances.
-
-        line segment crosses the edge list multiple times
-        - moving out of a cell at a corner node
-        - moving into and out of the mesh from outside
-        """
-        bmin = segment_state.distances == np.amin(segment_state.distances)
-        segment_state.distances = segment_state.distances[bmin]
-        segment_state.edges = segment_state.edges[bmin]
-        segment_state.nodes = segment_state.nodes[bmin]
-
     def _process_node_transition(self, segment: RiverSegment, node):
         """Process the transition at a node when a segment ends or continues."""
         finished = False
@@ -302,7 +290,7 @@ class MeshProcessor:
                 break
 
             if len(segment.edges) > 1:
-                self._select_first_crossing(segment)
+                segment.select_first_intersection()
 
             # slice location identified ...   (number of edges should be 1)
             node = segment.nodes[0]

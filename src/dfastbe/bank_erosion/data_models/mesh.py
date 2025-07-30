@@ -43,6 +43,18 @@ class RiverSegment:
         )
         return theta
 
+    def select_first_intersection(self):
+        """Select the first crossing from a set of edges and their associated distances.
+
+        line segment crosses the edge list multiple times
+            - moving out of a cell at a corner node
+            - moving into and out of the mesh from outside
+        """
+        # get the minimum distance from the distances array
+        min_distance_indices = self.distances == np.amin(self.distances)
+        self.distances = self.distances[min_distance_indices]
+        self.edges = self.edges[min_distance_indices]
+        self.nodes = self.nodes[min_distance_indices]
 
 @dataclass
 class Edges:
