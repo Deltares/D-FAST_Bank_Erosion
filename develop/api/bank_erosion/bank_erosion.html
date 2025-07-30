@@ -6172,7 +6172,13 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">378</span>
 <span class="normal">379</span>
 <span class="normal">380</span>
-<span class="normal">381</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for processing mesh-related operations.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -6219,6 +6225,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">edges_indexes</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="c1"># A single index was returned</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">edges_indexes</span>
+            <span class="n">vindex</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># A list of indices is expected</span>
             <span class="k">if</span> <span class="n">edges_indexes</span><span class="p">:</span>
@@ -6226,13 +6233,15 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;starting on edge of </span><span class="si">{</span><span class="n">edges_indexes</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
                 <span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges_indexes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">edges_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span> <span class="o">=</span> <span class="n">edges_indexes</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges_indexes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">vindex</span> <span class="o">=</span> <span class="n">edges_indexes</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">edges_indexes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;starting outside mesh&quot;</span><span class="p">)</span>
                 <span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+                <span class="n">vindex</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span> <span class="o">=</span> <span class="n">vindex</span>
 
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_store_segment_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_bank_point</span><span class="p">,</span> <span class="n">shape_length</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
@@ -6276,21 +6285,24 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">: moving from </span><span class="si">{</span><span class="n">index_str</span><span class="si">}</span><span class="s2"> via </span><span class="si">{</span><span class="n">transition_type</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">transition_index</span><span class="si">}</span><span class="s2"> &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;to </span><span class="si">{</span><span class="n">index0</span><span class="si">}</span><span class="s2"> at b = </span><span class="si">{</span><span class="n">prev_b</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_main_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">face_indexes</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_log_mesh_transition</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="s2">&quot;node&quot;</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">face_indexes</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_update_mesh_index_and_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">index0</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">face_indexes</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">face_indexes</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">face_indexes</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">face_indexes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">face_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span> <span class="o">=</span> <span class="n">face_indexes</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_update_mesh_index_and_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">face_indexes</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Helper to update mesh index and log transitions for intersect_line_mesh.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">index0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_log_mesh_transition</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="s2">&quot;node&quot;</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">index0</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index0</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index0</span>
-            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">index0</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">index0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index0</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span> <span class="o">=</span> <span class="n">index0</span>
+        <span class="k">if</span> <span class="n">face_indexes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_update_main_attributes</span><span class="p">(</span><span class="n">face_indexes</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
             <span class="k">return</span>
 
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">face</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">faces</span><span class="p">):</span>
@@ -6598,13 +6610,7 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 </details>
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/mesh_processor.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">337</span>
 <span class="normal">338</span>
 <span class="normal">339</span>
 <span class="normal">340</span>
@@ -6648,7 +6654,13 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 <span class="normal">378</span>
 <span class="normal">379</span>
 <span class="normal">380</span>
-<span class="normal">381</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_line_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_line_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.</span>
 
 <span class="sd">    This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.</span>
