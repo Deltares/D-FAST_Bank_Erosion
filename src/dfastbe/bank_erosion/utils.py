@@ -11,7 +11,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
     SingleBank,
 )
 from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData
-from dfastbe.bank_erosion.mesh_processor import MeshProcessor, enlarge
+from dfastbe.bank_erosion.mesh.processor import MeshProcessor, enlarge
 from dfastbe.io.data_models import LineGeometry
 from dfastbe.io.logger import log_text
 from dfastbe.utils import on_right_side
