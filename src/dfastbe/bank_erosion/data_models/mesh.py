@@ -152,7 +152,7 @@ class MeshData:
     boundary_edge_nrs: np.ndarray
     verbose: bool = False
 
-    def get_face_by_index(self, index: int, as_polygon: bool = False) -> np.ndarray:
+    def get_face_by_index(self, index: int, as_polygon: bool = False) -> np.ndarray | Polygon:
         """Returns the coordinates of the index-th mesh face as an (N, 2) array.
 
         Args:
@@ -256,7 +256,7 @@ class MeshData:
         else:
             edges = self.face_edge_connectivity[index, : self.n_nodes[index]]
         edge_relative_dist, segment_relative_dist, edges = (
-            self.calculate_edge_intersections(edges, segment, True)
+            self._calculate_edge_intersections(edges, segment, True)
         )
         is_intersected_at_node = -np.ones(edge_relative_dist.shape, dtype=np.int64)
         is_intersected_at_node[edge_relative_dist == 0] = self.edge_node[
@@ -268,7 +268,7 @@ class MeshData:
 
         return segment_relative_dist, edges, is_intersected_at_node
 
-    def calculate_edge_intersections(
+    def _calculate_edge_intersections(
         self,
         edges: np.ndarray,
         segment: RiverSegment,
@@ -351,7 +351,7 @@ class MeshData:
 
         return index_src
 
-    def calculate_edge_angle(self, edge: int, reverse: bool = False) -> float:
+    def _calculate_edge_angle(self, edge: int, reverse: bool = False) -> float:
         """Calculate the angle of a mesh edge in radians.
 
         Args:
@@ -369,7 +369,7 @@ class MeshData:
 
         return math.atan2(dy, dx)
 
-    def find_edges(self, theta, node, verbose_index: int = None) -> Edges:
+    def _find_edges(self, theta, node, verbose_index: int = None) -> Edges:
         """
         Helper to find the left and right edges at a node based on the direction theta.
 
@@ -396,7 +396,7 @@ class MeshData:
 
         for ie in all_node_edges:
             reverse = self.edge_node[ie, 0] != node
-            theta_edge = self.calculate_edge_angle(ie, reverse=reverse)
+            theta_edge = self._calculate_edge_angle(ie, reverse=reverse)
 
             if self.verbose and verbose_index is not None:
                 print(f"{verbose_index}: edge {ie} connects {self.edge_node[ie, :]}")
@@ -414,7 +414,7 @@ class MeshData:
 
         return edges
 
-    def resolve_next_face_from_edges(
+    def _resolve_next_face_from_edges(
         self, node, edges: Edges, verbose_index: int = None
     ) -> int:
         """
@@ -472,7 +472,7 @@ class MeshData:
         if self.verbose:
             print(f"{verbose_index}: moving in direction theta = {theta}")
 
-        edges = self.find_edges(theta, node, verbose_index)
+        edges = self._find_edges(theta, node, verbose_index)
 
         if self.verbose:
             print(f"{verbose_index}: the edge to the left is edge {edges.left}")
@@ -489,7 +489,7 @@ class MeshData:
                     f"{verbose_index}: continue between edges {edges.left}"
                     f" on the left and {edges.right} on the right"
                 )
-            next_face_index = self.resolve_next_face_from_edges(
+            next_face_index = self._resolve_next_face_from_edges(
                 node, edges, verbose_index
             )
         return next_face_index
@@ -505,7 +505,7 @@ class MeshData:
         if verbose:
             print(f"{segment.index}: moving in direction theta = {theta}")
 
-        theta_edge = self.calculate_edge_angle(edge)
+        theta_edge = self._calculate_edge_angle(edge)
         if theta == theta_edge or theta == -theta_edge:
             if verbose:
                 print(f"{segment.index}: continue along edge {edge}")
@@ -519,7 +519,7 @@ class MeshData:
                 current_point=next_point,
                 min_relative_distance=0,
             )
-            _, _, edges = self.calculate_edge_intersections(
+            _, _, edges = self._calculate_edge_intersections(
                 fe1,
                 reversed_segment,
                 False,
