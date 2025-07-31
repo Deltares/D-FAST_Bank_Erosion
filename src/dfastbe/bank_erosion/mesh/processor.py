@@ -28,13 +28,15 @@ class MeshWrapper:
     """A class for processing mesh-related operations."""
 
     def __init__(
-        self, bank_points: np.ndarray, mesh_data: MeshData, d_thresh: float = 0.001
+        self, mesh_data: MeshData, d_thresh: float = 0.001
     ):
-        self.bank_points = bank_points
         self.mesh_data = mesh_data
         self.d_thresh = d_thresh
-        self.coords = np.zeros((len(bank_points), 2))
-        self.face_indexes = np.zeros(len(bank_points), dtype=np.int64)
+
+    def read_target_object(self, xy_coords):
+        self.given_coords = xy_coords
+        self.coords = np.zeros((len(xy_coords), 2))
+        self.face_indexes = np.zeros(len(xy_coords), dtype=np.int64)
         self.verbose = False
         self.point_index = 0
         self.index: int
@@ -67,7 +69,7 @@ class MeshWrapper:
         if len(face_indexes) == 0 and self.verbose:
             print("starting outside mesh")
 
-        edges_indexes = self.mesh_data.locate_point(self.bank_points[0], face_indexes)
+        edges_indexes = self.mesh_data.locate_point(self.given_coords[0], face_indexes)
         if not isinstance(edges_indexes, list):
             # A single index was returned
             index = edges_indexes
@@ -193,7 +195,7 @@ class MeshWrapper:
         else:
             if (
                 np.isclose(segment.distances[0], 1.0, rtol=RTOL, atol=ATOL)
-                and segment.index == len(self.bank_points) - 1
+                and segment.index == len(self.given_coords) - 1
             ):
                 # catch case of last segment
                 if self.verbose:
@@ -206,9 +208,9 @@ class MeshWrapper:
                 # this segment ends in the node, so check next segment ...
                 # direction of next segment from bpj to bp[j+1]
                 theta = math.atan2(
-                    self.bank_points[segment.index + 1][1]
+                    self.given_coords[segment.index + 1][1]
                     - segment.current_point[1],
-                    self.bank_points[segment.index + 1][0]
+                    self.given_coords[segment.index + 1][0]
                     - segment.current_point[0],
                 )
         next_face_index = None
@@ -234,14 +236,14 @@ class MeshWrapper:
                     f"{segment.index}: ending on edge {edge} at {segment.distances[0]}"
                 )
             # figure out where we will be heading afterwards ...
-            if segment.index == len(self.bank_points) - 1:
+            if segment.index == len(self.given_coords) - 1:
                 # catch case of last segment
                 if self.verbose:
                     print(f"{segment.index}: last point ends on an edge")
                 self._store_segment_point(segment.current_point)
                 finished = True
             else:
-                next_point = [self.bank_points[segment.index + 1][0], self.bank_points[segment.index + 1][1]]
+                next_point = [self.given_coords[segment.index + 1][0], self.given_coords[segment.index + 1][1]]
                 next_face_index = self.mesh_data.determine_next_face_on_edge(segment, next_point, edge, faces)
 
         return finished, next_face_index
@@ -335,7 +337,7 @@ class MeshWrapper:
             - The function handles cases where the line starts outside the mesh, crosses multiple edges, or ends on a node.
             - Tiny segments shorter than `d_thresh` are removed from the output.
         """
-        for point_index, current_bank_point in enumerate(self.bank_points):
+        for point_index, current_bank_point in enumerate(self.given_coords):
             if self.verbose:
                 print(
                     f"Current location: {current_bank_point[0]}, {current_bank_point[1]}"
@@ -347,7 +349,7 @@ class MeshWrapper:
                     index=point_index,
                     min_relative_distance=0,
                     current_point=current_bank_point,
-                    previous_point=self.bank_points[point_index - 1],
+                    previous_point=self.given_coords[point_index - 1],
                 )
                 self._process_bank_segment(segment)
 
@@ -373,13 +375,15 @@ class MeshProcessor:
         self.bank_lines = river_data.bank_lines
         self.mesh_data = mesh_data
         self.river_data = river_data
+        self.wrapper = MeshWrapper(mesh_data)
 
     def get_fairway_data(self, river_axis: LineGeometry) -> FairwayData:
         log_text("chainage_to_fairway")
         # intersect fairway and mesh
-        fairway_intersection_coords, fairway_face_indices = MeshWrapper(
-            river_axis.as_array(), self.mesh_data
-        ).intersect_with_line()
+
+        self.wrapper.read_target_object(river_axis.as_array())
+
+        fairway_intersection_coords, fairway_face_indices = self.wrapper.intersect_with_line()
 
         if self.river_data.debug:
             arr = (
@@ -407,9 +411,8 @@ class MeshProcessor:
             line_coords = np.array(self.bank_lines.geometry[bank_index].coords)
             log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
 
-            coords_along_bank, face_indices = MeshWrapper(
-                line_coords, self.mesh_data
-            ).intersect_with_line()
+            self.wrapper.read_target_object(line_coords)
+            coords_along_bank, face_indices = self.wrapper.intersect_with_line()
             bank_line_coords.append(coords_along_bank)
             bank_face_indices.append(face_indices)
 
