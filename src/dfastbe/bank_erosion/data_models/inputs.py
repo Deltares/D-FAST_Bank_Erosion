@@ -14,7 +14,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
     SingleParameters,
 )
 from dfastbe.io.config import ConfigFile
-from dfastbe.io.data_models import BaseRiverData, BaseSimulationData
+from dfastbe.io.data_models import BaseRiverData, BaseSimulationData, LineGeometry
 from dfastbe.io.logger import log_text
 
 __all__ = [
@@ -238,7 +238,7 @@ class ErosionRiverData(BaseRiverData):
         self.output_intervals = config_file.get_float("Erosion", "OutputInterval", 1.0)
         self.bank_lines = config_file.read_bank_lines(str(self.bank_dir))
         self.river_axis = self._read_river_axis()
-        self.erosion_time = self.config_file.get_int("Erosion", "TErosion", positive=True)
+        self.erosion_time = config_file.get_int("Erosion", "TErosion", positive=True)
 
     def simulation_data(self) -> ErosionSimulationData:
         """Simulation Data."""
@@ -280,6 +280,48 @@ class ErosionRiverData(BaseRiverData):
         river_axis_file = self.config_file.get_str("Erosion", "RiverAxis")
         log_text("read_river_axis", data={"file": river_axis_file})
         river_axis = XYCModel.read(river_axis_file)
+        return river_axis
+
+    def process_river_axis_by_center_line(self) -> LineGeometry:
+        """Process the river axis by the center line.
+
+        Intersect the river center line with the river axis to map the stations from the first to the latter
+        then clip the river axis by the first and last station of the centerline.
+        """
+        river_axis = LineGeometry(self.river_axis, crs=self.config_file.crs)
+        river_axis_numpy = river_axis.as_array()
+        # optional sorting --> see 04_Waal_D3D example
+        # check: sum all distances and determine maximum distance ...
+        # if maximum > alpha * sum then perform sort
+        # Waal OK: 0.0082 ratio max/sum, Waal NotOK: 0.13 - Waal: 2500 points,
+        # so even when OK still some 21 times more than 1/2500 = 0.0004
+        dist2 = (np.diff(river_axis_numpy, axis=0) ** 2).sum(axis=1)
+        alpha = dist2.max() / dist2.sum()
+        if alpha > 0.03:
+            print("The river axis needs sorting!!")
+
+        # map km to axis points, further using axis
+        log_text("chainage_to_axis")
+        river_center_line_arr = self.river_center_line.as_array()
+        river_axis_km = river_axis.intersect_with_line(river_center_line_arr)
+
+        # clip river axis to reach of interest (get the closest point to the first and last station)
+        i1 = np.argmin(
+            ((river_center_line_arr[0, :2] - river_axis_numpy) ** 2).sum(axis=1)
+        )
+        i2 = np.argmin(
+            ((river_center_line_arr[-1, :2] - river_axis_numpy) ** 2).sum(axis=1)
+        )
+        if i1 < i2:
+            river_axis_km = river_axis_km[i1 : i2 + 1]
+            river_axis_numpy = river_axis_numpy[i1 : i2 + 1]
+        else:
+            # reverse river axis
+            river_axis_km = river_axis_km[i2 : i1 + 1][::-1]
+            river_axis_numpy = river_axis_numpy[i2 : i1 + 1][::-1]
+
+        river_axis = LineGeometry(river_axis_numpy, crs=self.config_file.crs)
+        river_axis.add_data(data={"stations": river_axis_km})
         return river_axis
 
 

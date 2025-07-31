@@ -25,10 +25,11 @@ The mesh processing component provides functions for processing mesh data, such 
 ## Usage Example
 
 ```python
-from dfastbe.bank_erosion.mesh.processor import MeshProcessor
+from dfastbe.bank_erosion.mesh.processor import MeshWrapper
 from dfastbe.bank_erosion.mesh.data_models import MeshData
 from dfastbe.io.config import ConfigFile
 from dfastbe.bank_erosion.bank_erosion import Erosion
+
 
 # Load configuration file
 config_file = ConfigFile.read("config.cfg")
@@ -41,7 +42,7 @@ mesh_data = erosion.simulation_data.compute_mesh_topology()
 
 # Intersect a bank line with the mesh
 bank_line_coords = erosion.river_data.bank_lines.geometry[0].coords
-coords_along_bank, face_indices = MeshProcessor(bank_line_coords, mesh_data).intersect_line_mesh()
+coords_along_bank, face_indices = MeshWrapper(mesh_data).intersect_with_coords(bank_line_coords)
 
 # Print results
 print(f"Number of intersection points: {len(coords_along_bank)}")
