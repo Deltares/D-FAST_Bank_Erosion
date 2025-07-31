@@ -193,10 +193,10 @@ class LineGeometry:
 
     @staticmethod
     def _handle_bound(
-            index: Optional[int],
-            station_bound: float,
-            is_lower: bool,
-            line_string_coords: np.ndarray,
+        index: Optional[int],
+        station_bound: float,
+        is_lower: bool,
+        line_string_coords: np.ndarray,
     ) -> Tuple[Optional[Tuple[float, float, float]], Optional[int]]:
         """Handle the clipping of the stations line for a given bound.
 
@@ -249,7 +249,7 @@ class LineGeometry:
 
     @staticmethod
     def _interpolate_point(
-            index: int, station_bound: float, line_string_coords: np.ndarray
+        index: int, station_bound: float, line_string_coords: np.ndarray
     ) -> Tuple[float, Tuple[float, float, float]]:
         """Interpolate a point between two coordinates.
 
@@ -727,17 +727,17 @@ def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndar
         time dependent).
     """
     # open file
-    rootgrp = netCDF4.Dataset(filename)
+    root_group = netCDF4.Dataset(filename)
 
     # locate 2d mesh variable
-    mesh2d = rootgrp.get_variables_by_attributes(
+    mesh2d = root_group.get_variables_by_attributes(
         cf_role="mesh_topology", topology_dimension=2
     )
     if len(mesh2d) != 1:
-        raise Exception(
+        raise ValueError(
             f"Currently only one 2D mesh supported ... this file contains {len(mesh2d)} 2D meshes."
         )
-    meshname = mesh2d[0].name
+    mesh_name = mesh2d[0].name
 
     # define a default start_index
     start_index = 0
@@ -745,40 +745,40 @@ def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndar
     # locate the requested variable ... start with some special cases
     if varname == "x":
         # the x-coordinate or longitude
-        crdnames = mesh2d[0].getncattr(location + "_coordinates").split()
-        for n in crdnames:
-            stdname = rootgrp.variables[n].standard_name
-            if stdname == "projection_x_coordinate" or stdname == "longitude":
-                var = rootgrp.variables[n]
+        coords_names = mesh2d[0].getncattr(location + "_coordinates").split()
+        for n in coords_names:
+            std_name = root_group.variables[n].standard_name
+            if std_name == "projection_x_coordinate" or std_name == "longitude":
+                var = root_group.variables[n]
                 break
 
     elif varname == "y":
         # the y-coordinate or latitude
-        crdnames = mesh2d[0].getncattr(location + "_coordinates").split()
-        for n in crdnames:
-            stdname = rootgrp.variables[n].standard_name
-            if stdname == "projection_y_coordinate" or stdname == "latitude":
-                var = rootgrp.variables[n]
+        coords_names = mesh2d[0].getncattr(location + "_coordinates").split()
+        for n in coords_names:
+            std_name = root_group.variables[n].standard_name
+            if std_name == "projection_y_coordinate" or std_name == "latitude":
+                var = root_group.variables[n]
                 break
 
     elif varname.endswith("connectivity"):
         # a mesh connectivity variable with corrected index
         varname = mesh2d[0].getncattr(varname)
-        var = rootgrp.variables[varname]
+        var = root_group.variables[varname]
         if "start_index" in var.ncattrs():
             start_index = var.getncattr("start_index")
 
     else:
         # find any other variable by standard_name or long_name
-        var = rootgrp.get_variables_by_attributes(
-            standard_name=varname, mesh=meshname, location=location
+        var = root_group.get_variables_by_attributes(
+            standard_name=varname, mesh=mesh_name, location=location
         )
         if len(var) == 0:
-            var = rootgrp.get_variables_by_attributes(
-                long_name=varname, mesh=meshname, location=location
+            var = root_group.get_variables_by_attributes(
+                long_name=varname, mesh=mesh_name, location=location
             )
         if len(var) != 1:
-            raise Exception(
+            raise ValueError(
                 f'Expected one variable for "{varname}", but obtained {len(var)}.'
             )
         var = var[0]
@@ -791,6 +791,6 @@ def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndar
     else:
         data = var[...] - start_index
 
-    rootgrp.close()
+    root_group.close()
 
     return data
