@@ -1444,6 +1444,39 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#dfastbe.bank_erosion.mesh.processor.IntersectionResults" class="md-nav__link">
+    <span class="md-ellipsis">
+      IntersectionResults
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="IntersectionResults">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dfastbe.bank_erosion.mesh.processor.IntersectionResults.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dfastbe.bank_erosion.mesh.processor.IntersectionResults.update" class="md-nav__link">
+    <span class="md-ellipsis">
+      update
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#dfastbe.bank_erosion.mesh.processor.MeshProcessor" class="md-nav__link">
     <span class="md-ellipsis">
       MeshProcessor
@@ -1487,9 +1520,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#dfastbe.bank_erosion.mesh.processor.MeshWrapper.intersect_with_line" class="md-nav__link">
+  <a href="#dfastbe.bank_erosion.mesh.processor.MeshWrapper.intersect_with_coords" class="md-nav__link">
     <span class="md-ellipsis">
-      intersect_with_line
+      intersect_with_coords
     </span>
   </a>
   
@@ -1947,6 +1980,39 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#dfastbe.bank_erosion.mesh.processor.IntersectionResults" class="md-nav__link">
+    <span class="md-ellipsis">
+      IntersectionResults
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="IntersectionResults">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dfastbe.bank_erosion.mesh.processor.IntersectionResults.__init__" class="md-nav__link">
+    <span class="md-ellipsis">
+      __init__
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dfastbe.bank_erosion.mesh.processor.IntersectionResults.update" class="md-nav__link">
+    <span class="md-ellipsis">
+      update
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#dfastbe.bank_erosion.mesh.processor.MeshProcessor" class="md-nav__link">
     <span class="md-ellipsis">
       MeshProcessor
@@ -1990,9 +2056,9 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#dfastbe.bank_erosion.mesh.processor.MeshWrapper.intersect_with_line" class="md-nav__link">
+  <a href="#dfastbe.bank_erosion.mesh.processor.MeshWrapper.intersect_with_coords" class="md-nav__link">
     <span class="md-ellipsis">
-      intersect_with_line
+      intersect_with_coords
     </span>
   </a>
   
@@ -2092,6 +2158,212 @@
 
 
 
+<h3 id="dfastbe.bank_erosion.mesh.processor.IntersectionResults" class="doc doc-heading"><a href="#dfastbe.bank_erosion.mesh.processor.IntersectionResults" class="toclink">
+            <code>IntersectionResults</code>
+
+
+  <span class="doc doc-labels">
+      <small class="doc doc-label doc-label-dataclass"><code>dataclass</code></small>
+  </span>
+
+</a><a href="#dfastbe.bank_erosion.mesh.processor.IntersectionResults" class="headerlink" title="Permanent link">#</a></h3>
+
+
+    <div class="doc doc-contents ">
+
+
+
+
+
+
+
+              <details class="quote">
+                <summary>Source code in <code>src/dfastbe/bank_erosion/mesh/processor.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">IntersectionResults</span><span class="p">:</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">face_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="n">point_index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">index</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">vindex</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="nb">int</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">)):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize the intersection results with given shape.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_bank_point</span><span class="p">,</span> <span class="n">shape_length</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Finalize a segment</span>
+
+<span class="sd">        Enlarge arrays if needed, set coordinates and index, and increment ind.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">shape_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">shape_length</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">shape_length</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="c1"># last coordinate reached, so enlarge arrays</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="p">(</span><span class="n">shape_length</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="n">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">,</span> <span class="p">(</span><span class="n">shape_length</span><span class="p">,))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">point_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_bank_point</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">point_index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">point_index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">+=</span> <span class="mi">1</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="dfastbe.bank_erosion.mesh.processor.IntersectionResults.__init__" class="doc doc-heading"><a href="#dfastbe.bank_erosion.mesh.processor.IntersectionResults.__init__" class="toclink">
+            <code class="highlight language-python"><span class="fm">__init__</span><span class="p">(</span><span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span></code>
+
+</a><a href="#dfastbe.bank_erosion.mesh.processor.IntersectionResults.__init__" class="headerlink" title="Permanent link">#</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Initialize the intersection results with given shape.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>src/dfastbe/bank_erosion/mesh/processor.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">)):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Initialize the intersection results with given shape.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="dfastbe.bank_erosion.mesh.processor.IntersectionResults.update" class="doc doc-heading"><a href="#dfastbe.bank_erosion.mesh.processor.IntersectionResults.update" class="toclink">
+            <code class="highlight language-python"><span class="n">update</span><span class="p">(</span><span class="n">current_bank_point</span><span class="p">,</span> <span class="n">shape_length</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span></code>
+
+</a><a href="#dfastbe.bank_erosion.mesh.processor.IntersectionResults.update" class="headerlink" title="Permanent link">#</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Finalize a segment</p>
+<p>Enlarge arrays if needed, set coordinates and index, and increment ind.</p>
+
+            <details class="quote">
+              <summary>Source code in <code>src/dfastbe/bank_erosion/mesh/processor.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_bank_point</span><span class="p">,</span> <span class="n">shape_length</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Finalize a segment</span>
+
+<span class="sd">    Enlarge arrays if needed, set coordinates and index, and increment ind.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">shape_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">shape_length</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">shape_length</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="c1"># last coordinate reached, so enlarge arrays</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="p">(</span><span class="n">shape_length</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="n">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">,</span> <span class="p">(</span><span class="n">shape_length</span><span class="p">,))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">point_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_bank_point</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">point_index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">point_index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">+=</span> <span class="mi">1</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
 <h3 id="dfastbe.bank_erosion.mesh.processor.MeshProcessor" class="doc doc-heading"><a href="#dfastbe.bank_erosion.mesh.processor.MeshProcessor" class="toclink">
             <code>MeshProcessor</code>
 
@@ -2111,37 +2383,7 @@
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/mesh/processor.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">371</span>
-<span class="normal">372</span>
-<span class="normal">373</span>
-<span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span>
-<span class="normal">380</span>
-<span class="normal">381</span>
-<span class="normal">382</span>
-<span class="normal">383</span>
-<span class="normal">384</span>
-<span class="normal">385</span>
-<span class="normal">386</span>
-<span class="normal">387</span>
-<span class="normal">388</span>
-<span class="normal">389</span>
-<span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span>
-<span class="normal">394</span>
-<span class="normal">395</span>
-<span class="normal">396</span>
-<span class="normal">397</span>
-<span class="normal">398</span>
-<span class="normal">399</span>
-<span class="normal">400</span>
-<span class="normal">401</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">401</span>
 <span class="normal">402</span>
 <span class="normal">403</span>
 <span class="normal">404</span>
@@ -2200,7 +2442,35 @@
 <span class="normal">457</span>
 <span class="normal">458</span>
 <span class="normal">459</span>
-<span class="normal">460</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to process bank lines and intersect them with a mesh.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">river_data</span><span class="p">:</span> <span class="n">ErosionRiverData</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">:</span> <span class="n">MeshData</span><span class="p">):</span>
@@ -2213,12 +2483,10 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_fairway_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">river_axis</span><span class="p">:</span> <span class="n">LineGeometry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FairwayData</span><span class="p">:</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_fairway&quot;</span><span class="p">)</span>
         <span class="c1"># intersect fairway and mesh</span>
-        <span class="n">fairway_intersection_coords</span><span class="p">,</span> <span class="n">fairway_face_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapper</span><span class="o">.</span><span class="n">intersect_with_line</span><span class="p">(</span><span class="n">river_axis</span><span class="o">.</span><span class="n">as_array</span><span class="p">())</span>
+        <span class="n">fairway_intersection_coords</span><span class="p">,</span> <span class="n">fairway_face_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapper</span><span class="o">.</span><span class="n">intersect_with_coords</span><span class="p">(</span><span class="n">river_axis</span><span class="o">.</span><span class="n">as_array</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
-            <span class="n">arr</span> <span class="o">=</span> <span class="p">(</span>
-                          <span class="n">fairway_intersection_coords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">fairway_intersection_coords</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-                  <span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="p">(</span><span class="n">fairway_intersection_coords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">fairway_intersection_coords</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span>
             <span class="n">line_geom</span> <span class="o">=</span> <span class="n">LineGeometry</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">river_axis</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
             <span class="n">line_geom</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span>
                 <span class="n">file_name</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span><span class="si">}</span><span class="s2">/fairway_face_indices.shp&quot;</span><span class="p">,</span>
@@ -2241,7 +2509,7 @@
             <span class="n">line_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_lines</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
             <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_nodes&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">bank_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">line_coords</span><span class="p">)})</span>
 
-            <span class="n">coords_along_bank</span><span class="p">,</span> <span class="n">face_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapper</span><span class="o">.</span><span class="n">intersect_with_line</span><span class="p">(</span><span class="n">line_coords</span><span class="p">)</span>
+            <span class="n">coords_along_bank</span><span class="p">,</span> <span class="n">face_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapper</span><span class="o">.</span><span class="n">intersect_with_coords</span><span class="p">(</span><span class="n">line_coords</span><span class="p">)</span>
             <span class="n">bank_line_coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords_along_bank</span><span class="p">)</span>
             <span class="n">bank_face_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">face_indices</span><span class="p">)</span>
 
@@ -2320,12 +2588,12 @@
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/mesh/processor.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span>
-<span class="normal">378</span>
-<span class="normal">379</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">river_data</span><span class="p">:</span> <span class="n">ErosionRiverData</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">:</span> <span class="n">MeshData</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">404</span>
+<span class="normal">405</span>
+<span class="normal">406</span>
+<span class="normal">407</span>
+<span class="normal">408</span>
+<span class="normal">409</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">river_data</span><span class="p">:</span> <span class="n">ErosionRiverData</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">:</span> <span class="n">MeshData</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Constructor for MeshProcessor.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">bank_lines</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">bank_lines</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span> <span class="o">=</span> <span class="n">mesh_data</span>
@@ -2375,35 +2643,7 @@
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/mesh/processor.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">398</span>
-<span class="normal">399</span>
-<span class="normal">400</span>
-<span class="normal">401</span>
-<span class="normal">402</span>
-<span class="normal">403</span>
-<span class="normal">404</span>
-<span class="normal">405</span>
-<span class="normal">406</span>
-<span class="normal">407</span>
-<span class="normal">408</span>
-<span class="normal">409</span>
-<span class="normal">410</span>
-<span class="normal">411</span>
-<span class="normal">412</span>
-<span class="normal">413</span>
-<span class="normal">414</span>
-<span class="normal">415</span>
-<span class="normal">416</span>
-<span class="normal">417</span>
-<span class="normal">418</span>
-<span class="normal">419</span>
-<span class="normal">420</span>
-<span class="normal">421</span>
-<span class="normal">422</span>
-<span class="normal">423</span>
-<span class="normal">424</span>
-<span class="normal">425</span>
-<span class="normal">426</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">426</span>
 <span class="normal">427</span>
 <span class="normal">428</span>
 <span class="normal">429</span>
@@ -2437,7 +2677,35 @@
 <span class="normal">457</span>
 <span class="normal">458</span>
 <span class="normal">459</span>
-<span class="normal">460</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bank_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BankData</span><span class="p">:</span>
+<span class="normal">460</span>
+<span class="normal">461</span>
+<span class="normal">462</span>
+<span class="normal">463</span>
+<span class="normal">464</span>
+<span class="normal">465</span>
+<span class="normal">466</span>
+<span class="normal">467</span>
+<span class="normal">468</span>
+<span class="normal">469</span>
+<span class="normal">470</span>
+<span class="normal">471</span>
+<span class="normal">472</span>
+<span class="normal">473</span>
+<span class="normal">474</span>
+<span class="normal">475</span>
+<span class="normal">476</span>
+<span class="normal">477</span>
+<span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bank_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BankData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Intersect bank lines with a mesh and return bank data.</span>
 
 <span class="sd">    Returns:</span>
@@ -2451,7 +2719,7 @@
         <span class="n">line_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_lines</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_nodes&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">bank_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">line_coords</span><span class="p">)})</span>
 
-        <span class="n">coords_along_bank</span><span class="p">,</span> <span class="n">face_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapper</span><span class="o">.</span><span class="n">intersect_with_line</span><span class="p">(</span><span class="n">line_coords</span><span class="p">)</span>
+        <span class="n">coords_along_bank</span><span class="p">,</span> <span class="n">face_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapper</span><span class="o">.</span><span class="n">intersect_with_coords</span><span class="p">(</span><span class="n">line_coords</span><span class="p">)</span>
         <span class="n">bank_line_coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords_along_bank</span><span class="p">)</span>
         <span class="n">bank_face_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">face_indices</span><span class="p">)</span>
 
@@ -2537,43 +2805,7 @@
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/mesh/processor.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 27</span>
-<span class="normal"> 28</span>
-<span class="normal"> 29</span>
-<span class="normal"> 30</span>
-<span class="normal"> 31</span>
-<span class="normal"> 32</span>
-<span class="normal"> 33</span>
-<span class="normal"> 34</span>
-<span class="normal"> 35</span>
-<span class="normal"> 36</span>
-<span class="normal"> 37</span>
-<span class="normal"> 38</span>
-<span class="normal"> 39</span>
-<span class="normal"> 40</span>
-<span class="normal"> 41</span>
-<span class="normal"> 42</span>
-<span class="normal"> 43</span>
-<span class="normal"> 44</span>
-<span class="normal"> 45</span>
-<span class="normal"> 46</span>
-<span class="normal"> 47</span>
-<span class="normal"> 48</span>
-<span class="normal"> 49</span>
-<span class="normal"> 50</span>
-<span class="normal"> 51</span>
-<span class="normal"> 52</span>
-<span class="normal"> 53</span>
-<span class="normal"> 54</span>
-<span class="normal"> 55</span>
-<span class="normal"> 56</span>
-<span class="normal"> 57</span>
-<span class="normal"> 58</span>
-<span class="normal"> 59</span>
-<span class="normal"> 60</span>
-<span class="normal"> 61</span>
-<span class="normal"> 62</span>
-<span class="normal"> 63</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 63</span>
 <span class="normal"> 64</span>
 <span class="normal"> 65</span>
 <span class="normal"> 66</span>
@@ -2878,7 +3110,37 @@
 <span class="normal">365</span>
 <span class="normal">366</span>
 <span class="normal">367</span>
-<span class="normal">368</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshWrapper</span><span class="p">:</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshWrapper</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A class for processing mesh-related operations.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -2889,6 +3151,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_target_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xy_coords</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">given_coords</span> <span class="o">=</span> <span class="n">xy_coords</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span> <span class="o">=</span> <span class="n">IntersectionResults</span><span class="p">(</span><span class="n">xy_coords</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">xy_coords</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xy_coords</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="kc">False</span>
@@ -2909,7 +3172,9 @@
             <span class="p">)</span>
         <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_starting_face</span><span class="p">(</span><span class="n">closest_cell_ind</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_store_segment_point</span><span class="p">(</span><span class="n">current_bank_point</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">vindex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">current_bank_point</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_find_starting_face</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">face_indexes</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Find the starting face for a bank line segment.</span>
@@ -2944,26 +3209,6 @@
 
         <span class="k">return</span> <span class="n">index</span><span class="p">,</span> <span class="n">vindex</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_store_segment_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_bank_point</span><span class="p">,</span> <span class="n">shape_length</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Finalize a segment</span>
-
-<span class="sd">        Enlarge arrays if needed, set coordinates and index, and increment ind.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">shape_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">shape_length</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">shape_length</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-            <span class="c1"># last coordinate reached, so enlarge arrays</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="n">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="p">(</span><span class="n">shape_length</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="n">enlarge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">,</span> <span class="p">(</span><span class="n">shape_length</span><span class="p">,))</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">point_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_bank_point</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">point_index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">point_index</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">+=</span> <span class="mi">1</span>
-
     <span class="k">def</span><span class="w"> </span><span class="nf">_log_mesh_transition</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">step</span><span class="p">,</span> <span class="n">transition_type</span><span class="p">,</span> <span class="n">transition_index</span><span class="p">,</span> <span class="n">index0</span><span class="p">,</span> <span class="n">prev_b</span>
     <span class="p">):</span>
@@ -2985,17 +3230,22 @@
             <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">: moving from </span><span class="si">{</span><span class="n">index_str</span><span class="si">}</span><span class="s2"> via </span><span class="si">{</span><span class="n">transition_type</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">transition_index</span><span class="si">}</span><span class="s2"> &quot;</span>
             <span class="sa">f</span><span class="s2">&quot;to </span><span class="si">{</span><span class="n">index0</span><span class="si">}</span><span class="s2"> at b = </span><span class="si">{</span><span class="n">prev_b</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_main_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">face_indexes</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">,</span> <span class="n">j</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_log_mesh_transition</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="s2">&quot;node&quot;</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">face_indexes</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">face_indexes</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">face_indexes</span>
+            <span class="c1"># self.index = face_indexes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">face_indexes</span>
         <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">face_indexes</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">face_indexes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">face_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># self.index = face_indexes[0]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">face_indexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span> <span class="o">=</span> <span class="n">face_indexes</span>
+            <span class="c1"># self.index = -2</span>
+            <span class="c1"># self.vindex = face_indexes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">vindex</span> <span class="o">=</span> <span class="n">face_indexes</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_update_mesh_index_and_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">node</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">faces</span><span class="p">,</span> <span class="n">face_indexes</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -3006,11 +3256,13 @@
             <span class="k">return</span>
 
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">face</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">faces</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">face</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="c1"># if face == self.index:</span>
+            <span class="k">if</span> <span class="n">face</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
                 <span class="n">other_face</span> <span class="o">=</span> <span class="n">faces</span><span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">i</span><span class="p">]</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_log_mesh_transition</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="s2">&quot;edge&quot;</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">other_face</span><span class="p">,</span> <span class="n">prev_b</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">other_face</span>
+                <span class="c1"># self.index = other_face</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">other_face</span>
                 <span class="k">return</span>
 
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -3026,10 +3278,12 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">pnt</span> <span class="o">=</span> <span class="n">Point</span><span class="p">(</span><span class="n">bpj</span><span class="p">)</span>
-            <span class="n">polygon_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">get_face_by_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">as_polygon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="c1"># polygon_k = self.mesh_data.get_face_by_index(self.index, as_polygon=True)</span>
+            <span class="n">polygon_k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">get_face_by_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">as_polygon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="ow">not</span> <span class="n">polygon_k</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">pnt</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: ERROR: point actually not contained within </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s2">!&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">: ERROR: point actually not contained within </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s2">!&quot;</span>
                 <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_node_transition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segment</span><span class="p">:</span> <span class="n">RiverSegment</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
@@ -3055,7 +3309,7 @@
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">segment</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s2">: last point ends in a node&quot;</span><span class="p">)</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">_store_segment_point</span><span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">current_point</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">current_point</span><span class="p">)</span>
                 <span class="n">theta</span> <span class="o">=</span> <span class="mf">0.0</span>
                 <span class="n">finished</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
@@ -3094,7 +3348,7 @@
                 <span class="c1"># catch case of last segment</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">segment</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s2">: last point ends on an edge&quot;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_store_segment_point</span><span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">current_point</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">current_point</span><span class="p">)</span>
                 <span class="n">finished</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">next_point</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">given_coords</span><span class="p">[</span><span class="n">segment</span><span class="o">.</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">given_coords</span><span class="p">[</span><span class="n">segment</span><span class="o">.</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span>
@@ -3105,29 +3359,29 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_process_bank_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">segment</span><span class="p">:</span> <span class="n">RiverSegment</span><span class="p">):</span>
 
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span>
-                <span class="n">index_src</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">resolve_ambiguous_edge_transition</span><span class="p">(</span><span class="n">segment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span>
+                <span class="n">index_src</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">resolve_ambiguous_edge_transition</span><span class="p">(</span><span class="n">segment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">vindex</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">index_src</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index_src</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">vindex</span> <span class="o">=</span> <span class="n">index_src</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index_src</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">vindex</span> <span class="o">=</span> <span class="n">index_src</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">1</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span>
             <span class="k">elif</span> <span class="n">segment</span><span class="o">.</span><span class="n">is_length_zero</span><span class="p">():</span>
                 <span class="c1"># segment has zero length</span>
                 <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">segment</span><span class="o">.</span><span class="n">distances</span><span class="p">,</span> <span class="n">segment</span><span class="o">.</span><span class="n">edges</span><span class="p">,</span> <span class="n">segment</span><span class="o">.</span><span class="n">nodes</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span><span class="o">.</span><span class="n">find_segment_intersections</span><span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
                         <span class="n">segment</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># rest of segment associated with same face</span>
-                <span class="n">shape_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">*</span> <span class="n">SHAPE_MULTIPLIER</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_store_segment_point</span><span class="p">(</span>
+                <span class="n">shape_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">point_index</span> <span class="o">*</span> <span class="n">SHAPE_MULTIPLIER</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
                     <span class="n">segment</span><span class="o">.</span><span class="n">current_point</span><span class="p">,</span> <span class="n">shape_length</span><span class="o">=</span><span class="n">shape_length</span>
                 <span class="p">)</span>
                 <span class="k">break</span>
@@ -3163,13 +3417,13 @@
                     <span class="o">+</span> <span class="n">segment</span><span class="o">.</span><span class="n">min_relative_distance</span>
                     <span class="o">*</span> <span class="p">(</span><span class="n">segment</span><span class="o">.</span><span class="n">current_point</span> <span class="o">-</span> <span class="n">segment</span><span class="o">.</span><span class="n">previous_point</span><span class="p">)</span>
             <span class="p">)</span>
-            <span class="n">shape_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">*</span> <span class="n">SHAPE_MULTIPLIER</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_store_segment_point</span><span class="p">(</span><span class="n">segment_x</span><span class="p">,</span> <span class="n">shape_length</span><span class="o">=</span><span class="n">shape_length</span><span class="p">)</span>
+            <span class="n">shape_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">point_index</span> <span class="o">*</span> <span class="n">SHAPE_MULTIPLIER</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">segment_x</span><span class="p">,</span> <span class="n">shape_length</span><span class="o">=</span><span class="n">shape_length</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">segment</span><span class="o">.</span><span class="n">min_relative_distance</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">break</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">intersect_with_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">given_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">intersect_with_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">given_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Intersects a coords with an unstructured mesh and returns the intersection coordinates and mesh face indices.</span>
 
 <span class="sd">        This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.</span>
 <span class="sd">        It calculates the intersection points and identifies the mesh faces corresponding to each segment of the line.</span>
@@ -3177,9 +3431,11 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Tuple[np.ndarray, np.ndarray]:</span>
 <span class="sd">                A tuple containing:</span>
-<span class="sd">                - `coords` (np.ndarray): A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.</span>
-<span class="sd">                - `idx` (np.ndarray): A 1D array of shape (M-1,) containing the indices of the mesh faces corresponding to</span>
-<span class="sd">                each segment of the intersected line.</span>
+<span class="sd">                - `coords` (np.ndarray):</span>
+<span class="sd">                    A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.</span>
+<span class="sd">                - `idx` (np.ndarray):</span>
+<span class="sd">                    A 1D array of shape (M-1,) containing the indices of the mesh faces corresponding to each segment</span>
+<span class="sd">                    of the intersected line.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            Exception:</span>
@@ -3209,17 +3465,17 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">_process_bank_segment</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
 
         <span class="c1"># clip to actual length (idx refers to segments, so we can ignore the last value)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">coords</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">point_index</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">point_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
 
         <span class="c1"># remove tiny segments</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span> <span class="n">d</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_thresh</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[</span><span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[</span><span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
 
         <span class="c1"># since index refers to segments, don&#39;t return the first one</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">face_indexes</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -3238,15 +3494,15 @@
 <div class="doc doc-object doc-function">
 
 
-<h4 id="dfastbe.bank_erosion.mesh.processor.MeshWrapper.intersect_with_line" class="doc doc-heading"><a href="#dfastbe.bank_erosion.mesh.processor.MeshWrapper.intersect_with_line" class="toclink">
-            <code class="highlight language-python"><span class="n">intersect_with_line</span><span class="p">(</span><span class="n">given_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span></code>
+<h4 id="dfastbe.bank_erosion.mesh.processor.MeshWrapper.intersect_with_coords" class="doc doc-heading"><a href="#dfastbe.bank_erosion.mesh.processor.MeshWrapper.intersect_with_coords" class="toclink">
+            <code class="highlight language-python"><span class="n">intersect_with_coords</span><span class="p">(</span><span class="n">given_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span></code>
 
-</a><a href="#dfastbe.bank_erosion.mesh.processor.MeshWrapper.intersect_with_line" class="headerlink" title="Permanent link">#</a></h4>
+</a><a href="#dfastbe.bank_erosion.mesh.processor.MeshWrapper.intersect_with_coords" class="headerlink" title="Permanent link">#</a></h4>
 
 
     <div class="doc doc-contents ">
 
-        <p>Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.</p>
+        <p>Intersects a coords with an unstructured mesh and returns the intersection coordinates and mesh face indices.</p>
 <p>This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.
 It calculates the intersection points and identifies the mesh faces corresponding to each segment of the line.</p>
 
@@ -3268,9 +3524,11 @@ It calculates the intersection points and identifies the mesh faces correspondin
               <div class="doc-md-description">
                 <p>Tuple[np.ndarray, np.ndarray]:
 A tuple containing:
-- <code>coords</code> (np.ndarray): A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.
-- <code>idx</code> (np.ndarray): A 1D array of shape (M-1,) containing the indices of the mesh faces corresponding to
-each segment of the intersected line.</p>
+- <code>coords</code> (np.ndarray):
+    A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.
+- <code>idx</code> (np.ndarray):
+    A 1D array of shape (M-1,) containing the indices of the mesh faces corresponding to each segment
+    of the intersected line.</p>
               </div>
             </td>
           </tr>
@@ -3312,35 +3570,7 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 </details>
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/mesh/processor.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">317</span>
-<span class="normal">318</span>
-<span class="normal">319</span>
-<span class="normal">320</span>
-<span class="normal">321</span>
-<span class="normal">322</span>
-<span class="normal">323</span>
-<span class="normal">324</span>
-<span class="normal">325</span>
-<span class="normal">326</span>
-<span class="normal">327</span>
-<span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
-<span class="normal">333</span>
-<span class="normal">334</span>
-<span class="normal">335</span>
-<span class="normal">336</span>
-<span class="normal">337</span>
-<span class="normal">338</span>
-<span class="normal">339</span>
-<span class="normal">340</span>
-<span class="normal">341</span>
-<span class="normal">342</span>
-<span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">345</span>
 <span class="normal">346</span>
 <span class="normal">347</span>
 <span class="normal">348</span>
@@ -3363,8 +3593,38 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 <span class="normal">365</span>
 <span class="normal">366</span>
 <span class="normal">367</span>
-<span class="normal">368</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_with_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">given_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.</span>
+<span class="normal">368</span>
+<span class="normal">369</span>
+<span class="normal">370</span>
+<span class="normal">371</span>
+<span class="normal">372</span>
+<span class="normal">373</span>
+<span class="normal">374</span>
+<span class="normal">375</span>
+<span class="normal">376</span>
+<span class="normal">377</span>
+<span class="normal">378</span>
+<span class="normal">379</span>
+<span class="normal">380</span>
+<span class="normal">381</span>
+<span class="normal">382</span>
+<span class="normal">383</span>
+<span class="normal">384</span>
+<span class="normal">385</span>
+<span class="normal">386</span>
+<span class="normal">387</span>
+<span class="normal">388</span>
+<span class="normal">389</span>
+<span class="normal">390</span>
+<span class="normal">391</span>
+<span class="normal">392</span>
+<span class="normal">393</span>
+<span class="normal">394</span>
+<span class="normal">395</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">intersect_with_coords</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">given_coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Intersects a coords with an unstructured mesh and returns the intersection coordinates and mesh face indices.</span>
 
 <span class="sd">    This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.</span>
 <span class="sd">    It calculates the intersection points and identifies the mesh faces corresponding to each segment of the line.</span>
@@ -3372,9 +3632,11 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        Tuple[np.ndarray, np.ndarray]:</span>
 <span class="sd">            A tuple containing:</span>
-<span class="sd">            - `coords` (np.ndarray): A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.</span>
-<span class="sd">            - `idx` (np.ndarray): A 1D array of shape (M-1,) containing the indices of the mesh faces corresponding to</span>
-<span class="sd">            each segment of the intersected line.</span>
+<span class="sd">            - `coords` (np.ndarray):</span>
+<span class="sd">                A 2D array of shape (M, 2) containing the x, y coordinates of the intersection points.</span>
+<span class="sd">            - `idx` (np.ndarray):</span>
+<span class="sd">                A 1D array of shape (M-1,) containing the indices of the mesh faces corresponding to each segment</span>
+<span class="sd">                of the intersected line.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        Exception:</span>
@@ -3404,17 +3666,17 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">_process_bank_segment</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span>
 
     <span class="c1"># clip to actual length (idx refers to segments, so we can ignore the last value)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">point_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">coords</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">point_index</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">point_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
 
     <span class="c1"># remove tiny segments</span>
-    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
     <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;bool&quot;</span><span class="p">),</span> <span class="n">d</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_thresh</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[</span><span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">coords</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">face_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">face_indexes</span><span class="p">[</span><span class="n">mask</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
 
     <span class="c1"># since index refers to segments, don&#39;t return the first one</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_indexes</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">coords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">intersection_results</span><span class="o">.</span><span class="n">face_indexes</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -3462,7 +3724,7 @@ ambiguous regions (e.g., edges shared by multiple faces).</p>
 
 <span class="c1"># Intersect a bank line with the mesh</span>
 <span class="n">bank_line_coords</span> <span class="o">=</span> <span class="n">erosion</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">bank_lines</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span>
-<span class="n">coords_along_bank</span><span class="p">,</span> <span class="n">face_indices</span> <span class="o">=</span> <span class="n">MeshWrapper</span><span class="p">(</span><span class="n">bank_line_coords</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">)</span><span class="o">.</span><span class="n">intersect_with_line</span><span class="p">()</span>
+<span class="n">coords_along_bank</span><span class="p">,</span> <span class="n">face_indices</span> <span class="o">=</span> <span class="n">MeshWrapper</span><span class="p">(</span><span class="n">mesh_data</span><span class="p">)</span><span class="o">.</span><span class="n">intersect_with_coords</span><span class="p">(</span><span class="n">bank_line_coords</span><span class="p">)</span>
 
 <span class="c1"># Print results</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of intersection points: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">coords_along_bank</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
