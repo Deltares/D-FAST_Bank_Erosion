@@ -33,7 +33,7 @@ class MeshWrapper:
         self.mesh_data = mesh_data
         self.d_thresh = d_thresh
 
-    def read_target_object(self, xy_coords):
+    def _read_target_object(self, xy_coords):
         self.given_coords = xy_coords
         self.coords = np.zeros((len(xy_coords), 2))
         self.face_indexes = np.zeros(len(xy_coords), dtype=np.int64)
@@ -314,7 +314,7 @@ class MeshWrapper:
             if segment.min_relative_distance == 1:
                 break
 
-    def intersect_with_line(self) -> Tuple[np.ndarray, np.ndarray]:
+    def intersect_with_line(self, given_coords: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.
 
         This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.
@@ -337,7 +337,8 @@ class MeshWrapper:
             - The function handles cases where the line starts outside the mesh, crosses multiple edges, or ends on a node.
             - Tiny segments shorter than `d_thresh` are removed from the output.
         """
-        for point_index, current_bank_point in enumerate(self.given_coords):
+        self._read_target_object(given_coords)
+        for point_index, current_bank_point in enumerate(given_coords):
             if self.verbose:
                 print(
                     f"Current location: {current_bank_point[0]}, {current_bank_point[1]}"
@@ -349,7 +350,7 @@ class MeshWrapper:
                     index=point_index,
                     min_relative_distance=0,
                     current_point=current_bank_point,
-                    previous_point=self.given_coords[point_index - 1],
+                    previous_point=given_coords[point_index - 1],
                 )
                 self._process_bank_segment(segment)
 
@@ -380,10 +381,7 @@ class MeshProcessor:
     def get_fairway_data(self, river_axis: LineGeometry) -> FairwayData:
         log_text("chainage_to_fairway")
         # intersect fairway and mesh
-
-        self.wrapper.read_target_object(river_axis.as_array())
-
-        fairway_intersection_coords, fairway_face_indices = self.wrapper.intersect_with_line()
+        fairway_intersection_coords, fairway_face_indices = self.wrapper.intersect_with_line(river_axis.as_array())
 
         if self.river_data.debug:
             arr = (
@@ -411,8 +409,7 @@ class MeshProcessor:
             line_coords = np.array(self.bank_lines.geometry[bank_index].coords)
             log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
 
-            self.wrapper.read_target_object(line_coords)
-            coords_along_bank, face_indices = self.wrapper.intersect_with_line()
+            coords_along_bank, face_indices = self.wrapper.intersect_with_line(line_coords)
             bank_line_coords.append(coords_along_bank)
             bank_face_indices.append(face_indices)
 
