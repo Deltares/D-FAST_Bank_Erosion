@@ -121,7 +121,7 @@ class TestErosion:
             erosion_instance.simulation_data = MagicMock()
             erosion_instance.sim_files = MagicMock()
             erosion_instance.p_discharge = MagicMock()
-            erosion_instance.bl_processor = MagicMock()
+            erosion_instance.mesh_processor = MagicMock()
             erosion_instance.debugger = MagicMock()
             erosion_instance.erosion_calculator = MagicMock()
 
