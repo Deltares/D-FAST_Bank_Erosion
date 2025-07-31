@@ -55,7 +55,7 @@ from dfastbe.bank_erosion.data_models.inputs import (
 from dfastbe.bank_erosion.debugger import Debugger
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.bank_erosion.plotter import ErosionPlotter
-from dfastbe.bank_erosion.banklines_processor import BankLinesProcessor
+from dfastbe.bank_erosion.mesh.banklines_processor import BankLinesProcessor
 from dfastbe.bank_erosion.utils import (
     get_km_bins,
     get_km_eroded_volume,
