@@ -33,12 +33,13 @@ class IntersectionResults:
     index: int
     vindex: np.ndarray | int
 
-    def __init__(self, shape: Tuple[int, int] = (100, 2)):
+    def __init__(self, shape: Tuple[int, int] = (100, 2), verbose: bool = False):
         """Initialize the intersection results with given shape."""
         self.coords = np.zeros(shape, dtype=np.float64)
         self.face_indexes = np.zeros(shape[0], dtype=np.int64)
         self.point_index = 0
         self.index: int = -1
+        self.verbose = verbose
 
     def update(self, current_bank_point, shape_length: bool = None):
         """Finalize a segment
@@ -60,24 +61,81 @@ class IntersectionResults:
             self.face_indexes[self.point_index] = self.index
         self.point_index += 1
 
+    def _log_mesh_transition(
+        self, step, transition_type, transition_index, index0, prev_b
+    ):
+        """Helper to print mesh transition information for debugging.
+
+        Args:
+            step (int): The current step or iteration.
+            index (int): The current mesh face index.
+            vindex (int): The vertex index.
+            transition_type (str): The type of transition (e.g., "node", "edge").
+            transition_index (int): The index of the transition (e.g., the node or edge index).
+            index0 (int): The target mesh face index.
+            prev_b (float): The previous value of b.
+        """
+        index_str = "outside" if self.index == -1 else self.index
+        if self.index == -2:
+            index_str = f"edge between {self.vindex}"
+        print(
+            f"{step}: moving from {index_str} via {transition_type} {transition_index} "
+            f"to {index0} at b = {prev_b}"
+        )
+
+    def _update_main_attributes(self, face_indexes, node, prev_b, j):
+        if self.verbose:
+            self._log_mesh_transition(j, "node", node, face_indexes, prev_b)
+
+        if isinstance(face_indexes, (int, np.integer)):
+            # self.index = face_indexes
+            self.index = face_indexes
+        elif hasattr(face_indexes, "__len__") and len(face_indexes) == 1:
+            # self.index = face_indexes[0]
+            self.index = face_indexes[0]
+        else:
+            # self.index = -2
+            # self.vindex = face_indexes
+            self.index = -2
+            self.vindex = face_indexes
+
+    def _update_mesh_index_and_log(self, j, node, edge, faces, face_indexes, prev_b):
+        """
+        Helper to update mesh index and log transitions for intersect_line_mesh.
+        """
+        if face_indexes is not None:
+            self._update_main_attributes(face_indexes, node, prev_b, j)
+            return
+
+        for i, face in enumerate(faces):
+            # if face == self.index:
+            if face == self.index:
+                other_face = faces[1 - i]
+                if self.verbose:
+                    self._log_mesh_transition(j, "edge", edge, other_face, prev_b)
+                # self.index = other_face
+                self.index = other_face
+                return
+
+        raise ValueError(
+            f"Shouldn't come here .... index {self.index} differs from both faces "
+            f"{faces[0]} and {faces[1]} associated with slicing edge {edge}"
+        )
+
+    
 class MeshWrapper:
     """A class for processing mesh-related operations."""
 
     def __init__(
-        self, mesh_data: MeshData, d_thresh: float = 0.001
+        self, mesh_data: MeshData, d_thresh: float = 0.001, verbose: bool = False
     ):
         self.mesh_data = mesh_data
         self.d_thresh = d_thresh
+        self.verbose = verbose
 
     def _read_target_object(self, xy_coords):
         self.given_coords = xy_coords
-        self.intersection_results = IntersectionResults(xy_coords.shape)
-        self.coords = np.zeros((len(xy_coords), 2))
-        self.face_indexes = np.zeros(len(xy_coords), dtype=np.int64)
-        self.verbose = False
-        self.point_index = 0
-        self.index: int
-        self.vindex: np.ndarray | int
+        self.intersection_results = IntersectionResults(xy_coords.shape, self.verbose)
 
     def _handle_first_point(self, current_bank_point: np.ndarray):
         # get the point on the mesh face that is closest to the first bank point
@@ -91,9 +149,9 @@ class MeshWrapper:
                 | (dy > 0).all(axis=1)
             )
         )[0]
-        self.index, self.vindex = self._find_starting_face(closest_cell_ind)
-        self.intersection_results.index = self.index
-        self.intersection_results.vindex = self.vindex
+        index, vindex = self._find_starting_face(closest_cell_ind)
+        self.intersection_results.index = index
+        self.intersection_results.vindex = vindex
         self.intersection_results.update(current_bank_point)
 
     def _find_starting_face(self, face_indexes: np.ndarray):
@@ -129,74 +187,13 @@ class MeshWrapper:
 
         return index, vindex
 
-    def _log_mesh_transition(
-        self, step, transition_type, transition_index, index0, prev_b
-    ):
-        """Helper to print mesh transition information for debugging.
-
-        Args:
-            step (int): The current step or iteration.
-            index (int): The current mesh face index.
-            vindex (int): The vertex index.
-            transition_type (str): The type of transition (e.g., "node", "edge").
-            transition_index (int): The index of the transition (e.g., the node or edge index).
-            index0 (int): The target mesh face index.
-            prev_b (float): The previous value of b.
-        """
-        index_str = "outside" if self.index == -1 else self.index
-        if self.index == -2:
-            index_str = f"edge between {self.vindex}"
-        print(
-            f"{step}: moving from {index_str} via {transition_type} {transition_index} "
-            f"to {index0} at b = {prev_b}"
-        )
-
-    def _update_main_attributes(self, face_indexes, node, prev_b, j):
-        if self.verbose:
-            self._log_mesh_transition(j, "node", node, face_indexes, prev_b)
-
-        if isinstance(face_indexes, (int, np.integer)):
-            # self.index = face_indexes
-            self.intersection_results.index = face_indexes
-        elif hasattr(face_indexes, "__len__") and len(face_indexes) == 1:
-            # self.index = face_indexes[0]
-            self.intersection_results.index = face_indexes[0]
-        else:
-            # self.index = -2
-            # self.vindex = face_indexes
-            self.intersection_results.index = -2
-            self.intersection_results.vindex = face_indexes
-
-    def _update_mesh_index_and_log(self, j, node, edge, faces, face_indexes, prev_b):
-        """
-        Helper to update mesh index and log transitions for intersect_line_mesh.
-        """
-        if face_indexes is not None:
-            self._update_main_attributes(face_indexes, node, prev_b, j)
-            return
-
-        for i, face in enumerate(faces):
-            # if face == self.index:
-            if face == self.intersection_results.index:
-                other_face = faces[1 - i]
-                if self.verbose:
-                    self._log_mesh_transition(j, "edge", edge, other_face, prev_b)
-                # self.index = other_face
-                self.intersection_results.index = other_face
-                return
-
-        raise ValueError(
-            f"Shouldn't come here .... index {self.index} differs from both faces "
-            f"{faces[0]} and {faces[1]} associated with slicing edge {edge}"
-        )
-
     def _log_slice_status(self, j, prev_b, bpj):
         if prev_b > 0:
             print(f"{j}: -- no further slices along this segment --")
         else:
             print(f"{j}: -- no slices along this segment --")
 
-        if self.index >= 0:
+        if self.intersection_results.index >= 0:
             pnt = Point(bpj)
             # polygon_k = self.mesh_data.get_face_by_index(self.index, as_polygon=True)
             polygon_k = self.mesh_data.get_face_by_index(self.intersection_results.index, as_polygon=True)
@@ -324,7 +321,7 @@ class MeshWrapper:
             if finished:
                 break
 
-            self._update_mesh_index_and_log(
+            self.intersection_results._update_mesh_index_and_log(
                 segment.index,
                 node,
                 edge,
