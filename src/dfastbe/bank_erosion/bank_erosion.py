@@ -34,6 +34,7 @@ from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
 
 from dfastbe import __version__
+from dfastbe.base_calculator import BaseCalculator
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     DischargeLevels,
@@ -69,14 +70,12 @@ X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
 
 
-class Erosion:
+class Erosion(BaseCalculator):
     """Class to handle the bank erosion calculations."""
 
     def __init__(self, config_file: ConfigFile, gui: bool = False):
         """Initialize the Erosion class."""
-        self.root_dir = config_file.root_dir
-        self._config_file = config_file
-        self.gui = gui
+        super().__init__(config_file, gui)
 
         self.river_data = ErosionRiverData(config_file)
         self.simulation_data = self.river_data.simulation_data()
@@ -85,26 +84,6 @@ class Erosion:
         )
         self.debugger = Debugger(config_file.crs, self.river_data.output_dir)
         self.erosion_calculator = ErosionCalculator()
-        self._results = None
-
-    @property
-    def config_file(self) -> ConfigFile:
-        """Configuration file object."""
-        return self._config_file
-
-    @property
-    def results(self) -> Dict[str, Any]:
-        """dict: Results of the bank line detection analysis.
-
-        Returns:
-        """
-        return self._results
-
-    @results.setter
-    def results(self, value: Dict[str, Any]):
-        """Set the results of the bank erosion analysis."""
-        self._results = value
-
 
     def calculate_fairway_bank_line_distance(
         self,
