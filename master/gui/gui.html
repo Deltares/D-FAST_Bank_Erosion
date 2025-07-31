@@ -5807,11 +5807,11 @@ to reflect it contents.</p>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">manual_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="n">showError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;User manual not found: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span>
-
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;win&quot;</span><span class="p">):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">startfile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c1"># bandit complains about os.startfile, but it is the only way to open a file in the default application on Windows.</span>
+        <span class="c1"># On Linux and MacOS, opening the file might give a security warning.</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">startfile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="c1"># nosec</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="n">showError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to open the user manual: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
