@@ -35,7 +35,6 @@ from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
 
 from dfastbe import __version__
-from dfastbe.bank_erosion.mesh.data_models import MeshData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     DischargeLevels,
@@ -107,26 +106,6 @@ class Erosion:
         """Set the results of the bank erosion analysis."""
         self._results = value
 
-    def _get_fairway_data(
-        self,
-        river_axis: LineGeometry,
-    ):
-        # map km to fairway points, further using axis
-        log_text("chainage_to_fairway")
-        # intersect fairway and mesh
-        fairway_intersection_coords, fairway_face_indices = self.bl_processor.get_fairway_data(river_axis)
-
-        if self.river_data.debug:
-            arr = (
-                fairway_intersection_coords[:-1] + fairway_intersection_coords[1:]
-            ) / 2
-            line_geom = LineGeometry(arr, crs=self.config_file.crs)
-            line_geom.to_file(
-                file_name=f"{str(self.river_data.output_dir)}{os.sep}fairway_face_indices.shp",
-                data={"iface": fairway_face_indices},
-            )
-
-        return FairwayData(fairway_face_indices, fairway_intersection_coords)
 
     def calculate_fairway_bank_line_distance(
         self,
@@ -644,7 +623,7 @@ class Erosion:
         self.get_mesh_processor()
 
         river_axis = self.river_data.process_river_axis_by_center_line()
-        fairway_data = self._get_fairway_data(river_axis)
+        fairway_data = self.bl_processor.get_fairway_data(river_axis)
 
         # map to the output interval
         km_bin = (

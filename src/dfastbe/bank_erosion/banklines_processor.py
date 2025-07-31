@@ -3,6 +3,7 @@ from dfastbe.bank_erosion.mesh.data_models import MeshData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     SingleBank,
+    FairwayData
 )
 from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData
 from dfastbe.io.data_models import LineGeometry
@@ -20,6 +21,7 @@ class BankLinesProcessor:
         self.river_center_line = river_data.river_center_line.as_array()
         self.num_bank_lines = len(self.bank_lines)
         self.mesh_data = mesh_data
+        self.river_data = river_data
 
     def get_fairway_data(self, river_axis: LineGeometry) :
         log_text("chainage_to_fairway")
@@ -28,7 +30,17 @@ class BankLinesProcessor:
             river_axis.as_array(), self.mesh_data
         ).intersect_line_mesh()
 
-        return fairway_intersection_coords, fairway_face_indices
+        if self.river_data.debug:
+            arr = (
+                          fairway_intersection_coords[:-1] + fairway_intersection_coords[1:]
+                  ) / 2
+            line_geom = LineGeometry(arr, crs=river_axis.crs)
+            line_geom.to_file(
+                file_name=f"{str(self.river_data.output_dir)}/fairway_face_indices.shp",
+                data={"iface": fairway_face_indices},
+            )
+
+        return FairwayData(fairway_face_indices, fairway_intersection_coords)
 
     def intersect_with_mesh(self) -> BankData:
         """Intersect bank lines with a mesh and return bank data.
