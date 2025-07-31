@@ -1,11 +1,41 @@
 """Bank erosion utilities."""
 
 import math
-from typing import Any, Tuple
+from typing import Tuple
 
 import numpy as np
 
-from dfastbe.bank_erosion.mesh.processor import enlarge
+
+def enlarge(
+        old_array: np.ndarray,
+        new_shape: Tuple
+):
+    """
+    Copy the values of the old array to a new, larger array of specified shape.
+
+    Arguments
+    ---------
+    old_array : numpy.ndarray
+        Array containing the values.
+    new_shape : Tuple
+        New shape of the array.
+
+    Returns
+    -------
+    new_array : numpy.ndarray
+        Array of shape "new_shape" with the 'first entries filled by the same
+        values as contained in "old_array". The data type of the new array is
+        equal to that of the old array.
+    """
+    old_shape = old_array.shape
+    print("old: ", old_shape)
+    print("new: ", new_shape)
+    new_array = np.zeros(new_shape, dtype=old_array.dtype)
+    if len(new_shape)==1:
+        new_array[:old_shape[0]] = old_array
+    elif len(new_shape)==2:
+        new_array[:old_shape[0], :old_shape[1]] = old_array
+    return new_array
 
 
 def get_km_bins(
