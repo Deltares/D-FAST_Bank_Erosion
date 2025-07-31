@@ -110,47 +110,6 @@ class Erosion:
         """Set the results of the bank erosion analysis."""
         self._results = value
 
-    def _process_river_axis_by_center_line(self) -> LineGeometry:
-        """Process the river axis by the center line.
-
-        Intersect the river center line with the river axis to map the stations from the first to the latter
-        then clip the river axis by the first and last station of the centerline.
-        """
-        river_axis = LineGeometry(self.river_data.river_axis, crs=self.config_file.crs)
-        river_axis_numpy = river_axis.as_array()
-        # optional sorting --> see 04_Waal_D3D example
-        # check: sum all distances and determine maximum distance ...
-        # if maximum > alpha * sum then perform sort
-        # Waal OK: 0.0082 ratio max/sum, Waal NotOK: 0.13 - Waal: 2500 points,
-        # so even when OK still some 21 times more than 1/2500 = 0.0004
-        dist2 = (np.diff(river_axis_numpy, axis=0) ** 2).sum(axis=1)
-        alpha = dist2.max() / dist2.sum()
-        if alpha > 0.03:
-            print("The river axis needs sorting!!")
-
-        # map km to axis points, further using axis
-        log_text("chainage_to_axis")
-        river_axis_km = river_axis.intersect_with_line(self.river_center_line_arr)
-
-        # clip river axis to reach of interest (get the closest point to the first and last station)
-        i1 = np.argmin(
-            ((self.river_center_line_arr[0, :2] - river_axis_numpy) ** 2).sum(axis=1)
-        )
-        i2 = np.argmin(
-            ((self.river_center_line_arr[-1, :2] - river_axis_numpy) ** 2).sum(axis=1)
-        )
-        if i1 < i2:
-            river_axis_km = river_axis_km[i1 : i2 + 1]
-            river_axis_numpy = river_axis_numpy[i1 : i2 + 1]
-        else:
-            # reverse river axis
-            river_axis_km = river_axis_km[i2 : i1 + 1][::-1]
-            river_axis_numpy = river_axis_numpy[i2 : i1 + 1][::-1]
-
-        river_axis = LineGeometry(river_axis_numpy, crs=self.config_file.crs)
-        river_axis.add_data(data={"stations": river_axis_km})
-        return river_axis
-
     def _get_fairway_data(
         self,
         river_axis: LineGeometry,
@@ -683,8 +642,7 @@ class Erosion:
 
         log_text("derive_topology")
 
-        mesh_data = self.simulation_data.compute_mesh_topology(verbose=False)
-        river_axis = self._process_river_axis_by_center_line()
+        river_axis = self.river_data.process_river_axis_by_center_line()
 
         # map to the output interval
         km_bin = (

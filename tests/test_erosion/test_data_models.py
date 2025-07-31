@@ -326,6 +326,49 @@ class TestErosionRiverData:
         assert isinstance(river_axis, LineString)
         assert river_axis.equals(mock_river_axis)
 
+    # @pytest.mark.unit
+    # def test_process_river_axis_by_center_line(self, mock_erosion: Erosion, mock_debug):
+    #     """Test the _process_river_axis_by_center_line method.
+    #
+    #     This method processes the river axis based on the center line of the river.
+    #
+    #     Args:
+    #         mock_erosion (Erosion): The Erosion instance to test.
+    #
+    #     Mocks:
+    #         LineGeometry:
+    #             A mocked LineGeometry instance to simulate line geometry operations.
+    #         Erosion:
+    #             The Erosion instance without executing the original __init__ method.
+    #
+    #     Asserts:
+    #         The river axis is processed correctly based on the center line.
+    #         The mocked LineGeometry methods are called.
+    #     """
+    #     mock_center_line = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
+    #     mock_erosion.river_center_line_arr = mock_center_line
+    #
+    #     with patch(
+    #             "dfastbe.bank_erosion.bank_erosion.LineGeometry"
+    #     ) as mock_line_geometry:
+    #         mock_line_geometry.return_value = MagicMock()
+    #         mock_line_geometry.return_value.as_array.return_value = np.array(
+    #             [
+    #                 [118594.085937, 414471.53125],
+    #                 [118608.34068032, 414475.92354911],
+    #                 [118622.59542364, 414480.31584821],
+    #                 [118636.85016696, 414484.70814732],
+    #                 [118651.10491029, 414489.10044643],
+    #             ]
+    #         )
+    #         mock_line_geometry.return_value.intersect_with_line.return_value = np.array(
+    #             [128.0, 128.0, 128.0, 128.0, 128.0]
+    #         )
+    #         river_axis = mock_erosion._process_river_axis_by_center_line()
+    #
+    #     mock_line_geometry.return_value.as_array.assert_called_once()
+    #     mock_line_geometry.return_value.intersect_with_line.assert_called_once()
+    #     river_axis.add_data.assert_called_with(data={"stations": np.array([128.0])})
 
 class TestShipsParameters:
 
