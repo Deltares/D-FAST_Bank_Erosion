@@ -30,15 +30,15 @@ class IntersectionResults:
     coords = np.ndarray
     face_indexes = np.ndarray
     point_index = 0
-    index: int
-    vindex: np.ndarray | int
+    current_face_index: int
+    vertex_index: np.ndarray | int
 
     def __init__(self, shape: Tuple[int, int] = (100, 2), verbose: bool = False):
         """Initialize the intersection results with given shape."""
         self.coords = np.zeros(shape, dtype=np.float64)
         self.face_indexes = np.zeros(shape[0], dtype=np.int64)
         self.point_index = 0
-        self.index: int = -1
+        self.current_face_index: int = -1
         self.verbose = verbose
 
     def update(self, current_bank_point, shape_length: bool = None):
@@ -55,70 +55,69 @@ class IntersectionResults:
 
         self.coords[self.point_index] = current_bank_point
 
-        if self.index == -2:
-            self.face_indexes[self.point_index] = self.vindex[0]
+        if self.current_face_index == -2:
+            self.face_indexes[self.point_index] = self.vertex_index[0]
         else:
-            self.face_indexes[self.point_index] = self.index
+            self.face_indexes[self.point_index] = self.current_face_index
         self.point_index += 1
 
     def _log_mesh_transition(
-        self, step, transition_type, transition_index, index0, prev_b
+        self, step, transition_type, transition_index, face_index, prev_b
     ):
         """Helper to print mesh transition information for debugging.
 
         Args:
-            step (int): The current step or iteration.
-            index (int): The current mesh face index.
-            vindex (int): The vertex index.
-            transition_type (str): The type of transition (e.g., "node", "edge").
-            transition_index (int): The index of the transition (e.g., the node or edge index).
-            index0 (int): The target mesh face index.
-            prev_b (float): The previous value of b.
+            step (int):
+                The current step or iteration.
+            transition_type (str):
+                The type of transition (e.g., "node", "edge").
+            transition_index (int):
+                The index of the transition (e.g., the node or edge index).
+            face_index (int):
+                The target mesh face index.
+            prev_b (float):
+                The previous value of b.
         """
-        index_str = "outside" if self.index == -1 else self.index
-        if self.index == -2:
-            index_str = f"edge between {self.vindex}"
+        index_str = "outside" if self.current_face_index == -1 else self.current_face_index
+        if self.current_face_index == -2:
+            index_str = f"edge between {self.vertex_index}"
         print(
             f"{step}: moving from {index_str} via {transition_type} {transition_index} "
-            f"to {index0} at b = {prev_b}"
+            f"to {face_index} at b = {prev_b}"
         )
 
-    def _update_main_attributes(self, face_indexes, node, prev_b, j):
+    def _update_main_attributes(self, face_indexes, node, prev_b, step):
         if self.verbose:
-            self._log_mesh_transition(j, "node", node, face_indexes, prev_b)
+            self._log_mesh_transition(step, "node", node, face_indexes, prev_b)
 
         if isinstance(face_indexes, (int, np.integer)):
-            # self.index = face_indexes
-            self.index = face_indexes
+            self.current_face_index = face_indexes
         elif hasattr(face_indexes, "__len__") and len(face_indexes) == 1:
-            # self.index = face_indexes[0]
-            self.index = face_indexes[0]
+            self.current_face_index = face_indexes[0]
         else:
-            # self.index = -2
-            # self.vindex = face_indexes
-            self.index = -2
-            self.vindex = face_indexes
+            self.current_face_index = -2
+            self.vertex_index = face_indexes
 
-    def _update_mesh_index_and_log(self, j, node, edge, faces, face_indexes, prev_b):
+    def _update_mesh_index_and_log(self, step, node, edge, faces, face_indexes, prev_b):
         """
         Helper to update mesh index and log transitions for intersect_line_mesh.
         """
         if face_indexes is not None:
-            self._update_main_attributes(face_indexes, node, prev_b, j)
+            self._update_main_attributes(face_indexes, node, prev_b, step)
             return
 
         for i, face in enumerate(faces):
             # if face == self.index:
-            if face == self.index:
+            if face == self.current_face_index:
                 other_face = faces[1 - i]
                 if self.verbose:
-                    self._log_mesh_transition(j, "edge", edge, other_face, prev_b)
+                    self._log_mesh_transition(step, "edge", edge, other_face, prev_b)
                 # self.index = other_face
-                self.index = other_face
+                self.current_face_index = other_face
                 return
 
         raise ValueError(
-            f"Shouldn't come here .... index {self.index} differs from both faces "
+            f"Shouldn't come here .... index {self.current_face_index} differs from both faces "
             f"{faces[0]} and {faces[1]} associated with slicing edge {edge}"
         )
 
@@ -150,8 +149,8 @@ class MeshWrapper:
             )
         )[0]
         index, vindex = self._find_starting_face(closest_cell_ind)
-        self.intersection_results.index = index
-        self.intersection_results.vindex = vindex
+        self.intersection_results.current_face_index = index
+        self.intersection_results.vertex_index = vindex
         self.intersection_results.update(current_bank_point)
 
     def _find_starting_face(self, face_indexes: np.ndarray):
@@ -193,14 +192,14 @@ class MeshWrapper:
         else:
             print(f"{j}: -- no slices along this segment --")
 
-        if self.intersection_results.index >= 0:
+        if self.intersection_results.current_face_index >= 0:
             pnt = Point(bpj)
             # polygon_k = self.mesh_data.get_face_by_index(self.index, as_polygon=True)
-            polygon_k = self.mesh_data.get_face_by_index(self.intersection_results.index, as_polygon=True)
+            polygon_k = self.mesh_data.get_face_by_index(self.intersection_results.current_face_index, as_polygon=True)
 
             if not polygon_k.contains(pnt):
                 raise ValueError(
-                    f"{j}: ERROR: point actually not contained within {self.intersection_results.index}!"
+                    f"{j}: ERROR: point actually not contained within {self.intersection_results.current_face_index}!"
                 )
 
     def _process_node_transition(self, segment: RiverSegment, node):
@@ -276,21 +275,21 @@ class MeshWrapper:
     def _process_bank_segment(self, segment: RiverSegment):
 
         while True:
-            if self.intersection_results.index == -2:
-                index_src = self.mesh_data.resolve_ambiguous_edge_transition(segment, self.intersection_results.vindex)
+            if self.intersection_results.current_face_index == -2:
+                index_src = self.mesh_data.resolve_ambiguous_edge_transition(segment, self.intersection_results.vertex_index)
 
                 if len(index_src) == 1:
-                    self.intersection_results.index = index_src[0]
-                    self.intersection_results.vindex = index_src[0:1]
+                    self.intersection_results.current_face_index = index_src[0]
+                    self.intersection_results.vertex_index = index_src[0:1]
                 else:
-                    self.intersection_results.index = -2
+                    self.intersection_results.current_face_index = -2
             elif segment.is_length_zero():
                 # segment has zero length
                 break
             else:
                 segment.distances, segment.edges, segment.nodes = (
                     self.mesh_data.find_segment_intersections(
-                        self.intersection_results.index,
+                        self.intersection_results.current_face_index,
                         segment,
                     )
                 )
