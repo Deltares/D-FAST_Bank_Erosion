@@ -689,7 +689,7 @@ class BaseRiverData:
         return get_bbox(coords, buffer)
 
     def get_erosion_sim_data(self, num_discharge_levels: int) -> Tuple[List[str], List[float]]:
-        # get pdischarges
+        # get p discharges
         sim_files = []
         p_discharge = []
         for iq in range(num_discharge_levels):
