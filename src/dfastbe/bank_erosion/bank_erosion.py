@@ -36,7 +36,6 @@ from shapely.geometry import LineString
 
 from dfastbe import __version__
 from dfastbe.bank_erosion.mesh.data_models import MeshData
-from dfastbe.bank_erosion.mesh.processor import MeshProcessor
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     DischargeLevels,
@@ -86,7 +85,6 @@ class Erosion:
         self.sim_files, self.p_discharge = self.river_data.get_erosion_sim_data(
             self.river_data.num_discharge_levels
         )
-        self.bl_processor = BankLinesProcessor(self.river_data)
         self.debugger = Debugger(config_file.crs, self.river_data.output_dir)
         self.erosion_calculator = ErosionCalculator()
         self._results = None
@@ -112,14 +110,12 @@ class Erosion:
     def _get_fairway_data(
         self,
         river_axis: LineGeometry,
-        mesh_data: MeshData,
     ):
         # map km to fairway points, further using axis
         log_text("chainage_to_fairway")
         # intersect fairway and mesh
-        fairway_intersection_coords, fairway_face_indices = MeshProcessor(
-            river_axis.as_array(), mesh_data
-        ).intersect_line_mesh()
+        fairway_intersection_coords, fairway_face_indices = self.bl_processor.get_fairway_data(river_axis)
+
         if self.river_data.debug:
             arr = (
                 fairway_intersection_coords[:-1] + fairway_intersection_coords[1:]
@@ -627,8 +623,11 @@ class Erosion:
             single_calculation,
         )
 
-    def process_mesh_data(self):
-        return self.simulation_data.compute_mesh_topology(verbose=False)
+    def get_mesh_processor(self):
+        log_text("derive_topology")
+        mesh_data = self.simulation_data.compute_mesh_topology(verbose=False)
+
+        self.bl_processor = BankLinesProcessor(self.river_data, mesh_data)
 
     def run(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
@@ -642,10 +641,10 @@ class Erosion:
         )
         log_text("-")
 
-        log_text("derive_topology")
+        self.get_mesh_processor()
 
-        mesh_data = self.simulation_data.compute_mesh_topology(verbose=False)
         river_axis = self.river_data.process_river_axis_by_center_line()
+        fairway_data = self._get_fairway_data(river_axis)
 
         # map to the output interval
         km_bin = (
@@ -655,11 +654,9 @@ class Erosion:
         )
         km_mid = get_km_bins(km_bin, station_type="mid")  # get mid-points
 
-        fairway_data = self._get_fairway_data(river_axis, mesh_data)
-
         # map bank lines to mesh cells
         log_text("intersect_bank_mesh")
-        bank_data = self.bl_processor.intersect_with_mesh(mesh_data)
+        bank_data = self.bl_processor.intersect_with_mesh()
         # map the bank data to the fairway data (the bank_data and fairway_data will be updated inside the `_map_bank_to_fairway` function)
         self.calculate_fairway_bank_line_distance(
             bank_data, fairway_data, self.simulation_data

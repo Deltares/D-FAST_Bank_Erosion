@@ -14,13 +14,23 @@ from dfastbe.bank_erosion.mesh.processor import MeshProcessor
 class BankLinesProcessor:
     """Class to process bank lines and intersect them with a mesh."""
 
-    def __init__(self, river_data: ErosionRiverData):
+    def __init__(self, river_data: ErosionRiverData, mesh_data: MeshData):
         """Constructor for BankLinesProcessor."""
         self.bank_lines = river_data.bank_lines
         self.river_center_line = river_data.river_center_line.as_array()
         self.num_bank_lines = len(self.bank_lines)
+        self.mesh_data = mesh_data
 
-    def intersect_with_mesh(self, mesh_data: MeshData) -> BankData:
+    def get_fairway_data(self, river_axis: LineGeometry) :
+        log_text("chainage_to_fairway")
+        # intersect fairway and mesh
+        fairway_intersection_coords, fairway_face_indices = MeshProcessor(
+            river_axis.as_array(), self.mesh_data
+        ).intersect_line_mesh()
+
+        return fairway_intersection_coords, fairway_face_indices
+
+    def intersect_with_mesh(self) -> BankData:
         """Intersect bank lines with a mesh and return bank data.
 
         Args:
@@ -38,7 +48,7 @@ class BankLinesProcessor:
             log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
 
             coords_along_bank, face_indices = MeshProcessor(
-                line_coords, mesh_data
+                line_coords, self.mesh_data
             ).intersect_line_mesh()
             bank_line_coords.append(coords_along_bank)
             bank_face_indices.append(face_indices)

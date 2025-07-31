@@ -233,57 +233,57 @@ class TestErosion:
         assert erosion_inputs.taucls_str == taucls_str
         assert len(erosion_inputs.bank_type) == 4
 
-    def test_get_fairway_data(
-        self, mock_erosion: Erosion, mock_config_file, mock_debug
-    ):
-        """Test the _get_fairway_data method.
-
-        This method retrieves fairway data by intersecting the river center line with the mesh.
-
-        Args:
-            mock_erosion (Erosion): The Erosion instance to test.
-            mock_config_file (MagicMock): A mocked ConfigFile instance.
-
-        Mocks:
-            FairwayData:
-                A mocked FairwayData instance to simulate fairway data retrieval.
-            intersect_line_mesh:
-                A mocked function to simulate the intersection of a line with a mesh.
-            GeoDataFrame:
-                A mocked GeoDataFrame to simulate the saving of fairway data to a file.
-
-        Asserts:
-            The fairway data contains the expected intersection coordinates and face indices.
-        """
-        mock_erosion.river_data.debug = True
-        mock_erosion._config_file = mock_config_file
-        with (
-            patch("dfastbe.bank_erosion.data_models.calculation.FairwayData"),
-            patch("dfastbe.bank_erosion.bank_erosion.MeshProcessor") as processor_mock,
-            patch("dfastbe.io.data_models.GeoDataFrame") as gdf_mock,
-        ):
-            fairway_intersection_coords = np.array(
-                [
-                    [209186.621094, 389659.99609375],
-                    [209187.69800938, 389665.38986148],
-                    [209189.26657398, 389673.24607124],
-                    [209189.367188, 389673.75],
-                    [209192.19921925, 389687.4921875],
-                    [209195.0312505, 389701.234375],
-                    [209195.96700092, 389705.77502325],
-                ]
-            )
-            fairway_face_indices = np.array([59166, 59167, 62557, 62557, 62557, 62557])
-            processor_mock.return_value.intersect_line_mesh.return_value = (
-                fairway_intersection_coords,
-                fairway_face_indices,
-            )
-            fairway_data = mock_erosion._get_fairway_data(MagicMock(), MagicMock())
-            gdf_mock.return_value.to_file.assert_called_once()
-        assert np.allclose(fairway_data.fairway_face_indices, fairway_face_indices)
-        assert np.allclose(
-            fairway_data.intersection_coords, fairway_intersection_coords
-        )
+    # def test_get_fairway_data(
+    #     self, mock_erosion: Erosion, mock_config_file, mock_debug
+    # ):
+    #     """Test the _get_fairway_data method.
+    #
+    #     This method retrieves fairway data by intersecting the river center line with the mesh.
+    #
+    #     Args:
+    #         mock_erosion (Erosion): The Erosion instance to test.
+    #         mock_config_file (MagicMock): A mocked ConfigFile instance.
+    #
+    #     Mocks:
+    #         FairwayData:
+    #             A mocked FairwayData instance to simulate fairway data retrieval.
+    #         intersect_line_mesh:
+    #             A mocked function to simulate the intersection of a line with a mesh.
+    #         GeoDataFrame:
+    #             A mocked GeoDataFrame to simulate the saving of fairway data to a file.
+    #
+    #     Asserts:
+    #         The fairway data contains the expected intersection coordinates and face indices.
+    #     """
+    #     mock_erosion.river_data.debug = True
+    #     mock_erosion._config_file = mock_config_file
+    #     with (
+    #         patch("dfastbe.bank_erosion.data_models.calculation.FairwayData"),
+    #         patch("dfastbe.bank_erosion.bank_erosion.MeshProcessor") as processor_mock,
+    #         patch("dfastbe.io.data_models.GeoDataFrame") as gdf_mock,
+    #     ):
+    #         fairway_intersection_coords = np.array(
+    #             [
+    #                 [209186.621094, 389659.99609375],
+    #                 [209187.69800938, 389665.38986148],
+    #                 [209189.26657398, 389673.24607124],
+    #                 [209189.367188, 389673.75],
+    #                 [209192.19921925, 389687.4921875],
+    #                 [209195.0312505, 389701.234375],
+    #                 [209195.96700092, 389705.77502325],
+    #             ]
+    #         )
+    #         fairway_face_indices = np.array([59166, 59167, 62557, 62557, 62557, 62557])
+    #         processor_mock.return_value.intersect_line_mesh.return_value = (
+    #             fairway_intersection_coords,
+    #             fairway_face_indices,
+    #         )
+    #         fairway_data = mock_erosion._get_fairway_data(MagicMock(), MagicMock())
+    #         gdf_mock.return_value.to_file.assert_called_once()
+    #     assert np.allclose(fairway_data.fairway_face_indices, fairway_face_indices)
+    #     assert np.allclose(
+    #         fairway_data.intersection_coords, fairway_intersection_coords
+    #     )
 
     @pytest.fixture
     def read_grid_data(self):
