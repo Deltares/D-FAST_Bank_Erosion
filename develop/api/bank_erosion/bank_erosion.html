@@ -4480,7 +4480,11 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">765</span>
 <span class="normal">766</span>
 <span class="normal">767</span>
-<span class="normal">768</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Erosion</span><span class="p">:</span>
+<span class="normal">768</span>
+<span class="normal">769</span>
+<span class="normal">770</span>
+<span class="normal">771</span>
+<span class="normal">772</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Erosion</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to handle the bank erosion calculations.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
@@ -5036,6 +5040,9 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="n">single_calculation</span><span class="p">,</span>
         <span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">process_mesh_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">compute_mesh_topology</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the bank erosion analysis for a specified configuration.&quot;&quot;&quot;</span>
         <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- start analysis --&quot;</span><span class="p">)</span>
@@ -5050,6 +5057,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;derive_topology&quot;</span><span class="p">)</span>
 
+        <span class="n">mesh_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">compute_mesh_topology</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">river_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">process_river_axis_by_center_line</span><span class="p">()</span>
 
         <span class="c1"># map to the output interval</span>
@@ -5819,10 +5827,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/bank_erosion.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">631</span>
-<span class="normal">632</span>
-<span class="normal">633</span>
-<span class="normal">634</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">634</span>
 <span class="normal">635</span>
 <span class="normal">636</span>
 <span class="normal">637</span>
@@ -5885,7 +5890,11 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">694</span>
 <span class="normal">695</span>
 <span class="normal">696</span>
-<span class="normal">697</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">697</span>
+<span class="normal">698</span>
+<span class="normal">699</span>
+<span class="normal">700</span>
+<span class="normal">701</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the bank erosion analysis for a specified configuration.&quot;&quot;&quot;</span>
     <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- start analysis --&quot;</span><span class="p">)</span>
     <span class="n">log_text</span><span class="p">(</span>
@@ -5899,6 +5908,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;derive_topology&quot;</span><span class="p">)</span>
 
+    <span class="n">mesh_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">compute_mesh_topology</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">river_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">process_river_axis_by_center_line</span><span class="p">()</span>
 
     <span class="c1"># map to the output interval</span>
@@ -5982,17 +5992,17 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/bank_erosion.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">771</span>
-<span class="normal">772</span>
-<span class="normal">773</span>
-<span class="normal">774</span>
-<span class="normal">775</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">775</span>
 <span class="normal">776</span>
 <span class="normal">777</span>
 <span class="normal">778</span>
 <span class="normal">779</span>
 <span class="normal">780</span>
-<span class="normal">781</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_alpha</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ind_1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ind_2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bp</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
+<span class="normal">781</span>
+<span class="normal">782</span>
+<span class="normal">783</span>
+<span class="normal">784</span>
+<span class="normal">785</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">calculate_alpha</span><span class="p">(</span><span class="n">coords</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ind_1</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">ind_2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bp</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the alpha value for the bank erosion model.&quot;&quot;&quot;</span>
     <span class="n">alpha</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">ind_1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">coords</span><span class="p">[</span><span class="n">ind_2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">bp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">coords</span><span class="p">[</span><span class="n">ind_2</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
