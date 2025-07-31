@@ -2203,17 +2203,12 @@
 <span class="normal">457</span>
 <span class="normal">458</span>
 <span class="normal">459</span>
-<span class="normal">460</span>
-<span class="normal">461</span>
-<span class="normal">462</span>
-<span class="normal">463</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
+<span class="normal">460</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to process bank lines and intersect them with a mesh.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">river_data</span><span class="p">:</span> <span class="n">ErosionRiverData</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">:</span> <span class="n">MeshData</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for BankLinesProcessor.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Constructor for MeshProcessor.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bank_lines</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">bank_lines</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">river_center_line</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">river_center_line</span><span class="o">.</span><span class="n">as_array</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">num_bank_lines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_lines</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span> <span class="o">=</span> <span class="n">mesh_data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span> <span class="o">=</span> <span class="n">river_data</span>
 
@@ -2239,9 +2234,6 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_bank_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BankData</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Intersect bank lines with a mesh and return bank data.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            mesh_data: Mesh data containing face coordinates and connectivity information.</span>
-
 <span class="sd">        Returns:</span>
 <span class="sd">            BankData object containing bank line coordinates, face indices, and other bank-related data.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -2261,12 +2253,14 @@
 
         <span class="c1"># linking bank lines to chainage</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_banks&quot;</span><span class="p">)</span>
+        <span class="n">river_center_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">river_center_line</span><span class="o">.</span><span class="n">as_array</span><span class="p">()</span>
+
         <span class="n">bank_chainage_midpoints</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_bank_lines</span>
         <span class="n">is_right_bank</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_bank_lines</span>
         <span class="k">for</span> <span class="n">bank_index</span><span class="p">,</span> <span class="n">coords</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bank_line_coords</span><span class="p">):</span>
             <span class="n">segment_mid_points</span> <span class="o">=</span> <span class="n">LineGeometry</span><span class="p">((</span><span class="n">coords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
             <span class="n">chainage_mid_points</span> <span class="o">=</span> <span class="n">segment_mid_points</span><span class="o">.</span><span class="n">intersect_with_line</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">river_center_line</span>
+                <span class="n">river_center_line</span>
             <span class="p">)</span>
 
             <span class="c1"># check if the bank line is defined from low chainage to high chainage</span>
@@ -2281,7 +2275,7 @@
             <span class="c1"># check if the bank line is a left or right bank</span>
             <span class="c1"># when looking from low-to-high chainage</span>
             <span class="n">is_right_bank</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">on_right_side</span><span class="p">(</span>
-                <span class="n">coords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_center_line</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">coords</span><span class="p">,</span> <span class="n">river_center_line</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">is_right_bank</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]:</span>
                 <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;right_side_bank&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">bank_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">})</span>
@@ -2328,7 +2322,7 @@
 
     <div class="doc doc-contents ">
 
-        <p>Constructor for BankLinesProcessor.</p>
+        <p>Constructor for MeshProcessor.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/mesh/processor.py</code></summary>
@@ -2336,13 +2330,9 @@
 <span class="normal">372</span>
 <span class="normal">373</span>
 <span class="normal">374</span>
-<span class="normal">375</span>
-<span class="normal">376</span>
-<span class="normal">377</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">river_data</span><span class="p">:</span> <span class="n">ErosionRiverData</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">:</span> <span class="n">MeshData</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Constructor for BankLinesProcessor.&quot;&quot;&quot;</span>
+<span class="normal">375</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">river_data</span><span class="p">:</span> <span class="n">ErosionRiverData</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">:</span> <span class="n">MeshData</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Constructor for MeshProcessor.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">bank_lines</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">bank_lines</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">river_center_line</span> <span class="o">=</span> <span class="n">river_data</span><span class="o">.</span><span class="n">river_center_line</span><span class="o">.</span><span class="n">as_array</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">num_bank_lines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_lines</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mesh_data</span> <span class="o">=</span> <span class="n">mesh_data</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span> <span class="o">=</span> <span class="n">river_data</span>
 </code></pre></div></td></tr></table></div>
@@ -2363,36 +2353,6 @@
     <div class="doc doc-contents ">
 
         <p>Intersect bank lines with a mesh and return bank data.</p>
-
-
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>mesh_data</code>
-            </td>
-            <td>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Mesh data containing face coordinates and connectivity information.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-      </tbody>
-    </table>
 
 
     <p><span class="doc-section-title">Returns:</span></p>
@@ -2419,7 +2379,9 @@
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/mesh/processor.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">398</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span>
 <span class="normal">399</span>
 <span class="normal">400</span>
 <span class="normal">401</span>
@@ -2481,14 +2443,8 @@
 <span class="normal">457</span>
 <span class="normal">458</span>
 <span class="normal">459</span>
-<span class="normal">460</span>
-<span class="normal">461</span>
-<span class="normal">462</span>
-<span class="normal">463</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bank_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BankData</span><span class="p">:</span>
+<span class="normal">460</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bank_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BankData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Intersect bank lines with a mesh and return bank data.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        mesh_data: Mesh data containing face coordinates and connectivity information.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        BankData object containing bank line coordinates, face indices, and other bank-related data.</span>
@@ -2509,12 +2465,14 @@
 
     <span class="c1"># linking bank lines to chainage</span>
     <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_banks&quot;</span><span class="p">)</span>
+    <span class="n">river_center_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">river_center_line</span><span class="o">.</span><span class="n">as_array</span><span class="p">()</span>
+
     <span class="n">bank_chainage_midpoints</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_bank_lines</span>
     <span class="n">is_right_bank</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_bank_lines</span>
     <span class="k">for</span> <span class="n">bank_index</span><span class="p">,</span> <span class="n">coords</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bank_line_coords</span><span class="p">):</span>
         <span class="n">segment_mid_points</span> <span class="o">=</span> <span class="n">LineGeometry</span><span class="p">((</span><span class="n">coords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">chainage_mid_points</span> <span class="o">=</span> <span class="n">segment_mid_points</span><span class="o">.</span><span class="n">intersect_with_line</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">river_center_line</span>
+            <span class="n">river_center_line</span>
         <span class="p">)</span>
 
         <span class="c1"># check if the bank line is defined from low chainage to high chainage</span>
@@ -2529,7 +2487,7 @@
         <span class="c1"># check if the bank line is a left or right bank</span>
         <span class="c1"># when looking from low-to-high chainage</span>
         <span class="n">is_right_bank</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">on_right_side</span><span class="p">(</span>
-            <span class="n">coords</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_center_line</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">coords</span><span class="p">,</span> <span class="n">river_center_line</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">is_right_bank</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]:</span>
             <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;right_side_bank&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">bank_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">})</span>
