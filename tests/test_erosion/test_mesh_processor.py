@@ -272,7 +272,7 @@ class TestMeshProcessor:
             The coordinates and indices of the intersection match the expected values.
         """
         wrapper = MeshWrapper(mesh_data)
-        crds, idx = wrapper.intersect_with_line(line)
+        crds, idx = wrapper.intersect_with_coords(line)
         assert np.allclose(crds, expected_coords)
         assert np.array_equal(idx, expected_idx)
 

@@ -42,7 +42,7 @@ mesh_data = erosion.simulation_data.compute_mesh_topology()
 
 # Intersect a bank line with the mesh
 bank_line_coords = erosion.river_data.bank_lines.geometry[0].coords
-coords_along_bank, face_indices = MeshWrapper(bank_line_coords, mesh_data).intersect_with_line()
+coords_along_bank, face_indices = MeshWrapper(mesh_data).intersect_with_coords(bank_line_coords)
 
 # Print results
 print(f"Number of intersection points: {len(coords_along_bank)}")
