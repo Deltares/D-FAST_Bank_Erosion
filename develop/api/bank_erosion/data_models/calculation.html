@@ -4912,6 +4912,7 @@ can be set to empty arrays if not needed.</p>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.io.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigFile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.bank_erosion.bank_erosion</span><span class="w"> </span><span class="kn">import</span> <span class="n">Erosion</span>
 
+
 <span class="c1"># Load configuration file</span>
 <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;config.cfg&quot;</span><span class="p">)</span>
 
@@ -4919,7 +4920,7 @@ can be set to empty arrays if not needed.</p>
 <span class="n">erosion</span> <span class="o">=</span> <span class="n">Erosion</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
 
 <span class="c1"># Access bank data</span>
-<span class="n">bank_data</span> <span class="o">=</span> <span class="n">erosion</span><span class="o">.</span><span class="n">bl_processor</span><span class="o">.</span><span class="n">intersect_with_mesh</span><span class="p">(</span><span class="n">erosion</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">mesh_data</span><span class="p">)</span>
+<span class="n">bank_data</span> <span class="o">=</span> <span class="n">erosion</span><span class="o">.</span><span class="n">mesh_processor</span><span class="o">.</span><span class="n">get_bank_data</span><span class="p">(</span><span class="n">erosion</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">mesh_data</span><span class="p">)</span>
 
 <span class="c1"># Print bank data properties</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of bank lines: </span><span class="si">{</span><span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
