@@ -3,7 +3,7 @@ import math
 from typing import Tuple
 import numpy as np
 from shapely.geometry import Point
-from dfastbe.bank_erosion.mesh.data_models import MeshData, RiverSegment
+from dfastbe.bank_erosion.mesh.data_models import RiverSegment
 from dfastbe.bank_erosion.utils import enlarge
 
 from dfastbe.bank_erosion.mesh.data_models import MeshData
@@ -17,14 +17,14 @@ from dfastbe.io.data_models import LineGeometry
 from dfastbe.io.logger import log_text
 from dfastbe.utils import on_right_side
 
-__all__ = ["BankLinesProcessor"]
+__all__ = ["MeshProcessor"]
 
 ATOL = 1e-8
 RTOL = 1e-8
 SHAPE_MULTIPLIER = 2
 
 
-class MeshProcessor:
+class MeshWrapper:
     """A class for processing mesh-related operations."""
 
     def __init__(
@@ -312,7 +312,7 @@ class MeshProcessor:
             if segment.min_relative_distance == 1:
                 break
 
-    def intersect_line_mesh(self) -> Tuple[np.ndarray, np.ndarray]:
+    def intersect_with_line(self) -> Tuple[np.ndarray, np.ndarray]:
         """Intersects a line with an unstructured mesh and returns the intersection coordinates and mesh face indices.
 
         This function determines where a given line (e.g., a bank line) intersects the faces of an unstructured mesh.
@@ -365,7 +365,7 @@ class MeshProcessor:
         return self.coords, self.face_indexes
 
 
-class BankLinesProcessor:
+class MeshProcessor:
     """Class to process bank lines and intersect them with a mesh."""
 
     def __init__(self, river_data: ErosionRiverData, mesh_data: MeshData):
@@ -376,12 +376,12 @@ class BankLinesProcessor:
         self.mesh_data = mesh_data
         self.river_data = river_data
 
-    def get_fairway_data(self, river_axis: LineGeometry) :
+    def get_fairway_data(self, river_axis: LineGeometry) -> FairwayData:
         log_text("chainage_to_fairway")
         # intersect fairway and mesh
-        fairway_intersection_coords, fairway_face_indices = MeshProcessor(
+        fairway_intersection_coords, fairway_face_indices = MeshWrapper(
             river_axis.as_array(), self.mesh_data
-        ).intersect_line_mesh()
+        ).intersect_with_line()
 
         if self.river_data.debug:
             arr = (
@@ -395,7 +395,7 @@ class BankLinesProcessor:
 
         return FairwayData(fairway_face_indices, fairway_intersection_coords)
 
-    def intersect_with_mesh(self) -> BankData:
+    def get_bank_data(self) -> BankData:
         """Intersect bank lines with a mesh and return bank data.
 
         Args:
@@ -412,9 +412,9 @@ class BankLinesProcessor:
             line_coords = np.array(self.bank_lines.geometry[bank_index].coords)
             log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
 
-            coords_along_bank, face_indices = MeshProcessor(
+            coords_along_bank, face_indices = MeshWrapper(
                 line_coords, self.mesh_data
-            ).intersect_line_mesh()
+            ).intersect_with_line()
             bank_line_coords.append(coords_along_bank)
             bank_face_indices.append(face_indices)
 

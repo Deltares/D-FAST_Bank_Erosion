@@ -54,7 +54,7 @@ from dfastbe.bank_erosion.data_models.inputs import (
 from dfastbe.bank_erosion.debugger import Debugger
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.bank_erosion.plotter import ErosionPlotter
-from dfastbe.bank_erosion.mesh.processor import BankLinesProcessor
+from dfastbe.bank_erosion.mesh.processor import MeshProcessor
 from dfastbe.bank_erosion.utils import (
     get_km_bins,
     get_km_eroded_volume,
@@ -605,7 +605,7 @@ class Erosion:
         log_text("derive_topology")
         mesh_data = self.simulation_data.compute_mesh_topology(verbose=False)
 
-        self.bl_processor = BankLinesProcessor(self.river_data, mesh_data)
+        self.bl_processor = MeshProcessor(self.river_data, mesh_data)
 
     def run(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
@@ -634,7 +634,7 @@ class Erosion:
 
         # map bank lines to mesh cells
         log_text("intersect_bank_mesh")
-        bank_data = self.bl_processor.intersect_with_mesh()
+        bank_data = self.bl_processor.get_bank_data()
         # map the bank data to the fairway data (the bank_data and fairway_data will be updated inside the `_map_bank_to_fairway` function)
         self.calculate_fairway_bank_line_distance(
             bank_data, fairway_data, self.simulation_data

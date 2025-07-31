@@ -222,6 +222,7 @@ from dfastbe.bank_erosion.data_models.calculation import BankData, ErosionInputs
 from dfastbe.io.config import ConfigFile
 from dfastbe.bank_erosion.bank_erosion import Erosion
 
+
 # Load configuration file
 config_file = ConfigFile.read("config.cfg")
 
@@ -229,7 +230,7 @@ config_file = ConfigFile.read("config.cfg")
 erosion = Erosion(config_file)
 
 # Access bank data
-bank_data = erosion.bl_processor.intersect_with_mesh(erosion.simulation_data.mesh_data)
+bank_data = erosion.bl_processor.get_bank_data(erosion.simulation_data.mesh_data)
 
 # Print bank data properties
 print(f"Number of bank lines: {bank_data.n_bank_lines}")

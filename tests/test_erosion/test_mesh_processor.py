@@ -3,7 +3,7 @@ import pytest
 
 from dfastbe.bank_erosion.mesh.data_models import MeshData, RiverSegment
 from dfastbe.bank_erosion.mesh.processor import (
-    MeshProcessor,
+    MeshWrapper,
     enlarge,
 )
 
@@ -271,7 +271,7 @@ class TestMeshProcessor:
         Asserts:
             The coordinates and indices of the intersection match the expected values.
         """
-        crds, idx = MeshProcessor(line, mesh_data).intersect_line_mesh()
+        crds, idx = MeshWrapper(line, mesh_data).intersect_with_line()
         assert np.allclose(crds, expected_coords)
         assert np.array_equal(idx, expected_idx)
 
