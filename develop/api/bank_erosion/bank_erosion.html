@@ -8937,7 +8937,13 @@ intersections along the current segment.</p>
 <span class="normal">481</span>
 <span class="normal">482</span>
 <span class="normal">483</span>
-<span class="normal">484</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">MeshProcessor</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Class to process bank lines and intersect them with a mesh.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">river_data</span><span class="p">:</span> <span class="n">ErosionRiverData</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">:</span> <span class="n">MeshData</span><span class="p">):</span>
@@ -8980,9 +8986,21 @@ intersections along the current segment.</p>
             <span class="n">bank_line_coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords_along_bank</span><span class="p">)</span>
             <span class="n">bank_face_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">face_indices</span><span class="p">)</span>
 
+        <span class="n">bank_order</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link_lines_to_stations</span><span class="p">(</span><span class="n">bank_line_coords</span><span class="p">,</span> <span class="n">bank_face_indices</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">BankData</span><span class="o">.</span><span class="n">from_column_arrays</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span>
+            <span class="n">SingleBank</span><span class="p">,</span>
+            <span class="n">bank_lines</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_lines</span><span class="p">,</span>
+            <span class="n">n_bank_lines</span><span class="o">=</span><span class="n">n_bank_lines</span><span class="p">,</span>
+            <span class="n">bank_order</span><span class="o">=</span><span class="n">bank_order</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_link_lines_to_stations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bank_line_coords</span><span class="p">,</span> <span class="n">bank_face_indices</span><span class="p">):</span>
         <span class="c1"># linking bank lines to chainage</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_banks&quot;</span><span class="p">)</span>
         <span class="n">river_center_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">river_center_line</span><span class="o">.</span><span class="n">as_array</span><span class="p">()</span>
+        <span class="n">n_bank_lines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_lines</span><span class="p">)</span>
 
         <span class="n">bank_chainage_midpoints</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_bank_lines</span>
         <span class="n">is_right_bank</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_bank_lines</span>
@@ -9018,13 +9036,7 @@ intersections along the current segment.</p>
             <span class="s1">&#39;bank_face_indices&#39;</span><span class="p">:</span> <span class="n">bank_face_indices</span><span class="p">,</span>
             <span class="s1">&#39;bank_chainage_midpoints&#39;</span><span class="p">:</span> <span class="n">bank_chainage_midpoints</span>
         <span class="p">}</span>
-        <span class="k">return</span> <span class="n">BankData</span><span class="o">.</span><span class="n">from_column_arrays</span><span class="p">(</span>
-            <span class="n">data</span><span class="p">,</span>
-            <span class="n">SingleBank</span><span class="p">,</span>
-            <span class="n">bank_lines</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_lines</span><span class="p">,</span>
-            <span class="n">n_bank_lines</span><span class="o">=</span><span class="n">n_bank_lines</span><span class="p">,</span>
-            <span class="n">bank_order</span><span class="o">=</span><span class="n">bank_order</span><span class="p">,</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">bank_order</span><span class="p">,</span> <span class="n">data</span>
 </code></pre></div></td></tr></table></div>
               </details>
 
@@ -9136,43 +9148,7 @@ intersections along the current segment.</p>
 <span class="normal">445</span>
 <span class="normal">446</span>
 <span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span>
-<span class="normal">451</span>
-<span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span>
-<span class="normal">455</span>
-<span class="normal">456</span>
-<span class="normal">457</span>
-<span class="normal">458</span>
-<span class="normal">459</span>
-<span class="normal">460</span>
-<span class="normal">461</span>
-<span class="normal">462</span>
-<span class="normal">463</span>
-<span class="normal">464</span>
-<span class="normal">465</span>
-<span class="normal">466</span>
-<span class="normal">467</span>
-<span class="normal">468</span>
-<span class="normal">469</span>
-<span class="normal">470</span>
-<span class="normal">471</span>
-<span class="normal">472</span>
-<span class="normal">473</span>
-<span class="normal">474</span>
-<span class="normal">475</span>
-<span class="normal">476</span>
-<span class="normal">477</span>
-<span class="normal">478</span>
-<span class="normal">479</span>
-<span class="normal">480</span>
-<span class="normal">481</span>
-<span class="normal">482</span>
-<span class="normal">483</span>
-<span class="normal">484</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bank_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BankData</span><span class="p">:</span>
+<span class="normal">448</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">get_bank_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BankData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Intersect bank lines with a mesh and return bank data.</span>
 
 <span class="sd">    Returns:</span>
@@ -9190,44 +9166,8 @@ intersections along the current segment.</p>
         <span class="n">bank_line_coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords_along_bank</span><span class="p">)</span>
         <span class="n">bank_face_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">face_indices</span><span class="p">)</span>
 
-    <span class="c1"># linking bank lines to chainage</span>
-    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_banks&quot;</span><span class="p">)</span>
-    <span class="n">river_center_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">river_center_line</span><span class="o">.</span><span class="n">as_array</span><span class="p">()</span>
+    <span class="n">bank_order</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_link_lines_to_stations</span><span class="p">(</span><span class="n">bank_line_coords</span><span class="p">,</span> <span class="n">bank_face_indices</span><span class="p">)</span>
 
-    <span class="n">bank_chainage_midpoints</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_bank_lines</span>
-    <span class="n">is_right_bank</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span> <span class="o">*</span> <span class="n">n_bank_lines</span>
-    <span class="k">for</span> <span class="n">bank_index</span><span class="p">,</span> <span class="n">coords</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bank_line_coords</span><span class="p">):</span>
-        <span class="n">segment_mid_points</span> <span class="o">=</span> <span class="n">LineGeometry</span><span class="p">((</span><span class="n">coords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">+</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="p">:])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="n">chainage_mid_points</span> <span class="o">=</span> <span class="n">segment_mid_points</span><span class="o">.</span><span class="n">intersect_with_line</span><span class="p">(</span>
-            <span class="n">river_center_line</span>
-        <span class="p">)</span>
-
-        <span class="c1"># check if the bank line is defined from low chainage to high chainage</span>
-        <span class="k">if</span> <span class="n">chainage_mid_points</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">chainage_mid_points</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="c1"># if not, flip the bank line and all associated data</span>
-            <span class="n">chainage_mid_points</span> <span class="o">=</span> <span class="n">chainage_mid_points</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="n">bank_line_coords</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">bank_line_coords</span><span class="p">[</span><span class="n">bank_index</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
-            <span class="n">bank_face_indices</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">bank_face_indices</span><span class="p">[</span><span class="n">bank_index</span><span class="p">][::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-
-        <span class="n">bank_chainage_midpoints</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">chainage_mid_points</span>
-
-        <span class="c1"># check if the bank line is a left or right bank</span>
-        <span class="c1"># when looking from low-to-high chainage</span>
-        <span class="n">is_right_bank</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">on_right_side</span><span class="p">(</span>
-            <span class="n">coords</span><span class="p">,</span> <span class="n">river_center_line</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
-        <span class="p">)</span>
-        <span class="k">if</span> <span class="n">is_right_bank</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]:</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;right_side_bank&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">bank_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">})</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;left_side_bank&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">bank_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">})</span>
-
-    <span class="n">bank_order</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="s2">&quot;right&quot;</span> <span class="k">if</span> <span class="n">val</span> <span class="k">else</span> <span class="s2">&quot;left&quot;</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">is_right_bank</span><span class="p">)</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">&#39;is_right_bank&#39;</span><span class="p">:</span> <span class="n">is_right_bank</span><span class="p">,</span>
-        <span class="s1">&#39;bank_line_coords&#39;</span><span class="p">:</span> <span class="n">bank_line_coords</span><span class="p">,</span>
-        <span class="s1">&#39;bank_face_indices&#39;</span><span class="p">:</span> <span class="n">bank_face_indices</span><span class="p">,</span>
-        <span class="s1">&#39;bank_chainage_midpoints&#39;</span><span class="p">:</span> <span class="n">bank_chainage_midpoints</span>
-    <span class="p">}</span>
     <span class="k">return</span> <span class="n">BankData</span><span class="o">.</span><span class="n">from_column_arrays</span><span class="p">(</span>
         <span class="n">data</span><span class="p">,</span>
         <span class="n">SingleBank</span><span class="p">,</span>
