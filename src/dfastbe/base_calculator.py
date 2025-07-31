@@ -47,7 +47,3 @@ class BaseCalculator:
     def results(self, value: Dict[str, Any]):
         """Set the results of the bank erosion analysis."""
         self._results = value
-
-    def __str__(self):
-        """String representation of the calculator."""
-        return f"Calculator: {self.name}"
