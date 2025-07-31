@@ -82,7 +82,6 @@ class Erosion:
         self.gui = gui
 
         self.river_data = ErosionRiverData(config_file)
-        self.river_center_line_arr = self.river_data.river_center_line.as_array()
         self.simulation_data = self.river_data.simulation_data()
         self.sim_files, self.p_discharge = self.river_data.get_erosion_sim_data(
             self.river_data.num_discharge_levels
@@ -716,7 +715,7 @@ class Erosion:
                 self.results["xy_line_eq_list"],
                 self.results["km_mid"],
                 self.river_data.output_intervals,
-                self.river_center_line_arr,
+                self.river_data.river_center_line.as_array(),
                 self.simulation_data,
             )
 
