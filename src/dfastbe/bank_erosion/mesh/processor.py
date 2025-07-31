@@ -369,10 +369,8 @@ class MeshProcessor:
     """Class to process bank lines and intersect them with a mesh."""
 
     def __init__(self, river_data: ErosionRiverData, mesh_data: MeshData):
-        """Constructor for BankLinesProcessor."""
+        """Constructor for MeshProcessor."""
         self.bank_lines = river_data.bank_lines
-        self.river_center_line = river_data.river_center_line.as_array()
-        self.num_bank_lines = len(self.bank_lines)
         self.mesh_data = mesh_data
         self.river_data = river_data
 
@@ -398,9 +396,6 @@ class MeshProcessor:
     def get_bank_data(self) -> BankData:
         """Intersect bank lines with a mesh and return bank data.
 
-        Args:
-            mesh_data: Mesh data containing face coordinates and connectivity information.
-
         Returns:
             BankData object containing bank line coordinates, face indices, and other bank-related data.
         """
@@ -420,12 +415,14 @@ class MeshProcessor:
 
         # linking bank lines to chainage
         log_text("chainage_to_banks")
+        river_center_line = self.river_data.river_center_line.as_array()
+
         bank_chainage_midpoints = [None] * n_bank_lines
         is_right_bank = [True] * n_bank_lines
         for bank_index, coords in enumerate(bank_line_coords):
             segment_mid_points = LineGeometry((coords[:-1, :] + coords[1:, :]) / 2)
             chainage_mid_points = segment_mid_points.intersect_with_line(
-                self.river_center_line
+                river_center_line
             )
 
             # check if the bank line is defined from low chainage to high chainage
@@ -440,7 +437,7 @@ class MeshProcessor:
             # check if the bank line is a left or right bank
             # when looking from low-to-high chainage
             is_right_bank[bank_index] = on_right_side(
-                coords, self.river_center_line[:, :2]
+                coords, river_center_line[:, :2]
             )
             if is_right_bank[bank_index]:
                 log_text("right_side_bank", data={"ib": bank_index + 1})
