@@ -437,9 +437,21 @@ class MeshProcessor:
             bank_line_coords.append(coords_along_bank)
             bank_face_indices.append(face_indices)
 
+        bank_order, data = self._link_lines_to_stations(bank_line_coords, bank_face_indices)
+
+        return BankData.from_column_arrays(
+            data,
+            SingleBank,
+            bank_lines=self.bank_lines,
+            n_bank_lines=n_bank_lines,
+            bank_order=bank_order,
+        )
+
+    def _link_lines_to_stations(self, bank_line_coords, bank_face_indices):
         # linking bank lines to chainage
         log_text("chainage_to_banks")
         river_center_line = self.river_data.river_center_line.as_array()
+        n_bank_lines = len(self.bank_lines)
 
         bank_chainage_midpoints = [None] * n_bank_lines
         is_right_bank = [True] * n_bank_lines
@@ -475,10 +487,4 @@ class MeshProcessor:
             'bank_face_indices': bank_face_indices,
             'bank_chainage_midpoints': bank_chainage_midpoints
         }
-        return BankData.from_column_arrays(
-            data,
-            SingleBank,
-            bank_lines=self.bank_lines,
-            n_bank_lines=n_bank_lines,
-            bank_order=bank_order,
-        )
+        return bank_order, data
