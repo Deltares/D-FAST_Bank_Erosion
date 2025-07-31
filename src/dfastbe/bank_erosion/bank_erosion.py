@@ -628,6 +628,9 @@ class Erosion:
             single_calculation,
         )
 
+    def process_mesh_data(self):
+        return self.simulation_data.compute_mesh_topology(verbose=False)
+
     def run(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
         timed_logger("-- start analysis --")
@@ -642,6 +645,7 @@ class Erosion:
 
         log_text("derive_topology")
 
+        mesh_data = self.simulation_data.compute_mesh_topology(verbose=False)
         river_axis = self.river_data.process_river_axis_by_center_line()
 
         # map to the output interval
