@@ -330,27 +330,6 @@ class MeshData:
         edges = edges[valid_intersections]
         return edge_relative_dist, segment_relative_dist, edges
 
-    def resolve_ambiguous_edge_transition(self, segment: RiverSegment, vindex):
-        """Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces."""
-        b = np.zeros(0)
-        edges = np.zeros(0, dtype=np.int64)
-        nodes = np.zeros(0, dtype=np.int64)
-        index_src = np.zeros(0, dtype=np.int64)
-
-        for i in vindex:
-            b1, edges1, nodes1 = self.find_segment_intersections(i, segment)
-            b = np.concatenate((b, b1), axis=0)
-            edges = np.concatenate((edges, edges1), axis=0)
-            nodes = np.concatenate((nodes, nodes1), axis=0)
-            index_src = np.concatenate((index_src, i + 0 * edges1), axis=0)
-
-        segment.edges, id_edges = np.unique(edges, return_index=True)
-        segment.distances = b[id_edges]
-        segment.nodes = nodes[id_edges]
-        index_src = index_src[id_edges]
-
-        return index_src
-
     def calculate_edge_angle(self, edge: int, reverse: bool = False) -> float:
         """Calculate the angle of a mesh edge in radians.
 
