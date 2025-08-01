@@ -13,11 +13,11 @@ from typing import (
     TypeVar,
     Union,
 )
-
+import math
 import numpy as np
 from geopandas import GeoDataFrame
 from geopandas.geoseries import GeoSeries
-from shapely.geometry import Point
+from shapely.geometry import Point, Polygon, LineString
 
 
 GenericType = TypeVar("GenericType")
@@ -27,7 +27,6 @@ __all__ = [
     "SingleErosion",
     "ErosionInputs",
     "WaterLevelData",
-    "MeshData",
     "SingleBank",
     "BankData",
     "FairwayData",
@@ -174,7 +173,6 @@ class WaterLevelData:
         vol_per_discharge (List[List[np.ndarray]]):
             Eroded volume per discharge level for each bank line.
     """
-
     hfw_max: float
     water_level: List[List[np.ndarray]]
     ship_wave_max: List[List[np.ndarray]]
@@ -182,45 +180,6 @@ class WaterLevelData:
     velocity: List[List[np.ndarray]]
     chezy: List[List[np.ndarray]]
     vol_per_discharge: List[List[np.ndarray]]
-
-
-@dataclass
-class MeshData:
-    """Class to hold mesh-related data.
-
-    args:
-        x_face_coords (np.ndarray):
-            X-coordinates of the mesh faces.
-        y_face_coords (np.ndarray):
-            Y-coordinates of the mesh faces.
-        x_edge_coords (np.ndarray):
-            X-coordinates of the mesh edges.
-        y_edge_coords (np.ndarray):
-            Y-coordinates of the mesh edges.
-        face_node (np.ndarray):
-            Node connectivity for each face.
-        n_nodes (np.ndarray):
-            Number of nodes in the mesh.
-        edge_node (np.ndarray):
-            Node connectivity for each edge.
-        edge_face_connectivity (np.ndarray):
-            Per edge a list of the indices of the faces on the left and right side of that edge.
-        face_edge_connectivity (np.ndarray):
-            Per face a list of indices of the edges that together form the boundary of that face.
-        boundary_edge_nrs (np.ndarray):
-            List of edge indices that together form the boundary of the whole mesh.
-    """
-
-    x_face_coords: np.ndarray
-    y_face_coords: np.ndarray
-    x_edge_coords: np.ndarray
-    y_edge_coords: np.ndarray
-    face_node: np.ndarray
-    n_nodes: np.ndarray
-    edge_node: np.ndarray
-    edge_face_connectivity: np.ndarray
-    face_edge_connectivity: np.ndarray
-    boundary_edge_nrs: np.ndarray
 
 
 @dataclass
@@ -380,7 +339,6 @@ class FairwayData:
         fairway_initial_water_levels (List[np.ndarray]):
             Reference water level at the fairway
     """
-
     fairway_face_indices: np.ndarray
     intersection_coords: np.ndarray
     fairway_initial_water_levels: List[np.ndarray] = field(default_factory=list)

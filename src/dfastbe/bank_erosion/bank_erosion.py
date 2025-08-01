@@ -26,7 +26,6 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-import os
 from typing import Any, Dict, List, Tuple
 
 import numpy as np
@@ -41,7 +40,6 @@ from dfastbe.bank_erosion.data_models.calculation import (
     ErosionInputs,
     ErosionResults,
     FairwayData,
-    MeshData,
     SingleCalculation,
     SingleDischargeLevel,
     SingleErosion,
@@ -55,15 +53,15 @@ from dfastbe.bank_erosion.data_models.inputs import (
 )
 from dfastbe.bank_erosion.debugger import Debugger
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
+from dfastbe.bank_erosion.mesh.processor import MeshProcessor
 from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.utils import (
-    BankLinesProcessor,
     get_km_bins,
     get_km_eroded_volume,
-    intersect_line_mesh,
     move_line,
     write_km_eroded_volumes,
 )
+from dfastbe.base_calculator import BaseCalculator
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.data_models import LineGeometry
 from dfastbe.io.logger import log_text, timed_logger
@@ -72,107 +70,20 @@ X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
 
 
-class Erosion:
+class Erosion(BaseCalculator):
     """Class to handle the bank erosion calculations."""
 
     def __init__(self, config_file: ConfigFile, gui: bool = False):
         """Initialize the Erosion class."""
-        self.root_dir = config_file.root_dir
-        self._config_file = config_file
-        self.gui = gui
+        super().__init__(config_file, gui)
 
         self.river_data = ErosionRiverData(config_file)
-        self.river_center_line_arr = self.river_data.river_center_line.as_array()
         self.simulation_data = self.river_data.simulation_data()
         self.sim_files, self.p_discharge = self.river_data.get_erosion_sim_data(
             self.river_data.num_discharge_levels
         )
-        self.bl_processor = BankLinesProcessor(self.river_data)
         self.debugger = Debugger(config_file.crs, self.river_data.output_dir)
         self.erosion_calculator = ErosionCalculator()
-        self._results = None
-
-    @property
-    def config_file(self) -> ConfigFile:
-        """Configuration file object."""
-        return self._config_file
-
-    @property
-    def results(self) -> Dict[str, Any]:
-        """dict: Results of the bank line detection analysis.
-
-        Returns:
-        """
-        return self._results
-
-    @results.setter
-    def results(self, value: Dict[str, Any]):
-        """Set the results of the bank erosion analysis."""
-        self._results = value
-
-    def _process_river_axis_by_center_line(self) -> LineGeometry:
-        """Process the river axis by the center line.
-
-        Intersect the river center line with the river axis to map the stations from the first to the latter
-        then clip the river axis by the first and last station of the centerline.
-        """
-        river_axis = LineGeometry(self.river_data.river_axis, crs=self.config_file.crs)
-        river_axis_numpy = river_axis.as_array()
-        # optional sorting --> see 04_Waal_D3D example
-        # check: sum all distances and determine maximum distance ...
-        # if maximum > alpha * sum then perform sort
-        # Waal OK: 0.0082 ratio max/sum, Waal NotOK: 0.13 - Waal: 2500 points,
-        # so even when OK still some 21 times more than 1/2500 = 0.0004
-        dist2 = (np.diff(river_axis_numpy, axis=0) ** 2).sum(axis=1)
-        alpha = dist2.max() / dist2.sum()
-        if alpha > 0.03:
-            print("The river axis needs sorting!!")
-
-        # map km to axis points, further using axis
-        log_text("chainage_to_axis")
-        river_axis_km = river_axis.intersect_with_line(self.river_center_line_arr)
-
-        # clip river axis to reach of interest (get the closest point to the first and last station)
-        i1 = np.argmin(
-            ((self.river_center_line_arr[0, :2] - river_axis_numpy) ** 2).sum(axis=1)
-        )
-        i2 = np.argmin(
-            ((self.river_center_line_arr[-1, :2] - river_axis_numpy) ** 2).sum(axis=1)
-        )
-        if i1 < i2:
-            river_axis_km = river_axis_km[i1 : i2 + 1]
-            river_axis_numpy = river_axis_numpy[i1 : i2 + 1]
-        else:
-            # reverse river axis
-            river_axis_km = river_axis_km[i2 : i1 + 1][::-1]
-            river_axis_numpy = river_axis_numpy[i2 : i1 + 1][::-1]
-
-        river_axis = LineGeometry(river_axis_numpy, crs=self.config_file.crs)
-        river_axis.add_data(data={"stations": river_axis_km})
-        return river_axis
-
-    def _get_fairway_data(
-        self,
-        river_axis: LineGeometry,
-        mesh_data: MeshData,
-    ):
-        # map km to fairway points, further using axis
-        log_text("chainage_to_fairway")
-        # intersect fairway and mesh
-        fairway_intersection_coords, fairway_face_indices = intersect_line_mesh(
-            river_axis.as_array(), mesh_data
-        )
-        if self.river_data.debug:
-            arr = (
-                fairway_intersection_coords[:-1] + fairway_intersection_coords[1:]
-            ) / 2
-            line_geom = LineGeometry(arr, crs=self.config_file.crs)
-            line_geom.to_file(
-                file_name=f"{str(self.river_data.output_dir)}{os.sep}fairway_face_indices.shp",
-                data={"iface": fairway_face_indices},
-            )
-
-        return FairwayData(fairway_face_indices, fairway_intersection_coords)
 
     def calculate_fairway_bank_line_distance(
         self,
@@ -669,6 +580,12 @@ class Erosion:
             single_calculation,
         )
 
+    def get_mesh_processor(self):
+        log_text("derive_topology")
+        mesh_data = self.simulation_data.compute_mesh_topology(verbose=False)
+
+        return MeshProcessor(self.river_data, mesh_data)
+
     def run(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
         timed_logger("-- start analysis --")
@@ -681,10 +598,10 @@ class Erosion:
         )
         log_text("-")
 
-        log_text("derive_topology")
+        mesh_processor = self.get_mesh_processor()
 
-        mesh_data = self.simulation_data.compute_mesh_topology()
-        river_axis = self._process_river_axis_by_center_line()
+        river_axis = self.river_data.process_river_axis_by_center_line()
+        fairway_data = mesh_processor.get_fairway_data(river_axis)
 
         # map to the output interval
         km_bin = (
@@ -694,11 +611,9 @@ class Erosion:
         )
         km_mid = get_km_bins(km_bin, station_type="mid")  # get mid-points
 
-        fairway_data = self._get_fairway_data(river_axis, mesh_data)
-
         # map bank lines to mesh cells
         log_text("intersect_bank_mesh")
-        bank_data = self.bl_processor.intersect_with_mesh(mesh_data)
+        bank_data = mesh_processor.get_bank_data()
         # map the bank data to the fairway data (the bank_data and fairway_data will be updated inside the `_map_bank_to_fairway` function)
         self.calculate_fairway_bank_line_distance(
             bank_data, fairway_data, self.simulation_data
@@ -754,7 +669,7 @@ class Erosion:
                 self.results["xy_line_eq_list"],
                 self.results["km_mid"],
                 self.river_data.output_intervals,
-                self.river_center_line_arr,
+                self.river_data.river_center_line.as_array(),
                 self.simulation_data,
             )
 
