@@ -107,12 +107,10 @@ class IntersectionState:
             return
 
         for i, face in enumerate(faces):
-            # if face == self.index:
             if face == self.current_face_index:
                 other_face = faces[1 - i]
                 if self.verbose:
                     self._log_mesh_transition(step, "edge", edge, other_face, prev_b)
-                # self.index = other_face
                 self.current_face_index = other_face
                 return
 
@@ -194,7 +192,6 @@ class MeshWrapper:
 
         if self.intersection_state.current_face_index >= 0:
             pnt = Point(bpj)
-            # polygon_k = self.mesh_data.get_face_by_index(self.index, as_polygon=True)
             polygon_k = self.mesh_data.get_face_by_index(self.intersection_state.current_face_index, as_polygon=True)
 
             if not polygon_k.contains(pnt):
@@ -338,6 +335,36 @@ class MeshWrapper:
             if segment.min_relative_distance == 1:
                 break
 
+    def resolve_next_face_by_direction(
+            self, theta: float, node, verbose_index: int = None
+    ):
+        """Helper to resolve the next face index based on the direction theta at a node."""
+
+        if self.verbose:
+            print(f"{verbose_index}: moving in direction theta = {theta}")
+
+        edges = self.mesh_data.find_edges(theta, node, verbose_index)
+
+        if self.verbose:
+            print(f"{verbose_index}: the edge to the left is edge {edges.left}")
+            print(f"{verbose_index}: the edge to the right is edge {edges.right}")
+
+        if edges.left == edges.right:
+            if self.verbose:
+                print(f"{verbose_index}: continue along edge {edges.left}")
+
+            next_face_index = self.mesh_data.edge_face_connectivity[edges.left, :]
+        else:
+            if self.verbose:
+                print(
+                    f"{verbose_index}: continue between edges {edges.left}"
+                    f" on the left and {edges.right} on the right"
+                )
+            next_face_index = self.mesh_data.resolve_next_face_from_edges(
+                node, edges, verbose_index
+            )
+        return next_face_index
+
     def determine_next_face_on_edge(
         self, segment: RiverSegment, next_point: List[float], edge, faces,
     ):
@@ -349,7 +376,7 @@ class MeshWrapper:
         if self.verbose:
             print(f"{segment.index}: moving in direction theta = {theta}")
 
-        theta_edge = self.mesh_data._calculate_edge_angle(edge)
+        theta_edge = self.mesh_data.calculate_edge_angle(edge)
         if theta == theta_edge or theta == -theta_edge:
             if self.verbose:
                 print(f"{segment.index}: continue along edge {edge}")
@@ -363,7 +390,7 @@ class MeshWrapper:
                 current_point=next_point,
                 min_relative_distance=0,
             )
-            _, _, edges = self.mesh_data._calculate_edge_intersections(
+            _, _, edges = self.mesh_data.calculate_edge_intersections(
                 fe1,
                 reversed_segment,
                 False,

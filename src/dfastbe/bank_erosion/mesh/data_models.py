@@ -256,7 +256,7 @@ class MeshData:
         else:
             edges = self.face_edge_connectivity[index, : self.n_nodes[index]]
         edge_relative_dist, segment_relative_dist, edges = (
-            self._calculate_edge_intersections(edges, segment, True)
+            self.calculate_edge_intersections(edges, segment, True)
         )
         is_intersected_at_node = -np.ones(edge_relative_dist.shape, dtype=np.int64)
         is_intersected_at_node[edge_relative_dist == 0] = self.edge_node[
@@ -268,7 +268,7 @@ class MeshData:
 
         return segment_relative_dist, edges, is_intersected_at_node
 
-    def _calculate_edge_intersections(
+    def calculate_edge_intersections(
         self,
         edges: np.ndarray,
         segment: RiverSegment,
@@ -351,7 +351,7 @@ class MeshData:
 
         return index_src
 
-    def _calculate_edge_angle(self, edge: int, reverse: bool = False) -> float:
+    def calculate_edge_angle(self, edge: int, reverse: bool = False) -> float:
         """Calculate the angle of a mesh edge in radians.
 
         Args:
@@ -369,7 +369,7 @@ class MeshData:
 
         return math.atan2(dy, dx)
 
-    def _find_edges(self, theta, node, verbose_index: int = None) -> Edges:
+    def find_edges(self, theta, node, verbose_index: int = None) -> Edges:
         """
         Helper to find the left and right edges at a node based on the direction theta.
 
@@ -396,7 +396,7 @@ class MeshData:
 
         for ie in all_node_edges:
             reverse = self.edge_node[ie, 0] != node
-            theta_edge = self._calculate_edge_angle(ie, reverse=reverse)
+            theta_edge = self.calculate_edge_angle(ie, reverse=reverse)
 
             if self.verbose and verbose_index is not None:
                 print(f"{verbose_index}: edge {ie} connects {self.edge_node[ie, :]}")
@@ -414,7 +414,7 @@ class MeshData:
 
         return edges
 
-    def _resolve_next_face_from_edges(
+    def resolve_next_face_from_edges(
         self, node, edges: Edges, verbose_index: int = None
     ) -> int:
         """
@@ -461,35 +461,5 @@ class MeshData:
             raise ValueError(
                 f"Shouldn't come here .... left edge {edges.left}"
                 f" and right edge {edges.right} don't share any face"
-            )
-        return next_face_index
-
-    def resolve_next_face_by_direction(
-        self, theta: float, node, verbose_index: int = None
-    ):
-        """Helper to resolve the next face index based on the direction theta at a node."""
-
-        if self.verbose:
-            print(f"{verbose_index}: moving in direction theta = {theta}")
-
-        edges = self._find_edges(theta, node, verbose_index)
-
-        if self.verbose:
-            print(f"{verbose_index}: the edge to the left is edge {edges.left}")
-            print(f"{verbose_index}: the edge to the right is edge {edges.right}")
-
-        if edges.left == edges.right:
-            if self.verbose:
-                print(f"{verbose_index}: continue along edge {edges.left}")
-
-            next_face_index = self.edge_face_connectivity[edges.left, :]
-        else:
-            if self.verbose:
-                print(
-                    f"{verbose_index}: continue between edges {edges.left}"
-                    f" on the left and {edges.right} on the right"
-                )
-            next_face_index = self._resolve_next_face_from_edges(
-                node, edges, verbose_index
             )
         return next_face_index
