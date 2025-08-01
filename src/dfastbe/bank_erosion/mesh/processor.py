@@ -1,6 +1,6 @@
 """module for processing mesh-related operations."""
 import math
-from typing import Tuple
+from typing import Tuple, List
 import numpy as np
 from dataclasses import dataclass
 from shapely.geometry import Point
@@ -268,7 +268,7 @@ class MeshWrapper:
                 finished = True
             else:
                 next_point = [self.given_coords[segment.index + 1][0], self.given_coords[segment.index + 1][1]]
-                next_face_index = self.mesh_data.determine_next_face_on_edge(segment, next_point, edge, faces)
+                next_face_index = self.determine_next_face_on_edge(segment, next_point, edge, faces)
 
         return finished, next_face_index
 
@@ -337,6 +337,42 @@ class MeshWrapper:
             self.intersection_state.update(segment_x, shape_length=shape_length)
             if segment.min_relative_distance == 1:
                 break
+
+    def determine_next_face_on_edge(
+        self, segment: RiverSegment, next_point: List[float], edge, faces,
+    ):
+        """Determine the next face to continue along an edge based on the segment direction."""
+        theta = math.atan2(
+            next_point[1] - segment.current_point[1],
+            next_point[0] - segment.current_point[0],
+            )
+        if self.verbose:
+            print(f"{segment.index}: moving in direction theta = {theta}")
+
+        theta_edge = self.mesh_data._calculate_edge_angle(edge)
+        if theta == theta_edge or theta == -theta_edge:
+            if self.verbose:
+                print(f"{segment.index}: continue along edge {edge}")
+            next_face_index = faces
+        else:
+            # check whether the (extended) segment slices any edge of faces[0]
+            fe1 = self.mesh_data.face_edge_connectivity[faces[0]]
+            reversed_segment = RiverSegment(
+                index=segment.index,
+                previous_point=segment.current_point,
+                current_point=next_point,
+                min_relative_distance=0,
+            )
+            _, _, edges = self.mesh_data._calculate_edge_intersections(
+                fe1,
+                reversed_segment,
+                False,
+            )
+            # yes, a slice (typically 1, but could be 2 if it slices at a node
+            # but that doesn't matter) ... so, we continue towards faces[0]
+            # if there are no slices for faces[0], we continue towards faces[1]
+            next_face_index = faces[0] if len(edges) > 0 else faces[1]
+        return next_face_index
 
     def intersect_with_coords(self, given_coords: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Intersects a coords with an unstructured mesh and returns the intersection coordinates and mesh face indices.
