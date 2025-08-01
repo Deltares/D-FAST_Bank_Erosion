@@ -199,22 +199,9 @@ class Erosion(BaseCalculator):
         fairway_data: FairwayData,
     ) -> ErosionInputs:
         # wave reduction s0, s1
-        wave_fairway_distance_0 = self.config_file.get_parameter(
-            "Erosion",
-            "Wave0",
-            num_stations_per_bank,
-            default=200,
-            positive=True,
-            onefile=True,
-        )
-        wave_fairway_distance_1 = self.config_file.get_parameter(
-            "Erosion",
-            "Wave1",
-            num_stations_per_bank,
-            default=150,
-            positive=True,
-            onefile=True,
-        )
+        parameters = self._get_parameters(num_stations_per_bank)
+        wave_fairway_distance_0 = parameters["Wave0"]
+        wave_fairway_distance_1 = parameters["Wave1"]
 
         # save 1_banklines
         # read vship, nship, nwave, draught (tship), shiptype ... independent of level number
@@ -225,24 +212,12 @@ class Erosion(BaseCalculator):
         # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
         classes = self.config_file.get_bool("Erosion", "Classes")
         if classes:
-            bank_type = self.config_file.get_parameter(
-                "Erosion",
-                "BankType",
-                num_stations_per_bank,
-                default=0,
-                ext=".btp",
-            )
+            bank_type = parameters["BankType"]
             tauc = []
             for bank in bank_type:
                 tauc.append(ErosionInputs.taucls[bank])
         else:
-            tauc = self.config_file.get_parameter(
-                "Erosion",
-                "BankType",
-                num_stations_per_bank,
-                default=0,
-                ext=".btp",
-            )
+            tauc = parameters["BankType"]
             thr = (ErosionInputs.taucls[:-1] + ErosionInputs.taucls[1:]) / 2
             bank_type = [None] * len(thr)
             for ib, shear_stress in enumerate(tauc):
@@ -251,15 +226,8 @@ class Erosion(BaseCalculator):
                     bt[shear_stress < thr_i] += 1
                 bank_type[ib] = bt
 
-        # read bank protection level dike_height
         dike_height_default = -1000
-        dike_height = self.config_file.get_parameter(
-            "Erosion",
-            "ProtectionLevel",
-            num_stations_per_bank,
-            default=dike_height_default,
-            ext=".bpl",
-        )
+        dike_height = parameters["ProtectionLevel"]
         # if dike_height undefined, set dike_height equal to water_level_fairway_ref - 1
         for ib, one_zss in enumerate(dike_height):
             mask = one_zss == dike_height_default
@@ -295,7 +263,7 @@ class Erosion(BaseCalculator):
             ),
         ]
 
-    def _get_parameters(self, num_stations_per_bank, **kwargs) -> Any:
+    def _get_parameters(self, num_stations_per_bank) -> Any:
         """Get a parameter from the configuration file."""
         data = {}
         for parameter in self._get_erosion_input_parameters():
