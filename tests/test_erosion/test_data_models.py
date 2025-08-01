@@ -309,7 +309,7 @@ class TestErosionRiverData:
 
     @pytest.fixture
     def river_data(self) -> ErosionRiverData:
-        path = "tests/data/erosion/meuse_manual.cfg"
+        path = "tests/data/erosion/meuse_manual/meuse_manual.cfg"
         config_file = ConfigFile.read(path)
         river_data = ErosionRiverData(config_file)
         return river_data
@@ -319,7 +319,9 @@ class TestErosionRiverData:
         """Test the read_river_axis method by mocking XYCModel.read."""
         mock_river_axis = LineString([(0, 0), (1, 1), (2, 2)])
         mock_read.return_value = mock_river_axis
-        expected_path = Path("tests/data/erosion/inputs/maas_rivieras_mod.xyc")
+        expected_path = Path(
+            "tests/data/erosion/meuse_manual/inputs/maas_rivieras_mod.xyc"
+        )
 
         river_axis = river_data._read_river_axis()
 

@@ -10,6 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
+from dfastio.xyc.models import XYCModel
 from geopandas import GeoDataFrame
 from pyfakefs.fake_filesystem import FakeFilesystem
 from shapely.geometry import LineString
@@ -247,6 +248,19 @@ class TestSimulationData:
         assert simulation_data.velocity_x_face.size == 0
         assert simulation_data.velocity_y_face.size == 0
         assert simulation_data.chezy_face.size == 0
+
+    def test_clip_arrays_dont_match(self):
+        with patch("dfastbe.io.data_models.log_text") as mock_line_log:
+            simulation_data = BaseSimulationData.read(
+                "tests/data/erosion/meuse_6gen/inputfiles/sim1300/Maas_merged.dfast.map.nc"
+            )
+            river_center_line = XYCModel.read(
+                "tests/data/erosion/meuse_6gen/inputfiles/rivkm_20m.xyc", num_columns=3
+            )
+            station_bounds = (123.0, 128.0)
+            LineGeometry(river_center_line, station_bounds)
+            simulation_data.clip(river_center_line, max_distance=98.11176516320512)
+        mock_line_log.assert_any_call
 
 
 class TestLogText:
@@ -515,22 +529,22 @@ class TestConfigFile:
 
     def test_get_str(self, config: ConfigParser):
         """Test retrieving a string value."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
         assert config_file.get_str("General", "Version") == "1.0"
 
     def test_get_int(self, config: ConfigParser):
         """Test retrieving an integer value."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
         assert config_file.get_int("Detect", "NBank") == 2
 
     def test_get_bool(self, config: ConfigParser):
         """Test retrieving a boolean value."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
         assert config_file.get_bool("General", "plotting") is True
 
     def test_get_float(self, config: ConfigParser):
         """Test retrieving a float value."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
         assert config_file.get_float("General", "ZoomStepKM") == pytest.approx(
             0.1, rel=1e-6
         )
@@ -545,14 +559,14 @@ class TestConfigFile:
 
     def test_get_start_end_stations(self, config: ConfigParser):
         """Test retrieving km bounds."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
         start, end = config_file.get_start_end_stations()
         assert start == pytest.approx(123.0, rel=1e-6)
         assert end == pytest.approx(128.0, rel=1e-6)
 
     def test_get_search_lines(self):
         """Test retrieving search lines."""
-        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+        config = ConfigFile.read("tests/data/erosion/meuse_manual/meuse_manual.cfg")
         mock_linestring = LineString([(0, 0), (1, 1), (2, 2)])
 
         with patch("dfastio.xyc.models.XYCModel.read", return_value=mock_linestring):
@@ -564,7 +578,7 @@ class TestConfigFile:
     def test_read_bank_lines(self, config: ConfigParser, fs: FakeFilesystem):
         """Test retrieving bank lines."""
         config["General"]["BankLine"] = "bankfile"
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
 
         fs.create_file(
             "inputs/bankfile_1.xyc",
@@ -618,7 +632,7 @@ class TestConfigFile:
         self, key, value, default, valid, expected, config: ConfigParser
     ):
         """Test retrieving a parameter field."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
         bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5, 6, 7])]
         num_stations_per_bank = [len(bank_i) for bank_i in bank_km]
         if value:
@@ -643,7 +657,7 @@ class TestConfigFile:
         self, key, value, positive, valid, expected, config: ConfigParser
     ):
         """Test retrieving a parameter field."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
         bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5])]
 
         # Case 5: Parameter does not match valid values
@@ -655,7 +669,7 @@ class TestConfigFile:
 
     def test_get_bank_search_distances(self, config: ConfigParser):
         """Test retrieving bank search distances."""
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
 
         # Case 1: Bank search distances exist in the configuration
         result = config_file.get_bank_search_distances(2)
@@ -667,7 +681,7 @@ class TestConfigFile:
 
     def test_get_river_center_line(self):
         """Test retrieving x and y coordinates."""
-        config = ConfigFile.read("tests/data/erosion/meuse_manual.cfg")
+        config = ConfigFile.read("tests/data/erosion/meuse_manual/meuse_manual.cfg")
         mock_linestring = LineString([(0, 0, 1), (1, 1, 2), (2, 2, 3)])
 
         with patch("dfastio.xyc.models.XYCModel.read", return_value=mock_linestring):
@@ -690,20 +704,20 @@ class TestConfigFile:
         """Test resolving paths in the configuration."""
         config = ConfigParser()
         config.read_dict(path_dict)
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
-        config_file.resolve("tests/data/erosion")
+        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
+        config_file.resolve("tests/data/erosion/meuse_manual")
         assert config_file.config["General"]["RiverKM"] == str(
-            Path("tests/data/erosion").resolve() / "inputs/rivkm_20m.xyc"
+            Path("tests/data/erosion/meuse_manual").resolve() / "inputs/rivkm_20m.xyc"
         )
 
     def test_relative_to(self, path_dict: Dict):
         """Test converting paths to relative paths."""
         config = ConfigParser()
         config.read_dict(path_dict)
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
+        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
         config_file.relative_to("tests/data")
         assert config_file.config["General"]["RiverKM"] == str(
-            Path("erosion") / "inputs/rivkm_20m.xyc"
+            Path("erosion/meuse_manual") / "inputs/rivkm_20m.xyc"
         )
 
     def test_make_paths_absolute(self, path_dict: Dict):
@@ -800,8 +814,8 @@ class TestConfigFile:
         """Test the get_plotting_flags method."""
         config = ConfigParser()
         config.read_dict(plotting_data)
-        config_file = ConfigFile(config, "tests/data/erosion/test.cfg")
-        root_dir = Path("tests/data/erosion").resolve()
+        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
+        root_dir = Path("tests/data/erosion/meuse_manual").resolve()
         plotting_flags = config_file.get_plotting_flags(str(root_dir))
 
         assert plotting_flags.plot_data is True
@@ -815,7 +829,7 @@ class TestConfigFile:
 
 class TestConfigFileE2E:
     def test_initialization(self):
-        path = "tests/data/erosion/meuse_manual.cfg"
+        path = "tests/data/erosion/meuse_manual/meuse_manual.cfg"
         config_file = ConfigFile.read(path)
         river_km = config_file.config["General"]["riverkm"]
         assert Path(river_km).exists()
@@ -856,7 +870,7 @@ class TestRiverData:
 
     @pytest.fixture
     def river_data(self) -> BaseRiverData:
-        path = "tests/data/erosion/meuse_manual.cfg"
+        path = "tests/data/erosion/meuse_manual/meuse_manual.cfg"
         config_file = ConfigFile.read(path)
         river_data = BaseRiverData(config_file)
         return river_data
