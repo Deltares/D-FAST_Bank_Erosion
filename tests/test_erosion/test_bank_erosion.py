@@ -885,7 +885,6 @@ class TestErosion:
         """
         mock_km_mid = MagicMock()
         mock_km_mid.return_value = np.arange(123.0, 123.6, 0.02)
-        # mock_erosion.bl_processor.intersect_with_mesh.return_value = mock_bank_data
         mock_erosion.simulation_data = mock_simulation_data
         mock_erosion.config_file.get_parameter.side_effect = [
             [np.array([150.0] * 29), np.array([150.0] * 29)],  # wave0
@@ -954,7 +953,6 @@ class TestErosion:
 
         mock_get_fairway_data.assert_called_once()
         mock_get_km_bins.assert_called_once()
-        # mock_process_river_axis_by_center_line.assert_called_once()
         mock_get_ship_data.assert_called_once()
         mock_read_discharge_parameters.assert_called()
         mock_read_simulation_data.assert_called()
