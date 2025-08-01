@@ -248,17 +248,17 @@ class ErodedBankLineSegment:
     """Class to represent a segment of an eroded bank line.
 
     Args:
-        x_start_segments (np.ndarray): x-coordinates of the segment start.
-        y_start_segments (np.ndarray): y-coordinates of the segment start.
-        x_end_segments (np.ndarray): x-coordinates of the segment end.
-        y_end_segments (np.ndarray): y-coordinates of the segment end.
-        ixy0 (int): Index of the segment start in the eroded bank line.
+        x_start_points (np.ndarray): x-coordinates of the segment start.
+        y_start_points (np.ndarray): y-coordinates of the segment start.
+        x_end_points (np.ndarray): x-coordinates of the segment end.
+        y_end_points (np.ndarray): y-coordinates of the segment end.
+        segment_start_index (int): Index of the segment start in the eroded bank line.
     """
-    x_start_segments: np.ndarray
-    y_start_segments: np.ndarray
-    x_end_segments: np.ndarray
-    y_end_segments: np.ndarray
-    ixy0: int
+    x_start_points: np.ndarray
+    y_start_points: np.ndarray
+    x_end_points: np.ndarray
+    y_end_points: np.ndarray
+    segment_start_index: int
 
 
 @dataclass
@@ -357,7 +357,10 @@ class ErodedBankLine:
         self.prec = 0.000001
 
     def _construct_bend_polygon(
-        self, index: int, include_wedge: bool = False, include_current: bool = False
+        self,
+        point_index: int,
+        include_wedge: bool = False,
+        include_current: bool = False,
     ) -> np.ndarray:
         """
         Construct a polygon for a bank bend segment.
@@ -371,18 +374,19 @@ class ErodedBankLine:
             np.ndarray: Polygon coordinates.
         """
         points = [
-            self.bank_line_points[index + 1],
-            self.bank_line_points[index + 1] + self.segment_normals[index],
-            self.bank_line_points[index] + self.segment_normals[index],
+            self.bank_line_points[point_index + 1],
+            self.bank_line_points[point_index + 1] + self.segment_normals[point_index],
+            self.bank_line_points[point_index] + self.segment_normals[point_index],
         ]
         if include_wedge:
             points.append(
-                self.bank_line_points[index] + self.segment_normals[index - 1]
+                self.bank_line_points[point_index]
+                + self.segment_normals[point_index - 1]
             )
         if include_current:
-            points.append(self.bank_line_points[index])
+            points.append(self.bank_line_points[point_index])
         else:
-            points.append(self.bank_line_points[index - 1])
+            points.append(self.bank_line_points[point_index - 1])
         return np.row_stack(points)
 
     def _create_segment_outline_polygon(
@@ -439,31 +443,31 @@ class ErodedBankLine:
                 and the index of the first segment.
         """
         if self.point_index > 20:
-            x_start_segments = self.eroded_bank_line[
+            x_start_points = self.eroded_bank_line[
                 (self.point_index - 20) : self.point_index, 0
             ].copy()
-            y_start_segments = self.eroded_bank_line[
+            y_start_points = self.eroded_bank_line[
                 (self.point_index - 20) : self.point_index, 1
             ].copy()
-            x_end_segments = self.eroded_bank_line[
+            x_end_points = self.eroded_bank_line[
                 (self.point_index - 19) : (self.point_index + 1), 0
             ].copy()
-            y_end_segments = self.eroded_bank_line[
+            y_end_points = self.eroded_bank_line[
                 (self.point_index - 19) : (self.point_index + 1), 1
             ].copy()
-            ixy0 = self.point_index - 20
+            segment_start_index = self.point_index - 20
         else:
-            x_start_segments = self.eroded_bank_line[: self.point_index, 0].copy()
-            y_start_segments = self.eroded_bank_line[: self.point_index, 1].copy()
-            x_end_segments = self.eroded_bank_line[1 : self.point_index + 1, 0].copy()
-            y_end_segments = self.eroded_bank_line[1 : self.point_index + 1, 1].copy()
-            ixy0 = 0
+            x_start_points = self.eroded_bank_line[: self.point_index, 0].copy()
+            y_start_points = self.eroded_bank_line[: self.point_index, 1].copy()
+            x_end_points = self.eroded_bank_line[1 : self.point_index + 1, 0].copy()
+            y_end_points = self.eroded_bank_line[1 : self.point_index + 1, 1].copy()
+            segment_start_index = 0
         return ErodedBankLineSegment(
-            x_start_segments=x_start_segments,
-            y_start_segments=y_start_segments,
-            x_end_segments=x_end_segments,
-            y_end_segments=y_end_segments,
-            ixy0=ixy0,
+            x_start_points=x_start_points,
+            y_start_points=y_start_points,
+            x_end_points=x_end_points,
+            y_end_points=y_end_points,
+            segment_start_index=segment_start_index,
         )
 
     def _collect_polyline_intersections(
@@ -492,10 +496,10 @@ class ErodedBankLine:
                 continue
             # check for intersection
             a2, b2, slices2 = calculate_segment_edge_intersections(
-                eroded_segment.x_start_segments,
-                eroded_segment.y_start_segments,
-                eroded_segment.x_end_segments,
-                eroded_segment.y_end_segments,
+                eroded_segment.x_start_points,
+                eroded_segment.y_start_points,
+                eroded_segment.x_end_points,
+                eroded_segment.y_end_points,
                 poly[i, 0],
                 poly[i, 1],
                 poly[i + 1, 0],
@@ -640,14 +644,16 @@ class ErodedBankLine:
         Returns:
             int: Updated index in the shifted bankline.
         """
-        pnt_intersect = intersection_context.get_intersection_point(intersection_index)
+        intersected_point = intersection_context.get_intersection_point(
+            intersection_index
+        )
         if self.verbose:
-            print(f"  adding intersection point {pnt_intersect}")
+            print(f"  adding intersection point {intersected_point}")
         point_is_new, current_point = self._point_in_bankline(
-            current_point, pnt_intersect
+            current_point, intersected_point
         )
         if point_is_new:
-            self._add_point(current_point, pnt_intersect)
+            self._add_point(current_point, intersected_point)
         return current_point
 
     def _update_inside_flag_for_intersection(
@@ -682,18 +688,16 @@ class ErodedBankLine:
             delta_intersection_x, delta_intersection_y = intersection_context.get_delta(
                 intersection_index
             )
-            s2 = current_segment - eroded_segment.ixy0 + offset
-            if is_end and s2 > len(eroded_segment.x_start_segments) - 1:
+            s2 = current_segment - eroded_segment.segment_start_index + offset
+            if is_end and s2 > len(eroded_segment.x_start_points) - 1:
                 # if the end is beyond the last segment, consider it inside
                 inside = True
             else:
                 delta_bankline_y = (
-                    eroded_segment.y_end_segments[s2]
-                    - eroded_segment.y_start_segments[s2]
+                    eroded_segment.y_end_points[s2] - eroded_segment.y_start_points[s2]
                 )
                 delta_bankline_x = (
-                    eroded_segment.x_end_segments[s2]
-                    - eroded_segment.x_start_segments[s2]
+                    eroded_segment.x_end_points[s2] - eroded_segment.x_start_points[s2]
                 )
                 inside = (
                     delta_intersection_y * delta_bankline_x
@@ -833,7 +837,9 @@ class ErodedBankLine:
         # sort the intersections by distance along the already shifted bank line
         segment_intersection_distance = segment_indices + intersection_alphas
         sorted_idx = np.argsort(segment_intersection_distance)
-        sorted_segment_indices = segment_indices[sorted_idx] + eroded_segment.ixy0
+        sorted_segment_indices = (
+            segment_indices[sorted_idx] + eroded_segment.segment_start_index
+        )
         sorted_intersection_alphas = intersection_alphas[sorted_idx]
         sorted_polygon_alphas = polygon_alphas[sorted_idx]
         sorted_polygon_edge_indices = polygon_edge_indices[sorted_idx]
