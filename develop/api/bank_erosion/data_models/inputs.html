@@ -2237,12 +2237,14 @@
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/inputs.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">527</span>
-<span class="normal">528</span>
-<span class="normal">529</span>
-<span class="normal">530</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesResultsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">530</span>
+<span class="normal">531</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLinesResultsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Custom exception for BankLine results errors.&quot;&quot;&quot;</span>
 
+    <span class="k">pass</span>
     <span class="k">pass</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -2375,7 +2377,11 @@
 <span class="normal">322</span>
 <span class="normal">323</span>
 <span class="normal">324</span>
-<span class="normal">325</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ErosionRiverData</span><span class="p">(</span><span class="n">BaseRiverData</span><span class="p">):</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">ErosionRiverData</span><span class="p">(</span><span class="n">BaseRiverData</span><span class="p">):</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
@@ -2385,8 +2391,12 @@
         <span class="c1"># set plotting flags</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plot_flags</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_plotting_flags</span><span class="p">(</span><span class="n">config_file</span><span class="o">.</span><span class="n">root_dir</span><span class="p">)</span>
         <span class="c1"># get filter settings for bank levels and flow velocities along banks</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">zb_dx</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;BedFilterDist&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">vel_dx</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;VelFilterDist&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zb_dx</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span>
+            <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;BedFilterDist&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vel_dx</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span>
+            <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;VelFilterDist&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
         <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;get_levels&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_discharge_levels</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_int</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;NLevel&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_intervals</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;OutputInterval&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
@@ -2509,11 +2519,7 @@ then clip the river axis by the first and last station of the centerline.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/inputs.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">285</span>
-<span class="normal">286</span>
-<span class="normal">287</span>
-<span class="normal">288</span>
-<span class="normal">289</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">289</span>
 <span class="normal">290</span>
 <span class="normal">291</span>
 <span class="normal">292</span>
@@ -2549,7 +2555,11 @@ then clip the river axis by the first and last station of the centerline.</p>
 <span class="normal">322</span>
 <span class="normal">323</span>
 <span class="normal">324</span>
-<span class="normal">325</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">process_river_axis_by_center_line</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LineGeometry</span><span class="p">:</span>
+<span class="normal">325</span>
+<span class="normal">326</span>
+<span class="normal">327</span>
+<span class="normal">328</span>
+<span class="normal">329</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">process_river_axis_by_center_line</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LineGeometry</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Process the river axis by the center line.</span>
 
 <span class="sd">    Intersect the river center line with the river axis to map the stations from the first to the latter</span>
@@ -2611,17 +2621,17 @@ then clip the river axis by the first and last station of the centerline.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/inputs.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">243</span>
-<span class="normal">244</span>
-<span class="normal">245</span>
-<span class="normal">246</span>
-<span class="normal">247</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
 <span class="normal">251</span>
 <span class="normal">252</span>
-<span class="normal">253</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">simulation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ErosionSimulationData</span><span class="p">:</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">simulation_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ErosionSimulationData</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Simulation Data.&quot;&quot;&quot;</span>
     <span class="n">ref_level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_int</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;RefLevel&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="c1"># read simulation data (get_sim_data)</span>
@@ -2669,11 +2679,7 @@ then clip the river axis by the first and last station of the centerline.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/inputs.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 28</span>
-<span class="normal"> 29</span>
-<span class="normal"> 30</span>
-<span class="normal"> 31</span>
-<span class="normal"> 32</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 32</span>
 <span class="normal"> 33</span>
 <span class="normal"> 34</span>
 <span class="normal"> 35</span>
@@ -2957,12 +2963,8 @@ then clip the river axis by the first and last station of the centerline.</p>
         <span class="n">edge_face</span><span class="p">[</span><span class="n">edge_nr</span><span class="p">[</span><span class="n">unique_edge</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">face_nr</span><span class="p">[</span><span class="n">unique_edge</span><span class="p">]</span>
         <span class="n">edge_face</span><span class="p">[</span><span class="n">edge_nr</span><span class="p">[</span><span class="n">equal_to_previous</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">face_nr</span><span class="p">[</span><span class="n">equal_to_previous</span><span class="p">]</span>
 
-        <span class="n">x_face_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_masked_indexing</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">x_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_node</span>
-        <span class="p">)</span>
-        <span class="n">y_face_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_masked_indexing</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">y_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_node</span>
-        <span class="p">)</span>
+        <span class="n">x_face_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_masked_indexing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_node</span><span class="p">)</span>
+        <span class="n">y_face_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_masked_indexing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_node</span><span class="p">)</span>
         <span class="n">x_edge_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_node</span><span class="p">[</span><span class="n">edge_node</span><span class="p">]</span>
         <span class="n">y_edge_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_node</span><span class="p">[</span><span class="n">edge_node</span><span class="p">]</span>
 
@@ -2977,7 +2979,7 @@ then clip the river axis by the first and last station of the centerline.</p>
             <span class="n">edge_face_connectivity</span><span class="o">=</span><span class="n">edge_face</span><span class="p">,</span>
             <span class="n">face_edge_connectivity</span><span class="o">=</span><span class="n">face_edge_connectivity</span><span class="p">,</span>
             <span class="n">boundary_edge_nrs</span><span class="o">=</span><span class="n">boundary_edge_nrs</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+            <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
@@ -3004,35 +3006,35 @@ then clip the river axis by the first and last station of the centerline.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_bank_velocity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">single_bank</span><span class="p">:</span> <span class="s2">&quot;SingleBank&quot;</span><span class="p">,</span> <span class="n">vel_dx</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.bank_erosion.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">moving_avg</span>
+
         <span class="n">bank_face_indices</span> <span class="o">=</span> <span class="n">single_bank</span><span class="o">.</span><span class="n">bank_face_indices</span>
         <span class="n">vel_bank</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">velocity_x_face</span><span class="p">[</span><span class="n">bank_face_indices</span><span class="p">]</span> <span class="o">*</span> <span class="n">single_bank</span><span class="o">.</span><span class="n">dx</span>
-                    <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity_y_face</span><span class="p">[</span><span class="n">bank_face_indices</span><span class="p">]</span> <span class="o">*</span> <span class="n">single_bank</span><span class="o">.</span><span class="n">dy</span>
-                <span class="p">)</span>
-                <span class="o">/</span> <span class="n">single_bank</span><span class="o">.</span><span class="n">segment_length</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">velocity_x_face</span><span class="p">[</span><span class="n">bank_face_indices</span><span class="p">]</span> <span class="o">*</span> <span class="n">single_bank</span><span class="o">.</span><span class="n">dx</span>
+                <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity_y_face</span><span class="p">[</span><span class="n">bank_face_indices</span><span class="p">]</span> <span class="o">*</span> <span class="n">single_bank</span><span class="o">.</span><span class="n">dy</span>
+            <span class="p">)</span>
+            <span class="o">/</span> <span class="n">single_bank</span><span class="o">.</span><span class="n">segment_length</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">vel_dx</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
-            <span class="n">vel_bank</span> <span class="o">=</span> <span class="n">moving_avg</span><span class="p">(</span>
-                <span class="n">single_bank</span><span class="o">.</span><span class="n">bank_chainage_midpoints</span><span class="p">,</span> <span class="n">vel_bank</span><span class="p">,</span> <span class="n">vel_dx</span>
-            <span class="p">)</span>
+            <span class="n">vel_bank</span> <span class="o">=</span> <span class="n">moving_avg</span><span class="p">(</span><span class="n">single_bank</span><span class="o">.</span><span class="n">bank_chainage_midpoints</span><span class="p">,</span> <span class="n">vel_bank</span><span class="p">,</span> <span class="n">vel_dx</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">vel_bank</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">calculate_bank_height</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">single_bank</span><span class="p">:</span> <span class="n">SingleBank</span><span class="p">,</span> <span class="n">zb_dx</span><span class="p">):</span>
         <span class="c1"># bank height = maximum bed elevation per cell</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">dfastbe.bank_erosion.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">moving_avg</span>
+
         <span class="n">bank_index</span> <span class="o">=</span> <span class="n">single_bank</span><span class="o">.</span><span class="n">bank_face_indices</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bed_elevation_location</span> <span class="o">==</span> <span class="s2">&quot;node&quot;</span><span class="p">:</span>
             <span class="n">zb_nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bed_elevation_values</span>
-            <span class="n">zb_all</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_masked_indexing</span><span class="p">(</span>
-                <span class="n">zb_nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_node</span><span class="p">[</span><span class="n">bank_index</span><span class="p">,</span> <span class="p">:]</span>
-            <span class="p">)</span>
+            <span class="n">zb_all</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_masked_indexing</span><span class="p">(</span><span class="n">zb_nodes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_node</span><span class="p">[</span><span class="n">bank_index</span><span class="p">,</span> <span class="p">:])</span>
             <span class="n">zb_bank</span> <span class="o">=</span> <span class="n">zb_all</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">zb_dx</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
                 <span class="n">zb_bank</span> <span class="o">=</span> <span class="n">moving_avg</span><span class="p">(</span>
-                    <span class="n">single_bank</span><span class="o">.</span><span class="n">bank_chainage_midpoints</span><span class="p">,</span> <span class="n">zb_bank</span><span class="p">,</span> <span class="n">zb_dx</span><span class="p">,</span>
+                    <span class="n">single_bank</span><span class="o">.</span><span class="n">bank_chainage_midpoints</span><span class="p">,</span>
+                    <span class="n">zb_bank</span><span class="p">,</span>
+                    <span class="n">zb_dx</span><span class="p">,</span>
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># don&#39;t know ... need to check neighbouring cells ...</span>
@@ -3291,11 +3293,7 @@ in the simulation data.</p>
 </details>
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/inputs.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 30</span>
-<span class="normal"> 31</span>
-<span class="normal"> 32</span>
-<span class="normal"> 33</span>
-<span class="normal"> 34</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 34</span>
 <span class="normal"> 35</span>
 <span class="normal"> 36</span>
 <span class="normal"> 37</span>
@@ -3498,12 +3496,8 @@ in the simulation data.</p>
     <span class="n">edge_face</span><span class="p">[</span><span class="n">edge_nr</span><span class="p">[</span><span class="n">unique_edge</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">face_nr</span><span class="p">[</span><span class="n">unique_edge</span><span class="p">]</span>
     <span class="n">edge_face</span><span class="p">[</span><span class="n">edge_nr</span><span class="p">[</span><span class="n">equal_to_previous</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">face_nr</span><span class="p">[</span><span class="n">equal_to_previous</span><span class="p">]</span>
 
-    <span class="n">x_face_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_masked_indexing</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">x_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_node</span>
-    <span class="p">)</span>
-    <span class="n">y_face_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_masked_indexing</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">y_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_node</span>
-    <span class="p">)</span>
+    <span class="n">x_face_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_masked_indexing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_node</span><span class="p">)</span>
+    <span class="n">y_face_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">apply_masked_indexing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y_node</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">face_node</span><span class="p">)</span>
     <span class="n">x_edge_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_node</span><span class="p">[</span><span class="n">edge_node</span><span class="p">]</span>
     <span class="n">y_edge_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_node</span><span class="p">[</span><span class="n">edge_node</span><span class="p">]</span>
 
@@ -3518,7 +3512,7 @@ in the simulation data.</p>
         <span class="n">edge_face_connectivity</span><span class="o">=</span><span class="n">edge_face</span><span class="p">,</span>
         <span class="n">face_edge_connectivity</span><span class="o">=</span><span class="n">face_edge_connectivity</span><span class="p">,</span>
         <span class="n">boundary_edge_nrs</span><span class="o">=</span><span class="n">boundary_edge_nrs</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -3704,11 +3698,7 @@ in the simulation data.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/inputs.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">328</span>
-<span class="normal">329</span>
-<span class="normal">330</span>
-<span class="normal">331</span>
-<span class="normal">332</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">332</span>
 <span class="normal">333</span>
 <span class="normal">334</span>
 <span class="normal">335</span>
@@ -3900,7 +3890,10 @@ in the simulation data.</p>
 <span class="normal">521</span>
 <span class="normal">522</span>
 <span class="normal">523</span>
-<span class="normal">524</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">ShipsParameters</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Data for ships going through the fairway for bank erosion simulation.</span>
 
@@ -3922,9 +3915,7 @@ in the simulation data.</p>
 <span class="sd">        reed (List[np.ndarray]):</span>
 <span class="sd">            Reed values for each bank.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">Parameters</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="s2">&quot;Parameters&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span>
-        <span class="s2">&quot;Parameters&quot;</span><span class="p">,</span> <span class="s2">&quot;name default valid onefile positive ext&quot;</span>
-    <span class="p">)</span>
+
     <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
     <span class="n">velocity</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
     <span class="n">number</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
@@ -4001,13 +3992,13 @@ in the simulation data.</p>
 <span class="sd">            List[namedtuple]: List of parameter definitions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;VShip&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NShip&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NWave&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Draught&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;ShipType&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Slope&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;slp&quot;</span><span class="p">),</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Reed&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;rdd&quot;</span><span class="p">),</span>
+            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;VShip&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NShip&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NWave&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Draught&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;ShipType&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Slope&quot;</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;slp&quot;</span><span class="p">),</span>
+            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Reed&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;rdd&quot;</span><span class="p">),</span>
         <span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_discharge_parameter_definitions</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Parameters</span><span class="p">]:</span>
@@ -4017,13 +4008,13 @@ in the simulation data.</p>
 <span class="sd">            List[namedtuple]: List of parameter definitions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;VShip&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NShip&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NWave&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_waves</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Draught&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">draught</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;ShipType&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Slope&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">slope</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;slp&quot;</span><span class="p">),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Reed&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reed</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;rdd&quot;</span><span class="p">),</span>
+            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;VShip&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocity</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NShip&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">number</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;NWave&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_waves</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Draught&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">draught</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;ShipType&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Slope&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">slope</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;slp&quot;</span><span class="p">),</span>
+            <span class="n">Parameters</span><span class="p">(</span><span class="s2">&quot;Reed&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">reed</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;rdd&quot;</span><span class="p">),</span>
         <span class="p">]</span>
 
     <span class="nd">@staticmethod</span>
@@ -4050,7 +4041,8 @@ in the simulation data.</p>
 
             <span class="c1"># Calculate mu_reed (empirical damping coefficient)</span>
             <span class="n">mu_reed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">ShipsParameters</span><span class="o">.</span><span class="n">REED_DAMPING_COEFFICIENT</span> <span class="o">*</span> <span class="n">pr</span> <span class="o">**</span> <span class="n">ShipsParameters</span><span class="o">.</span><span class="n">REED_DAMPING_EXPONENT</span>
+                <span class="n">ShipsParameters</span><span class="o">.</span><span class="n">REED_DAMPING_COEFFICIENT</span>
+                <span class="o">*</span> <span class="n">pr</span><span class="o">**</span><span class="n">ShipsParameters</span><span class="o">.</span><span class="n">REED_DAMPING_EXPONENT</span>
             <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">mu_slope</span><span class="p">,</span> <span class="n">mu_reed</span>
@@ -4201,9 +4193,7 @@ in the simulation data.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/inputs.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">365</span>
-<span class="normal">366</span>
-<span class="normal">367</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">367</span>
 <span class="normal">368</span>
 <span class="normal">369</span>
 <span class="normal">370</span>
@@ -4232,7 +4222,9 @@ in the simulation data.</p>
 <span class="normal">393</span>
 <span class="normal">394</span>
 <span class="normal">395</span>
-<span class="normal">396</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
+<span class="normal">396</span>
+<span class="normal">397</span>
+<span class="normal">398</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@classmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">get_ship_data</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">,</span> <span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ShipsParameters&quot;</span><span class="p">:</span>
@@ -4356,10 +4348,7 @@ in the simulation data.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/bank_erosion/data_models/inputs.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">483</span>
-<span class="normal">484</span>
-<span class="normal">485</span>
-<span class="normal">486</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">486</span>
 <span class="normal">487</span>
 <span class="normal">488</span>
 <span class="normal">489</span>
@@ -4397,7 +4386,10 @@ in the simulation data.</p>
 <span class="normal">521</span>
 <span class="normal">522</span>
 <span class="normal">523</span>
-<span class="normal">524</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">read_discharge_parameters</span><span class="p">(</span>
+<span class="normal">524</span>
+<span class="normal">525</span>
+<span class="normal">526</span>
+<span class="normal">527</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">read_discharge_parameters</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">level_i</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
     <span class="n">num_stations_per_bank</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
