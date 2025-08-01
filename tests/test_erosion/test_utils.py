@@ -28,8 +28,10 @@ class TestErodedBankLine:
         return np.loadtxt(f"{folder_path}/moved_lines.txt", delimiter=",")
 
     @pytest.mark.integration
-    def test_move_line_right(self, xylines, erosion_distance, expected_moved_lines):
-        """Test the move_line_right method of ErodedBankLine.
+    def test_move_line_by_erosion(
+        self, xylines, erosion_distance, expected_moved_lines
+    ):
+        """Test the move_line_by_erosion method of ErodedBankLine.
 
         Args:
             xylines (np.ndarray): The input xylines data.
