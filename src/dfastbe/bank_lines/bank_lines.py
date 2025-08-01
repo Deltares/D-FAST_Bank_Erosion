@@ -10,6 +10,7 @@ from shapely.geometry import LineString, MultiLineString
 from shapely.geometry.polygon import Polygon
 
 from dfastbe import __version__
+from dfastbe.base_calculator import BaseCalculator
 from dfastbe.bank_lines.data_models import BankLinesRiverData
 from dfastbe.bank_lines.plotter import BankLinesPlotter
 from dfastbe.bank_lines.utils import poly_to_line, sort_connect_bank_lines, tri_to_line
@@ -27,7 +28,7 @@ EXTENSION = ".shp"
 __all__ = ["BankLines"]
 
 
-class BankLines:
+class BankLines(BaseCalculator):
     """Bank line detection class."""
 
     def __init__(self, config_file: ConfigFile, gui: bool = False):
@@ -51,11 +52,8 @@ class BankLines:
 
             ```
         """
+        super().__init__(config_file, gui)
         # the root_dir is used to get the FigureDir in the `_get_plotting_flags`
-        self.root_dir = config_file.root_dir
-
-        self._config_file = config_file
-        self.gui = gui
         self.bank_output_dir = config_file.get_output_dir("banklines")
 
         # set plotting flags
@@ -68,13 +66,6 @@ class BankLines:
         if self.plot_flags.plot_data:
             self.plotter = self.get_plotter()
 
-        self._results = None
-
-    @property
-    def config_file(self) -> ConfigFile:
-        """ConfigFile: object containing the configuration file."""
-        return self._config_file
-
     @property
     def max_river_width(self) -> int:
         """int: Maximum river width in meters."""
@@ -85,27 +76,6 @@ class BankLines:
             self.gui, self.plot_flags, self.config_file.crs, self.simulation_data, self.river_data.river_center_line,
             self.river_data.river_center_line.station_bounds,
         )
-
-    @property
-    def results(self) -> Dict[str, Any]:
-        """dict: Results of the bank line detection analysis.
-
-        Returns:
-            bank (List[LineString]):
-                List of bank lines.
-            banklines (GeoSeries):
-                Un-ordered set of bank line segments.
-            masked_bank_lines (List[MultiLineString]):
-                Un-ordered set of bank line segments, clipped to bank area.
-            bank_areas (List[Polygon]):
-                A search area corresponding to one of the bank search lines.
-        """
-        return self._results
-
-    @results.setter
-    def results(self, value: Dict[str, Any]):
-        """Set the results of the bank line detection analysis."""
-        self._results = value
 
     def detect(self) -> None:
         """Run the bank line detection analysis for a specified configuration.

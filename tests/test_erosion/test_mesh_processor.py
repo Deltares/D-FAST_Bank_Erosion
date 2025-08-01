@@ -1,15 +1,13 @@
 import numpy as np
 import pytest
 
-from dfastbe.bank_erosion.data_models.calculation import MeshData
-from dfastbe.bank_erosion.mesh_processor import (
-    _get_slices,
-    _get_slices_core,
+from dfastbe.bank_erosion.mesh.data_models import MeshData, RiverSegment
+from dfastbe.bank_erosion.mesh.processor import (
+    MeshWrapper,
     enlarge,
-    get_slices_ab,
-    intersect_line_mesh,
 )
 
+from dfastbe.bank_erosion.utils import calculate_segment_edge_intersections
 
 class TestMeshProcessor:
 
@@ -273,7 +271,8 @@ class TestMeshProcessor:
         Asserts:
             The coordinates and indices of the intersection match the expected values.
         """
-        crds, idx = intersect_line_mesh(line, mesh_data)
+        wrapper = MeshWrapper(mesh_data)
+        crds, idx = wrapper.intersect_with_coords(line)
         assert np.allclose(crds, expected_coords)
         assert np.array_equal(idx, expected_idx)
 
@@ -326,7 +325,7 @@ class TestMeshProcessor:
         xi1 = 209189.367188
         yi0 = 389659.99609375
         yi1 = 389673.75
-        a, b, slices = get_slices_ab(X0, Y0, X1, Y1, xi0, yi0, xi1, yi1, 0)
+        a, b, slices = calculate_segment_edge_intersections(X0, Y0, X1, Y1, xi0, yi0, xi1, yi1, 0)
         expected_a = np.ma.array([0.9207387758922553])
         expected_b = np.ma.array([0.3921626068608838])
         expected_slices = np.array([2])
@@ -347,9 +346,15 @@ class TestMeshProcessor:
         """
         index = 1
         prev_b = 0.0
-        bpj = np.array([209266.44709443, 389670.16238121])
-        bpj1 = np.array([209266.44709443, 389651.16238121])
-        b, edges, nodes = _get_slices(index, prev_b, bpj, bpj1, mesh_data)
+        current_point = np.array([209266.44709443, 389670.16238121])
+        previous_point = np.array([209266.44709443, 389651.16238121])
+        segment = RiverSegment(
+            index=index,
+            min_relative_distance=prev_b,
+            previous_point=previous_point,
+            current_point=current_point,
+        )
+        b, edges, nodes = mesh_data.find_segment_intersections(index, segment)
         assert np.allclose(b, np.array([0.6845984]))
         assert np.array_equal(edges, np.array([2]))
         assert np.array_equal(nodes, np.array([-1]))
@@ -366,9 +371,15 @@ class TestMeshProcessor:
             The computed nodes match expected values.
         """
         edges = np.array([5, 6, 7, 2])
-        bpj = np.array([209266.44709443, 389670.16238121])
-        bpj1 = np.array([209266.44709443, 389651.16238121])
-        b, edges, nodes = _get_slices_core(edges, mesh_data, bpj1, bpj, 0.0)
+        current_point = np.array([209266.44709443, 389670.16238121])
+        previous_point = np.array([209266.44709443, 389651.16238121])
+        segment = RiverSegment(
+            index=0,
+            current_point=current_point,
+            previous_point=previous_point,
+            min_relative_distance=0.0,
+        )
+        b, edges, nodes = mesh_data.calculate_edge_intersections(edges, segment)
         assert np.allclose(b, np.array([0.71466942]))
         assert np.allclose(edges, np.array([0.6845984]))
         assert np.array_equal(nodes, np.array([2]))

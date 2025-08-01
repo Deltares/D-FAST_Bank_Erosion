@@ -1843,11 +1843,11 @@ def menu_open_manual():
     if not manual_path.exists():
         showError(f"User manual not found: {filename}")
         return
-
     try:
-        if sys.platform.startswith("win"):
-            os.startfile(filename)
-    except OSError as e:
+        # bandit complains about os.startfile, but it is the only way to open a file in the default application on Windows.
+        # On Linux and MacOS, opening the file might give a security warning.
+        os.startfile(filename) # nosec
+    except Exception as e:
         showError(f"Failed to open the user manual: {e}")
 
 

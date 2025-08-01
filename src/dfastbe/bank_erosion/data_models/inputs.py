@@ -2,20 +2,20 @@ import os
 from collections import namedtuple
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar, Dict, List, Tuple
+from typing import Dict, List, Tuple
 
 import numpy as np
 from dfastio.xyc.models import XYCModel
 from shapely.geometry import LineString
 
 from dfastbe.bank_erosion.data_models.calculation import (
-    MeshData,
     SingleBank,
     SingleLevelParameters,
     SingleParameters,
 )
+from dfastbe.bank_erosion.mesh.data_models import MeshData
 from dfastbe.io.config import ConfigFile
-from dfastbe.io.data_models import BaseRiverData, BaseSimulationData
+from dfastbe.io.data_models import BaseRiverData, BaseSimulationData, LineGeometry
 from dfastbe.io.logger import log_text
 
 __all__ = [
@@ -23,12 +23,15 @@ __all__ = [
     "ErosionRiverData",
     "BankLinesResultsError",
     "ShipsParameters",
+    "Parameters",
 ]
+
+Parameters = namedtuple("Parameters", "name default valid onefile positive ext")
 
 
 class ErosionSimulationData(BaseSimulationData):
 
-    def compute_mesh_topology(self) -> MeshData:
+    def compute_mesh_topology(self, verbose: bool = False) -> MeshData:
         """Derive secondary topology arrays from the face-node connectivity of the mesh.
 
         This function computes the edge-node, edge-face, and face-edge connectivity arrays,
@@ -121,12 +124,8 @@ class ErosionSimulationData(BaseSimulationData):
         edge_face[edge_nr[unique_edge], 0] = face_nr[unique_edge]
         edge_face[edge_nr[equal_to_previous], 1] = face_nr[equal_to_previous]
 
-        x_face_coords = self.apply_masked_indexing(
-            self.x_node, self.face_node
-        )
-        y_face_coords = self.apply_masked_indexing(
-            self.y_node, self.face_node
-        )
+        x_face_coords = self.apply_masked_indexing(self.x_node, self.face_node)
+        y_face_coords = self.apply_masked_indexing(self.y_node, self.face_node)
         x_edge_coords = self.x_node[edge_node]
         y_edge_coords = self.y_node[edge_node]
 
@@ -141,6 +140,7 @@ class ErosionSimulationData(BaseSimulationData):
             edge_face_connectivity=edge_face,
             face_edge_connectivity=face_edge_connectivity,
             boundary_edge_nrs=boundary_edge_nrs,
+            verbose=verbose,
         )
 
     @staticmethod
@@ -167,35 +167,35 @@ class ErosionSimulationData(BaseSimulationData):
 
     def calculate_bank_velocity(self, single_bank: "SingleBank", vel_dx) -> np.ndarray:
         from dfastbe.bank_erosion.utils import moving_avg
+
         bank_face_indices = single_bank.bank_face_indices
         vel_bank = (
-                np.abs(
-                    self.velocity_x_face[bank_face_indices] * single_bank.dx
-                    + self.velocity_y_face[bank_face_indices] * single_bank.dy
-                )
-                / single_bank.segment_length
+            np.abs(
+                self.velocity_x_face[bank_face_indices] * single_bank.dx
+                + self.velocity_y_face[bank_face_indices] * single_bank.dy
+            )
+            / single_bank.segment_length
         )
 
         if vel_dx > 0.0:
-            vel_bank = moving_avg(
-                single_bank.bank_chainage_midpoints, vel_bank, vel_dx
-            )
+            vel_bank = moving_avg(single_bank.bank_chainage_midpoints, vel_bank, vel_dx)
 
         return vel_bank
 
     def calculate_bank_height(self, single_bank: SingleBank, zb_dx):
         # bank height = maximum bed elevation per cell
         from dfastbe.bank_erosion.utils import moving_avg
+
         bank_index = single_bank.bank_face_indices
         if self.bed_elevation_location == "node":
             zb_nodes = self.bed_elevation_values
-            zb_all = self.apply_masked_indexing(
-                zb_nodes, self.face_node[bank_index, :]
-            )
+            zb_all = self.apply_masked_indexing(zb_nodes, self.face_node[bank_index, :])
             zb_bank = zb_all.max(axis=1)
             if zb_dx > 0.0:
                 zb_bank = moving_avg(
-                    single_bank.bank_chainage_midpoints, zb_bank, zb_dx,
+                    single_bank.bank_chainage_midpoints,
+                    zb_bank,
+                    zb_dx,
                 )
         else:
             # don't know ... need to check neighbouring cells ...
@@ -231,14 +231,18 @@ class ErosionRiverData(BaseRiverData):
         # set plotting flags
         self.plot_flags = config_file.get_plotting_flags(config_file.root_dir)
         # get filter settings for bank levels and flow velocities along banks
-        self.zb_dx = config_file.get_float("Erosion", "BedFilterDist", 0.0, positive=True)
-        self.vel_dx = config_file.get_float("Erosion", "VelFilterDist", 0.0, positive=True)
+        self.zb_dx = config_file.get_float(
+            "Erosion", "BedFilterDist", 0.0, positive=True
+        )
+        self.vel_dx = config_file.get_float(
+            "Erosion", "VelFilterDist", 0.0, positive=True
+        )
         log_text("get_levels")
         self.num_discharge_levels = config_file.get_int("Erosion", "NLevel")
         self.output_intervals = config_file.get_float("Erosion", "OutputInterval", 1.0)
         self.bank_lines = config_file.read_bank_lines(str(self.bank_dir))
         self.river_axis = self._read_river_axis()
-        self.erosion_time = self.config_file.get_int("Erosion", "TErosion", positive=True)
+        self.erosion_time = config_file.get_int("Erosion", "TErosion", positive=True)
 
     def simulation_data(self) -> ErosionSimulationData:
         """Simulation Data."""
@@ -282,6 +286,48 @@ class ErosionRiverData(BaseRiverData):
         river_axis = XYCModel.read(river_axis_file)
         return river_axis
 
+    def process_river_axis_by_center_line(self) -> LineGeometry:
+        """Process the river axis by the center line.
+
+        Intersect the river center line with the river axis to map the stations from the first to the latter
+        then clip the river axis by the first and last station of the centerline.
+        """
+        river_axis = LineGeometry(self.river_axis, crs=self.config_file.crs)
+        river_axis_numpy = river_axis.as_array()
+        # optional sorting --> see 04_Waal_D3D example
+        # check: sum all distances and determine maximum distance ...
+        # if maximum > alpha * sum then perform sort
+        # Waal OK: 0.0082 ratio max/sum, Waal NotOK: 0.13 - Waal: 2500 points,
+        # so even when OK still some 21 times more than 1/2500 = 0.0004
+        dist2 = (np.diff(river_axis_numpy, axis=0) ** 2).sum(axis=1)
+        alpha = dist2.max() / dist2.sum()
+        if alpha > 0.03:
+            print("The river axis needs sorting!!")
+
+        # map km to axis points, further using axis
+        log_text("chainage_to_axis")
+        river_center_line_arr = self.river_center_line.as_array()
+        river_axis_km = river_axis.intersect_with_line(river_center_line_arr)
+
+        # clip river axis to reach of interest (get the closest point to the first and last station)
+        i1 = np.argmin(
+            ((river_center_line_arr[0, :2] - river_axis_numpy) ** 2).sum(axis=1)
+        )
+        i2 = np.argmin(
+            ((river_center_line_arr[-1, :2] - river_axis_numpy) ** 2).sum(axis=1)
+        )
+        if i1 < i2:
+            river_axis_km = river_axis_km[i1 : i2 + 1]
+            river_axis_numpy = river_axis_numpy[i1 : i2 + 1]
+        else:
+            # reverse river axis
+            river_axis_km = river_axis_km[i2 : i1 + 1][::-1]
+            river_axis_numpy = river_axis_numpy[i2 : i1 + 1][::-1]
+
+        river_axis = LineGeometry(river_axis_numpy, crs=self.config_file.crs)
+        river_axis.add_data(data={"stations": river_axis_km})
+        return river_axis
+
 
 @dataclass
 class ShipsParameters:
@@ -305,9 +351,7 @@ class ShipsParameters:
         reed (List[np.ndarray]):
             Reed values for each bank.
     """
-    Parameters: ClassVar["Parameters"] = namedtuple(
-        "Parameters", "name default valid onefile positive ext"
-    )
+
     config_file: ConfigFile
     velocity: List[np.ndarray]
     number: List[np.ndarray]
@@ -384,13 +428,13 @@ class ShipsParameters:
             List[namedtuple]: List of parameter definitions.
         """
         return [
-            cls.Parameters("VShip", None, None, True, True, None),
-            cls.Parameters("NShip", None, None, True, True, None),
-            cls.Parameters("NWave", 5, None, True, True, None),
-            cls.Parameters("Draught", None, None, True, True, None),
-            cls.Parameters("ShipType", None, [1, 2, 3], True, None, None),
-            cls.Parameters("Slope", 20, None, None, True, "slp"),
-            cls.Parameters("Reed", 0, None, None, True, "rdd"),
+            Parameters("VShip", None, None, True, True, None),
+            Parameters("NShip", None, None, True, True, None),
+            Parameters("NWave", 5, None, True, True, None),
+            Parameters("Draught", None, None, True, True, None),
+            Parameters("ShipType", None, [1, 2, 3], True, None, None),
+            Parameters("Slope", 20, None, None, True, "slp"),
+            Parameters("Reed", 0, None, None, True, "rdd"),
         ]
 
     def _get_discharge_parameter_definitions(self) -> List[Parameters]:
@@ -400,13 +444,13 @@ class ShipsParameters:
             List[namedtuple]: List of parameter definitions.
         """
         return [
-            self.Parameters("VShip", self.velocity, None, None, None, None),
-            self.Parameters("NShip", self.number, None, None, None, None),
-            self.Parameters("NWave", self.num_waves, None, None, None, None),
-            self.Parameters("Draught", self.draught, None, None, None, None),
-            self.Parameters("ShipType", self.type, [1, 2, 3], True, None, None),
-            self.Parameters("Slope", self.slope, None, None, True, "slp"),
-            self.Parameters("Reed", self.reed, None, None, True, "rdd"),
+            Parameters("VShip", self.velocity, None, None, None, None),
+            Parameters("NShip", self.number, None, None, None, None),
+            Parameters("NWave", self.num_waves, None, None, None, None),
+            Parameters("Draught", self.draught, None, None, None, None),
+            Parameters("ShipType", self.type, [1, 2, 3], True, None, None),
+            Parameters("Slope", self.slope, None, None, True, "slp"),
+            Parameters("Reed", self.reed, None, None, True, "rdd"),
         ]
 
     @staticmethod
@@ -433,7 +477,8 @@ class ShipsParameters:
 
             # Calculate mu_reed (empirical damping coefficient)
             mu_reed.append(
-                ShipsParameters.REED_DAMPING_COEFFICIENT * pr ** ShipsParameters.REED_DAMPING_EXPONENT
+                ShipsParameters.REED_DAMPING_COEFFICIENT
+                * pr**ShipsParameters.REED_DAMPING_EXPONENT
             )
 
         return mu_slope, mu_reed

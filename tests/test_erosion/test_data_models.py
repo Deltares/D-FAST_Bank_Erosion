@@ -6,12 +6,12 @@ import pytest
 from geopandas import GeoDataFrame
 from shapely.geometry import LineString
 
+from dfastbe.bank_erosion.mesh.data_models import MeshData
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     ErosionInputs,
     ErosionResults,
     FairwayData,
-    MeshData,
     SingleBank,
     SingleErosion,
     SingleLevelParameters,
@@ -38,12 +38,12 @@ class TestErosionInputs:
         """Test instantiation of the ErosionInputs dataclass."""
         shipping_data = {"ship1": [np.array([1.0, 1.0])]}
         bank_type = np.array([1.0, 1.0])
-        data = dict(
-            wave_fairway_distance_0=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
-            wave_fairway_distance_1=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
-            bank_protection_level=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
-            tauc=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
-        )
+        data = {
+            'wave_fairway_distance_0': [np.array([1.0, 1.0]), np.array([2.0, 2.0])],
+            'wave_fairway_distance_1': [np.array([1.0, 1.0]), np.array([2.0, 2.0])],
+            'bank_protection_level': [np.array([1.0, 1.0]), np.array([2.0, 2.0])],
+            'tauc': [np.array([1.0, 1.0]), np.array([2.0, 2.0])]
+        }
         erosion_inputs = ErosionInputs.from_column_arrays(
             data,
             SingleErosion,
@@ -111,18 +111,17 @@ class TestBankData:
         """Test instantiation of the BankData dataclass."""
         bank_lines = GeoDataFrame(geometry=[LineString([(0, 0), (1, 1)])])
         n_bank_lines = 1
-        bank_data = dict(
-            is_right_bank=[True, False],
-            bank_line_coords=[
+        bank_data = {
+            'is_right_bank': [True, False], 'bank_line_coords': [
                 np.array([[1.0, 1.0], [1.0, 1.0]]),
                 np.array([[2.0, 2.0], [2.0, 2.0]]),
             ],
-            bank_face_indices=[np.array([1, 1]), np.array([2, 2])],
-            bank_line_size=[np.array([1.0, 1.0]), np.array([2, 2])],
-            fairway_distances=[np.array([1.0, 1.0]), np.array([2, 2])],
-            fairway_face_indices=[np.array([1, 1]), np.array([2, 2])],
-            bank_chainage_midpoints=[np.array([1.0, 1.0]), np.array([2.0, 2.0])],
-        )
+            'bank_face_indices': [np.array([1, 1]), np.array([2, 2])],
+             'bank_line_size': [np.array([1.0, 1.0]), np.array([2, 2])],
+             'fairway_distances': [np.array([1.0, 1.0]), np.array([2, 2])],
+             'fairway_face_indices': [np.array([1, 1]), np.array([2, 2])],
+             'bank_chainage_midpoints': [np.array([1.0, 1.0]), np.array([2.0, 2.0])]
+        }
         bank_data = BankData.from_column_arrays(
             bank_data,
             SingleBank,
@@ -329,6 +328,49 @@ class TestErosionRiverData:
         assert isinstance(river_axis, LineString)
         assert river_axis.equals(mock_river_axis)
 
+    # @pytest.mark.unit
+    # def test_process_river_axis_by_center_line(self, mock_erosion: Erosion, mock_debug):
+    #     """Test the _process_river_axis_by_center_line method.
+    #
+    #     This method processes the river axis based on the center line of the river.
+    #
+    #     Args:
+    #         mock_erosion (Erosion): The Erosion instance to test.
+    #
+    #     Mocks:
+    #         LineGeometry:
+    #             A mocked LineGeometry instance to simulate line geometry operations.
+    #         Erosion:
+    #             The Erosion instance without executing the original __init__ method.
+    #
+    #     Asserts:
+    #         The river axis is processed correctly based on the center line.
+    #         The mocked LineGeometry methods are called.
+    #     """
+    #     mock_center_line = np.array([[0, 0], [1, 1], [2, 2], [3, 3]])
+    #     mock_erosion.river_center_line_arr = mock_center_line
+    #
+    #     with patch(
+    #             "dfastbe.bank_erosion.bank_erosion.LineGeometry"
+    #     ) as mock_line_geometry:
+    #         mock_line_geometry.return_value = MagicMock()
+    #         mock_line_geometry.return_value.as_array.return_value = np.array(
+    #             [
+    #                 [118594.085937, 414471.53125],
+    #                 [118608.34068032, 414475.92354911],
+    #                 [118622.59542364, 414480.31584821],
+    #                 [118636.85016696, 414484.70814732],
+    #                 [118651.10491029, 414489.10044643],
+    #             ]
+    #         )
+    #         mock_line_geometry.return_value.intersect_with_line.return_value = np.array(
+    #             [128.0, 128.0, 128.0, 128.0, 128.0]
+    #         )
+    #         river_axis = mock_erosion._process_river_axis_by_center_line()
+    #
+    #     mock_line_geometry.return_value.as_array.assert_called_once()
+    #     mock_line_geometry.return_value.intersect_with_line.assert_called_once()
+    #     river_axis.add_data.assert_called_with(data={"stations": np.array([128.0])})
 
 class TestShipsParameters:
 

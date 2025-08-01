@@ -26,8 +26,7 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-import os
-from typing import Any, Dict, List, Tuple
+from typing import Any, List, Tuple, Dict
 
 import numpy as np
 from geopandas.geodataframe import GeoDataFrame
@@ -41,7 +40,6 @@ from dfastbe.bank_erosion.data_models.calculation import (
     ErosionInputs,
     ErosionResults,
     FairwayData,
-    MeshData,
     SingleCalculation,
     SingleDischargeLevel,
     SingleErosion,
@@ -51,20 +49,20 @@ from dfastbe.bank_erosion.data_models.calculation import (
 from dfastbe.bank_erosion.data_models.inputs import (
     ErosionRiverData,
     ErosionSimulationData,
+    Parameters,
     ShipsParameters,
 )
 from dfastbe.bank_erosion.debugger import Debugger
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
+from dfastbe.bank_erosion.mesh.processor import MeshProcessor
 from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.utils import (
-    BankLinesProcessor,
-    calculate_alpha,
     get_km_bins,
     get_km_eroded_volume,
-    intersect_line_mesh,
     move_line,
     write_km_eroded_volumes,
 )
+from dfastbe.base_calculator import BaseCalculator
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.data_models import LineGeometry
 from dfastbe.io.logger import log_text, timed_logger
@@ -73,107 +71,20 @@ X_AXIS_TITLE = "x-coordinate [km]"
 Y_AXIS_TITLE = "y-coordinate [km]"
 
 
-class Erosion:
+class Erosion(BaseCalculator):
     """Class to handle the bank erosion calculations."""
 
     def __init__(self, config_file: ConfigFile, gui: bool = False):
         """Initialize the Erosion class."""
-        self.root_dir = config_file.root_dir
-        self._config_file = config_file
-        self.gui = gui
+        super().__init__(config_file, gui)
 
         self.river_data = ErosionRiverData(config_file)
-        self.river_center_line_arr = self.river_data.river_center_line.as_array()
         self.simulation_data = self.river_data.simulation_data()
         self.sim_files, self.p_discharge = self.river_data.get_erosion_sim_data(
             self.river_data.num_discharge_levels
         )
-        self.bl_processor = BankLinesProcessor(self.river_data)
         self.debugger = Debugger(config_file.crs, self.river_data.output_dir)
         self.erosion_calculator = ErosionCalculator()
-        self._results = None
-
-    @property
-    def config_file(self) -> ConfigFile:
-        """Configuration file object."""
-        return self._config_file
-
-    @property
-    def results(self) -> Dict[str, Any]:
-        """dict: Results of the bank line detection analysis.
-
-        Returns:
-        """
-        return self._results
-
-    @results.setter
-    def results(self, value: Dict[str, Any]):
-        """Set the results of the bank erosion analysis."""
-        self._results = value
-
-    def _process_river_axis_by_center_line(self) -> LineGeometry:
-        """Process the river axis by the center line.
-
-        Intersect the river center line with the river axis to map the stations from the first to the latter
-        then clip the river axis by the first and last station of the centerline.
-        """
-        river_axis = LineGeometry(self.river_data.river_axis, crs=self.config_file.crs)
-        river_axis_numpy = river_axis.as_array()
-        # optional sorting --> see 04_Waal_D3D example
-        # check: sum all distances and determine maximum distance ...
-        # if maximum > alpha * sum then perform sort
-        # Waal OK: 0.0082 ratio max/sum, Waal NotOK: 0.13 - Waal: 2500 points,
-        # so even when OK still some 21 times more than 1/2500 = 0.0004
-        dist2 = (np.diff(river_axis_numpy, axis=0) ** 2).sum(axis=1)
-        alpha = dist2.max() / dist2.sum()
-        if alpha > 0.03:
-            print("The river axis needs sorting!!")
-
-        # map km to axis points, further using axis
-        log_text("chainage_to_axis")
-        river_axis_km = river_axis.intersect_with_line(self.river_center_line_arr)
-
-        # clip river axis to reach of interest (get the closest point to the first and last station)
-        i1 = np.argmin(
-            ((self.river_center_line_arr[0, :2] - river_axis_numpy) ** 2).sum(axis=1)
-        )
-        i2 = np.argmin(
-            ((self.river_center_line_arr[-1, :2] - river_axis_numpy) ** 2).sum(axis=1)
-        )
-        if i1 < i2:
-            river_axis_km = river_axis_km[i1 : i2 + 1]
-            river_axis_numpy = river_axis_numpy[i1 : i2 + 1]
-        else:
-            # reverse river axis
-            river_axis_km = river_axis_km[i2 : i1 + 1][::-1]
-            river_axis_numpy = river_axis_numpy[i2 : i1 + 1][::-1]
-
-        river_axis = LineGeometry(river_axis_numpy, crs=self.config_file.crs)
-        river_axis.add_data(data={"stations": river_axis_km})
-        return river_axis
-
-    def _get_fairway_data(
-        self,
-        river_axis: LineGeometry,
-        mesh_data: MeshData,
-    ):
-        # map km to fairway points, further using axis
-        log_text("chainage_to_fairway")
-        # intersect fairway and mesh
-        fairway_intersection_coords, fairway_face_indices = intersect_line_mesh(
-            river_axis.as_array(), mesh_data
-        )
-        if self.river_data.debug:
-            arr = (
-                fairway_intersection_coords[:-1] + fairway_intersection_coords[1:]
-            ) / 2
-            line_geom = LineGeometry(arr, crs=self.config_file.crs)
-            line_geom.to_file(
-                file_name=f"{str(self.river_data.output_dir)}{os.sep}fairway_face_indices.shp",
-                data={"iface": fairway_face_indices},
-            )
-
-        return FairwayData(fairway_face_indices, fairway_intersection_coords)
 
     def calculate_fairway_bank_line_distance(
         self,
@@ -287,22 +198,9 @@ class Erosion:
         fairway_data: FairwayData,
     ) -> ErosionInputs:
         # wave reduction s0, s1
-        wave_fairway_distance_0 = self.config_file.get_parameter(
-            "Erosion",
-            "Wave0",
-            num_stations_per_bank,
-            default=200,
-            positive=True,
-            onefile=True,
-        )
-        wave_fairway_distance_1 = self.config_file.get_parameter(
-            "Erosion",
-            "Wave1",
-            num_stations_per_bank,
-            default=150,
-            positive=True,
-            onefile=True,
-        )
+        parameters = self._get_parameters(num_stations_per_bank)
+        wave_fairway_distance_0 = parameters["Wave0"]
+        wave_fairway_distance_1 = parameters["Wave1"]
 
         # save 1_banklines
         # read vship, nship, nwave, draught (tship), shiptype ... independent of level number
@@ -313,24 +211,12 @@ class Erosion:
         # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
         classes = self.config_file.get_bool("Erosion", "Classes")
         if classes:
-            bank_type = self.config_file.get_parameter(
-                "Erosion",
-                "BankType",
-                num_stations_per_bank,
-                default=0,
-                ext=".btp",
-            )
+            bank_type = parameters["BankType"]
             tauc = []
             for bank in bank_type:
                 tauc.append(ErosionInputs.taucls[bank])
         else:
-            tauc = self.config_file.get_parameter(
-                "Erosion",
-                "BankType",
-                num_stations_per_bank,
-                default=0,
-                ext=".btp",
-            )
+            tauc = parameters["BankType"]
             thr = (ErosionInputs.taucls[:-1] + ErosionInputs.taucls[1:]) / 2
             bank_type = [None] * len(thr)
             for ib, shear_stress in enumerate(tauc):
@@ -339,15 +225,8 @@ class Erosion:
                     bt[shear_stress < thr_i] += 1
                 bank_type[ib] = bt
 
-        # read bank protection level dike_height
         dike_height_default = -1000
-        dike_height = self.config_file.get_parameter(
-            "Erosion",
-            "ProtectionLevel",
-            num_stations_per_bank,
-            default=dike_height_default,
-            ext=".bpl",
-        )
+        dike_height = parameters["ProtectionLevel"]
         # if dike_height undefined, set dike_height equal to water_level_fairway_ref - 1
         for ib, one_zss in enumerate(dike_height):
             mask = one_zss == dike_height_default
@@ -357,16 +236,43 @@ class Erosion:
             'wave_fairway_distance_0': wave_fairway_distance_0,
             'wave_fairway_distance_1': wave_fairway_distance_1,
             'bank_protection_level': dike_height,
-            'tauc': tauc
+            'tauc': tauc,
         }
         return ErosionInputs.from_column_arrays(
             data, SingleErosion, shipping_data=ships_parameters, bank_type=bank_type
         )
 
-    def _calculate_bank_height(self, bank_data: BankData, simulation_data: ErosionSimulationData) -> BankData:
+    def _get_erosion_input_parameters(self) -> List[Parameters]:
+        return [
+            Parameters(name="Wave0", default=200, valid=True, onefile=True, positive=None, ext=None),
+            Parameters(name="Wave1", default=150, valid=True, onefile=True, positive=None, ext=None),
+            Parameters(name="BankType", default=0, valid=None, onefile=None, positive=None, ext=".btp"),
+            Parameters(name="ProtectionLevel", default=-1000, valid=None, onefile=None, positive=None, ext=".bpl"),
+        ]
+
+    def _get_parameters(self, num_stations_per_bank) -> Dict[str, Any]:
+        """Get a parameter from the configuration file."""
+        data = {}
+        for parameter in self._get_erosion_input_parameters():
+            data[parameter.name] = self.config_file.get_parameter(
+                "Erosion",
+                parameter.name,
+                num_stations_per_bank,
+                default=parameter.default,
+                positive=parameter.positive,
+                onefile=parameter.onefile,
+                ext=parameter.ext,
+            )
+        return data
+
+    def _calculate_bank_height(
+        self, bank_data: BankData, simulation_data: ErosionSimulationData
+    ) -> BankData:
         # bank height = maximum bed elevation per cell
         for bank_i in bank_data:
-            bank_i.height = simulation_data.calculate_bank_height(bank_i, self.river_data.zb_dx)
+            bank_i.height = simulation_data.calculate_bank_height(
+                bank_i, self.river_data.zb_dx
+            )
 
         return bank_data
 
@@ -588,14 +494,16 @@ class Erosion:
 
             # last discharge level
             if level_i == num_levels - 1:
-                erosion_distance_eq, erosion_volume_eq = self.erosion_calculator.comp_erosion_eq(
-                    bank_i.height,
-                    bank_i.segment_length,
-                    fairway_data.fairway_initial_water_levels[ind],
-                    single_parameters.get_bank(ind),
-                    bank_i.fairway_distances,
-                    single_calculation.water_depth,
-                    erosion_inputs.get_bank(ind),
+                erosion_distance_eq, erosion_volume_eq = (
+                    self.erosion_calculator.comp_erosion_eq(
+                        bank_i.height,
+                        bank_i.segment_length,
+                        fairway_data.fairway_initial_water_levels[ind],
+                        single_parameters.get_bank(ind),
+                        bank_i.fairway_distances,
+                        single_calculation.water_depth,
+                        erosion_inputs.get_bank(ind),
+                    )
                 )
                 single_calculation.erosion_distance_eq = erosion_distance_eq
                 single_calculation.erosion_volume_eq = erosion_volume_eq
@@ -613,7 +521,9 @@ class Erosion:
 
             # accumulate eroded volumes per km
             volume_per_discharge = get_km_eroded_volume(
-                bank_i.bank_chainage_midpoints, single_calculation.erosion_volume_tot, km_bin
+                bank_i.bank_chainage_midpoints,
+                single_calculation.erosion_volume_tot,
+                km_bin,
             )
             single_calculation.volume_per_discharge = volume_per_discharge
             par_list.append(single_calculation)
@@ -670,6 +580,12 @@ class Erosion:
             single_calculation,
         )
 
+    def get_mesh_processor(self):
+        log_text("derive_topology")
+        mesh_data = self.simulation_data.compute_mesh_topology(verbose=False)
+
+        return MeshProcessor(self.river_data, mesh_data, verbose=self.config_file.debug)
+
     def run(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
         timed_logger("-- start analysis --")
@@ -682,10 +598,10 @@ class Erosion:
         )
         log_text("-")
 
-        log_text("derive_topology")
+        mesh_processor = self.get_mesh_processor()
 
-        mesh_data = self.simulation_data.compute_mesh_topology()
-        river_axis = self._process_river_axis_by_center_line()
+        river_axis = self.river_data.process_river_axis_by_center_line()
+        fairway_data = mesh_processor.get_fairway_data(river_axis)
 
         # map to the output interval
         km_bin = (
@@ -695,11 +611,9 @@ class Erosion:
         )
         km_mid = get_km_bins(km_bin, station_type="mid")  # get mid-points
 
-        fairway_data = self._get_fairway_data(river_axis, mesh_data)
-
         # map bank lines to mesh cells
         log_text("intersect_bank_mesh")
-        bank_data = self.bl_processor.intersect_with_mesh(mesh_data)
+        bank_data = mesh_processor.get_bank_data()
         # map the bank data to the fairway data (the bank_data and fairway_data will be updated inside the `_map_bank_to_fairway` function)
         self.calculate_fairway_bank_line_distance(
             bank_data, fairway_data, self.simulation_data
@@ -755,7 +669,7 @@ class Erosion:
                 self.results["xy_line_eq_list"],
                 self.results["km_mid"],
                 self.river_data.output_intervals,
-                self.river_center_line_arr,
+                self.river_data.river_center_line.as_array(),
                 self.simulation_data,
             )
 
@@ -763,11 +677,10 @@ class Erosion:
         self._write_bankline_shapefiles(
             self.results["bankline_new_list"],
             self.results["bankline_eq_list"],
-            self.config_file
+            self.config_file,
         )
         self._write_volume_outputs(
-            self.results["erosion_results"],
-            self.results["km_mid"]
+            self.results["erosion_results"], self.results["km_mid"]
         )
 
     def _write_bankline_shapefiles(
