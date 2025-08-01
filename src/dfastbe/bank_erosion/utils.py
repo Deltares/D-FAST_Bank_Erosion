@@ -572,18 +572,20 @@ class ErodedBankLine:
             poly (np.ndarray): Polygon coordinates for the current segment.
             num_edges (int): Number of edges in the polygon.
         """
-        ixy1 = self.point_index
+        current_point = self.point_index
         for n2 in range(min(num_edges, 2), -1, -1):
             if self.verbose:
                 print(f"  adding point {poly[n2]}")
-            point_is_new, ixy1 = self._point_in_bankline(ixy1, poly[n2])
+            point_is_new, current_point = self._point_in_bankline(
+                current_point, poly[n2]
+            )
             if point_is_new:
-                self._add_point(ixy1, poly[n2])
-        self.point_index = ixy1
+                self._add_point(current_point, poly[n2])
+        self.point_index = current_point
 
     def _update_points_between_segments(
         self,
-        ixy1: int,
+        current_point: int,
         start: int,
         end: int,
         intersection_context: IntersectionContext,
@@ -593,7 +595,7 @@ class ErodedBankLine:
         Add or re-add points between segments, using either poly or recent_bankline_points from intersection_context.
 
         Args:
-            ixy1 (int): Current index in the shifted bankline.
+            current_point (int): Current index in the shifted bankline.
             start (int): Start index for the points to add.
             end (int): End index for the points to add.
             intersection_context (IntersectionContext): Context containing poly and recent_bankline_points.
@@ -618,14 +620,14 @@ class ErodedBankLine:
                 ]
                 if self.verbose:
                     print(f"  re-adding old point {point}")
-            point_is_new, ixy1 = self._point_in_bankline(ixy1, point)
+            point_is_new, current_point = self._point_in_bankline(current_point, point)
             if point_is_new:
-                self._add_point(ixy1, point)
-        return ixy1
+                self._add_point(current_point, point)
+        return current_point
 
     def _add_intersection_point_to_bankline(
         self,
-        ixy1: int,
+        current_point: int,
         intersection_context: IntersectionContext,
         intersection_index: int,
     ) -> int:
@@ -633,7 +635,7 @@ class ErodedBankLine:
         Add the intersection point for the given index to the shifted bankline.
 
         Args:
-            ixy1 (int): Current index in the shifted bankline.
+            current_point (int): Current index in the shifted bankline.
             intersection_context (IntersectionContext): Context containing intersection data.
             intersection_index (int): Index of the current intersection.
 
@@ -643,10 +645,12 @@ class ErodedBankLine:
         pnt_intersect = intersection_context.get_intersection_point(intersection_index)
         if self.verbose:
             print(f"  adding intersection point {pnt_intersect}")
-        point_is_new, ixy1 = self._point_in_bankline(ixy1, pnt_intersect)
+        point_is_new, current_point = self._point_in_bankline(
+            current_point, pnt_intersect
+        )
         if point_is_new:
-            self._add_point(ixy1, pnt_intersect)
-        return ixy1
+            self._add_point(current_point, pnt_intersect)
+        return current_point
 
     def _update_inside_flag_for_intersection(
         self,
@@ -712,7 +716,7 @@ class ErodedBankLine:
         inside: bool,
         last_segment: int,
         last_edge_index: int,
-        ixy1: int,
+        current_point: int,
     ) -> Tuple[bool, int, int, int]:
         """
         Process a single intersection and update the shifted bankline accordingly.
@@ -721,7 +725,7 @@ class ErodedBankLine:
             inside (bool): Updated inside flag.
             s_last (int): Updated last segment index.
             n_last (int): Updated last edge index.
-            ixy1 (int): Updated index in shifted bankline.
+            current_point (int): Updated index in shifted bankline.
         """
         if self.verbose:
             print(
@@ -738,15 +742,15 @@ class ErodedBankLine:
             else:
                 start = last_segment
                 end = current_segment
-            ixy1 = self._update_points_between_segments(
-                ixy1,
+            current_point = self._update_points_between_segments(
+                current_point,
                 start,
                 end,
                 intersection_context,
                 inside=inside,
             )
-            ixy1 = self._add_intersection_point_to_bankline(
-                ixy1, intersection_context, intersection_index
+            current_point = self._add_intersection_point_to_bankline(
+                current_point, intersection_context, intersection_index
             )
             last_edge_index = intersection_context.polygon_edge_indices[
                 intersection_index
@@ -764,13 +768,13 @@ class ErodedBankLine:
                     print("  existing line continues inside")
                 else:
                     print("  existing line continues outside")
-        return inside, last_segment, last_edge_index, ixy1
+        return inside, last_segment, last_edge_index, current_point
 
     def _finalize_bankline_after_intersections(
         self,
         inside: bool,
         last_edge_index: int,
-        ixy1: int,
+        current_point: int,
         last_segment: int,
         intersection_context: IntersectionContext,
     ) -> int:
@@ -781,7 +785,7 @@ class ErodedBankLine:
             inside (bool): Whether the current path is inside the new polygon.
             n_last (int): Last polygon edge index processed.
             poly (np.ndarray): Polygon coordinates for the current segment.
-            ixy1 (int): Current index in the shifted bankline.
+            current_point (int): Current index in the shifted bankline.
             recent_bankline_points (np.ndarray): Temporary array of old bankline points.
             bankline_start_index (int): Starting index for recent_bankline_points.
             s_last (int): Last segment index processed.
@@ -799,10 +803,10 @@ class ErodedBankLine:
                 + intersection_context.bankline_start_index
                 - 1
             )
-        ixy1 = self._update_points_between_segments(
-            ixy1, start, end, intersection_context, inside=inside
+        current_point = self._update_points_between_segments(
+            current_point, start, end, intersection_context, inside=inside
         )
-        return ixy1
+        return current_point
 
     def _process_intersections_and_update_bankline(
         self,
@@ -921,7 +925,9 @@ class ErodedBankLine:
 
         return self.eroded_bank_line
 
-    def _point_in_bankline(self, ixy1, point: np.ndarray) -> Tuple[bool, int]:
+    def _point_in_bankline(
+        self, current_point: int, point: np.ndarray
+    ) -> Tuple[bool, int]:
         """Check if a point is within the bankline.
 
         Args:
@@ -931,23 +937,25 @@ class ErodedBankLine:
             bool: True if the point is within the bankline, False otherwise.
         """
         # Check if the point is within the x and y bounds of the bankline
-        point_is_new = (self.eroded_bank_line[ixy1] - point != 0).any()
+        point_is_new = (self.eroded_bank_line[current_point] - point != 0).any()
         if point_is_new:
-            ixy1 = ixy1 + 1
-        return point_is_new, ixy1
+            current_point = current_point + 1
+        return point_is_new, current_point
 
-    def _add_point(self, ixy1: int, point: np.ndarray):
+    def _add_point(self, current_point: int, point: np.ndarray):
         """Add the x,y-coordinates of a point to the xylines_new array.
 
         Args:
-            ixy1 (int):
+            point_index (int):
                 Index of last point in xy_in array
             point (np.ndarray):
                 1 x 2 array containing the x- and y-coordinates of one point
         """
-        if ixy1 >= len(self.eroded_bank_line):
-            self.eroded_bank_line = enlarge(self.eroded_bank_line, (2 * ixy1, 2))
-        self.eroded_bank_line[ixy1] = point
+        if current_point >= len(self.eroded_bank_line):
+            self.eroded_bank_line = enlarge(
+                self.eroded_bank_line, (2 * current_point, 2)
+            )
+        self.eroded_bank_line[current_point] = point
 
 
 def calculate_segment_edge_intersections(
