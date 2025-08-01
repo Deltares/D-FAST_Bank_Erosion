@@ -41,7 +41,7 @@ class TestErodedBankLine:
             The moved lines are close to the expected moved lines within a tolerance.
         """
         eroded_bank_line = ErodedBankLine(xylines, erosion_distance)
-        moved_lines = eroded_bank_line.move_line_right()
+        moved_lines = eroded_bank_line.move_line_by_erosion()
 
-        assert moved_lines.shape == (469, 2)
+        assert moved_lines.shape == expected_moved_lines.shape
         assert np.allclose(moved_lines, expected_moved_lines)
