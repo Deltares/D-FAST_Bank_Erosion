@@ -26,7 +26,8 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Any, Dict, List, Tuple
+from collections import namedtuple
+from typing import Any, List, Tuple
 
 import numpy as np
 from geopandas.geodataframe import GeoDataFrame
@@ -34,7 +35,6 @@ from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
 
 from dfastbe import __version__
-from dfastbe.base_calculator import BaseCalculator
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     DischargeLevels,
@@ -54,14 +54,15 @@ from dfastbe.bank_erosion.data_models.inputs import (
 )
 from dfastbe.bank_erosion.debugger import Debugger
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
-from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.mesh.processor import MeshProcessor
+from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.utils import (
     get_km_bins,
     get_km_eroded_volume,
     move_line,
     write_km_eroded_volumes,
 )
+from dfastbe.base_calculator import BaseCalculator
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.data_models import LineGeometry
 from dfastbe.io.logger import log_text, timed_logger
@@ -84,6 +85,7 @@ class Erosion(BaseCalculator):
         )
         self.debugger = Debugger(config_file.crs, self.river_data.output_dir)
         self.erosion_calculator = ErosionCalculator()
+        self.Parameters = namedtuple("Parameters", "name default onefile positive ext")
 
     def calculate_fairway_bank_line_distance(
         self,
@@ -272,6 +274,41 @@ class Erosion(BaseCalculator):
         return ErosionInputs.from_column_arrays(
             data, SingleErosion, shipping_data=ships_parameters, bank_type=bank_type
         )
+
+    def _get_erosion_input_parameters(self) -> "Parameters":
+        return [
+            self.Parameters(
+                "Wave0", default=200, positive=True, onefile=True, ext=None
+            ),
+            self.Parameters(
+                "Wave1", default=150, positive=True, onefile=True, ext=None
+            ),
+            self.Parameters(
+                "ProtectionLevel",
+                default=-1000,
+                positive=None,
+                onefile=None,
+                ext=".bpl",
+            ),
+            self.Parameters(
+                "BankType", default=0, positive=None, onefile=None, ext=".btp"
+            ),
+        ]
+
+    def _get_parameters(self, num_stations_per_bank, **kwargs) -> Any:
+        """Get a parameter from the configuration file."""
+        data = {}
+        for parameter in self._get_erosion_input_parameters():
+            data[parameter.name] = self.config_file.get_parameter(
+                "Erosion",
+                parameter.name,
+                num_stations_per_bank,
+                default=parameter.default,
+                positive=parameter.positive,
+                onefile=parameter.onefile,
+                ext=parameter.ext,
+            )
+        return data
 
     def _calculate_bank_height(self, bank_data: BankData, simulation_data: ErosionSimulationData) -> BankData:
         # bank height = maximum bed elevation per cell
