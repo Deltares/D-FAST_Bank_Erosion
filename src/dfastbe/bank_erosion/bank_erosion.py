@@ -245,22 +245,10 @@ class Erosion(BaseCalculator):
 
     def _get_erosion_input_parameters(self) -> "Parameters":
         return [
-            self.Parameters(
-                "Wave0", default=200, positive=True, onefile=True, ext=None
-            ),
-            self.Parameters(
-                "Wave1", default=150, positive=True, onefile=True, ext=None
-            ),
-            self.Parameters(
-                "ProtectionLevel",
-                default=-1000,
-                positive=None,
-                onefile=None,
-                ext=".bpl",
-            ),
-            self.Parameters(
-                "BankType", default=0, positive=None, onefile=None, ext=".btp"
-            ),
+            self.Parameters("Wave0", 200, True, True, None),
+            self.Parameters("Wave1", 150, True, True, None),
+            self.Parameters("ProtectionLevel", -1000, None, None, ".bpl"),
+            self.Parameters("BankType", 0, None, None, ".btp"),
         ]
 
     def _get_parameters(self, num_stations_per_bank) -> Any:
