@@ -931,6 +931,7 @@ class ErodedBankLine:
         """Check if a point is within the bankline.
 
         Args:
+            current_point (int): Index of the last point in the eroded bank line.
             point (np.ndarray): The point to check.
 
         Returns:
@@ -943,11 +944,11 @@ class ErodedBankLine:
         return point_is_new, current_point
 
     def _add_point(self, current_point: int, point: np.ndarray):
-        """Add the x,y-coordinates of a point to the xylines_new array.
+        """Add the x,y-coordinates of a point to the eroded_bank_line array.
 
         Args:
-            point_index (int):
-                Index of last point in xy_in array
+            current_point (int):
+                Index of last point in eroded_bank_line array
             point (np.ndarray):
                 1 x 2 array containing the x- and y-coordinates of one point
         """
