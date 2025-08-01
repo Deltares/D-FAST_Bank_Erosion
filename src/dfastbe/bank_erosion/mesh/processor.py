@@ -1,6 +1,6 @@
 """module for processing mesh-related operations."""
 import math
-from typing import Tuple
+from typing import Tuple, List, Optional
 import numpy as np
 from dataclasses import dataclass
 from shapely.geometry import Point
@@ -26,7 +26,21 @@ SHAPE_MULTIPLIER = 2
 
 
 @dataclass
-class IntersectionResults:
+class Status:
+    step: int
+    transition_index: int
+    prev_b: float
+    face_index: Optional[int] = None
+    transition_type: Optional[str] = None
+
+    def print(self, index_str: str = None):
+        print(
+            f"{self.step}: moving from {index_str} via {self.transition_type} {self.transition_index} "
+            f"to {self.face_index} at b = {self.prev_b}"
+        )
+
+@dataclass
+class IntersectionState:
     coords = np.ndarray
     face_indexes = np.ndarray
     point_index = 0
@@ -61,35 +75,20 @@ class IntersectionResults:
             self.face_indexes[self.point_index] = self.current_face_index
         self.point_index += 1
 
-    def _log_mesh_transition(
-        self, step, transition_type, transition_index, face_index, prev_b
-    ):
-        """Helper to print mesh transition information for debugging.
-
-        Args:
-            step (int):
-                The current step or iteration.
-            transition_type (str):
-                The type of transition (e.g., "node", "edge").
-            transition_index (int):
-                The index of the transition (e.g., the node or edge index).
-            face_index (int):
-                The target mesh face index.
-            prev_b (float):
-                The previous value of b.
-        """
+    def _log_mesh_transition(self, log_status: Status):
+        """Helper to print mesh transition information for debugging."""
         index_str = "outside" if self.current_face_index == -1 else self.current_face_index
         if self.current_face_index == -2:
             index_str = f"edge between {self.vertex_index}"
-        print(
-            f"{step}: moving from {index_str} via {transition_type} {transition_index} "
-            f"to {face_index} at b = {prev_b}"
-        )
 
-    def _update_main_attributes(self, face_indexes, node, prev_b, step):
+        log_status.print(index_str)
+
+    def _update_main_attributes(self, log_status):
         if self.verbose:
-            self._log_mesh_transition(step, "node", node, face_indexes, prev_b)
+            log_status.transition_type = "node"
+            self._log_mesh_transition(log_status)
 
+        face_indexes = log_status.face_index
         if isinstance(face_indexes, (int, np.integer)):
             self.current_face_index = face_indexes
         elif hasattr(face_indexes, "__len__") and len(face_indexes) == 1:
@@ -98,21 +97,23 @@ class IntersectionResults:
             self.current_face_index = -2
             self.vertex_index = face_indexes
 
-    def _update_mesh_index_and_log(self, step, node, edge, faces, face_indexes, prev_b):
+    def update_index_and_log(self, status: Status, edge, faces):
         """
         Helper to update mesh index and log transitions for intersect_line_mesh.
         """
-        if face_indexes is not None:
-            self._update_main_attributes(face_indexes, node, prev_b, step)
+        if status.face_index is not None:
+            self._update_main_attributes(status)
             return
+        
+        status.transition_type = "edge"
+        status.transition_index = edge
 
         for i, face in enumerate(faces):
-            # if face == self.index:
             if face == self.current_face_index:
                 other_face = faces[1 - i]
                 if self.verbose:
-                    self._log_mesh_transition(step, "edge", edge, other_face, prev_b)
-                # self.index = other_face
+                    status.face_index = other_face
+                    self._log_mesh_transition(status)
                 self.current_face_index = other_face
                 return
 
@@ -134,7 +135,7 @@ class MeshWrapper:
 
     def _read_target_object(self, xy_coords):
         self.given_coords = xy_coords
-        self.intersection_results = IntersectionResults(xy_coords.shape, self.verbose)
+        self.intersection_state = IntersectionState(xy_coords.shape, self.verbose)
 
     def _handle_first_point(self, current_bank_point: np.ndarray):
         # get the point on the mesh face that is closest to the first bank point
@@ -149,9 +150,9 @@ class MeshWrapper:
             )
         )[0]
         index, vindex = self._find_starting_face(closest_cell_ind)
-        self.intersection_results.current_face_index = index
-        self.intersection_results.vertex_index = vindex
-        self.intersection_results.update(current_bank_point)
+        self.intersection_state.current_face_index = index
+        self.intersection_state.vertex_index = vindex
+        self.intersection_state.update(current_bank_point)
 
     def _find_starting_face(self, face_indexes: np.ndarray):
         """Find the starting face for a bank line segment.
@@ -192,14 +193,13 @@ class MeshWrapper:
         else:
             print(f"{j}: -- no slices along this segment --")
 
-        if self.intersection_results.current_face_index >= 0:
+        if self.intersection_state.current_face_index >= 0:
             pnt = Point(bpj)
-            # polygon_k = self.mesh_data.get_face_by_index(self.index, as_polygon=True)
-            polygon_k = self.mesh_data.get_face_by_index(self.intersection_results.current_face_index, as_polygon=True)
+            polygon_k = self.mesh_data.get_face_by_index(self.intersection_state.current_face_index, as_polygon=True)
 
             if not polygon_k.contains(pnt):
                 raise ValueError(
-                    f"{j}: ERROR: point actually not contained within {self.intersection_results.current_face_index}!"
+                    f"{j}: ERROR: point actually not contained within {self.intersection_state.current_face_index}!"
                 )
 
     def _process_node_transition(self, segment: RiverSegment, node):
@@ -225,7 +225,7 @@ class MeshWrapper:
                 if self.verbose:
                     print(f"{segment.index}: last point ends in a node")
 
-                self.intersection_results.update(segment.current_point)
+                self.intersection_state.update(segment.current_point)
                 theta = 0.0
                 finished = True
             else:
@@ -264,40 +264,41 @@ class MeshWrapper:
                 # catch case of last segment
                 if self.verbose:
                     print(f"{segment.index}: last point ends on an edge")
-                self.intersection_results.update(segment.current_point)
+                self.intersection_state.update(segment.current_point)
                 finished = True
             else:
                 next_point = [self.given_coords[segment.index + 1][0], self.given_coords[segment.index + 1][1]]
-                next_face_index = self.mesh_data.determine_next_face_on_edge(segment, next_point, edge, faces)
+                next_face_index = self.determine_next_face_on_edge(segment, next_point, edge, faces)
 
         return finished, next_face_index
 
     def _process_bank_segment(self, segment: RiverSegment):
 
         while True:
-            if self.intersection_results.current_face_index == -2:
-                index_src = self.mesh_data.resolve_ambiguous_edge_transition(segment, self.intersection_results.vertex_index)
+            if self.intersection_state.current_face_index == -2:
+                index_src = self._resolve_ambiguous_edge_transition(segment, self.intersection_state.vertex_index)
 
                 if len(index_src) == 1:
-                    self.intersection_results.current_face_index = index_src[0]
-                    self.intersection_results.vertex_index = index_src[0:1]
+                    self.intersection_state.current_face_index = index_src[0]
+                    self.intersection_state.vertex_index = index_src[0:1]
                 else:
-                    self.intersection_results.current_face_index = -2
+                    self.intersection_state.current_face_index = -2
+
             elif segment.is_length_zero():
                 # segment has zero length
                 break
             else:
                 segment.distances, segment.edges, segment.nodes = (
                     self.mesh_data.find_segment_intersections(
-                        self.intersection_results.current_face_index,
+                        self.intersection_state.current_face_index,
                         segment,
                     )
                 )
 
             if len(segment.edges) == 0:
                 # rest of segment associated with same face
-                shape_length = self.intersection_results.point_index * SHAPE_MULTIPLIER
-                self.intersection_results.update(
+                shape_length = self.intersection_state.point_index * SHAPE_MULTIPLIER
+                self.intersection_state.update(
                     segment.current_point, shape_length=shape_length
                 )
                 break
@@ -311,7 +312,7 @@ class MeshWrapper:
             faces = self.mesh_data.edge_face_connectivity[edge]
             segment.min_relative_distance = segment.distances[0]
 
-            finished, index0 = self._slice_by_node_or_edge(
+            finished, face_index = self._slice_by_node_or_edge(
                 segment,
                 node,
                 edge,
@@ -320,23 +321,109 @@ class MeshWrapper:
             if finished:
                 break
 
-            self.intersection_results._update_mesh_index_and_log(
-                segment.index,
-                node,
-                edge,
-                faces,
-                index0,
-                segment.min_relative_distance,
-            )
+            status = Status(**{
+                "step": segment.index,
+                "transition_index": node,
+                "face_index": face_index,
+                "prev_b": segment.min_relative_distance,
+            })
+            self.intersection_state.update_index_and_log(status, edge, faces)
             segment_x = (
                     segment.previous_point
                     + segment.min_relative_distance
                     * (segment.current_point - segment.previous_point)
             )
-            shape_length = self.intersection_results.point_index * SHAPE_MULTIPLIER
-            self.intersection_results.update(segment_x, shape_length=shape_length)
+            shape_length = self.intersection_state.point_index * SHAPE_MULTIPLIER
+            self.intersection_state.update(segment_x, shape_length=shape_length)
             if segment.min_relative_distance == 1:
                 break
+
+    def _resolve_ambiguous_edge_transition(self, segment: RiverSegment, vindex):
+        """Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces."""
+        b = np.zeros(0)
+        edges = np.zeros(0, dtype=np.int64)
+        nodes = np.zeros(0, dtype=np.int64)
+        index_src = np.zeros(0, dtype=np.int64)
+
+        for i in vindex:
+            b1, edges1, nodes1 = self.mesh_data.find_segment_intersections(i, segment)
+            b = np.concatenate((b, b1), axis=0)
+            edges = np.concatenate((edges, edges1), axis=0)
+            nodes = np.concatenate((nodes, nodes1), axis=0)
+            index_src = np.concatenate((index_src, i + 0 * edges1), axis=0)
+
+        segment.edges, id_edges = np.unique(edges, return_index=True)
+        segment.distances = b[id_edges]
+        segment.nodes = nodes[id_edges]
+        index_src = index_src[id_edges]
+
+        return index_src
+
+    def resolve_next_face_by_direction(
+            self, theta: float, node, verbose_index: int = None
+    ):
+        """Helper to resolve the next face index based on the direction theta at a node."""
+
+        if self.verbose:
+            print(f"{verbose_index}: moving in direction theta = {theta}")
+
+        edges = self.mesh_data.find_edges(theta, node, verbose_index)
+
+        if self.verbose:
+            print(f"{verbose_index}: the edge to the left is edge {edges.left}")
+            print(f"{verbose_index}: the edge to the right is edge {edges.right}")
+
+        if edges.left == edges.right:
+            if self.verbose:
+                print(f"{verbose_index}: continue along edge {edges.left}")
+
+            next_face_index = self.mesh_data.edge_face_connectivity[edges.left, :]
+        else:
+            if self.verbose:
+                print(
+                    f"{verbose_index}: continue between edges {edges.left}"
+                    f" on the left and {edges.right} on the right"
+                )
+            next_face_index = self.mesh_data.resolve_next_face_from_edges(
+                node, edges, verbose_index
+            )
+        return next_face_index
+
+    def determine_next_face_on_edge(
+        self, segment: RiverSegment, next_point: List[float], edge, faces,
+    ):
+        """Determine the next face to continue along an edge based on the segment direction."""
+        theta = math.atan2(
+            next_point[1] - segment.current_point[1],
+            next_point[0] - segment.current_point[0],
+            )
+        if self.verbose:
+            print(f"{segment.index}: moving in direction theta = {theta}")
+
+        theta_edge = self.mesh_data.calculate_edge_angle(edge)
+        if theta == theta_edge or theta == -theta_edge:
+            if self.verbose:
+                print(f"{segment.index}: continue along edge {edge}")
+            next_face_index = faces
+        else:
+            # check whether the (extended) segment slices any edge of faces[0]
+            fe1 = self.mesh_data.face_edge_connectivity[faces[0]]
+            reversed_segment = RiverSegment(
+                index=segment.index,
+                previous_point=segment.current_point,
+                current_point=next_point,
+                min_relative_distance=0,
+            )
+            _, _, edges = self.mesh_data.calculate_edge_intersections(
+                fe1,
+                reversed_segment,
+                False,
+            )
+            # yes, a slice (typically 1, but could be 2 if it slices at a node
+            # but that doesn't matter) ... so, we continue towards faces[0]
+            # if there are no slices for faces[0], we continue towards faces[1]
+            next_face_index = faces[0] if len(edges) > 0 else faces[1]
+        return next_face_index
 
     def intersect_with_coords(self, given_coords: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Intersects a coords with an unstructured mesh and returns the intersection coordinates and mesh face indices.
@@ -381,28 +468,28 @@ class MeshWrapper:
                 self._process_bank_segment(segment)
 
         # clip to actual length (idx refers to segments, so we can ignore the last value)
-        self.intersection_results.coords = self.intersection_results.coords[: self.intersection_results.point_index]
-        self.intersection_results.face_indexes = self.intersection_results.face_indexes[: self.intersection_results.point_index - 1]
+        self.intersection_state.coords = self.intersection_state.coords[: self.intersection_state.point_index]
+        self.intersection_state.face_indexes = self.intersection_state.face_indexes[: self.intersection_state.point_index - 1]
 
         # remove tiny segments
-        d = np.sqrt((np.diff(self.intersection_results.coords, axis=0) ** 2).sum(axis=1))
+        d = np.sqrt((np.diff(self.intersection_state.coords, axis=0) ** 2).sum(axis=1))
         mask = np.concatenate((np.ones((1), dtype="bool"), d > self.d_thresh))
-        self.intersection_results.coords = self.intersection_results.coords[mask, :]
-        self.intersection_results.face_indexes = self.intersection_results.face_indexes[mask[1:]]
+        self.intersection_state.coords = self.intersection_state.coords[mask, :]
+        self.intersection_state.face_indexes = self.intersection_state.face_indexes[mask[1:]]
 
         # since index refers to segments, don't return the first one
-        return self.intersection_results.coords, self.intersection_results.face_indexes
+        return self.intersection_state.coords, self.intersection_state.face_indexes
 
 
 class MeshProcessor:
     """Class to process bank lines and intersect them with a mesh."""
 
-    def __init__(self, river_data: ErosionRiverData, mesh_data: MeshData):
+    def __init__(self, river_data: ErosionRiverData, mesh_data: MeshData, verbose: bool = False):
         """Constructor for MeshProcessor."""
         self.bank_lines = river_data.bank_lines
         self.mesh_data = mesh_data
         self.river_data = river_data
-        self.wrapper = MeshWrapper(mesh_data)
+        self.wrapper = MeshWrapper(mesh_data, verbose=verbose)
 
     def get_fairway_data(self, river_axis: LineGeometry) -> FairwayData:
         log_text("chainage_to_fairway")
