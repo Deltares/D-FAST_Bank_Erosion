@@ -26,7 +26,7 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple, Dict
 
 import numpy as np
 from geopandas.geodataframe import GeoDataFrame
@@ -244,13 +244,13 @@ class Erosion(BaseCalculator):
 
     def _get_erosion_input_parameters(self) -> List[Parameters]:
         return [
-            Parameters("Wave0", 200, True, True, None, None),
-            Parameters("Wave1", 150, True, True, None, None),
-            Parameters("BankType", 0, None, None, None, ".btp"),
-            Parameters("ProtectionLevel", -1000, None, None, None, ".bpl"),
+            Parameters(name="Wave0", default=200, valid=True, onefile=True, positive=None, ext=None),
+            Parameters(name="Wave1", default=150, valid=True, onefile=True, positive=None, ext=None),
+            Parameters(name="BankType", default=0, valid=None, onefile=None, positive=None, ext=".btp"),
+            Parameters(name="ProtectionLevel", default=-1000, valid=None, onefile=None, positive=None, ext=".bpl"),
         ]
 
-    def _get_parameters(self, num_stations_per_bank) -> Any:
+    def _get_parameters(self, num_stations_per_bank) -> Dict[str, Any]:
         """Get a parameter from the configuration file."""
         data = {}
         for parameter in self._get_erosion_input_parameters():
