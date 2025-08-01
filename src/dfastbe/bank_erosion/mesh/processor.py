@@ -1,6 +1,6 @@
 """module for processing mesh-related operations."""
 import math
-from typing import Tuple, List
+from typing import Tuple, List, Optional
 import numpy as np
 from dataclasses import dataclass
 from shapely.geometry import Point
@@ -28,10 +28,10 @@ SHAPE_MULTIPLIER = 2
 @dataclass
 class LogStatus:
     step: int
-    transition_type: str
     transition_index: int
-    face_index: int
     prev_b: float
+    face_index: Optional[int] = None
+    transition_type: Optional[str] = None
 
     def print(self, index_str: str = None):
         print(
@@ -85,19 +85,12 @@ class IntersectionState:
 
         log_status.print(index_str)
 
-    def _update_main_attributes(self, face_indexes, node, prev_b, step):
+    def _update_main_attributes(self, log_status):
         if self.verbose:
-            log_status = LogStatus(
-                **{
-                    "step": step,
-                    "transition_type": "node",
-                    "transition_index": node,
-                    "face_index": face_indexes,
-                    "prev_b": prev_b
-                }
-            )
+            log_status.transition_type = "node"
             self._log_mesh_transition(log_status)
 
+        face_indexes = log_status.face_index
         if isinstance(face_indexes, (int, np.integer)):
             self.current_face_index = face_indexes
         elif hasattr(face_indexes, "__len__") and len(face_indexes) == 1:
@@ -111,22 +104,30 @@ class IntersectionState:
         Helper to update mesh index and log transitions for intersect_line_mesh.
         """
         if face_indexes is not None:
-            self._update_main_attributes(face_indexes, node, prev_b, step)
+            log_status = LogStatus(
+                **{
+                    "step": step,
+                    "transition_index": node,
+                    "face_index": face_indexes,
+                    "prev_b": prev_b
+                }
+            )
+            self._update_main_attributes(log_status)
             return
 
+        log_status = LogStatus(
+            **{
+                "step": step,
+                "transition_type": "edge",
+                "transition_index": edge,
+                "prev_b": prev_b
+            }
+        )
         for i, face in enumerate(faces):
             if face == self.current_face_index:
                 other_face = faces[1 - i]
                 if self.verbose:
-                    log_status = LogStatus(
-                        **{
-                            "step": step,
-                            "transition_type": "edge",
-                            "transition_index": edge,
-                            "face_index": other_face,
-                            "prev_b": prev_b
-                        }
-                    )
+                    log_status.face_index = other_face
                     self._log_mesh_transition(log_status)
                 self.current_face_index = other_face
                 return
