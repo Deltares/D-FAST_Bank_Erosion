@@ -321,28 +321,37 @@ class ErodedBankLine:
     """Class to calculate an eroded bank line with its segments and erosion data."""
 
     def __init__(
-        self, xylines: np.ndarray, erosion_distance: np.ndarray, verbose: bool = False
+        self,
+        bank_line_points: np.ndarray,
+        erosion_distance: np.ndarray,
+        verbose: bool = False,
     ):
-        self.xylines = xylines
+        self.bank_line_points = bank_line_points
         self.erosion_distance = erosion_distance
         colvec = (len(self.erosion_distance), 1)
 
         # determine segment angle
-        self.dxy = xylines[1:, :] - xylines[:-1, :]
-        self.theta = np.arctan2(self.dxy[:, 1], self.dxy[:, 0])
+        self.segment_deltas = (
+            self.bank_line_points[1:, :] - self.bank_line_points[:-1, :]
+        )
+        self.theta = np.arctan2(self.segment_deltas[:, 1], self.segment_deltas[:, 0])
 
         # determine shift vector nxy for each segment
-        ds = np.sqrt((self.dxy**2).sum(axis=1))
-        self.nxy = (
-            self.dxy[:, ::-1] * [1, -1] * (self.erosion_distance / ds).reshape(colvec)
+        ds = np.sqrt((self.segment_deltas**2).sum(axis=1))
+        self.segment_normals = (
+            self.segment_deltas[:, ::-1]
+            * [1, -1]
+            * (self.erosion_distance / ds).reshape(colvec)
         )
 
-        self.xylines_new = np.zeros((100, 2))
-        self.xylines_new[0] = xylines[0] + self.nxy[0]
-        self._add_point(1, self.xylines[1] + self.nxy[0])
-        point_is_new, self.point_index = self._point_in_bankline(1, self.xylines[1])
+        self.eroded_bank_line = np.zeros((100, 2))
+        self.eroded_bank_line[0] = self.bank_line_points[0] + self.segment_normals[0]
+        self._add_point(1, self.bank_line_points[1] + self.segment_normals[0])
+        point_is_new, self.point_index = self._point_in_bankline(
+            1, self.bank_line_points[1]
+        )
         if point_is_new:
-            self._add_point(self.point_index, self.xylines[1])
+            self._add_point(self.point_index, self.bank_line_points[1])
 
         self.verbose = verbose
         self.prec = 0.000001
@@ -362,16 +371,18 @@ class ErodedBankLine:
             np.ndarray: Polygon coordinates.
         """
         points = [
-            self.xylines[index + 1],
-            self.xylines[index + 1] + self.nxy[index],
-            self.xylines[index] + self.nxy[index],
+            self.bank_line_points[index + 1],
+            self.bank_line_points[index + 1] + self.segment_normals[index],
+            self.bank_line_points[index] + self.segment_normals[index],
         ]
         if include_wedge:
-            points.append(self.xylines[index] + self.nxy[index - 1])
+            points.append(
+                self.bank_line_points[index] + self.segment_normals[index - 1]
+            )
         if include_current:
-            points.append(self.xylines[index])
+            points.append(self.bank_line_points[index])
         else:
-            points.append(self.xylines[index - 1])
+            points.append(self.bank_line_points[index - 1])
         return np.row_stack(points)
 
     def _create_segment_outline_polygon(
@@ -390,8 +401,8 @@ class ErodedBankLine:
             # no erosion, so just a linear extension
             poly = np.row_stack(
                 [
-                    self.xylines[erosion_index + 1],
-                    self.xylines[erosion_index],
+                    self.bank_line_points[erosion_index + 1],
+                    self.bank_line_points[erosion_index],
                 ]
             )
         elif dtheta <= 0:
@@ -428,24 +439,24 @@ class ErodedBankLine:
                 and the index of the first segment.
         """
         if self.point_index > 20:
-            x_start_segments = self.xylines_new[
+            x_start_segments = self.eroded_bank_line[
                 (self.point_index - 20) : self.point_index, 0
             ].copy()
-            y_start_segments = self.xylines_new[
+            y_start_segments = self.eroded_bank_line[
                 (self.point_index - 20) : self.point_index, 1
             ].copy()
-            x_end_segments = self.xylines_new[
+            x_end_segments = self.eroded_bank_line[
                 (self.point_index - 19) : (self.point_index + 1), 0
             ].copy()
-            y_end_segments = self.xylines_new[
+            y_end_segments = self.eroded_bank_line[
                 (self.point_index - 19) : (self.point_index + 1), 1
             ].copy()
             ixy0 = self.point_index - 20
         else:
-            x_start_segments = self.xylines_new[: self.point_index, 0].copy()
-            y_start_segments = self.xylines_new[: self.point_index, 1].copy()
-            x_end_segments = self.xylines_new[1 : self.point_index + 1, 0].copy()
-            y_end_segments = self.xylines_new[1 : self.point_index + 1, 1].copy()
+            x_start_segments = self.eroded_bank_line[: self.point_index, 0].copy()
+            y_start_segments = self.eroded_bank_line[: self.point_index, 1].copy()
+            x_end_segments = self.eroded_bank_line[1 : self.point_index + 1, 0].copy()
+            y_end_segments = self.eroded_bank_line[1 : self.point_index + 1, 1].copy()
             ixy0 = 0
         return ErodedBankLineSegment(
             x_start_segments=x_start_segments,
@@ -521,13 +532,13 @@ class ErodedBankLine:
         Returns:
             float: The cross product value.
         """
-        multiply_array = self.nxy if shifted else self.dxy
+        multiply_array = self.segment_normals if shifted else self.segment_deltas
         return (
-            self.xylines_new[self.point_index, 0]
-            - self.xylines_new[self.point_index - 1, 0]
+            self.eroded_bank_line[self.point_index, 0]
+            - self.eroded_bank_line[self.point_index - 1, 0]
         ) * multiply_array[erosion_index, 1] - (
-            self.xylines_new[self.point_index, 1]
-            - self.xylines_new[self.point_index - 1, 1]
+            self.eroded_bank_line[self.point_index, 1]
+            - self.eroded_bank_line[self.point_index - 1, 1]
         ) * multiply_array[
             erosion_index, 0
         ]
@@ -810,7 +821,7 @@ class ErodedBankLine:
             eroded_segment: ErodedBankLineSegment with recent shifted bankline segments.
 
         Modifies:
-            self.xylines_new and self.point_index in place.
+            self.eroded_bank_line and self.point_index in place.
         """
         segment_indices = np.concatenate(intersections.segment_indices)
         intersection_alphas = np.concatenate(intersections.intersection_alphas)
@@ -828,7 +839,7 @@ class ErodedBankLine:
         segment_index = sorted_segment_indices[0]
         if self.verbose:
             print(f"continuing new path at point {segment_index}")
-        recent_bankline_points = self.xylines_new[
+        recent_bankline_points = self.eroded_bank_line[
             segment_index : self.point_index + 1
         ].copy()
         bankline_start_index = segment_index
@@ -879,7 +890,7 @@ class ErodedBankLine:
                     f"{erosion_index}: current length of new bankline is {self.point_index}"
                 )
                 print(
-                    f"{erosion_index}: segment starting at {self.xylines[erosion_index]} to be shifted by {eroded_distance}"
+                    f"{erosion_index}: segment starting at {self.bank_line_points[erosion_index]} to be shifted by {eroded_distance}"
                 )
                 print(f"{erosion_index}: change in direction quantified as {dtheta}")
             poly = self._create_segment_outline_polygon(erosion_index, dtheta)
@@ -906,9 +917,9 @@ class ErodedBankLine:
                 )
             # if iseg == isegstop:
             #     break
-        self.xylines_new = self.xylines_new[: self.point_index, :]
+        self.eroded_bank_line = self.eroded_bank_line[: self.point_index, :]
 
-        return self.xylines_new
+        return self.eroded_bank_line
 
     def _point_in_bankline(self, ixy1, point: np.ndarray) -> Tuple[bool, int]:
         """Check if a point is within the bankline.
@@ -920,7 +931,7 @@ class ErodedBankLine:
             bool: True if the point is within the bankline, False otherwise.
         """
         # Check if the point is within the x and y bounds of the bankline
-        point_is_new = (self.xylines_new[ixy1] - point != 0).any()
+        point_is_new = (self.eroded_bank_line[ixy1] - point != 0).any()
         if point_is_new:
             ixy1 = ixy1 + 1
         return point_is_new, ixy1
@@ -934,9 +945,9 @@ class ErodedBankLine:
             point (np.ndarray):
                 1 x 2 array containing the x- and y-coordinates of one point
         """
-        if ixy1 >= len(self.xylines_new):
-            self.xylines_new = enlarge(self.xylines_new, (2 * ixy1, 2))
-        self.xylines_new[ixy1] = point
+        if ixy1 >= len(self.eroded_bank_line):
+            self.eroded_bank_line = enlarge(self.eroded_bank_line, (2 * ixy1, 2))
+        self.eroded_bank_line[ixy1] = point
 
 
 def calculate_segment_edge_intersections(
