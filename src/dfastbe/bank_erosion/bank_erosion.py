@@ -247,8 +247,8 @@ class Erosion(BaseCalculator):
         return [
             self.Parameters("Wave0", 200, True, True, None),
             self.Parameters("Wave1", 150, True, True, None),
-            self.Parameters("ProtectionLevel", -1000, None, None, ".bpl"),
             self.Parameters("BankType", 0, None, None, ".btp"),
+            self.Parameters("ProtectionLevel", -1000, None, None, ".bpl"),
         ]
 
     def _get_parameters(self, num_stations_per_bank) -> Any:
