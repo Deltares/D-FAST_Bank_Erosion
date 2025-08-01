@@ -584,7 +584,7 @@ class Erosion(BaseCalculator):
         log_text("derive_topology")
         mesh_data = self.simulation_data.compute_mesh_topology(verbose=False)
 
-        return MeshProcessor(self.river_data, mesh_data)
+        return MeshProcessor(self.river_data, mesh_data, verbose=self.config_file.debug)
 
     def run(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""

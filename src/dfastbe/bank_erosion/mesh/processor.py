@@ -26,6 +26,20 @@ SHAPE_MULTIPLIER = 2
 
 
 @dataclass
+class LogStatus:
+    step: int
+    transition_type: str
+    transition_index: int
+    face_index: int
+    prev_b: float
+
+    def print(self, index_str: str = None):
+        print(
+            f"{self.step}: moving from {index_str} via {self.transition_type} {self.transition_index} "
+            f"to {self.face_index} at b = {self.prev_b}"
+        )
+
+@dataclass
 class IntersectionState:
     coords = np.ndarray
     face_indexes = np.ndarray
@@ -62,33 +76,27 @@ class IntersectionState:
         self.point_index += 1
 
     def _log_mesh_transition(
-        self, step, transition_type, transition_index, face_index, prev_b
+        self, log_status: LogStatus,
     ):
-        """Helper to print mesh transition information for debugging.
-
-        Args:
-            step (int):
-                The current step or iteration.
-            transition_type (str):
-                The type of transition (e.g., "node", "edge").
-            transition_index (int):
-                The index of the transition (e.g., the node or edge index).
-            face_index (int):
-                The target mesh face index.
-            prev_b (float):
-                The previous value of b.
-        """
+        """Helper to print mesh transition information for debugging."""
         index_str = "outside" if self.current_face_index == -1 else self.current_face_index
         if self.current_face_index == -2:
             index_str = f"edge between {self.vertex_index}"
-        print(
-            f"{step}: moving from {index_str} via {transition_type} {transition_index} "
-            f"to {face_index} at b = {prev_b}"
-        )
+
+        log_status.print(index_str)
 
     def _update_main_attributes(self, face_indexes, node, prev_b, step):
         if self.verbose:
-            self._log_mesh_transition(step, "node", node, face_indexes, prev_b)
+            log_status = LogStatus(
+                **{
+                    "step": step,
+                    "transition_type": "node",
+                    "transition_index": node,
+                    "face_index": face_indexes,
+                    "prev_b": prev_b
+                }
+            )
+            self._log_mesh_transition(log_status)
 
         if isinstance(face_indexes, (int, np.integer)):
             self.current_face_index = face_indexes
@@ -98,7 +106,7 @@ class IntersectionState:
             self.current_face_index = -2
             self.vertex_index = face_indexes
 
-    def _update_mesh_index_and_log(self, step, node, edge, faces, face_indexes, prev_b):
+    def update_index_and_log(self, step, node, edge, faces, face_indexes, prev_b):
         """
         Helper to update mesh index and log transitions for intersect_line_mesh.
         """
@@ -110,7 +118,16 @@ class IntersectionState:
             if face == self.current_face_index:
                 other_face = faces[1 - i]
                 if self.verbose:
-                    self._log_mesh_transition(step, "edge", edge, other_face, prev_b)
+                    log_status = LogStatus(
+                        **{
+                            "step": step,
+                            "transition_type": "edge",
+                            "transition_index": edge,
+                            "face_index": other_face,
+                            "prev_b": prev_b
+                        }
+                    )
+                    self._log_mesh_transition(log_status)
                 self.current_face_index = other_face
                 return
 
@@ -308,7 +325,7 @@ class MeshWrapper:
             faces = self.mesh_data.edge_face_connectivity[edge]
             segment.min_relative_distance = segment.distances[0]
 
-            finished, index0 = self._slice_by_node_or_edge(
+            finished, face_index = self._slice_by_node_or_edge(
                 segment,
                 node,
                 edge,
@@ -317,12 +334,12 @@ class MeshWrapper:
             if finished:
                 break
 
-            self.intersection_state._update_mesh_index_and_log(
+            self.intersection_state.update_index_and_log(
                 segment.index,
                 node,
                 edge,
                 faces,
-                index0,
+                face_index,
                 segment.min_relative_distance,
             )
             segment_x = (
@@ -481,12 +498,12 @@ class MeshWrapper:
 class MeshProcessor:
     """Class to process bank lines and intersect them with a mesh."""
 
-    def __init__(self, river_data: ErosionRiverData, mesh_data: MeshData):
+    def __init__(self, river_data: ErosionRiverData, mesh_data: MeshData, verbose: bool = False):
         """Constructor for MeshProcessor."""
         self.bank_lines = river_data.bank_lines
         self.mesh_data = mesh_data
         self.river_data = river_data
-        self.wrapper = MeshWrapper(mesh_data)
+        self.wrapper = MeshWrapper(mesh_data, verbose=verbose)
 
     def get_fairway_data(self, river_axis: LineGeometry) -> FairwayData:
         log_text("chainage_to_fairway")
