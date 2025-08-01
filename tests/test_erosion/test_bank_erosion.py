@@ -125,9 +125,6 @@ class TestErosion:
             erosion_instance.mesh_processor = MagicMock()
             erosion_instance.debugger = MagicMock()
             erosion_instance.erosion_calculator = MagicMock()
-            erosion_instance.Parameters = namedtuple(
-                "Parameters", "name default onefile positive ext"
-            )
 
             yield erosion_instance
 

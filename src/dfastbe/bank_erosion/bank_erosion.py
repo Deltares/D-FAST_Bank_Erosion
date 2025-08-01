@@ -26,7 +26,6 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from collections import namedtuple
 from typing import Any, List, Tuple
 
 import numpy as np
@@ -50,6 +49,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
 from dfastbe.bank_erosion.data_models.inputs import (
     ErosionRiverData,
     ErosionSimulationData,
+    Parameters,
     ShipsParameters,
 )
 from dfastbe.bank_erosion.debugger import Debugger
@@ -85,7 +85,6 @@ class Erosion(BaseCalculator):
         )
         self.debugger = Debugger(config_file.crs, self.river_data.output_dir)
         self.erosion_calculator = ErosionCalculator()
-        self.Parameters = namedtuple("Parameters", "name default onefile positive ext")
 
     def calculate_fairway_bank_line_distance(
         self,
@@ -237,18 +236,18 @@ class Erosion(BaseCalculator):
             'wave_fairway_distance_0': wave_fairway_distance_0,
             'wave_fairway_distance_1': wave_fairway_distance_1,
             'bank_protection_level': dike_height,
-            'tauc': tauc
+            'tauc': tauc,
         }
         return ErosionInputs.from_column_arrays(
             data, SingleErosion, shipping_data=ships_parameters, bank_type=bank_type
         )
 
-    def _get_erosion_input_parameters(self) -> "Parameters":
+    def _get_erosion_input_parameters(self) -> List[Parameters]:
         return [
-            self.Parameters("Wave0", 200, True, True, None),
-            self.Parameters("Wave1", 150, True, True, None),
-            self.Parameters("BankType", 0, None, None, ".btp"),
-            self.Parameters("ProtectionLevel", -1000, None, None, ".bpl"),
+            Parameters("Wave0", 200, True, True, None, None),
+            Parameters("Wave1", 150, True, True, None, None),
+            Parameters("BankType", 0, None, None, None, ".btp"),
+            Parameters("ProtectionLevel", -1000, None, None, None, ".bpl"),
         ]
 
     def _get_parameters(self, num_stations_per_bank) -> Any:
@@ -266,10 +265,14 @@ class Erosion(BaseCalculator):
             )
         return data
 
-    def _calculate_bank_height(self, bank_data: BankData, simulation_data: ErosionSimulationData) -> BankData:
+    def _calculate_bank_height(
+        self, bank_data: BankData, simulation_data: ErosionSimulationData
+    ) -> BankData:
         # bank height = maximum bed elevation per cell
         for bank_i in bank_data:
-            bank_i.height = simulation_data.calculate_bank_height(bank_i, self.river_data.zb_dx)
+            bank_i.height = simulation_data.calculate_bank_height(
+                bank_i, self.river_data.zb_dx
+            )
 
         return bank_data
 
@@ -491,14 +494,16 @@ class Erosion(BaseCalculator):
 
             # last discharge level
             if level_i == num_levels - 1:
-                erosion_distance_eq, erosion_volume_eq = self.erosion_calculator.comp_erosion_eq(
-                    bank_i.height,
-                    bank_i.segment_length,
-                    fairway_data.fairway_initial_water_levels[ind],
-                    single_parameters.get_bank(ind),
-                    bank_i.fairway_distances,
-                    single_calculation.water_depth,
-                    erosion_inputs.get_bank(ind),
+                erosion_distance_eq, erosion_volume_eq = (
+                    self.erosion_calculator.comp_erosion_eq(
+                        bank_i.height,
+                        bank_i.segment_length,
+                        fairway_data.fairway_initial_water_levels[ind],
+                        single_parameters.get_bank(ind),
+                        bank_i.fairway_distances,
+                        single_calculation.water_depth,
+                        erosion_inputs.get_bank(ind),
+                    )
                 )
                 single_calculation.erosion_distance_eq = erosion_distance_eq
                 single_calculation.erosion_volume_eq = erosion_volume_eq
@@ -516,7 +521,9 @@ class Erosion(BaseCalculator):
 
             # accumulate eroded volumes per km
             volume_per_discharge = get_km_eroded_volume(
-                bank_i.bank_chainage_midpoints, single_calculation.erosion_volume_tot, km_bin
+                bank_i.bank_chainage_midpoints,
+                single_calculation.erosion_volume_tot,
+                km_bin,
             )
             single_calculation.volume_per_discharge = volume_per_discharge
             par_list.append(single_calculation)
@@ -670,11 +677,10 @@ class Erosion(BaseCalculator):
         self._write_bankline_shapefiles(
             self.results["bankline_new_list"],
             self.results["bankline_eq_list"],
-            self.config_file
+            self.config_file,
         )
         self._write_volume_outputs(
-            self.results["erosion_results"],
-            self.results["km_mid"]
+            self.results["erosion_results"], self.results["km_mid"]
         )
 
     def _write_bankline_shapefiles(
