@@ -339,12 +339,10 @@ class ErodedBankLine:
 
         self.xylines_new = np.zeros((100, 2))
         self.xylines_new[0] = xylines[0] + self.nxy[0]
-        self.point_index, self.xylines_new = self._add_point(
-            0, self.xylines_new, self.xylines[1] + self.nxy[0]
-        )
-        self.point_index, self.xylines_new = self._add_point(
-            self.point_index, self.xylines_new, self.xylines[1]
-        )
+        self._add_point(1, self.xylines[1] + self.nxy[0])
+        point_is_new, self.point_index = self._point_in_bankline(1, self.xylines[1])
+        if point_is_new:
+            self._add_point(self.point_index, self.xylines[1])
 
         self.verbose = verbose
         self.prec = 0.000001
@@ -567,7 +565,9 @@ class ErodedBankLine:
         for n2 in range(min(num_edges, 2), -1, -1):
             if self.verbose:
                 print(f"  adding point {poly[n2]}")
-            ixy1, self.xylines_new = self._add_point(ixy1, self.xylines_new, poly[n2])
+            point_is_new, ixy1 = self._point_in_bankline(ixy1, poly[n2])
+            if point_is_new:
+                self._add_point(ixy1, poly[n2])
         self.point_index = ixy1
 
     def _update_points_between_segments(
@@ -607,7 +607,9 @@ class ErodedBankLine:
                 ]
                 if self.verbose:
                     print(f"  re-adding old point {point}")
-            ixy1, self.xylines_new = self._add_point(ixy1, self.xylines_new, point)
+            point_is_new, ixy1 = self._point_in_bankline(ixy1, point)
+            if point_is_new:
+                self._add_point(ixy1, point)
         return ixy1
 
     def _add_intersection_point_to_bankline(
@@ -630,7 +632,9 @@ class ErodedBankLine:
         pnt_intersect = intersection_context.get_intersection_point(intersection_index)
         if self.verbose:
             print(f"  adding intersection point {pnt_intersect}")
-        ixy1, self.xylines_new = self._add_point(ixy1, self.xylines_new, pnt_intersect)
+        point_is_new, ixy1 = self._point_in_bankline(ixy1, pnt_intersect)
+        if point_is_new:
+            self._add_point(ixy1, pnt_intersect)
         return ixy1
 
     def _update_inside_flag_for_intersection(
@@ -906,32 +910,33 @@ class ErodedBankLine:
 
         return self.xylines_new
 
-    def _add_point(
-        self, ixy1: int, xy_in: np.ndarray, point: np.ndarray
-    ) -> Tuple[int, np.ndarray]:
-        """Add the x,y-coordinates of a point to an array of x,y-coordinates if it differs from the last point.
+    def _point_in_bankline(self, ixy1, point: np.ndarray) -> Tuple[bool, int]:
+        """Check if a point is within the bankline.
+
+        Args:
+            point (np.ndarray): The point to check.
+
+        Returns:
+            bool: True if the point is within the bankline, False otherwise.
+        """
+        # Check if the point is within the x and y bounds of the bankline
+        point_is_new = (self.xylines_new[ixy1] - point != 0).any()
+        if point_is_new:
+            ixy1 = ixy1 + 1
+        return point_is_new, ixy1
+
+    def _add_point(self, ixy1: int, point: np.ndarray):
+        """Add the x,y-coordinates of a point to the xylines_new array.
 
         Args:
             ixy1 (int):
                 Index of last point in xy_in array
-            xy_in (np.ndarray):
-                N x 2 array containing the x- and y-coordinates of points (partially filled)
             point (np.ndarray):
                 1 x 2 array containing the x- and y-coordinates of one point
-
-        Returns:
-            Tuple[int, np.ndarray]: The updated index and the array of coordinates.
         """
-        if (xy_in[ixy1] - point != 0).any():
-            ixy1 = ixy1 + 1
-            if ixy1 >= len(xy_in):
-                xy_out = enlarge(xy_in, (2 * ixy1, 2))
-            else:
-                xy_out = xy_in
-            xy_out[ixy1] = point
-        else:
-            xy_out = xy_in
-        return ixy1, xy_out
+        if ixy1 >= len(self.xylines_new):
+            self.xylines_new = enlarge(self.xylines_new, (2 * ixy1, 2))
+        self.xylines_new[ixy1] = point
 
 
 def calculate_segment_edge_intersections(
