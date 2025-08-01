@@ -75,9 +75,7 @@ class IntersectionState:
             self.face_indexes[self.point_index] = self.current_face_index
         self.point_index += 1
 
-    def _log_mesh_transition(
-        self, log_status: Status,
-    ):
+    def _log_mesh_transition(self, log_status: Status):
         """Helper to print mesh transition information for debugging."""
         index_str = "outside" if self.current_face_index == -1 else self.current_face_index
         if self.current_face_index == -2:
@@ -99,36 +97,23 @@ class IntersectionState:
             self.current_face_index = -2
             self.vertex_index = face_indexes
 
-    def update_index_and_log(self, step, node, edge, faces, face_indexes, prev_b):
+    def update_index_and_log(self, status: Status, edge, faces):
         """
         Helper to update mesh index and log transitions for intersect_line_mesh.
         """
-        if face_indexes is not None:
-            log_status = Status(
-                **{
-                    "step": step,
-                    "transition_index": node,
-                    "face_index": face_indexes,
-                    "prev_b": prev_b
-                }
-            )
-            self._update_main_attributes(log_status)
+        if status.face_index is not None:
+            self._update_main_attributes(status)
             return
+        
+        status.transition_type = "edge"
+        status.transition_index = edge
 
-        log_status = Status(
-            **{
-                "step": step,
-                "transition_type": "edge",
-                "transition_index": edge,
-                "prev_b": prev_b
-            }
-        )
         for i, face in enumerate(faces):
             if face == self.current_face_index:
                 other_face = faces[1 - i]
                 if self.verbose:
-                    log_status.face_index = other_face
-                    self._log_mesh_transition(log_status)
+                    status.face_index = other_face
+                    self._log_mesh_transition(status)
                 self.current_face_index = other_face
                 return
 
@@ -334,14 +319,16 @@ class MeshWrapper:
             )
             if finished:
                 break
-
+            status = Status(**{
+                "step": segment.index,
+                "transition_index": node,
+                "face_index": face_index,
+                "prev_b": segment.min_relative_distance,
+            })
             self.intersection_state.update_index_and_log(
-                segment.index,
-                node,
+                status,
                 edge,
                 faces,
-                face_index,
-                segment.min_relative_distance,
             )
             segment_x = (
                     segment.previous_point
