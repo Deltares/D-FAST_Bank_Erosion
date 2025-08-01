@@ -26,7 +26,7 @@ SHAPE_MULTIPLIER = 2
 
 
 @dataclass
-class IntersectionResults:
+class IntersectionState:
     coords = np.ndarray
     face_indexes = np.ndarray
     point_index = 0
@@ -134,7 +134,7 @@ class MeshWrapper:
 
     def _read_target_object(self, xy_coords):
         self.given_coords = xy_coords
-        self.intersection_results = IntersectionResults(xy_coords.shape, self.verbose)
+        self.intersection_state = IntersectionState(xy_coords.shape, self.verbose)
 
     def _handle_first_point(self, current_bank_point: np.ndarray):
         # get the point on the mesh face that is closest to the first bank point
@@ -149,9 +149,9 @@ class MeshWrapper:
             )
         )[0]
         index, vindex = self._find_starting_face(closest_cell_ind)
-        self.intersection_results.current_face_index = index
-        self.intersection_results.vertex_index = vindex
-        self.intersection_results.update(current_bank_point)
+        self.intersection_state.current_face_index = index
+        self.intersection_state.vertex_index = vindex
+        self.intersection_state.update(current_bank_point)
 
     def _find_starting_face(self, face_indexes: np.ndarray):
         """Find the starting face for a bank line segment.
@@ -192,14 +192,14 @@ class MeshWrapper:
         else:
             print(f"{j}: -- no slices along this segment --")
 
-        if self.intersection_results.current_face_index >= 0:
+        if self.intersection_state.current_face_index >= 0:
             pnt = Point(bpj)
             # polygon_k = self.mesh_data.get_face_by_index(self.index, as_polygon=True)
-            polygon_k = self.mesh_data.get_face_by_index(self.intersection_results.current_face_index, as_polygon=True)
+            polygon_k = self.mesh_data.get_face_by_index(self.intersection_state.current_face_index, as_polygon=True)
 
             if not polygon_k.contains(pnt):
                 raise ValueError(
-                    f"{j}: ERROR: point actually not contained within {self.intersection_results.current_face_index}!"
+                    f"{j}: ERROR: point actually not contained within {self.intersection_state.current_face_index}!"
                 )
 
     def _process_node_transition(self, segment: RiverSegment, node):
@@ -225,7 +225,7 @@ class MeshWrapper:
                 if self.verbose:
                     print(f"{segment.index}: last point ends in a node")
 
-                self.intersection_results.update(segment.current_point)
+                self.intersection_state.update(segment.current_point)
                 theta = 0.0
                 finished = True
             else:
@@ -264,7 +264,7 @@ class MeshWrapper:
                 # catch case of last segment
                 if self.verbose:
                     print(f"{segment.index}: last point ends on an edge")
-                self.intersection_results.update(segment.current_point)
+                self.intersection_state.update(segment.current_point)
                 finished = True
             else:
                 next_point = [self.given_coords[segment.index + 1][0], self.given_coords[segment.index + 1][1]]
@@ -275,29 +275,29 @@ class MeshWrapper:
     def _process_bank_segment(self, segment: RiverSegment):
 
         while True:
-            if self.intersection_results.current_face_index == -2:
-                index_src = self.mesh_data.resolve_ambiguous_edge_transition(segment, self.intersection_results.vertex_index)
+            if self.intersection_state.current_face_index == -2:
+                index_src = self.mesh_data.resolve_ambiguous_edge_transition(segment, self.intersection_state.vertex_index)
 
                 if len(index_src) == 1:
-                    self.intersection_results.current_face_index = index_src[0]
-                    self.intersection_results.vertex_index = index_src[0:1]
+                    self.intersection_state.current_face_index = index_src[0]
+                    self.intersection_state.vertex_index = index_src[0:1]
                 else:
-                    self.intersection_results.current_face_index = -2
+                    self.intersection_state.current_face_index = -2
             elif segment.is_length_zero():
                 # segment has zero length
                 break
             else:
                 segment.distances, segment.edges, segment.nodes = (
                     self.mesh_data.find_segment_intersections(
-                        self.intersection_results.current_face_index,
+                        self.intersection_state.current_face_index,
                         segment,
                     )
                 )
 
             if len(segment.edges) == 0:
                 # rest of segment associated with same face
-                shape_length = self.intersection_results.point_index * SHAPE_MULTIPLIER
-                self.intersection_results.update(
+                shape_length = self.intersection_state.point_index * SHAPE_MULTIPLIER
+                self.intersection_state.update(
                     segment.current_point, shape_length=shape_length
                 )
                 break
@@ -320,7 +320,7 @@ class MeshWrapper:
             if finished:
                 break
 
-            self.intersection_results._update_mesh_index_and_log(
+            self.intersection_state._update_mesh_index_and_log(
                 segment.index,
                 node,
                 edge,
@@ -333,8 +333,8 @@ class MeshWrapper:
                     + segment.min_relative_distance
                     * (segment.current_point - segment.previous_point)
             )
-            shape_length = self.intersection_results.point_index * SHAPE_MULTIPLIER
-            self.intersection_results.update(segment_x, shape_length=shape_length)
+            shape_length = self.intersection_state.point_index * SHAPE_MULTIPLIER
+            self.intersection_state.update(segment_x, shape_length=shape_length)
             if segment.min_relative_distance == 1:
                 break
 
@@ -381,17 +381,17 @@ class MeshWrapper:
                 self._process_bank_segment(segment)
 
         # clip to actual length (idx refers to segments, so we can ignore the last value)
-        self.intersection_results.coords = self.intersection_results.coords[: self.intersection_results.point_index]
-        self.intersection_results.face_indexes = self.intersection_results.face_indexes[: self.intersection_results.point_index - 1]
+        self.intersection_state.coords = self.intersection_state.coords[: self.intersection_state.point_index]
+        self.intersection_state.face_indexes = self.intersection_state.face_indexes[: self.intersection_state.point_index - 1]
 
         # remove tiny segments
-        d = np.sqrt((np.diff(self.intersection_results.coords, axis=0) ** 2).sum(axis=1))
+        d = np.sqrt((np.diff(self.intersection_state.coords, axis=0) ** 2).sum(axis=1))
         mask = np.concatenate((np.ones((1), dtype="bool"), d > self.d_thresh))
-        self.intersection_results.coords = self.intersection_results.coords[mask, :]
-        self.intersection_results.face_indexes = self.intersection_results.face_indexes[mask[1:]]
+        self.intersection_state.coords = self.intersection_state.coords[mask, :]
+        self.intersection_state.face_indexes = self.intersection_state.face_indexes[mask[1:]]
 
         # since index refers to segments, don't return the first one
-        return self.intersection_results.coords, self.intersection_results.face_indexes
+        return self.intersection_state.coords, self.intersection_state.face_indexes
 
 
 class MeshProcessor:
