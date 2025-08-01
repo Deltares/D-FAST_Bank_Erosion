@@ -1,7 +1,8 @@
 """Bank erosion utilities."""
 
 import math
-from typing import Tuple
+from dataclasses import dataclass
+from typing import List, Tuple
 
 import numpy as np
 
@@ -231,363 +232,741 @@ def move_line(
         Nx2 array containing the x- and y-coordinates of the moved line.
     """
     if right_bank:
-        xylines_new = _move_line_right(xylines, erosion_distance)
+        eroded_bank_line = ErodedBankLine(xylines, erosion_distance)
+        xylines_new = eroded_bank_line.move_line_by_erosion()
     else:
         xylines_rev = xylines[::-1, :]
         dn_rev = erosion_distance[::-1]
-        xylines_new_rev = _move_line_right(xylines_rev, dn_rev)
+        eroded_bank_line = ErodedBankLine(xylines_rev, dn_rev)
+        xylines_new_rev = eroded_bank_line.move_line_by_erosion()
         xylines_new = xylines_new_rev[::-1, :]
     return xylines_new
 
 
-def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.ndarray:
+@dataclass
+class ErodedBankLineSegment:
+    """Class to represent a segment of an eroded bank line.
+
+    Args:
+        x_start_points (np.ndarray): x-coordinates of the segment start.
+        y_start_points (np.ndarray): y-coordinates of the segment start.
+        x_end_points (np.ndarray): x-coordinates of the segment end.
+        y_end_points (np.ndarray): y-coordinates of the segment end.
+        segment_start_index (int): Index of the segment start in the eroded bank line.
     """
-    Shift a line of a variable distance sideways (positive shift to the right).
+    x_start_points: np.ndarray
+    y_start_points: np.ndarray
+    x_end_points: np.ndarray
+    y_end_points: np.ndarray
+    segment_start_index: int
 
-    Arguments
-    ---------
-    xylines : np.ndarray
-        Nx2 array containing the x- and y-coordinates of the line to be moved.
-    dn0 : np.ndarray
-        Distance over which to move the line sideways. A positive shift is
-        defined towards the right when looking along the line.
 
-    Returns
-    -------
-    xylines_new : umpy.ndarray
-        Nx2 array containing the x- and y-coordinates of the moved line.
+@dataclass
+class PolylineIntersections:
+    """Class to hold the results of polyline intersections.
+
+    Args:
+        intersection_alphas (List[np.ndarray]): List of alphas for intersections with segments.
+        polygon_alphas (List[np.ndarray]): List of alphas for intersections with polygons.
+        polygon_edge_indices (List[np.ndarray]): List of indices for polygon edges.
+        segment_indices (List[np.ndarray]): List of indices for segments intersected.
     """
-    nsegments = len(erosion_distance)
-    colvec = (nsegments, 1)
 
-    # determine segment angle
-    dxy = xylines[1:, :] - xylines[:-1, :]
-    theta = np.arctan2(dxy[:, 1], dxy[:, 0])
+    intersection_alphas: List[np.ndarray]
+    polygon_alphas: List[np.ndarray]
+    polygon_edge_indices: List[np.ndarray]
+    segment_indices: List[np.ndarray]
 
-    # determine shift vector nxy for each segment
-    ds = np.sqrt((dxy ** 2).sum(axis=1))
-    nxy = dxy[:, ::-1] * [1, -1] * (erosion_distance / ds).reshape(colvec)
 
-    xylines_new = np.zeros((100, 2))
-    xylines_new[0] = xylines[0] + nxy[0]
-    ixy, xylines_new = _add_point(0, xylines_new, xylines[1] + nxy[0])
-    ixy, xylines_new = _add_point(ixy, xylines_new, xylines[1])
+@dataclass
+class IntersectionContext(PolylineIntersections):
+    """Describes part of the polyline with intersections and the polygon it intersects.
 
-    verbose = False
-    prec = 0.000001
-    ixy1: int
-    for iseg in range(1, nsegments):
-        dtheta = theta[iseg] - theta[iseg - 1]
-        if dtheta > math.pi:
-            dtheta = dtheta - 2 * math.pi
-        if verbose:
-            print("{}: current length of new bankline is {}".format(iseg, ixy))
-            print(
-                "{}: segment starting at {} to be shifted by {}".format(
-                    iseg, xylines[iseg], erosion_distance[iseg]
-                )
+    Args:
+        poly (np.ndarray):
+            Polygon coordinates.
+        recent_bankline_points (np.ndarray):
+            Points of the recent bank line.
+        bankline_start_index (int):
+            Start index of the recent bank line.
+        num_edges (int):
+            Number of edges in the polygon.
+    """
+
+    poly: np.ndarray
+    recent_bankline_points: np.ndarray
+    bankline_start_index: int
+    num_edges: int
+
+    def get_delta(self, current_intersection: int) -> Tuple[float, float]:
+        """Get the x, y-delta for the current intersection."""
+        return (
+            self.poly[self.polygon_edge_indices[current_intersection] + 1, 0]
+            - self.poly[self.polygon_edge_indices[current_intersection], 0],
+            self.poly[self.polygon_edge_indices[current_intersection] + 1, 1]
+            - self.poly[self.polygon_edge_indices[current_intersection], 1],
+        )
+
+    def get_intersection_point(self, current_intersection: int) -> np.ndarray:
+        """Get the intersection point for the current index."""
+        return self.poly[
+            self.polygon_edge_indices[current_intersection]
+        ] + self.polygon_alphas[current_intersection] * (
+            self.poly[self.polygon_edge_indices[current_intersection] + 1]
+            - self.poly[self.polygon_edge_indices[current_intersection]]
+        )
+
+
+class ErodedBankLine:
+    """Class to calculate an eroded bank line with its segments and erosion data."""
+
+    def __init__(
+        self,
+        bank_line_points: np.ndarray,
+        erosion_distance: np.ndarray,
+        verbose: bool = False,
+    ):
+        self.bank_line_points = bank_line_points
+        self.erosion_distance = erosion_distance
+        colvec = (len(self.erosion_distance), 1)
+
+        # determine segment angle
+        self.segment_deltas = (
+            self.bank_line_points[1:, :] - self.bank_line_points[:-1, :]
+        )
+        self.theta = np.arctan2(self.segment_deltas[:, 1], self.segment_deltas[:, 0])
+
+        # determine shift vector nxy for each segment
+        ds = np.sqrt((self.segment_deltas**2).sum(axis=1))
+        self.segment_normals = (
+            self.segment_deltas[:, ::-1]
+            * [1, -1]
+            * (self.erosion_distance / ds).reshape(colvec)
+        )
+
+        self.eroded_bank_line = np.zeros((100, 2))
+        self.eroded_bank_line[0] = self.bank_line_points[0] + self.segment_normals[0]
+        self._add_point(1, self.bank_line_points[1] + self.segment_normals[0])
+        point_is_new, self.point_index = self._point_in_bankline(
+            1, self.bank_line_points[1]
+        )
+        if point_is_new:
+            self._add_point(self.point_index, self.bank_line_points[1])
+
+        self.verbose = verbose
+        self.prec = 0.000001
+
+    def _construct_bend_polygon(
+        self,
+        point_index: int,
+        include_wedge: bool = False,
+        include_current: bool = False,
+    ) -> np.ndarray:
+        """
+        Construct a polygon for a bank bend segment.
+
+        Args:
+            index: Current segment index.
+            include_wedge: If True, include the wedge (shifted previous point).
+            include_current: If True, include the current point (not shifted).
+
+        Returns:
+            np.ndarray: Polygon coordinates.
+        """
+        points = [
+            self.bank_line_points[point_index + 1],
+            self.bank_line_points[point_index + 1] + self.segment_normals[point_index],
+            self.bank_line_points[point_index] + self.segment_normals[point_index],
+        ]
+        if include_wedge:
+            points.append(
+                self.bank_line_points[point_index]
+                + self.segment_normals[point_index - 1]
             )
-            print("{}: change in direction quantified as {}".format(iseg, dtheta))
+        if include_current:
+            points.append(self.bank_line_points[point_index])
+        else:
+            points.append(self.bank_line_points[point_index - 1])
+        return np.row_stack(points)
 
-        # create a polyline for the outline of the new segment
-        if erosion_distance[iseg] < prec:
+    def _create_segment_outline_polygon(
+        self, erosion_index: int, dtheta: float
+    ) -> np.ndarray:
+        """Create a polyline for the outline of the new segment based on bend type and erosion distance.
+
+        Args:
+            erosion_index: Current segment index.
+            dtheta: Change in direction at the segment.
+
+        Returns:
+            np.ndarray: Polygon coordinates for the segment outline.
+        """
+        if self.erosion_distance[erosion_index] < self.prec:
             # no erosion, so just a linear extension
-            if verbose:
-                print("{}: no shifting, just linear extension".format(iseg))
-            poly = np.row_stack([xylines[iseg + 1], xylines[iseg],])
+            poly = np.row_stack(
+                [
+                    self.bank_line_points[erosion_index + 1],
+                    self.bank_line_points[erosion_index],
+                ]
+            )
         elif dtheta <= 0:
             # right bend
             if -0.001 * math.pi < dtheta:
-                # almost straight
-                if verbose:
-                    print("{}: slight bend to right".format(iseg))
-                if erosion_distance[iseg] > erosion_distance[iseg]:
-                    poly = np.row_stack(
-                        [
-                            xylines[iseg + 1],
-                            xylines[iseg + 1] + nxy[iseg],
-                            xylines[iseg] + nxy[iseg],
-                            xylines[iseg] + nxy[iseg - 1],
-                            xylines[iseg - 1],
-                            ]
-                    )
-                else:
-                    poly = np.row_stack(
-                        [
-                            xylines[iseg + 1],
-                            xylines[iseg + 1] + nxy[iseg],
-                            xylines[iseg] + nxy[iseg],
-                            xylines[iseg - 1],
-                            ]
-                    )
+                # slight bend to the right (almost straight)
+                # TODO: check if this is still needed and if it is fix the expression.
+                # if (
+                #     self.erosion_distance[erosion_index]
+                #     > self.erosion_distance[erosion_index]
+                # ):
+                #     poly = self._construct_bend_polygon(
+                #         erosion_index, include_wedge=True
+                #     )
+                # else:
+                poly = self._construct_bend_polygon(erosion_index)
             else:
-                # more significant bend
-                if verbose:
-                    print("{}: bend to right".format(iseg))
-                poly = np.row_stack(
-                    [
-                        xylines[iseg + 1],
-                        xylines[iseg + 1] + nxy[iseg],
-                        xylines[iseg] + nxy[iseg],
-                        xylines[iseg],
-                        ]
-                )
-        elif erosion_distance[iseg - 1] < prec:
+                # more significant bend to the right
+                poly = self._construct_bend_polygon(erosion_index, include_current=True)
+        elif self.erosion_distance[erosion_index - 1] < self.prec:
             # left bend: previous segment isn't eroded, so nothing to connect to
-            if verbose:
-                print("{}: bend to left".format(iseg))
-            poly = np.row_stack(
-                [
-                    xylines[iseg + 1],
-                    xylines[iseg + 1] + nxy[iseg],
-                    xylines[iseg] + nxy[iseg],
-                    xylines[iseg],
-                    ]
-            )
+            poly = self._construct_bend_polygon(erosion_index, include_current=True)
         else:
             # left bend: connect it to the previous segment to avoid non eroded wedges
-            if verbose:
-                print("{}: bend to left".format(iseg))
-            poly = np.row_stack(
-                [
-                    xylines[iseg + 1],
-                    xylines[iseg + 1] + nxy[iseg],
-                    xylines[iseg] + nxy[iseg],
-                    xylines[iseg] + nxy[iseg - 1],
-                    xylines[iseg - 1],
-                    ]
-            )
+            poly = self._construct_bend_polygon(erosion_index, include_wedge=True)
+        return poly
 
-        nedges = poly.shape[0] - 1
+    def _get_recent_shifted_bankline_segments(self) -> ErodedBankLineSegment:
+        """Get the recent segments of the shifted bankline for intersection checks.
 
-        # make a temporary copy of the last 20 nodes of the already shifted bankline
-        if ixy > 20:
-            X0 = xylines_new[(ixy - 20) : ixy, 0].copy()
-            Y0 = xylines_new[(ixy - 20) : ixy, 1].copy()
-            X1 = xylines_new[(ixy - 19) : (ixy + 1), 0].copy()
-            Y1 = xylines_new[(ixy - 19) : (ixy + 1), 1].copy()
-            ixy0 = ixy - 20
+        Returns:
+            ErodedBankLineSegment:
+                A dataclass containing the coordinates of the segments
+                and the index of the first segment.
+        """
+        if self.point_index > 20:
+            x_start_points = self.eroded_bank_line[
+                (self.point_index - 20) : self.point_index, 0
+            ].copy()
+            y_start_points = self.eroded_bank_line[
+                (self.point_index - 20) : self.point_index, 1
+            ].copy()
+            x_end_points = self.eroded_bank_line[
+                (self.point_index - 19) : (self.point_index + 1), 0
+            ].copy()
+            y_end_points = self.eroded_bank_line[
+                (self.point_index - 19) : (self.point_index + 1), 1
+            ].copy()
+            segment_start_index = self.point_index - 20
         else:
-            X0 = xylines_new[:ixy, 0].copy()
-            Y0 = xylines_new[:ixy, 1].copy()
-            X1 = xylines_new[1 : ixy + 1, 0].copy()
-            Y1 = xylines_new[1 : ixy + 1, 1].copy()
-            ixy0 = 0
+            x_start_points = self.eroded_bank_line[: self.point_index, 0].copy()
+            y_start_points = self.eroded_bank_line[: self.point_index, 1].copy()
+            x_end_points = self.eroded_bank_line[1 : self.point_index + 1, 0].copy()
+            y_end_points = self.eroded_bank_line[1 : self.point_index + 1, 1].copy()
+            segment_start_index = 0
+        return ErodedBankLineSegment(
+            x_start_points=x_start_points,
+            y_start_points=y_start_points,
+            x_end_points=x_end_points,
+            y_end_points=y_end_points,
+            segment_start_index=segment_start_index,
+        )
 
-        a = []
-        b = []
-        slices = []
-        n = []
-        # for each edge of the new polyline collect all intersections with the
-        # already shifted bankline ...
-        for i in range(nedges):
+    def _collect_polyline_intersections(
+        self,
+        eroded_segment: ErodedBankLineSegment,
+        poly: np.ndarray,
+        num_edges: int,
+    ) -> PolylineIntersections:
+        """For each edge of the new polyline, collect all intersections with the already shifted bankline.
+
+        Args:
+            eroded_segment: ErodedBankLineSegment containing x0, y0, x1, y1, ixy0.
+            poly: Nx2 array of polygon coordinates.
+            num_edges: Number of edges in the polygon (poly.shape[0] - 1).
+
+        Returns:
+            PolylineIntersections: A dataclass containing lists of intersection data.
+        """
+        intersection_alphas = []
+        polygon_alphas = []
+        segment_indices = []
+        polygon_edge_indices = []
+        for i in range(num_edges):
             if (poly[i + 1] == poly[i]).all():
                 # polyline segment has no actual length, so skip it
-                pass
-            else:
-                # check for intersection
-                a2, b2, slices2 = calculate_segment_edge_intersections(
-                    X0,
-                    Y0,
-                    X1,
-                    Y1,
-                    poly[i, 0],
-                    poly[i, 1],
-                    poly[i + 1, 0],
-                    poly[i + 1, 1],
-                    0,
-                    True,
-                )
-                # exclude the intersection if it's only at the very last point
-                # of the last segment
-                if i == nedges - 1:
-                    keep_mask = a2 < 1 - prec
-                    a2 = a2[keep_mask]
-                    b2 = b2[keep_mask]
-                    slices2 = slices2[keep_mask]
-                a.append(a2)
-                b.append(b2)
-                slices.append(slices2)
-                n.append(slices2 * 0 + i)
+                continue
+            # check for intersection
+            a2, b2, slices2 = calculate_segment_edge_intersections(
+                eroded_segment.x_start_points,
+                eroded_segment.y_start_points,
+                eroded_segment.x_end_points,
+                eroded_segment.y_end_points,
+                poly[i, 0],
+                poly[i, 1],
+                poly[i + 1, 0],
+                poly[i + 1, 1],
+                0,
+                True,
+            )
+            # exclude the intersection if it's only at the very last point of the last segment
+            if i == num_edges - 1:
+                keep_mask = a2 < 1 - self.prec
+                a2 = a2[keep_mask]
+                b2 = b2[keep_mask]
+                slices2 = slices2[keep_mask]
+            intersection_alphas.append(a2)
+            polygon_alphas.append(b2)
+            segment_indices.append(slices2)
+            polygon_edge_indices.append(slices2 * 0 + i)
+        return PolylineIntersections(
+            intersection_alphas=intersection_alphas,
+            polygon_alphas=polygon_alphas,
+            segment_indices=segment_indices,
+            polygon_edge_indices=polygon_edge_indices,
+        )
 
-        s = np.concatenate(slices)
-        if verbose:
-            print("{}: {} intersections detected".format(iseg, len(s)))
-        if len(s) == 0:
-            # no intersections found
-            if dtheta < 0:
-                # right bend (not straight)
-                if erosion_distance[iseg] > 0:
-                    cross = (xylines_new[ixy, 0] - xylines_new[ixy - 1, 0]) * nxy[
-                        iseg, 1
-                    ] - (xylines_new[ixy, 1] - xylines_new[ixy - 1, 1]) * nxy[iseg, 0]
-                else:
-                    cross = (xylines_new[ixy, 0] - xylines_new[ixy - 1, 0]) * dxy[
-                        iseg, 1
-                    ] - (xylines_new[ixy, 1] - xylines_new[ixy - 1, 1]) * dxy[iseg, 0]
-                if cross <= 0.0:
-                    # extended path turns right ... always add
-                    pass
-                else:
-                    # extended path turns left
-                    # we can probably ignore it, let's do so...
-                    # the only exception would be an eroded patch encompassing
-                    # all of the eroded bank line
-                    if verbose:
-                        print("{}: ignoring segment".format(iseg))
-                    continue
-            else:
-                # left bend or straight: always add ... just the rectangle of eroded material
-                pass
-            ixy1 = ixy
-            for n2 in range(min(nedges, 2), -1, -1):
-                if verbose:
-                    print("  adding point {}".format(poly[n2]))
-                ixy1, xylines_new = _add_point(ixy1, xylines_new, poly[n2])
-            ixy = ixy1
+    def _calculate_cross_product(
+        self, erosion_index: int, shifted: bool = False
+    ) -> float:
+        """Calculate the cross product for the current erosion segment.
 
+        Args:
+            erosion_index (int): Index of the current erosion segment.
+            shifted (bool): If True, use the shifted coordinates for the calculation.
+
+        Returns:
+            float: The cross product value.
+        """
+        multiply_array = self.segment_normals if shifted else self.segment_deltas
+        return (
+            self.eroded_bank_line[self.point_index, 0]
+            - self.eroded_bank_line[self.point_index - 1, 0]
+        ) * multiply_array[erosion_index, 1] - (
+            self.eroded_bank_line[self.point_index, 1]
+            - self.eroded_bank_line[self.point_index - 1, 1]
+        ) * multiply_array[
+            erosion_index, 0
+        ]
+
+    def _should_add_right_bend_segment(self, erosion_index: int) -> bool:
+        """
+        Determine if the right bend segment should be added based on the cross product.
+
+        Args:
+            erosion_index (int): Index of the current erosion segment.
+
+        Returns:
+            bool: True if the segment should be added, False if it should be ignored.
+        """
+        add = True
+        if self.erosion_distance[erosion_index] > 0:
+            cross = self._calculate_cross_product(erosion_index, shifted=True)
         else:
-            # one or more intersections found
-            a = np.concatenate(a)
-            b = np.concatenate(b)
-            n = np.concatenate(n)
+            cross = self._calculate_cross_product(erosion_index)
+        if cross > 0.0:
+            if self.verbose:
+                print(f"{erosion_index}: ignoring segment")
+            add = False
+        return add
 
-            # sort the intersections by distance along the already shifted bank line
-            d = s + a
-            sorted = np.argsort(d)
-            s = s[sorted] + ixy0
-            a = a[sorted]
-            b = b[sorted]
-            d = d[sorted]
-            n = n[sorted]
+    def _add_right_bend_segment_points(self, poly: np.ndarray, num_edges: int) -> None:
+        """
+        Add the first three points of the polygon to the shifted bankline for a right bend segment.
 
-            ixy1 = s[0]
-            if verbose:
-                print("{}: continuing new path at point {}".format(iseg, ixy1))
-            xytmp = xylines_new[ixy1 : ixy + 1].copy()
-            ixytmp = ixy1
+        Args:
+            poly (np.ndarray): Polygon coordinates for the current segment.
+            num_edges (int): Number of edges in the polygon.
+        """
+        current_point = self.point_index
+        for n2 in range(min(num_edges, 2), -1, -1):
+            if self.verbose:
+                print(f"  adding point {poly[n2]}")
+            point_is_new, current_point = self._point_in_bankline(
+                current_point, poly[n2]
+            )
+            if point_is_new:
+                self._add_point(current_point, poly[n2])
+        self.point_index = current_point
 
-            inside = False
-            s_last = s[0]
-            n_last = nedges
-            for i in range(len(s)):
-                if verbose:
-                    print(
-                        "- intersection {}: new polyline edge {} crosses segment {} at {}".format(
-                            i, n[i], s[i], a[i]
-                        )
-                    )
-                if i == 0 or n[i] != nedges - 1:
-                    if inside:
-                        if verbose:
-                            print("  existing line is inside the new polygon")
-                        for n2 in range(n_last, n[i], -1):
-                            if verbose:
-                                print("  adding new point {}".format(poly[n2]))
-                            ixy1, xylines_new = _add_point(ixy1, xylines_new, poly[n2])
-                    else:
-                        if verbose:
-                            print("  existing line is outside the new polygon")
-                        for s2 in range(s_last, s[i]):
-                            if verbose:
-                                print(
-                                    "  re-adding old point {}".format(
-                                        xytmp[s2 - ixytmp + 1]
-                                    )
-                                )
-                            ixy1, xylines_new = _add_point(
-                                ixy1, xylines_new, xytmp[s2 - ixytmp + 1]
-                            )
-                    pnt_intersect = poly[n[i]] + b[i] * (poly[n[i] + 1] - poly[n[i]])
-                    if verbose:
-                        print("  adding intersection point {}".format(pnt_intersect))
-                    ixy1, xylines_new = _add_point(ixy1, xylines_new, pnt_intersect, )
-                    n_last = n[i]
-                    s_last = s[i]
-                    if a[i] < prec:
-                        dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
-                        dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
-                        s2 = s[i] - ixy0
-                        dBy = Y1[s2] - Y0[s2]
-                        dBx = X1[s2] - X0[s2]
-                        inside = dPy * dBx - dPx * dBy > 0
-                    elif a[i] > 1 - prec:
-                        dPy = poly[n[i] + 1, 1] - poly[n[i], 1]
-                        dPx = poly[n[i] + 1, 0] - poly[n[i], 0]
-                        s2 = s[i] - ixy0 + 1
-                        if s2 > len(X0) - 1:
-                            inside = True
-                        else:
-                            dBy = Y1[s2] - Y0[s2]
-                            dBx = X1[s2] - X0[s2]
-                            inside = dPy * dBx - dPx * dBy > 0
-                    else:
-                        # line segment slices the edge somewhere in the middle
-                        inside = not inside
-                    if verbose:
-                        if inside:
-                            print("  existing line continues inside")
-                        else:
-                            print("  existing line continues outside")
+    def _update_points_between_segments(
+        self,
+        current_point: int,
+        start: int,
+        end: int,
+        intersection_context: IntersectionContext,
+        inside: bool = True,
+    ) -> int:
+        """
+        Add or re-add points between segments, using either poly or recent_bankline_points from intersection_context.
 
-            if verbose:
-                print("- wrapping up after last intersection")
+        Args:
+            current_point (int): Current index in the shifted bankline.
+            start (int): Start index for the points to add.
+            end (int): End index for the points to add.
+            intersection_context (IntersectionContext): Context containing poly and recent_bankline_points.
+            inside (bool): If True, use poly; if False, use recent_bankline_points.
+
+        Returns:
+            int: Updated index in the shifted bankline.
+        """
+        modifier = -1 if inside else 1
+        if self.verbose:
+            print(
+                f"  existing line is {'inside' if inside else 'outside'} the new polygon"
+            )
+        for idx in range(start, end, modifier):
             if inside:
-                if verbose:
-                    print("  existing line is inside the new polygon")
-                for n2 in range(n_last, -1, -1):
-                    if verbose:
-                        print("  adding new point {}".format(poly[n2]))
-                    ixy1, xylines_new = _add_point(ixy1, xylines_new, poly[n2])
+                point = intersection_context.poly[idx]
             else:
-                if verbose:
-                    print("  existing line is inside the new polygon")
-                for s2 in range(s_last, len(xytmp) + ixytmp - 1):
-                    if verbose:
-                        print("  re-adding old point {}".format(xytmp[s2 - ixytmp + 1]))
-                    ixy1, xylines_new = _add_point(
-                        ixy1, xylines_new, xytmp[s2 - ixytmp + 1]
-                    )
-            ixy = ixy1
-        # if iseg == isegstop:
-        #     break
-    xylines_new = xylines_new[:ixy, :]
+                point = intersection_context.recent_bankline_points[
+                    idx - intersection_context.bankline_start_index + 1
+                ]
+            if self.verbose:
+                print(f"  adding point {point}")
+            point_is_new, current_point = self._point_in_bankline(current_point, point)
+            if point_is_new:
+                self._add_point(current_point, point)
+        return current_point
 
-    return xylines_new
+    def _add_intersection_point_to_bankline(
+        self,
+        current_point: int,
+        intersection_context: IntersectionContext,
+        intersection_index: int,
+    ) -> int:
+        """
+        Add the intersection point for the given index to the shifted bankline.
 
+        Args:
+            current_point (int): Current index in the shifted bankline.
+            intersection_context (IntersectionContext): Context containing intersection data.
+            intersection_index (int): Index of the current intersection.
 
-def _add_point(
-    ixy1: int, xy_in: np.ndarray, point: np.ndarray
-) -> Tuple[int, np.ndarray]:
-    """
-    Add the x,y-coordinates of a point to an array of x,y-coordinates if it differs from the last point.
+        Returns:
+            int: Updated index in the shifted bankline.
+        """
+        intersected_point = intersection_context.get_intersection_point(
+            intersection_index
+        )
+        if self.verbose:
+            print(f"  adding intersection point {intersected_point}")
+        point_is_new, current_point = self._point_in_bankline(
+            current_point, intersected_point
+        )
+        if point_is_new:
+            self._add_point(current_point, intersected_point)
+        return current_point
 
-    Arguments
-    ---------
-    ixy1 : int
-        Index of last point in xy_in array
-    xy_in : np.ndarray
-        N x 2 array containing the x- and y-coordinates of points (partially filled)
-    point : np.ndarray
-        1 x 2 array containing the x- and y-coordinates of one point
+    def _update_inside_flag_for_intersection(
+        self,
+        intersection_context: IntersectionContext,
+        intersection_index: int,
+        current_segment: int,
+        eroded_segment: ErodedBankLineSegment,
+        inside: bool,
+    ) -> bool:
+        """
+        Update the 'inside' flag after processing an intersection point.
 
-    Results
-    -------
-    ixy1 : int
-        Index of the new point in the xy_out array
-    xy_out : np.ndarray
-        Possibly extended copy of xy_in that includes the coordinates of point at ixy1
-    """
-    if (xy_in[ixy1] - point != 0).any():
-        ixy1 = ixy1 + 1
-        if ixy1 >= len(xy_in):
-            xy_out = enlarge(xy_in, (2 * ixy1, 2))
+        Args:
+            intersection_context (IntersectionContext): Context containing intersection data.
+            i (int): Index of the current intersection.
+            current_segment (int): Current segment index.
+            eroded_segment (ErodedBankLineSegment): Segment data for the eroded bankline.
+
+        Returns:
+            bool: Updated inside flag.
+        """
+        is_start = (
+            intersection_context.intersection_alphas[intersection_index] < self.prec
+        )
+        is_end = (
+            intersection_context.intersection_alphas[intersection_index] > 1 - self.prec
+        )
+        offset = 1 if is_end else 0
+        if is_start or is_end:
+            # intersection is at the start or end of the segment
+            delta_intersection_x, delta_intersection_y = intersection_context.get_delta(
+                intersection_index
+            )
+            boundary_segment = (
+                current_segment - eroded_segment.segment_start_index + offset
+            )
+            if is_end and boundary_segment > len(eroded_segment.x_start_points) - 1:
+                # if the end is beyond the last segment, consider it inside
+                inside = True
+            else:
+                delta_bankline_y = (
+                    eroded_segment.y_end_points[boundary_segment]
+                    - eroded_segment.y_start_points[boundary_segment]
+                )
+                delta_bankline_x = (
+                    eroded_segment.x_end_points[boundary_segment]
+                    - eroded_segment.x_start_points[boundary_segment]
+                )
+                inside = (
+                    delta_intersection_y * delta_bankline_x
+                    - delta_intersection_x * delta_bankline_y
+                    > 0
+                )
         else:
-            xy_out = xy_in
-        xy_out[ixy1] = point
-    else:
-        xy_out = xy_in
-    return ixy1, xy_out
+            # line segment slices the edge somewhere in the middle
+            inside = not inside
+        return inside
+
+    def _process_single_intersection(
+        self,
+        intersection_index: int,
+        current_segment: int,
+        eroded_segment: ErodedBankLineSegment,
+        intersection_context: IntersectionContext,
+        inside: bool,
+        last_segment: int,
+        last_edge_index: int,
+        current_point: int,
+    ) -> Tuple[bool, int, int, int]:
+        """
+        Process a single intersection and update the shifted bankline accordingly.
+
+        Returns:
+            inside (bool): Updated inside flag.
+            s_last (int): Updated last segment index.
+            n_last (int): Updated last edge index.
+            current_point (int): Updated index in shifted bankline.
+        """
+        if self.verbose:
+            print(
+                f"- intersection {intersection_index}: new polyline edge {intersection_context.polygon_edge_indices[intersection_index]} crosses segment {current_segment} at {intersection_context.intersection_alphas[intersection_index]}"
+            )
+        if (
+            intersection_index == 0
+            or intersection_context.polygon_edge_indices[intersection_index]
+            != intersection_context.num_edges - 1
+        ):
+            if inside:
+                start = last_edge_index
+                end = intersection_context.polygon_edge_indices[intersection_index]
+            else:
+                start = last_segment
+                end = current_segment
+            current_point = self._update_points_between_segments(
+                current_point,
+                start,
+                end,
+                intersection_context,
+                inside=inside,
+            )
+            current_point = self._add_intersection_point_to_bankline(
+                current_point, intersection_context, intersection_index
+            )
+            last_edge_index = intersection_context.polygon_edge_indices[
+                intersection_index
+            ]
+            last_segment = current_segment
+            inside = self._update_inside_flag_for_intersection(
+                intersection_context,
+                intersection_index,
+                current_segment,
+                eroded_segment,
+                inside,
+            )
+            if self.verbose:
+                if inside:
+                    print("  existing line continues inside")
+                else:
+                    print("  existing line continues outside")
+        return inside, last_segment, last_edge_index, current_point
+
+    def _finalize_bankline_after_intersections(
+        self,
+        inside: bool,
+        last_edge_index: int,
+        current_point: int,
+        last_segment: int,
+        intersection_context: IntersectionContext,
+    ) -> int:
+        """
+        Finalize the shifted bankline after processing all intersections.
+
+        Args:
+            inside (bool): Whether the current path is inside the new polygon.
+            n_last (int): Last polygon edge index processed.
+            poly (np.ndarray): Polygon coordinates for the current segment.
+            current_point (int): Current index in the shifted bankline.
+            recent_bankline_points (np.ndarray): Temporary array of old bankline points.
+            bankline_start_index (int): Starting index for recent_bankline_points.
+            s_last (int): Last segment index processed.
+
+        Returns:
+            int: Updated index in the shifted bankline.
+        """
+        if inside:
+            start = last_edge_index
+            end = -1
+        else:
+            start = last_segment
+            end = (
+                len(intersection_context.recent_bankline_points)
+                + intersection_context.bankline_start_index
+                - 1
+            )
+        current_point = self._update_points_between_segments(
+            current_point, start, end, intersection_context, inside=inside
+        )
+        return current_point
+
+    def _process_intersections_and_update_bankline(
+        self,
+        intersections: PolylineIntersections,
+        poly: np.ndarray,
+        num_edges: int,
+        eroded_segment: ErodedBankLineSegment,
+    ) -> None:
+        """
+        Process sorted intersections and update the shifted bankline accordingly.
+
+        Args:
+            intersections: PolylineIntersections object with intersection data.
+            poly: Polygon coordinates for the current segment.
+            num_edges: Number of edges in the polygon.
+            eroded_segment: ErodedBankLineSegment with recent shifted bankline segments.
+
+        Modifies:
+            self.eroded_bank_line and self.point_index in place.
+        """
+        segment_indices = np.concatenate(intersections.segment_indices)
+        intersection_alphas = np.concatenate(intersections.intersection_alphas)
+        polygon_alphas = np.concatenate(intersections.polygon_alphas)
+        polygon_edge_indices = np.concatenate(intersections.polygon_edge_indices)
+
+        # sort the intersections by distance along the already shifted bank line
+        segment_intersection_distance = segment_indices + intersection_alphas
+        sorted_idx = np.argsort(segment_intersection_distance)
+        sorted_segment_indices = (
+            segment_indices[sorted_idx] + eroded_segment.segment_start_index
+        )
+        sorted_intersection_alphas = intersection_alphas[sorted_idx]
+        sorted_polygon_alphas = polygon_alphas[sorted_idx]
+        sorted_polygon_edge_indices = polygon_edge_indices[sorted_idx]
+
+        segment_index = sorted_segment_indices[0]
+        if self.verbose:
+            print(f"continuing new path at point {segment_index}")
+        recent_bankline_points = self.eroded_bank_line[
+            segment_index : self.point_index + 1
+        ].copy()
+        bankline_start_index = segment_index
+
+        inside = False
+        last_segment = sorted_segment_indices[0]
+        last_edge_index = num_edges
+        intersection_context = IntersectionContext(
+            intersection_alphas=sorted_intersection_alphas,
+            polygon_alphas=sorted_polygon_alphas,
+            segment_indices=sorted_segment_indices,
+            polygon_edge_indices=sorted_polygon_edge_indices,
+            poly=poly,
+            recent_bankline_points=recent_bankline_points,
+            bankline_start_index=bankline_start_index,
+            num_edges=num_edges,
+        )
+        for i, current_segment in enumerate(sorted_segment_indices):
+            inside, last_segment, last_edge_index, segment_index = (
+                self._process_single_intersection(
+                    i,
+                    current_segment,
+                    eroded_segment,
+                    intersection_context,
+                    inside,
+                    last_segment,
+                    last_edge_index,
+                    segment_index,
+                )
+            )
+
+        self.point_index = self._finalize_bankline_after_intersections(
+            inside, last_edge_index, segment_index, last_segment, intersection_context
+        )
+
+    def move_line_by_erosion(self) -> np.ndarray:
+        """Shift a line using the erosion distance.
+
+        Returns
+            np.ndarray: Nx2 array containing the x- and y-coordinates of the moved line.
+        """
+        for erosion_index, eroded_distance in enumerate(self.erosion_distance):
+            dtheta = self.theta[erosion_index] - self.theta[erosion_index - 1]
+            if dtheta > math.pi:
+                dtheta = dtheta - 2 * math.pi
+            if self.verbose:
+                print(
+                    f"{erosion_index}: current length of new bankline is {self.point_index}"
+                )
+                print(
+                    f"{erosion_index}: segment starting at {self.bank_line_points[erosion_index]} to be shifted by {eroded_distance}"
+                )
+                print(f"{erosion_index}: change in direction quantified as {dtheta}")
+            poly = self._create_segment_outline_polygon(erosion_index, dtheta)
+            num_edges = poly.shape[0] - 1
+
+            eroded_segment = self._get_recent_shifted_bankline_segments()
+
+            intersections = self._collect_polyline_intersections(
+                eroded_segment, poly, num_edges
+            )
+
+            bank_line_segments = np.concatenate(intersections.segment_indices)
+            if self.verbose:
+                print(
+                    f"{erosion_index}: {len(bank_line_segments)} intersections detected"
+                )
+            if len(bank_line_segments) == 0:
+                if dtheta < 0 and not self._should_add_right_bend_segment(
+                    erosion_index
+                ):
+                    continue
+                self._add_right_bend_segment_points(poly, num_edges)
+            else:
+                self._process_intersections_and_update_bankline(
+                    intersections, poly, num_edges, eroded_segment
+                )
+            # if iseg == isegstop:
+            #     break
+        self.eroded_bank_line = self.eroded_bank_line[: self.point_index, :]
+
+        return self.eroded_bank_line
+
+    def _point_in_bankline(
+        self, current_point: int, point: np.ndarray
+    ) -> Tuple[bool, int]:
+        """Check if a point is within the bankline.
+
+        Args:
+            current_point (int): Index of the last point in the eroded bank line.
+            point (np.ndarray): The point to check.
+
+        Returns:
+            bool: True if the point is within the bankline, False otherwise.
+        """
+        # Check if the point is within the x and y bounds of the bankline
+        point_is_new = (self.eroded_bank_line[current_point] - point != 0).any()
+        if point_is_new:
+            current_point = current_point + 1
+        return point_is_new, current_point
+
+    def _add_point(self, current_point: int, point: np.ndarray):
+        """Add the x,y-coordinates of a point to the eroded_bank_line array.
+
+        Args:
+            current_point (int):
+                Index of last point in eroded_bank_line array
+            point (np.ndarray):
+                1 x 2 array containing the x- and y-coordinates of one point
+        """
+        if current_point >= len(self.eroded_bank_line):
+            self.eroded_bank_line = enlarge(
+                self.eroded_bank_line, (2 * current_point, 2)
+            )
+        self.eroded_bank_line[current_point] = point
 
 
 def calculate_segment_edge_intersections(
