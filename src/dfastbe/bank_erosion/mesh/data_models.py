@@ -256,7 +256,7 @@ class MeshData:
         else:
             edges = self.face_edge_connectivity[index, : self.n_nodes[index]]
         edge_relative_dist, segment_relative_dist, edges = (
-            self._calculate_edge_intersections(edges, segment, True)
+            self.calculate_edge_intersections(edges, segment, True)
         )
         is_intersected_at_node = -np.ones(edge_relative_dist.shape, dtype=np.int64)
         is_intersected_at_node[edge_relative_dist == 0] = self.edge_node[
@@ -268,7 +268,7 @@ class MeshData:
 
         return segment_relative_dist, edges, is_intersected_at_node
 
-    def _calculate_edge_intersections(
+    def calculate_edge_intersections(
         self,
         edges: np.ndarray,
         segment: RiverSegment,
@@ -330,28 +330,7 @@ class MeshData:
         edges = edges[valid_intersections]
         return edge_relative_dist, segment_relative_dist, edges
 
-    def resolve_ambiguous_edge_transition(self, segment: RiverSegment, vindex):
-        """Resolve ambiguous edge transitions when a line segment is on the edge of multiple mesh faces."""
-        b = np.zeros(0)
-        edges = np.zeros(0, dtype=np.int64)
-        nodes = np.zeros(0, dtype=np.int64)
-        index_src = np.zeros(0, dtype=np.int64)
-
-        for i in vindex:
-            b1, edges1, nodes1 = self.find_segment_intersections(i, segment)
-            b = np.concatenate((b, b1), axis=0)
-            edges = np.concatenate((edges, edges1), axis=0)
-            nodes = np.concatenate((nodes, nodes1), axis=0)
-            index_src = np.concatenate((index_src, i + 0 * edges1), axis=0)
-
-        segment.edges, id_edges = np.unique(edges, return_index=True)
-        segment.distances = b[id_edges]
-        segment.nodes = nodes[id_edges]
-        index_src = index_src[id_edges]
-
-        return index_src
-
-    def _calculate_edge_angle(self, edge: int, reverse: bool = False) -> float:
+    def calculate_edge_angle(self, edge: int, reverse: bool = False) -> float:
         """Calculate the angle of a mesh edge in radians.
 
         Args:
@@ -369,7 +348,7 @@ class MeshData:
 
         return math.atan2(dy, dx)
 
-    def _find_edges(self, theta, node, verbose_index: int = None) -> Edges:
+    def find_edges(self, theta, node, verbose_index: int = None) -> Edges:
         """
         Helper to find the left and right edges at a node based on the direction theta.
 
@@ -396,7 +375,7 @@ class MeshData:
 
         for ie in all_node_edges:
             reverse = self.edge_node[ie, 0] != node
-            theta_edge = self._calculate_edge_angle(ie, reverse=reverse)
+            theta_edge = self.calculate_edge_angle(ie, reverse=reverse)
 
             if self.verbose and verbose_index is not None:
                 print(f"{verbose_index}: edge {ie} connects {self.edge_node[ie, :]}")
@@ -414,7 +393,7 @@ class MeshData:
 
         return edges
 
-    def _resolve_next_face_from_edges(
+    def resolve_next_face_from_edges(
         self, node, edges: Edges, verbose_index: int = None
     ) -> int:
         """
@@ -462,70 +441,4 @@ class MeshData:
                 f"Shouldn't come here .... left edge {edges.left}"
                 f" and right edge {edges.right} don't share any face"
             )
-        return next_face_index
-
-    def resolve_next_face_by_direction(
-        self, theta: float, node, verbose_index: int = None
-    ):
-        """Helper to resolve the next face index based on the direction theta at a node."""
-
-        if self.verbose:
-            print(f"{verbose_index}: moving in direction theta = {theta}")
-
-        edges = self._find_edges(theta, node, verbose_index)
-
-        if self.verbose:
-            print(f"{verbose_index}: the edge to the left is edge {edges.left}")
-            print(f"{verbose_index}: the edge to the right is edge {edges.right}")
-
-        if edges.left == edges.right:
-            if self.verbose:
-                print(f"{verbose_index}: continue along edge {edges.left}")
-
-            next_face_index = self.edge_face_connectivity[edges.left, :]
-        else:
-            if self.verbose:
-                print(
-                    f"{verbose_index}: continue between edges {edges.left}"
-                    f" on the left and {edges.right} on the right"
-                )
-            next_face_index = self._resolve_next_face_from_edges(
-                node, edges, verbose_index
-            )
-        return next_face_index
-
-    def determine_next_face_on_edge(
-        self, segment: RiverSegment, next_point: List[float], edge, faces,
-    ):
-        """Determine the next face to continue along an edge based on the segment direction."""
-        theta = math.atan2(
-            next_point[1] - segment.current_point[1],
-            next_point[0] - segment.current_point[0],
-        )
-        if self.verbose:
-            print(f"{segment.index}: moving in direction theta = {theta}")
-
-        theta_edge = self._calculate_edge_angle(edge)
-        if theta == theta_edge or theta == -theta_edge:
-            if self.verbose:
-                print(f"{segment.index}: continue along edge {edge}")
-            next_face_index = faces
-        else:
-            # check whether the (extended) segment slices any edge of faces[0]
-            fe1 = self.face_edge_connectivity[faces[0]]
-            reversed_segment = RiverSegment(
-                index=segment.index,
-                previous_point=segment.current_point,
-                current_point=next_point,
-                min_relative_distance=0,
-            )
-            _, _, edges = self._calculate_edge_intersections(
-                fe1,
-                reversed_segment,
-                False,
-            )
-            # yes, a slice (typically 1, but could be 2 if it slices at a node
-            # but that doesn't matter) ... so, we continue towards faces[0]
-            # if there are no slices for faces[0], we continue towards faces[1]
-            next_face_index = faces[0] if len(edges) > 0 else faces[1]
         return next_face_index

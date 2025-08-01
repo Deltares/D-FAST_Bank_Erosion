@@ -26,7 +26,7 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
-from typing import Any, Dict, List, Tuple
+from typing import Any, List, Tuple, Dict
 
 import numpy as np
 from geopandas.geodataframe import GeoDataFrame
@@ -49,6 +49,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
 from dfastbe.bank_erosion.data_models.inputs import (
     ErosionRiverData,
     ErosionSimulationData,
+    Parameters,
     ShipsParameters,
 )
 from dfastbe.bank_erosion.debugger import Debugger
@@ -197,22 +198,9 @@ class Erosion(BaseCalculator):
         fairway_data: FairwayData,
     ) -> ErosionInputs:
         # wave reduction s0, s1
-        wave_fairway_distance_0 = self.config_file.get_parameter(
-            "Erosion",
-            "Wave0",
-            num_stations_per_bank,
-            default=200,
-            positive=True,
-            onefile=True,
-        )
-        wave_fairway_distance_1 = self.config_file.get_parameter(
-            "Erosion",
-            "Wave1",
-            num_stations_per_bank,
-            default=150,
-            positive=True,
-            onefile=True,
-        )
+        parameters = self._get_parameters(num_stations_per_bank)
+        wave_fairway_distance_0 = parameters["Wave0"]
+        wave_fairway_distance_1 = parameters["Wave1"]
 
         # save 1_banklines
         # read vship, nship, nwave, draught (tship), shiptype ... independent of level number
@@ -223,24 +211,12 @@ class Erosion(BaseCalculator):
         # read classes flag (yes: banktype = taucp, no: banktype = tauc) and banktype (taucp: 0-4 ... or ... tauc = critical shear value)
         classes = self.config_file.get_bool("Erosion", "Classes")
         if classes:
-            bank_type = self.config_file.get_parameter(
-                "Erosion",
-                "BankType",
-                num_stations_per_bank,
-                default=0,
-                ext=".btp",
-            )
+            bank_type = parameters["BankType"]
             tauc = []
             for bank in bank_type:
                 tauc.append(ErosionInputs.taucls[bank])
         else:
-            tauc = self.config_file.get_parameter(
-                "Erosion",
-                "BankType",
-                num_stations_per_bank,
-                default=0,
-                ext=".btp",
-            )
+            tauc = parameters["BankType"]
             thr = (ErosionInputs.taucls[:-1] + ErosionInputs.taucls[1:]) / 2
             bank_type = [None] * len(thr)
             for ib, shear_stress in enumerate(tauc):
@@ -249,15 +225,8 @@ class Erosion(BaseCalculator):
                     bt[shear_stress < thr_i] += 1
                 bank_type[ib] = bt
 
-        # read bank protection level dike_height
         dike_height_default = -1000
-        dike_height = self.config_file.get_parameter(
-            "Erosion",
-            "ProtectionLevel",
-            num_stations_per_bank,
-            default=dike_height_default,
-            ext=".bpl",
-        )
+        dike_height = parameters["ProtectionLevel"]
         # if dike_height undefined, set dike_height equal to water_level_fairway_ref - 1
         for ib, one_zss in enumerate(dike_height):
             mask = one_zss == dike_height_default
@@ -267,16 +236,43 @@ class Erosion(BaseCalculator):
             'wave_fairway_distance_0': wave_fairway_distance_0,
             'wave_fairway_distance_1': wave_fairway_distance_1,
             'bank_protection_level': dike_height,
-            'tauc': tauc
+            'tauc': tauc,
         }
         return ErosionInputs.from_column_arrays(
             data, SingleErosion, shipping_data=ships_parameters, bank_type=bank_type
         )
 
-    def _calculate_bank_height(self, bank_data: BankData, simulation_data: ErosionSimulationData) -> BankData:
+    def _get_erosion_input_parameters(self) -> List[Parameters]:
+        return [
+            Parameters(name="Wave0", default=200, valid=True, onefile=True, positive=None, ext=None),
+            Parameters(name="Wave1", default=150, valid=True, onefile=True, positive=None, ext=None),
+            Parameters(name="BankType", default=0, valid=None, onefile=None, positive=None, ext=".btp"),
+            Parameters(name="ProtectionLevel", default=-1000, valid=None, onefile=None, positive=None, ext=".bpl"),
+        ]
+
+    def _get_parameters(self, num_stations_per_bank) -> Dict[str, Any]:
+        """Get a parameter from the configuration file."""
+        data = {}
+        for parameter in self._get_erosion_input_parameters():
+            data[parameter.name] = self.config_file.get_parameter(
+                "Erosion",
+                parameter.name,
+                num_stations_per_bank,
+                default=parameter.default,
+                positive=parameter.positive,
+                onefile=parameter.onefile,
+                ext=parameter.ext,
+            )
+        return data
+
+    def _calculate_bank_height(
+        self, bank_data: BankData, simulation_data: ErosionSimulationData
+    ) -> BankData:
         # bank height = maximum bed elevation per cell
         for bank_i in bank_data:
-            bank_i.height = simulation_data.calculate_bank_height(bank_i, self.river_data.zb_dx)
+            bank_i.height = simulation_data.calculate_bank_height(
+                bank_i, self.river_data.zb_dx
+            )
 
         return bank_data
 
@@ -498,14 +494,16 @@ class Erosion(BaseCalculator):
 
             # last discharge level
             if level_i == num_levels - 1:
-                erosion_distance_eq, erosion_volume_eq = self.erosion_calculator.comp_erosion_eq(
-                    bank_i.height,
-                    bank_i.segment_length,
-                    fairway_data.fairway_initial_water_levels[ind],
-                    single_parameters.get_bank(ind),
-                    bank_i.fairway_distances,
-                    single_calculation.water_depth,
-                    erosion_inputs.get_bank(ind),
+                erosion_distance_eq, erosion_volume_eq = (
+                    self.erosion_calculator.comp_erosion_eq(
+                        bank_i.height,
+                        bank_i.segment_length,
+                        fairway_data.fairway_initial_water_levels[ind],
+                        single_parameters.get_bank(ind),
+                        bank_i.fairway_distances,
+                        single_calculation.water_depth,
+                        erosion_inputs.get_bank(ind),
+                    )
                 )
                 single_calculation.erosion_distance_eq = erosion_distance_eq
                 single_calculation.erosion_volume_eq = erosion_volume_eq
@@ -523,7 +521,9 @@ class Erosion(BaseCalculator):
 
             # accumulate eroded volumes per km
             volume_per_discharge = get_km_eroded_volume(
-                bank_i.bank_chainage_midpoints, single_calculation.erosion_volume_tot, km_bin
+                bank_i.bank_chainage_midpoints,
+                single_calculation.erosion_volume_tot,
+                km_bin,
             )
             single_calculation.volume_per_discharge = volume_per_discharge
             par_list.append(single_calculation)
@@ -584,7 +584,7 @@ class Erosion(BaseCalculator):
         log_text("derive_topology")
         mesh_data = self.simulation_data.compute_mesh_topology(verbose=False)
 
-        return MeshProcessor(self.river_data, mesh_data)
+        return MeshProcessor(self.river_data, mesh_data, verbose=self.config_file.debug)
 
     def run(self) -> None:
         """Run the bank erosion analysis for a specified configuration."""
@@ -677,11 +677,10 @@ class Erosion(BaseCalculator):
         self._write_bankline_shapefiles(
             self.results["bankline_new_list"],
             self.results["bankline_eq_list"],
-            self.config_file
+            self.config_file,
         )
         self._write_volume_outputs(
-            self.results["erosion_results"],
-            self.results["km_mid"]
+            self.results["erosion_results"], self.results["km_mid"]
         )
 
     def _write_bankline_shapefiles(
