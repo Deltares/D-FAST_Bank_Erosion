@@ -283,6 +283,7 @@ class MeshWrapper:
                     self.intersection_state.vertex_index = index_src[0:1]
                 else:
                     self.intersection_state.current_face_index = -2
+
             elif segment.is_length_zero():
                 # segment has zero length
                 break
@@ -319,17 +320,14 @@ class MeshWrapper:
             )
             if finished:
                 break
+
             status = Status(**{
                 "step": segment.index,
                 "transition_index": node,
                 "face_index": face_index,
                 "prev_b": segment.min_relative_distance,
             })
-            self.intersection_state.update_index_and_log(
-                status,
-                edge,
-                faces,
-            )
+            self.intersection_state.update_index_and_log(status, edge, faces)
             segment_x = (
                     segment.previous_point
                     + segment.min_relative_distance
