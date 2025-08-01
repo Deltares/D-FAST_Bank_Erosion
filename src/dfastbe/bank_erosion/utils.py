@@ -612,14 +612,12 @@ class ErodedBankLine:
         for idx in range(start, end, modifier):
             if inside:
                 point = intersection_context.poly[idx]
-                if self.verbose:
-                    print(f"  adding new point {point}")
             else:
                 point = intersection_context.recent_bankline_points[
                     idx - intersection_context.bankline_start_index + 1
                 ]
-                if self.verbose:
-                    print(f"  re-adding old point {point}")
+            if self.verbose:
+                print(f"  adding point {point}")
             point_is_new, current_point = self._point_in_bankline(current_point, point)
             if point_is_new:
                 self._add_point(current_point, point)
