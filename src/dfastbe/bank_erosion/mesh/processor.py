@@ -26,7 +26,7 @@ SHAPE_MULTIPLIER = 2
 
 
 @dataclass
-class LogStatus:
+class Status:
     step: int
     transition_index: int
     prev_b: float
@@ -76,7 +76,7 @@ class IntersectionState:
         self.point_index += 1
 
     def _log_mesh_transition(
-        self, log_status: LogStatus,
+        self, log_status: Status,
     ):
         """Helper to print mesh transition information for debugging."""
         index_str = "outside" if self.current_face_index == -1 else self.current_face_index
@@ -104,7 +104,7 @@ class IntersectionState:
         Helper to update mesh index and log transitions for intersect_line_mesh.
         """
         if face_indexes is not None:
-            log_status = LogStatus(
+            log_status = Status(
                 **{
                     "step": step,
                     "transition_index": node,
@@ -115,7 +115,7 @@ class IntersectionState:
             self._update_main_attributes(log_status)
             return
 
-        log_status = LogStatus(
+        log_status = Status(
             **{
                 "step": step,
                 "transition_type": "edge",
