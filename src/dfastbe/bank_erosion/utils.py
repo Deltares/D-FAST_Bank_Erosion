@@ -233,12 +233,12 @@ def move_line(
     """
     if right_bank:
         eroded_bank_line = ErodedBankLine(xylines, erosion_distance)
-        xylines_new = eroded_bank_line.move_line_right()
+        xylines_new = eroded_bank_line.move_line_by_erosion()
     else:
         xylines_rev = xylines[::-1, :]
         dn_rev = erosion_distance[::-1]
         eroded_bank_line = ErodedBankLine(xylines_rev, dn_rev)
-        xylines_new_rev = eroded_bank_line.move_line_right()
+        xylines_new_rev = eroded_bank_line.move_line_by_erosion()
         xylines_new = xylines_new_rev[::-1, :]
     return xylines_new
 
@@ -883,7 +883,7 @@ class ErodedBankLine:
             inside, last_edge_index, segment_index, last_segment, intersection_context
         )
 
-    def move_line_right(self) -> np.ndarray:
+    def move_line_by_erosion(self) -> np.ndarray:
         """Shift a line using the erosion distance.
 
         Returns
