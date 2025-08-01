@@ -34,7 +34,6 @@ from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
 
 from dfastbe import __version__
-from dfastbe.base_calculator import BaseCalculator
 from dfastbe.bank_erosion.data_models.calculation import (
     BankData,
     DischargeLevels,
@@ -54,14 +53,15 @@ from dfastbe.bank_erosion.data_models.inputs import (
 )
 from dfastbe.bank_erosion.debugger import Debugger
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
-from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.mesh.processor import MeshProcessor
+from dfastbe.bank_erosion.plotter import ErosionPlotter
 from dfastbe.bank_erosion.utils import (
     get_km_bins,
     get_km_eroded_volume,
     move_line,
     write_km_eroded_volumes,
 )
+from dfastbe.base_calculator import BaseCalculator
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.data_models import LineGeometry
 from dfastbe.io.logger import log_text, timed_logger
@@ -110,9 +110,9 @@ class Erosion(BaseCalculator):
         # distance fairway-bankline (bank-fairway)
         log_text("bank_distance_fairway")
 
-        num_fairway_face_ind = len(fairway_data.fairway_face_indices)
+        num_fairway_faces = len(fairway_data.fairway_face_indices)
 
-        for bank_i, single_bank in enumerate(bank_data):
+        for bank_index, single_bank in enumerate(bank_data):
             bank_coords = single_bank.bank_line_coords
             coords_mid = (bank_coords[:-1] + bank_coords[1:]) / 2
             bank_fairway_dist = np.zeros(len(coords_mid))
@@ -151,7 +151,7 @@ class Erosion(BaseCalculator):
                         if d1 < fairway_bank_distance:
                             fairway_bank_distance = d1
                             # projected point located on segment before, which corresponds to initial choice: iseg = ifw - 1
-                if closest_ind < num_fairway_face_ind:
+                if closest_ind < num_fairway_faces:
                     alpha = calculate_alpha(
                         fairway_data.intersection_coords,
                         closest_ind + 1,
@@ -174,10 +174,10 @@ class Erosion(BaseCalculator):
             if self.river_data.debug:
                 line_geom = LineGeometry(coords_mid, crs=self.config_file.crs)
                 line_geom.to_file(
-                    file_name=f"{self.river_data.output_dir}/bank_{bank_i + 1}_chainage_and_fairway_face_idx.shp",
+                    file_name=f"{self.river_data.output_dir}/bank_{bank_index + 1}_chainage_and_fairway_face_idx.shp",
                     data={
                         "chainage": single_bank.bank_chainage_midpoints,
-                        "iface_fw": bp_fw_face_idx[bank_i],
+                        "iface_fw": bp_fw_face_idx[bank_index],
                     },
                 )
 
