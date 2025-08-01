@@ -688,16 +688,20 @@ class ErodedBankLine:
             delta_intersection_x, delta_intersection_y = intersection_context.get_delta(
                 intersection_index
             )
-            s2 = current_segment - eroded_segment.segment_start_index + offset
-            if is_end and s2 > len(eroded_segment.x_start_points) - 1:
+            boundary_segment = (
+                current_segment - eroded_segment.segment_start_index + offset
+            )
+            if is_end and boundary_segment > len(eroded_segment.x_start_points) - 1:
                 # if the end is beyond the last segment, consider it inside
                 inside = True
             else:
                 delta_bankline_y = (
-                    eroded_segment.y_end_points[s2] - eroded_segment.y_start_points[s2]
+                    eroded_segment.y_end_points[boundary_segment]
+                    - eroded_segment.y_start_points[boundary_segment]
                 )
                 delta_bankline_x = (
-                    eroded_segment.x_end_points[s2] - eroded_segment.x_start_points[s2]
+                    eroded_segment.x_end_points[boundary_segment]
+                    - eroded_segment.x_start_points[boundary_segment]
                 )
                 inside = (
                     delta_intersection_y * delta_bankline_x
@@ -910,10 +914,12 @@ class ErodedBankLine:
                 eroded_segment, poly, num_edges
             )
 
-            s = np.concatenate(intersections.segment_indices)
+            bank_line_segments = np.concatenate(intersections.segment_indices)
             if self.verbose:
-                print(f"{erosion_index}: {len(s)} intersections detected")
-            if len(s) == 0:
+                print(
+                    f"{erosion_index}: {len(bank_line_segments)} intersections detected"
+                )
+            if len(bank_line_segments) == 0:
                 if dtheta < 0 and not self._should_add_right_bend_segment(
                     erosion_index
                 ):
