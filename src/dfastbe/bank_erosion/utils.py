@@ -248,16 +248,16 @@ class ErodedBankLineSegment:
     """Class to represent a segment of an eroded bank line.
 
     Args:
-        x0 (np.ndarray): x-coordinates of the segment start.
-        y0 (np.ndarray): y-coordinates of the segment start.
-        x1 (np.ndarray): x-coordinates of the segment end.
-        y1 (np.ndarray): y-coordinates of the segment end.
+        x_start_segments (np.ndarray): x-coordinates of the segment start.
+        y_start_segments (np.ndarray): y-coordinates of the segment start.
+        x_end_segments (np.ndarray): x-coordinates of the segment end.
+        y_end_segments (np.ndarray): y-coordinates of the segment end.
         ixy0 (int): Index of the segment start in the eroded bank line.
     """
-    x0: np.ndarray
-    y0: np.ndarray
-    x1: np.ndarray
-    y1: np.ndarray
+    x_start_segments: np.ndarray
+    y_start_segments: np.ndarray
+    x_end_segments: np.ndarray
+    y_end_segments: np.ndarray
     ixy0: int
 
 
@@ -430,22 +430,32 @@ class ErodedBankLine:
                 and the index of the first segment.
         """
         if self.point_index > 20:
-            X0 = self.xylines_new[(self.point_index - 20) : self.point_index, 0].copy()
-            Y0 = self.xylines_new[(self.point_index - 20) : self.point_index, 1].copy()
-            X1 = self.xylines_new[
+            x_start_segments = self.xylines_new[
+                (self.point_index - 20) : self.point_index, 0
+            ].copy()
+            y_start_segments = self.xylines_new[
+                (self.point_index - 20) : self.point_index, 1
+            ].copy()
+            x_end_segments = self.xylines_new[
                 (self.point_index - 19) : (self.point_index + 1), 0
             ].copy()
-            Y1 = self.xylines_new[
+            y_end_segments = self.xylines_new[
                 (self.point_index - 19) : (self.point_index + 1), 1
             ].copy()
             ixy0 = self.point_index - 20
         else:
-            X0 = self.xylines_new[: self.point_index, 0].copy()
-            Y0 = self.xylines_new[: self.point_index, 1].copy()
-            X1 = self.xylines_new[1 : self.point_index + 1, 0].copy()
-            Y1 = self.xylines_new[1 : self.point_index + 1, 1].copy()
+            x_start_segments = self.xylines_new[: self.point_index, 0].copy()
+            y_start_segments = self.xylines_new[: self.point_index, 1].copy()
+            x_end_segments = self.xylines_new[1 : self.point_index + 1, 0].copy()
+            y_end_segments = self.xylines_new[1 : self.point_index + 1, 1].copy()
             ixy0 = 0
-        return ErodedBankLineSegment(x0=X0, y0=Y0, x1=X1, y1=Y1, ixy0=ixy0)
+        return ErodedBankLineSegment(
+            x_start_segments=x_start_segments,
+            y_start_segments=y_start_segments,
+            x_end_segments=x_end_segments,
+            y_end_segments=y_end_segments,
+            ixy0=ixy0,
+        )
 
     def _collect_polyline_intersections(
         self,
@@ -473,10 +483,10 @@ class ErodedBankLine:
                 continue
             # check for intersection
             a2, b2, slices2 = calculate_segment_edge_intersections(
-                eroded_segment.x0,
-                eroded_segment.y0,
-                eroded_segment.x1,
-                eroded_segment.y1,
+                eroded_segment.x_start_segments,
+                eroded_segment.y_start_segments,
+                eroded_segment.x_end_segments,
+                eroded_segment.y_end_segments,
                 poly[i, 0],
                 poly[i, 1],
                 poly[i + 1, 0],
@@ -656,12 +666,18 @@ class ErodedBankLine:
                 intersection_index
             )
             s2 = current_segment - eroded_segment.ixy0 + offset
-            if is_end and s2 > len(eroded_segment.x0) - 1:
+            if is_end and s2 > len(eroded_segment.x_start_segments) - 1:
                 # if the end is beyond the last segment, consider it inside
                 inside = True
             else:
-                delta_bankline_y = eroded_segment.y1[s2] - eroded_segment.y0[s2]
-                delta_bankline_x = eroded_segment.x1[s2] - eroded_segment.x0[s2]
+                delta_bankline_y = (
+                    eroded_segment.y_end_segments[s2]
+                    - eroded_segment.y_start_segments[s2]
+                )
+                delta_bankline_x = (
+                    eroded_segment.x_end_segments[s2]
+                    - eroded_segment.x_start_segments[s2]
+                )
                 inside = (
                     delta_intersection_y * delta_bankline_x
                     - delta_intersection_x * delta_bankline_y
