@@ -5721,11 +5721,11 @@ to reflect it contents.</p>
     <span class="n">msg</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">gui_text</span><span class="p">(</span><span class="s2">&quot;about&quot;</span><span class="p">))</span>
     <span class="n">msg</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Ok</span><span class="p">)</span>
 
-    <span class="n">dfast_logo</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ICONS_DIR</span><span class="si">}</span><span class="s2">/D-FASTBE.png&quot;</span>
-    <span class="n">logo_size</span> <span class="o">=</span> <span class="mi">40</span>
-    <span class="n">pixmap</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">dfast_logo</span><span class="p">)</span>
-    <span class="n">msg</span><span class="o">.</span><span class="n">setIconPixmap</span><span class="p">(</span><span class="n">pixmap</span><span class="o">.</span><span class="n">scaled</span><span class="p">(</span><span class="n">logo_size</span><span class="p">,</span> <span class="n">logo_size</span><span class="p">))</span>
-    <span class="n">msg</span><span class="o">.</span><span class="n">setWindowIcon</span><span class="p">(</span><span class="n">getIcon</span><span class="p">(</span><span class="n">dfast_logo</span><span class="p">))</span>
+    <span class="n">dfast_icon</span> <span class="o">=</span> <span class="n">getIcon</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ICONS_DIR</span><span class="si">}</span><span class="s2">/D-FASTBE.png&quot;</span><span class="p">)</span>
+    <span class="n">icon_size</span> <span class="o">=</span> <span class="n">dfast_icon</span><span class="o">.</span><span class="n">availableSizes</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">pixmap</span> <span class="o">=</span> <span class="n">dfast_icon</span><span class="o">.</span><span class="n">pixmap</span><span class="p">(</span><span class="n">icon_size</span><span class="p">)</span><span class="o">.</span><span class="n">scaled</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span><span class="mi">64</span><span class="p">);</span>
+    <span class="n">msg</span><span class="o">.</span><span class="n">setIconPixmap</span><span class="p">(</span><span class="n">pixmap</span><span class="p">)</span>
+    <span class="n">msg</span><span class="o">.</span><span class="n">setWindowIcon</span><span class="p">(</span><span class="n">dfast_icon</span><span class="p">)</span>
     <span class="n">msg</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
