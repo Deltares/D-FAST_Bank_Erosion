@@ -1822,11 +1822,11 @@ def menu_about_self():
     msg.setWindowTitle(gui_text("about"))
     msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
     
-    dfast_logo = f"{ICONS_DIR}/D-FASTBE.png"
-    logo_size = 40
-    pixmap = PyQt5.QtGui.QPixmap(dfast_logo)
-    msg.setIconPixmap(pixmap.scaled(logo_size, logo_size))
-    msg.setWindowIcon(getIcon(dfast_logo))
+    dfast_icon = getIcon(f"{ICONS_DIR}/D-FASTBE.png")
+    icon_size = dfast_icon.availableSizes()[0]
+    pixmap = dfast_icon.pixmap(icon_size).scaled(64,64);
+    msg.setIconPixmap(pixmap)
+    msg.setWindowIcon(dfast_icon)
     msg.exec_()
 
 
