@@ -98,6 +98,7 @@ def create_dialog() -> None:
     win = QtWidgets.QMainWindow()
     win.setGeometry(200, 200, 600, 300)
     win.setWindowTitle("D-FAST Bank Erosion")
+    win.setWindowIcon(getIcon(f"{ICONS_DIR}/D-FASTBE.png"))
     dialog["window"] = win
 
     menubar = win.menuBar()
@@ -1821,7 +1822,12 @@ def menu_about_self():
     msg.setDetailedText(gui_text("license"))
     msg.setWindowTitle(gui_text("about"))
     msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
-    msg.setStyleSheet("QDialogButtonBox{min-width: 400px;}")
+    
+    dfast_logo = f"{ICONS_DIR}/D-FASTBE.png"
+    logo_size = int(msg.heightMM() * 0.9)
+    pixmap = PyQt5.QtGui.QPixmap(dfast_logo)
+    msg.setIconPixmap(pixmap.scaled(logo_size, logo_size))
+    msg.setWindowIcon(getIcon(dfast_logo))
     msg.exec_()
 
 
