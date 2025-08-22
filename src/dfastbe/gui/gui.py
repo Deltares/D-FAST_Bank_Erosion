@@ -1,5 +1,5 @@
 """
-Copyright (C) 2020 Stichting Deltares.
+Copyright (C) 2025 Stichting Deltares.
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -1818,13 +1818,13 @@ def menu_about_self():
     msg = QtWidgets.QMessageBox()
     msg.setIcon(QtWidgets.QMessageBox.Information)
     msg.setText(f"D-FAST Bank Erosion {__version__}")
-    msg.setInformativeText("Copyright (c) 2020 Deltares.")
+    msg.setInformativeText("Copyright (c) 2025 Deltares.")
     msg.setDetailedText(gui_text("license"))
     msg.setWindowTitle(gui_text("about"))
     msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
     
     dfast_logo = f"{ICONS_DIR}/D-FASTBE.png"
-    logo_size = int(msg.heightMM() * 0.9)
+    logo_size = msg.iconPixmap().height()
     pixmap = PyQt5.QtGui.QPixmap(dfast_logo)
     msg.setIconPixmap(pixmap.scaled(logo_size, logo_size))
     msg.setWindowIcon(getIcon(dfast_logo))
