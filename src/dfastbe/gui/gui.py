@@ -1816,7 +1816,6 @@ def menu_about_self():
     None
     """
     msg = QtWidgets.QMessageBox()
-    msg.setIcon(QtWidgets.QMessageBox.Information)
     msg.setText(f"D-FAST Bank Erosion {__version__}")
     msg.setInformativeText("Copyright (c) 2025 Deltares.")
     msg.setDetailedText(gui_text("license"))
@@ -1824,7 +1823,7 @@ def menu_about_self():
     msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
     
     dfast_logo = f"{ICONS_DIR}/D-FASTBE.png"
-    logo_size = msg.iconPixmap().height()
+    logo_size = 40
     pixmap = PyQt5.QtGui.QPixmap(dfast_logo)
     msg.setIconPixmap(pixmap.scaled(logo_size, logo_size))
     msg.setWindowIcon(getIcon(dfast_logo))
