@@ -5596,7 +5596,8 @@ to reflect it contents.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/gui/gui.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1860</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1859</span>
+<span class="normal">1860</span>
 <span class="normal">1861</span>
 <span class="normal">1862</span>
 <span class="normal">1863</span>
@@ -5608,8 +5609,7 @@ to reflect it contents.</p>
 <span class="normal">1869</span>
 <span class="normal">1870</span>
 <span class="normal">1871</span>
-<span class="normal">1872</span>
-<span class="normal">1873</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1872</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Start the user interface using default settings or optional configuration.</span>
 
@@ -5646,15 +5646,15 @@ to reflect it contents.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/gui/gui.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1834</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1833</span>
+<span class="normal">1834</span>
 <span class="normal">1835</span>
 <span class="normal">1836</span>
 <span class="normal">1837</span>
 <span class="normal">1838</span>
 <span class="normal">1839</span>
 <span class="normal">1840</span>
-<span class="normal">1841</span>
-<span class="normal">1842</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">menu_about_qt</span><span class="p">():</span>
+<span class="normal">1841</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">menu_about_qt</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Show the about dialog for Qt.</span>
 
@@ -5706,8 +5706,7 @@ to reflect it contents.</p>
 <span class="normal">1827</span>
 <span class="normal">1828</span>
 <span class="normal">1829</span>
-<span class="normal">1830</span>
-<span class="normal">1831</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">menu_about_self</span><span class="p">():</span>
+<span class="normal">1830</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">menu_about_self</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Show the about dialog for D-FAST Bank Erosion.</span>
 
@@ -5716,7 +5715,6 @@ to reflect it contents.</p>
 <span class="sd">    None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">msg</span> <span class="o">=</span> <span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="p">()</span>
-    <span class="n">msg</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Information</span><span class="p">)</span>
     <span class="n">msg</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;D-FAST Bank Erosion </span><span class="si">{</span><span class="n">__version__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">msg</span><span class="o">.</span><span class="n">setInformativeText</span><span class="p">(</span><span class="s2">&quot;Copyright (c) 2025 Deltares.&quot;</span><span class="p">)</span>
     <span class="n">msg</span><span class="o">.</span><span class="n">setDetailedText</span><span class="p">(</span><span class="n">gui_text</span><span class="p">(</span><span class="s2">&quot;license&quot;</span><span class="p">))</span>
@@ -5724,7 +5722,7 @@ to reflect it contents.</p>
     <span class="n">msg</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Ok</span><span class="p">)</span>
 
     <span class="n">dfast_logo</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ICONS_DIR</span><span class="si">}</span><span class="s2">/D-FASTBE.png&quot;</span>
-    <span class="n">logo_size</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">iconPixmap</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+    <span class="n">logo_size</span> <span class="o">=</span> <span class="mi">40</span>
     <span class="n">pixmap</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">dfast_logo</span><span class="p">)</span>
     <span class="n">msg</span><span class="o">.</span><span class="n">setIconPixmap</span><span class="p">(</span><span class="n">pixmap</span><span class="o">.</span><span class="n">scaled</span><span class="p">(</span><span class="n">logo_size</span><span class="p">,</span> <span class="n">logo_size</span><span class="p">))</span>
     <span class="n">msg</span><span class="o">.</span><span class="n">setWindowIcon</span><span class="p">(</span><span class="n">getIcon</span><span class="p">(</span><span class="n">dfast_logo</span><span class="p">))</span>
@@ -5800,7 +5798,8 @@ to reflect it contents.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/gui/gui.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1845</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1844</span>
+<span class="normal">1845</span>
 <span class="normal">1846</span>
 <span class="normal">1847</span>
 <span class="normal">1848</span>
@@ -5811,8 +5810,7 @@ to reflect it contents.</p>
 <span class="normal">1853</span>
 <span class="normal">1854</span>
 <span class="normal">1855</span>
-<span class="normal">1856</span>
-<span class="normal">1857</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">menu_open_manual</span><span class="p">():</span>
+<span class="normal">1856</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">menu_open_manual</span><span class="p">():</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Open the user manual.&quot;&quot;&quot;</span>
     <span class="n">manual_path</span> <span class="o">=</span> <span class="n">r_dir</span> <span class="o">/</span> <span class="n">USER_MANUAL_FILE_NAME</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">manual_path</span><span class="p">)</span>
