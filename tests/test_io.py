@@ -102,9 +102,7 @@ class TestSimulationData:
         file_name = "test_map.nc"
         mock_x_node = np.array([0.0, 1.0, 2.0])
         mock_y_node = np.array([0.0, 1.0, 2.0])
-        mock_face_node = MagicMock()
-        mock_face_node.data = np.array([[0, 1, 2], [2, 3, 4]])
-        mock_face_node.mask = np.array([[False, False, False], [False, False, False]])
+        mock_face_node = np.ma.MaskedArray([[0, 1, 2], [2, 3, 4]], [[False, False, False], [False, False, False]])
         mock_bed_level_values = np.array([10.0, 20.0, 30.0])
         mock_water_level_face = np.array([1.0, 2.0, 3.0])
         mock_water_depth_face = np.array([0.5, 1.0, 1.5])
