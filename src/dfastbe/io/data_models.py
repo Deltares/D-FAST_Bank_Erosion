@@ -29,6 +29,7 @@ from typing import Tuple, List, Dict, Optional
 from pathlib import Path
 import numpy as np
 import netCDF4
+import math
 from shapely.geometry import LineString, Point
 from shapely import prepare
 from geopandas.geodataframe import GeoDataFrame
@@ -490,16 +491,27 @@ class BaseSimulationData:
         name = Path(file_name).name
         if name.endswith("map.nc"):
             log_text("read_grid", indent=indent)
+
+            # read the node coordinates
             x_node = _read_fm_map(file_name, "x", location="node")
             y_node = _read_fm_map(file_name, "y", location="node")
-            f_nc = _read_fm_map(file_name, "face_node_connectivity")
-            if f_nc.mask.shape == ():
-                # all faces have the same number of nodes
-                n_nodes = np.ones(f_nc.data.shape[0], dtype=int) * f_nc.data.shape[1]
+
+            # read the face node connectivity and make sure it's a masked array
+            f_nc_read = _read_fm_map(file_name, "face_node_connectivity")
+            if isinstance(f_nc_read, np.ma.MaskedArray):
+                f_nc = f_nc_read
+                # make sure the mask is a full array
+                if f_nc.mask.size == 1:
+                    f_nc.mask = np.full(f_nc.shape, False)
             else:
-                # varying number of nodes
-                n_nodes = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
+                f_nc = np.ma.MaskedArray(f_nc, np.full(f_np.shape, False))
+
+            # remove invalid node indices ... this happens typically if _FillValue is not correctly set or applied
+            f_nc.mask[f_nc.data < 0] = True
+            f_nc.mask[f_nc.data > x_node.size-1] = True
+            # consider checking for invalid indices and applying mask
             f_nc.data[f_nc.mask] = 0
+            n_nodes_per_face = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
 
             face_node = f_nc
             log_text("read_bathymetry", indent=indent)
@@ -542,7 +554,7 @@ class BaseSimulationData:
         return cls(
             x_node=x_node,
             y_node=y_node,
-            n_nodes=n_nodes,
+            n_nodes=n_nodes_per_face,
             face_node=face_node,
             bed_elevation_location=bed_elevation_location,
             bed_elevation_values=bed_elevation_values,
@@ -603,6 +615,7 @@ class BaseSimulationData:
         y_min = bbox.coords[0][1]
         y_max = bbox.coords[2][1]
 
+        # mark which nodes to keep
         prepare(xy_buffer)
         x = self.x_node
         y = self.y_node
@@ -612,11 +625,13 @@ class BaseSimulationData:
             if keep[i] and not xy_buffer.contains(Point((x[i], y[i]))):
                 keep[i] = False
 
+        # mark which faces to keep
         fnc = self.face_node
-        keep_face = keep[fnc].all(axis=1)
+        keep_face_nodes = np.ma.masked_array(keep[fnc], fnc.mask)
+        keep_face = keep_face_nodes.all(axis=1)
         renum = np.zeros(nnodes, dtype=int)
         renum[keep] = range(sum(keep))
-        self.face_node = renum[fnc[keep_face]]
+        self.face_node = np.ma.masked_array(renum[fnc[keep_face]], fnc.mask[keep_face])
 
         self.x_node = x[keep]
         self.y_node = y[keep]
@@ -728,6 +743,7 @@ def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndar
     """
     # open file
     root_group = netCDF4.Dataset(filename)
+    remove_mask = True
 
     # locate 2d mesh variable
     mesh2d = root_group.get_variables_by_attributes(
@@ -767,6 +783,7 @@ def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndar
         var = root_group.variables[varname]
         if "start_index" in var.ncattrs():
             start_index = var.getncattr("start_index")
+        remove_mask = False
 
     else:
         # find any other variable by standard_name or long_name
@@ -787,9 +804,15 @@ def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndar
     if var.get_dims()[0].isunlimited():
         # assume that time dimension is unlimited and is the first dimension
         # slice to obtain last time step
-        data = var[-1, :]
+        data_read = var[-1, :]
     else:
-        data = var[...] - start_index
+        data_read = var[...] - start_index
+
+    if remove_mask and isinstance(data_read, np.ma.MaskedArray):
+        data = data_read.data
+        data[data_read.mask] = math.nan
+    else:
+        data = data_read
 
     root_group.close()
 
