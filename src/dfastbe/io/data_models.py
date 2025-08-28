@@ -504,7 +504,7 @@ class BaseSimulationData:
                 if f_nc.mask.size == 1:
                     f_nc.mask = np.full(f_nc.shape, False)
             else:
-                f_nc = np.ma.MaskedArray(f_nc, np.full(f_np.shape, False))
+                f_nc = np.ma.MaskedArray(f_nc_read, np.full(f_nc_read.shape, False))
 
             # remove invalid node indices ... this happens typically if _FillValue is not correctly set or applied
             f_nc.mask[f_nc.data < 0] = True
