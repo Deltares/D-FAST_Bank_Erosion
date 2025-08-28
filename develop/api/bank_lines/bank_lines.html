@@ -2855,17 +2855,7 @@
 <span class="normal">388</span>
 <span class="normal">389</span>
 <span class="normal">390</span>
-<span class="normal">391</span>
-<span class="normal">392</span>
-<span class="normal">393</span>
-<span class="normal">394</span>
-<span class="normal">395</span>
-<span class="normal">396</span>
-<span class="normal">397</span>
-<span class="normal">398</span>
-<span class="normal">399</span>
-<span class="normal">400</span>
-<span class="normal">401</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLines</span><span class="p">(</span><span class="n">BaseCalculator</span><span class="p">):</span>
+<span class="normal">391</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BankLines</span><span class="p">(</span><span class="n">BaseCalculator</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Bank line detection class.&quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_file</span><span class="p">:</span> <span class="n">ConfigFile</span><span class="p">,</span> <span class="n">gui</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
@@ -3093,13 +3083,8 @@
 <span class="sd">            ```</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">h_node</span> <span class="o">=</span> <span class="n">BankLines</span><span class="o">.</span><span class="n">_calculate_water_depth</span><span class="p">(</span><span class="n">simulation_data</span><span class="p">)</span>
-        <span class="n">wet_node</span> <span class="o">=</span> <span class="n">h_node</span> <span class="o">&gt;</span> <span class="n">critical_water_depth</span>
-
-        <span class="n">wet_face_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">wet_node</span><span class="p">[</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span><span class="p">],</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
-        <span class="n">num_wet_arr</span> <span class="o">=</span> <span class="n">wet_face_nodes</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
         <span class="n">lines</span> <span class="o">=</span> <span class="n">BankLines</span><span class="o">.</span><span class="n">_generate_bank_lines</span><span class="p">(</span>
-            <span class="n">simulation_data</span><span class="p">,</span> <span class="n">wet_node</span><span class="p">,</span> <span class="n">num_wet_arr</span><span class="p">,</span> <span class="n">h_node</span><span class="p">,</span> <span class="n">critical_water_depth</span>
+            <span class="n">simulation_data</span><span class="p">,</span> <span class="n">h_node</span><span class="p">,</span> <span class="n">critical_water_depth</span>
         <span class="p">)</span>
         <span class="n">multi_line</span> <span class="o">=</span> <span class="n">union_all</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
         <span class="n">merged_line</span> <span class="o">=</span> <span class="n">line_merge</span><span class="p">(</span><span class="n">multi_line</span><span class="p">)</span>
@@ -3165,8 +3150,6 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_generate_bank_lines</span><span class="p">(</span>
         <span class="n">simulation_data</span><span class="p">:</span> <span class="n">BaseSimulationData</span><span class="p">,</span>
-        <span class="n">wet_node</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
-        <span class="n">num_wet_arr</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">h_node</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
         <span class="n">critical_water_depth</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">]:</span>
@@ -3175,10 +3158,6 @@
 <span class="sd">        Args:</span>
 <span class="sd">            simulation_data (BaseSimulationData):</span>
 <span class="sd">                Simulation data: mesh, bed levels, water levels, velocities, etc.</span>
-<span class="sd">            wet_node (np.ndarray):</span>
-<span class="sd">                Wet/dry boolean array for each face node.</span>
-<span class="sd">            num_wet_arr (np.ndarray):</span>
-<span class="sd">                Number of wet nodes for each face.</span>
 <span class="sd">            h_node (np.ndarray):</span>
 <span class="sd">                Water depth at each node.</span>
 <span class="sd">            critical_water_depth (float):</span>
@@ -3189,32 +3168,33 @@
 <span class="sd">                List of detected bank lines.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">num_faces</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span><span class="p">)</span>
-        <span class="n">x_face_nodes</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">[</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span><span class="p">]</span>
-        <span class="n">y_face_nodes</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">y_node</span><span class="p">[</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span><span class="p">]</span>
-        <span class="n">wet_face_nodes</span> <span class="o">=</span> <span class="n">wet_node</span><span class="p">[</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span><span class="p">]</span>
-        <span class="n">h_face_nodes</span> <span class="o">=</span> <span class="n">h_node</span><span class="p">[</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span><span class="p">]</span>
-        <span class="n">mask</span> <span class="o">=</span> <span class="n">num_wet_arr</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_faces</span><span class="p">):</span>
             <span class="n">BankLines</span><span class="o">.</span><span class="n">_progress_bar</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">num_faces</span><span class="p">)</span>
 
-            <span class="n">n_wet</span> <span class="o">=</span> <span class="n">num_wet_arr</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="n">n_node</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n_wet</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">MaskedConstant</span><span class="p">)</span> <span class="ow">or</span> <span class="n">n_wet</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n_wet</span> <span class="o">==</span> <span class="n">n_node</span><span class="p">:</span>
+            <span class="n">face_nodes</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span><span class="p">[</span><span class="n">i</span><span class="p">,:</span><span class="n">n_node</span><span class="p">]</span>
+            <span class="n">x_face_nodes</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">x_node</span><span class="p">[</span><span class="n">face_nodes</span><span class="p">]</span>
+            <span class="n">y_face_nodes</span> <span class="o">=</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">y_node</span><span class="p">[</span><span class="n">face_nodes</span><span class="p">]</span>
+            <span class="n">h_face_nodes</span> <span class="o">=</span> <span class="n">h_node</span><span class="p">[</span><span class="n">face_nodes</span><span class="p">]</span>
+
+            <span class="n">wet_face_nodes</span> <span class="o">=</span> <span class="n">h_face_nodes</span> <span class="o">&gt;</span> <span class="n">critical_water_depth</span>
+            <span class="n">n_wet</span> <span class="o">=</span> <span class="n">wet_face_nodes</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">n_wet</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">n_wet</span> <span class="o">==</span> <span class="n">n_node</span><span class="p">:</span>
                 <span class="k">continue</span>
 
             <span class="k">if</span> <span class="n">n_node</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="n">line</span> <span class="o">=</span> <span class="n">tri_to_line</span><span class="p">(</span>
-                    <span class="n">x_face_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">y_face_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">wet_face_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">h_face_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">critical_water_depth</span>
+                    <span class="n">x_face_nodes</span><span class="p">,</span> <span class="n">y_face_nodes</span><span class="p">,</span> <span class="n">wet_face_nodes</span><span class="p">,</span> <span class="n">h_face_nodes</span><span class="p">,</span> <span class="n">critical_water_depth</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">line</span> <span class="o">=</span> <span class="n">poly_to_line</span><span class="p">(</span>
                     <span class="n">n_node</span><span class="p">,</span>
-                    <span class="n">x_face_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                    <span class="n">y_face_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                    <span class="n">wet_face_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                    <span class="n">h_face_nodes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="n">x_face_nodes</span><span class="p">,</span>
+                    <span class="n">y_face_nodes</span><span class="p">,</span>
+                    <span class="n">wet_face_nodes</span><span class="p">,</span>
+                    <span class="n">h_face_nodes</span><span class="p">,</span>
                     <span class="n">critical_water_depth</span><span class="p">,</span>
                 <span class="p">)</span>
 
@@ -3763,12 +3743,7 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="normal">262</span>
 <span class="normal">263</span>
 <span class="normal">264</span>
-<span class="normal">265</span>
-<span class="normal">266</span>
-<span class="normal">267</span>
-<span class="normal">268</span>
-<span class="normal">269</span>
-<span class="normal">270</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
+<span class="normal">265</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@staticmethod</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">detect_bank_lines</span><span class="p">(</span>
     <span class="n">simulation_data</span><span class="p">:</span> <span class="n">BaseSimulationData</span><span class="p">,</span>
     <span class="n">critical_water_depth</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -3803,13 +3778,8 @@ The collection of all detected bank segments in the remaining model area.</p>
 <span class="sd">        ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">h_node</span> <span class="o">=</span> <span class="n">BankLines</span><span class="o">.</span><span class="n">_calculate_water_depth</span><span class="p">(</span><span class="n">simulation_data</span><span class="p">)</span>
-    <span class="n">wet_node</span> <span class="o">=</span> <span class="n">h_node</span> <span class="o">&gt;</span> <span class="n">critical_water_depth</span>
-
-    <span class="n">wet_face_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">wet_node</span><span class="p">[</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span><span class="p">],</span> <span class="n">simulation_data</span><span class="o">.</span><span class="n">face_node</span><span class="o">.</span><span class="n">mask</span><span class="p">)</span>
-    <span class="n">num_wet_arr</span> <span class="o">=</span> <span class="n">wet_face_nodes</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
     <span class="n">lines</span> <span class="o">=</span> <span class="n">BankLines</span><span class="o">.</span><span class="n">_generate_bank_lines</span><span class="p">(</span>
-        <span class="n">simulation_data</span><span class="p">,</span> <span class="n">wet_node</span><span class="p">,</span> <span class="n">num_wet_arr</span><span class="p">,</span> <span class="n">h_node</span><span class="p">,</span> <span class="n">critical_water_depth</span>
+        <span class="n">simulation_data</span><span class="p">,</span> <span class="n">h_node</span><span class="p">,</span> <span class="n">critical_water_depth</span>
     <span class="p">)</span>
     <span class="n">multi_line</span> <span class="o">=</span> <span class="n">union_all</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
     <span class="n">merged_line</span> <span class="o">=</span> <span class="n">line_merge</span><span class="p">(</span><span class="n">multi_line</span><span class="p">)</span>
