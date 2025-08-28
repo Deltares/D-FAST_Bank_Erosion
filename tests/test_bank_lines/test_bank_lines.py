@@ -98,7 +98,7 @@ class TestBankLines:
             MagicMock: A mock object simulating BaseSimulationData.
         """
         mock_data = MagicMock(spec=BaseSimulationData)
-        mock_data.face_node = np.array([[0, 1, 2], [1, 2, 3], [2, 3, 4]])
+        mock_data.face_node = np.ma.MaskedArray([[0, 1, 2], [1, 2, 3], [2, 3, 4]], np.full((3,3), False))
         mock_data.x_node = np.array([0, 1, 2, 3, 4, 5, 6, 7])
         mock_data.y_node = np.array([0, 1, 2, 3, 4, 5, 6, 7])
         mock_data.water_level_face = np.array([1.0, 2.0, 1.0])
@@ -232,11 +232,7 @@ class TestBankLines:
         """
         h_node = BankLines._calculate_water_depth(mock_simulation_data)
         expected_h_node = np.array(
-            [
-                [0.1, 0.6, 0.2333333333],
-                [0.6, 0.2333333333, 0.4],
-                [0.2333333333, 0.4, -0.1],
-            ]
+            [0.1, 0.6, 0.2333333333, 0.4, -0.1]
         )
         assert h_node.shape == mock_simulation_data.face_node.shape
         assert np.allclose(h_node, expected_h_node)
