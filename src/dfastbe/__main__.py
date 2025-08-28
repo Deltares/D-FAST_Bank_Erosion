@@ -77,14 +77,16 @@ def parse_arguments() -> Tuple[str, str, str]:
     parser.add_argument(
         "--language",
         default="UK",
+        choices=["NL", "UK"],
         type=str.upper,
         help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--mode",
         default="GUI",
+        choices=["BANKLINES", "BANKEROSION", "GUI"],
         type=str.upper,
-        help="run mode 'BATCH' or 'GUI' (%(default)s is default)",
+        help="run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (%(default)s is default)",
     )
     parser.add_argument(
         "--config",
