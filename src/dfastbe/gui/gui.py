@@ -1219,7 +1219,7 @@ def try_run_and_catch(run_analysis_steps: Callable[[ConfigFile], None]) -> None:
     except:
         dialog["application"].restoreOverrideCursor()
         stack_trace = traceback.format_exc()
-        showError(
+        show_error(
             "A run-time exception occurred. Press 'Show Details...' for the full stack trace.",
             stack_trace,
         )
@@ -1322,7 +1322,7 @@ def load_configuration(filename: str) -> None:
     """
     if not os.path.exists(filename):
         if filename != "dfastbe.cfg":
-            showError("The file '{}' does not exist!".format(filename))
+            show_error("The file '{}' does not exist!".format(filename))
         return
     absfilename = absolute_path(os.getcwd(), filename)
     rootdir = os.path.dirname(absfilename)
@@ -1333,7 +1333,7 @@ def load_configuration(filename: str) -> None:
     try:
         version = config_file.version
     except KeyError:
-        showError("No version information in the file!")
+        show_error("No version information in the file!")
         return
 
     config = config_file.config
@@ -1461,7 +1461,7 @@ def load_configuration(filename: str) -> None:
             dialog[istr + "_eroVolEdit"].setText(txt)
 
     else:
-        showError("Unsupported version number {} in the file!".format(version))
+        show_error("Unsupported version number {} in the file!".format(version))
 
 
 def addTabForLevel(istr: str) -> None:
@@ -1824,7 +1824,7 @@ def get_configuration() -> configparser.ConfigParser:
     return config
 
 
-def showError(message: str, detailed_message: Optional[str] = None) -> None:
+def show_error(message: str, detailed_message: Optional[str] = None) -> None:
     """
     Display an error message box with specified string.
 
@@ -1880,14 +1880,14 @@ def menu_open_manual():
     manual_path = r_dir / USER_MANUAL_FILE_NAME
     filename = str(manual_path)
     if not manual_path.exists():
-        showError(f"User manual not found: {filename}")
+        show_error(f"User manual not found: {filename}")
         return
     try:
         # bandit complains about os.startfile, but it is the only way to open a file in the default application on Windows.
         # On Linux and MacOS, opening the file might give a security warning.
         os.startfile(filename) # nosec
     except Exception as e:
-        showError(f"Failed to open the user manual: {e}")
+        show_error(f"Failed to open the user manual: {e}")
 
 
 def main(config: Optional[str] = None) -> None:
