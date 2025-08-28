@@ -232,9 +232,9 @@ class TestBankLines:
         """
         h_node = BankLines._calculate_water_depth(mock_simulation_data)
         expected_h_node = np.array(
-            [0.1, 0.6, 0.2333333333, 0.4, -0.1]
+            [0.1, 0.6, 0.2333333333, 0.4, -0.1, 0, 0, 0]
         )
-        assert h_node.shape == mock_simulation_data.face_node.shape
+        assert h_node.shape == mock_simulation_data.x_node.shape
         assert np.allclose(h_node, expected_h_node)
 
     @pytest.mark.unit
@@ -259,33 +259,28 @@ class TestBankLines:
             The method correctly handles the wet nodes and water depth to create
                 appropriate bank lines.
         """
-        wet_node = np.array(
-            [[True, False, True], [False, True, True], [True, False, True]]
+        h_node = np.array(
+            [0.1, 0.6, 0.2333333333, 0.4, -0.1, 0, 0, 0]
         )
-        n_wet_arr = np.ma.masked_array([2, 2, 2])
-        h_node = np.array([[0.9, 1.1, 0.9], [0.9, 0.5, 1.1], [0.9, 0.5, 1.1]])
         h0 = 0.3
 
         lines = BankLines._generate_bank_lines(
-            mock_simulation_data, wet_node, n_wet_arr, h_node, h0
+            mock_simulation_data, h_node, h0
         )
         expected = [
-            LineString([(-2.999999999, -2.999999999), (5.0, 5.0)]),
-            LineString([(-4.999999999, -4.999999999), (2.5, 2.5)]),
-            LineString([(3.5, 3.5), (2.6666666666, 2.6666666666)]),
+            LineString([(0.4, 0.4), (1.818181818, 1.818181818)]),
+            LineString([(1.818181818, 1.818181818), (2.4, 2.4)]),
+            LineString([(2.4, 2.4), (3.2, 3.2)]),
         ]
-        assert all(
-            [
-                line.equals_exact(expected[i], tolerance=1e-8)
-                for i, line in enumerate(lines)
-            ]
-        )
+        assert len(lines) == len(expected)
+        for i in range(len(lines)):
+            assert lines[i].equals_exact(expected[i], tolerance=1e-8)
 
     @pytest.mark.parametrize(
         "face_node, n_nodes, expected",
         [
             (
-                np.array([[0, 1, 2], [1, 2, 3], [2, 3, 4]]),
+                np.ma.masked_array([[0, 1, 2], [1, 2, 3], [2, 3, 4]], np.full((3, 3), False)),
                 np.array([3, 3, 3]),
                 LineString(
                     [
@@ -297,7 +292,7 @@ class TestBankLines:
                 ),
             ),
             (
-                np.array([[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 7]]),
+                np.ma.MaskedArray([[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 7]], np.full((3, 4), False)),
                 np.array([4, 4, 4]),
                 MultiLineString(
                     [
