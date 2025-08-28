@@ -30,9 +30,10 @@ import configparser
 import os
 import pathlib
 import sys
+import traceback
 from functools import partial
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import matplotlib.pyplot
 import PyQt5.QtGui
@@ -1191,16 +1192,17 @@ def selectFile(key: str) -> None:
         dialog[key].setText(fil)
 
 
-def run_detection() -> None:
+def try_run_and_catch(run_analysis_steps: Callable[[ConfigFile], None]) -> None:
     """
-    Run the bank line detection based on settings in the GUI.
+    Run an analysis based on settings in the GUI.
     
     Use a dummy configuration name in the current work directory to create
     relative paths.
 
     Arguments
     ---------
-    None
+    run_analysis_steps : Callable[[configparser.ConfigParser], None]
+        function containing the plain analysis steps
     """
     config = get_configuration()
     rootdir = os.getcwd()
@@ -1210,39 +1212,72 @@ def run_detection() -> None:
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
     matplotlib.pyplot.close("all")
     # should maybe use a separate thread for this ...
-    msg = ""
     try:
-        bank_line = BankLines(config_file, gui=True)
-        bank_line.detect()
-        bank_line.plot()
-        bank_line.save()
-    except Exception as Ex:
-        msg = str(Ex)
-    dialog["application"].restoreOverrideCursor()
-    if msg != "":
-        print(msg)
-        showError(msg)
+        run_analysis_steps(config_file)
+    except (SystemExit, KeyboardInterrupt) as exception:
+        raise exception
+    except:
+        dialog["application"].restoreOverrideCursor()
+        stack_trace = traceback.format_exc()
+        showError(
+            "A run-time exception occurred. Press 'Show Details...' for the full stack trace.",
+            stack_trace,
+        )
+    else:
+        dialog["application"].restoreOverrideCursor()
+
+
+def run_detection() -> None:
+    """
+    Trigger the bank line detection analysis with error handling.
+
+    Arguments
+    ---------
+    None
+    """
+    try_run_and_catch(run_detection_steps)
+
+
+def run_detection_steps(config_file: ConfigFile) -> None:
+    """
+    Create bank line detection object and run the analysis.
+
+    Arguments
+    ---------
+    config : configparser.ConfigParser
+        Analysis configuration settings.
+    """
+    bank_line = BankLines(config_file, gui=True)
+    bank_line.detect()
+    bank_line.plot()
+    bank_line.save()
 
 
 def run_erosion() -> None:
     """
-    Run the D-FAST Bank Erosion analysis based on settings in the GUI.
+    Trigger the bank line erosion analysis with error handling.
 
-    Use a dummy configuration name in the current work directory to create
-    relative paths.
+    Arguments
+    ---------
+    None
     """
-    config = get_configuration()
-    rootdir = os.getcwd()
-    config_file = ConfigFile(config)
-    config_file.root_dir = rootdir
-    config_file.relative_to(rootdir)
-    dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
-    matplotlib.pyplot.close("all")
+    try_run_and_catch(run_erosion_steps)
+    
+
+
+def run_erosion_steps(config_file: ConfigFile) -> None:
+    """
+    Create bank line erosion object and run the analysis.
+
+    Arguments
+    ---------
+    config : configparser.ConfigParser
+        Analysis configuration settings.
+    """
     erosion = Erosion(config_file, gui=True)
     erosion.run()
     erosion.plot()
     erosion.save()
-    dialog["application"].restoreOverrideCursor()
 
 
 def close_dialog() -> None:
@@ -1789,7 +1824,7 @@ def get_configuration() -> configparser.ConfigParser:
     return config
 
 
-def showError(message):
+def showError(message: str, detailed_message: Optional[str] = None) -> None:
     """
     Display an error message box with specified string.
 
@@ -1797,10 +1832,14 @@ def showError(message):
     ---------
     message : str
         Text to be displayed in the message box.
+    detailed_message : Option[str]
+        Text to be displayed when the user clicks the Details button.
     """
     msg = QtWidgets.QMessageBox()
     msg.setIcon(QtWidgets.QMessageBox.Critical)
     msg.setText(message)
+    if detailed_message:
+        msg.setDetailedText(detailed_message)
     msg.setWindowTitle("Error")
     msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
     msg.exec_()
