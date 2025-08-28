@@ -2109,9 +2109,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dfastbe.gui.gui.showError" class="md-nav__link">
+  <a href="#dfastbe.gui.gui.show_error" class="md-nav__link">
     <span class="md-ellipsis">
-      showError
+      show_error
     </span>
   </a>
   
@@ -2678,9 +2678,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#dfastbe.gui.gui.showError" class="md-nav__link">
+  <a href="#dfastbe.gui.gui.show_error" class="md-nav__link">
     <span class="md-ellipsis">
-      showError
+      show_error
     </span>
   </a>
   
@@ -5484,7 +5484,7 @@ to reflect it contents.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">filename</span> <span class="o">!=</span> <span class="s2">&quot;dfastbe.cfg&quot;</span><span class="p">:</span>
-            <span class="n">showError</span><span class="p">(</span><span class="s2">&quot;The file &#39;</span><span class="si">{}</span><span class="s2">&#39; does not exist!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+            <span class="n">show_error</span><span class="p">(</span><span class="s2">&quot;The file &#39;</span><span class="si">{}</span><span class="s2">&#39; does not exist!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
         <span class="k">return</span>
     <span class="n">absfilename</span> <span class="o">=</span> <span class="n">absolute_path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">filename</span><span class="p">)</span>
     <span class="n">rootdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">absfilename</span><span class="p">)</span>
@@ -5495,7 +5495,7 @@ to reflect it contents.</p>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">version</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">version</span>
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-        <span class="n">showError</span><span class="p">(</span><span class="s2">&quot;No version information in the file!&quot;</span><span class="p">)</span>
+        <span class="n">show_error</span><span class="p">(</span><span class="s2">&quot;No version information in the file!&quot;</span><span class="p">)</span>
         <span class="k">return</span>
 
     <span class="n">config</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">config</span>
@@ -5623,7 +5623,7 @@ to reflect it contents.</p>
             <span class="n">dialog</span><span class="p">[</span><span class="n">istr</span> <span class="o">+</span> <span class="s2">&quot;_eroVolEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">showError</span><span class="p">(</span><span class="s2">&quot;Unsupported version number </span><span class="si">{}</span><span class="s2"> in the file!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">version</span><span class="p">))</span>
+        <span class="n">show_error</span><span class="p">(</span><span class="s2">&quot;Unsupported version number </span><span class="si">{}</span><span class="s2"> in the file!&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">version</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5859,14 +5859,14 @@ to reflect it contents.</p>
     <span class="n">manual_path</span> <span class="o">=</span> <span class="n">r_dir</span> <span class="o">/</span> <span class="n">USER_MANUAL_FILE_NAME</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">manual_path</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">manual_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="n">showError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;User manual not found: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">show_error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;User manual not found: </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">return</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># bandit complains about os.startfile, but it is the only way to open a file in the default application on Windows.</span>
         <span class="c1"># On Linux and MacOS, opening the file might give a security warning.</span>
         <span class="n">os</span><span class="o">.</span><span class="n">startfile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="c1"># nosec</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="n">showError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to open the user manual: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">show_error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Failed to open the user manual: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7117,16 +7117,16 @@ default : str
 <div class="doc doc-object doc-function">
 
 
-<h3 id="dfastbe.gui.gui.showError" class="doc doc-heading"><a href="#dfastbe.gui.gui.showError" class="toclink">
-            <code class="highlight language-python"><span class="n">showError</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">detailed_message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+<h3 id="dfastbe.gui.gui.show_error" class="doc doc-heading"><a href="#dfastbe.gui.gui.show_error" class="toclink">
+            <code class="highlight language-python"><span class="n">show_error</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">detailed_message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
 
-</a><a href="#dfastbe.gui.gui.showError" class="headerlink" title="Permanent link">#</a></h3>
+</a><a href="#dfastbe.gui.gui.show_error" class="headerlink" title="Permanent link">#</a></h3>
 
 
     <div class="doc doc-contents ">
 
         <p>Display an error message box with specified string.</p>
-<h5 id="dfastbe.gui.gui.showError--arguments"><a class="toclink" href="#dfastbe.gui.gui.showError--arguments">Arguments</a><a class="headerlink" href="#dfastbe.gui.gui.showError--arguments" title="Permanent link">#</a></h5>
+<h5 id="dfastbe.gui.gui.show_error--arguments"><a class="toclink" href="#dfastbe.gui.gui.show_error--arguments">Arguments</a><a class="headerlink" href="#dfastbe.gui.gui.show_error--arguments" title="Permanent link">#</a></h5>
 <p>message : str
     Text to be displayed in the message box.
 detailed_message : Option[str]
@@ -7152,7 +7152,7 @@ detailed_message : Option[str]
 <span class="normal">1842</span>
 <span class="normal">1843</span>
 <span class="normal">1844</span>
-<span class="normal">1845</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">showError</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">detailed_message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1845</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">show_error</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">detailed_message</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Display an error message box with specified string.</span>
 
@@ -7256,7 +7256,7 @@ relative paths.</p>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;application&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">restoreOverrideCursor</span><span class="p">()</span>
         <span class="n">stack_trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
-        <span class="n">showError</span><span class="p">(</span>
+        <span class="n">show_error</span><span class="p">(</span>
             <span class="s2">&quot;A run-time exception occurred. Press &#39;Show Details...&#39; for the full stack trace.&quot;</span><span class="p">,</span>
             <span class="n">stack_trace</span><span class="p">,</span>
         <span class="p">)</span>
