@@ -60,7 +60,7 @@ def image_list() -> List[str]:
     "case, config_file",
     [
         ("meuse_manual", "meuse_manual.cfg"),
-        ("meuse_6gen", "Test_Meuse_6gen_km144-247.cfg ")
+        ("meuse_6gen", "Test_Meuse_6gen_km144-247.cfg")
     ], ids=[
           "5th gen Meuse short",
           "6th gen Meuse short",
@@ -68,12 +68,6 @@ def image_list() -> List[str]:
 )
 def test_bank_erosion(image_list: List[str], case: str, config_file: str):
     folder = f"./tests/data/erosion/{case}/"
-    print(folder)
-    print(os.listdir('.'))
-    print(os.listdir('./tests'))
-    print(os.listdir('./tests/data'))
-    print(os.listdir('./tests/data/erosion'))
-    print(os.listdir(f'./tests/data/erosion/{case}'))
     language = "UK"
     folder_and_config_file = f"{folder}{config_file}"
     run(language, "BANKLINES", folder_and_config_file)
