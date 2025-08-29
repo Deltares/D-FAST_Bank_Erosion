@@ -25,7 +25,8 @@ from dfastbe.io.data_models import (
 from dfastbe.io.file_utils import absolute_path, relative_path
 from dfastbe.io.logger import get_text, load_program_texts, log_text
 
-filename = "tests/data/files/e02_f001_c011_simplechannel_map.nc"
+fmmap_filename = "tests/data/files/e02_f001_c011_simplechannel_map.nc"
+config_filename = "tests/data/erosion/meuse_manual/test.cfg"
 
 @contextmanager
 def captured_output():
@@ -338,7 +339,7 @@ class TestReadFMMap:
         """
 
         varname = "x"
-        datac = _read_fm_map(filename, varname)
+        datac = _read_fm_map(fmmap_filename, varname)
         dataref = 41.24417604888325
         assert datac[1] == pytest.approx(dataref)
 
@@ -348,7 +349,7 @@ class TestReadFMMap:
         """
         varname = "y"
         location = "edge"
-        datac = _read_fm_map(filename, varname, location)
+        datac = _read_fm_map(fmmap_filename, varname, location)
         dataref = 7059.853000358055
         assert datac[1] == dataref
 
@@ -357,7 +358,7 @@ class TestReadFMMap:
         Testing read_fm_map: face node connectivity.
         """
         varname = "face_node_connectivity"
-        datac = _read_fm_map(filename, varname)
+        datac = _read_fm_map(fmmap_filename, varname)
         dataref = 2352
         assert datac[-1][1] == dataref
 
@@ -366,7 +367,7 @@ class TestReadFMMap:
         Testing read_fm_map: variable by standard name.
         """
         varname = "sea_floor_depth_below_sea_surface"
-        datac = _read_fm_map(filename, varname)
+        datac = _read_fm_map(fmmap_filename, varname)
         dataref = 3.894498393076889
         assert datac[1] == pytest.approx(dataref)
 
@@ -375,7 +376,7 @@ class TestReadFMMap:
         Testing read_fm_map: variable by long name.
         """
         varname = "Water level"
-        datac = _read_fm_map(filename, varname)
+        datac = _read_fm_map(fmmap_filename, varname)
         dataref = 3.8871328177527262
         assert datac[1] == pytest.approx(dataref)
 
@@ -385,7 +386,7 @@ class TestReadFMMap:
         """
         varname = "water level"
         with pytest.raises(Exception) as cm:
-            _read_fm_map(filename, varname)
+            _read_fm_map(fmmap_filename, varname)
         assert (
             str(cm.value) == 'Expected one variable for "water level", but obtained 0.'
         )
@@ -527,22 +528,22 @@ class TestConfigFile:
 
     def test_get_str(self, config: ConfigParser):
         """Test retrieving a string value."""
-        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
+        config_file = ConfigFile(config, config_filename)
         assert config_file.get_str("General", "Version") == "1.0"
 
     def test_get_int(self, config: ConfigParser):
         """Test retrieving an integer value."""
-        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
+        config_file = ConfigFile(config, config_filename)
         assert config_file.get_int("Detect", "NBank") == 2
 
     def test_get_bool(self, config: ConfigParser):
         """Test retrieving a boolean value."""
-        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
+        config_file = ConfigFile(config, config_filename)
         assert config_file.get_bool("General", "plotting") is True
 
     def test_get_float(self, config: ConfigParser):
         """Test retrieving a float value."""
-        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
+        config_file = ConfigFile(config, config_filename)
         assert config_file.get_float("General", "ZoomStepKM") == pytest.approx(
             0.1, rel=1e-6
         )
@@ -557,7 +558,7 @@ class TestConfigFile:
 
     def test_get_start_end_stations(self, config: ConfigParser):
         """Test retrieving km bounds."""
-        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
+        config_file = ConfigFile(config, config_filename)
         start, end = config_file.get_start_end_stations()
         assert start == pytest.approx(123.0, rel=1e-6)
         assert end == pytest.approx(128.0, rel=1e-6)
@@ -576,7 +577,7 @@ class TestConfigFile:
     def test_read_bank_lines(self, config: ConfigParser, fs: FakeFilesystem):
         """Test retrieving bank lines."""
         config["General"]["BankLine"] = "bankfile"
-        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
+        config_file = ConfigFile(config, config_filename)
 
         fs.create_file(
             "inputs/bankfile_1.xyc",
@@ -630,7 +631,7 @@ class TestConfigFile:
         self, key, value, default, valid, expected, config: ConfigParser
     ):
         """Test retrieving a parameter field."""
-        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
+        config_file = ConfigFile(config, config_filename)
         bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5, 6, 7])]
         num_stations_per_bank = [len(bank_i) for bank_i in bank_km]
         if value:
@@ -655,7 +656,7 @@ class TestConfigFile:
         self, key, value, positive, valid, expected, config: ConfigParser
     ):
         """Test retrieving a parameter field."""
-        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
+        config_file = ConfigFile(config, config_filename)
         bank_km = [np.array([0, 1, 2]), np.array([3, 4, 5])]
 
         # Case 5: Parameter does not match valid values
@@ -667,7 +668,7 @@ class TestConfigFile:
 
     def test_get_bank_search_distances(self, config: ConfigParser):
         """Test retrieving bank search distances."""
-        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
+        config_file = ConfigFile(config, config_filename)
 
         # Case 1: Bank search distances exist in the configuration
         result = config_file.get_bank_search_distances(2)
@@ -702,7 +703,7 @@ class TestConfigFile:
         """Test resolving paths in the configuration."""
         config = ConfigParser()
         config.read_dict(path_dict)
-        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
+        config_file = ConfigFile(config, config_filename)
         config_file.resolve("tests/data/erosion/meuse_manual")
         assert config_file.config["General"]["RiverKM"] == str(
             Path("tests/data/erosion/meuse_manual").resolve() / "inputs/rivkm_20m.xyc"
@@ -712,7 +713,7 @@ class TestConfigFile:
         """Test converting paths to relative paths."""
         config = ConfigParser()
         config.read_dict(path_dict)
-        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
+        config_file = ConfigFile(config, config_filename)
         config_file.relative_to("tests/data")
         assert config_file.config["General"]["RiverKM"] == str(
             Path("erosion/meuse_manual") / "inputs/rivkm_20m.xyc"
@@ -812,7 +813,7 @@ class TestConfigFile:
         """Test the get_plotting_flags method."""
         config = ConfigParser()
         config.read_dict(plotting_data)
-        config_file = ConfigFile(config, "tests/data/erosion/meuse_manual/test.cfg")
+        config_file = ConfigFile(config, config_filename)
         root_dir = Path("tests/data/erosion/meuse_manual").resolve()
         plotting_flags = config_file.get_plotting_flags(str(root_dir))
 

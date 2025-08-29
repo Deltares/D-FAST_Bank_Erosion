@@ -1322,7 +1322,7 @@ def load_configuration(filename: str) -> None:
     """
     if not os.path.exists(filename):
         if filename != "dfastbe.cfg":
-            show_error("The file '{}' does not exist!".format(filename))
+            show_error(f"The file {filename} does not exist!")
         return
     absfilename = absolute_path(os.getcwd(), filename)
     rootdir = os.path.dirname(absfilename)
@@ -1333,7 +1333,7 @@ def load_configuration(filename: str) -> None:
     try:
         version = config_file.version
     except KeyError:
-        show_error("No version information in the file!")
+        show_error(f"No version information in the file {filename}!")
         return
 
     config = config_file.config
@@ -1461,7 +1461,7 @@ def load_configuration(filename: str) -> None:
             dialog[istr + "_eroVolEdit"].setText(txt)
 
     else:
-        show_error("Unsupported version number {} in the file!".format(version))
+        show_error(f"Unsupported version number {version} in the file {filename}!")
 
 
 def addTabForLevel(istr: str) -> None:

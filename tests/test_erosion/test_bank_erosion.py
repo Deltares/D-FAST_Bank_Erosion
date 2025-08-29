@@ -55,15 +55,26 @@ def image_list() -> List[str]:
 
 
 @pytest.mark.e2e
-def test_bank_erosion(image_list: List[str]):
-    file = "erosion/meuse_manual"
+@pytest.mark.parametrize(
+    "case, config_file",
+    [
+        ("meuse_manual", "meuse_manual.cfg"),
+        ("meuse_6gen", "Test_Meuse_6gen_km144-247.cfg ")
+    ], ids=[
+          "5th gen Meuse short",
+          "6th gen Meuse short",
+    ],
+)
+def test_bank_erosion(image_list: List[str], case: str, config_file: str):
+    folder = f"./tests/data/erosion/{case}/"
+    config_file = "meuse_manual.cfg"
     language = "UK"
-    config_file = f"tests/data/{file}/meuse_manual.cfg"
-    run(language, "BANKLINES", config_file)
+    folder_and_config_file = f"{folder}/{config_file}"
+    run(language, "BANKLINES", folder_and_config_file)
     print("Banklines done")
-    run(language, "BANKEROSION", config_file)
+    run(language, "BANKEROSION", folder_and_config_file)
     print("Bank erosion done")
-    test_path = Path(f"./tests/data/{file}")
+    test_path = Path(folder)
 
     output_dir = test_path / "output/figures"
     reference_dir = test_path / "reference/figures"
@@ -73,15 +84,6 @@ def test_bank_erosion(image_list: List[str]):
         output_img = output_dir / image
         assert output_img.exists()
         assert compare_images(str(output_img), str(reference_img), 0.0001) is None
-
-
-@pytest.mark.e2e
-def test_bank_erosion_with_unstructured_tile():
-    file = "erosion/meuse_6gen"
-    language = "UK"
-    config_file = f"tests/data/{file}/Test_Meuse_6gen_km144-247.cfg"
-    run(language, "BANKLINES", config_file)
-    run(language, "BANKEROSION", config_file)
 
 
 class TestErosion:
