@@ -29,7 +29,6 @@ from typing import Tuple, List, Dict, Optional
 from pathlib import Path
 import numpy as np
 import netCDF4
-import math
 from shapely.geometry import LineString, Point
 from shapely import prepare
 from geopandas.geodataframe import GeoDataFrame
@@ -509,7 +508,6 @@ class BaseSimulationData:
             # remove invalid node indices ... this happens typically if _FillValue is not correctly set or applied
             f_nc.mask[f_nc.data < 0] = True
             f_nc.mask[f_nc.data > x_node.size-1] = True
-            # consider checking for invalid indices and applying mask
             f_nc.data[f_nc.mask] = 0
             n_nodes_per_face = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
 
@@ -810,7 +808,7 @@ def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndar
 
     if remove_mask and isinstance(data_read, np.ma.MaskedArray):
         data = data_read.data
-        data[data_read.mask] = math.nan
+        data[data_read.mask] = np.nan
     else:
         data = data_read
 
