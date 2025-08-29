@@ -52,18 +52,18 @@ The tool requires the result of a \dflowfm computation for a given set of flow c
 \dfastbe is compatible with \dhydrosuite 2025.02.
 
 \section{Installation}
-\dfastbe is distributed as a plain zip-file (and a tar-file for Linux).
+\dfastbe is distributed as a plain zip-file.
 The installation procedure is described in the \dfastbe, User Manual.
 
 \section {Documentation list}
 The following documentation is distributed with this release:
 
-\begin{enumerate}
+\begin{itemize}
 	\item \dfastbe, Release notes (this document)
 	\item \dfastbe, User Manual
 	\item \dfastbe, Technical Reference Manual
 %	\item \dfastbe, Validation Document
-\end{enumerate}
+\end{itemize}
 
 \chapter{Release summary}
 
@@ -94,19 +94,13 @@ The known issues are:
 
 As this release is focused on maintainability, most changes are not relevant for the end user. Here follows a list of resolved issues since the release of version 2.3.1, which are relevant for the end user:
 
-\begin{longtable}{l|l|p{8cm}}
-\caption{List of resolved issues for version 3.0.0} \\
-Issue & Type & Description \\ \hline
-\endfirsthead
-\multicolumn{3}{l}{\textsl{(continued from previous page)}} \\
-Issue & Type & Description \\ \hline
-\endhead
-\hline \multicolumn{3}{r}{\textsl{(continued on next page)}} \\
-\endfoot
-\endlastfoot 
-DFAST-304 & Bug & Security issue: dependency on tornado \\
-DFAST-215 & Improvement & Add cover pages to the documentation (UM, TRM and RelNotes) \\
-\end{longtable}
+\begin{adjustbox}{left=-0.25cm}
+	\begin{tabular}{ l l } 
+		issue & description / summary\\ \hline
+		DFAST-304 & Security issue: dependency on tornado \\
+		DFAST-215 & Add cover pages to the documentation (UM, TRM and RelNotes) \\
+	\end{tabular}
+\end{adjustbox}
 
 %------------------------------------------------------------------------------
 \pagestyle{empty}
