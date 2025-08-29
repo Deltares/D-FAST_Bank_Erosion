@@ -67,7 +67,6 @@ def image_list() -> List[str]:
 )
 def test_bank_erosion(image_list: List[str], case: str, config_file: str):
     folder = f"./tests/data/erosion/{case}/"
-    config_file = "meuse_manual.cfg"
     language = "UK"
     folder_and_config_file = f"{folder}/{config_file}"
     run(language, "BANKLINES", folder_and_config_file)
