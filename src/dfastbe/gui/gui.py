@@ -1823,9 +1823,11 @@ def menu_about_self():
     msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
     
     dfast_icon = getIcon(f"{ICONS_DIR}/D-FASTBE.png")
-    icon_size = dfast_icon.availableSizes()[0]
-    pixmap = dfast_icon.pixmap(icon_size).scaled(64,64);
-    msg.setIconPixmap(pixmap)
+    available_sizes = dfast_icon.availableSizes()
+    if available_sizes:
+        icon_size = available_sizes[0]
+        pixmap = dfast_icon.pixmap(icon_size).scaled(64,64)
+        msg.setIconPixmap(pixmap)
     msg.setWindowIcon(dfast_icon)
     msg.exec_()
 
