@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import List
 from unittest.mock import MagicMock, patch
 
+import os
 import matplotlib
 import numpy as np
 import pytest
@@ -67,6 +68,11 @@ def image_list() -> List[str]:
 )
 def test_bank_erosion(image_list: List[str], case: str, config_file: str):
     folder = f"./tests/data/erosion/{case}/"
+    print(os.listdir('.'))
+    print(os.listdir('./tests')
+    print(os.listdir('./tests/data')
+    print(os.listdir('./tests/data/erosion')
+    print(os.listdir('./tests/data/erosion/{case}')
     language = "UK"
     folder_and_config_file = f"{folder}{config_file}"
     run(language, "BANKLINES", folder_and_config_file)
