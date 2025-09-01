@@ -505,9 +505,15 @@ class BaseSimulationData:
             else:
                 f_nc = np.ma.MaskedArray(f_nc_read, np.full(f_nc_read.shape, False))
 
-            # remove invalid node indices ... this happens typically if _FillValue is not correctly set or applied
+            # sometimes the _FillValue is not correctly set or applied in all preprocessing steps
+            # clean-up the indices to make the code more robust:
+            
+            # 1) remove negative node indices
             f_nc.mask[f_nc.data < 0] = True
+            # 2) remove node indices larger than the number of nodes
             f_nc.mask[f_nc.data > x_node.size-1] = True
+            
+            # set all masked node indices to 0, such that indexing operations don't fail
             f_nc.data[f_nc.mask] = 0
             n_nodes_per_face = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
 
