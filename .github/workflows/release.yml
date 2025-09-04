@@ -120,7 +120,7 @@ jobs:
 
           echo "Version bump completed successfully"
 
-      - name: Build hydrolib-core package
+      - name: Build package
         run: poetry build
 
       - name: Create GitHub release
