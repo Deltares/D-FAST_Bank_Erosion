@@ -1,5 +1,5 @@
 """
-Copyright (C) 2020 Stichting Deltares.
+Copyright (C) 2025 Stichting Deltares.
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -78,13 +78,15 @@ def parse_arguments() -> Tuple[str, str, str]:
         "--language",
         default="UK",
         choices=["NL", "UK"],
-        help="display language 'NL' or 'UK' ('UK' is default)",
+        type=str.upper,
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--mode",
-        choices=["BANKLINES", "BANKEROSION", "GUI"],
         default="GUI",
-        help="run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is default)",
+        choices=["BANKLINES", "BANKEROSION", "GUI"],
+        type=str.upper,
+        help="run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (%(default)s is default)",
     )
     parser.add_argument(
         "--config",

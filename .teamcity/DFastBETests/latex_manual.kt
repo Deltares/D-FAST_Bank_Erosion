@@ -8,7 +8,7 @@ import jetbrains.buildServer.configs.kotlin.triggers.vcs
 
 object LatexManual : BuildType({
     name = "Latex Manual Generation"
-    description = "Generate the D-FAST Bank Erosion user manual and technical reference using LaTeX."
+    description = "Generate the D-FAST Bank Erosion documents using LaTeX."
 
     artifactRules = """
         +:%artifact_path%*.pdf
@@ -20,6 +20,7 @@ object LatexManual : BuildType({
         param("artifact_path", "docs/end-user-docs/")
         param("file_name_of_techref", "dfastbe_techref")
         param("file_name_of_usermanual", "dfastbe_usermanual")
+        param("file_name_of_relnotes", "dfastbe_release_notes")
     }
 
     vcs {
@@ -58,6 +59,17 @@ object LatexManual : BuildType({
                 bibtex %file_name_of_techref%
                 pdflatex %file_name_of_techref%
                 pdflatex %file_name_of_techref%
+            """.trimIndent()
+        }
+        script {
+            name = "Generate Release Notes"
+            executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
+            workingDir = "docs/end-user-docs"
+            scriptContent = """
+                pdflatex %file_name_of_relnotes%
+                bibtex %file_name_of_relnotes%
+                pdflatex %file_name_of_relnotes%
+                pdflatex %file_name_of_relnotes%
             """.trimIndent()
         }
     }

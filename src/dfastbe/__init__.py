@@ -7,7 +7,7 @@ https://github.com/Deltares/D-FAST_Bank_Erosion
 
 License:
 
-Copyright (C) 2020 Stichting Deltares.
+Copyright (C) 2025 Stichting Deltares.
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -33,6 +33,6 @@ Stichting Deltares. All rights reserved.
 
 from typing import List, Any
 
-__version__ = "2.3.1"
+__version__ = "3.0.0"
 
 __all__: List[Any] = []
