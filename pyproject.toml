@@ -89,6 +89,8 @@ version_files = [
 changelog_file = "docs/mkdocs/change-log.md"
 update_changelog_on_bump = true
 changelog_incremental = true
+version_scheme = "pep440"
+
 
 
 [tool.pytest.ini_options]
