@@ -141,8 +141,10 @@ class BankLines(BaseCalculator):
         masked_bank_lines = []
         for ib, bank_area in enumerate(bank_areas):
             log_text("bank_lines", data={"ib": ib + 1})
-            masked_bank_lines.append(self.mask(banklines, bank_area))
-            bank.append(sort_connect_bank_lines(masked_bank_lines[ib], river_center_line_values, to_right[ib]))
+            masked_bank_line = self.mask(banklines, bank_area)
+            if not masked_bank_line.is_empty:
+                masked_bank_lines.append(masked_bank_line)
+                bank.append(sort_connect_bank_lines(masked_bank_line, river_center_line_values, to_right[ib]))
 
         self.results = {
             "bank": bank,
@@ -254,12 +256,8 @@ class BankLines(BaseCalculator):
             ```
         """
         h_node = BankLines._calculate_water_depth(simulation_data)
-
-        wet_node = h_node > critical_water_depth
-        num_wet_arr = wet_node.sum(axis=1)
-
         lines = BankLines._generate_bank_lines(
-            simulation_data, wet_node, num_wet_arr, h_node, critical_water_depth
+            simulation_data, h_node, critical_water_depth
         )
         multi_line = union_all(lines)
         merged_line = line_merge(multi_line)
@@ -269,11 +267,16 @@ class BankLines(BaseCalculator):
     @staticmethod
     def _calculate_water_depth(
         simulation_data: BaseSimulationData,
-    ) -> Tuple[np.ndarray, np.ndarray]:
+    ) -> np.ndarray:
         """Calculate the water depth at each node in the simulation data.
 
         This method computes the water depth for each node by considering the
-        water levels at the faces and the bed elevation values.
+        water levels at the faces and the bed elevation values at the nodes.
+        There are two cases to consider:
+           (1) the water levels at the "dry" faces are equal to the bed level
+               at the faces (Delft3D-FLOW, WAQUA, D-Flow FM before June 2023)
+           (2) the water levels at the "dry" faces are undefined (D-Flow FM
+               after June 2023)
 
         Args:
             simulation_data (BaseSimulationData):
@@ -285,37 +288,41 @@ class BankLines(BaseCalculator):
                 An array representing the water depth at each node.
         """
         face_node = simulation_data.face_node
-        max_num_nodes = simulation_data.face_node.shape[1]
+        max_num_nodes = face_node.shape[1]
         num_nodes_total = len(simulation_data.x_node)
 
-        if hasattr(face_node, "mask"):
-            mask = ~face_node.mask
-            non_masked = sum(mask.reshape(face_node.size))
-            f_nc_m = face_node[mask]
-            zwm = np.repeat(simulation_data.water_level_face, max_num_nodes)[
-                mask.flatten()
-            ]
-        else:
-            non_masked = face_node.size
-            f_nc_m = face_node.reshape(non_masked)
-            zwm = np.repeat(simulation_data.water_level_face, max_num_nodes).reshape(
-                non_masked
-            )
+        # mask all nodes that shouldn't be used to compute the water level at the nodes.
+        # start with all unused entries in the face node connectivity
+        # mask all node indices if the water level at the face is undefined (dry)
+        mask = face_node.mask.copy()
+        mask[np.isnan(simulation_data.water_level_face)] = True
 
-        zw_node = np.bincount(f_nc_m, weights=zwm, minlength=num_nodes_total)
+        # construct two arrays of equal size:
+        # * an array of the unmasked node indices in face_node, and
+        # * an array of water levels at the corresponding face
+        total_num_node_indices = face_node.size
+        num_masked_node_indices = sum(mask.reshape(total_num_node_indices))
+        num_unmasked_node_indices = total_num_node_indices - num_masked_node_indices
+        unmasked = ~mask
+        node_indices = face_node[unmasked]
+        water_levels = np.repeat(simulation_data.water_level_face, max_num_nodes)[
+            unmasked.flatten()
+        ]
+
+        # compute the water level at nodes as the average of the water levels at all corresponding faces and use the bed level if none of the corresponding faces has a water level
+        zw_node = np.bincount(node_indices, weights=water_levels, minlength=num_nodes_total)
         num_val = np.bincount(
-            f_nc_m, weights=np.ones(non_masked), minlength=num_nodes_total
+            node_indices, weights=np.ones(num_unmasked_node_indices), minlength=num_nodes_total
         )
         zw_node = zw_node / np.maximum(num_val, 1)
         zw_node[num_val == 0] = simulation_data.bed_elevation_values[num_val == 0]
-        h_node = zw_node[face_node] - simulation_data.bed_elevation_values[face_node]
+        h_node = zw_node - simulation_data.bed_elevation_values
+
         return h_node
 
     @staticmethod
     def _generate_bank_lines(
         simulation_data: BaseSimulationData,
-        wet_node: np.ndarray,
-        num_wet_arr: np.ndarray,
         h_node: np.ndarray,
         critical_water_depth: float,
     ) -> List[LineString]:
@@ -324,10 +331,6 @@ class BankLines(BaseCalculator):
         Args:
             simulation_data (BaseSimulationData):
                 Simulation data: mesh, bed levels, water levels, velocities, etc.
-            wet_node (np.ndarray):
-                Wet/dry boolean array for each face node.
-            num_wet_arr (np.ndarray):
-                Number of wet nodes for each face.
             h_node (np.ndarray):
                 Water depth at each node.
             critical_water_depth (float):
@@ -338,30 +341,33 @@ class BankLines(BaseCalculator):
                 List of detected bank lines.
         """
         num_faces = len(simulation_data.face_node)
-        x_node = simulation_data.x_node[simulation_data.face_node]
-        y_node = simulation_data.y_node[simulation_data.face_node]
-        mask = num_wet_arr.mask.size > 1
         lines = []
 
         for i in range(num_faces):
             BankLines._progress_bar(i, num_faces)
 
-            n_wet = num_wet_arr[i]
             n_node = simulation_data.n_nodes[i]
-            if (mask and n_wet.mask) or n_wet == 0 or n_wet == n_node:
+            face_nodes = simulation_data.face_node[i,:n_node]
+            x_face_nodes = simulation_data.x_node[face_nodes]
+            y_face_nodes = simulation_data.y_node[face_nodes]
+            h_face_nodes = h_node[face_nodes]
+            
+            wet_face_nodes = h_face_nodes > critical_water_depth
+            n_wet = wet_face_nodes.sum()
+            if n_wet == 0 or n_wet == n_node:
                 continue
 
             if n_node == 3:
                 line = tri_to_line(
-                    x_node[i], y_node[i], wet_node[i], h_node[i], critical_water_depth
+                    x_face_nodes, y_face_nodes, wet_face_nodes, h_face_nodes, critical_water_depth
                 )
             else:
                 line = poly_to_line(
                     n_node,
-                    x_node[i],
-                    y_node[i],
-                    wet_node[i],
-                    h_node[i],
+                    x_face_nodes,
+                    y_face_nodes,
+                    wet_face_nodes,
+                    h_face_nodes,
                     critical_water_depth,
                 )
 
