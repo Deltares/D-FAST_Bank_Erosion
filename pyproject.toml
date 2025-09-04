@@ -34,6 +34,7 @@ pytest-cov = "^6.0.0"
 pyfakefs = "^5.1.0"
 teamcity-messages = "^1.32"
 pre-commit = "^4.2.0"
+commitizen = "^4.8.3"
 
 
 [tool.poetry.group.docs.dependencies]
@@ -77,6 +78,16 @@ skip-string-normalization = true  # Avoid unnecessary quote changes
 profile = "black"
 line_length = 88
 multi_line_output = 3
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version = "2.3.1"
+tag_format = "$version"
+version_files = [
+    "src/dfastbe/__init__.py",
+    "pyproject.toml:version",
+]
+changelog_file = "docs/mkdocs/change-log.md"
 
 [tool.pytest.ini_options]
 addopts = [ "--cov",
