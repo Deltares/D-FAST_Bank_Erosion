@@ -54,6 +54,7 @@ START /B /WAIT python -m nuitka ^
  --include-data-files=LICENSE.md=LICENSE.md ^
  --include-data-files=docs/dfastbe_usermanual.pdf=dfastbe/dfastbe_usermanual.pdf ^
  --include-data-files=docs/dfastbe_techref.pdf=dfastbe/dfastbe_techref.pdf ^
+ --include-data-files=docs/dfastbe_release_notes.pdf=dfastbe/dfastbe_release_notes.pdf ^
  %cmd_box_args%
 
 rem move some libraries to resolve dependencies ...
