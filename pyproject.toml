@@ -87,6 +87,9 @@ version_files = [
     "src/dfastbe/__init__.py:__version__",
 ]
 changelog_file = "docs/mkdocs/change-log.md"
+update_changelog_on_bump = true
+changelog_incremental = true
+
 
 [tool.pytest.ini_options]
 addopts = [ "--cov",
