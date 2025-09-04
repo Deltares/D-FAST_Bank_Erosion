@@ -63,7 +63,7 @@ class TestBatchMode:
         """
         Testing the bank erosion mode.
         """
-        test_dir = "tests/data/erosion"
+        test_dir = "tests/data/erosion/meuse_manual"
         cwd = os.getcwd()
         try:
             os.chdir(test_dir)
