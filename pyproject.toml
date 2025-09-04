@@ -15,7 +15,7 @@ matplotlib = "3.8.4"
 geopandas = "^0.14.4"
 shapely = "^2.1.0"
 Pillow = "<11.2.0 || >=11.3.0"  # Allow only Pillow versions below 11.2.0 or 11.3.0 and above to avoid CWE-122 vulnerability
-dfastio = { git = "https://github.com/Deltares/D-FAST_Commons.git", tag = "0.1.0-alpha.2" }
+dfastio = { git = "https://github.com/Deltares/D-FAST_Commons.git", rev = "0.1.0" }
 certifi = "2025.1.31"
 
 [tool.poetry.group.gui.dependencies]
@@ -34,6 +34,7 @@ pytest-cov = "^6.0.0"
 pyfakefs = "^5.1.0"
 teamcity-messages = "^1.32"
 pre-commit = "^4.2.0"
+commitizen = "^4.8.3"
 
 
 [tool.poetry.group.docs.dependencies]
@@ -77,6 +78,20 @@ skip-string-normalization = true  # Avoid unnecessary quote changes
 profile = "black"
 line_length = 88
 multi_line_output = 3
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version_provider = "poetry"
+tag_format = "$version"
+version_files = [
+    "src/dfastbe/__init__.py:__version__",
+]
+changelog_file = "docs/mkdocs/change-log.md"
+update_changelog_on_bump = true
+changelog_incremental = true
+version_scheme = "pep440"
+
+
 
 [tool.pytest.ini_options]
 addopts = [ "--cov",
