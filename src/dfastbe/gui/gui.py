@@ -1,5 +1,5 @@
 """
-Copyright (C) 2020 Stichting Deltares.
+Copyright (C) 2025 Stichting Deltares.
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -99,6 +99,7 @@ def create_dialog() -> None:
     win = QtWidgets.QMainWindow()
     win.setGeometry(200, 200, 600, 300)
     win.setWindowTitle("D-FAST Bank Erosion")
+    win.setWindowIcon(getIcon(f"{ICONS_DIR}/D-FASTBE.png"))
     dialog["window"] = win
 
     menubar = win.menuBar()
@@ -1854,13 +1855,19 @@ def menu_about_self():
     None
     """
     msg = QtWidgets.QMessageBox()
-    msg.setIcon(QtWidgets.QMessageBox.Information)
     msg.setText(f"D-FAST Bank Erosion {__version__}")
-    msg.setInformativeText("Copyright (c) 2020 Deltares.")
+    msg.setInformativeText("Copyright (c) 2025 Deltares.")
     msg.setDetailedText(gui_text("license"))
     msg.setWindowTitle(gui_text("about"))
     msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
-    msg.setStyleSheet("QDialogButtonBox{min-width: 400px;}")
+    
+    dfast_icon = getIcon(f"{ICONS_DIR}/D-FASTBE.png")
+    available_sizes = dfast_icon.availableSizes()
+    if available_sizes:
+        icon_size = available_sizes[0]
+        pixmap = dfast_icon.pixmap(icon_size).scaled(64,64)
+        msg.setIconPixmap(pixmap)
+    msg.setWindowIcon(dfast_icon)
     msg.exec_()
 
 

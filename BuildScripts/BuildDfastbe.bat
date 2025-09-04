@@ -46,11 +46,11 @@ START /B /WAIT python -m nuitka ^
  --windows-icon-from-ico=src/dfastbe/gui/icons/D-FASTBE.png ^
  --include-data-files=src/dfastbe/io/log_data/messages.NL.ini=dfastbe/io/log_data/messages.NL.ini ^
  --include-data-files=src/dfastbe/io/log_data/messages.UK.ini=dfastbe/io/log_data/messages.UK.ini ^
- --include-data-files=src/dfastbe/gui/icons/D-FASTBE.png=dfastbe/D-FASTBE.png ^
- --include-data-files=src/dfastbe/gui/icons/open.png=dfastbe/open.png ^
- --include-data-files=src/dfastbe/gui/icons/add.png=dfastbe/add.png ^
- --include-data-files=src/dfastbe/gui/icons/edit.png=dfastbe/edit.png ^
- --include-data-files=src/dfastbe/gui/icons/remove.png=dfastbe/remove.png ^
+ --include-data-files=src/dfastbe/gui/icons/D-FASTBE.png=dfastbe/gui/icons/D-FASTBE.png ^
+ --include-data-files=src/dfastbe/gui/icons/open.png=dfastbe/gui/icons/open.png ^
+ --include-data-files=src/dfastbe/gui/icons/add.png=dfastbe/gui/icons/add.png ^
+ --include-data-files=src/dfastbe/gui/icons/edit.png=dfastbe/gui/icons/edit.png ^
+ --include-data-files=src/dfastbe/gui/icons/remove.png=dfastbe/gui/icons/remove.png ^
  --include-data-files=LICENSE.md=LICENSE.md ^
  --include-data-files=docs/dfastbe_usermanual.pdf=dfastbe/dfastbe_usermanual.pdf ^
  --include-data-files=docs/dfastbe_techref.pdf=dfastbe/dfastbe_techref.pdf ^
