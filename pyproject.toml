@@ -81,11 +81,10 @@ multi_line_output = 3
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version = "2.3.1"
+version_provider = "poetry"
 tag_format = "$version"
 version_files = [
-    "src/dfastbe/__init__.py",
-    "pyproject.toml:version",
+    "src/dfastbe/__init__.py:__version__",
 ]
 changelog_file = "docs/mkdocs/change-log.md"
 

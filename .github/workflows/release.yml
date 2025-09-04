@@ -1,5 +1,8 @@
 name: Automated release workflow
 
+permissions:
+  contents: write
+
 on:
   workflow_dispatch:
     inputs:
@@ -57,10 +60,10 @@ jobs:
       - name: Set up python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.13
+          python-version: 3.11
 
       - name: Run image
-        uses: abatilo/actions-poetry@v2.3.0
+        uses: abatilo/actions-poetry@v4
         with:
           poetry-version: 1.8.4
 
