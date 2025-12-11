@@ -103,8 +103,4 @@ object LatexManual : BuildType({
             }
         }
     }
-
-    requirements {
-        exists("WindowsSDKv10.0")
-    }
 })
