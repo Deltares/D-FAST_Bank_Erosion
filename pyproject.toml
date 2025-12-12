@@ -10,7 +10,7 @@ packages = [{ include = "dfastbe", from= "src"}]
 python = "~3.11.0"
 numpy = "^2.0.0"
 netcdf4 = "^1.7.2"
-pandas = "^1.5.3"
+pandas = "^2.0.0"
 matplotlib = "3.8.4"
 geopandas = "^1.0.0"
 shapely = "^2.1.0"
