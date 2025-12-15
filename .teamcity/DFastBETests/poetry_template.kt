@@ -5,6 +5,10 @@ import jetbrains.buildServer.configs.kotlin.buildSteps.script
 object PoetryTemplate : Template({
     name = "D-FAST Poetry configuration"
 
+    artifactRules = """
+        coverage.xml
+        report.xml
+    """.trimIndent()
     buildNumberPattern = "%build.revisions.short%"
 
     vcs {
