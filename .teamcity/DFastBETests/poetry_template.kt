@@ -31,6 +31,7 @@ object PoetryTemplate : Template({
             name = "Create Poetry environment"
             id = "create_poetry_environment"
             scriptContent = """
+                chcp 65001
                 C:\poetry-temp\poetry\bin\poetry.exe env use %env.PYTHON_PATH%\python.exe
                 C:\poetry-temp\poetry\bin\poetry.exe run python --version
             """.trimIndent()
@@ -39,6 +40,7 @@ object PoetryTemplate : Template({
             name = "Install dependencies via poetry"
             id = "Install_dependencies_via_poetry"
             scriptContent = """
+                chcp 65001
                 C:\poetry-temp\poetry\bin\poetry.exe install
                 C:\poetry-temp\poetry\bin\poetry.exe show
             """.trimIndent()
