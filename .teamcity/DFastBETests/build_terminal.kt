@@ -25,11 +25,8 @@ object BuildTerminal : BuildType({
             name = "build D-FAST BE"
             id = "build_D_FAST_BE"
             scriptContent = """
-                set PATH=%env.PYTHON_PATH%;%env.PYTHON_PATH%\Scripts;%PATH%
-                for /f "delims=" %%i in ('poetry env info --path') do set POETRY_ENV_PATH=%%i
-                CALL "%POETRY_ENV_PATH%\Scripts\activate.bat"
-                CALL .\BuildScripts\BuildDfastbe.bat || exit /b
-                deactivate
+                %APPDATA%\Python\Scripts\poetry.exe run cmd /c .\BuildScripts\BuildDfastbe.bat
+                if errorlevel 1 exit /b 1
             """.trimIndent()
         }
         stepsOrder = arrayListOf("install_poetry", "create_poetry_environment", "Install_dependencies_via_poetry", "build_D_FAST_BE", "cleanup_poetry_environment")

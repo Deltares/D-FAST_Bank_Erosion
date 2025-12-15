@@ -36,11 +36,7 @@ object TestBinaries : BuildType({
             name = "Validate distribution"
             id = "Validate_distribution"
             scriptContent = """
-                set PATH=%env.PYTHON_PATH%;%env.PYTHON_PATH%\Scripts;%PATH%
-                for /f "delims=" %%i in ('poetry env info --path') do set POETRY_ENV_PATH=%%i
-                CALL "%POETRY_ENV_PATH%\Scripts\activate.bat"
-                pytest -v %test_dir% --no-cov
-                deactivate
+                %APPDATA%\Python\Scripts\poetry.exe run pytest -v %test_dir% --no-cov
             """.trimIndent()
         }
         stepsOrder = arrayListOf("install_poetry", "create_poetry_environment", "Install_dependencies_via_poetry", "Get_folder_listing", "Validate_distribution", "cleanup_poetry_environment")
