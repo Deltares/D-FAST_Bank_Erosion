@@ -25,7 +25,7 @@ object BuildTerminal : BuildType({
             name = "build D-FAST BE"
             id = "build_D_FAST_BE"
             scriptContent = """
-                set PATH=%APPDATA%\Python\Scripts;%PATH%
+                set PATH=%env.PYTHON_PATH%;%env.PYTHON_PATH%\Scripts;%PATH%
                 for /f "delims=" %%i in ('poetry env info --path') do set POETRY_ENV_PATH=%%i
                 CALL "%POETRY_ENV_PATH%\Scripts\activate.bat"
                 CALL .\BuildScripts\BuildDfastbe.bat || exit /b

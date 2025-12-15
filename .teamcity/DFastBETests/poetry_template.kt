@@ -20,23 +20,25 @@ object PoetryTemplate : Template({
             name = "Install Poetry"
             id = "install_poetry"
             scriptContent = """
-                curl -sSL https://install.python-poetry.org | python -
-                set PATH=%APPDATA%\Python\Scripts;%PATH%
+                set PATH=%env.PYTHON_PATH%;%env.PYTHON_PATH%\Scripts;%PATH%
+                python -m pip install --upgrade pip
+                python -m pip install poetry
             """.trimIndent()
         }
         script {
             name = "Create Poetry environment"
             id = "create_poetry_environment"
             scriptContent = """
-                set PATH=%APPDATA%\Python\Scripts;%PATH%
-                poetry env use python
+                set PATH=%env.PYTHON_PATH%;%env.PYTHON_PATH%\Scripts;%PATH%
+                poetry env use %env.PYTHON_PATH%\python.exe
+                poetry run python --version
             """.trimIndent()
         }
         script {
             name = "Install dependencies via poetry"
             id = "Install_dependencies_via_poetry"
             scriptContent = """
-                set PATH=%APPDATA%\Python\Scripts;%PATH%
+                set PATH=%env.PYTHON_PATH%;%env.PYTHON_PATH%\Scripts;%PATH%
                 poetry install
                 poetry show
             """.trimIndent()
@@ -46,14 +48,14 @@ object PoetryTemplate : Template({
             id = "cleanup_poetry_environment"
             executionMode = BuildStep.ExecutionMode.ALWAYS
             scriptContent = """
-                set PATH=%APPDATA%\Python\Scripts;%PATH%
+                set PATH=%env.PYTHON_PATH%;%env.PYTHON_PATH%\Scripts;%PATH%
                 poetry env remove --all
             """.trimIndent()
         }
     }
 
     requirements {
-        exists("env.python3913")
+        exists("env.PYTHON_PATH")
         contains("teamcity.agent.jvm.os.name", "Windows")
     }
 })

@@ -29,7 +29,7 @@ object UnitTests : BuildType({
             name = "Unit test and code coverage"
             id = "Unit_test_and_code_coverage"
             scriptContent = """
-                set PATH=%APPDATA%\Python\Scripts;%PATH%
+                set PATH=%env.PYTHON_PATH%;%env.PYTHON_PATH%\Scripts;%PATH%
                 for /f "delims=" %%i in ('poetry env info --path') do set POETRY_ENV_PATH=%%i
                 CALL "%POETRY_ENV_PATH%\Scripts\activate.bat"
                 pytest --junitxml="report.xml" --cov=%COVERAGE_LOC% --cov-report=xml tests/ -m "not binaries"
