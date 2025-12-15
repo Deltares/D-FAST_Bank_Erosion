@@ -17,30 +17,28 @@ object PoetryTemplate : Template({
 
     steps {
         script {
-            name = "Install Poetry"
+            name = "Install Poetry standalone"
             id = "install_poetry"
             scriptContent = """
-                set PATH=%env.PYTHON_PATH%;%env.PYTHON_PATH%\Scripts;%PATH%
-                python -m pip install --upgrade pip
-                python -m pip install poetry
+                curl -sSL https://install.python-poetry.org -o install-poetry.py
+                %env.PYTHON_PATH%\python.exe install-poetry.py
+                del install-poetry.py
             """.trimIndent()
         }
         script {
             name = "Create Poetry environment"
             id = "create_poetry_environment"
             scriptContent = """
-                set PATH=%env.PYTHON_PATH%;%env.PYTHON_PATH%\Scripts;%PATH%
-                poetry env use %env.PYTHON_PATH%\python.exe
-                poetry run python --version
+                %APPDATA%\Python\Scripts\poetry.exe env use %env.PYTHON_PATH%\python.exe
+                %APPDATA%\Python\Scripts\poetry.exe run python --version
             """.trimIndent()
         }
         script {
             name = "Install dependencies via poetry"
             id = "Install_dependencies_via_poetry"
             scriptContent = """
-                set PATH=%env.PYTHON_PATH%;%env.PYTHON_PATH%\Scripts;%PATH%
-                poetry install
-                poetry show
+                %APPDATA%\Python\Scripts\poetry.exe install
+                %APPDATA%\Python\Scripts\poetry.exe show
             """.trimIndent()
         }
         script {
@@ -48,8 +46,7 @@ object PoetryTemplate : Template({
             id = "cleanup_poetry_environment"
             executionMode = BuildStep.ExecutionMode.ALWAYS
             scriptContent = """
-                set PATH=%env.PYTHON_PATH%;%env.PYTHON_PATH%\Scripts;%PATH%
-                poetry env remove --all
+                %APPDATA%\Python\Scripts\poetry.exe env remove --all
             """.trimIndent()
         }
     }
