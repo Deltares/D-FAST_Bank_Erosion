@@ -25,8 +25,7 @@ object BuildTerminal : BuildType({
             name = "build D-FAST BE"
             id = "build_D_FAST_BE"
             scriptContent = """
-                %APPDATA%\Python\Scripts\poetry.exe run cmd /c .\BuildScripts\BuildDfastbe.bat
-                if errorlevel 1 exit /b 1
+                C:\poetry-temp\poetry\bin\poetry.exe run .\BuildScripts\BuildDfastbe.bat
             """.trimIndent()
         }
         stepsOrder = arrayListOf("install_poetry", "create_poetry_environment", "Install_dependencies_via_poetry", "build_D_FAST_BE", "cleanup_poetry_environment")
