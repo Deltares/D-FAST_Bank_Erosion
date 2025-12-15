@@ -3,6 +3,7 @@ import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.projectFeatures.*
 import UnitTests
 import CondaTemplate
+import PoetryTemplate
 import LatexManual
 import SignedReleaseTerminal
 import BuildTerminal
@@ -24,6 +25,7 @@ project {
     }
 
     template(CondaTemplate)
+    template(PoetryTemplate)
 
     buildType(UnitTests)
     buildType(LatexManual)
