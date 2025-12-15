@@ -5,10 +5,10 @@ import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnMetric
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnMetricChange
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
-import CondaTemplate
+import PoetryTemplate
 
 object TestBinaries : BuildType({
-    templates(CondaTemplate)
+    templates(PoetryTemplate)
     name = "Distribution Tests"
     description = "Test D-FAST Bank Erosion binaries."
 
@@ -36,14 +36,14 @@ object TestBinaries : BuildType({
             name = "Validate distribution"
             id = "Validate_distribution"
             scriptContent = """
-                rem echo on
-                rem CALL poetry env use %%python3913%%\python.exe
-                CALL conda activate %CONDA_ENV_NAME%
-                CALL poetry run pytest -v %test_dir% --no-cov
-                CALL conda deactivate
+                set PATH=%APPDATA%\Python\Scripts;%PATH%
+                for /f "delims=" %%i in ('poetry env info --path') do set POETRY_ENV_PATH=%%i
+                CALL "%POETRY_ENV_PATH%\Scripts\activate.bat"
+                pytest -v %test_dir% --no-cov
+                deactivate
             """.trimIndent()
         }
-        stepsOrder = arrayListOf("Conda_create_environment", "Python_pip_install_poetry", "Install_dependencies_via_poetry", "Get_folder_listing", "Validate_distribution", "Conda_deactivate_and_remove_environment")
+        stepsOrder = arrayListOf("install_poetry", "create_poetry_environment", "Install_dependencies_via_poetry", "Get_folder_listing", "Validate_distribution", "cleanup_poetry_environment")
     }
 
     failureConditions {

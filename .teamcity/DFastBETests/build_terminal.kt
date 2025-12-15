@@ -4,10 +4,10 @@ import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnMetr
 import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnText
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnMetricChange
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnText
-import CondaTemplate
+import PoetryTemplate
 
 object BuildTerminal : BuildType({
-    templates(CondaTemplate)
+    templates(PoetryTemplate)
     name = "Build with command window"
     description = "Build D-FAST Bank Erosion with terminal window for debugging"
 
@@ -25,12 +25,14 @@ object BuildTerminal : BuildType({
             name = "build D-FAST BE"
             id = "build_D_FAST_BE"
             scriptContent = """
-                CALL conda activate %CONDA_ENV_NAME%
+                set PATH=%APPDATA%\Python\Scripts;%PATH%
+                for /f "delims=" %%i in ('poetry env info --path') do set POETRY_ENV_PATH=%%i
+                CALL "%POETRY_ENV_PATH%\Scripts\activate.bat"
                 CALL .\BuildScripts\BuildDfastbe.bat || exit /b
-                CALL conda deactivate
+                deactivate
             """.trimIndent()
         }
-        stepsOrder = arrayListOf("Conda_create_environment", "Python_pip_install_poetry", "Install_dependencies_via_poetry", "build_D_FAST_BE", "Conda_deactivate_and_remove_environment")
+        stepsOrder = arrayListOf("install_poetry", "create_poetry_environment", "Install_dependencies_via_poetry", "build_D_FAST_BE", "cleanup_poetry_environment")
     }
 
     failureConditions {
