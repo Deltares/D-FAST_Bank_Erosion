@@ -56,7 +56,7 @@ START /B /WAIT python -m nuitka ^
  %cmd_box_args%
 
 rem remove read-only attribute from the executable
-attrib -R src\dfastbe.dist\dfastbe.exe
+attrib -R dfastbe.dist\dfastbe.exe
 
 rem move some libraries to resolve dependencies ...
 call BuildScripts\Move_Libs.bat
