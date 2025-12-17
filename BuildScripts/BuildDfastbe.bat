@@ -1,16 +1,13 @@
 @echo off
 
+# redirect output and error logs to files when --no-console is specified
 if "%1" == "--no-console" (
-
-set cmd_box_args=--windows-force-stderr-spec=%PROGRAM%logs.txt ^
- --windows-force-stdout-spec=%PROGRAM%output.txt ^
- --windows-disable-console ^
- src/dfastbe
- 
+    set cmd_box_args=--windows-force-stderr-spec=%PROGRAM%logs.txt ^
+     --windows-force-stdout-spec=%PROGRAM%output.txt ^
+     --windows-disable-console ^
+     src/dfastbe
 ) else (
-
-set cmd_box_args=src/dfastbe
-
+    set cmd_box_args=src/dfastbe
 )
 
 cd %~dp0
@@ -28,6 +25,7 @@ START /B /WAIT python -m nuitka ^
  --show-progress ^
  --enable-plugin=pyqt5 ^
  --file-reference-choice=runtime ^
+ --include-package=numpy ^
  --include-package=pyproj ^
  --include-module=shapely ^
  --include-package=matplotlib ^
@@ -37,7 +35,7 @@ START /B /WAIT python -m nuitka ^
  --include-package-data=geopandas.datasets ^
  --include-module=fiona ^
  --company-name=Deltares ^
- --file-version=2.3.1 ^
+ --file-version=3.0.0 ^
  --product-version=2025.01 ^
  --product-name="D-FAST Bank Erosion" ^
  --file-description="A Python tool to perform a bank erosion analysis based on a number of D-Flow FM simulations." ^
@@ -56,6 +54,9 @@ START /B /WAIT python -m nuitka ^
  --include-data-files=docs/dfastbe_techref.pdf=dfastbe/dfastbe_techref.pdf ^
  --include-data-files=docs/dfastbe_release_notes.pdf=dfastbe/dfastbe_release_notes.pdf ^
  %cmd_box_args%
+
+rem remove read-only attribute from the executable
+attrib -R dfastbe.dist\dfastbe.exe
 
 rem move some libraries to resolve dependencies ...
 call BuildScripts\Move_Libs.bat
