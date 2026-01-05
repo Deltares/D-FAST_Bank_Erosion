@@ -10,6 +10,10 @@ if "%1" == "--no-console" (
     set cmd_box_args=src/dfastbe
 )
 
+# get version number
+for /f "tokens=*" %%i in ('poetry version -s') do set VERSION=%%i
+echo %VERSION%
+
 cd %~dp0
 cd..
 START /B /WAIT python -m nuitka ^
@@ -35,7 +39,7 @@ START /B /WAIT python -m nuitka ^
  --include-package-data=geopandas.datasets ^
  --include-module=fiona ^
  --company-name=Deltares ^
- --file-version=3.0.0 ^
+ --file-version=%VERSION% ^
  --product-version=2025.01 ^
  --product-name="D-FAST Bank Erosion" ^
  --file-description="A Python tool to perform a bank erosion analysis based on a number of D-Flow FM simulations." ^
