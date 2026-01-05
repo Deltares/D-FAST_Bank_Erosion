@@ -34,6 +34,7 @@ from typing import Tuple
 import matplotlib
 
 from dfastbe.cmd import run
+from dfastbe import __version__
 
 matplotlib.use("Qt5Agg")
 
@@ -73,6 +74,9 @@ def parse_arguments() -> Tuple[str, str, str]:
     """
     parser = argparse.ArgumentParser(
         description="D-FAST Bank Erosion. Example: python -m dfastbe --mode BANKEROSION --config settings.cfg"
+    )
+    parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}"
     )
     parser.add_argument(
         "--language",

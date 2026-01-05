@@ -33,6 +33,13 @@ Stichting Deltares. All rights reserved.
 
 from typing import List, Any
 
-__version__ = "3.0.0"
+from importlib.metadata import PackageNotFoundError, version
+
+try:
+    __version__ = version("d-fast-bank-erosion")
+except PackageNotFoundError:
+    # Package is not installed
+    __version__ = "unknown"
+
 
 __all__: List[Any] = []
