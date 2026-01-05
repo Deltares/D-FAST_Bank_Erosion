@@ -12,7 +12,10 @@ if "%1" == "--no-console" (
 
 # get version number
 for /f "tokens=*" %%i in ('poetry version -s') do set VERSION=%%i
-echo %VERSION%
+
+echo.
+echo Version: %VERSION%
+echo.
 
 cd %~dp0
 cd..
