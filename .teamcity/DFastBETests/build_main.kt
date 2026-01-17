@@ -42,6 +42,7 @@ object BuildMain : BuildType({
         snapshot(TestBinaries) {
             onDependencyFailure = FailureAction.FAIL_TO_START
         }
+/*
         dependency(LatexManual) {
             snapshot {
                 onDependencyFailure = FailureAction.FAIL_TO_START
@@ -51,5 +52,6 @@ object BuildMain : BuildType({
                 artifactRules = "+:*.pdf => docs/"
             }
         }
+*/
     }
 })
