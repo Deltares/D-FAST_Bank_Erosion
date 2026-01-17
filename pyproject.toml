@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "d-fast-bank-erosion"
-version = "3.1.0"
+version = "3.0.1"
 description = "A tool to perform a bank erosion analysis based on a number of D-Flow FM simulations."
 authors = ["Stichting Deltares <delft3d.support@deltares.nl>"]
 readme = "README.md"
