@@ -20,6 +20,7 @@ echo.
 cd %~dp0
 cd..
 START /B /WAIT python -m nuitka ^
+ %cmd_box_args% ^
  --standalone ^
  --mingw64 ^
  --assume-yes-for-downloads ^
@@ -56,11 +57,7 @@ START /B /WAIT python -m nuitka ^
  --include-data-files=src/dfastbe/gui/icons/add.png=dfastbe/gui/icons/add.png ^
  --include-data-files=src/dfastbe/gui/icons/edit.png=dfastbe/gui/icons/edit.png ^
  --include-data-files=src/dfastbe/gui/icons/remove.png=dfastbe/gui/icons/remove.png ^
- --include-data-files=LICENSE.md=LICENSE.md ^
-rem  --include-data-files=docs/dfastbe_usermanual.pdf=dfastbe/dfastbe_usermanual.pdf ^
-rem  --include-data-files=docs/dfastbe_techref.pdf=dfastbe/dfastbe_techref.pdf ^
-rem  --include-data-files=docs/dfastbe_release_notes.pdf=dfastbe/dfastbe_release_notes.pdf ^
- %cmd_box_args%
+ --include-data-files=LICENSE.md=LICENSE.md
 
 rem remove read-only attribute from the executable
 attrib -R dfastbe.dist\dfastbe.exe
