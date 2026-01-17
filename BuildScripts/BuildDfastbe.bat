@@ -1,6 +1,6 @@
 @echo off
 
-# redirect output and error logs to files when --no-console is specified
+rem redirect output and error logs to files when --no-console is specified
 if "%1" == "--no-console" (
     set cmd_box_args=--windows-force-stderr-spec=%PROGRAM%logs.txt ^
      --windows-force-stdout-spec=%PROGRAM%output.txt ^
@@ -10,7 +10,7 @@ if "%1" == "--no-console" (
     set cmd_box_args=src/dfastbe
 )
 
-# get version number
+rem get version number
 for /f "tokens=*" %%i in ('poetry version -s') do set VERSION=%%i
 
 echo.
