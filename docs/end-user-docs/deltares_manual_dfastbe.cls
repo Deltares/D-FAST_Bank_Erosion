@@ -126,7 +126,7 @@
 \usepackage{fancyvrb} % needed for framed verbatim environment
 \usepackage{calc} % adding, substracting, multiplying of lengths
 \usepackage{wrapfig}
-\usepackage{caption}
+\usepackage[compatibility=false]{caption}
 \usepackage{subcaption} % two or more figures in a figure-environment
 \usepackage{url}
 \urlstyle{same}
