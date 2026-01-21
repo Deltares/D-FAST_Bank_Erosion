@@ -58,9 +58,6 @@ START /B /WAIT python -m nuitka ^
  --include-data-files=src/dfastbe/gui/icons/add.png=dfastbe/gui/icons/add.png ^
  --include-data-files=src/dfastbe/gui/icons/edit.png=dfastbe/gui/icons/edit.png ^
  --include-data-files=src/dfastbe/gui/icons/remove.png=dfastbe/gui/icons/remove.png ^
-
-rem remove read-only attribute from the executable
-attrib -R dfastbe.dist\dfastbe.exe
  --include-data-files=LICENSE.md=LICENSE.md ^
  --include-data-files=docs/dfastbe_usermanual.pdf=dfastbe/dfastbe_usermanual.pdf ^
  --include-data-files=docs/dfastbe_techref.pdf=dfastbe/dfastbe_techref.pdf ^
