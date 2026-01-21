@@ -25,7 +25,7 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-
+from __future__ import annotations
 from typing import Any, List, Tuple, Dict
 
 import numpy as np

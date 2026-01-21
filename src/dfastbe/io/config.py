@@ -26,6 +26,7 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
+from __future__ import annotations
 from configparser import ConfigParser
 from configparser import Error as ConfigparserError
 from dataclasses import dataclass

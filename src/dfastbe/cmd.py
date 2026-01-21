@@ -25,6 +25,7 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
+from __future__ import annotations
 from pathlib import Path
 from dfastbe.io.logger import load_program_texts
 from dfastbe.io.config import ConfigFile
