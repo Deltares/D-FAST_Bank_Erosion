@@ -25,7 +25,6 @@ echo.
 cd %~dp0
 cd..
 START /B /WAIT python -m nuitka ^
- %cmd_box_args% ^
  --standalone ^
  --mingw64 ^
  --assume-yes-for-downloads ^
