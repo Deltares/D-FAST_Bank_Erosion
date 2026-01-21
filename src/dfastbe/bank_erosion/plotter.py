@@ -19,7 +19,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
 from dfastbe.bank_erosion.data_models.inputs import ErosionSimulationData
 from dfastbe.bank_erosion.erosion_calculator import WATER_DENSITY, g
 from dfastbe.io.config import PlotProperties, get_bbox
-from dfastbe.io.logger import log_text
+from dfastbe.io.logger import LogData
 from dfastbe.plotting import BasePlot, Plot
 from dfastbe.utils import get_zoom_extends
 
@@ -106,8 +106,8 @@ class ErosionPlotter(BasePlot):
             simulation_data (ErosionSimulationData):
                 The simulation data used in the analysis.
         """
-        log_text("=")
-        log_text("create_figures")
+        LogData().log_text("=")
+        LogData().log_text("create_figures")
         fig_i = 0
         bbox = get_bbox(river_center_line_arr)
 

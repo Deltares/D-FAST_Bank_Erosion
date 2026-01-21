@@ -27,11 +27,10 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 """
 from __future__ import annotations
 from pathlib import Path
-from dfastbe.io.logger import load_program_texts
 from dfastbe.io.config import ConfigFile
 from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_lines.bank_lines import BankLines
-from dfastbe.io.logger import log_text, timed_logger
+from dfastbe.io.logger import timed_logger, LogData
 from dfastbe.gui.gui import main
 from dfastbe import __file__
 R_DIR = Path(__file__).resolve().parent
@@ -83,8 +82,8 @@ def run(
         ```
     """
     language = language.upper()
-    load_program_texts( LOG_DATA_DIR / f"messages.{language}.ini")
     run_mode = run_mode.upper()
+    log_data = LogData(LOG_DATA_DIR / f"messages.{language}.ini")
 
     if run_mode == "GUI":
         main(configfile)
@@ -101,7 +100,7 @@ def run(
             erosion.run()
             erosion.plot()
             erosion.save()
-            log_text("end_bankerosion")
+            log_data.log_text("end_bankerosion")
             timed_logger("-- end analysis --")
         else:
             raise ValueError(f"Invalid run mode {run_mode} specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'.")

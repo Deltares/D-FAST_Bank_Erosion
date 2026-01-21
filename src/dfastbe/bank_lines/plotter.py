@@ -11,7 +11,7 @@ from shapely import LineString, Polygon
 
 from dfastbe.io.config import PlotProperties
 from dfastbe.io.data_models import BaseSimulationData, LineGeometry
-from dfastbe.io.logger import log_text
+from dfastbe.io.logger import LogData
 from dfastbe.plotting import BasePlot, Plot
 from dfastbe.utils import get_zoom_extends
 
@@ -131,8 +131,8 @@ class BankLinesPlotter(BasePlot):
 
             ```
         """
-        log_text("=")
-        log_text("create_figures")
+        LogData().log_text("=")
+        LogData().log_text("create_figures")
         fig_i = 0
 
         if self.flags.save_zoomed_plot:

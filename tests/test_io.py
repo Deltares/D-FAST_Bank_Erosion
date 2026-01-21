@@ -23,10 +23,12 @@ from dfastbe.io.data_models import (
     _read_fm_map,
 )
 from dfastbe.io.file_utils import absolute_path, relative_path
-from dfastbe.io.logger import get_text, load_program_texts, log_text
+from dfastbe.io.logger import LogData
 
 fmmap_filename = "tests/data/files/e02_f001_c011_simplechannel_map.nc"
 config_filename = "tests/data/erosion/meuse_manual/test.cfg"
+
+log_data = LogData("tests/data/files/messages.UK.ini")
 
 @contextmanager
 def captured_output():
@@ -37,14 +39,6 @@ def captured_output():
         yield sys.stdout, sys.stderr
     finally:
         sys.stdout, sys.stderr = old_out, old_err
-
-
-def test_load_program_texts_01():
-    """
-    Testing load_program_texts.
-    """
-    print("current work directory: ", os.getcwd())
-    assert load_program_texts("tests/data/files/messages.UK.ini") is None
 
 
 class TestPlotProperties:
@@ -249,7 +243,7 @@ class TestSimulationData:
         assert simulation_data.chezy_face.size == 0
 
     def test_clip_arrays_dont_match(self):
-        with patch("dfastbe.io.data_models.log_text") as mock_line_log:
+        with patch("dfastbe.io.data_models.LogData") as mock_line_log:
             simulation_data = BaseSimulationData.read(
                 "tests/data/erosion/meuse_6gen/inputfiles/sim1300/Maas_merged.dfast.map.nc"
             )
@@ -259,6 +253,7 @@ class TestSimulationData:
             station_bounds = (123.0, 128.0)
             LineGeometry(river_center_line, station_bounds)
             simulation_data.clip(river_center_line, max_distance=98.11176516320512)
+
         mock_line_log.assert_any_call
 
 
@@ -269,7 +264,7 @@ class TestLogText:
         """
         key = "confirm"
         with captured_output() as (out, err):
-            log_text(key)
+            log_data.log_text(key)
         outstr = out.getvalue().splitlines()
         strref = ['Confirm using "y" ...', '']
         assert outstr == strref
@@ -281,7 +276,7 @@ class TestLogText:
         key = ""
         nr = 3
         with captured_output() as (out, err):
-            log_text(key, repeat=nr)
+            log_data.log_text(key, repeat=nr)
         outstr = out.getvalue().splitlines()
         strref = ['', '', '']
         assert outstr == strref
@@ -293,7 +288,7 @@ class TestLogText:
         key = "reach"
         data = {"reach": "ABC"}
         with captured_output() as (out, err):
-            log_text(key, data=data)
+            log_data.log_text(key, data=data)
         outstr = out.getvalue().splitlines()
         strref = ['The measure is located on reach ABC']
         assert outstr == strref
@@ -306,7 +301,7 @@ class TestLogText:
         data = {"reach": "ABC"}
         filename = "test.log"
         with open(filename, "w") as f:
-            log_text(key, data=data, file=f)
+            log_data.log_text(key, data=data, file=f)
         all_lines = open(filename, "r").read().splitlines()
         strref = ['The measure is located on reach ABC']
         assert all_lines == strref
@@ -317,19 +312,19 @@ class TestGetText:
         """
         Testing get_text: key not found.
         """
-        assert get_text("@") == ["No message found for @"]
+        assert log_data.get_text("@") == ["No message found for @"]
 
     def test_get_text_02(self):
         """
         Testing get_text: empty line key.
         """
-        assert get_text("") == [""]
+        assert log_data.get_text("") == [""]
 
     def test_get_text_03(self):
         """
         Testing get_text: "confirm" key.
         """
-        assert get_text("confirm") == ['Confirm using "y" ...', '']
+        assert log_data.get_text("confirm") == ['Confirm using "y" ...', '']
 
 
 class TestReadFMMap:
