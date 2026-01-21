@@ -50,7 +50,7 @@ object BuildTerminal : BuildType({
     }
 
     dependencies {
-/*
+
         dependency(LatexManual) {
             snapshot {
                 onDependencyFailure = FailureAction.FAIL_TO_START
@@ -60,7 +60,7 @@ object BuildTerminal : BuildType({
                 artifactRules = "+:*.pdf => docs/"
             }
         }
- */
+
         snapshot(UnitTests) {
             onDependencyFailure = FailureAction.FAIL_TO_START
         }
