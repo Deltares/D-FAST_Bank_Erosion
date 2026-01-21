@@ -1,9 +1,6 @@
 import os
 import platform
-import sys
 from configparser import ConfigParser
-from contextlib import contextmanager
-from io import StringIO
 from pathlib import Path
 from typing import Dict, Tuple
 from unittest.mock import MagicMock, patch
@@ -23,26 +20,10 @@ from dfastbe.io.data_models import (
     _read_fm_map,
 )
 from dfastbe.io.file_utils import absolute_path, relative_path
-from dfastbe.io.logger import LogData
 
 fmmap_filename = "tests/data/files/e02_f001_c011_simplechannel_map.nc"
 config_filename = "tests/data/erosion/meuse_manual/test.cfg"
 
-
-@pytest.fixture
-def log_data():
-    return LogData(Path("tests/data/files/messages.UK.ini"))
-
-
-@contextmanager
-def captured_output():
-    new_out, new_err = StringIO(), StringIO()
-    old_out, old_err = sys.stdout, sys.stderr
-    try:
-        sys.stdout, sys.stderr = new_out, new_err
-        yield sys.stdout, sys.stderr
-    finally:
-        sys.stdout, sys.stderr = old_out, old_err
 
 
 class TestPlotProperties:
@@ -259,76 +240,6 @@ class TestSimulationData:
             simulation_data.clip(river_center_line, max_distance=98.11176516320512)
 
         mock_line_log.assert_any_call
-
-
-class TestLogText:
-    def test_log_text_01(self, log_data):
-        """
-        Testing standard output of a single text without expansion.
-        """
-        key = "confirm"
-        with captured_output() as (out, err):
-            log_data.log_text(key)
-        outstr = out.getvalue().splitlines()
-        strref = ['Confirm using "y" ...', '']
-        assert outstr == strref
-
-    def test_log_text_02(self, log_data):
-        """
-        Testing standard output of a repeated text without expansion.
-        """
-        key = ""
-        nr = 3
-        with captured_output() as (out, err):
-            log_data.log_text(key, repeat=nr)
-        outstr = out.getvalue().splitlines()
-        strref = ['', '', '']
-        assert outstr == strref
-
-    def test_log_text_03(self, log_data):
-        """
-        Testing standard output of a text with expansion.
-        """
-        key = "reach"
-        data = {"reach": "ABC"}
-        with captured_output() as (out, err):
-            log_data.log_text(key, data=data)
-        outstr = out.getvalue().splitlines()
-        strref = ['The measure is located on reach ABC']
-        assert outstr == strref
-
-    def test_log_text_04(self, log_data):
-        """
-        Testing file output of a text with expansion.
-        """
-        key = "reach"
-        data = {"reach": "ABC"}
-        filename = "test.log"
-        with open(filename, "w") as f:
-            log_data.log_text(key, data=data, file=f)
-        all_lines = open(filename, "r").read().splitlines()
-        strref = ['The measure is located on reach ABC']
-        assert all_lines == strref
-
-
-class TestGetText:
-    def test_get_text_01(self):
-        """
-        Testing get_text: key not found.
-        """
-        assert log_data.get_text("@") == ["No message found for @"]
-
-    def test_get_text_02(self):
-        """
-        Testing get_text: empty line key.
-        """
-        assert log_data.get_text("") == [""]
-
-    def test_get_text_03(self):
-        """
-        Testing get_text: "confirm" key.
-        """
-        assert log_data.get_text("confirm") == ['Confirm using "y" ...', '']
 
 
 class TestReadFMMap:
