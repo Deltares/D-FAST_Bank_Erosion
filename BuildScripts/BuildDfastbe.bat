@@ -29,6 +29,7 @@ START /B /WAIT python -m nuitka ^
  --python-flag=no_docstrings ^
  --nofollow-import-to=*.tests ^
  --nofollow-import-to=*unittest* ^
+ --noinclude-unittest-mode=nofollow ^
  --report=compilation-report.xml ^
  --show-progress ^
  --enable-plugin=pyqt5 ^
