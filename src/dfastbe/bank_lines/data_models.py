@@ -215,7 +215,6 @@ class BankLinesRiverData(BaseRiverData):
         Examples:
             ```python
             >>> from dfastbe.io.config import ConfigFile
-            >>> from unittest.mock import patch
             >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
             >>> bank_lines_river_data = BankLinesRiverData(config_file)  # doctest: +ELLIPSIS
             N...e
