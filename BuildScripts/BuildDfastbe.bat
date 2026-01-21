@@ -1,5 +1,13 @@
 @echo off
 
+rem Define common paths
+set ICONS_SRC=src/dfastbe/gui/icons
+set ICONS_DEST=dfastbe/gui/icons
+set LOG_DATA_SRC=src/dfastbe/io/log_data
+set LOG_DATA_DEST=dfastbe/io/log_data
+set DOCS_SRC=docs
+set DOCS_DEST=dfastbe
+
 rem redirect output and error logs to files when --no-console is specified
 if "%1" == "--no-console" (
     set cmd_box_args=--windows-force-stderr-spec=%PROGRAM%logs.txt --windows-force-stdout-spec=%PROGRAM%output.txt --windows-disable-console
@@ -47,18 +55,18 @@ START /B /WAIT python -m nuitka ^
  --file-description="A Python tool to perform a bank erosion analysis based on a number of D-Flow FM simulations." ^
  --trademarks="All indications and logos of, and references to, \"D-FAST\", \"D-FAST Bank Erosion\" and \"D-FAST BE\" are registered trademarks of Stichting Deltares, and remain the property of Stichting Deltares. All rights reserved." ^
  --copyright="Copyright (C) 2025 Stichting Deltares." ^
- --windows-icon-from-ico=src/dfastbe/gui/icons/D-FASTBE.png ^
- --include-data-files=src/dfastbe/io/log_data/messages.NL.ini=dfastbe/io/log_data/messages.NL.ini ^
- --include-data-files=src/dfastbe/io/log_data/messages.UK.ini=dfastbe/io/log_data/messages.UK.ini ^
- --include-data-files=src/dfastbe/gui/icons/D-FASTBE.png=dfastbe/gui/icons/D-FASTBE.png ^
- --include-data-files=src/dfastbe/gui/icons/open.png=dfastbe/gui/icons/open.png ^
- --include-data-files=src/dfastbe/gui/icons/add.png=dfastbe/gui/icons/add.png ^
- --include-data-files=src/dfastbe/gui/icons/edit.png=dfastbe/gui/icons/edit.png ^
- --include-data-files=src/dfastbe/gui/icons/remove.png=dfastbe/gui/icons/remove.png ^
+ --windows-icon-from-ico=%ICONS_SRC%/D-FASTBE.png ^
+ --include-data-files=%LOG_DATA_SRC%/messages.NL.ini=%LOG_DATA_DEST%/messages.NL.ini ^
+ --include-data-files=%LOG_DATA_SRC%/messages.UK.ini=%LOG_DATA_DEST%/messages.UK.ini ^
+ --include-data-files=%ICONS_SRC%/D-FASTBE.png=%ICONS_DEST%/D-FASTBE.png ^
+ --include-data-files=%ICONS_SRC%/open.png=%ICONS_DEST%/open.png ^
+ --include-data-files=%ICONS_SRC%/add.png=%ICONS_DEST%/add.png ^
+ --include-data-files=%ICONS_SRC%/edit.png=%ICONS_DEST%/edit.png ^
+ --include-data-files=%ICONS_SRC%/remove.png=%ICONS_DEST%/remove.png ^
  --include-data-files=LICENSE.md=LICENSE.md ^
- --include-data-files=docs/dfastbe_usermanual.pdf=dfastbe/dfastbe_usermanual.pdf ^
- --include-data-files=docs/dfastbe_techref.pdf=dfastbe/dfastbe_techref.pdf ^
- --include-data-files=docs/dfastbe_release_notes.pdf=dfastbe/dfastbe_release_notes.pdf ^
+ --include-data-files=%DOCS_SRC%/dfastbe_usermanual.pdf=%DOCS_DEST%/dfastbe_usermanual.pdf ^
+ --include-data-files=%DOCS_SRC%/dfastbe_techref.pdf=%DOCS_DEST%/dfastbe_techref.pdf ^
+ --include-data-files=%DOCS_SRC%/dfastbe_release_notes.pdf=%DOCS_DEST%/dfastbe_release_notes.pdf ^
  %cmd_box_args% ^
  src/dfastbe
 
