@@ -111,7 +111,7 @@ class TestSimulationData:
 
         with patch("dfastbe.io.data_models._read_fm_map") as mock_read_fm_map, patch(
             "netCDF4.Dataset"
-        ) as mock_dataset:
+        ) as mock_dataset, patch("dfastbe.io.data_models.LogData"):
             mock_read_fm_map.side_effect = [
                 mock_x_node,
                 mock_y_node,
