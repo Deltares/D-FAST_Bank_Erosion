@@ -2,12 +2,9 @@
 
 rem redirect output and error logs to files when --no-console is specified
 if "%1" == "--no-console" (
-    set cmd_box_args=--windows-force-stderr-spec=%PROGRAM%logs.txt ^
-     --windows-force-stdout-spec=%PROGRAM%output.txt ^
-     --windows-disable-console ^
-     src/dfastbe
+    set cmd_box_args=--windows-force-stderr-spec=%PROGRAM%logs.txt --windows-force-stdout-spec=%PROGRAM%output.txt --windows-disable-console
 ) else (
-    set cmd_box_args=src/dfastbe
+    set cmd_box_args=
 )
 
 rem get version number
@@ -62,6 +59,8 @@ START /B /WAIT python -m nuitka ^
  --include-data-files=docs/dfastbe_usermanual.pdf=dfastbe/dfastbe_usermanual.pdf ^
  --include-data-files=docs/dfastbe_techref.pdf=dfastbe/dfastbe_techref.pdf ^
  --include-data-files=docs/dfastbe_release_notes.pdf=dfastbe/dfastbe_release_notes.pdf ^
+ %cmd_box_args% ^
+ src/dfastbe
 
 rem move some libraries to resolve dependencies ...
 call BuildScripts\Move_Libs.bat
