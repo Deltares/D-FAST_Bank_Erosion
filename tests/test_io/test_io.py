@@ -129,7 +129,7 @@ class TestSimulationData:
             assert np.array_equal(sim_object.velocity_x_face, mock_velocity_x_face)
             assert np.array_equal(sim_object.velocity_y_face, mock_velocity_y_face)
             assert np.array_equal(sim_object.chezy_face, mock_chezy_face)
-            assert sim_object.dry_wet_threshold == 0.1
+            assert sim_object.dry_wet_threshold == pytest.approx(0.1)
 
             mock_read_fm_map.assert_any_call(file_name, "x", location="node")
             mock_read_fm_map.assert_any_call(file_name, "y", location="node")
@@ -267,7 +267,7 @@ class TestReadFMMap:
         location = "edge"
         datac = _read_fm_map(fmmap_filename, varname, location)
         dataref = 7059.853000358055
-        assert datac[1] == dataref
+        assert datac[1] == pytest.approx(dataref)
 
     def test_read_fm_map_03(self):
         """
@@ -589,11 +589,11 @@ class TestConfigFile:
 
         # Case 1: Bank search distances exist in the configuration
         result = config_file.get_bank_search_distances(2)
-        assert all(pytest.approx(item, rel=1e-6) == 50.0 for item in result)
+        assert all(pytest.approx(item, rel=1e-6) == pytest.approx(50.0) for item in result)
 
         # Case 2: Bank search distances do not exist, use default value
         result = config_file.get_bank_search_distances(2)
-        assert all(pytest.approx(item, rel=1e-6) == 50.0 for item in result)
+        assert all(pytest.approx(item, rel=1e-6) == pytest.approx(50.0) for item in result)
 
     def test_get_river_center_line(self):
         """Test retrieving x and y coordinates."""
@@ -794,8 +794,8 @@ class TestRiverData:
     def test_initialization(self, river_data: BaseRiverData):
         assert isinstance(river_data.config_file, ConfigFile)
         center_line = river_data.river_center_line
-        assert center_line.station_bounds[0] == 123.0
-        assert center_line.station_bounds[1] == 128.0
+        assert center_line.station_bounds[0] == pytest.approx(123.0)
+        assert center_line.station_bounds[1] == pytest.approx(128.0)
         assert isinstance(center_line.values, LineString)
         center_line_arr = center_line.as_array()
         assert isinstance(center_line_arr, np.ndarray)
