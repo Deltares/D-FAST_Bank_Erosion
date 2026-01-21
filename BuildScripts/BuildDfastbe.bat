@@ -24,6 +24,10 @@ echo.
 
 cd %~dp0
 cd..
+
+echo Starting Nuitka build...
+echo.
+
 START /B /WAIT python -m nuitka ^
  --standalone ^
  --mingw64 ^
@@ -69,10 +73,28 @@ START /B /WAIT python -m nuitka ^
  %cmd_box_args% ^
  src/dfastbe
 
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo ERROR: Nuitka build failed with error code %ERRORLEVEL%
+    echo.
+    pause
+    exit /b %ERRORLEVEL%
+)
+
+echo.
+echo Nuitka build completed successfully
+echo.
+
 rem move some libraries to resolve dependencies ...
+echo Moving libraries to resolve dependencies...
 call BuildScripts\Move_Libs.bat
 
 rem include example files into the distribution
+echo Collecting example files...
 call BuildScripts\Collect_Examples.bat
+
+echo.
+echo Build completed successfully!
+echo.
 
 rem end of build
