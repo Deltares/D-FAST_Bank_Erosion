@@ -28,7 +28,11 @@ from dfastbe.io.logger import LogData
 fmmap_filename = "tests/data/files/e02_f001_c011_simplechannel_map.nc"
 config_filename = "tests/data/erosion/meuse_manual/test.cfg"
 
-log_data = LogData("tests/data/files/messages.UK.ini")
+
+@pytest.fixture
+def log_data():
+    return LogData(Path("tests/data/files/messages.UK.ini"))
+
 
 @contextmanager
 def captured_output():
@@ -258,7 +262,7 @@ class TestSimulationData:
 
 
 class TestLogText:
-    def test_log_text_01(self):
+    def test_log_text_01(self, log_data):
         """
         Testing standard output of a single text without expansion.
         """
@@ -269,7 +273,7 @@ class TestLogText:
         strref = ['Confirm using "y" ...', '']
         assert outstr == strref
 
-    def test_log_text_02(self):
+    def test_log_text_02(self, log_data):
         """
         Testing standard output of a repeated text without expansion.
         """
@@ -281,7 +285,7 @@ class TestLogText:
         strref = ['', '', '']
         assert outstr == strref
 
-    def test_log_text_03(self):
+    def test_log_text_03(self, log_data):
         """
         Testing standard output of a text with expansion.
         """
@@ -293,7 +297,7 @@ class TestLogText:
         strref = ['The measure is located on reach ABC']
         assert outstr == strref
 
-    def test_log_text_04(self):
+    def test_log_text_04(self, log_data):
         """
         Testing file output of a text with expansion.
         """
