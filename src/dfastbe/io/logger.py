@@ -63,7 +63,6 @@ class LogData:
     def reset(cls):
         """Reset the singleton instance to allow re-initialization."""
         cls._instance = None
-        cls._initialized = False
 
     def read_data(self, file_name: str | Path) -> dict[str, list[str]]:
         """Load texts from a configuration file, and store globally for access.
