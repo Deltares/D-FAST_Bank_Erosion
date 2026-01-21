@@ -9,6 +9,7 @@ from dfastbe.io.logger import LogData
 
 @pytest.fixture
 def log_data() -> LogData:
+    LogData.reset()
     return LogData(Path("tests/data/files/messages.UK.ini"))
 
 

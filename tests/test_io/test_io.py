@@ -20,10 +20,16 @@ from dfastbe.io.data_models import (
     _read_fm_map,
 )
 from dfastbe.io.file_utils import absolute_path, relative_path
-
+from dfastbe.io.logger import LogData
+from dfastbe import __path__
 fmmap_filename = "tests/data/files/e02_f001_c011_simplechannel_map.nc"
 config_filename = "tests/data/erosion/meuse_manual/test.cfg"
 
+
+@pytest.fixture(scope="module")
+def log_data():
+    LogData.reset()
+    return LogData(Path(__path__[0]) / "io/log_data/messages.UK.ini")
 
 
 class TestPlotProperties:
@@ -373,6 +379,7 @@ class TestRelativePath:
         assert relative_path(rootdir, file) == file
 
 
+@pytest.mark.usefixtures("log_data")
 class TestConfigFile:
     """Test cases for the ConfigFile class."""
 
