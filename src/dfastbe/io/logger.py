@@ -237,23 +237,29 @@ class LogData:
 
                 ```
         """
-        all_lines = open(file_name, "r").read().splitlines()
+        with open(file_name, "r", encoding="utf-8") as f:
+            all_lines = f.read().splitlines()
+
         data: Dict[str, List[str]] = {}
         text: List[str] = []
         key = None
+
         for line in all_lines:
             r_line = line.strip()
             if r_line.startswith("[") and r_line.endswith("]"):
                 if key is not None:
+                    if key in data:
+                        raise ValueError(f"Duplicate entry for '{key}' in {file_name}.")
                     data[key] = text
                 key = r_line[1:-1]
                 text = []
             else:
                 text.append(line)
-        if key in data.keys():
-            raise ValueError(f"Duplicate entry for {key} in {file_name}.")
 
+        # Handle the last key
         if key is not None:
+            if key in data:
+                raise ValueError(f"Duplicate entry for '{key}' in {file_name}.")
             data[key] = text
 
         return data
@@ -303,11 +309,11 @@ class LogData:
 
                 ```
         """
-        if key in self.data.keys():
-            str_value = self.data[key]
+        if key in self.data:
+            val = self.data[key]
         else:
-            str_value = ["No message found for " + key]
-        return str_value
+            val = [f"No message found for {key}"]
+        return val
 
     def log_text(
         self,
@@ -382,7 +388,13 @@ class LogData:
         str_value = self.get_text(key)
         for _ in range(repeat):
             for s in str_value:
-                sexp = s.format(**data)
+                try:
+                    sexp = s.format(**data)
+                except KeyError as e:
+                    raise KeyError(
+                        f"Missing placeholder {e} in message '{key}'. "
+                        f"Available data keys: {list(data.keys())}"
+                    ) from e
                 if file is None:
                     print(indent + sexp)
                 else:
