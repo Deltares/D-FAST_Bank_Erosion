@@ -11,37 +11,27 @@ from PyQt5.QtGui import QValidator, QDoubleValidator
 
 class TestGuiText:
     """Test the gui_text function for text retrieval."""
-
-    def test_gui_text_returns_string(self):
+    @pytest.mark.parametrize("key,prefix,placeholder_dict,expected", [
+        ("action_close", None, None, "Close"),
+        ("some_key", "custom_", None, "No message found for custom_some_key"),
+        ("read_param", "", {"param": "Parameter", "file": "filename"}, "reading Parameter from file: filename"),
+        ("action_close", None, {"param": "Parameter", "file": "filename"}, "Close"),
+    ],
+    ids=[
+        "existing_key_and_prefix",
+        "non_existing_key_with_custom_prefix",
+        "existing_key_and_placeholder_dict",
+        "existing_key_but_not_formattable",
+    ])
+    def test_gui_text(self, key, prefix, placeholder_dict, expected):
         """Test that gui_text returns the correct string."""
-        result = gui_text("action_close")
-        assert isinstance(result, str)
-        assert len(result) > 0
-
-    def test_gui_text_with_custom_prefix(self):
-        """Test gui_text with custom prefix."""
-        # This will depend on your actual text dictionary
-        result = gui_text("some_key", prefix="custom_")
-        assert isinstance(result, str)
-        assert result == "No message found for custom_some_key"
-
-
-    def test_gui_text_with_format_dict(self):
-        """Test gui_text with formatting text."""
-        # Example: if your text has placeholders like {name}
-        result = gui_text(key="read_param",
-                          prefix= "",
-                          placeholder_dict={"param": "Parameter", "file": "filename"})
-        assert isinstance(result, str)
-        assert result == "reading Parameter from file: filename"
-
-    def test_gui_text_with_format_dict_no_format_possible(self):
-        """Test gui_text with formatting text, but the string doesn't allow it."""
-        # Example: if your text has placeholders like {name}
-        result = gui_text(key="action_close",
-                          placeholder_dict={"param": "Parameter", "file": "filename"})
-        assert isinstance(result, str)
-        assert result == "Close"
+        kwargs = {"key": key}
+        if prefix is not None:
+            kwargs["prefix"] = prefix
+        if placeholder_dict is not None:
+            kwargs["placeholder_dict"] = placeholder_dict
+        result = gui_text(**kwargs)
+        assert result == expected
 
 
 class TestValidator:
@@ -57,3 +47,28 @@ class TestValidator:
         """Test that validator raises an error when it is unknown."""
         with pytest.raises(ValueError):
             validator("not_existing_validator")
+
+
+class TestShipTypes:
+    """Test the shipTypes function."""
+
+    def test_amount_of_ship_types(self):
+        """Test that shipTypes returns a list."""
+        types = shipTypes()
+        assert isinstance(types, list)
+        assert len(types) == 3
+
+    @pytest.mark.parametrize("index,expected", [
+        (0, "1 (multiple barge convoy set)"),
+        (1, "2 (RHK ship / motorship)"),
+        (2, "3 (towboat)"),
+    ],
+    ids=[
+        "first_ship_type",
+        "second_ship_type",
+        "third_ship_type",
+    ])
+    def test_ship_types_contains_expected_values(self, index, expected):
+        """Test that shipTypes returns the correct ship type strings."""
+        result = shipTypes()
+        assert result[index] == expected
