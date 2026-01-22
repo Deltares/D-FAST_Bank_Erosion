@@ -24,7 +24,7 @@ class TestGuiText:
         "existing_key_but_not_formattable",
     ])
     def test_gui_text(self, key, prefix, placeholder_dict, expected):
-        """Test that gui_text returns the correct string."""
+        """Test that gui_text returns the expected string."""
         kwargs = {"key": key}
         if prefix is not None:
             kwargs["prefix"] = prefix
@@ -38,7 +38,7 @@ class TestValidator:
     """Test the validator function for input validation."""
 
     def test_validator_positive_real_returns_validator(self):
-        """Test that validator returns a QValidator for positive_real."""
+        """Test that validator returns a QDoubleValidator for positive_real."""
         val = validator("positive_real")
         assert val is not None
         assert isinstance(val, QDoubleValidator)
@@ -53,7 +53,7 @@ class TestShipTypes:
     """Test the shipTypes function."""
 
     def test_amount_of_ship_types(self):
-        """Test that shipTypes returns a list."""
+        """Test that shipTypes returns a list of 3 elements."""
         types = shipTypes()
         assert isinstance(types, list)
         assert len(types) == 3
