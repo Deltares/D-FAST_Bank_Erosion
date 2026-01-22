@@ -36,14 +36,12 @@ START /B /WAIT python -m nuitka ^
  --python-flag=no_asserts ^
  --python-flag=no_docstrings ^
  --nofollow-import-to=*.tests ^
- --nofollow-import-to=unittest ^
- --nofollow-import-to=unittest.mock ^
- --noinclude-unittest-mode=nofollow ^
  --enable-plugin=anti-bloat ^
  --report=compilation-report.xml ^
  --show-progress ^
  --enable-plugin=pyqt5 ^
  --file-reference-choice=runtime ^
+ --include-package=unittest ^
  --include-package=numpy ^
  --include-package=pyproj ^
  --include-module=shapely ^
