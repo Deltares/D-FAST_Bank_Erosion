@@ -3,8 +3,6 @@ from typing import List, Optional, Tuple
 import geopandas as gpd
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from shapely import LineString, Polygon
