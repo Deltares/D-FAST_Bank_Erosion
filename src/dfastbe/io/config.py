@@ -1318,7 +1318,7 @@ def _get_stations(filename: str, key: str, positive: bool):
         filename,
         names=["Chainage", "Val"],
         skipinitialspace=True,
-        delim_whitespace=True,
+        sep='\s+'
     )
 
     km = points.Chainage.to_numpy()
