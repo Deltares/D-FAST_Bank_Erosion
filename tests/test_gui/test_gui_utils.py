@@ -18,9 +18,9 @@ class TestGuiText:
         ("action_close", None, {"param": "Parameter", "file": "filename"}, "Close"),
     ],
     ids=[
-        "existing_key_and_prefix",
+        "existing_key_and_default_prefix",
         "non_existing_key_with_custom_prefix",
-        "existing_key_and_placeholder_dict",
+        "existing_key_with_placeholder_formatting",
         "existing_key_but_not_formattable",
     ])
     def test_gui_text(self, key, prefix, placeholder_dict, expected):
