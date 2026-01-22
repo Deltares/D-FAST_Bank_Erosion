@@ -88,7 +88,7 @@ class LogData:
 
     _instance: Optional["LogData"] = None
 
-    def __new__(cls, file_name: Optional[Path] = None):
+    def __new__(cls, file_name: Optional[str | Path] = None) -> "LogData":
         """Create or return the singleton LogData instance.
 
         Implements the singleton pattern using ``__new__``. On first call,
@@ -131,7 +131,7 @@ class LogData:
             cls._instance._initialized = False
         return cls._instance
 
-    def __init__(self, file_name: Optional[Path] = None):
+    def __init__(self, file_name: Optional[str | Path] = None) -> None:
         """Initialize the LogData singleton instance.
 
         Loads and parses the message file on first initialization. Subsequent
@@ -166,7 +166,7 @@ class LogData:
             self._initialized = True
 
     @classmethod
-    def reset(cls):
+    def reset(cls) -> None:
         """Reset the singleton instance to allow re-initialization.
 
         This class method clears the singleton instance, allowing a new instance
