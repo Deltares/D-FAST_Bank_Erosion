@@ -23,7 +23,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
     
     
       
@@ -31,7 +31,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.618322db.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
       
         
         <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -5211,7 +5211,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="sd">                    - fairway_initial_water_levels</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># distance fairway-bankline (bank-fairway)</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_distance_fairway&quot;</span><span class="p">)</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_distance_fairway&quot;</span><span class="p">)</span>
 
         <span class="n">num_fairway_face_ind</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fairway_data</span><span class="o">.</span><span class="n">fairway_face_indices</span><span class="p">)</span>
 
@@ -5393,10 +5393,10 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="c1"># initialize arrays for erosion loop over all discharges</span>
         <span class="n">discharge_levels</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;total_time&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">erosion_time</span><span class="p">})</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;total_time&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;t&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">erosion_time</span><span class="p">})</span>
 
         <span class="k">for</span> <span class="n">level_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_levels</span><span class="p">):</span>
-            <span class="n">log_text</span><span class="p">(</span>
+            <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span>
                 <span class="s2">&quot;discharge_header&quot;</span><span class="p">,</span>
                 <span class="n">data</span><span class="o">=</span><span class="p">{</span>
                     <span class="s2">&quot;i&quot;</span><span class="p">:</span> <span class="n">level_i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
@@ -5405,7 +5405,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                 <span class="p">},</span>
             <span class="p">)</span>
 
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_q_params&quot;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
+            <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_q_params&quot;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
             <span class="c1"># 1) read level-specific parameters</span>
             <span class="c1"># read ship_velocity, num_ship, nwave, draught, ship_type, slope, reed, fairway_depth, ... (level specific values)</span>
             <span class="n">level_parameters</span> <span class="o">=</span> <span class="n">erosion_inputs</span><span class="o">.</span><span class="n">shipping_data</span><span class="o">.</span><span class="n">read_discharge_parameters</span><span class="p">(</span>
@@ -5413,14 +5413,14 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="p">)</span>
 
             <span class="c1"># 2) load FM result</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
-            <span class="n">log_text</span><span class="p">(</span>
+            <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
+            <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span>
                 <span class="s2">&quot;read_simdata&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_files</span><span class="p">[</span><span class="n">level_i</span><span class="p">]},</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span>
             <span class="p">)</span>
             <span class="n">simulation_data</span> <span class="o">=</span> <span class="n">ErosionSimulationData</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">sim_files</span><span class="p">[</span><span class="n">level_i</span><span class="p">],</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span>
             <span class="p">)</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_erosion&quot;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
+            <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_erosion&quot;</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">level_i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">bank_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_bank_height</span><span class="p">(</span><span class="n">bank_data</span><span class="p">,</span> <span class="n">simulation_data</span><span class="p">)</span>
@@ -5441,7 +5441,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="n">error_vol_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span>
                 <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;EroVol</span><span class="si">{</span><span class="n">level_i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;erovolQ</span><span class="si">{</span><span class="n">level_i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">.evo&quot;</span>
             <span class="p">)</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_error_vol&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">error_vol_file</span><span class="p">},</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
+            <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_error_vol&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">error_vol_file</span><span class="p">},</span> <span class="n">indent</span><span class="o">=</span><span class="s2">&quot;  &quot;</span><span class="p">)</span>
             <span class="n">write_km_eroded_volumes</span><span class="p">(</span>
                 <span class="n">km_mid</span><span class="p">,</span> <span class="n">dvol_bank</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">error_vol_file</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
@@ -5486,7 +5486,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">erosion_results</span><span class="p">:</span> <span class="n">ErosionResults</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">LineString</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Postprocess the erosion results to get the new bank lines and volumes.&quot;&quot;&quot;</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
         <span class="n">avg_erosion_rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span><span class="p">)</span>
         <span class="n">dn_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span><span class="p">)</span>
         <span class="n">d_nav_flow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span><span class="p">)</span>
@@ -5515,12 +5515,12 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
                 <span class="n">erosion_results</span><span class="o">.</span><span class="n">eq_erosion_dist</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">*</span> <span class="n">single_bank</span><span class="o">.</span><span class="n">bank_line_size</span>
             <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">single_bank</span><span class="o">.</span><span class="n">bank_line_size</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
             <span class="n">dn_max_eq</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">erosion_results</span><span class="o">.</span><span class="n">eq_erosion_dist</span><span class="p">[</span><span class="n">ib</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnav&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">ib</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">avg_erosion_rate</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnavflow&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">d_nav_flow</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnavship&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">d_nav_ship</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnmax&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">dn_max</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnaveq&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">d_nav_eq</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnmaxeq&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">dn_max_eq</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
+            <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnav&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">ib</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">avg_erosion_rate</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
+            <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnavflow&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">d_nav_flow</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
+            <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnavship&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">d_nav_ship</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
+            <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnmax&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">dn_max</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
+            <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnaveq&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">d_nav_eq</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
+            <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dnmaxeq&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;v&quot;</span><span class="p">:</span> <span class="n">dn_max_eq</span><span class="p">[</span><span class="n">ib</span><span class="p">]})</span>
 
             <span class="n">xy_line_new</span> <span class="o">=</span> <span class="n">move_line</span><span class="p">(</span>
                 <span class="n">bank_coords</span><span class="p">,</span>
@@ -5551,7 +5551,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
             <span class="p">)</span>
             <span class="n">total_eroded_vol_per_km</span><span class="p">[:,</span> <span class="n">ib</span><span class="p">]</span> <span class="o">=</span> <span class="n">dvol_tot</span>
             <span class="k">if</span> <span class="n">ib</span> <span class="o">&lt;</span> <span class="n">bank_data</span><span class="o">.</span><span class="n">n_bank_lines</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+                <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
 
         <span class="n">erosion_results</span><span class="o">.</span><span class="n">avg_erosion_rate</span> <span class="o">=</span> <span class="n">avg_erosion_rate</span>
         <span class="n">erosion_results</span><span class="o">.</span><span class="n">eq_eroded_vol_per_km</span> <span class="o">=</span> <span class="n">eq_eroded_vol_per_km</span>
@@ -5683,7 +5683,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_mesh_processor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;derive_topology&quot;</span><span class="p">)</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;derive_topology&quot;</span><span class="p">)</span>
         <span class="n">mesh_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation_data</span><span class="o">.</span><span class="n">compute_mesh_topology</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">MeshProcessor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="p">,</span> <span class="n">mesh_data</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">debug</span><span class="p">)</span>
@@ -5691,14 +5691,14 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the bank erosion analysis for a specified configuration.&quot;&quot;&quot;</span>
         <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- start analysis --&quot;</span><span class="p">)</span>
-        <span class="n">log_text</span><span class="p">(</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span>
             <span class="s2">&quot;header_bankerosion&quot;</span><span class="p">,</span>
             <span class="n">data</span><span class="o">=</span><span class="p">{</span>
                 <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">__version__</span><span class="p">,</span>
                 <span class="s2">&quot;location&quot;</span><span class="p">:</span> <span class="s2">&quot;https://github.com/Deltares/D-FAST_Bank_Erosion&quot;</span><span class="p">,</span>
             <span class="p">},</span>
         <span class="p">)</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
 
         <span class="n">mesh_processor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mesh_processor</span><span class="p">()</span>
 
@@ -5714,7 +5714,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">km_mid</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">,</span> <span class="n">station_type</span><span class="o">=</span><span class="s2">&quot;mid&quot;</span><span class="p">)</span>  <span class="c1"># get mid-points</span>
 
         <span class="c1"># map bank lines to mesh cells</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;intersect_bank_mesh&quot;</span><span class="p">)</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;intersect_bank_mesh&quot;</span><span class="p">)</span>
         <span class="n">bank_data</span> <span class="o">=</span> <span class="n">mesh_processor</span><span class="o">.</span><span class="n">get_bank_data</span><span class="p">()</span>
         <span class="c1"># map the bank data to the fairway data (the bank_data and fairway_data will be updated inside the `_map_bank_to_fairway` function)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">calculate_fairway_bank_line_distance</span><span class="p">(</span>
@@ -5793,21 +5793,21 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">bank_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;BankFile&quot;</span><span class="p">,</span> <span class="s2">&quot;bankfile&quot;</span><span class="p">)</span>
 
         <span class="n">bank_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">_new.shp&quot;</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)})</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)})</span>
         <span class="n">bank_lines_new</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)</span>
 
         <span class="n">bankline_eq_series</span> <span class="o">=</span> <span class="n">GeoSeries</span><span class="p">(</span><span class="n">bankline_eq_list</span><span class="p">,</span> <span class="n">crs</span><span class="o">=</span><span class="n">config_file</span><span class="o">.</span><span class="n">crs</span><span class="p">)</span>
         <span class="n">banklines_eq</span> <span class="o">=</span> <span class="n">GeoDataFrame</span><span class="p">(</span><span class="n">geometry</span><span class="o">=</span><span class="n">bankline_eq_series</span><span class="p">)</span>
 
         <span class="n">bank_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">output_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bank_name</span><span class="si">}</span><span class="s2">_eq.shp&quot;</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)})</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_banklines&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)})</span>
         <span class="n">banklines_eq</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">bank_file</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_write_volume_outputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">erosion_results</span><span class="p">:</span> <span class="n">ErosionResults</span><span class="p">,</span> <span class="n">km_mid</span><span class="p">):</span>
         <span class="n">erosion_vol_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span>
             <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;EroVol&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;erovol.evo&quot;</span>
         <span class="p">)</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_tot_erovol&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">erosion_vol_file</span><span class="p">})</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_tot_erovol&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">erosion_vol_file</span><span class="p">})</span>
         <span class="n">write_km_eroded_volumes</span><span class="p">(</span>
             <span class="n">km_mid</span><span class="p">,</span>
             <span class="n">erosion_results</span><span class="o">.</span><span class="n">total_eroded_vol_per_km</span><span class="p">,</span>
@@ -5818,7 +5818,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">erosion_vol_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span>
             <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;EroVolEqui&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;erovol_eq.evo&quot;</span>
         <span class="p">)</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_eq_erovol&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">erosion_vol_file</span><span class="p">})</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;save_eq_erovol&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">erosion_vol_file</span><span class="p">})</span>
         <span class="n">write_km_eroded_volumes</span><span class="p">(</span>
             <span class="n">km_mid</span><span class="p">,</span>
             <span class="n">erosion_results</span><span class="o">.</span><span class="n">eq_eroded_vol_per_km</span><span class="p">,</span>
@@ -6120,7 +6120,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="sd">                - fairway_initial_water_levels</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># distance fairway-bankline (bank-fairway)</span>
-    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_distance_fairway&quot;</span><span class="p">)</span>
+    <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_distance_fairway&quot;</span><span class="p">)</span>
 
     <span class="n">num_fairway_face_ind</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fairway_data</span><span class="o">.</span><span class="n">fairway_face_indices</span><span class="p">)</span>
 
@@ -6491,14 +6491,14 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 <span class="normal">654</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the bank erosion analysis for a specified configuration.&quot;&quot;&quot;</span>
     <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- start analysis --&quot;</span><span class="p">)</span>
-    <span class="n">log_text</span><span class="p">(</span>
+    <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span>
         <span class="s2">&quot;header_bankerosion&quot;</span><span class="p">,</span>
         <span class="n">data</span><span class="o">=</span><span class="p">{</span>
             <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="n">__version__</span><span class="p">,</span>
             <span class="s2">&quot;location&quot;</span><span class="p">:</span> <span class="s2">&quot;https://github.com/Deltares/D-FAST_Bank_Erosion&quot;</span><span class="p">,</span>
         <span class="p">},</span>
     <span class="p">)</span>
-    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+    <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
 
     <span class="n">mesh_processor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_mesh_processor</span><span class="p">()</span>
 
@@ -6514,7 +6514,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
     <span class="n">km_mid</span> <span class="o">=</span> <span class="n">get_km_bins</span><span class="p">(</span><span class="n">km_bin</span><span class="p">,</span> <span class="n">station_type</span><span class="o">=</span><span class="s2">&quot;mid&quot;</span><span class="p">)</span>  <span class="c1"># get mid-points</span>
 
     <span class="c1"># map bank lines to mesh cells</span>
-    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;intersect_bank_mesh&quot;</span><span class="p">)</span>
+    <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;intersect_bank_mesh&quot;</span><span class="p">)</span>
     <span class="n">bank_data</span> <span class="o">=</span> <span class="n">mesh_processor</span><span class="o">.</span><span class="n">get_bank_data</span><span class="p">()</span>
     <span class="c1"># map the bank data to the fairway data (the bank_data and fairway_data will be updated inside the `_map_bank_to_fairway` function)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">calculate_fairway_bank_line_distance</span><span class="p">(</span>
@@ -10032,7 +10032,7 @@ intersections along the current segment.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">wrapper</span> <span class="o">=</span> <span class="n">MeshWrapper</span><span class="p">(</span><span class="n">mesh_data</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">get_fairway_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">river_axis</span><span class="p">:</span> <span class="n">LineGeometry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FairwayData</span><span class="p">:</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_fairway&quot;</span><span class="p">)</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_fairway&quot;</span><span class="p">)</span>
         <span class="c1"># intersect fairway and mesh</span>
         <span class="n">fairway_intersection_coords</span><span class="p">,</span> <span class="n">fairway_face_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapper</span><span class="o">.</span><span class="n">intersect_with_coords</span><span class="p">(</span><span class="n">river_axis</span><span class="o">.</span><span class="n">as_array</span><span class="p">())</span>
 
@@ -10058,7 +10058,7 @@ intersections along the current segment.</p>
         <span class="n">bank_face_indices</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">bank_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_bank_lines</span><span class="p">):</span>
             <span class="n">line_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_lines</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_nodes&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">bank_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">line_coords</span><span class="p">)})</span>
+            <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_nodes&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">bank_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">line_coords</span><span class="p">)})</span>
 
             <span class="n">coords_along_bank</span><span class="p">,</span> <span class="n">face_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapper</span><span class="o">.</span><span class="n">intersect_with_coords</span><span class="p">(</span><span class="n">line_coords</span><span class="p">)</span>
             <span class="n">bank_line_coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords_along_bank</span><span class="p">)</span>
@@ -10076,7 +10076,7 @@ intersections along the current segment.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_link_lines_to_stations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bank_line_coords</span><span class="p">,</span> <span class="n">bank_face_indices</span><span class="p">):</span>
         <span class="c1"># linking bank lines to chainage</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_banks&quot;</span><span class="p">)</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_banks&quot;</span><span class="p">)</span>
         <span class="n">river_center_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_data</span><span class="o">.</span><span class="n">river_center_line</span><span class="o">.</span><span class="n">as_array</span><span class="p">()</span>
         <span class="n">n_bank_lines</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_lines</span><span class="p">)</span>
 
@@ -10103,9 +10103,9 @@ intersections along the current segment.</p>
                 <span class="n">coords</span><span class="p">,</span> <span class="n">river_center_line</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">is_right_bank</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]:</span>
-                <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;right_side_bank&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">bank_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">})</span>
+                <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;right_side_bank&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">bank_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">})</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;left_side_bank&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">bank_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">})</span>
+                <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;left_side_bank&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">bank_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">})</span>
 
         <span class="n">bank_order</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="s2">&quot;right&quot;</span> <span class="k">if</span> <span class="n">val</span> <span class="k">else</span> <span class="s2">&quot;left&quot;</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">is_right_bank</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
@@ -10238,7 +10238,7 @@ intersections along the current segment.</p>
     <span class="n">bank_face_indices</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">bank_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_bank_lines</span><span class="p">):</span>
         <span class="n">line_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_lines</span><span class="o">.</span><span class="n">geometry</span><span class="p">[</span><span class="n">bank_index</span><span class="p">]</span><span class="o">.</span><span class="n">coords</span><span class="p">)</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_nodes&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">bank_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">line_coords</span><span class="p">)})</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_nodes&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;ib&quot;</span><span class="p">:</span> <span class="n">bank_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;n&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">line_coords</span><span class="p">)})</span>
 
         <span class="n">coords_along_bank</span><span class="p">,</span> <span class="n">face_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrapper</span><span class="o">.</span><span class="n">intersect_with_coords</span><span class="p">(</span><span class="n">line_coords</span><span class="p">)</span>
         <span class="n">bank_line_coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coords_along_bank</span><span class="p">)</span>
@@ -14485,7 +14485,7 @@ can be set to empty arrays if not needed.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">vel_dx</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span>
             <span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;VelFilterDist&quot;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">positive</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;get_levels&quot;</span><span class="p">)</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;get_levels&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_discharge_levels</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_int</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;NLevel&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">output_intervals</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">get_float</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;OutputInterval&quot;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bank_lines</span> <span class="o">=</span> <span class="n">config_file</span><span class="o">.</span><span class="n">read_bank_lines</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bank_dir</span><span class="p">))</span>
@@ -14497,18 +14497,18 @@ can be set to empty arrays if not needed.</p>
         <span class="n">ref_level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_int</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;RefLevel&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
         <span class="c1"># read simulation data (get_sim_data)</span>
         <span class="n">sim_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_sim_file</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ref_level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_simdata&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">sim_file</span><span class="p">})</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_simdata&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">sim_file</span><span class="p">})</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
         <span class="n">simulation_data</span> <span class="o">=</span> <span class="n">ErosionSimulationData</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">sim_file</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">simulation_data</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_bank_output_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
         <span class="n">bank_output_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;BankDir&quot;</span><span class="p">)</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dir_out&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dir&quot;</span><span class="p">:</span> <span class="n">bank_output_dir</span><span class="p">})</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dir_out&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dir&quot;</span><span class="p">:</span> <span class="n">bank_output_dir</span><span class="p">})</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">bank_output_dir</span><span class="p">):</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;overwrite_dir&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dir&quot;</span><span class="p">:</span> <span class="n">bank_output_dir</span><span class="p">})</span>
+            <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;overwrite_dir&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dir&quot;</span><span class="p">:</span> <span class="n">bank_output_dir</span><span class="p">})</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">bank_output_dir</span><span class="p">)</span>
 
@@ -14516,10 +14516,10 @@ can be set to empty arrays if not needed.</p>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_bank_line_dir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
         <span class="n">bank_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;General&quot;</span><span class="p">,</span> <span class="s2">&quot;BankDir&quot;</span><span class="p">)</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dir_in&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dir&quot;</span><span class="p">:</span> <span class="n">bank_dir</span><span class="p">})</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;bank_dir_in&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dir&quot;</span><span class="p">:</span> <span class="n">bank_dir</span><span class="p">})</span>
         <span class="n">bank_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">bank_dir</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">bank_dir</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;missing_dir&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dir&quot;</span><span class="p">:</span> <span class="n">bank_dir</span><span class="p">})</span>
+            <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;missing_dir&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;dir&quot;</span><span class="p">:</span> <span class="n">bank_dir</span><span class="p">})</span>
             <span class="k">raise</span> <span class="n">BankLinesResultsError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Required bank line directory:</span><span class="si">{</span><span class="n">bank_dir</span><span class="si">}</span><span class="s2"> does not exist. please use the banklines command to run the &quot;</span>
                 <span class="s2">&quot;bankline detection tool first it.&quot;</span>
@@ -14530,7 +14530,7 @@ can be set to empty arrays if not needed.</p>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_river_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LineString</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the river axis from the analysis settings.&quot;&quot;&quot;</span>
         <span class="n">river_axis_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_str</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;RiverAxis&quot;</span><span class="p">)</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_river_axis&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">river_axis_file</span><span class="p">})</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_river_axis&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">river_axis_file</span><span class="p">})</span>
         <span class="n">river_axis</span> <span class="o">=</span> <span class="n">XYCModel</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">river_axis_file</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">river_axis</span>
 
@@ -14553,7 +14553,7 @@ can be set to empty arrays if not needed.</p>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The river axis needs sorting!!&quot;</span><span class="p">)</span>
 
         <span class="c1"># map km to axis points, further using axis</span>
-        <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_axis&quot;</span><span class="p">)</span>
+        <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_axis&quot;</span><span class="p">)</span>
         <span class="n">river_center_line_arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_center_line</span><span class="o">.</span><span class="n">as_array</span><span class="p">()</span>
         <span class="n">river_axis_km</span> <span class="o">=</span> <span class="n">river_axis</span><span class="o">.</span><span class="n">intersect_with_line</span><span class="p">(</span><span class="n">river_center_line_arr</span><span class="p">)</span>
 
@@ -14666,7 +14666,7 @@ then clip the river axis by the first and last station of the centerline.</p>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The river axis needs sorting!!&quot;</span><span class="p">)</span>
 
     <span class="c1"># map km to axis points, further using axis</span>
-    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_axis&quot;</span><span class="p">)</span>
+    <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;chainage_to_axis&quot;</span><span class="p">)</span>
     <span class="n">river_center_line_arr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">river_center_line</span><span class="o">.</span><span class="n">as_array</span><span class="p">()</span>
     <span class="n">river_axis_km</span> <span class="o">=</span> <span class="n">river_axis</span><span class="o">.</span><span class="n">intersect_with_line</span><span class="p">(</span><span class="n">river_center_line_arr</span><span class="p">)</span>
 
@@ -14724,9 +14724,9 @@ then clip the river axis by the first and last station of the centerline.</p>
     <span class="n">ref_level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_int</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="s2">&quot;RefLevel&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="c1"># read simulation data (get_sim_data)</span>
     <span class="n">sim_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_file</span><span class="o">.</span><span class="n">get_sim_file</span><span class="p">(</span><span class="s2">&quot;Erosion&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ref_level</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
-    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_simdata&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">sim_file</span><span class="p">})</span>
-    <span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+    <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+    <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;read_simdata&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;file&quot;</span><span class="p">:</span> <span class="n">sim_file</span><span class="p">})</span>
+    <span class="n">LogData</span><span class="p">()</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
     <span class="n">simulation_data</span> <span class="o">=</span> <span class="n">ErosionSimulationData</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">sim_file</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">simulation_data</span>
@@ -16666,10 +16666,10 @@ in the simulation data.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "search.highlight", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["announce.dismiss", "content.action.edit", "content.action.view", "content.code.annotate", "content.code.copy", "content.tooltips", "navigation.footer", "navigation.indexes", "navigation.sections", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "search.highlight", "search.suggest", "toc.follow"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.e71a0d61.min.js"></script>
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
         <script src="https://unpkg.com/mermaid@10/dist/mermaid.min.js"></script>
       
