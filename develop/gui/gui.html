@@ -8075,7 +8075,7 @@ relative paths.</p>
         <span class="n">validator</span> <span class="o">=</span> <span class="n">PyQt5</span><span class="o">.</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDoubleValidator</span><span class="p">()</span>
         <span class="n">validator</span><span class="o">.</span><span class="n">setBottom</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Unknown validator type: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">validstr</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown validator type: </span><span class="si">{</span><span class="n">validstr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">validator</span>
 </code></pre></div></td></tr></table></div>
             </details>
