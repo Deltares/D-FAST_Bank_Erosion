@@ -95,10 +95,10 @@ def get_text(key: str) -> List[str]:
     global PROGTEXTS
 
     if key in PROGTEXTS.keys():
-        str_value = PROGTEXTS[key]
+        progtexts_value = PROGTEXTS[key]
     else:
-        str_value = ["No message found for " + key]
-    return str_value
+        progtexts_value = [f"No message found for {key}"]
+    return progtexts_value
 
 def log_text(
         key: str,

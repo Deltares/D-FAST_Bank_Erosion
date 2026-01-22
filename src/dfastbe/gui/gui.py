@@ -54,7 +54,7 @@ dialog: DialogObject
 r_dir = Path(__file__).resolve().parent
 ICONS_DIR = "gui/icons"
 
-def gui_text(key: str, prefix: str = "gui_", dict: Dict[str, Any] = {}):
+def gui_text(key: str, prefix: str = "gui_", placeholder_dict: Dict[str, Any] = {}):
     """
     Query the global dictionary of texts for a single string in the GUI.
 
@@ -69,16 +69,16 @@ def gui_text(key: str, prefix: str = "gui_", dict: Dict[str, Any] = {}):
         The key string used to query the dictionary (extended with prefix).
     prefix : str
         The prefix used in combination with the key (default "gui_").
-    dict : Dict[str, Any]
+    placeholder_dict : Dict[str, Any]
         A dictionary used for placeholder expansions (default empty).
 
     Returns
     -------
         The first line of the text in the dictionary expanded with the keys.
     """
-    cstr = get_text(prefix + key)
-    str = cstr[0].format(**dict)
-    return str
+    progtexts_value = get_text(prefix + key)
+    progtexts_str = progtexts_value[0].format(**placeholder_dict)
+    return progtexts_str
 
 
 def create_dialog() -> None:

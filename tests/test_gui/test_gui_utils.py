@@ -31,7 +31,7 @@ class TestGuiText:
         # Example: if your text has placeholders like {name}
         result = gui_text(key="read_param",
                           prefix= "",
-                          dict={"param": "Parameter", "file": "filename"})
+                          placeholder_dict={"param": "Parameter", "file": "filename"})
         assert isinstance(result, str)
         assert result == "reading Parameter from file: filename"
 
@@ -39,9 +39,10 @@ class TestGuiText:
         """Test gui_text with formatting text, but the string doesn't allow it."""
         # Example: if your text has placeholders like {name}
         result = gui_text(key="action_close",
-                          dict={"param": "Parameter", "file": "filename"})
+                          placeholder_dict={"param": "Parameter", "file": "filename"})
         assert isinstance(result, str)
         assert result == "Close"
+
 
 class TestValidator:
     """Test the validator function for input validation."""
