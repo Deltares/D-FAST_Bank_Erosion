@@ -6,6 +6,7 @@ These tests cover pure functions that don't require Qt event loop or complex set
 
 import pytest
 from dfastbe.gui.gui import gui_text, validator, shipTypes
+from PyQt5.QtGui import QValidator, QDoubleValidator
 
 
 class TestGuiText:
@@ -41,3 +42,17 @@ class TestGuiText:
                           dict={"param": "Parameter", "file": "filename"})
         assert isinstance(result, str)
         assert result == "Close"
+
+class TestValidator:
+    """Test the validator function for input validation."""
+
+    def test_validator_positive_real_returns_validator(self):
+        """Test that validator returns a QValidator for positive_real."""
+        val = validator("positive_real")
+        assert val is not None
+        assert isinstance(val, QDoubleValidator)
+
+    def test_validator_raises_error(self):
+        """Test that validator raises an error when it is unknown."""
+        with pytest.raises(Exception):
+            validator("not_existing_validator")
