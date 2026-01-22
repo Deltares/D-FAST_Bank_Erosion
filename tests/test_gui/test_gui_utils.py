@@ -54,5 +54,5 @@ class TestValidator:
 
     def test_validator_raises_error(self):
         """Test that validator raises an error when it is unknown."""
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError):
             validator("not_existing_validator")

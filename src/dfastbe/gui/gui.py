@@ -577,7 +577,7 @@ def validator(validstr: str) -> PyQt5.QtGui.QValidator:
         validator = PyQt5.QtGui.QDoubleValidator()
         validator.setBottom(0)
     else:
-        raise Exception("Unknown validator type: {}".format(validstr))
+        raise ValueError(f"Unknown validator type: {validstr}")
     return validator
 
 
