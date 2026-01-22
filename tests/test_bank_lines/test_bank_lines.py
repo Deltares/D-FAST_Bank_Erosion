@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -196,7 +197,7 @@ class TestBankLines:
 
         with patch(
             "dfastbe.bank_lines.bank_lines.sort_connect_bank_lines"
-        ) as mock_sort, patch("dfastbe.bank_lines.bank_lines.log_text"):
+        ) as mock_sort, patch("dfastbe.bank_lines.bank_lines.LogData"):
             mock_sort.return_value = [LineString([(0, 0), (1, 1)])]
             bank_lines.detect()
             bank_lines.plot()
@@ -428,7 +429,7 @@ class TestBankLines:
             "bank_areas": bank_areas,
         }
 
-        with patch("dfastbe.bank_lines.bank_lines.log_text"):
+        with patch("dfastbe.bank_lines.bank_lines.LogData"):
             bank_lines.save()
 
         assert (tmp_path / "bank_file.shp").exists()
@@ -498,7 +499,7 @@ class TestBankLines:
         ) as mock_close, patch(
             "dfastbe.plotting.Plot._zoom_xy_and_save"
         ) as mock_zoom_xy_and_save, patch(
-            "dfastbe.bank_lines.plotter.log_text"
+            "dfastbe.bank_lines.plotter.LogData"
         ):
 
             bank_lines_plotter = BankLinesPlotter(

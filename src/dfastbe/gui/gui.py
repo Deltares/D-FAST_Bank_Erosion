@@ -25,7 +25,7 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-
+from __future__ import annotations
 import configparser
 import os
 import pathlib
@@ -44,7 +44,7 @@ from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.file_utils import absolute_path
-from dfastbe.io.logger import get_text
+from dfastbe.io.logger import LogData
 
 USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
 DialogObject = Dict[str, PyQt5.QtCore.QObject]
@@ -76,7 +76,7 @@ def gui_text(key: str, prefix: str = "gui_", dict: Dict[str, Any] = {}):
     -------
         The first line of the text in the dictionary expanded with the keys.
     """
-    cstr = get_text(prefix + key)
+    cstr = LogData().get_text(prefix + key)
     str = cstr[0].format(**dict)
     return str
 
