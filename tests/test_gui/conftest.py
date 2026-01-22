@@ -21,8 +21,3 @@ def initialize_log_data():
     LogData.reset()
 
     return LogData(Path(__path__[0]) / "io/log_data/messages.UK.ini")
-
-
-
-
-
