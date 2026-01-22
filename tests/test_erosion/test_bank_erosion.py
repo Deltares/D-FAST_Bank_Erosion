@@ -1,9 +1,7 @@
-from collections import namedtuple
 from pathlib import Path
 from typing import List
 from unittest.mock import MagicMock, patch
 
-import os
 import matplotlib
 import numpy as np
 import pytest
@@ -715,6 +713,7 @@ class TestErosion:
             patch(
                 "dfastbe.bank_erosion.bank_erosion.DischargeLevels"
             ) as mock_discharge_levels,
+            patch("dfastbe.bank_erosion.bank_erosion.LogData")
         ):
             flow_erosion_dist = [
                 np.array([7.06542424e-02, 6.75617155e-02, 7.01268742e-02]),

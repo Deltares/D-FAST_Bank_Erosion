@@ -3,7 +3,7 @@ from typing import List, Tuple
 from shapely.geometry import LineString, MultiLineString, Point
 from shapely.geometry.polygon import Polygon
 
-from dfastbe.io.logger import log_text
+from dfastbe.io.logger import LogData
 from dfastbe.io.data_models import BaseRiverData, BaseSimulationData, LineGeometry
 
 MAX_RIVER_WIDTH = 1000
@@ -195,7 +195,7 @@ class BankLinesRiverData(BaseRiverData):
                 simulation data and critical water depth (h0).
         """
         sim_file = self.config_file.get_sim_file("Detect", "")
-        log_text("read_simdata", data={"file": sim_file})
+        LogData().log_text("read_simdata", data={"file": sim_file})
         simulation_data = BaseSimulationData.read(sim_file)
         # increase critical water depth h0 by flooding threshold dh0
         # get critical water depth used for defining bank line (default = 0.0 m)
@@ -228,7 +228,7 @@ class BankLinesRiverData(BaseRiverData):
         """
         simulation_data, h0 = self._get_bank_lines_simulation_data()
         # clip simulation data to boundaries ...
-        log_text("clip_data")
+        LogData().log_text("clip_data")
         simulation_data.clip(self.river_center_line.values, self.search_lines.max_distance)
 
         return simulation_data, h0
