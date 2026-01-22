@@ -1,6 +1,6 @@
 ## Description of Files in the TeamCity pipelines
 
-The `DFastBETests` folder contains Kotlin DSL configuration files for defining and managing TeamCity build configurations, templates, and dependencies for the D-FAST Bank Erosion project. Below is a description of each file:
+The `.teamcity/DFastBETests` folder contains Kotlin DSL configuration files for defining and managing TeamCity build configurations, templates, and dependencies for the D-FAST Bank Erosion project. Below is a description of each file as currently implemented:
 
 ### 1. `settings.kts`
 **Purpose:**  
@@ -8,165 +8,120 @@ The main entry point for the TeamCity Kotlin DSL configuration. Defines the proj
 
 **Key Features:**  
 - Sets the project description and version.  
-- Includes global parameters like `CONDA_ENV_NAME` and `python.version`.  
-- References build configurations such as `UnitTestsSonarCloud`, `BuildWithCommandWindow`, and others.
+- Includes global parameters like `python.version`, and `poetry.path`.  
+- References build configurations such as `UnitTests`, `BuildMain`, `BuildTerminal`, `LatexManual`, `SignedRelease`, `SignedReleaseTerminal`, and `TestBinaries`.
 
 ---
 
-### 2. `unittestssonarcloud.kt`
+### 2. `poetry_template.kt`
 **Purpose:**  
-Defines the build configuration for running unit tests and performing SonarCloud analysis.
+Provides a reusable template for all builds using Poetry for dependency management and environment setup.
 
 **Key Features:**  
-- Runs the unit tests
-- Integrates with SonarCloud for code quality analysis.  
-- Publishes commit statuses to GitHub using a personal access token.  
+- Installs Poetry standalone in a temporary directory.  
+- Creates and manages a Poetry environment using the specified Python version.  
+- Installs dependencies via Poetry.  
+- Cleans up the Poetry environment after the build.  
+- Ensures builds run only on Windows agents with the required Python path.
 
 ---
 
-### 3. `condatemplate.kt`
+### 3. `unit_tests.kt`
 **Purpose:**  
-Provides a reusable template for cleaning up the build environment.
+Defines the build configuration for running unit tests and (optionally) SonarCloud analysis.
 
 **Key Features:**  
-- Defines the steps for setting up the conda environment and clean up of the environment. 
-- Can be used as a base template for other build configurations to ensure a clean workspace.
+- Uses the Poetry template for environment setup.  
+- Runs unit tests and generates coverage reports.  
+- (Optionally) runs SonarCloud analysis (step is present but disabled by default).  
+- Publishes commit statuses to GitHub.
 
 ---
 
-### 4. `buildwithcommandwindow.kt`
+### 4. `build_main.kt`
 **Purpose:**  
-Defines the build configuration for compiling the D-FAST Bank Erosion project providing a command window version as final result.
+Defines the build configuration for compiling the D-FAST Bank Erosion project as the main distribution (without a command window).
 
 **Key Features:**  
-- Executes a batch script (`BuildDfastbe.bat`) to build the project.  
-- Relies on the template (`CondaTemplate.kt`) for conda environment setup.  
-- Includes failure conditions:  
-    - Fails the build if an `AssertionError` is detected in the logs.  
-    - Fails the build if the total artifact size is below a specified threshold (e.g., 100MB).  
-- Defines dependencies:  
-    - Depends on `LatexManualGeneration` for PDF artifacts.  
-    - Depends on `UnitTestsSonarCloud` for unit tests and code coverage.  
+- Uses the Poetry template for environment setup.  
+- Executes the `BuildDfastbe_no_command_window.bat` script via Poetry.  
+- Produces zipped distribution artifacts.  
+- Fails the build on `AssertionError` in logs.
 
 ---
 
-### 5. `buildwithoutcommandwindow.kt`
+### 5. `build_terminal.kt`
 **Purpose:**  
-Defines the build configuration for compiling the D-FAST Bank Erosion project where the final result suppresses the command window.
+Defines the build configuration for compiling the D-FAST Bank Erosion project with a command window (for debugging).
 
 **Key Features:**  
-- Executes a batch script (`BuildDfastbe_no_command_window.bat`) to build the project.  
-- Relies on the template (`CondaTemplate.kt`) for conda environment setup.   
-- Includes failure conditions:  
-    - Fails the build if an `AssertionError` is detected in the logs.  
-    - Fails the build if the total artifact size is below a specified threshold (e.g., 100MB).  
-- Defines dependencies:  
-    - Depends on `LatexManualGeneration` for PDF artifacts.  
-    - Depends on `UnitTestsSonarCloud` for unit tests and code coverage. 
+- Uses the Poetry template for environment setup.  
+- Executes the `BuildDfastbe.bat` script via Poetry.  
+- Produces zipped distribution artifacts.  
+- Fails the build on `AssertionError` in logs.  
+- Has a build timeout and artifact size checks.
 
 ---
 
-### 6. `latexmanualgeneration.kt`
+### 6. `latex_manual.kt`
 **Purpose:**  
 Defines a build configuration for generating LaTeX-based documentation for the project.
 
 **Key Features:**  
-- Runs a script to compile LaTeX files into PDF documentation.
-- Produces PDF artifacts that are used as dependencies to prevent other build configurations from running if the documentation generation fails (e.g., `BuildWithCommandWindow`).
-- Ensures that the documentation is up-to-date with the latest changes in the project.
+- Runs scripts to generate user manual, technical reference, and release notes using LaTeX and BibTeX.  
+- Produces PDF and log artifacts.  
+- Fails the build if documentation generation fails.  
+- Publishes commit statuses to GitHub.
 
 ---
 
-### 7. `signedrelease.kt`
+### 7. `signed_release.kt`
 **Purpose:**  
-Defines a build configuration for creating signed releases of the D-FAST Bank Erosion project. This configuration combines artifacts from multiple sources, including the command window version and the suppressed command window version, and ensures that the release is properly signed and ready for distribution.
+Defines a build configuration for collecting and packaging the signed release of the D-FAST Bank Erosion project.
 
 **Key Features:**  
-- Produces a signed release artifact.
-- Moves the CLI version of dfastbe.exe to the root directory and cleans up unnecessary folders.
+- Collects artifacts from the main and terminal builds, as well as from signing dependencies.  
+- Produces a signed release zip artifact.  
+- Runs only on Windows agents.
 
 ---
 
-### 8. `signedreleasecommand.kt`
-**Purpose:**
-Defines a build configuration for executing the signing process of release artifacts using a command-based approach. This configuration ensures that the release artifacts are signed with the appropriate certificates and are ready for secure distribution.
+### 8. `signed_release_terminal.kt`
+**Purpose:**  
+Defines a build configuration for collecting the signed release with a command window for debugging.
 
-**Key Features:**
-- Produces a signed release zip archive artifact.
-- Collects the artifacts from the signing configuration.
+**Key Features:**  
+- Collects artifacts from the terminal build and signing dependencies.  
+- Produces a signed release zip artifact.  
+- Runs only on Windows agents.
 
 ---
 
-### 9. `TestBinaries.kt`
+### 9. `test_binaries.kt`
 **Purpose:**  
 Defines a build configuration for running distribution tests on the built binaries.
 
 **Key Features:**  
-- Ensures that the distributed artifacts are functional and meet quality standards.
-- Runs automated tests on the final release binaries.
+- Uses the Poetry template for environment setup.  
+- Runs tests on the distributed binaries.  
+- Publishes commit statuses to GitHub.  
+- Triggers on VCS changes in production environment.  
+- Depends on the signed release with command window.
 
 ---
 
 ### 10. `pom.xml`
 **Purpose:**  
-Defines the Maven project configuration for the D-FAST Bank Erosion project. This file is used to manage project dependencies, build lifecycle, and plugins.
+Defines the Maven project configuration for the D-FAST Bank Erosion project (legacy or for Java-based tools).
 
 **Key Features:**  
-- Specifies project metadata such as group ID, artifact ID, and version.  
-- Manages dependencies required for building and testing the project.  
-- Configures Maven plugins for tasks like compiling, packaging, and testing.  
-- Supports integration with CI/CD pipelines by automating build and deployment processes.  
-- Ensures compatibility with Java-based tools and frameworks.
+- Specifies project metadata and dependencies.  
+- May be used for integration with Java-based tools or legacy build steps.
 
 ---
 
-### Commit status publisher:
-The Commit Status Publisher is a feature used in some TeamCity configurations to report the build status of commits back to GitHub. This integration helps developers track the success or failure of builds directly within their GitHub pull requests or commit history.
-
-- The Commit Status Publisher uses a personal access token to authenticate with GitHub. This token is required to update the commit status in GitHub.
-- The token is securely stored in TeamCity as a parameter. To view or manage the list of tokens in TeamCity, navigate to Project Settings → Parameters.
-- The token is accessed in the build configuration using the %parameter_name% syntax. This ensures that sensitive information, such as the token, is protected and not exposed in the build logs or configuration files.
-
-### Triggering Builds Based on Environment
-To avoid unnecessary builds in a test environment, TeamCity allows you to control triggering using a context parameter. This ensures that builds are only triggered in the appropriate environment, such as production.
-
-1. How to Enable or Disable Triggering
-- Enable Triggering:
-  Set the context parameter environment to "production". This allows builds to be triggered automatically.
-- Disable Triggering:
-  Set the context parameter environment to "test". This prevents builds from being triggered automatically.
-
-2. Where to Set the Context Parameter
-The context parameter can be configured in Versioned Settings under Context Parameters. This allows you to manage the environment-specific behavior of your build configurations directly in the versioned settings.
-
-3. Benefits
-- Efficiency: Prevents unnecessary builds in non-production environments, saving resources.
-- Flexibility: Easily switch between environments by updating the context parameter.
-- Control: Ensures that builds are only triggered when appropriate, reducing noise in the CI/CD pipeline.
-
-## VCS Root Setup
-To enable TeamCity to import settings from the repository and monitor changes, you need to configure a VCS Root. The VCS Root defines the connection settings to your version control system (e.g., Git) and specifies how TeamCity interacts with the repository.
-
-Key Configuration Steps:
-1. Type of VCS
-- Select the type of version control system.
-- For this project, choose Git as the VCS type.
-
-2. VCS Root Details
-- VCS Root Name: Provide a descriptive name for the VCS root (e.g., D-FAST_Bank_Erosion_Main).
-- VCS Root ID: This is auto-generated by TeamCity. Modify it only if necessary and with caution.
-
-3. General Settings
-- Fetch URL: Specify the Git repository URL to clone or fetch the code from (e.g., https://github.com/your-org/your-repo.git).
-- Push URL: Specify the Git repository URL for pushing changes, if applicable.
-- Default Branch: Define the main branch of the repository (e.g., main or master).
-- Branch Specification: Configure the branches TeamCity should monitor for changes or run builds on.
-  - Use + to include branches (e.g., +refs/heads/* to include all branches).
-  - Use - to exclude branches.
-  - Use * as a wildcard to match branch patterns.
-
-Example Configuration:
-![VCS Root Settings](images/vcs_root_settings.png)
-
-### Folder Overview
-The `DFastBETests` folder is structured to modularize the TeamCity build configurations and templates for the D-FAST Bank Erosion project. Each file serves a specific purpose, such as running tests, building the project, or managing dependencies, while the `settings.kts` file ties everything together into a cohesive project.
+### Additional Notes
+- All builds are now based on Poetry for Python dependency and environment management.
+- The build pipeline is modular, with clear separation between testing, building, documentation, signing, and distribution testing.
+- Commit status publishing and clean workspace features are enabled for quality and traceability.
+- The configuration is designed for Windows build agents and expects a valid Python path and Poetry installation.
