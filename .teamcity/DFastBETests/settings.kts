@@ -16,8 +16,6 @@ project {
     description = "D-FAST Bank Erosion"
 
     params {
-        param("CONDA_ENV_NAME", "python-dfastbe")
-        param("CONDA_PATH", "D:\\ProgramData\\Miniforge3\\envs")
         param("python.version", "3.11.12")
         param("poetry.path", "%teamcity.agent.home.dir%\\..\\poetry")
         param("SonarSource", "dfastbe")
