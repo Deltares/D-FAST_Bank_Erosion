@@ -2,7 +2,6 @@
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.projectFeatures.*
 import UnitTests
-import CondaTemplate
 import PoetryTemplate
 import LatexManual
 import SignedReleaseTerminal
@@ -25,7 +24,6 @@ project {
         param("SonarProjectKey", "Deltares_D-FAST_Bank_Erosion")
     }
 
-    template(CondaTemplate)
     template(PoetryTemplate)
 
     buildType(UnitTests)
