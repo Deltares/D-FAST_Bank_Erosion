@@ -16,7 +16,7 @@ from dfastbe.bank_lines.plotter import BankLinesPlotter
 from dfastbe.bank_lines.utils import poly_to_line, sort_connect_bank_lines, tri_to_line
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.data_models import BaseSimulationData
-from dfastbe.io.logger import log_text, timed_logger
+from dfastbe.io.logger import LogData, timed_logger
 from dfastbe.utils import on_right_side
 
 MAX_RIVER_WIDTH = 1000
@@ -107,14 +107,14 @@ class BankLines(BaseCalculator):
         """
         timed_logger("-- start analysis --")
 
-        log_text(
+        LogData().log_text(
             "header_banklines",
             data={
                 "version": __version__,
                 "location": "https://github.com/Deltares/D-FAST_Bank_Erosion",
             },
         )
-        log_text("-")
+        LogData().log_text("-")
 
         # clip the chainage path to the range of chainages of interest
         river_center_line = self.river_data.river_center_line
@@ -129,17 +129,17 @@ class BankLines(BaseCalculator):
                 np.array(self.search_lines.values[ib].coords), center_line_arr[:, :2]
             )
 
-        log_text("identify_banklines")
+        LogData().log_text("identify_banklines")
         banklines = self.detect_bank_lines(
             self.simulation_data, self.critical_water_depth, self.config_file
         )
 
         # clip the set of detected bank lines to the bank areas
-        log_text("simplify_banklines")
+        LogData().log_text("simplify_banklines")
         bank = []
         masked_bank_lines = []
         for ib, bank_area in enumerate(bank_areas):
-            log_text("bank_lines", data={"ib": ib + 1})
+            LogData().log_text("bank_lines", data={"ib": ib + 1})
             masked_bank_line = self.mask(banklines, bank_area)
             if not masked_bank_line.is_empty:
                 masked_bank_lines.append(masked_bank_line)
@@ -152,7 +152,7 @@ class BankLines(BaseCalculator):
             "bank_areas": bank_areas,
         }
 
-        log_text("end_banklines")
+        LogData().log_text("end_banklines")
         timed_logger("-- stop analysis --")
 
     @staticmethod
@@ -207,7 +207,7 @@ class BankLines(BaseCalculator):
 
         bank_name = self.config_file.get_str("General", "BankFile", "bankfile")
         bank_file = self.bank_output_dir / f"{bank_name}{EXTENSION}"
-        log_text("save_banklines", data={"file": bank_file})
+        LogData().log_text("save_banklines", data={"file": bank_file})
         gpd.GeoSeries(self.results["bank"], crs=self.config_file.crs).to_file(bank_file)
 
         gpd.GeoSeries(self.results["masked_bank_lines"], crs=self.config_file.crs).to_file(

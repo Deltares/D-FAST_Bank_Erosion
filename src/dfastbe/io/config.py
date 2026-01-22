@@ -26,6 +26,7 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 
+from __future__ import annotations
 from configparser import ConfigParser
 from configparser import Error as ConfigparserError
 from dataclasses import dataclass
@@ -41,7 +42,7 @@ from geopandas.geoseries import GeoSeries
 from shapely.geometry import LineString
 
 from dfastbe.io.file_utils import absolute_path, relative_path
-from dfastbe.io.logger import log_text
+from dfastbe.io.logger import LogData
 
 __all__ = ["ConfigFile", "ConfigFileError", "SimulationFilesError", "PlotProperties"]
 
@@ -119,6 +120,7 @@ class ConfigFile:
             self.path = Path(path)
             self.root_dir = self.path.parent
             self.make_paths_absolute()
+        self.log_data = LogData()
 
     @property
     def config(self) -> ConfigParser:
@@ -631,7 +633,7 @@ class ConfigFile:
         line = []
         for b in range(n_bank):
             bankfile = self.config["Detect"][f"Line{b + 1}"]
-            log_text("read_search_line", data={"nr": b + 1, "file": bankfile})
+            self.log_data.log_text("read_search_line", data={"nr": b + 1, "file": bankfile})
             line.append(XYCModel.read(bankfile))
         return line
 
@@ -647,11 +649,11 @@ class ConfigFile:
         bank_name = self.get_str("General", "BankFile", "bankfile")
         bankfile = Path(bank_dir) / f"{bank_name}.shp"
         if bankfile.exists():
-            log_text("read_banklines", data={"file": str(bankfile)})
+            self.log_data.log_text("read_banklines", data={"file": str(bankfile)})
             return gpd.read_file(bankfile)
 
         bankfile = Path(bank_dir) / f"{bank_name}_#.xyc"
-        log_text("read_banklines", data={"file": str(bankfile)})
+        self.log_data.log_text("read_banklines", data={"file": str(bankfile)})
         bankline_list = []
         b = 1
         while True:
@@ -826,13 +828,13 @@ class ConfigFile:
 
         except (ValueError, TypeError):
             if onefile:
-                log_text("read_param", data={"param": key, "file": value})
+                self.log_data.log_text("read_param", data={"param": key, "file": value})
                 km_thr, val = _get_stations(value, key, positive)
 
             for ib, num_stations in enumerate(num_stations_per_bank):
                 if not onefile:
                     filename_i = f"{value}_{ib + 1}{ext}"
-                    log_text(
+                    self.log_data.log_text(
                         "read_param_one_bank",
                         data={"param": key, "i": ib + 1, "file": filename_i},
                     )
@@ -927,7 +929,7 @@ class ConfigFile:
         """
         # get the chainage file
         river_center_line_file = self.get_str("General", "RiverKM")
-        log_text("read_chainage", data={"file": river_center_line_file})
+        self.log_data.log_text("read_chainage", data={"file": river_center_line_file})
         river_center_line = XYCModel.read(river_center_line_file, num_columns=3)
 
         # make sure that chainage is increasing with node index
@@ -1153,10 +1155,10 @@ class ConfigFile:
         # as appropriate, check output dir for figures and file format
         if save_plot:
             fig_dir = self.get_str("General", "FigureDir", Path(root_dir) / "figure")
-            log_text("figure_dir", data={"dir": fig_dir})
+            self.log_data.log_text("figure_dir", data={"dir": fig_dir})
             path_fig_dir = Path(fig_dir)
             if path_fig_dir.exists():
-                log_text("overwrite_dir", data={"dir": fig_dir})
+                self.log_data.log_text("overwrite_dir", data={"dir": fig_dir})
             path_fig_dir.mkdir(parents=True, exist_ok=True)
             plot_ext = self.get_str("General", "FigureExt", ".png")
             data = data | {
@@ -1183,9 +1185,9 @@ class ConfigFile:
             output_dir = self.get_str("Erosion", "OutputDir")
 
         output_dir = Path(output_dir)
-        log_text(f"{option}_out", data={"dir": output_dir})
+        self.log_data.log_text(f"{option}_out", data={"dir": output_dir})
         if output_dir.exists():
-            log_text("overwrite_dir", data={"dir": output_dir})
+            self.log_data.log_text("overwrite_dir", data={"dir": output_dir})
         else:
             output_dir.mkdir(parents=True, exist_ok=True)
 

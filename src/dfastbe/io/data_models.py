@@ -32,7 +32,7 @@ import netCDF4
 from shapely.geometry import LineString, Point
 from shapely import prepare
 from geopandas.geodataframe import GeoDataFrame
-from dfastbe.io.logger import log_text
+from dfastbe.io.logger import LogData
 from dfastbe.io.config import SimulationFilesError, ConfigFile, get_bbox
 
 
@@ -76,7 +76,7 @@ class LineGeometry:
         else:
             self.values: LineString = self.mask(line, mask)
 
-            log_text(
+            LogData().log_text(
                 "clip_chainage", data={"low": self.station_bounds[0], "high": self.station_bounds[1]}
             )
 
@@ -489,7 +489,7 @@ class BaseSimulationData:
         """
         name = Path(file_name).name
         if name.endswith("map.nc"):
-            log_text("read_grid", indent=indent)
+            LogData().log_text("read_grid", indent=indent)
 
             # read the node coordinates
             x_node = _read_fm_map(file_name, "x", location="node")
@@ -518,22 +518,22 @@ class BaseSimulationData:
             n_nodes_per_face = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
 
             face_node = f_nc
-            log_text("read_bathymetry", indent=indent)
+            LogData().log_text("read_bathymetry", indent=indent)
             bed_elevation_location = "node"
             bed_elevation_values = _read_fm_map(file_name, "altitude", location="node")
-            log_text("read_water_level", indent=indent)
+            LogData().log_text("read_water_level", indent=indent)
             water_level_face = _read_fm_map(file_name, "Water level")
-            log_text("read_water_depth", indent=indent)
+            LogData().log_text("read_water_depth", indent=indent)
             water_depth_face = np.maximum(
                 _read_fm_map(file_name, "sea_floor_depth_below_sea_surface"), 0.0
             )
-            log_text("read_velocity", indent=indent)
+            LogData().log_text("read_velocity", indent=indent)
             velocity_x_face = _read_fm_map(file_name, "sea_water_x_velocity")
             velocity_y_face = _read_fm_map(file_name, "sea_water_y_velocity")
-            log_text("read_chezy", indent=indent)
+            LogData().log_text("read_chezy", indent=indent)
             chezy_face = _read_fm_map(file_name, "Chezy roughness")
 
-            log_text("read_drywet", indent=indent)
+            LogData().log_text("read_drywet", indent=indent)
             root_group = netCDF4.Dataset(file_name)
             try:
                 file_source = root_group.converted_from
