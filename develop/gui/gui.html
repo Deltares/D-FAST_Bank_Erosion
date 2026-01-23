@@ -3323,7 +3323,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
     <span class="n">app</span> <span class="o">=</span> <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;application&quot;</span><span class="p">]</span>
     <span class="n">win</span> <span class="o">=</span> <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;window&quot;</span><span class="p">]</span>
     <span class="n">win</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec_</span><span class="p">())</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">app</span><span class="o">.</span><span class="n">exec</span><span class="p">())</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -6266,7 +6266,7 @@ to reflect it contents.</p>
         <span class="n">pixmap</span> <span class="o">=</span> <span class="n">dfast_icon</span><span class="o">.</span><span class="n">pixmap</span><span class="p">(</span><span class="n">icon_size</span><span class="p">)</span><span class="o">.</span><span class="n">scaled</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span><span class="mi">64</span><span class="p">)</span>
         <span class="n">msg</span><span class="o">.</span><span class="n">setIconPixmap</span><span class="p">(</span><span class="n">pixmap</span><span class="p">)</span>
     <span class="n">msg</span><span class="o">.</span><span class="n">setWindowIcon</span><span class="p">(</span><span class="n">dfast_icon</span><span class="p">)</span>
-    <span class="n">msg</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+    <span class="n">msg</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7666,7 +7666,7 @@ detailed_message : Option[str]
         <span class="n">msg</span><span class="o">.</span><span class="n">setDetailedText</span><span class="p">(</span><span class="n">detailed_message</span><span class="p">)</span>
     <span class="n">msg</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Error&quot;</span><span class="p">)</span>
     <span class="n">msg</span><span class="o">.</span><span class="n">setStandardButtons</span><span class="p">(</span><span class="n">QtWidgets</span><span class="o">.</span><span class="n">QMessageBox</span><span class="o">.</span><span class="n">Ok</span><span class="p">)</span>
-    <span class="n">msg</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+    <span class="n">msg</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
