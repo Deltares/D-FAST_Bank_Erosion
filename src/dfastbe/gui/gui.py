@@ -601,7 +601,7 @@ def activate_dialog() -> None:
     app = dialog["application"]
     win = dialog["window"]
     win.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 def generalParLayout(
@@ -1856,7 +1856,7 @@ def show_error(message: str, detailed_message: Optional[str] = None) -> None:
         msg.setDetailedText(detailed_message)
     msg.setWindowTitle("Error")
     msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
-    msg.exec_()
+    msg.exec()
 
 
 def menu_about_self():
@@ -1881,7 +1881,7 @@ def menu_about_self():
         pixmap = dfast_icon.pixmap(icon_size).scaled(64,64)
         msg.setIconPixmap(pixmap)
     msg.setWindowIcon(dfast_icon)
-    msg.exec_()
+    msg.exec()
 
 
 def menu_about_qt():
