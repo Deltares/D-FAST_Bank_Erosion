@@ -73,7 +73,7 @@ def gui_text(
     prefix : str
         The prefix used in combination with the key (default "gui_").
     placeholder_dict : Optional[Dict[str, Any]]
-        A dictionary used for placeholder expansions (default None).
+        A dictionary used for placeholder expansions (it defaults to None).
 
     Returns
     -------
