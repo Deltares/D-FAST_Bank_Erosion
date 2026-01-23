@@ -49,7 +49,7 @@ from dfastbe.io.logger import LogData
 USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
 DialogObject = Dict[str, PyQt5.QtCore.QObject]
 
-dialog: DialogObject
+dialog: DialogObject = {}
 
 r_dir = Path(__file__).resolve().parent
 ICONS_DIR = "gui/icons"
@@ -96,9 +96,10 @@ def create_dialog() -> None:
     None
     """
     global dialog
-    dialog = {}
 
-    app = QtWidgets.QApplication(sys.argv)
+    app = QtWidgets.QApplication.instance()
+    if app is None:
+        app = QtWidgets.QApplication(sys.argv)
     app.setStyle("fusion")
     dialog["application"] = app
 
