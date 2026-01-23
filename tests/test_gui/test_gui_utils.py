@@ -25,11 +25,10 @@ class TestGuiText:
     ])
     def test_gui_text(self, key, prefix, placeholder_dict, expected):
         """Test that gui_text returns the expected string."""
-        kwargs = {"key": key}
+        kwargs = {"key": key, "placeholder_dict": placeholder_dict}
+
         if prefix is not None:
             kwargs["prefix"] = prefix
-        if placeholder_dict is not None:
-            kwargs["placeholder_dict"] = placeholder_dict
         result = gui_text(**kwargs)
         assert result == expected
 

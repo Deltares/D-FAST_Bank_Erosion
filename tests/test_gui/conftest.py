@@ -10,7 +10,7 @@ from dfastbe.io.logger import LogData
 
 
 @pytest.fixture(autouse=True)
-def initialize_log_data():
+def initialize_log_data() -> LogData:
     """
     Initialize LogData singleton with messages file before each test.
 
