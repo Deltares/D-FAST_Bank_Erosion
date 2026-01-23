@@ -36,8 +36,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import matplotlib.pyplot
-import PyQt5.QtGui
-from PyQt5 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets, QtGui
 
 from dfastbe import __file__, __version__
 from dfastbe.bank_erosion.bank_erosion import Erosion
@@ -47,7 +46,7 @@ from dfastbe.io.file_utils import absolute_path
 from dfastbe.io.logger import LogData
 
 USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
-DialogObject = Dict[str, PyQt5.QtCore.QObject]
+DialogObject = Dict[str, QtCore.QObject]
 
 dialog: DialogObject
 
@@ -143,13 +142,13 @@ def create_dialog() -> None:
     addBankTab(tabs, win)
 
 
-def createMenus(menubar: PyQt5.QtWidgets.QMenuBar) -> None:
+def createMenus(menubar: QtWidgets.QMenuBar) -> None:
     """
     Add the menus to the menubar.
 
     Arguments
     ---------
-    menubar : PyQt5.QtWidgets.QMenuBar
+    menubar : QtWidgets.QMenuBar
         Menubar to which menus should be added.
     """
     menu = menubar.addMenu(gui_text("File"))
@@ -172,7 +171,7 @@ def createMenus(menubar: PyQt5.QtWidgets.QMenuBar) -> None:
 
 
 def addGeneralTab(
-    tabs: PyQt5.QtWidgets.QTabWidget, win: PyQt5.QtWidgets.QMainWindow
+    tabs: QtWidgets.QTabWidget, win: QtWidgets.QMainWindow
 ) -> None:
     """
     Create the tab for the general settings.
@@ -182,9 +181,9 @@ def addGeneralTab(
 
     Arguments
     ---------
-    tabs : PyQt5.QtWidgets.QTabWidget
+    tabs : QtWidgets.QTabWidget
         Tabs object to which the tab should be added.
-    win : PyQt5.QtWidgets.QMainWindow
+    win : QtWidgets.QMainWindow
         Windows in which the tab item is located.
     """
     generalWidget = QtWidgets.QWidget()
@@ -251,7 +250,7 @@ def addGeneralTab(
 
 
 def addCheckBox(
-    formLayout: PyQt5.QtWidgets.QFormLayout,
+    formLayout: QtWidgets.QFormLayout,
     key: str,
     labelString: str,
     isChecked: bool = False,
@@ -261,7 +260,7 @@ def addCheckBox(
 
     Arguments
     ---------
-    formLayout : PyQt5.QtWidgets.QFormLayout
+    formLayout : QtWidgets.QFormLayout
         Form layout object in which to position the edit controls.
     key : str
         Short name of the parameter.
@@ -280,20 +279,20 @@ def addCheckBox(
 
 
 def addDetectTab(
-    tabs: PyQt5.QtWidgets.QTabWidget,
-    win: PyQt5.QtWidgets.QMainWindow,
-    app: PyQt5.QtWidgets.QApplication,
+    tabs: QtWidgets.QTabWidget,
+    win: QtWidgets.QMainWindow,
+    app: QtWidgets.QApplication,
 ) -> None:
     """
     Create the tab for the bank line detection settings.
 
     Arguments
     ---------
-    tabs : PyQt5.QtWidgets.QTabWidget
+    tabs : QtWidgets.QTabWidget
         Tabs object to which the tab should be added.
-    win : PyQt5.QtWidgets.QMainWindow
+    win : QtWidgets.QMainWindow
         The window object in which the tab item is located.
-    app : PyQt5.QtWidgets.QApplication
+    app : QtWidgets.QApplication
         The application object to which the window belongs, needed for font information.
     """
     detectWidget = QtWidgets.QWidget()
@@ -319,20 +318,20 @@ def addDetectTab(
 
 
 def addErosionTab(
-    tabs: PyQt5.QtWidgets.QTabWidget,
-    win: PyQt5.QtWidgets.QMainWindow,
-    app: PyQt5.QtWidgets.QApplication,
+    tabs: QtWidgets.QTabWidget,
+    win: QtWidgets.QMainWindow,
+    app: QtWidgets.QApplication,
 ) -> None:
     """
     Create the tab for the main bank erosion settings.
 
     Arguments
     ---------
-    tabs : PyQt5.QtWidgets.QTabWidget
+    tabs : QtWidgets.QTabWidget
         Tabs object to which the tab should be added.
-    win : PyQt5.QtWidgets.QMainWindow
+    win : QtWidgets.QMainWindow
         The window object in which the tab item is located.
-    app : PyQt5.QtWidgets.QApplication
+    app : QtWidgets.QApplication
         The application object to which the window belongs, needed for font information.
     """
     erosionWidget = QtWidgets.QWidget()
@@ -359,7 +358,7 @@ def addErosionTab(
     erosionLayout.addRow("Discharges", disLayout)
 
     refLevel = QtWidgets.QLineEdit(win)
-    refLevel.setValidator(PyQt5.QtGui.QIntValidator(1, 1))
+    refLevel.setValidator(QtGui.QIntValidator(1, 1))
     dialog["refLevel"] = refLevel
     erosionLayout.addRow("Reference Case", refLevel)
 
@@ -388,16 +387,16 @@ def addErosionTab(
 
 
 def addShippingTab(
-    tabs: PyQt5.QtWidgets.QTabWidget, win: PyQt5.QtWidgets.QMainWindow
+    tabs: QtWidgets.QTabWidget, win: QtWidgets.QMainWindow
 ) -> None:
     """
     Create the tab for the general shipping settings.
 
     Arguments
     ---------
-    tabs : PyQt5.QtWidgets.QTabWidget
+    tabs : QtWidgets.QTabWidget
         Tabs object to which the tab should be added.
-    win : PyQt5.QtWidgets.QMainWindow
+    win : QtWidgets.QMainWindow
         The window object in which the tab item is located.
     """
     eParamsWidget = QtWidgets.QWidget()
@@ -433,16 +432,16 @@ def shipTypes() -> List[str]:
 
 
 def addBankTab(
-    tabs: PyQt5.QtWidgets.QTabWidget, win: PyQt5.QtWidgets.QMainWindow
+    tabs: QtWidgets.QTabWidget, win: QtWidgets.QMainWindow
 ) -> None:
     """
     Create the tab for the general bank properties.
 
     Arguments
     ---------
-    tabs : PyQt5.QtWidgets.QTabWidget
+    tabs : QtWidgets.QTabWidget
         Tabs object to which the tab should be added.
-    win : PyQt5.QtWidgets.QMainWindow
+    win : QtWidgets.QMainWindow
         The window object in which the tab item is located.
     """
     eParamsWidget = QtWidgets.QWidget()
@@ -484,14 +483,14 @@ def addBankTab(
 
 
 def addFilter(
-    gridLayout: PyQt5.QtWidgets.QGridLayout, row: int, key: str, labelString: str
+    gridLayout: QtWidgets.QGridLayout, row: int, key: str, labelString: str
 ) -> None:
     """
     Add a line of controls for a filter
 
     Arguments
     ---------
-    gridLayout : PyQt5.QtWidgets.QGridLayout
+    gridLayout : QtWidgets.QGridLayout
         Grid layout object in which to position the edit controls.
     row : int
         Grid row number to be used for this parameter.
@@ -565,7 +564,7 @@ def bankStrengthSwitch() -> None:
         dialog["bankTypeEditFile"].setEnabled(False)
 
 
-def validator(validstr: str) -> PyQt5.QtGui.QValidator:
+def validator(validstr: str) -> QtGui.QValidator:
     """
     Wrapper to easily create a validator.
 
@@ -576,11 +575,11 @@ def validator(validstr: str) -> PyQt5.QtGui.QValidator:
 
     Returns
     -------
-    validator : PyQt5.QtGui.QValidator
+    validator : QtGui.QValidator
         Validator for the requested validation method.
     """
     if validstr == "positive_real":
-        validator = PyQt5.QtGui.QDoubleValidator()
+        validator = QtGui.QDoubleValidator()
         validator.setBottom(0)
     else:
         raise ValueError(f"Unknown validator type: {validstr}")
@@ -602,7 +601,7 @@ def activate_dialog() -> None:
 
 
 def generalParLayout(
-    gridLayout: PyQt5.QtWidgets.QGridLayout,
+    gridLayout: QtWidgets.QGridLayout,
     row: int,
     key: str,
     labelString: str,
@@ -613,7 +612,7 @@ def generalParLayout(
 
     Arguments
     ---------
-    gridLayout : PyQt5.QtWidgets.QGridLayout
+    gridLayout : QtWidgets.QGridLayout
         Grid layout object in which to position the edit controls.
     row : int
         Grid row number to be used for this parameter.
@@ -653,14 +652,14 @@ def generalParLayout(
 
 
 def addOpenFileRow(
-    formLayout: PyQt5.QtWidgets.QFormLayout, key: str, labelString: str
+    formLayout: QtWidgets.QFormLayout, key: str, labelString: str
 ) -> None:
     """
     Add a line of controls for selecting a file or folder in a form layout.
 
     Arguments
     ---------
-    formLayout : PyQt5.QtWidgets.QFormLayout
+    formLayout : QtWidgets.QFormLayout
         Form layout object in which to position the edit controls.
     key : str
         Short name of the parameter.
@@ -673,7 +672,7 @@ def addOpenFileRow(
     formLayout.addRow(Label, fLayout)
 
 
-def getIcon(filename: str) -> PyQt5.QtGui.QIcon:
+def getIcon(filename: str) -> QtGui.QIcon:
     """
     Opens the icon file relative to the location of the program.
 
@@ -683,10 +682,10 @@ def getIcon(filename: str) -> PyQt5.QtGui.QIcon:
         Name of the icon file.
     """
     progloc = str(pathlib.Path(__file__).parent.absolute())
-    return PyQt5.QtGui.QIcon(progloc + os.path.sep + filename)
+    return QtGui.QIcon(progloc + os.path.sep + filename)
 
 
-def openFileLayout(key, enabled=True) -> PyQt5.QtWidgets.QWidget:
+def openFileLayout(key, enabled=True) -> QtWidgets.QWidget:
     """
     Create a standard layout with a file or folder edit field and selection button.
 
@@ -699,7 +698,7 @@ def openFileLayout(key, enabled=True) -> PyQt5.QtWidgets.QWidget:
 
     Returns
     ------
-    parent : PyQt5.QtWidgets.QWidget
+    parent : QtWidgets.QWidget
         Parent QtWidget that contains the edit field and selection button.
     """
     parent = QtWidgets.QWidget()
@@ -720,21 +719,21 @@ def openFileLayout(key, enabled=True) -> PyQt5.QtWidgets.QWidget:
 
 
 def addRemoveEditLayout(
-    mainWidget: PyQt5.QtWidgets.QWidget, key: str
-) -> PyQt5.QtWidgets.QWidget:
+    mainWidget: QtWidgets.QWidget, key: str
+) -> QtWidgets.QWidget:
     """
     Create a standard layout with list control and add, edit and remove buttons.
 
     Arguments
     ---------
-    mainWidget : PyQt5.QtWidgets.QWidget
+    mainWidget : QtWidgets.QWidget
         Main object on which the add, edit and remove buttons should operate.
     key : str
         Short name of the parameter.
 
     Returns
     -------
-    parent : PyQt5.QtWidgets.QWidget
+    parent : QtWidgets.QWidget
         Parent QtWidget that contains the add, edit and remove buttons.
     """
     parent = QtWidgets.QWidget()
@@ -825,7 +824,7 @@ def addAnItem(key: str) -> None:
     dialog[key + "Remove"].setEnabled(True)
 
 
-def setDialogSize(editDialog: PyQt5.QtWidgets.QDialog, width: int, height: int) -> None:
+def setDialogSize(editDialog: QtWidgets.QDialog, width: int, height: int) -> None:
     """
     Set the width and height of a dialog and position it centered relative to the main window.
     
@@ -875,7 +874,7 @@ def editASearchLine(
     editDialog = QtWidgets.QDialog()
     setDialogSize(editDialog, 600, 100)
     editDialog.setWindowFlags(
-        PyQt5.QtCore.Qt.WindowTitleHint | PyQt5.QtCore.Qt.WindowSystemMenuHint
+        QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint
     )
     editDialog.setWindowTitle("Edit Search Line")
     editLayout = QtWidgets.QFormLayout(editDialog)
@@ -921,7 +920,7 @@ def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
     editDialog = QtWidgets.QDialog()
     setDialogSize(editDialog, 600, 100)
     editDialog.setWindowFlags(
-        PyQt5.QtCore.Qt.WindowTitleHint | PyQt5.QtCore.Qt.WindowSystemMenuHint
+        QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint
     )
     editDialog.setWindowTitle("Edit Discharge")
     editLayout = QtWidgets.QFormLayout(editDialog)
@@ -949,13 +948,13 @@ def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
     return fileName, prob
 
 
-def close_edit(hDialog: PyQt5.QtWidgets.QDialog) -> None:
+def close_edit(hDialog: QtWidgets.QDialog) -> None:
     """
     Generic close function for edit dialogs.
 
     Arguments
     ---------
-    hDialog : PyQt5.QtWidgets.QDialog
+    hDialog : QtWidgets.QDialog
         Dialog object to be closed.
     """
     hDialog.close()
@@ -1510,14 +1509,14 @@ def addTabForLevel(istr: str) -> None:
 
 
 def optionalParLayout(
-    gridLayout: PyQt5.QtWidgets.QGridLayout, row: int, key, labelString, selectList=None
+    gridLayout: QtWidgets.QGridLayout, row: int, key, labelString, selectList=None
 ) -> None:
     """
     Add a line of controls for editing an optional parameter.
 
     Arguments
     ---------
-    gridLayout : PyQt5.QtWidgets.QGridLayout
+    gridLayout : QtWidgets.QGridLayout
         Grid layout object in which to position the edit controls.
     row : int
         Grid row number to be used for this parameter.
