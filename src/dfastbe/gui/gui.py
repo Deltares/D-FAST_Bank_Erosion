@@ -31,9 +31,8 @@ import os
 import pathlib
 import sys
 import traceback
-from functools import partial
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 import matplotlib.pyplot
 from PySide6 import QtCore, QtWidgets, QtGui
@@ -512,7 +511,7 @@ def addFilter(
 
     useFilter = QtWidgets.QCheckBox("")
     useFilter.setChecked(False)
-    useFilter.stateChanged.connect(partial(updateFilter, key))
+    useFilter.stateChanged.connect(lambda: updateFilter(key))
     gridLayout.addWidget(useFilter, row, 1)
     dialog[key + "Active"] = useFilter
 
@@ -629,14 +628,14 @@ def generalParLayout(
         In case the parameter can only have a limited number of values: a list
         of strings describing the options.
     """
-    Label = QtWidgets.QLabel(labelString)
+    Label = QLabel(labelString)
     dialog[key] = Label
     gridLayout.addWidget(Label, row, 0)
 
     paramTypes = ("Constant", "Variable")
-    Type = QtWidgets.QComboBox()
+    Type = QComboBox()
     Type.addItems(paramTypes)
-    Type.currentIndexChanged.connect(partial(typeUpdatePar, key))
+    Type.currentIndexChanged.connect(lambda: typeUpdatePar(key))
     dialog[key + "Type"] = Type
     gridLayout.addWidget(Type, row, 1)
 
@@ -715,7 +714,7 @@ def openFileLayout(key, enabled=True) -> QtWidgets.QWidget:
     gridly.addWidget(myWidget, 0, 0)
 
     openFile = QtWidgets.QPushButton(getIcon(f"{ICONS_DIR}/open.png"), "")
-    openFile.clicked.connect(partial(selectFile, key))
+    openFile.clicked.connect(lambda: selectFile(key))
     openFile.setEnabled(enabled)
     dialog[key + "File"] = openFile
     gridly.addWidget(openFile, 0, 2)
@@ -754,18 +753,18 @@ def addRemoveEditLayout(
     gridly.addWidget(buttonBar, 0, 1)
 
     addBtn = QtWidgets.QPushButton(getIcon(f"{ICONS_DIR}/add.png"), "")
-    addBtn.clicked.connect(partial(addAnItem, key))
+    addBtn.clicked.connect(lambda: addAnItem(key))
     dialog[key + "Add"] = addBtn
     buttonBarLayout.addWidget(addBtn)
 
     editBtn = QtWidgets.QPushButton(getIcon(f"{ICONS_DIR}/edit.png"), "")
-    editBtn.clicked.connect(partial(editAnItem, key))
+    editBtn.clicked.connect(lambda: editAnItem( key))
     editBtn.setEnabled(False)
     dialog[key + "Edit"] = editBtn
     buttonBarLayout.addWidget(editBtn)
 
     delBtn = QtWidgets.QPushButton(getIcon(f"{ICONS_DIR}/remove.png"), "")
-    delBtn.clicked.connect(partial(removeAnItem, key))
+    delBtn.clicked.connect(lambda: removeAnItem( key))
     delBtn.setEnabled(False)
     dialog[key + "Remove"] = delBtn
     buttonBarLayout.addWidget(delBtn)
@@ -898,7 +897,7 @@ def editASearchLine(
     editLayout.addRow("Search Distance [m]", searchDistance)
 
     done = QtWidgets.QPushButton("Done")
-    done.clicked.connect(partial(close_edit, editDialog))
+    done.clicked.connect(lambda: close_edit(editDialog))
     # edit_SearchDistance.setValidator(validator("positive_real"))
     editLayout.addRow(" ", done)
 
@@ -944,7 +943,7 @@ def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
     editLayout.addRow("Probability [-]", probability)
 
     done = QtWidgets.QPushButton("Done")
-    done.clicked.connect(partial(close_edit, editDialog))
+    done.clicked.connect(lambda: close_edit(editDialog))
     # edit_SearchDistance.setValidator(validator("positive_real"))
     editLayout.addRow(" ", done)
 
@@ -1053,11 +1052,11 @@ def updateTabKeys(i: int) -> None:
         if key[-4:] == "Type":
             obj.currentIndexChanged.disconnect()
             obj.currentIndexChanged.connect(
-                partial(typeUpdatePar, newStart + key[N:-4])
+                lambda: typeUpdatePar(newStart + key[N:-4])
             )
         elif key[-4:] == "File":
             obj.clicked.disconnect()
-            obj.clicked.connect(partial(selectFile, newStart + key[N:-4]))
+            obj.clicked.connect(lambda: selectFile(newStart + key[N:-4]))
         dialog[newStart + key[N:]] = obj
 
 
@@ -1544,7 +1543,7 @@ def optionalParLayout(
     paramTypes = ("Use Default", "Constant", "Variable")
     Type = QtWidgets.QComboBox()
     Type.addItems(paramTypes)
-    Type.currentIndexChanged.connect(partial(typeUpdatePar, key))
+    Type.currentIndexChanged.connect(lambda: typeUpdatePar(key))
     dialog[key + "Type"] = Type
     gridLayout.addWidget(Type, row, 1)
 
@@ -1617,21 +1616,21 @@ def setParam(field: str, config, group: str, key: str, default: str = "??") -> N
 
     """
     config_file = ConfigFile(config)
-    str = config_file.get_str(group, key, default)
+    extracted_val = config_file.get_str(group, key, default)
 
     try:
-        val = float(str)
-        dialog[field + "Type"].setCurrentText("Constant")
+        val = float(extracted_val)
+        cast(QComboBox, dialog[field + "Type"]).setCurrentText("Constant")
         if field + "Select" in dialog.keys():
             ival = int(val)
             if field == "shipType":
                 ival = ival - 1
-            dialog[field + "Select"].setCurrentIndex(ival)
+            cast(QComboBox, dialog[field + "Select"]).setCurrentIndex(ival)
         else:
-            dialog[field + "Edit"].setText(str)
+            cast(QLineEdit, dialog[field + "Edit"]).setText(extracted_val)
     except:
-        dialog[field + "Type"].setCurrentText("Variable")
-        dialog[field + "Edit"].setText(str)
+        cast(QComboBox, dialog[field + "Type"]).setCurrentText("Variable")
+        cast(QLineEdit, dialog[field + "Edit"]).setText(extracted_val)
 
 
 def setFilter(field: str, config, group: str, key: str) -> None:
