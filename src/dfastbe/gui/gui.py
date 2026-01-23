@@ -54,7 +54,10 @@ dialog: DialogObject
 r_dir = Path(__file__).resolve().parent
 ICONS_DIR = "gui/icons"
 
-def gui_text(key: str, prefix: str = "gui_", dict: Dict[str, Any] = {}):
+def gui_text(
+        key: str,
+        prefix: str = "gui_",
+        placeholder_dict: Optional[Dict[str, Any]] = None) -> str:
     """
     Query the global dictionary of texts for a single string in the GUI.
 
@@ -69,16 +72,19 @@ def gui_text(key: str, prefix: str = "gui_", dict: Dict[str, Any] = {}):
         The key string used to query the dictionary (extended with prefix).
     prefix : str
         The prefix used in combination with the key (default "gui_").
-    dict : Dict[str, Any]
-        A dictionary used for placeholder expansions (default empty).
+    placeholder_dict : Optional[Dict[str, Any]]
+        A dictionary used for placeholder expansions (it defaults to None).
 
     Returns
     -------
         The first line of the text in the dictionary expanded with the keys.
     """
-    cstr = LogData().get_text(prefix + key)
-    str = cstr[0].format(**dict)
-    return str
+    if placeholder_dict is None:
+        placeholder_dict = {}
+
+    progtexts_value = LogData().get_text(prefix + key)
+    progtexts_str = progtexts_value[0].format(**placeholder_dict)
+    return progtexts_str
 
 
 def create_dialog() -> None:
@@ -577,7 +583,7 @@ def validator(validstr: str) -> PyQt5.QtGui.QValidator:
         validator = PyQt5.QtGui.QDoubleValidator()
         validator.setBottom(0)
     else:
-        raise Exception("Unknown validator type: {}".format(validstr))
+        raise ValueError(f"Unknown validator type: {validstr}")
     return validator
 
 
