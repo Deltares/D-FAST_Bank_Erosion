@@ -20,9 +20,6 @@ certifi = "2025.1.31"
 
 [tool.poetry.group.gui.dependencies]
 pyside6 = "^6.10.1"
-# to be removed when PyQt5 is no longer needed
-pyqt5 = "^5.15.11"
-pyqt5-qt5 = "5.15.2"
 
 [tool.poetry.group.binary.dependencies]
 cftime  = ">=1.6.3"
