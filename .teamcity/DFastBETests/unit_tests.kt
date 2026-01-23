@@ -29,7 +29,7 @@ object UnitTests : BuildType({
             name = "Unit test and code coverage"
             id = "Unit_test_and_code_coverage"
             scriptContent = """
-                C:\poetry-temp\poetry\bin\poetry.exe run pytest --junitxml="report.xml" --cov=%COVERAGE_LOC% --cov-report=xml tests/ -m "not binaries"
+                %poetry.exe.path% run pytest --junitxml="report.xml" --cov=%COVERAGE_LOC% --cov-report=xml tests/ -m "not binaries"
             """.trimIndent()
         }
         step {

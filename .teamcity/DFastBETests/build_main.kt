@@ -22,7 +22,7 @@ object BuildMain : BuildType({
             name = "build D-FAST BE"
             id = "build_D_FAST_BE"
             scriptContent = """
-                C:\poetry-temp\poetry\bin\poetry.exe run .\BuildScripts\BuildDfastbe_no_command_window.bat
+                %poetry.exe.path% run .\BuildScripts\BuildDfastbe_no_command_window.bat
             """.trimIndent()
         }
         stepsOrder = arrayListOf("install_poetry", "create_poetry_environment", "Install_dependencies_via_poetry", "build_D_FAST_BE", "cleanup_poetry_environment")
