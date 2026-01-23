@@ -758,13 +758,13 @@ def addRemoveEditLayout(
     buttonBarLayout.addWidget(addBtn)
 
     editBtn = QtWidgets.QPushButton(getIcon(f"{ICONS_DIR}/edit.png"), "")
-    editBtn.clicked.connect(lambda: editAnItem( key))
+    editBtn.clicked.connect(lambda: editAnItem(key))
     editBtn.setEnabled(False)
     dialog[key + "Edit"] = editBtn
     buttonBarLayout.addWidget(editBtn)
 
     delBtn = QtWidgets.QPushButton(getIcon(f"{ICONS_DIR}/remove.png"), "")
-    delBtn.clicked.connect(lambda: removeAnItem( key))
+    delBtn.clicked.connect(lambda: removeAnItem(key))
     delBtn.setEnabled(False)
     dialog[key + "Remove"] = delBtn
     buttonBarLayout.addWidget(delBtn)
@@ -1616,21 +1616,21 @@ def setParam(field: str, config, group: str, key: str, default: str = "??") -> N
 
     """
     config_file = ConfigFile(config)
-    extracted_val = config_file.get_str(group, key, default)
+    config_value = config_file.get_str(group, key, default)
 
     try:
-        val = float(extracted_val)
+        val = float(config_value)
         cast(QComboBox, dialog[field + "Type"]).setCurrentText("Constant")
         if field + "Select" in dialog.keys():
-            ival = int(val)
+            int_value = int(val)
             if field == "shipType":
-                ival = ival - 1
-            cast(QComboBox, dialog[field + "Select"]).setCurrentIndex(ival)
+                int_value = int_value - 1
+            cast(QComboBox, dialog[field + "Select"]).setCurrentIndex(int_value)
         else:
-            cast(QLineEdit, dialog[field + "Edit"]).setText(extracted_val)
+            cast(QLineEdit, dialog[field + "Edit"]).setText(config_value)
     except:
         cast(QComboBox, dialog[field + "Type"]).setCurrentText("Variable")
-        cast(QLineEdit, dialog[field + "Edit"]).setText(extracted_val)
+        cast(QLineEdit, dialog[field + "Edit"]).setText(config_value)
 
 
 def setFilter(field: str, config, group: str, key: str) -> None:
