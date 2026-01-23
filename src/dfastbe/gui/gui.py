@@ -111,7 +111,7 @@ def create_dialog() -> None:
     createMenus(menubar)
 
     centralWidget = QtWidgets.QWidget()
-    layout = QtWidgets.QBoxLayout(2, centralWidget)
+    layout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.Direction.TopToBottom, centralWidget)
     win.setCentralWidget(centralWidget)
 
     tabs = QtWidgets.QTabWidget(win)
@@ -119,7 +119,7 @@ def create_dialog() -> None:
     layout.addWidget(tabs)
 
     buttonBar = QtWidgets.QWidget(win)
-    buttonBarLayout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.LeftToRight, buttonBar)
+    buttonBarLayout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.Direction.LeftToRight, buttonBar)
     buttonBarLayout.setContentsMargins(0, 0, 0, 0)
     layout.addWidget(buttonBar)
 
@@ -744,7 +744,7 @@ def addRemoveEditLayout(
     gridly.addWidget(mainWidget, 0, 0)
 
     buttonBar = QtWidgets.QWidget()
-    buttonBarLayout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.TopToBottom, buttonBar)
+    buttonBarLayout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.Direction.TopToBottom, buttonBar)
     buttonBarLayout.setContentsMargins(0, 0, 0, 0)
     gridly.addWidget(buttonBar, 0, 1)
 
