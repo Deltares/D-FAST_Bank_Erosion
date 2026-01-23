@@ -36,7 +36,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 import matplotlib.pyplot
 from PySide6 import QtCore, QtWidgets, QtGui
-from PySide6.QtWidgets import QSizePolicy, QComboBox, QLineEdit, QLabel
+from PySide6.QtWidgets import QSizePolicy, QComboBox, QLineEdit, QLabel, QApplication
 
 from dfastbe import __file__, __version__
 from dfastbe.bank_erosion.bank_erosion import Erosion
@@ -97,7 +97,7 @@ def create_dialog() -> None:
     global dialog
     dialog = {}
 
-    app = QtWidgets.QApplication(sys.argv)
+    app = QApplication()
     app.setStyle("fusion")
     dialog["application"] = app
 
