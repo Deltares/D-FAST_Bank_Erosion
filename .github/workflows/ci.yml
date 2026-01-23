@@ -36,6 +36,10 @@ jobs:
           poetry config virtualenvs.in-project false
           poetry config virtualenvs.path ~/.virtualenvs
 
+      - name: Install libEGL for PySide6
+        run: sudo apt-get update && sudo apt-get install -y libegl1
+        if: runner.os == 'Linux'
+
       - name: Install Dependencies
         run: poetry install
         if: steps.cache.outputs.cache-hit != 'true'
