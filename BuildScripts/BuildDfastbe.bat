@@ -30,7 +30,7 @@ START /B /WAIT python -m nuitka ^
  --nofollow-import-to=*unittest* ^
  --report=compilation-report.xml ^
  --show-progress ^
- --enable-plugin=pyqt5 ^
+ --enable-plugin=pyside6 ^
  --file-reference-choice=runtime ^
  --include-package=numpy ^
  --include-package=pyproj ^
