@@ -37,6 +37,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import matplotlib.pyplot
 from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6.QtWidgets import QSizePolicy, QComboBox, QLineEdit, QLabel
 
 from dfastbe import __file__, __version__
 from dfastbe.bank_erosion.bank_erosion import Erosion
@@ -411,7 +412,9 @@ def addShippingTab(
     generalParLayout(eParamsLayout, 6, "wavePar0", "Wave0 [m]")
     generalParLayout(eParamsLayout, 7, "wavePar1", "Wave1 [m]")
 
-    stretch = QtWidgets.QSpacerItem(10, 10, 13, 7)
+    stretch = QtWidgets.QSpacerItem(
+        10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
+    )
     eParamsLayout.addItem(stretch, 8, 0)
 
 
@@ -478,7 +481,9 @@ def addBankTab(
     addFilter(eParamsLayout, 7, "velFilter", "Velocity Filter [km]")
     addFilter(eParamsLayout, 8, "bedFilter", "Bank Elevation Filter [km]")
 
-    stretch = QtWidgets.QSpacerItem(10, 10, 13, 7)
+    stretch = QtWidgets.QSpacerItem(
+        10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
+    )
     eParamsLayout.addItem(stretch, 9, 0)
 
 
@@ -765,7 +770,9 @@ def addRemoveEditLayout(
     dialog[key + "Remove"] = delBtn
     buttonBarLayout.addWidget(delBtn)
 
-    stretch = QtWidgets.QSpacerItem(10, 10, 13, 7)
+    stretch = QtWidgets.QSpacerItem(
+        10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
+    )
     buttonBarLayout.addItem(stretch)
 
     return parent
@@ -1504,7 +1511,9 @@ def addTabForLevel(istr: str) -> None:
     dialog[istr + "_eroVolEdit"] = Edit
     newLayout.addWidget(Edit, 8, 2)
 
-    stretch = QtWidgets.QSpacerItem(10, 10, 13, 7)
+    stretch = QtWidgets.QSpacerItem(
+        10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
+    )
     newLayout.addItem(stretch, 9, 0)
 
 
