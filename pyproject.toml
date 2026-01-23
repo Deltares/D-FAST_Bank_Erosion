@@ -19,6 +19,8 @@ dfastio = { git = "https://github.com/Deltares/D-FAST_Commons.git", rev = "0.1.0
 certifi = "2025.1.31"
 
 [tool.poetry.group.gui.dependencies]
+pyside6 = "^6.10.1"
+# to be removed when PyQt5 is no longer needed
 pyqt5 = "^5.15.11"
 pyqt5-qt5 = "5.15.2"
 
