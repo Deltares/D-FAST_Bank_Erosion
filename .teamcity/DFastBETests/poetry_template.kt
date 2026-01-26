@@ -12,8 +12,8 @@ object PoetryTemplate : Template({
     buildNumberPattern = "%build.revisions.short%"
 
     params {
-        param("POETRY_HOME", "%teamcity.build.tempDir%\\poetry-temp")
-        param("POETRY_EXE", "%teamcity.build.tempDir%\\poetry-temp\\poetry\\bin\\poetry.exe")
+        param("POETRY_HOME", "C:\\poetry-temp")
+        param("POETRY_EXE", "C:\\poetry-temp\\poetry\\bin\\poetry.exe")
     }
 
     vcs {
