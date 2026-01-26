@@ -29,7 +29,7 @@ from __future__ import annotations
 import argparse
 import os
 from pathlib import Path
-from typing import Tuple
+from typing import Optional, Tuple
 
 import matplotlib
 
@@ -59,7 +59,15 @@ if is_nuitka:
 # ------------------------------------------------------------------------------
 
 
-def parse_arguments() -> Tuple[str, str, str]:
+def _existing_path(value: str) -> Path:
+    """Return a Path for an existing file, or raise argparse error."""
+    path = Path(value)
+    if not path.exists():
+        raise argparse.ArgumentTypeError(f"config file not found: {path}")
+    return path
+
+
+def parse_arguments() -> Tuple[str, str, Optional[Path]]:
     """Parse the command line arguments.
 
     Raises:
@@ -69,7 +77,7 @@ def parse_arguments() -> Tuple[str, str, str]:
             Language identifier ("NL" or "UK").
         run_mode (str):
             Specification of the run mode ("BANKLINES", "BANKEROSION" or "GUI")
-        config_name (str):
+        config_name (Path | None):
             Name of the configuration file.
     """
     parser = argparse.ArgumentParser(
@@ -94,10 +102,13 @@ def parse_arguments() -> Tuple[str, str, str]:
     )
     parser.add_argument(
         "--config",
-        default="dfastbe.cfg",
+        default=None,
+        type=_existing_path,
         help="name of the configuration file ('dfastbe.cfg' is default)",
     )
     args = parser.parse_args()
+    if args.mode != "GUI" and args.config is None:
+        parser.error("--config is required when --mode is BANKLINES or BANKEROSION")
 
     language = args.language
     run_mode = args.mode
