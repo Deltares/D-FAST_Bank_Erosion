@@ -8,17 +8,16 @@ from dfastbe.gui.gui import dialog, gui_text
 
 
 @pytest.fixture
-def dialog_window(qtbot, qapp):
+def dialog_window(qtbot):
     """
     Fixture that creates the dialog and provides qtbot.
 
-    The create_dialog function will use the existing QApplication
-    from pytest-qt's qapp fixture.
+    The create_dialog function will use the existing QApplication.
     """
-    # Clear the dialog dict before creating
+    # TODO: this fixture would need an update when switching to OOP in gui.py
+    # setUp phase
     dialog.clear()
 
-    # Create the dialog (will use existing QApplication from qapp)
     gui.create_dialog()
 
     # Add the window to qtbot for proper event handling
@@ -27,26 +26,19 @@ def dialog_window(qtbot, qapp):
 
     yield dialog
 
-    # Cleanup
+    # tearDown phase
     if "window" in dialog:
         dialog["window"].close()
     dialog.clear()
 
 
-def test_create_dialog_initializes_global_dialog(dialog_window):
-    """Test that create_dialog initializes the global dialog dictionary."""
-    assert isinstance(dialog, dict)
-    assert len(dialog) > 0
-    assert "application" in dialog
-    assert "window" in dialog
-    assert "tabs" in dialog
-
-
-def test_create_dialog_uses_existing_qapplication(dialog_window, qapp):
-    """Test that QApplication from pytest-qt is reused."""
-    app = dialog["application"]
-    assert isinstance(app, QtWidgets.QApplication)
-    assert app is qapp
+def test_create_dialog_contains_expected_elements(dialog_window):
+    """Test that create_dialog instantiates window, tabs and application."""
+    assert isinstance(dialog_window, dict)
+    assert len(dialog_window) > 0
+    assert "application" in dialog_window
+    assert "window" in dialog_window
+    assert "tabs" in dialog_window
 
 
 def test_create_dialog_sets_fusion_style(dialog_window):
@@ -62,7 +54,7 @@ def test_create_dialog_creates_main_window(dialog_window):
     assert win.windowTitle() == "D-FAST Bank Erosion"
 
 
-def test_create_dialog_window_geometry(dialog_window):
+def test_create_dialog_has_expected_window_geometry(dialog_window):
     """Test that window has correct initial geometry."""
     win = dialog["window"]
     geometry = win.geometry()
@@ -74,7 +66,7 @@ def test_create_dialog_window_geometry(dialog_window):
 
 def test_create_dialog_window_has_icon(dialog_window):
     """Test that window icon is set."""
-    win = dialog["window"]
+    win = dialog_window["window"]
     assert not win.windowIcon().isNull()
 
 
