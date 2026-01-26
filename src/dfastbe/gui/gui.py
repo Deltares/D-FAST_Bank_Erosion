@@ -86,62 +86,6 @@ def gui_text(
     return progtexts_str
 
 
-def create_dialog() -> None:
-    """
-    Construct the D-FAST Bank Erosion user interface.
-
-    Arguments
-    ---------
-    None
-    """
-    global dialog
-    dialog = {}
-
-    app = QApplication()
-    app.setStyle("fusion")
-    dialog["application"] = app
-
-    win = QtWidgets.QMainWindow()
-    win.setGeometry(200, 200, 600, 300)
-    win.setWindowTitle("D-FAST Bank Erosion")
-    win.setWindowIcon(getIcon(f"{ICONS_DIR}/D-FASTBE.png"))
-    dialog["window"] = win
-
-    menubar = win.menuBar()
-    createMenus(menubar)
-
-    centralWidget = QtWidgets.QWidget()
-    layout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.Direction.TopToBottom, centralWidget)
-    win.setCentralWidget(centralWidget)
-
-    tabs = QtWidgets.QTabWidget(win)
-    dialog["tabs"] = tabs
-    layout.addWidget(tabs)
-
-    buttonBar = QtWidgets.QWidget(win)
-    buttonBarLayout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.Direction.LeftToRight, buttonBar)
-    buttonBarLayout.setContentsMargins(0, 0, 0, 0)
-    layout.addWidget(buttonBar)
-
-    detect = QtWidgets.QPushButton(gui_text("action_detect"), win)
-    detect.clicked.connect(run_detection)
-    buttonBarLayout.addWidget(detect)
-
-    erode = QtWidgets.QPushButton(gui_text("action_erode"), win)
-    erode.clicked.connect(run_erosion)
-    buttonBarLayout.addWidget(erode)
-
-    done = QtWidgets.QPushButton(gui_text("action_close"), win)
-    done.clicked.connect(close_dialog)
-    buttonBarLayout.addWidget(done)
-
-    addGeneralTab(tabs, win)
-    addDetectTab(tabs, win, app)
-    addErosionTab(tabs, win, app)
-    addShippingTab(tabs, win)
-    addBankTab(tabs, win)
-
-
 def createMenus(menubar: QtWidgets.QMenuBar) -> None:
     """
     Add the menus to the menubar.
@@ -1320,7 +1264,7 @@ def menu_load_configuration() -> None:
         load_configuration(filename)
 
 
-def load_configuration(filename: str) -> None:
+def load_configuration(config_path: Path) -> None:
     """
     Open a configuration file and update the GUI accordingly.
 
@@ -1329,14 +1273,15 @@ def load_configuration(filename: str) -> None:
 
     Arguments
     ---------
-    filename : str
+    config_path : str
         Name of the configuration file to be opened.
     """
-    if not os.path.exists(filename):
-        if filename != "dfastbe.cfg":
-            show_error(f"The file {filename} does not exist!")
+    if not config_path.exists():
+        if config_path != "dfastbe.cfg":
+            show_error(f"The file {config_path} does not exist!")
         return
-    absfilename = absolute_path(os.getcwd(), filename)
+
+    absfilename = absolute_path(os.getcwd(), config_path)
     rootdir = os.path.dirname(absfilename)
     config_file = ConfigFile.read(absfilename)
 
@@ -1345,7 +1290,7 @@ def load_configuration(filename: str) -> None:
     try:
         version = config_file.version
     except KeyError:
-        show_error(f"No version information in the file {filename}!")
+        show_error(f"No version information in the file {config_path}!")
         return
 
     config = config_file.config
@@ -1473,7 +1418,7 @@ def load_configuration(filename: str) -> None:
             dialog[istr + "_eroVolEdit"].setText(txt)
 
     else:
-        show_error(f"Unsupported version number {version} in the file {filename}!")
+        show_error(f"Unsupported version number {version} in the file {config_path}!")
 
 
 def addTabForLevel(istr: str) -> None:
@@ -1910,7 +1855,7 @@ def menu_open_manual():
         show_error(f"Failed to open the user manual: {e}")
 
 
-def main(config: Optional[str] = None) -> None:
+def main(config: Optional[Path] = None) -> None:
     """
     Start the user interface using default settings or optional configuration.
 
@@ -1919,8 +1864,65 @@ def main(config: Optional[str] = None) -> None:
     config : Optional[str]
         Optional name of configuration file.
     """
-    create_dialog()
+    gui = GUI()
+    gui.create_dialog()
     if not config is None:
         load_configuration(config)
 
     activate_dialog()
+
+
+class GUI:
+
+    def __init__(self):
+        global dialog
+        dialog = {}
+
+        self.app = QApplication()
+        self.app.setStyle("fusion")
+        dialog["application"] = self.app
+
+
+    def create_dialog(self) -> None:
+        """
+        Construct the D-FAST Bank Erosion user interface.
+        """
+        win = QtWidgets.QMainWindow()
+        win.setGeometry(200, 200, 600, 300)
+        win.setWindowTitle("D-FAST Bank Erosion")
+        win.setWindowIcon(getIcon(f"{ICONS_DIR}/D-FASTBE.png"))
+        dialog["window"] = win
+
+        menubar = win.menuBar()
+        createMenus(menubar)
+
+        centralWidget = QtWidgets.QWidget()
+        layout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.Direction.TopToBottom, centralWidget)
+        win.setCentralWidget(centralWidget)
+
+        tabs = QtWidgets.QTabWidget(win)
+        dialog["tabs"] = tabs
+        layout.addWidget(tabs)
+
+        buttonBar = QtWidgets.QWidget(win)
+        buttonBarLayout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.Direction.LeftToRight, buttonBar)
+        buttonBarLayout.setContentsMargins(0, 0, 0, 0)
+        layout.addWidget(buttonBar)
+
+        detect = QtWidgets.QPushButton(gui_text("action_detect"), win)
+        detect.clicked.connect(run_detection)
+        buttonBarLayout.addWidget(detect)
+
+        erode = QtWidgets.QPushButton(gui_text("action_erode"), win)
+        erode.clicked.connect(run_erosion)
+        buttonBarLayout.addWidget(erode)
+
+        done = QtWidgets.QPushButton(gui_text("action_close"), win)
+        done.clicked.connect(close_dialog)
+        buttonBarLayout.addWidget(done)
+
+        addGeneralTab(tabs, win)
+        addDetectTab(tabs, win, self.app)
+        addErosionTab(tabs, win, self.app)
+        addShippingTab(tabs, win)
+        addBankTab(tabs, win)
