@@ -1959,7 +1959,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/cmd.html" class="md-nav__link">
+      <a href="../api/runner.html" class="md-nav__link">
         
   
   
@@ -2469,7 +2469,7 @@
 │       ├───io                # Input/output handling modules
 │       │   └───log_data      # Logging data and resources
 │       ├───__main__.py       # Entry point for CLI
-│       ├───cmd.py            # Command processing
+│       ├───runner.py            # Command processing
 │       ├───plotting.py       # Plotting utilities
 │       └───utils.py          # General utilities
 ├───tests                     # Test suite
@@ -2481,7 +2481,7 @@
 <pre class="mermaid"><code>graph TD
     subgraph Presentation_Layer
         GUI["GUI (gui.py)"]
-        CLI["CLI (__main__.py, cmd.py)"]
+        CLI["CLI (__main__.py, runner.py)"]
     end
 
     subgraph Domain_Layer
@@ -2495,11 +2495,11 @@
         Plotting["Plotting (plotting.py)"]
     end
 
-    CLI --&gt; cmd
-    GUI --&gt; cmd
+    CLI --&gt; runner
+    GUI --&gt; runner
 
-    cmd --&gt; BankErosion
-    cmd --&gt; BankLines
+    runner --&gt; BankErosion
+    runner --&gt; BankLines
 
     BankErosion --&gt; IO
     BankErosion --&gt; Utils
