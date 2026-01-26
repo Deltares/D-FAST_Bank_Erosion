@@ -78,6 +78,7 @@ def test_create_dialog_has_central_widget(dialog_window):
     assert central_widget is not None
     assert isinstance(central_widget, QtWidgets.QWidget)
     assert central_widget.layout() is not None
+    assert central_widget.layout().direction() == 2
 
 
 def test_create_dialog_creates_tabs(dialog_window):
@@ -96,9 +97,9 @@ def test_create_dialog_tab_count(dialog_window):
 def test_create_dialog_tab_names(dialog_window):
     """Test that tabs have the expected names."""
     tabs = dialog["tabs"]
-    expected_tabs = ["General", "Detection", "Erosion", "Shipping Parameters", "Bank Parameters"]
+    expected_tab_names = ["General", "Detection", "Erosion", "Shipping Parameters", "Bank Parameters"]
     actual_tabs = [tabs.tabText(i) for i in range(tabs.count())]
-    assert actual_tabs == expected_tabs
+    assert actual_tabs == expected_tab_names
 
 
 def test_create_dialog_creates_buttons(dialog_window):
@@ -126,14 +127,14 @@ def test_create_dialog_detect_button(dialog_window):
     assert detect_btn.isEnabled()
 
 
-def test_create_dialog_erode_button(dialog_window):
-    """Test that erode button exists and has proper text."""
+def test_create_dialog_compute_button(dialog_window):
+    """Test that compute button exists and has proper text."""
     win = dialog["window"]
     buttons = win.findChildren(QtWidgets.QPushButton)
-    erode_buttons = [btn for btn in buttons if btn.text() == gui_text("action_erode")]
+    compute_buttons = [btn for btn in buttons if btn.text() == gui_text("action_erode")]
 
-    assert len(erode_buttons) == 1
-    erode_btn = erode_buttons[0]
+    assert len(compute_buttons) == 1
+    erode_btn = compute_buttons[0]
     assert erode_btn.isEnabled()
 
 
