@@ -78,7 +78,7 @@ def parse_arguments() -> Tuple[str, str, Optional[Path]]:
         run_mode (str):
             Specification of the run mode ("BANKLINES", "BANKEROSION" or "GUI")
         config_name (Path | None):
-            Name of the configuration file.
+            Path to the configuration file, required for non-GUI modes.
     """
     parser = argparse.ArgumentParser(
         description="D-FAST Bank Erosion. Example: python -m dfastbe --mode BANKEROSION --config settings.cfg"
@@ -104,7 +104,7 @@ def parse_arguments() -> Tuple[str, str, Optional[Path]]:
         "--config",
         default=None,
         type=_existing_path,
-        help="name of the configuration file ('dfastbe.cfg' is default)",
+        help="path to the configuration file (required unless --mode GUI)",
     )
     args = parser.parse_args()
     if args.mode != "GUI" and args.config is None:
