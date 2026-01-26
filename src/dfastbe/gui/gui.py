@@ -28,11 +28,10 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from __future__ import annotations
 import configparser
 import os
-import pathlib
 import sys
 import traceback
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+from typing import Callable, Dict, List, Optional, Tuple, cast
 
 import matplotlib.pyplot as plt
 from PySide6 import QtCore, QtWidgets, QtGui
@@ -1693,15 +1692,13 @@ def get_configuration() -> configparser.ConfigParser:
 
 
 def show_error(message: str, detailed_message: Optional[str] = None) -> None:
-    """
-    Display an error message box with specified string.
+    """Display an error message box with specified string.
 
-    Arguments
-    ---------
-    message : str
-        Text to be displayed in the message box.
-    detailed_message : Option[str]
-        Text to be displayed when the user clicks the Details button.
+    Args:
+        message : str
+            Text to be displayed in the message box.
+        detailed_message : Option[str]
+            Text to be displayed when the user clicks the Details button.
     """
     msg = QtWidgets.QMessageBox()
     msg.setIcon(QtWidgets.QMessageBox.Critical)
