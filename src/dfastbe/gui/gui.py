@@ -43,7 +43,7 @@ from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.file_utils import absolute_path
-from dfastbe.io.logger import LogData
+from dfastbe.gui.utils import get_icon, gui_text
 
 USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
 DialogObject = Dict[str, QtCore.QObject]
@@ -52,66 +52,6 @@ dialog: DialogObject
 
 r_dir = Path(__file__).resolve().parent
 ICONS_DIR = "gui/icons"
-
-def gui_text(
-        key: str,
-        prefix: str = "gui_",
-        placeholder_dict: Optional[Dict[str, Any]] = None) -> str:
-    """
-    Query the global dictionary of texts for a single string in the GUI.
-
-    This routine concatenates the prefix and the key to query the global
-    dictionary of texts. It selects the first line of the text obtained and
-    expands and placeholders in the string using the optional dictionary
-    provided.
-
-    Arguments
-    ---------
-    key : str
-        The key string used to query the dictionary (extended with prefix).
-    prefix : str
-        The prefix used in combination with the key (default "gui_").
-    placeholder_dict : Optional[Dict[str, Any]]
-        A dictionary used for placeholder expansions (it defaults to None).
-
-    Returns
-    -------
-        The first line of the text in the dictionary expanded with the keys.
-    """
-    if placeholder_dict is None:
-        placeholder_dict = {}
-
-    progtexts_value = LogData().get_text(prefix + key)
-    progtexts_str = progtexts_value[0].format(**placeholder_dict)
-    return progtexts_str
-
-
-def createMenus(menubar: QtWidgets.QMenuBar) -> None:
-    """
-    Add the menus to the menubar.
-
-    Arguments
-    ---------
-    menubar : QtWidgets.QMenuBar
-        Menubar to which menus should be added.
-    """
-    menu = menubar.addMenu(gui_text("File"))
-    item = menu.addAction(gui_text("Load"))
-    item.triggered.connect(menu_load_configuration)
-    item = menu.addAction(gui_text("Save"))
-    item.triggered.connect(menu_save_configuration)
-    menu.addSeparator()
-    item = menu.addAction(gui_text("Close"))
-    item.triggered.connect(close_dialog)
-
-    menu = menubar.addMenu(gui_text("Help"))
-    item = menu.addAction(gui_text("Manual"))
-    item.triggered.connect(menu_open_manual)
-    menu.addSeparator()
-    item = menu.addAction(gui_text("Version"))
-    item.triggered.connect(menu_about_self)
-    item = menu.addAction(gui_text("AboutQt"))
-    item.triggered.connect(menu_about_qt)
 
 
 def addGeneralTab(
@@ -657,7 +597,7 @@ def openFileLayout(key, enabled=True) -> QtWidgets.QWidget:
     dialog[key] = myWidget
     gridly.addWidget(myWidget, 0, 0)
 
-    openFile = QtWidgets.QPushButton(getIcon(f"{ICONS_DIR}/open.png"), "")
+    openFile = QPushButton(get_icon(f"{ICONS_DIR}/open.png"), "")
     openFile.clicked.connect(lambda: selectFile(key))
     openFile.setEnabled(enabled)
     dialog[key + "File"] = openFile
@@ -696,18 +636,18 @@ def addRemoveEditLayout(
     buttonBarLayout.setContentsMargins(0, 0, 0, 0)
     gridly.addWidget(buttonBar, 0, 1)
 
-    addBtn = QtWidgets.QPushButton(getIcon(f"{ICONS_DIR}/add.png"), "")
+    addBtn = QPushButton(get_icon(f"{ICONS_DIR}/add.png"), "")
     addBtn.clicked.connect(lambda: addAnItem(key))
     dialog[key + "Add"] = addBtn
     buttonBarLayout.addWidget(addBtn)
 
-    editBtn = QtWidgets.QPushButton(getIcon(f"{ICONS_DIR}/edit.png"), "")
+    editBtn = QPushButton(get_icon(f"{ICONS_DIR}/edit.png"), "")
     editBtn.clicked.connect(lambda: editAnItem(key))
     editBtn.setEnabled(False)
     dialog[key + "Edit"] = editBtn
     buttonBarLayout.addWidget(editBtn)
 
-    delBtn = QtWidgets.QPushButton(getIcon(f"{ICONS_DIR}/remove.png"), "")
+    delBtn = QPushButton(get_icon(f"{ICONS_DIR}/remove.png"), "")
     delBtn.clicked.connect(lambda: removeAnItem(key))
     delBtn.setEnabled(False)
     dialog[key + "Remove"] = delBtn
