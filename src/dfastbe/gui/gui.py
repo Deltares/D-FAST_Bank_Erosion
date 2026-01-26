@@ -560,19 +560,6 @@ def addOpenFileRow(
     formLayout.addRow(Label, fLayout)
 
 
-def getIcon(filename: str) -> QtGui.QIcon:
-    """
-    Opens the icon file relative to the location of the program.
-
-    Arguments
-    ---------
-    filename : str
-        Name of the icon file.
-    """
-    progloc = str(pathlib.Path(__file__).parent.absolute())
-    return QtGui.QIcon(progloc + os.path.sep + filename)
-
-
 def openFileLayout(key, enabled=True) -> QtWidgets.QWidget:
     """
     Create a standard layout with a file or folder edit field and selection button.
