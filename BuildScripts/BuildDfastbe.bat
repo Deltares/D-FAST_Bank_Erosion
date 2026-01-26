@@ -50,7 +50,6 @@ START /B /WAIT python -m nuitka ^
  --include-package=cftime ^
  --include-module=geopandas ^
  --include-package=pandas ^
- --include-module=pandas._libs._cyutility ^
  --include-package=pytz ^
  --include-distribution-metadata=pytz ^
  --include-package-data=geopandas.datasets ^
