@@ -1190,11 +1190,11 @@ def load_configuration(config_path: Path) -> None:
             show_error(f"The file {config_path} does not exist!")
         return
 
-    absfilename = absolute_path(os.getcwd(), config_path)
-    rootdir = os.path.dirname(absfilename)
-    config_file = ConfigFile.read(absfilename)
+    config_path_abs = absolute_path(os.getcwd(), config_path)
+    rootdir = os.path.dirname(config_path_abs)
+    config_file = ConfigFile.read(config_path_abs)
 
-    config_file.path = absfilename
+    config_file.path = config_path_abs
 
     try:
         version = config_file.version
