@@ -42,7 +42,9 @@ from PySide6.QtWidgets import (
     QLabel,
     QApplication,
     QBoxLayout,
-    QPushButton
+    QPushButton,
+    QDialog,
+    QMainWindow
 )
 
 from dfastbe import __file__, __version__
@@ -726,7 +728,7 @@ def editASearchLine(
     dist1 : str
         Updated string representation of the search distance.
     """
-    editDialog = QtWidgets.QDialog()
+    editDialog = QDialog()
     setDialogSize(editDialog, 600, 100)
     editDialog.setWindowFlags(
         QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint
@@ -772,7 +774,7 @@ def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
     prob : str
         String representation of the weight for this simulation.
     """
-    editDialog = QtWidgets.QDialog()
+    editDialog = QDialog()
     setDialogSize(editDialog, 600, 100)
     editDialog.setWindowFlags(
         QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint
@@ -803,13 +805,13 @@ def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
     return fileName, prob
 
 
-def close_edit(hDialog: QtWidgets.QDialog) -> None:
+def close_edit(hDialog: QDialog) -> None:
     """
     Generic close function for edit dialogs.
 
     Arguments
     ---------
-    hDialog : QtWidgets.QDialog
+    hDialog : QDialog
         Dialog object to be closed.
     """
     hDialog.close()
@@ -1756,7 +1758,7 @@ def main(config: Optional[Path] = None) -> None:
         Optional name of configuration file.
     """
     gui = GUI()
-    gui.create_dialog()
+    gui.create()
     if not config is None:
         load_configuration(config)
 
@@ -1773,10 +1775,11 @@ class GUI:
         self.app.setStyle("fusion")
         dialog["application"] = self.app
         self.window = self.create_window()
+        dialog["window"] = win
 
     @staticmethod
     def create_window():
-        win = QtWidgets.QMainWindow()
+        win = QMainWindow()
         win.setWindowTitle("D-FAST Bank Erosion")
         win.setGeometry(200, 200, 600, 300)
         win.setWindowIcon(get_icon(f"{ICONS_DIR}/D-FASTBE.png"))
@@ -1785,13 +1788,11 @@ class GUI:
         # win.setCentralWidget(QtWidgets.QWidget())
         return win
 
-    def create_dialog(self) -> None:
+    def create(self) -> None:
         """
         Construct the D-FAST Bank Erosion user interface.
         """
         win = self.window
-
-        dialog["window"] = win
 
         menubar = win.menuBar()
         self.create_menus(menubar)
