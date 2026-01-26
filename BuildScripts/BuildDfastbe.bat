@@ -51,6 +51,7 @@ START /B /WAIT python -m nuitka ^
  --include-module=geopandas ^
  --include-package=pandas ^
  --include-module=pandas._libs._cyutility ^
+ --include-package=pytz ^
  --include-package-data=geopandas.datasets ^
  --include-module=fiona ^
  --company-name=Deltares ^
