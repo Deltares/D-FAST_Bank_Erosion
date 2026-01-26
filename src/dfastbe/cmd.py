@@ -62,7 +62,7 @@ def run(
 
             Defaults to 'GUI'.
         configfile (str, optional):
-            Path to the configuration file. Defaults to 'dfastbe.cfg'.
+            Path to the configuration file. Defaults to None.
 
     Raises:
         Exception: If an invalid `run_mode` is provided. The valid options are
