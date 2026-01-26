@@ -474,20 +474,6 @@ def validator(validstr: str) -> QtGui.QValidator:
     return validator
 
 
-def activate_dialog() -> None:
-    """
-    Activate the user interface and run the program.
-
-    Arguments
-    ---------
-    None
-    """
-    app = dialog["application"]
-    win = dialog["window"]
-    win.show()
-    sys.exit(app.exec())
-
-
 def generalParLayout(
     gridLayout: QtWidgets.QGridLayout,
     row: int,
@@ -1163,18 +1149,6 @@ def run_erosion_steps(config_file: ConfigFile) -> None:
     erosion.save()
 
 
-def close_dialog() -> None:
-    """
-    Close the dialog and program.
-
-    Arguments
-    ---------
-    None
-    """
-    matplotlib.pyplot.close("all")
-    dialog["window"].close()
-
-
 def menu_load_configuration() -> None:
     """
     Select and load a configuration file.
@@ -1796,7 +1770,7 @@ def main(config: Optional[Path] = None) -> None:
     if not config is None:
         load_configuration(config)
 
-    activate_dialog()
+    gui.activate()
 
 
 class GUI:
@@ -1808,20 +1782,29 @@ class GUI:
         self.app = QApplication()
         self.app.setStyle("fusion")
         dialog["application"] = self.app
+        self.window = self.create_window()
 
+    @staticmethod
+    def create_window():
+        win = QtWidgets.QMainWindow()
+        win.setWindowTitle("D-FAST Bank Erosion")
+        win.setGeometry(200, 200, 600, 300)
+        win.setWindowIcon(get_icon(f"{ICONS_DIR}/D-FASTBE.png"))
+
+        # win.resize(1000, 800)
+        # win.setCentralWidget(QtWidgets.QWidget())
+        return win
 
     def create_dialog(self) -> None:
         """
         Construct the D-FAST Bank Erosion user interface.
         """
-        win = QtWidgets.QMainWindow()
-        win.setGeometry(200, 200, 600, 300)
-        win.setWindowTitle("D-FAST Bank Erosion")
-        win.setWindowIcon(getIcon(f"{ICONS_DIR}/D-FASTBE.png"))
+        win = self.window
+
         dialog["window"] = win
 
         menubar = win.menuBar()
-        createMenus(menubar)
+        self.create_menus(menubar)
 
         centralWidget = QtWidgets.QWidget()
         layout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.Direction.TopToBottom, centralWidget)
@@ -1853,3 +1836,40 @@ class GUI:
         addErosionTab(tabs, win, self.app)
         addShippingTab(tabs, win)
         addBankTab(tabs, win)
+
+    def create_menus(self, menubar: QtWidgets.QMenuBar) -> None:
+        """
+        Add the menus to the menubar.
+
+        Arguments
+        ---------
+        menubar : QtWidgets.QMenuBar
+            Menubar to which menus should be added.
+        """
+        menu = menubar.addMenu(gui_text("File"))
+        item = menu.addAction(gui_text("Load"))
+        item.triggered.connect(menu_load_configuration)
+        item = menu.addAction(gui_text("Save"))
+        item.triggered.connect(menu_save_configuration)
+        menu.addSeparator()
+        item = menu.addAction(gui_text("Close"))
+        item.triggered.connect(self.close)
+
+        menu = menubar.addMenu(gui_text("Help"))
+        item = menu.addAction(gui_text("Manual"))
+        item.triggered.connect(menu_open_manual)
+        menu.addSeparator()
+        item = menu.addAction(gui_text("Version"))
+        item.triggered.connect(menu_about_self)
+        item = menu.addAction(gui_text("AboutQt"))
+        item.triggered.connect(menu_about_qt)
+
+    def activate(self) -> None:
+        """Activate the user interface and run the program."""
+        self.window.show()
+        sys.exit(self.app.exec())
+
+    def close(self) -> None:
+        """Close the dialog and program."""
+        plt.close("all")
+        self.window.close()
