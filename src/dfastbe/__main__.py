@@ -33,7 +33,7 @@ from typing import Optional, Tuple
 
 import matplotlib
 
-from dfastbe.cmd import run
+from dfastbe.cmd import Runner
 from dfastbe import __version__
 
 matplotlib.use("Qt5Agg")
@@ -113,7 +113,7 @@ def parse_arguments() -> Tuple[str, str, Optional[Path]]:
     )
     args = parser.parse_args()
     if args.mode != "GUI" and args.config is None:
-        parser.error("--config is required when --mode is BANKLINES or BANKEROSION")
+        raise ValueError("--config is required when --mode is BANKLINES or BANKEROSION")
 
     language = args.language
     run_mode = args.mode
@@ -125,7 +125,8 @@ def parse_arguments() -> Tuple[str, str, Optional[Path]]:
 def main():
     """Main function to run the D-FAST Bank Erosion application."""
     language, run_mode, configfile = parse_arguments()
-    run(language, run_mode, configfile)
+    runner = Runner(language, run_mode, configfile)
+    runner.run()
 
 
 if __name__ == "__main__":

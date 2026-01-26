@@ -35,72 +35,89 @@ from dfastbe.gui.gui import main
 from dfastbe import __file__
 R_DIR = Path(__file__).resolve().parent
 LOG_DATA_DIR = R_DIR / "io/log_data"
+AVAILABLE_RUN_MODES = ["BANKLINES", "BANKEROSION", "GUI"]
 
 
-def run(
-    language: str = "UK",
-    run_mode: str = "GUI",
-    configfile: Path | None = None,
-) -> None:
-    """
-    Initializes the language file and starts the chosen run mode.
+class Runner:
+    def __init__(
+        self,
+        language: str = "UK",
+        run_mode: str = "GUI",
+        configfile: Path | None = None,
+    ):
 
-    This function loads the appropriate language file and executes one of the
-    available modes: 'BANKLINES', 'BANKEROSION', or 'GUI'. The default configuration
-    file is `dfastbe.cfg`.
+        self.language = language.upper()
+        self.run_mode = self._validate_run_mode(run_mode)
+        self.log_data = LogData(LOG_DATA_DIR / f"messages.{language}.ini")
+        self.configfile = configfile
 
-    Args:
-        language (str, optional):
-            Display language code. Acceptable values are 'NL' (Dutch) or 'UK' (English).
-            Defaults to 'UK'.
-        run_mode (str, optional):
-            Mode in which the program should run. Available options:
-
-            - 'BANKLINES': Runs the bank lines processing.
-            - 'BANKEROSION': Runs the bank erosion processing.
-            - 'GUI': Launches the graphical user interface.
-
-            Defaults to 'GUI'.
-        configfile (str, optional):
-            Path to the configuration file. Defaults to None.
-
-    Raises:
-        Exception: If an invalid `run_mode` is provided. The valid options are
-            'BANKLINES', 'BANKEROSION', or 'GUI'.
-
-    Example:
-        Running the program with Dutch language and bank erosion mode:
-
-        ```python
-        run(language="NL", run_mode="BANKEROSION", configfile="custom_config.cfg")
-        ```
-
-        Running the program in default mode (GUI) with the English language:
-
-        ```python
-        run()
-        ```
-    """
-    language = language.upper()
-    run_mode = run_mode.upper()
-    log_data = LogData(LOG_DATA_DIR / f"messages.{language}.ini")
-
-    if run_mode == "GUI":
-        main(configfile)
-    else:
-        config_file = ConfigFile.read(configfile)
-
-        if run_mode == "BANKLINES":
-            bank_lines = BankLines(config_file)
-            bank_lines.detect()
-            bank_lines.plot()
-            bank_lines.save()
-        elif run_mode == "BANKEROSION":
-            erosion = Erosion(config_file)
-            erosion.run()
-            erosion.plot()
-            erosion.save()
-            log_data.log_text("end_bankerosion")
-            timed_logger("-- end analysis --")
-        else:
+    @staticmethod
+    def _validate_run_mode(run_mode: str) -> str:
+        if run_mode not in AVAILABLE_RUN_MODES:
             raise ValueError(f"Invalid run mode {run_mode} specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'.")
+        else:
+            run_mode = run_mode.upper()
+        return run_mode
+
+    def run(self) -> None:
+        """
+        Initializes the language file and starts the chosen run mode.
+
+        This function loads the appropriate language file and executes one of the
+        available modes: 'BANKLINES', 'BANKEROSION', or 'GUI'. The default configuration
+        file is `dfastbe.cfg`.
+
+        Args:
+            language (str, optional):
+                Display language code. Acceptable values are 'NL' (Dutch) or 'UK' (English).
+                Defaults to 'UK'.
+            run_mode (str, optional):
+                Mode in which the program should run. Available options:
+
+                - 'BANKLINES': Runs the bank lines processing.
+                - 'BANKEROSION': Runs the bank erosion processing.
+                - 'GUI': Launches the graphical user interface.
+
+                Defaults to 'GUI'.
+            configfile (str, optional):
+                Path to the configuration file. Defaults to None.
+
+        Raises:
+            Exception: If an invalid `run_mode` is provided. The valid options are
+                'BANKLINES', 'BANKEROSION', or 'GUI'.
+
+        Example:
+            Running the program with Dutch language and bank erosion mode:
+
+            ```python
+            run(language="NL", run_mode="BANKEROSION", configfile="custom_config.cfg")
+            ```
+
+            Running the program in default mode (GUI) with the English language:
+
+            ```python
+            run()
+            ```
+        """
+
+        if self.run_mode == "GUI":
+            main(self.configfile)
+        else:
+            config_file = ConfigFile.read(self.configfile)
+
+            if self.run_mode == "BANKLINES":
+                bank_lines = BankLines(config_file)
+                bank_lines.detect()
+                bank_lines.plot()
+                bank_lines.save()
+            elif self.run_mode == "BANKEROSION":
+                erosion = Erosion(config_file)
+                erosion.run()
+                erosion.plot()
+                erosion.save()
+                self.log_data.log_text("end_bankerosion")
+                timed_logger("-- end analysis --")
+            else:
+                raise ValueError(
+                    f"Invalid run mode {self.run_mode} specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'."
+                )

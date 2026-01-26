@@ -3,7 +3,8 @@ import sys
 import matplotlib
 
 matplotlib.use("Agg")
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
+from pathlib import Path
 
 import pytest
 
@@ -13,12 +14,12 @@ with patch("matplotlib.use", lambda *args, **kwargs: None):
 
 
 @pytest.mark.parametrize(
-    "args, expected",
+    "args, expected, success",
     [
-        (["prog"], ("UK", "GUI", "dfastbe.cfg")),
-        (["prog", "--language", "NL"], ("NL", "GUI", "dfastbe.cfg")),
-        (["prog", "--mode", "BANKLINES"], ("UK", "BANKLINES", "dfastbe.cfg")),
-        (["prog", "--config", "custom.cfg"], ("UK", "GUI", "custom.cfg")),
+        (["prog"], ("UK", "GUI", None), True),
+        (["prog", "--language", "NL"], ("NL", "GUI", None), True),
+        (["prog", "--mode", "BANKLINES"], ("UK", "BANKLINES", None), False),
+        (["prog", "--config", "custom.cfg"], ("UK", "GUI", Path("custom.cfg")), True),
         (
             [
                 "prog",
@@ -29,13 +30,20 @@ with patch("matplotlib.use", lambda *args, **kwargs: None):
                 "--config",
                 "custom.cfg",
             ],
-            ("NL", "BANKEROSION", "custom.cfg"),
+            ("NL", "BANKEROSION", Path("custom.cfg")),
+            True,
         ),
     ],
 )
-def test_parse_arguments_valid(args, expected, monkeypatch):
+def test_parse_arguments_valid(args, expected, success, monkeypatch):
     monkeypatch.setattr(sys, "argv", args)
-    assert parse_arguments() == expected
+
+    with patch("pathlib.Path.exists", return_value=True):
+        if not success:
+            with pytest.raises(ValueError):
+                assert parse_arguments() == expected
+        else:
+            assert parse_arguments() == expected
 
 
 @pytest.mark.parametrize(
@@ -52,11 +60,16 @@ def test_parse_arguments_invalid(args, monkeypatch):
 
 
 def test_main_runs(monkeypatch):
-    mock_run = lambda lang, mode, cfg: print(f"Mock run with {lang}, {mode}, {cfg}")
-    monkeypatch.setattr("dfastbe.__main__.run", mock_run)
+    mock_runner = MagicMock()
+    mock_runner.run = MagicMock()
+    mock_run = MagicMock(return_value=mock_runner)
+    monkeypatch.setattr("dfastbe.__main__.Runner", mock_run)
     monkeypatch.setattr(
         sys,
         "argv",
         ["prog", "--language", "UK", "--mode", "GUI", "--config", "cfg.ini"],
     )
-    main()
+    with patch("pathlib.Path.exists", return_value=True):
+        main()
+    mock_run.assert_called_once_with("UK", "GUI", Path("cfg.ini"))
+    mock_runner.run.assert_called_once_with()

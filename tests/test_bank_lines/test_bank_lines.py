@@ -11,7 +11,7 @@ from shapely.geometry import LineString, MultiLineString, Polygon
 
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.bank_lines.plotter import BankLinesPlotter
-from dfastbe.cmd import run
+from dfastbe.cmd import Runner
 from dfastbe.io.config import ConfigFile, PlotProperties
 from dfastbe.io.data_models import BaseSimulationData, LineGeometry
 
@@ -41,7 +41,8 @@ def test_bank_lines():
     language = "UK"
     run_mode = "BANKLINES"
     config_file = test_r_dir / "Meuse_manual.cfg"
-    run(language, run_mode, str(config_file))
+    runner = Runner(language, run_mode, config_file)
+    runner.run()
 
     # check the detected banklines
     file_1 = test_r_dir / "output/banklines/raw_detected_bankline_fragments.shp"
