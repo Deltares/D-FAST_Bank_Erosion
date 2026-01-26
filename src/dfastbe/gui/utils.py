@@ -3,9 +3,10 @@ from pathlib import Path
 from PySide6.QtGui import QIcon
 
 from dfastbe.io.logger import LogData
+SHIP_TYPES = ["1 (multiple barge convoy set)", "2 (RHK ship / motorship)", "3 (towboat)"]
 
 
-__all__ = ["get_icon", "gui_text"]
+__all__ = ["get_icon", "gui_text", "SHIP_TYPES"]
 
 
 def get_icon(file_name: str) -> QIcon:

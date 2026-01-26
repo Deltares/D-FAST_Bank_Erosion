@@ -50,7 +50,8 @@ from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.file_utils import absolute_path
-from dfastbe.gui.utils import get_icon, gui_text
+from dfastbe.gui.utils import get_icon, gui_text, SHIP_TYPES
+
 
 USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
 DialogObject = Dict[str, QtCore.QObject]
@@ -294,7 +295,7 @@ def addShippingTab(
     eParamsLayout = QtWidgets.QGridLayout(eParamsWidget)
     tabs.addTab(eParamsWidget, "Shipping Parameters")
 
-    generalParLayout(eParamsLayout, 0, "shipType", "Ship Type", selectList=shipTypes())
+    generalParLayout(eParamsLayout, 0, "shipType", "Ship Type", selectList=SHIP_TYPES)
     generalParLayout(eParamsLayout, 2, "shipVeloc", "Velocity [m/s]")
     generalParLayout(eParamsLayout, 3, "nShips", "# Ships [1/yr]")
     generalParLayout(eParamsLayout, 4, "shipNWaves", "# Waves [1/ship]")
@@ -306,22 +307,6 @@ def addShippingTab(
         10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
     )
     eParamsLayout.addItem(stretch, 8, 0)
-
-
-def shipTypes() -> List[str]:
-    """
-    Return the tuple of ship types.
-
-    Arguments
-    ---------
-    None
-
-    Returns
-    -------
-    types : List[str]
-        List of three ship types.
-    """
-    return ["1 (multiple barge convoy set)", "2 (RHK ship / motorship)", "3 (towboat)"]
 
 
 def addBankTab(
@@ -1347,7 +1332,7 @@ def addTabForLevel(istr: str) -> None:
     dialog["tabs"].addTab(newWidget, "Level " + istr)
 
     optionalParLayout(
-        newLayout, 0, istr + "_shipType", "Ship Type", selectList=shipTypes()
+        newLayout, 0, istr + "_shipType", "Ship Type", selectList=SHIP_TYPES
     )
     optionalParLayout(newLayout, 2, istr + "_shipVeloc", "Velocity [m/s]")
     optionalParLayout(newLayout, 3, istr + "_nShips", "# Ships [1/yr]")
