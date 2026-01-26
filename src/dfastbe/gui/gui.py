@@ -36,7 +36,15 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 import matplotlib.pyplot as plt
 from PySide6 import QtCore, QtWidgets, QtGui
-from PySide6.QtWidgets import QSizePolicy, QComboBox, QLineEdit, QLabel, QApplication
+from PySide6.QtWidgets import (
+    QSizePolicy,
+    QComboBox,
+    QLineEdit,
+    QLabel,
+    QApplication,
+    QBoxLayout,
+    QPushButton
+)
 
 from dfastbe import __file__, __version__
 from dfastbe.bank_erosion.bank_erosion import Erosion
@@ -605,7 +613,7 @@ def addRemoveEditLayout(
     gridly.addWidget(mainWidget, 0, 0)
 
     buttonBar = QtWidgets.QWidget()
-    buttonBarLayout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.Direction.TopToBottom, buttonBar)
+    buttonBarLayout = QBoxLayout(QBoxLayout.Direction.TopToBottom, buttonBar)
     buttonBarLayout.setContentsMargins(0, 0, 0, 0)
     gridly.addWidget(buttonBar, 0, 1)
 
@@ -753,7 +761,7 @@ def editASearchLine(
     searchDistance.setValidator(validator("positive_real"))
     editLayout.addRow("Search Distance [m]", searchDistance)
 
-    done = QtWidgets.QPushButton("Done")
+    done = QPushButton("Done")
     done.clicked.connect(lambda: close_edit(editDialog))
     # edit_SearchDistance.setValidator(validator("positive_real"))
     editLayout.addRow(" ", done)
@@ -799,7 +807,7 @@ def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
     probability.setValidator(validator("positive_real"))
     editLayout.addRow("Probability [-]", probability)
 
-    done = QtWidgets.QPushButton("Done")
+    done = QPushButton("Done")
     done.clicked.connect(lambda: close_edit(editDialog))
     # edit_SearchDistance.setValidator(validator("positive_real"))
     editLayout.addRow(" ", done)
@@ -1720,7 +1728,7 @@ def menu_about_self():
     msg.setWindowTitle(gui_text("about"))
     msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
     
-    dfast_icon = getIcon(f"{ICONS_DIR}/D-FASTBE.png")
+    dfast_icon = get_icon(f"{ICONS_DIR}/D-FASTBE.png")
     available_sizes = dfast_icon.availableSizes()
     if available_sizes:
         icon_size = available_sizes[0]
@@ -1807,7 +1815,7 @@ class GUI:
         self.create_menus(menubar)
 
         centralWidget = QtWidgets.QWidget()
-        layout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.Direction.TopToBottom, centralWidget)
+        layout = QBoxLayout(QBoxLayout.Direction.TopToBottom, centralWidget)
         win.setCentralWidget(centralWidget)
 
         tabs = QtWidgets.QTabWidget(win)
@@ -1815,20 +1823,20 @@ class GUI:
         layout.addWidget(tabs)
 
         buttonBar = QtWidgets.QWidget(win)
-        buttonBarLayout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.Direction.LeftToRight, buttonBar)
+        buttonBarLayout = QBoxLayout(QBoxLayout.Direction.LeftToRight, buttonBar)
         buttonBarLayout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(buttonBar)
 
-        detect = QtWidgets.QPushButton(gui_text("action_detect"), win)
+        detect = QPushButton(gui_text("action_detect"), win)
         detect.clicked.connect(run_detection)
         buttonBarLayout.addWidget(detect)
 
-        erode = QtWidgets.QPushButton(gui_text("action_erode"), win)
+        erode = QPushButton(gui_text("action_erode"), win)
         erode.clicked.connect(run_erosion)
         buttonBarLayout.addWidget(erode)
 
-        done = QtWidgets.QPushButton(gui_text("action_close"), win)
-        done.clicked.connect(close_dialog)
+        done = QPushButton(gui_text("action_close"), win)
+        done.clicked.connect(self.close)
         buttonBarLayout.addWidget(done)
 
         addGeneralTab(tabs, win)
