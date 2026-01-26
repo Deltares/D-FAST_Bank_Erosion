@@ -40,7 +40,7 @@ LOG_DATA_DIR = R_DIR / "io/log_data"
 def run(
     language: str = "UK",
     run_mode: str = "GUI",
-    configfile: str = "dfastbe.cfg",
+    configfile: Path | None = None,
 ) -> None:
     """
     Initializes the language file and starts the chosen run mode.
