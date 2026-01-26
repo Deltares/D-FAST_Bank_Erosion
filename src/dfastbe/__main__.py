@@ -67,6 +67,11 @@ def _existing_path(value: str) -> Path:
     return path
 
 
+def _upper(value: str) -> str:
+    """Return the uppercased string value for argparse."""
+    return value.upper()
+
+
 def parse_arguments() -> Tuple[str, str, Optional[Path]]:
     """Parse the command line arguments.
 
@@ -90,14 +95,14 @@ def parse_arguments() -> Tuple[str, str, Optional[Path]]:
         "--language",
         default="UK",
         choices=["NL", "UK"],
-        type=str.upper,
+        type=_upper,
         help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--mode",
         default="GUI",
         choices=["BANKLINES", "BANKEROSION", "GUI"],
-        type=str.upper,
+        type=_upper,
         help="run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (%(default)s is default)",
     )
     parser.add_argument(
