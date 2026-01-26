@@ -13,7 +13,7 @@ object PoetryTemplate : Template({
 
     params {
         param("POETRY_HOME", "%teamcity.build.tempDir%\\poetry-temp")
-        param("POETRY_EXE", "%POETRY_HOME%\\poetry\\bin\\poetry.exe")
+        param("POETRY_EXE", "%teamcity.build.tempDir%\\poetry-temp\\poetry\\bin\\poetry.exe")
     }
 
     vcs {
