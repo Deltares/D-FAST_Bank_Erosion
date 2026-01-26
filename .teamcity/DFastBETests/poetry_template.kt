@@ -12,8 +12,8 @@ object PoetryTemplate : Template({
     buildNumberPattern = "%build.revisions.short%"
 
     params {
-        param("poetry.temp.dir", "%teamcity.build.tempDir%\\poetry-temp")
-        param("poetry.exe.path", "%poetry.temp.dir%\\poetry\\bin\\poetry.exe")
+        param("POETRY_HOME", "%teamcity.build.tempDir%\\poetry-temp")
+        param("POETRY_EXE", "%POETRY_HOME%\\poetry\\bin\\poetry.exe")
     }
 
     vcs {
@@ -25,26 +25,26 @@ object PoetryTemplate : Template({
             name = "Install Poetry standalone"
             id = "install_poetry"
             scriptContent = """
-                mkdir %poetry.temp.dir%
-                curl -sSL https://install.python-poetry.org -o %poetry.temp.dir%\install-poetry.py
-                set POETRY_HOME=%poetry.temp.dir%\poetry
-                %env.PYTHON_PATH%\python.exe %poetry.temp.dir%\install-poetry.py --force
-                del %poetry.temp.dir%\install-poetry.py
+                mkdir %POETRY_HOME%
+                curl -sSL https://install.python-poetry.org -o %POETRY_HOME%\install-poetry.py
+                set POETRY_HOME=%POETRY_HOME%\poetry
+                %env.PYTHON_PATH%\python.exe %POETRY_HOME%\install-poetry.py --force
+                del %POETRY_HOME%\install-poetry.py
             """.trimIndent()
         }
         script {
             name = "Create Poetry environment"
             id = "create_poetry_environment"
             scriptContent = """
-                %poetry.exe.path% env use %env.PYTHON_PATH%\python.exe
-                %poetry.exe.path% run python --version
+                %POETRY_EXE% env use %env.PYTHON_PATH%\python.exe
+                %POETRY_EXE% run python --version
             """.trimIndent()
         }
         script {
             name = "Install dependencies via poetry"
             id = "Install_dependencies_via_poetry"
             scriptContent = """
-                %poetry.exe.path% install
+                %POETRY_EXE% install
             """.trimIndent()
         }
         script {
@@ -52,8 +52,8 @@ object PoetryTemplate : Template({
             id = "cleanup_poetry_environment"
             executionMode = BuildStep.ExecutionMode.ALWAYS
             scriptContent = """
-                %poetry.exe.path% env remove --all
-                rmdir /S /Q %poetry.temp.dir%
+                %POETRY_EXE% env remove --all
+                rmdir /S /Q %POETRY_HOME%
             """.trimIndent()
         }
     }

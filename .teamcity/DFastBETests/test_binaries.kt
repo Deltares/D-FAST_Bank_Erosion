@@ -36,7 +36,7 @@ object TestBinaries : BuildType({
             name = "Validate distribution"
             id = "Validate_distribution"
             scriptContent = """
-                %poetry.exe.path% run pytest -v %test_dir% --no-cov
+                %POETRY_EXE% run pytest -v %test_dir% --no-cov
             """.trimIndent()
         }
         stepsOrder = arrayListOf("install_poetry", "create_poetry_environment", "Install_dependencies_via_poetry", "Get_folder_listing", "Validate_distribution", "cleanup_poetry_environment")
