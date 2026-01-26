@@ -3806,7 +3806,7 @@ version = "2025.2"
 description = "World timezone definitions, modern and historical"
 optional = false
 python-versions = "*"
-groups = ["main", "docs"]
+groups = ["main", "binary", "docs"]
 files = [
     {file = "pytz-2025.2-py2.py3-none-any.whl", hash = "sha256:5ddf76296dd8c44c26eb8f4b6f35488f3ccbf6fbbd7adee0b7262d43f0ec2f00"},
     {file = "pytz-2025.2.tar.gz", hash = "sha256:360b9e3dbb49a209c21ad61809c7fb453643e048b38924c765813546746e81c3"},
@@ -5010,4 +5010,4 @@ cffi = ["cffi (>=1.17,<2.0) ; platform_python_implementation != \"PyPy\" and pyt
 [metadata]
 lock-version = "2.1"
 python-versions = "~3.11.0"
-content-hash = "6772c33a5f9185fa1509d7d9cce8303064e54753d08abe4076a0db4be0423551"
+content-hash = "f6a2e3bafb6d4f9bab42cf50bd6871a358bec74b68112c07ad0c3e1e027ae23d"

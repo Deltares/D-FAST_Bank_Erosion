@@ -28,6 +28,7 @@ pyproj = "^3.4.1"
 nuitka = "^2.0.0"
 imageio = "^2.33.1"
 fiona = "^1.10.1"
+pytz = ">=2020.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
