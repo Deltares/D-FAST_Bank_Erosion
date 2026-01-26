@@ -5,7 +5,8 @@ These tests cover pure functions that don't require Qt event loop or complex set
 """
 
 import pytest
-from dfastbe.gui.gui import gui_text, validator, shipTypes
+from dfastbe.gui.gui import gui_text, validator
+from dfastbe.gui.utils import SHIP_TYPES
 from PySide6.QtGui import QDoubleValidator
 
 
