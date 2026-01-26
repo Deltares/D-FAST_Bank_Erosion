@@ -34,7 +34,7 @@ import traceback
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
-import matplotlib.pyplot
+import matplotlib.pyplot as plt
 from PySide6 import QtCore, QtWidgets, QtGui
 from PySide6.QtWidgets import QSizePolicy, QComboBox, QLineEdit, QLabel, QApplication
 
@@ -1166,7 +1166,7 @@ def try_run_and_catch(run_analysis_steps: Callable[[ConfigFile], None]) -> None:
     config_file.root_dir = rootdir
     config_file.relative_to(rootdir)
     dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
-    matplotlib.pyplot.close("all")
+    plt.close("all")
     # should maybe use a separate thread for this ...
     try:
         run_analysis_steps(config_file)
