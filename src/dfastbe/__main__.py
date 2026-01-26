@@ -33,7 +33,7 @@ from typing import Optional, Tuple
 
 import matplotlib
 
-from dfastbe.cmd import Runner
+from dfastbe.runner import Runner
 from dfastbe import __version__
 
 matplotlib.use("Qt5Agg")

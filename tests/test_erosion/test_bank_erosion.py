@@ -26,7 +26,7 @@ from dfastbe.bank_erosion.data_models.inputs import (
 )
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.bank_erosion.mesh.processor import MeshProcessor
-from dfastbe.cmd import Runner
+from dfastbe.runner import Runner
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.data_models import LineGeometry
 

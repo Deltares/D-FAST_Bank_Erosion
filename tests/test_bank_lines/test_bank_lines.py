@@ -11,7 +11,7 @@ from shapely.geometry import LineString, MultiLineString, Polygon
 
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.bank_lines.plotter import BankLinesPlotter
-from dfastbe.cmd import Runner
+from dfastbe.runner import Runner
 from dfastbe.io.config import ConfigFile, PlotProperties
 from dfastbe.io.data_models import BaseSimulationData, LineGeometry
 
