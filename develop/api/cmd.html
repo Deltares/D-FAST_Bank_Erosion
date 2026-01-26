@@ -1837,13 +1837,30 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#dfastbe.cmd.run" class="md-nav__link">
+  <a href="#dfastbe.cmd.Runner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runner
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Runner">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dfastbe.cmd.Runner.run" class="md-nav__link">
     <span class="md-ellipsis">
       
         run
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2180,13 +2197,30 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#dfastbe.cmd.run" class="md-nav__link">
+  <a href="#dfastbe.cmd.Runner" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Runner
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Runner">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#dfastbe.cmd.Runner.run" class="md-nav__link">
     <span class="md-ellipsis">
       
         run
       
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2318,131 +2352,28 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 
 
 
+<div class="doc doc-object doc-class">
 
-<div class="doc doc-object doc-function">
 
 
-<h3 id="dfastbe.cmd.run" class="doc doc-heading"><a href="#dfastbe.cmd.run" class="toclink">
-            <code class="highlight language-python"><span class="n">run</span><span class="p">(</span><span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;UK&#39;</span><span class="p">,</span> <span class="n">run_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;GUI&#39;</span><span class="p">,</span> <span class="n">configfile</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+<h3 id="dfastbe.cmd.Runner" class="doc doc-heading"><a href="#dfastbe.cmd.Runner" class="toclink">
+            <code>Runner</code>
 
-</a><a href="#dfastbe.cmd.run" class="headerlink" title="Permanent link">#</a></h3>
+
+</a><a href="#dfastbe.cmd.Runner" class="headerlink" title="Permanent link">#</a></h3>
 
 
     <div class="doc doc-contents ">
 
-        <p>Initializes the language file and starts the chosen run mode.</p>
-<p>This function loads the appropriate language file and executes one of the
-available modes: 'BANKLINES', 'BANKEROSION', or 'GUI'. The default configuration
-file is <code>dfastbe.cfg</code>.</p>
 
 
-<p><span class="doc-section-title">Parameters:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Description</th>
-          <th>Default</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                <code>language</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Display language code. Acceptable values are 'NL' (Dutch) or 'UK' (English).
-Defaults to 'UK'.</p>
-              </div>
-            </td>
-            <td>
-                  <code>&#39;UK&#39;</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>run_mode</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Mode in which the program should run. Available options:</p>
-<ul>
-<li>'BANKLINES': Runs the bank lines processing.</li>
-<li>'BANKEROSION': Runs the bank erosion processing.</li>
-<li>'GUI': Launches the graphical user interface.</li>
-</ul>
-<p>Defaults to 'GUI'.</p>
-              </div>
-            </td>
-            <td>
-                  <code>&#39;GUI&#39;</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td>
-                <code>configfile</code>
-            </td>
-            <td>
-                  <code><span title="str">str</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Path to the configuration file. Defaults to None.</p>
-              </div>
-            </td>
-            <td>
-                  <code>None</code>
-            </td>
-          </tr>
-      </tbody>
-    </table>
 
 
-<p><span class="doc-section-title">Raises:</span></p>
-    <table>
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Description</th>
-        </tr>
-      </thead>
-      <tbody>
-          <tr class="doc-section-item">
-            <td>
-                  <code><span title="Exception">Exception</span></code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>If an invalid <code>run_mode</code> is provided. The valid options are
-'BANKLINES', 'BANKEROSION', or 'GUI'.</p>
-              </div>
-            </td>
-          </tr>
-      </tbody>
-    </table>
 
 
-<details class="example" open>
-  <summary>Example</summary>
-  <p>Running the program with Dutch language and bank erosion mode:</p>
-<div class="highlight"><pre><span></span><code><span class="n">run</span><span class="p">(</span><span class="n">language</span><span class="o">=</span><span class="s2">&quot;NL&quot;</span><span class="p">,</span> <span class="n">run_mode</span><span class="o">=</span><span class="s2">&quot;BANKEROSION&quot;</span><span class="p">,</span> <span class="n">configfile</span><span class="o">=</span><span class="s2">&quot;custom_config.cfg&quot;</span><span class="p">)</span>
-</code></pre></div>
-<p>Running the program in default mode (GUI) with the English language:</p>
-<div class="highlight"><pre><span></span><code><span class="n">run</span><span class="p">()</span>
-</code></pre></div>
-</details>
-            <details class="quote">
-              <summary>Source code in <code>src/dfastbe/cmd.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 40</span>
-<span class="normal"> 41</span>
+              <details class="quote">
+                <summary>Source code in <code>src/dfastbe/cmd.py</code></summary>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 41</span>
 <span class="normal"> 42</span>
 <span class="normal"> 43</span>
 <span class="normal"> 44</span>
@@ -2507,11 +2438,305 @@ Defaults to 'UK'.</p>
 <span class="normal">103</span>
 <span class="normal">104</span>
 <span class="normal">105</span>
-<span class="normal">106</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span>
-    <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;UK&quot;</span><span class="p">,</span>
-    <span class="n">run_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;GUI&quot;</span><span class="p">,</span>
-    <span class="n">configfile</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">Runner</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;UK&quot;</span><span class="p">,</span>
+        <span class="n">run_mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;GUI&quot;</span><span class="p">,</span>
+        <span class="n">configfile</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="n">language</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_validate_run_mode</span><span class="p">(</span><span class="n">run_mode</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_data</span> <span class="o">=</span> <span class="n">LogData</span><span class="p">(</span><span class="n">LOG_DATA_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;messages.</span><span class="si">{</span><span class="n">language</span><span class="si">}</span><span class="s2">.ini&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">configfile</span> <span class="o">=</span> <span class="n">configfile</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_validate_run_mode</span><span class="p">(</span><span class="n">run_mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">run_mode</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">AVAILABLE_RUN_MODES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid run mode </span><span class="si">{</span><span class="n">run_mode</span><span class="si">}</span><span class="s2"> specified. Should read &#39;BANKLINES&#39;, &#39;BANKEROSION&#39; or &#39;GUI&#39;.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">run_mode</span> <span class="o">=</span> <span class="n">run_mode</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">run_mode</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes the language file and starts the chosen run mode.</span>
+
+<span class="sd">        This function loads the appropriate language file and executes one of the</span>
+<span class="sd">        available modes: &#39;BANKLINES&#39;, &#39;BANKEROSION&#39;, or &#39;GUI&#39;. The default configuration</span>
+<span class="sd">        file is `dfastbe.cfg`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            language (str, optional):</span>
+<span class="sd">                Display language code. Acceptable values are &#39;NL&#39; (Dutch) or &#39;UK&#39; (English).</span>
+<span class="sd">                Defaults to &#39;UK&#39;.</span>
+<span class="sd">            run_mode (str, optional):</span>
+<span class="sd">                Mode in which the program should run. Available options:</span>
+
+<span class="sd">                - &#39;BANKLINES&#39;: Runs the bank lines processing.</span>
+<span class="sd">                - &#39;BANKEROSION&#39;: Runs the bank erosion processing.</span>
+<span class="sd">                - &#39;GUI&#39;: Launches the graphical user interface.</span>
+
+<span class="sd">                Defaults to &#39;GUI&#39;.</span>
+<span class="sd">            configfile (str, optional):</span>
+<span class="sd">                Path to the configuration file. Defaults to None.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Exception: If an invalid `run_mode` is provided. The valid options are</span>
+<span class="sd">                &#39;BANKLINES&#39;, &#39;BANKEROSION&#39;, or &#39;GUI&#39;.</span>
+
+<span class="sd">        Example:</span>
+<span class="sd">            Running the program with Dutch language and bank erosion mode:</span>
+
+<span class="sd">            ```python</span>
+<span class="sd">            run(language=&quot;NL&quot;, run_mode=&quot;BANKEROSION&quot;, configfile=&quot;custom_config.cfg&quot;)</span>
+<span class="sd">            ```</span>
+
+<span class="sd">            Running the program in default mode (GUI) with the English language:</span>
+
+<span class="sd">            ```python</span>
+<span class="sd">            run()</span>
+<span class="sd">            ```</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;GUI&quot;</span><span class="p">:</span>
+            <span class="n">main</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configfile</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configfile</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;BANKLINES&quot;</span><span class="p">:</span>
+                <span class="n">bank_lines</span> <span class="o">=</span> <span class="n">BankLines</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+                <span class="n">bank_lines</span><span class="o">.</span><span class="n">detect</span><span class="p">()</span>
+                <span class="n">bank_lines</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+                <span class="n">bank_lines</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;BANKEROSION&quot;</span><span class="p">:</span>
+                <span class="n">erosion</span> <span class="o">=</span> <span class="n">Erosion</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
+                <span class="n">erosion</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+                <span class="n">erosion</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+                <span class="n">erosion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log_data</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;end_bankerosion&quot;</span><span class="p">)</span>
+                <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- end analysis --&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Invalid run mode </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">run_mode</span><span class="si">}</span><span class="s2"> specified. Should read &#39;BANKLINES&#39;, &#39;BANKEROSION&#39; or &#39;GUI&#39;.&quot;</span>
+                <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+              </details>
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h4 id="dfastbe.cmd.Runner.run" class="doc doc-heading"><a href="#dfastbe.cmd.Runner.run" class="toclink">
+            <code class="highlight language-python"><span class="n">run</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span></code>
+
+</a><a href="#dfastbe.cmd.Runner.run" class="headerlink" title="Permanent link">#</a></h4>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Initializes the language file and starts the chosen run mode.</p>
+<p>This function loads the appropriate language file and executes one of the
+available modes: 'BANKLINES', 'BANKEROSION', or 'GUI'. The default configuration
+file is <code>dfastbe.cfg</code>.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>language</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Display language code. Acceptable values are 'NL' (Dutch) or 'UK' (English).
+Defaults to 'UK'.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>run_mode</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Mode in which the program should run. Available options:</p>
+<ul>
+<li>'BANKLINES': Runs the bank lines processing.</li>
+<li>'BANKEROSION': Runs the bank erosion processing.</li>
+<li>'GUI': Launches the graphical user interface.</li>
+</ul>
+<p>Defaults to 'GUI'.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>configfile</code>
+            </td>
+            <td>
+                  <code><span title="str">str</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Path to the configuration file. Defaults to None.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code><span title="Exception">Exception</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If an invalid <code>run_mode</code> is provided. The valid options are
+'BANKLINES', 'BANKEROSION', or 'GUI'.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="example" open>
+  <summary>Example</summary>
+  <p>Running the program with Dutch language and bank erosion mode:</p>
+<div class="highlight"><pre><span></span><code><span class="n">run</span><span class="p">(</span><span class="n">language</span><span class="o">=</span><span class="s2">&quot;NL&quot;</span><span class="p">,</span> <span class="n">run_mode</span><span class="o">=</span><span class="s2">&quot;BANKEROSION&quot;</span><span class="p">,</span> <span class="n">configfile</span><span class="o">=</span><span class="s2">&quot;custom_config.cfg&quot;</span><span class="p">)</span>
+</code></pre></div>
+<p>Running the program in default mode (GUI) with the English language:</p>
+<div class="highlight"><pre><span></span><code><span class="n">run</span><span class="p">()</span>
+</code></pre></div>
+</details>
+            <details class="quote">
+              <summary>Source code in <code>src/dfastbe/cmd.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initializes the language file and starts the chosen run mode.</span>
 
@@ -2551,34 +2776,42 @@ Defaults to 'UK'.</p>
 <span class="sd">        run()</span>
 <span class="sd">        ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">language</span> <span class="o">=</span> <span class="n">language</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-    <span class="n">run_mode</span> <span class="o">=</span> <span class="n">run_mode</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-    <span class="n">log_data</span> <span class="o">=</span> <span class="n">LogData</span><span class="p">(</span><span class="n">LOG_DATA_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;messages.</span><span class="si">{</span><span class="n">language</span><span class="si">}</span><span class="s2">.ini&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;GUI&quot;</span><span class="p">:</span>
-        <span class="n">main</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;GUI&quot;</span><span class="p">:</span>
+        <span class="n">main</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configfile</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span>
+        <span class="n">config_file</span> <span class="o">=</span> <span class="n">ConfigFile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">configfile</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;BANKLINES&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;BANKLINES&quot;</span><span class="p">:</span>
             <span class="n">bank_lines</span> <span class="o">=</span> <span class="n">BankLines</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
             <span class="n">bank_lines</span><span class="o">.</span><span class="n">detect</span><span class="p">()</span>
             <span class="n">bank_lines</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
             <span class="n">bank_lines</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;BANKEROSION&quot;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_mode</span> <span class="o">==</span> <span class="s2">&quot;BANKEROSION&quot;</span><span class="p">:</span>
             <span class="n">erosion</span> <span class="o">=</span> <span class="n">Erosion</span><span class="p">(</span><span class="n">config_file</span><span class="p">)</span>
             <span class="n">erosion</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
             <span class="n">erosion</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
             <span class="n">erosion</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
-            <span class="n">log_data</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;end_bankerosion&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">log_data</span><span class="o">.</span><span class="n">log_text</span><span class="p">(</span><span class="s2">&quot;end_bankerosion&quot;</span><span class="p">)</span>
             <span class="n">timed_logger</span><span class="p">(</span><span class="s2">&quot;-- end analysis --&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid run mode </span><span class="si">{</span><span class="n">run_mode</span><span class="si">}</span><span class="s2"> specified. Should read &#39;BANKLINES&#39;, &#39;BANKEROSION&#39; or &#39;GUI&#39;.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Invalid run mode </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">run_mode</span><span class="si">}</span><span class="s2"> specified. Should read &#39;BANKLINES&#39;, &#39;BANKEROSION&#39; or &#39;GUI&#39;.&quot;</span>
+            <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
 
 </div>
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
 
 
 
