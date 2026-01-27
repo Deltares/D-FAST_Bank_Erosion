@@ -1,27 +1,8 @@
 """
 Tests for the create_dialog() function in dfastbe.gui.gui module.
 """
-import pytest
 from PyQt5 import QtWidgets
-from dfastbe.gui import gui
 from dfastbe.gui.gui import dialog, gui_text
-
-
-@pytest.fixture
-def dialog_window(qtbot):
-    """
-    Fixture that creates the dialog and provides qtbot.
-
-    The create_dialog function will use the existing QApplication.
-    """
-    # TODO: this fixture would need an update when switching to OOP in gui.py
-    # setUp phase
-    dialog.clear()
-
-    gui.create_dialog()
-
-    yield dialog
-
 
 
 def test_create_dialog_contains_expected_elements(dialog_window):
