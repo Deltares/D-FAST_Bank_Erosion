@@ -1775,7 +1775,7 @@ class GUI:
         self.app.setStyle("fusion")
         dialog["application"] = self.app
         self.window = self.create_window()
-        dialog["window"] = win
+        dialog["window"] = self.window
 
     @staticmethod
     def create_window():
