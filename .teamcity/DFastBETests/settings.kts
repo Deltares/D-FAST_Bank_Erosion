@@ -2,7 +2,7 @@
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.projectFeatures.*
 import UnitTests
-import CondaTemplate
+import PoetryTemplate
 import LatexManual
 import SignedReleaseTerminal
 import BuildTerminal
@@ -16,14 +16,13 @@ project {
     description = "D-FAST Bank Erosion"
 
     params {
-        param("CONDA_ENV_NAME", "python-dfastbe")
-        param("CONDA_PATH", "D:\\ProgramData\\Miniforge3\\envs")
         param("python.version", "3.11.12")
+        param("poetry.path", "%teamcity.agent.home.dir%\\..\\poetry")
         param("SonarSource", "dfastbe")
         param("SonarProjectKey", "Deltares_D-FAST_Bank_Erosion")
     }
 
-    template(CondaTemplate)
+    template(PoetryTemplate)
 
     buildType(UnitTests)
     buildType(LatexManual)
