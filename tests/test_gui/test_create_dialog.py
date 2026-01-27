@@ -20,16 +20,8 @@ def dialog_window(qtbot):
 
     gui.create_dialog()
 
-    # Add the window to qtbot for proper event handling
-    if "window" in dialog:
-        qtbot.addWidget(dialog["window"])
-
     yield dialog
 
-    # tearDown phase
-    if "window" in dialog:
-        dialog["window"].close()
-    dialog.clear()
 
 
 def test_create_dialog_contains_expected_elements(dialog_window):
