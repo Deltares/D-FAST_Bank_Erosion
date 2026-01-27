@@ -42,7 +42,6 @@ class BankLines(BaseCalculator):
 
         Examples:
             ```python
-            >>> from unittest.mock import patch
             >>> from dfastbe.io.config import ConfigFile
             >>> config_file = ConfigFile.read("tests/data/bank_lines/meuse_manual.cfg")
             >>> bank_lines = BankLines(config_file)  # doctest: +ELLIPSIS

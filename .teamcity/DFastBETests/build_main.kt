@@ -4,7 +4,7 @@ import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnText
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnText
 
 object BuildMain : BuildType({
-    templates(CondaTemplate)
+    templates(PoetryTemplate)
     name = "Build without command window"
     description = "Build D-FAST Bank Erosion without terminal window as main distribution"
 
@@ -22,12 +22,10 @@ object BuildMain : BuildType({
             name = "build D-FAST BE"
             id = "build_D_FAST_BE"
             scriptContent = """
-                CALL conda activate %CONDA_ENV_NAME%
-                CALL .\BuildScripts\BuildDfastbe_no_command_window.bat
-                CALL conda deactivate
+                %POETRY_EXE% run .\BuildScripts\BuildDfastbe_no_command_window.bat
             """.trimIndent()
         }
-        stepsOrder = arrayListOf("Conda_create_environment", "Python_pip_install_poetry", "Install_dependencies_via_poetry", "build_D_FAST_BE", "Conda_deactivate_and_remove_environment")
+        stepsOrder = arrayListOf("install_poetry", "create_poetry_environment", "Install_dependencies_via_poetry", "build_D_FAST_BE", "cleanup_poetry_environment")
     }
 
     failureConditions {
@@ -44,6 +42,7 @@ object BuildMain : BuildType({
         snapshot(TestBinaries) {
             onDependencyFailure = FailureAction.FAIL_TO_START
         }
+
         dependency(LatexManual) {
             snapshot {
                 onDependencyFailure = FailureAction.FAIL_TO_START
@@ -53,5 +52,6 @@ object BuildMain : BuildType({
                 artifactRules = "+:*.pdf => docs/"
             }
         }
+
     }
 })
