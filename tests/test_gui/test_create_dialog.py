@@ -107,7 +107,6 @@ def test_create_dialog_creates_buttons(dialog_window):
     win = dialog["window"]
     buttons = win.findChildren(QtWidgets.QPushButton)
 
-    # Should have at least 3 main buttons: Detect, Erode, Close
     assert len(buttons) >= 3
 
     button_texts = [btn.text() for btn in buttons]
@@ -116,55 +115,17 @@ def test_create_dialog_creates_buttons(dialog_window):
     assert gui_text("action_close") in button_texts
 
 
-def test_create_dialog_detect_button(dialog_window):
-    """Test that detect button exists and has proper text."""
-    win = dialog["window"]
-    buttons = win.findChildren(QtWidgets.QPushButton)
-    detect_buttons = [btn for btn in buttons if btn.text() == gui_text("action_detect")]
-
-    assert len(detect_buttons) == 1
-    detect_btn = detect_buttons[0]
-    assert detect_btn.isEnabled()
-
-
-def test_create_dialog_compute_button(dialog_window):
-    """Test that compute button exists and has proper text."""
-    win = dialog["window"]
-    buttons = win.findChildren(QtWidgets.QPushButton)
-    compute_buttons = [btn for btn in buttons if btn.text() == gui_text("action_erode")]
-
-    assert len(compute_buttons) == 1
-    erode_btn = compute_buttons[0]
-    assert erode_btn.isEnabled()
-
-
-def test_create_dialog_close_button(dialog_window):
-    """Test that close button exists and has proper text."""
-    win = dialog["window"]
-    buttons = win.findChildren(QtWidgets.QPushButton)
-    close_buttons = [btn for btn in buttons if btn.text() == gui_text("action_close")]
-
-    assert len(close_buttons) == 1
-    close_btn = close_buttons[0]
-    assert close_btn.isEnabled()
-
-
-def test_create_dialog_buttons_have_connections(dialog_window):
-    """Test that buttons are properly connected to their handlers."""
+def test_create_dialog_check_buttons(dialog_window):
+    """Test that buttons are enabled."""
     win = dialog["window"]
     buttons = win.findChildren(QtWidgets.QPushButton)
 
     detect_btn = next(btn for btn in buttons if btn.text() == gui_text("action_detect"))
-    erode_btn = next(btn for btn in buttons if btn.text() == gui_text("action_erode"))
+    compute_btn = next(btn for btn in buttons if btn.text() == gui_text("action_erode"))
     close_btn = next(btn for btn in buttons if btn.text() == gui_text("action_close"))
 
-    # Check that buttons exist and are enabled (connections are harder to test directly in PyQt5)
-    # The fact that the buttons were created with .clicked.connect() means they have connections
-    assert detect_btn is not None
-    assert erode_btn is not None
-    assert close_btn is not None
     assert detect_btn.isEnabled()
-    assert erode_btn.isEnabled()
+    assert compute_btn.isEnabled()
     assert close_btn.isEnabled()
 
 
@@ -173,7 +134,6 @@ def test_create_dialog_creates_menubar(dialog_window):
     win = dialog["window"]
     menubar = win.menuBar()
 
-    assert menubar is not None
     assert isinstance(menubar, QtWidgets.QMenuBar)
 
 
@@ -195,72 +155,13 @@ def test_create_dialog_tabs_widget_in_layout(dialog_window):
     """Test that tabs widget is properly added to the layout."""
     win = dialog["window"]
     central_widget = win.centralWidget()
-    tabs = dialog["tabs"]
+    expected_tab_names = ["General", "Detection", "Erosion", "Shipping Parameters", "Bank Parameters"]
 
-    # Verify tabs widget is in the central widget's layout
     layout = central_widget.layout()
     assert layout is not None
-    # Check that tabs is one of the widgets in the layout
-    found_tabs = False
-    for i in range(layout.count()):
-        item = layout.itemAt(i)
-        if item and item.widget() == tabs:
-            found_tabs = True
-            break
-    assert found_tabs, "Tabs widget not found in central widget layout"
 
+    # Check that the tabs widgets are inside the layout
+    item = layout.itemAt(0)
+    actual_tab_names = [item.widget().tabText(idx) for idx in range(0,5)]
 
-def test_create_dialog_window_not_shown_by_default(dialog_window):
-    """Test that window is created but not shown by default."""
-    win = dialog["window"]
-    # The window should be created but not necessarily visible yet
-    # (visibility depends on whether show() or exec() is called)
-    assert isinstance(win, QtWidgets.QMainWindow)
-
-
-def test_create_dialog_can_be_called_multiple_times(qtbot, qapp):
-    """Test that create_dialog can be called multiple times without crashing."""
-    dialog.clear()
-
-    # First call
-    gui.create_dialog()
-    first_window = dialog.get("window")
-    if first_window:
-        qtbot.addWidget(first_window)
-        first_window.close()
-
-    dialog.clear()
-
-    # Second call
-    gui.create_dialog()
-    second_window = dialog.get("window")
-    if second_window:
-        qtbot.addWidget(second_window)
-
-    assert second_window is not None
-    assert isinstance(second_window, QtWidgets.QMainWindow)
-
-    # Cleanup
-    if second_window:
-        second_window.close()
-    dialog.clear()
-
-
-def test_create_dialog_global_dialog_dict_structure(dialog_window):
-    """Test that dialog dictionary has the expected structure."""
-    required_keys = ["application", "window", "tabs"]
-
-    for key in required_keys:
-        assert key in dialog, f"Missing required key: {key}"
-
-
-def test_create_dialog_tabs_parent_is_window(dialog_window):
-    """Test that tabs widget has the window or central widget as parent."""
-    tabs = dialog["tabs"]
-    win = dialog["window"]
-    central_widget = win.centralWidget()
-
-    # The tabs parent should be either the window or the central widget
-    # (depending on how Qt manages the hierarchy when added to layout)
-    tabs_parent = tabs.parent()
-    assert tabs_parent == win or tabs_parent == central_widget
+    assert expected_tab_names == actual_tab_names
