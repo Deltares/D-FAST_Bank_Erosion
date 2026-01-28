@@ -332,57 +332,56 @@ class ShippingTab(BaseTab):
         eParamsLayout.addItem(stretch, 8, 0)
 
 
-def addBankTab(
-    tabs: QTabWidget, win: QMainWindow
-) -> None:
-    """
-    Create the tab for the general bank properties.
+class BankTab(BaseTab):
+    def __init__(self, tabs: QTabWidget):
+        """Initialize the tab for the bank erosion settings.
 
-    Arguments
-    ---------
-    tabs : QTabWidget
-        Tabs object to which the tab should be added.
-    win : QMainWindow
-        The window object in which the tab item is located.
-    """
-    eParamsWidget = QWidget()
-    eParamsLayout = QGridLayout(eParamsWidget)
-    tabs.addTab(eParamsWidget, "Bank Parameters")
+        Args:
+            tabs : QTabWidget
+                Tabs object to which the tab should be added.
+        """
+        super().__init__(tabs)
 
-    strength = QLabel("Strength Parameter")
-    eParamsLayout.addWidget(strength, 0, 0)
-    strengthPar = QComboBox()
-    strengthPar.addItems(("Bank Type", "Critical Shear Stress"))
-    strengthPar.currentIndexChanged.connect(bankStrengthSwitch)
-    dialog["strengthPar"] = strengthPar
-    eParamsLayout.addWidget(strengthPar, 0, 1, 1, 2)
+    def create(self) -> None:
+        """Create the tab for the general bank properties."""
+        eParamsWidget = QWidget()
+        eParamsLayout = QGridLayout(eParamsWidget)
+        self.tabs.addTab(eParamsWidget, "Bank Parameters")
 
-    generalParLayout(
-        eParamsLayout,
-        1,
-        "bankType",
-        "Bank Type",
-        selectList=[
-            "0 (Beschermde oeverlijn)",
-            "1 (Begroeide oeverlijn)",
-            "2 (Goede klei)",
-            "3 (Matig / slechte klei)",
-            "4 (Zand)",
-        ],
-    )
-    generalParLayout(eParamsLayout, 3, "bankShear", "Critical Shear Stress [N/m2]")
-    bankStrengthSwitch()
-    generalParLayout(eParamsLayout, 4, "bankProtect", "Protection [m]")
-    generalParLayout(eParamsLayout, 5, "bankSlope", "Slope [-]")
-    generalParLayout(eParamsLayout, 6, "bankReed", "Reed [-]")
+        strength = QLabel("Strength Parameter")
+        eParamsLayout.addWidget(strength, 0, 0)
+        strengthPar = QComboBox()
+        strengthPar.addItems(("Bank Type", "Critical Shear Stress"))
+        strengthPar.currentIndexChanged.connect(bankStrengthSwitch)
+        dialog["strengthPar"] = strengthPar
+        eParamsLayout.addWidget(strengthPar, 0, 1, 1, 2)
 
-    addFilter(eParamsLayout, 7, "velFilter", "Velocity Filter [km]")
-    addFilter(eParamsLayout, 8, "bedFilter", "Bank Elevation Filter [km]")
+        generalParLayout(
+            eParamsLayout,
+            1,
+            "bankType",
+            "Bank Type",
+            selectList=[
+                "0 (Beschermde oeverlijn)",
+                "1 (Begroeide oeverlijn)",
+                "2 (Goede klei)",
+                "3 (Matig / slechte klei)",
+                "4 (Zand)",
+            ],
+        )
+        generalParLayout(eParamsLayout, 3, "bankShear", "Critical Shear Stress [N/m2]")
+        bankStrengthSwitch()
+        generalParLayout(eParamsLayout, 4, "bankProtect", "Protection [m]")
+        generalParLayout(eParamsLayout, 5, "bankSlope", "Slope [-]")
+        generalParLayout(eParamsLayout, 6, "bankReed", "Reed [-]")
 
-    stretch = QSpacerItem(
-        10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
-    )
-    eParamsLayout.addItem(stretch, 9, 0)
+        addFilter(eParamsLayout, 7, "velFilter", "Velocity Filter [km]")
+        addFilter(eParamsLayout, 8, "bedFilter", "Bank Elevation Filter [km]")
+
+        stretch = QSpacerItem(
+            10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
+        )
+        eParamsLayout.addItem(stretch, 9, 0)
 
 
 def addFilter(
@@ -1807,9 +1806,9 @@ class GUI:
         """Construct the D-FAST Bank Erosion user interface."""
         self.create_menu_bar()
 
-        centralWidget = QWidget()
-        layout = QBoxLayout(QBoxLayout.Direction.TopToBottom, centralWidget)
-        self.window.setCentralWidget(centralWidget)
+        central_widget = QWidget()
+        layout = QBoxLayout(QBoxLayout.Direction.TopToBottom, central_widget)
+        self.window.setCentralWidget(central_widget)
 
         tabs = QTabWidget(self.window)
         dialog["tabs"] = tabs
@@ -1844,7 +1843,8 @@ class GUI:
         shipping_tab = ShippingTab(tabs)
         shipping_tab.create()
 
-        addBankTab(tabs, self.window)
+        bank_tab = BankTab(tabs)
+        bank_tab.create()
 
     def create_menu_bar(self) -> None:
         """Add the menus to the menubar."""
