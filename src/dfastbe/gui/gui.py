@@ -55,17 +55,23 @@ from PySide6.QtWidgets import (
     QTreeWidget,
     QTreeWidgetItem,
     QFileDialog,
-    QMessageBox
 )
 
-from dfastbe import __file__, __version__
+from dfastbe import __file__
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.file_utils import absolute_path
-from dfastbe.gui.utils import get_icon, gui_text, SHIP_TYPES, show_error
+from dfastbe.gui.utils import (
+    get_icon,
+    gui_text,
+    SHIP_TYPES,
+    show_error,
+    menu_open_manual,
+    menu_about_self,
+    menu_about_qt
+)
 from dfastbe.gui.analysis_runner import run_detection, run_erosion
 
 
-USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
 DialogObject = Dict[str, QtCore.QObject]
 
 dialog: DialogObject
@@ -1589,51 +1595,6 @@ def get_configuration() -> configparser.ConfigParser:
         if dialog[istr + "_eroVolEdit"].text() != "":
             config["Erosion"]["EroVol" + istr] = dialog[istr + "_eroVolEdit"].text()
     return config
-
-
-def menu_about_self():
-    """
-    Show the about dialog for D-FAST Bank Erosion.
-
-    Arguments
-    ---------
-    None
-    """
-    msg = QMessageBox()
-    msg.setText(f"D-FAST Bank Erosion {__version__}")
-    msg.setInformativeText("Copyright (c) 2025 Deltares.")
-    msg.setDetailedText(gui_text("license"))
-    msg.setWindowTitle(gui_text("about"))
-    msg.setStandardButtons(QMessageBox.Ok)
-    
-    dfast_icon = get_icon(f"{ICONS_DIR}/D-FASTBE.png")
-    available_sizes = dfast_icon.availableSizes()
-    if available_sizes:
-        icon_size = available_sizes[0]
-        pixmap = dfast_icon.pixmap(icon_size).scaled(64,64)
-        msg.setIconPixmap(pixmap)
-    msg.setWindowIcon(dfast_icon)
-    msg.exec()
-
-
-def menu_about_qt():
-    """Show the about dialog for Qt."""
-    QApplication.aboutQt()
-
-
-def menu_open_manual():
-    """Open the user manual."""
-    manual_path = r_dir / USER_MANUAL_FILE_NAME
-    filename = str(manual_path)
-    if not manual_path.exists():
-        show_error(f"User manual not found: {filename}")
-        return
-    try:
-        # bandit complains about os.startfile, but it is the only way to open a file in the default application on Windows.
-        # On Linux and MacOS, opening the file might give a security warning.
-        os.startfile(filename) # nosec
-    except Exception as e:
-        show_error(f"Failed to open the user manual: {e}")
 
 
 def main(config: Optional[Path] = None) -> None:

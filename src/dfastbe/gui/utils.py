@@ -1,15 +1,27 @@
+import os
 from typing import Any, Dict
 from pathlib import Path
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QMessageBox
-
+from PySide6.QtWidgets import QMessageBox, QApplication
 from dfastbe.io.logger import LogData
 
+from dfastbe import __version__
 
 SHIP_TYPES = ["1 (multiple barge convoy set)", "2 (RHK ship / motorship)", "3 (towboat)"]
+r_dir = Path(__file__).resolve().parent
+ICONS_DIR = r_dir / "gui/icons"
+USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
 
 
-__all__ = ["get_icon", "gui_text", "SHIP_TYPES"]
+__all__ = [
+    "get_icon",
+    "gui_text",
+    "SHIP_TYPES",
+    "menu_open_manual",
+    "show_error",
+    "menu_about_qt",
+    "menu_about_self"
+]
 
 
 def get_icon(file_name: str) -> QIcon:
@@ -69,6 +81,46 @@ def show_error(message: str, detailed_message: str | None = None) -> None:
     msg.setText(message)
     if detailed_message:
         msg.setDetailedText(detailed_message)
+
     msg.setWindowTitle("Error")
     msg.setStandardButtons(QMessageBox.Ok)
     msg.exec()
+
+
+def menu_open_manual():
+    """Open the user manual."""
+    manual_path = r_dir / USER_MANUAL_FILE_NAME
+    if manual_path.exists():
+        try:
+            # bandit complains about os.startfile, but it is the only way to open a file in the default application on Windows.
+            # On Linux and MacOS, opening the file might give a security warning.
+            os.startfile(str(manual_path)) # nosec
+        except Exception as e:
+            show_error(f"Failed to open the user manual: {e}")
+    else:
+        show_error(f"User manual not found: {manual_path}")
+
+
+def menu_about_self():
+    """Show the about dialog for D-FAST Bank Erosion."""
+
+    msg = QMessageBox()
+    msg.setText(f"D-FAST Bank Erosion {__version__}")
+    msg.setInformativeText("Copyright (c) 2025 Deltares.")
+    msg.setDetailedText(gui_text("license"))
+    msg.setWindowTitle(gui_text("about"))
+    msg.setStandardButtons(QMessageBox.Ok)
+
+    dfast_icon = get_icon(f"{ICONS_DIR}/D-FASTBE.png")
+    available_sizes = dfast_icon.availableSizes()
+    if available_sizes:
+        icon_size = available_sizes[0]
+        pixmap = dfast_icon.pixmap(icon_size).scaled(64,64)
+        msg.setIconPixmap(pixmap)
+    msg.setWindowIcon(dfast_icon)
+    msg.exec()
+
+
+def menu_about_qt():
+    """Show the about dialog for Qt."""
+    QApplication.aboutQt()
