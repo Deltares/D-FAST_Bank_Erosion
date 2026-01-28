@@ -3230,7 +3230,7 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
         <span class="n">strengthPar</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">()</span>
         <span class="n">strengthPar</span><span class="o">.</span><span class="n">addItems</span><span class="p">((</span><span class="s2">&quot;Bank Type&quot;</span><span class="p">,</span> <span class="s2">&quot;Critical Shear Stress&quot;</span><span class="p">))</span>
         <span class="n">strengthPar</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bankStrengthSwitch</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;strengthPar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strengthPar</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;strengthPar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strengthPar</span>
         <span class="n">eParamsLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">strengthPar</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="n">generalParLayout</span><span class="p">(</span>
@@ -3406,7 +3406,7 @@ Tabs object to which the tab should be added.</p>
     <span class="n">strengthPar</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">()</span>
     <span class="n">strengthPar</span><span class="o">.</span><span class="n">addItems</span><span class="p">((</span><span class="s2">&quot;Bank Type&quot;</span><span class="p">,</span> <span class="s2">&quot;Critical Shear Stress&quot;</span><span class="p">))</span>
     <span class="n">strengthPar</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">bankStrengthSwitch</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;strengthPar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strengthPar</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;strengthPar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">strengthPar</span>
     <span class="n">eParamsLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">strengthPar</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="n">generalParLayout</span><span class="p">(</span>
@@ -3470,21 +3470,21 @@ Tabs object to which the tab should be added.</p>
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/gui/gui.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">927</span>
-<span class="normal">928</span>
-<span class="normal">929</span>
-<span class="normal">930</span>
-<span class="normal">931</span>
-<span class="normal">932</span>
-<span class="normal">933</span>
-<span class="normal">934</span>
-<span class="normal">935</span>
-<span class="normal">936</span>
-<span class="normal">937</span>
-<span class="normal">938</span>
-<span class="normal">939</span>
-<span class="normal">940</span>
-<span class="normal">941</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BaseBar</span><span class="p">:</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">853</span>
+<span class="normal">854</span>
+<span class="normal">855</span>
+<span class="normal">856</span>
+<span class="normal">857</span>
+<span class="normal">858</span>
+<span class="normal">859</span>
+<span class="normal">860</span>
+<span class="normal">861</span>
+<span class="normal">862</span>
+<span class="normal">863</span>
+<span class="normal">864</span>
+<span class="normal">865</span>
+<span class="normal">866</span>
+<span class="normal">867</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">BaseBar</span><span class="p">:</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">window</span><span class="p">:</span> <span class="n">QMainWindow</span><span class="p">,</span> <span class="n">app</span><span class="p">:</span> <span class="n">QApplication</span><span class="p">,</span> <span class="n">layout</span><span class="p">:</span> <span class="n">QBoxLayout</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window</span> <span class="o">=</span> <span class="n">window</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="n">layout</span>
@@ -3529,12 +3529,12 @@ Tabs object to which the tab should be added.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/gui/gui.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">936</span>
-<span class="normal">937</span>
-<span class="normal">938</span>
-<span class="normal">939</span>
-<span class="normal">940</span>
-<span class="normal">941</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">862</span>
+<span class="normal">863</span>
+<span class="normal">864</span>
+<span class="normal">865</span>
+<span class="normal">866</span>
+<span class="normal">867</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Close the dialog and program.&quot;&quot;&quot;</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -3691,7 +3691,7 @@ Tabs object to which the tab should be added.</p>
         <span class="n">gridly</span> <span class="o">=</span> <span class="n">QGridLayout</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
         <span class="n">gridly</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-        <span class="n">dialog</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">main_widget</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">main_widget</span>
         <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">main_widget</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
         <span class="n">button_bar</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
@@ -3701,19 +3701,19 @@ Tabs object to which the tab should be added.</p>
 
         <span class="n">add_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="n">get_icon</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ICONS_DIR</span><span class="si">}</span><span class="s2">/add.png&quot;</span><span class="p">),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="n">add_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">addAnItem</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Add&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">add_button</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Add&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">add_button</span>
         <span class="n">button_bar_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">add_button</span><span class="p">)</span>
 
         <span class="n">edit_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="n">get_icon</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ICONS_DIR</span><span class="si">}</span><span class="s2">/edit.png&quot;</span><span class="p">),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="n">edit_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit_an_item</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
         <span class="n">edit_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Edit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">edit_button</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Edit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">edit_button</span>
         <span class="n">button_bar_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">edit_button</span><span class="p">)</span>
 
         <span class="n">delete_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="n">get_icon</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ICONS_DIR</span><span class="si">}</span><span class="s2">/remove.png&quot;</span><span class="p">),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
         <span class="n">delete_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">removeAnItem</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
         <span class="n">delete_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Remove&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">delete_button</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Remove&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">delete_button</span>
         <span class="n">button_bar_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">delete_button</span><span class="p">)</span>
 
         <span class="n">stretch</span> <span class="o">=</span> <span class="n">QSpacerItem</span><span class="p">(</span>
@@ -3734,7 +3734,7 @@ Tabs object to which the tab should be added.</p>
 <span class="sd">        key : str</span>
 <span class="sd">            Short name of the parameter.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">selected</span> <span class="o">=</span> <span class="n">dialog</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">selectedItems</span><span class="p">()</span>
+        <span class="n">selected</span> <span class="o">=</span> <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">selectedItems</span><span class="p">()</span>
         <span class="c1"># root = dialog[key].invisibleRootItem()</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">istr</span> <span class="o">=</span> <span class="n">selected</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -3862,7 +3862,7 @@ key : str
     <span class="n">gridly</span> <span class="o">=</span> <span class="n">QGridLayout</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
     <span class="n">gridly</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
-    <span class="n">dialog</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">main_widget</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">main_widget</span>
     <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">main_widget</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="n">button_bar</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
@@ -3872,19 +3872,19 @@ key : str
 
     <span class="n">add_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="n">get_icon</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ICONS_DIR</span><span class="si">}</span><span class="s2">/add.png&quot;</span><span class="p">),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="n">add_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">addAnItem</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Add&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">add_button</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Add&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">add_button</span>
     <span class="n">button_bar_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">add_button</span><span class="p">)</span>
 
     <span class="n">edit_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="n">get_icon</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ICONS_DIR</span><span class="si">}</span><span class="s2">/edit.png&quot;</span><span class="p">),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="n">edit_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit_an_item</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
     <span class="n">edit_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Edit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">edit_button</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Edit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">edit_button</span>
     <span class="n">button_bar_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">edit_button</span><span class="p">)</span>
 
     <span class="n">delete_button</span> <span class="o">=</span> <span class="n">QPushButton</span><span class="p">(</span><span class="n">get_icon</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ICONS_DIR</span><span class="si">}</span><span class="s2">/remove.png&quot;</span><span class="p">),</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="n">delete_button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">removeAnItem</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
     <span class="n">delete_button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Remove&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">delete_button</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Remove&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">delete_button</span>
     <span class="n">button_bar_layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">delete_button</span><span class="p">)</span>
 
     <span class="n">stretch</span> <span class="o">=</span> <span class="n">QSpacerItem</span><span class="p">(</span>
@@ -3955,7 +3955,7 @@ key : str
 <span class="sd">    key : str</span>
 <span class="sd">        Short name of the parameter.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">selected</span> <span class="o">=</span> <span class="n">dialog</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">selectedItems</span><span class="p">()</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">selectedItems</span><span class="p">()</span>
     <span class="c1"># root = dialog[key].invisibleRootItem()</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">istr</span> <span class="o">=</span> <span class="n">selected</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -4068,7 +4068,7 @@ key : str
 
         <span class="n">water_depth</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
         <span class="n">water_depth</span><span class="o">.</span><span class="n">setValidator</span><span class="p">(</span><span class="n">validator</span><span class="p">(</span><span class="s2">&quot;positive_real&quot;</span><span class="p">))</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;waterDepth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">water_depth</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;waterDepth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">water_depth</span>
         <span class="n">detect_layout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Water Depth [m]&quot;</span><span class="p">,</span> <span class="n">water_depth</span><span class="p">)</span>
 
         <span class="n">search_lines</span> <span class="o">=</span> <span class="n">QTreeWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
@@ -4246,7 +4246,7 @@ The application object to which the window belongs, needed for font information.
 
     <span class="n">water_depth</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
     <span class="n">water_depth</span><span class="o">.</span><span class="n">setValidator</span><span class="p">(</span><span class="n">validator</span><span class="p">(</span><span class="s2">&quot;positive_real&quot;</span><span class="p">))</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;waterDepth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">water_depth</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;waterDepth&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">water_depth</span>
     <span class="n">detect_layout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Water Depth [m]&quot;</span><span class="p">,</span> <span class="n">water_depth</span><span class="p">)</span>
 
     <span class="n">search_lines</span> <span class="o">=</span> <span class="n">QTreeWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
@@ -4381,7 +4381,7 @@ The application object to which the window belongs, needed for font information.
 
         <span class="n">tErosion</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
         <span class="n">tErosion</span><span class="o">.</span><span class="n">setValidator</span><span class="p">(</span><span class="n">validator</span><span class="p">(</span><span class="s2">&quot;positive_real&quot;</span><span class="p">))</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;tErosion&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tErosion</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;tErosion&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tErosion</span>
         <span class="n">erosionLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Simulation Time [yr]&quot;</span><span class="p">,</span> <span class="n">tErosion</span><span class="p">)</span>
 
         <span class="n">addOpenFileRow</span><span class="p">(</span><span class="n">erosionLayout</span><span class="p">,</span> <span class="s2">&quot;riverAxis&quot;</span><span class="p">,</span> <span class="s2">&quot;River Axis File&quot;</span><span class="p">)</span>
@@ -4400,30 +4400,30 @@ The application object to which the window belongs, needed for font information.
 
         <span class="n">refLevel</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
         <span class="n">refLevel</span><span class="o">.</span><span class="n">setValidator</span><span class="p">(</span><span class="n">QIntValidator</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;refLevel&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">refLevel</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;refLevel&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">refLevel</span>
         <span class="n">erosionLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Reference Case&quot;</span><span class="p">,</span> <span class="n">refLevel</span><span class="p">)</span>
 
         <span class="n">chainageOutStep</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
         <span class="n">chainageOutStep</span><span class="o">.</span><span class="n">setValidator</span><span class="p">(</span><span class="n">validator</span><span class="p">(</span><span class="s2">&quot;positive_real&quot;</span><span class="p">))</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;chainageOutStep&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chainageOutStep</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;chainageOutStep&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chainageOutStep</span>
         <span class="n">erosionLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Chainage Output Step [km]&quot;</span><span class="p">,</span> <span class="n">chainageOutStep</span><span class="p">)</span>
 
         <span class="n">addOpenFileRow</span><span class="p">(</span><span class="n">erosionLayout</span><span class="p">,</span> <span class="s2">&quot;outDir&quot;</span><span class="p">,</span> <span class="s2">&quot;Output Directory&quot;</span><span class="p">)</span>
 
         <span class="n">newBankFile</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;newBankFile&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newBankFile</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;newBankFile&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newBankFile</span>
         <span class="n">erosionLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;New Bank File Name&quot;</span><span class="p">,</span> <span class="n">newBankFile</span><span class="p">)</span>
 
         <span class="n">newEqBankFile</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;newEqBankFile&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newEqBankFile</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;newEqBankFile&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newEqBankFile</span>
         <span class="n">erosionLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;New Eq Bank File Name&quot;</span><span class="p">,</span> <span class="n">newEqBankFile</span><span class="p">)</span>
 
         <span class="n">eroVol</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;eroVol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eroVol</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;eroVol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eroVol</span>
         <span class="n">erosionLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;EroVol File Name&quot;</span><span class="p">,</span> <span class="n">eroVol</span><span class="p">)</span>
 
         <span class="n">eroVolEqui</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;eroVolEqui&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eroVolEqui</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;eroVolEqui&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eroVolEqui</span>
         <span class="n">erosionLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;EroVolEqui File Name&quot;</span><span class="p">,</span> <span class="n">eroVolEqui</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
               </details>
@@ -4621,7 +4621,7 @@ The application object to which the window belongs, needed for font information.
 
     <span class="n">tErosion</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
     <span class="n">tErosion</span><span class="o">.</span><span class="n">setValidator</span><span class="p">(</span><span class="n">validator</span><span class="p">(</span><span class="s2">&quot;positive_real&quot;</span><span class="p">))</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;tErosion&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tErosion</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;tErosion&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tErosion</span>
     <span class="n">erosionLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Simulation Time [yr]&quot;</span><span class="p">,</span> <span class="n">tErosion</span><span class="p">)</span>
 
     <span class="n">addOpenFileRow</span><span class="p">(</span><span class="n">erosionLayout</span><span class="p">,</span> <span class="s2">&quot;riverAxis&quot;</span><span class="p">,</span> <span class="s2">&quot;River Axis File&quot;</span><span class="p">)</span>
@@ -4640,30 +4640,30 @@ The application object to which the window belongs, needed for font information.
 
     <span class="n">refLevel</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
     <span class="n">refLevel</span><span class="o">.</span><span class="n">setValidator</span><span class="p">(</span><span class="n">QIntValidator</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;refLevel&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">refLevel</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;refLevel&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">refLevel</span>
     <span class="n">erosionLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Reference Case&quot;</span><span class="p">,</span> <span class="n">refLevel</span><span class="p">)</span>
 
     <span class="n">chainageOutStep</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
     <span class="n">chainageOutStep</span><span class="o">.</span><span class="n">setValidator</span><span class="p">(</span><span class="n">validator</span><span class="p">(</span><span class="s2">&quot;positive_real&quot;</span><span class="p">))</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;chainageOutStep&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chainageOutStep</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;chainageOutStep&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chainageOutStep</span>
     <span class="n">erosionLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Chainage Output Step [km]&quot;</span><span class="p">,</span> <span class="n">chainageOutStep</span><span class="p">)</span>
 
     <span class="n">addOpenFileRow</span><span class="p">(</span><span class="n">erosionLayout</span><span class="p">,</span> <span class="s2">&quot;outDir&quot;</span><span class="p">,</span> <span class="s2">&quot;Output Directory&quot;</span><span class="p">)</span>
 
     <span class="n">newBankFile</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;newBankFile&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newBankFile</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;newBankFile&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newBankFile</span>
     <span class="n">erosionLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;New Bank File Name&quot;</span><span class="p">,</span> <span class="n">newBankFile</span><span class="p">)</span>
 
     <span class="n">newEqBankFile</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;newEqBankFile&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newEqBankFile</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;newEqBankFile&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newEqBankFile</span>
     <span class="n">erosionLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;New Eq Bank File Name&quot;</span><span class="p">,</span> <span class="n">newEqBankFile</span><span class="p">)</span>
 
     <span class="n">eroVol</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;eroVol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eroVol</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;eroVol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eroVol</span>
     <span class="n">erosionLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;EroVol File Name&quot;</span><span class="p">,</span> <span class="n">eroVol</span><span class="p">)</span>
 
     <span class="n">eroVolEqui</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;eroVolEqui&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eroVolEqui</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;eroVolEqui&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">eroVolEqui</span>
     <span class="n">erosionLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;EroVolEqui File Name&quot;</span><span class="p">,</span> <span class="n">eroVolEqui</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -4700,91 +4700,91 @@ The application object to which the window belongs, needed for font information.
 
               <details class="quote">
                 <summary>Source code in <code>src/dfastbe/gui/gui.py</code></summary>
-                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">853</span>
-<span class="normal">854</span>
-<span class="normal">855</span>
-<span class="normal">856</span>
-<span class="normal">857</span>
-<span class="normal">858</span>
-<span class="normal">859</span>
-<span class="normal">860</span>
-<span class="normal">861</span>
-<span class="normal">862</span>
-<span class="normal">863</span>
-<span class="normal">864</span>
-<span class="normal">865</span>
-<span class="normal">866</span>
-<span class="normal">867</span>
-<span class="normal">868</span>
-<span class="normal">869</span>
-<span class="normal">870</span>
-<span class="normal">871</span>
-<span class="normal">872</span>
-<span class="normal">873</span>
-<span class="normal">874</span>
-<span class="normal">875</span>
-<span class="normal">876</span>
-<span class="normal">877</span>
-<span class="normal">878</span>
-<span class="normal">879</span>
-<span class="normal">880</span>
-<span class="normal">881</span>
-<span class="normal">882</span>
-<span class="normal">883</span>
-<span class="normal">884</span>
-<span class="normal">885</span>
-<span class="normal">886</span>
-<span class="normal">887</span>
-<span class="normal">888</span>
-<span class="normal">889</span>
-<span class="normal">890</span>
-<span class="normal">891</span>
-<span class="normal">892</span>
-<span class="normal">893</span>
-<span class="normal">894</span>
-<span class="normal">895</span>
-<span class="normal">896</span>
-<span class="normal">897</span>
-<span class="normal">898</span>
-<span class="normal">899</span>
-<span class="normal">900</span>
-<span class="normal">901</span>
-<span class="normal">902</span>
-<span class="normal">903</span>
-<span class="normal">904</span>
-<span class="normal">905</span>
-<span class="normal">906</span>
-<span class="normal">907</span>
-<span class="normal">908</span>
-<span class="normal">909</span>
-<span class="normal">910</span>
-<span class="normal">911</span>
-<span class="normal">912</span>
-<span class="normal">913</span>
-<span class="normal">914</span>
-<span class="normal">915</span>
-<span class="normal">916</span>
-<span class="normal">917</span>
-<span class="normal">918</span>
+                <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">918</span>
 <span class="normal">919</span>
 <span class="normal">920</span>
 <span class="normal">921</span>
 <span class="normal">922</span>
 <span class="normal">923</span>
-<span class="normal">924</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GUI</span><span class="p">:</span>
+<span class="normal">924</span>
+<span class="normal">925</span>
+<span class="normal">926</span>
+<span class="normal">927</span>
+<span class="normal">928</span>
+<span class="normal">929</span>
+<span class="normal">930</span>
+<span class="normal">931</span>
+<span class="normal">932</span>
+<span class="normal">933</span>
+<span class="normal">934</span>
+<span class="normal">935</span>
+<span class="normal">936</span>
+<span class="normal">937</span>
+<span class="normal">938</span>
+<span class="normal">939</span>
+<span class="normal">940</span>
+<span class="normal">941</span>
+<span class="normal">942</span>
+<span class="normal">943</span>
+<span class="normal">944</span>
+<span class="normal">945</span>
+<span class="normal">946</span>
+<span class="normal">947</span>
+<span class="normal">948</span>
+<span class="normal">949</span>
+<span class="normal">950</span>
+<span class="normal">951</span>
+<span class="normal">952</span>
+<span class="normal">953</span>
+<span class="normal">954</span>
+<span class="normal">955</span>
+<span class="normal">956</span>
+<span class="normal">957</span>
+<span class="normal">958</span>
+<span class="normal">959</span>
+<span class="normal">960</span>
+<span class="normal">961</span>
+<span class="normal">962</span>
+<span class="normal">963</span>
+<span class="normal">964</span>
+<span class="normal">965</span>
+<span class="normal">966</span>
+<span class="normal">967</span>
+<span class="normal">968</span>
+<span class="normal">969</span>
+<span class="normal">970</span>
+<span class="normal">971</span>
+<span class="normal">972</span>
+<span class="normal">973</span>
+<span class="normal">974</span>
+<span class="normal">975</span>
+<span class="normal">976</span>
+<span class="normal">977</span>
+<span class="normal">978</span>
+<span class="normal">979</span>
+<span class="normal">980</span>
+<span class="normal">981</span>
+<span class="normal">982</span>
+<span class="normal">983</span>
+<span class="normal">984</span>
+<span class="normal">985</span>
+<span class="normal">986</span>
+<span class="normal">987</span>
+<span class="normal">988</span>
+<span class="normal">989</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="nc">GUI</span><span class="p">:</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">global</span> <span class="n">dialog</span>
-        <span class="n">dialog</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">global</span> <span class="n">StateManagement</span>
+        <span class="n">StateManagement</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">QApplication</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">setStyle</span><span class="p">(</span><span class="s2">&quot;fusion&quot;</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;application&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;application&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">app</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_window</span><span class="p">()</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;window&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;window&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">tabs</span> <span class="o">=</span> <span class="n">QTabWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;tabs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabs</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;tabs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">menu_Bar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_menu_bar</span><span class="p">()</span>
@@ -4873,10 +4873,10 @@ The application object to which the window belongs, needed for font information.
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/gui/gui.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">914</span>
-<span class="normal">915</span>
-<span class="normal">916</span>
-<span class="normal">917</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">979</span>
+<span class="normal">980</span>
+<span class="normal">981</span>
+<span class="normal">982</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">activate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Activate the user interface and run the program.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">exec</span><span class="p">())</span>
@@ -4901,12 +4901,12 @@ The application object to which the window belongs, needed for font information.
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/gui/gui.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">919</span>
-<span class="normal">920</span>
-<span class="normal">921</span>
-<span class="normal">922</span>
-<span class="normal">923</span>
-<span class="normal">924</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">984</span>
+<span class="normal">985</span>
+<span class="normal">986</span>
+<span class="normal">987</span>
+<span class="normal">988</span>
+<span class="normal">989</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Close the dialog and program.&quot;&quot;&quot;</span>
     <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -4933,22 +4933,22 @@ The application object to which the window belongs, needed for font information.
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/gui/gui.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">886</span>
-<span class="normal">887</span>
-<span class="normal">888</span>
-<span class="normal">889</span>
-<span class="normal">890</span>
-<span class="normal">891</span>
-<span class="normal">892</span>
-<span class="normal">893</span>
-<span class="normal">894</span>
-<span class="normal">895</span>
-<span class="normal">896</span>
-<span class="normal">897</span>
-<span class="normal">898</span>
-<span class="normal">899</span>
-<span class="normal">900</span>
-<span class="normal">901</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">951</span>
+<span class="normal">952</span>
+<span class="normal">953</span>
+<span class="normal">954</span>
+<span class="normal">955</span>
+<span class="normal">956</span>
+<span class="normal">957</span>
+<span class="normal">958</span>
+<span class="normal">959</span>
+<span class="normal">960</span>
+<span class="normal">961</span>
+<span class="normal">962</span>
+<span class="normal">963</span>
+<span class="normal">964</span>
+<span class="normal">965</span>
+<span class="normal">966</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Construct the D-FAST Bank Erosion user interface.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">general_tab</span> <span class="o">=</span> <span class="n">GeneralTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">general_tab</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
@@ -4985,11 +4985,11 @@ The application object to which the window belongs, needed for font information.
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/gui/gui.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">903</span>
-<span class="normal">904</span>
-<span class="normal">905</span>
-<span class="normal">906</span>
-<span class="normal">907</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_menu_bar</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MenuBar</span><span class="p">:</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">968</span>
+<span class="normal">969</span>
+<span class="normal">970</span>
+<span class="normal">971</span>
+<span class="normal">972</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">create_menu_bar</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MenuBar</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add the menus to the menubar.&quot;&quot;&quot;</span>
     <span class="n">menu</span> <span class="o">=</span> <span class="n">MenuBar</span><span class="p">(</span><span class="n">window</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">,</span> <span class="n">app</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="p">)</span>
     <span class="n">menu</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
@@ -5141,11 +5141,11 @@ The application object to which the window belongs, needed for font information.
 
         <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;From [km]&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
         <span class="n">start_range</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;startRange&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_range</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;startRange&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_range</span>
         <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">start_range</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;To [km]&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
         <span class="n">end_range</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;endRange&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_range</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;endRange&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_range</span>
         <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">end_range</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 
         <span class="n">general_layout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Study Range&quot;</span><span class="p">,</span> <span class="n">chain_range</span><span class="p">)</span>
@@ -5153,14 +5153,14 @@ The application object to which the window belongs, needed for font information.
         <span class="n">addOpenFileRow</span><span class="p">(</span><span class="n">general_layout</span><span class="p">,</span> <span class="s2">&quot;bankDir&quot;</span><span class="p">,</span> <span class="s2">&quot;Bank Directory&quot;</span><span class="p">)</span>
 
         <span class="n">bank_file_name</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;bankFileName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bank_file_name</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;bankFileName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bank_file_name</span>
         <span class="n">general_layout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Bank File Name&quot;</span><span class="p">,</span> <span class="n">bank_file_name</span><span class="p">)</span>
 
         <span class="n">addCheckBox</span><span class="p">(</span><span class="n">general_layout</span><span class="p">,</span> <span class="s2">&quot;makePlots&quot;</span><span class="p">,</span> <span class="s2">&quot;Create Figures&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;makePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">updatePlotting</span><span class="p">)</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;makePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">updatePlotting</span><span class="p">)</span>
 
         <span class="n">addCheckBox</span><span class="p">(</span><span class="n">general_layout</span><span class="p">,</span> <span class="s2">&quot;savePlots&quot;</span><span class="p">,</span> <span class="s2">&quot;Save Figures&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;savePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">updatePlotting</span><span class="p">)</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;savePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">updatePlotting</span><span class="p">)</span>
 
         <span class="n">zoom_plots</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
         <span class="n">gridly</span> <span class="o">=</span> <span class="n">QGridLayout</span><span class="p">(</span><span class="n">zoom_plots</span><span class="p">)</span>
@@ -5170,22 +5170,22 @@ The application object to which the window belongs, needed for font information.
         <span class="n">save_zoom_plots_edit</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">updatePlotting</span><span class="p">)</span>
         <span class="n">save_zoom_plots_edit</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">save_zoom_plots_edit</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;saveZoomPlotsEdit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">save_zoom_plots_edit</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;saveZoomPlotsEdit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">save_zoom_plots_edit</span>
 
         <span class="n">zoom_plots_range_txt</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Zoom Range [km]&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
         <span class="n">zoom_plots_range_txt</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">zoom_plots_range_txt</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;zoomPlotsRangeTxt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">zoom_plots_range_txt</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;zoomPlotsRangeTxt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">zoom_plots_range_txt</span>
 
         <span class="n">zoom_plots_range_edit</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
         <span class="n">zoom_plots_range_edit</span><span class="o">.</span><span class="n">setValidator</span><span class="p">(</span><span class="n">validator</span><span class="p">(</span><span class="s2">&quot;positive_real&quot;</span><span class="p">))</span>
         <span class="n">zoom_plots_range_edit</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">zoom_plots_range_edit</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;zoomPlotsRangeEdit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">zoom_plots_range_edit</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;zoomPlotsRangeEdit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">zoom_plots_range_edit</span>
 
         <span class="n">save_zoom_plots</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Save Zoomed Figures&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
         <span class="n">general_layout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="n">save_zoom_plots</span><span class="p">,</span> <span class="n">zoom_plots</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;saveZoomPlots&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">save_zoom_plots</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;saveZoomPlots&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">save_zoom_plots</span>
 
         <span class="n">addOpenFileRow</span><span class="p">(</span><span class="n">general_layout</span><span class="p">,</span> <span class="s2">&quot;figureDir&quot;</span><span class="p">,</span> <span class="s2">&quot;Figure Directory&quot;</span><span class="p">)</span>
         <span class="n">addCheckBox</span><span class="p">(</span><span class="n">general_layout</span><span class="p">,</span> <span class="s2">&quot;closePlots&quot;</span><span class="p">,</span> <span class="s2">&quot;Close Figures&quot;</span><span class="p">)</span>
@@ -5393,11 +5393,11 @@ erosion analysis.</p>
 
     <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;From [km]&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
     <span class="n">start_range</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;startRange&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_range</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;startRange&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_range</span>
     <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">start_range</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;To [km]&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">end_range</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;endRange&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_range</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;endRange&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">end_range</span>
     <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">end_range</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 
     <span class="n">general_layout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Study Range&quot;</span><span class="p">,</span> <span class="n">chain_range</span><span class="p">)</span>
@@ -5405,14 +5405,14 @@ erosion analysis.</p>
     <span class="n">addOpenFileRow</span><span class="p">(</span><span class="n">general_layout</span><span class="p">,</span> <span class="s2">&quot;bankDir&quot;</span><span class="p">,</span> <span class="s2">&quot;Bank Directory&quot;</span><span class="p">)</span>
 
     <span class="n">bank_file_name</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;bankFileName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bank_file_name</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;bankFileName&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bank_file_name</span>
     <span class="n">general_layout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Bank File Name&quot;</span><span class="p">,</span> <span class="n">bank_file_name</span><span class="p">)</span>
 
     <span class="n">addCheckBox</span><span class="p">(</span><span class="n">general_layout</span><span class="p">,</span> <span class="s2">&quot;makePlots&quot;</span><span class="p">,</span> <span class="s2">&quot;Create Figures&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;makePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">updatePlotting</span><span class="p">)</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;makePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">updatePlotting</span><span class="p">)</span>
 
     <span class="n">addCheckBox</span><span class="p">(</span><span class="n">general_layout</span><span class="p">,</span> <span class="s2">&quot;savePlots&quot;</span><span class="p">,</span> <span class="s2">&quot;Save Figures&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;savePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">updatePlotting</span><span class="p">)</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;savePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">updatePlotting</span><span class="p">)</span>
 
     <span class="n">zoom_plots</span> <span class="o">=</span> <span class="n">QWidget</span><span class="p">()</span>
     <span class="n">gridly</span> <span class="o">=</span> <span class="n">QGridLayout</span><span class="p">(</span><span class="n">zoom_plots</span><span class="p">)</span>
@@ -5422,22 +5422,22 @@ erosion analysis.</p>
     <span class="n">save_zoom_plots_edit</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">updatePlotting</span><span class="p">)</span>
     <span class="n">save_zoom_plots_edit</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">save_zoom_plots_edit</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;saveZoomPlotsEdit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">save_zoom_plots_edit</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;saveZoomPlotsEdit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">save_zoom_plots_edit</span>
 
     <span class="n">zoom_plots_range_txt</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Zoom Range [km]&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
     <span class="n">zoom_plots_range_txt</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">zoom_plots_range_txt</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;zoomPlotsRangeTxt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">zoom_plots_range_txt</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;zoomPlotsRangeTxt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">zoom_plots_range_txt</span>
 
     <span class="n">zoom_plots_range_edit</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="s2">&quot;1.0&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
     <span class="n">zoom_plots_range_edit</span><span class="o">.</span><span class="n">setValidator</span><span class="p">(</span><span class="n">validator</span><span class="p">(</span><span class="s2">&quot;positive_real&quot;</span><span class="p">))</span>
     <span class="n">zoom_plots_range_edit</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">gridly</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">zoom_plots_range_edit</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;zoomPlotsRangeEdit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">zoom_plots_range_edit</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;zoomPlotsRangeEdit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">zoom_plots_range_edit</span>
 
     <span class="n">save_zoom_plots</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="s2">&quot;Save Zoomed Figures&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">)</span>
     <span class="n">general_layout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="n">save_zoom_plots</span><span class="p">,</span> <span class="n">zoom_plots</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;saveZoomPlots&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">save_zoom_plots</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;saveZoomPlots&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">save_zoom_plots</span>
 
     <span class="n">addOpenFileRow</span><span class="p">(</span><span class="n">general_layout</span><span class="p">,</span> <span class="s2">&quot;figureDir&quot;</span><span class="p">,</span> <span class="s2">&quot;Figure Directory&quot;</span><span class="p">)</span>
     <span class="n">addCheckBox</span><span class="p">(</span><span class="n">general_layout</span><span class="p">,</span> <span class="s2">&quot;closePlots&quot;</span><span class="p">,</span> <span class="s2">&quot;Close Figures&quot;</span><span class="p">)</span>
@@ -5762,20 +5762,20 @@ Short name of the parameter.</p>
 <span class="sd">        key : str</span>
 <span class="sd">            Short name of the parameter.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">nItems</span> <span class="o">=</span> <span class="n">dialog</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span><span class="o">.</span><span class="n">childCount</span><span class="p">()</span>
+    <span class="n">nItems</span> <span class="o">=</span> <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span><span class="o">.</span><span class="n">childCount</span><span class="p">()</span>
     <span class="n">i</span> <span class="o">=</span> <span class="n">nItems</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="n">istr</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;searchLines&quot;</span><span class="p">:</span>
         <span class="n">fileName</span><span class="p">,</span> <span class="n">dist</span> <span class="o">=</span> <span class="n">editASearchLine</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">istr</span><span class="p">)</span>
-        <span class="n">c1</span> <span class="o">=</span> <span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;searchLines&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">istr</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">dist</span><span class="p">])</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;searchLines&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">istr</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">dist</span><span class="p">])</span>
     <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;discharges&quot;</span><span class="p">:</span>
         <span class="n">prob</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">nItems</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
         <span class="n">fileName</span><span class="p">,</span> <span class="n">prob</span> <span class="o">=</span> <span class="n">editADischarge</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">istr</span><span class="p">,</span> <span class="n">prob</span><span class="o">=</span><span class="n">prob</span><span class="p">)</span>
-        <span class="n">c1</span> <span class="o">=</span> <span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;discharges&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">istr</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">prob</span><span class="p">])</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;discharges&quot;</span><span class="p">],</span> <span class="p">[</span><span class="n">istr</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">prob</span><span class="p">])</span>
         <span class="n">addTabForLevel</span><span class="p">(</span><span class="n">istr</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;refLevel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">validator</span><span class="p">()</span><span class="o">.</span><span class="n">setTop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Edit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Remove&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;refLevel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">validator</span><span class="p">()</span><span class="o">.</span><span class="n">setTop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Edit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Remove&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -5922,10 +5922,10 @@ Initial state of the check box.</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">checkBox</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="n">checkBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="n">isChecked</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Edit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">checkBox</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Edit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">checkBox</span>
 
     <span class="n">checkTxt</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">labelString</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">checkTxt</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">checkTxt</span>
     <span class="n">formLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="n">checkTxt</span><span class="p">,</span> <span class="n">checkBox</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
@@ -6011,17 +6011,17 @@ labelString : str
     <span class="n">widthEdit</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">(</span><span class="s2">&quot;0.3&quot;</span><span class="p">)</span>
     <span class="n">widthEdit</span><span class="o">.</span><span class="n">setValidator</span><span class="p">(</span><span class="n">validator</span><span class="p">(</span><span class="s2">&quot;positive_real&quot;</span><span class="p">))</span>
     <span class="n">gridLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widthEdit</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">widthEdit</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Width&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">widthEdit</span>
 
     <span class="n">useFilter</span> <span class="o">=</span> <span class="n">QCheckBox</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
     <span class="n">useFilter</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">useFilter</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">updateFilter</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
     <span class="n">gridLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">useFilter</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Active&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">useFilter</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Active&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">useFilter</span>
 
     <span class="n">filterTxt</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">labelString</span><span class="p">)</span>
     <span class="n">gridLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">filterTxt</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Txt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filterTxt</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Txt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">filterTxt</span>
 
     <span class="n">updateFilter</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -6086,7 +6086,7 @@ labelString : str
 <span class="sd">        String describing the parameter to be displayed as label.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">labelString</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">Label</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">Label</span>
     <span class="n">fLayout</span> <span class="o">=</span> <span class="n">openFileLayout</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Edit&quot;</span><span class="p">)</span>
     <span class="n">formLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="n">Label</span><span class="p">,</span> <span class="n">fLayout</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
@@ -6255,7 +6255,7 @@ String representation of the weight for this simulation.</p>
     <span class="n">editLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Level Nr&quot;</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
 
     <span class="n">addOpenFileRow</span><span class="p">(</span><span class="n">editLayout</span><span class="p">,</span> <span class="s2">&quot;editDischarge&quot;</span><span class="p">,</span> <span class="s2">&quot;Simulation File&quot;</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;editDischargeEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;editDischargeEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
 
     <span class="n">probability</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">()</span>
     <span class="n">probability</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span>
@@ -6269,7 +6269,7 @@ String representation of the weight for this simulation.</p>
 
     <span class="n">editDialog</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
 
-    <span class="n">fileName</span> <span class="o">=</span> <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;editDischargeEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+    <span class="n">fileName</span> <span class="o">=</span> <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;editDischargeEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
     <span class="n">prob</span> <span class="o">=</span> <span class="n">probability</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">prob</span>
 </code></pre></div></td></tr></table></div>
@@ -6397,7 +6397,7 @@ dist1 : str
     <span class="n">editLayout</span><span class="o">.</span><span class="n">addRow</span><span class="p">(</span><span class="s2">&quot;Search Line Nr&quot;</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
 
     <span class="n">addOpenFileRow</span><span class="p">(</span><span class="n">editLayout</span><span class="p">,</span> <span class="s2">&quot;editSearchLine&quot;</span><span class="p">,</span> <span class="s2">&quot;Search Line File&quot;</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;editSearchLineEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;editSearchLineEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
 
     <span class="n">searchDistance</span> <span class="o">=</span> <span class="n">QLineEdit</span><span class="p">()</span>
     <span class="n">searchDistance</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
@@ -6411,7 +6411,7 @@ dist1 : str
 
     <span class="n">editDialog</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span>
 
-    <span class="n">fileName</span> <span class="o">=</span> <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;editSearchLineEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+    <span class="n">fileName</span> <span class="o">=</span> <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;editSearchLineEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
     <span class="n">dist</span> <span class="o">=</span> <span class="n">searchDistance</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">dist</span>
 </code></pre></div></td></tr></table></div>
@@ -6520,14 +6520,14 @@ selectList : Optional[List[str]]
 <span class="sd">        of strings describing the options.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Label</span> <span class="o">=</span> <span class="n">QLabel</span><span class="p">(</span><span class="n">labelString</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">Label</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">Label</span>
     <span class="n">gridLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">Label</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="n">paramTypes</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;Constant&quot;</span><span class="p">,</span> <span class="s2">&quot;Variable&quot;</span><span class="p">)</span>
     <span class="n">Type</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">()</span>
     <span class="n">Type</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">paramTypes</span><span class="p">)</span>
     <span class="n">Type</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">typeUpdatePar</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Type</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Type</span>
     <span class="n">gridLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">Type</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">selectList</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -6536,11 +6536,11 @@ selectList : Optional[List[str]]
     <span class="k">else</span><span class="p">:</span>
         <span class="n">Select</span> <span class="o">=</span> <span class="n">QComboBox</span><span class="p">()</span>
         <span class="n">Select</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">selectList</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Select&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Select</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Select&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Select</span>
         <span class="n">gridLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">Select</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
         <span class="n">fLayout</span> <span class="o">=</span> <span class="n">openFileLayout</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Edit&quot;</span><span class="p">,</span> <span class="n">enabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Edit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Edit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">gridLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">fLayout</span><span class="p">,</span> <span class="n">row</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="n">typeUpdatePar</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
@@ -6562,9 +6562,37 @@ selectList : Optional[List[str]]
     <div class="doc doc-contents ">
 
         <p>Start the user interface using default settings or optional configuration.</p>
-<h5 id="dfastbe.gui.gui.main--arguments"><a class="toclink" href="#dfastbe.gui.gui.main--arguments">Arguments</a><a class="headerlink" href="#dfastbe.gui.gui.main--arguments" title="Permanent link">#</a></h5>
-<p>config : Optional[str]
-    Optional name of configuration file.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>config </code>
+            </td>
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Optional[str]
+Optional name of configuration file.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
             <details class="quote">
               <summary>Source code in <code>src/dfastbe/gui/gui.py</code></summary>
@@ -6581,15 +6609,13 @@ selectList : Optional[List[str]]
 <span class="normal">1002</span>
 <span class="normal">1003</span>
 <span class="normal">1004</span>
-<span class="normal">1005</span>
-<span class="normal">1006</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="normal">1005</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Start the user interface using default settings or optional configuration.</span>
 
-<span class="sd">    Arguments</span>
-<span class="sd">    ---------</span>
-<span class="sd">    config : Optional[str]</span>
-<span class="sd">        Optional name of configuration file.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        config : Optional[str]</span>
+<span class="sd">            Optional name of configuration file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">gui</span> <span class="o">=</span> <span class="n">GUI</span><span class="p">()</span>
     <span class="n">gui</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
@@ -6774,8 +6800,8 @@ Short name of the parameter.</p>
 <span class="sd">        key : str</span>
 <span class="sd">            Short name of the parameter.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">selected</span> <span class="o">=</span> <span class="n">dialog</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">selectedItems</span><span class="p">()</span>
-    <span class="n">root</span> <span class="o">=</span> <span class="n">dialog</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">selectedItems</span><span class="p">()</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">invisibleRootItem</span><span class="p">()</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selected</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">istr</span> <span class="o">=</span> <span class="n">selected</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">root</span><span class="o">.</span><span class="n">removeChild</span><span class="p">(</span><span class="n">selected</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -6785,15 +6811,15 @@ Short name of the parameter.</p>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">istr</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
     <span class="k">if</span> <span class="n">root</span><span class="o">.</span><span class="n">childCount</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Edit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Remove&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Edit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Remove&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">istr</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
         <span class="k">pass</span>
     <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;searchLines&quot;</span><span class="p">:</span>
         <span class="k">pass</span>
     <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;discharges&quot;</span><span class="p">:</span>
-        <span class="n">tabs</span> <span class="o">=</span> <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;tabs&quot;</span><span class="p">]</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;refLevel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">validator</span><span class="p">()</span><span class="o">.</span><span class="n">setTop</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">childCount</span><span class="p">())</span>
+        <span class="n">tabs</span> <span class="o">=</span> <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;tabs&quot;</span><span class="p">]</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;refLevel&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">validator</span><span class="p">()</span><span class="o">.</span><span class="n">setTop</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">childCount</span><span class="p">())</span>
         <span class="n">dj</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">tabs</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
             <span class="k">if</span> <span class="n">dj</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -6915,7 +6941,7 @@ Desired height of the dialog.</p>
 <span class="sd">        height : int</span>
 <span class="sd">            Desired height of the dialog.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">parent</span> <span class="o">=</span> <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;window&quot;</span><span class="p">]</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;window&quot;</span><span class="p">]</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
     <span class="n">pw</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
@@ -6968,10 +6994,10 @@ Desired height of the dialog.</p>
 <span class="sd">    key : str</span>
 <span class="sd">        Short name of the parameter.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Active&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Width&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Active&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Width&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Width&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;Width&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7016,24 +7042,24 @@ Desired height of the dialog.</p>
 <span class="normal">675</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">updatePlotting</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Update the plotting flags.&quot;&quot;&quot;</span>
 
-    <span class="n">plotFlag</span> <span class="o">=</span> <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;makePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;savePlots&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">plotFlag</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;savePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">plotFlag</span><span class="p">)</span>
+    <span class="n">plotFlag</span> <span class="o">=</span> <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;makePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;savePlots&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">plotFlag</span><span class="p">)</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;savePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">plotFlag</span><span class="p">)</span>
 
-    <span class="n">saveFlag</span> <span class="o">=</span> <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;savePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="ow">and</span> <span class="n">plotFlag</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;saveZoomPlots&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">saveFlag</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;saveZoomPlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">saveFlag</span><span class="p">)</span>
+    <span class="n">saveFlag</span> <span class="o">=</span> <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;savePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="ow">and</span> <span class="n">plotFlag</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;saveZoomPlots&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">saveFlag</span><span class="p">)</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;saveZoomPlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">saveFlag</span><span class="p">)</span>
 
-    <span class="n">saveZoomFlag</span> <span class="o">=</span> <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;saveZoomPlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="ow">and</span> <span class="n">saveFlag</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;zoomPlotsRangeTxt&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">saveZoomFlag</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;zoomPlotsRangeEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">saveZoomFlag</span><span class="p">)</span>
+    <span class="n">saveZoomFlag</span> <span class="o">=</span> <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;saveZoomPlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()</span> <span class="ow">and</span> <span class="n">saveFlag</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;zoomPlotsRangeTxt&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">saveZoomFlag</span><span class="p">)</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;zoomPlotsRangeEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">saveZoomFlag</span><span class="p">)</span>
 
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;figureDir&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">saveFlag</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;figureDirEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">saveFlag</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;figureDirEditFile&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">saveFlag</span><span class="p">)</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;figureDir&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">saveFlag</span><span class="p">)</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;figureDirEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">saveFlag</span><span class="p">)</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;figureDirEditFile&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">saveFlag</span><span class="p">)</span>
 
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;closePlots&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">plotFlag</span><span class="p">)</span>
-    <span class="n">dialog</span><span class="p">[</span><span class="s2">&quot;closePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">plotFlag</span><span class="p">)</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;closePlots&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">plotFlag</span><span class="p">)</span>
+    <span class="n">StateManagement</span><span class="p">[</span><span class="s2">&quot;closePlotsEdit&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">plotFlag</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -7117,9 +7143,9 @@ Number of the tab to be updated.</p>
     <span class="n">iStart</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span>
     <span class="n">newStart</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span>
     <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">iStart</span><span class="p">)</span>
-    <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">dialog</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span><span class="p">[:</span><span class="n">N</span><span class="p">]</span> <span class="o">==</span> <span class="n">iStart</span><span class="p">]</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">StateManagement</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span><span class="p">[:</span><span class="n">N</span><span class="p">]</span> <span class="o">==</span> <span class="n">iStart</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">:</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">StateManagement</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">key</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s2">&quot;Type&quot;</span><span class="p">:</span>
             <span class="n">obj</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
             <span class="n">obj</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
@@ -7128,7 +7154,7 @@ Number of the tab to be updated.</p>
         <span class="k">elif</span> <span class="n">key</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s2">&quot;File&quot;</span><span class="p">:</span>
             <span class="n">obj</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
             <span class="n">obj</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="n">selectFile</span><span class="p">(</span><span class="n">newStart</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="n">N</span><span class="p">:</span><span class="o">-</span><span class="mi">4</span><span class="p">]))</span>
-        <span class="n">dialog</span><span class="p">[</span><span class="n">newStart</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="n">N</span><span class="p">:]]</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="n">StateManagement</span><span class="p">[</span><span class="n">newStart</span> <span class="o">+</span> <span class="n">key</span><span class="p">[</span><span class="n">N</span><span class="p">:]]</span> <span class="o">=</span> <span class="n">obj</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
