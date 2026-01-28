@@ -2,6 +2,7 @@ import os
 import subprocess
 import pytest
 from pathlib import Path
+import argparse
 
 
 @pytest.mark.binaries
@@ -16,7 +17,7 @@ class TestBatchMode:
         test_dir = "tests/data/bank_lines"
         try:
             os.chdir(test_dir)
-            with pytest.raises(FileNotFoundError):
+            with pytest.raises(argparse.ArgumentTypeError):
                 subprocess.run(
                     [
                         exe_path,
