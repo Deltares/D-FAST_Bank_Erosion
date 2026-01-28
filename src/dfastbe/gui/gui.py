@@ -103,67 +103,67 @@ class GeneralTab(BaseTab):
         These settings are used by both the bank line detection and the bank
         erosion analysis.
         """
-        generalWidget = QWidget()
-        generalLayout = QFormLayout(generalWidget)
-        self.tabs.addTab(generalWidget, "General")
+        general_widget = QWidget()
+        general_layout = QFormLayout(general_widget)
+        self.tabs.addTab(general_widget, "General")
 
-        addOpenFileRow(generalLayout, "chainFile", "Chain File")
+        addOpenFileRow(general_layout, "chainFile", "Chain File")
 
-        chainRange = QWidget()
-        gridly = QGridLayout(chainRange)
+        chain_range = QWidget()
+        gridly = QGridLayout(chain_range)
         gridly.setContentsMargins(0, 0, 0, 0)
 
         gridly.addWidget(QLabel("From [km]", self.window), 0, 0)
-        startRange = QLineEdit(self.window)
-        dialog["startRange"] = startRange
-        gridly.addWidget(startRange, 0, 1)
+        start_range = QLineEdit(self.window)
+        dialog["startRange"] = start_range
+        gridly.addWidget(start_range, 0, 1)
         gridly.addWidget(QLabel("To [km]", self.window), 0, 2)
-        endRange = QLineEdit(self.window)
-        dialog["endRange"] = endRange
-        gridly.addWidget(endRange, 0, 3)
+        end_range = QLineEdit(self.window)
+        dialog["endRange"] = end_range
+        gridly.addWidget(end_range, 0, 3)
 
-        generalLayout.addRow("Study Range", chainRange)
+        general_layout.addRow("Study Range", chain_range)
 
-        addOpenFileRow(generalLayout, "bankDir", "Bank Directory")
+        addOpenFileRow(general_layout, "bankDir", "Bank Directory")
 
-        bankFileName = QLineEdit(self.window)
-        dialog["bankFileName"] = bankFileName
-        generalLayout.addRow("Bank File Name", bankFileName)
+        bank_file_name = QLineEdit(self.window)
+        dialog["bankFileName"] = bank_file_name
+        general_layout.addRow("Bank File Name", bank_file_name)
 
-        addCheckBox(generalLayout, "makePlots", "Create Figures", True)
+        addCheckBox(general_layout, "makePlots", "Create Figures", True)
         dialog["makePlotsEdit"].stateChanged.connect(updatePlotting)
 
-        addCheckBox(generalLayout, "savePlots", "Save Figures", True)
+        addCheckBox(general_layout, "savePlots", "Save Figures", True)
         dialog["savePlotsEdit"].stateChanged.connect(updatePlotting)
 
-        zoomPlots = QWidget()
-        gridly = QGridLayout(zoomPlots)
+        zoom_plots = QWidget()
+        gridly = QGridLayout(zoom_plots)
         gridly.setContentsMargins(0, 0, 0, 0)
 
-        saveZoomPlotsEdit = QCheckBox("", self.window)
-        saveZoomPlotsEdit.stateChanged.connect(updatePlotting)
-        saveZoomPlotsEdit.setChecked(False)
-        gridly.addWidget(saveZoomPlotsEdit, 0, 0)
-        dialog["saveZoomPlotsEdit"] = saveZoomPlotsEdit
+        save_zoom_plots_edit = QCheckBox("", self.window)
+        save_zoom_plots_edit.stateChanged.connect(updatePlotting)
+        save_zoom_plots_edit.setChecked(False)
+        gridly.addWidget(save_zoom_plots_edit, 0, 0)
+        dialog["saveZoomPlotsEdit"] = save_zoom_plots_edit
 
-        zoomPlotsRangeTxt = QLabel("Zoom Range [km]", self.window)
-        zoomPlotsRangeTxt.setEnabled(False)
-        gridly.addWidget(zoomPlotsRangeTxt, 0, 1)
-        dialog["zoomPlotsRangeTxt"] = zoomPlotsRangeTxt
+        zoom_plots_range_txt = QLabel("Zoom Range [km]", self.window)
+        zoom_plots_range_txt.setEnabled(False)
+        gridly.addWidget(zoom_plots_range_txt, 0, 1)
+        dialog["zoomPlotsRangeTxt"] = zoom_plots_range_txt
 
-        zoomPlotsRangeEdit = QLineEdit("1.0",self.window)
-        zoomPlotsRangeEdit.setValidator(validator("positive_real"))
-        zoomPlotsRangeEdit.setEnabled(False)
-        gridly.addWidget(zoomPlotsRangeEdit, 0, 2)
-        dialog["zoomPlotsRangeEdit"] = zoomPlotsRangeEdit
+        zoom_plots_range_edit = QLineEdit("1.0",self.window)
+        zoom_plots_range_edit.setValidator(validator("positive_real"))
+        zoom_plots_range_edit.setEnabled(False)
+        gridly.addWidget(zoom_plots_range_edit, 0, 2)
+        dialog["zoomPlotsRangeEdit"] = zoom_plots_range_edit
 
-        saveZoomPlots = QLabel("Save Zoomed Figures", self.window)
-        generalLayout.addRow(saveZoomPlots, zoomPlots)
-        dialog["saveZoomPlots"] = saveZoomPlots
+        save_zoom_plots = QLabel("Save Zoomed Figures", self.window)
+        general_layout.addRow(save_zoom_plots, zoom_plots)
+        dialog["saveZoomPlots"] = save_zoom_plots
 
-        addOpenFileRow(generalLayout, "figureDir", "Figure Directory")
-        addCheckBox(generalLayout, "closePlots", "Close Figures")
-        addCheckBox(generalLayout, "debugOutput", "Debug Output")
+        addOpenFileRow(general_layout, "figureDir", "Figure Directory")
+        addCheckBox(general_layout, "closePlots", "Close Figures")
+        addCheckBox(general_layout, "debugOutput", "Debug Output")
 
 
 def addCheckBox(
