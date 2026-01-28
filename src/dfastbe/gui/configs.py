@@ -40,7 +40,7 @@ def load_configuration(config_path: Path) -> None:
         config_path : str
             Name of the configuration file to be opened.
     """
-    from dfastbe.gui.gui import dialog
+    from dfastbe.gui.gui import StateManagement
     if not config_path.exists():
         if config_path != "dfastbe.cfg":
             show_error(f"The file {config_path} does not exist!")
@@ -61,76 +61,76 @@ def load_configuration(config_path: Path) -> None:
     config = config_file.config
     if version == "1.0":
         section = config["General"]
-        dialog["chainFileEdit"].setText(section["RiverKM"])
+        StateManagement["chainFileEdit"].setText(section["RiverKM"])
         study_range = config_file.get_range("General", "Boundaries")
-        dialog["startRange"].setText(str(study_range[0]))
-        dialog["endRange"].setText(str(study_range[1]))
-        dialog["bankDirEdit"].setText(section["BankDir"])
+        StateManagement["startRange"].setText(str(study_range[0]))
+        StateManagement["endRange"].setText(str(study_range[1]))
+        StateManagement["bankDirEdit"].setText(section["BankDir"])
         bank_file = config_file.get_str("General", "BankFile", default="bankfile")
-        dialog["bankFileName"].setText(bank_file)
+        StateManagement["bankFileName"].setText(bank_file)
         flag = config_file.get_bool("General", "Plotting", default=True)
-        dialog["makePlotsEdit"].setChecked(flag)
+        StateManagement["makePlotsEdit"].setChecked(flag)
         flag = config_file.get_bool("General", "SavePlots", default=True)
-        dialog["savePlotsEdit"].setChecked(flag)
+        StateManagement["savePlotsEdit"].setChecked(flag)
         flag = config_file.get_bool("General", "SaveZoomPlots", default=False)
-        dialog["saveZoomPlotsEdit"].setChecked(flag)
+        StateManagement["saveZoomPlotsEdit"].setChecked(flag)
         zoom_step_km = config_file.get_float("General", "ZoomStepKM", default=1.0)
-        dialog["zoomPlotsRangeEdit"].setText(str(zoom_step_km))
+        StateManagement["zoomPlotsRangeEdit"].setText(str(zoom_step_km))
         fig_dir = config_file.get_str(
             "General",
             "FigureDir",
             default=absolute_path(rootdir, "figures"),
         )
-        dialog["figureDirEdit"].setText(fig_dir)
+        StateManagement["figureDirEdit"].setText(fig_dir)
         flag = config_file.get_bool("General", "ClosePlots", default=False)
-        dialog["closePlotsEdit"].setChecked(flag)
+        StateManagement["closePlotsEdit"].setChecked(flag)
         flag = config_file.get_bool("General", "DebugOutput", default=False)
-        dialog["debugOutputEdit"].setChecked(flag)
+        StateManagement["debugOutputEdit"].setChecked(flag)
 
         section = config["Detect"]
-        dialog["simFileEdit"].setText(section["SimFile"])
+        StateManagement["simFileEdit"].setText(section["SimFile"])
         water_depth = config_file.get_float("Detect", "WaterDepth", default=0.0)
-        dialog["waterDepth"].setText(str(water_depth))
+        StateManagement["waterDepth"].setText(str(water_depth))
         n_bank = config_file.get_int("Detect", "NBank", default=0, positive=True)
         d_lines = config_file.get_bank_search_distances(n_bank)
-        dialog["searchLines"].invisibleRootItem().takeChildren()
+        StateManagement["searchLines"].invisibleRootItem().takeChildren()
         for i in range(n_bank):
             istr = str(i + 1)
             file_name = config_file.get_str("Detect", "Line" + istr)
             c1 = QTreeWidgetItem(
-                dialog["searchLines"], [istr, file_name, str(d_lines[i])]
+                StateManagement["searchLines"], [istr, file_name, str(d_lines[i])]
             )
         if n_bank > 0:
-            dialog["searchLinesEdit"].setEnabled(True)
-            dialog["searchLinesRemove"].setEnabled(True)
+            StateManagement["searchLinesEdit"].setEnabled(True)
+            StateManagement["searchLinesRemove"].setEnabled(True)
 
         section = config["Erosion"]
-        dialog["tErosion"].setText(section["TErosion"])
-        dialog["riverAxisEdit"].setText(section["RiverAxis"])
-        dialog["fairwayEdit"].setText(section["Fairway"])
-        dialog["chainageOutStep"].setText(section["OutputInterval"])
-        dialog["outDirEdit"].setText(section["OutputDir"])
+        StateManagement["tErosion"].setText(section["TErosion"])
+        StateManagement["riverAxisEdit"].setText(section["RiverAxis"])
+        StateManagement["fairwayEdit"].setText(section["Fairway"])
+        StateManagement["chainageOutStep"].setText(section["OutputInterval"])
+        StateManagement["outDirEdit"].setText(section["OutputDir"])
         bankNew = config_file.get_str("Erosion", "BankNew", default="banknew")
-        dialog["newBankFile"].setText(bankNew)
+        StateManagement["newBankFile"].setText(bankNew)
         bankEq = config_file.get_str("Erosion", "BankEq", default="bankeq")
-        dialog["newEqBankFile"].setText(bankEq)
+        StateManagement["newEqBankFile"].setText(bankEq)
         txt = config_file.get_str("Erosion", "EroVol", default="erovol_standard.evo")
-        dialog["eroVol"].setText(txt)
+        StateManagement["eroVol"].setText(txt)
         txt = config_file.get_str("Erosion", "EroVolEqui", default="erovol_eq.evo")
-        dialog["eroVolEqui"].setText(txt)
+        StateManagement["eroVolEqui"].setText(txt)
 
         NLevel = config_file.get_int("Erosion", "NLevel", default=0, positive=True)
-        dialog["discharges"].invisibleRootItem().takeChildren()
+        StateManagement["discharges"].invisibleRootItem().takeChildren()
         for i in range(NLevel):
             istr = str(i + 1)
             file_name = config_file.get_str("Erosion", "SimFile" + istr)
             prob = config_file.get_str("Erosion", "PDischarge" + istr)
-            c1 = QTreeWidgetItem(dialog["discharges"], [istr, file_name, prob])
+            c1 = QTreeWidgetItem(StateManagement["discharges"], [istr, file_name, prob])
         if NLevel > 0:
-            dialog["dischargesEdit"].setEnabled(True)
-            dialog["dischargesRemove"].setEnabled(True)
-        dialog["refLevel"].validator().setTop(NLevel)
-        dialog["refLevel"].setText(section["RefLevel"])
+            StateManagement["dischargesEdit"].setEnabled(True)
+            StateManagement["dischargesRemove"].setEnabled(True)
+        StateManagement["refLevel"].validator().setTop(NLevel)
+        StateManagement["refLevel"].setText(section["RefLevel"])
 
         setParam("shipType", config, "Erosion", "ShipType")
         setParam("shipVeloc", config, "Erosion", "VShip")
@@ -142,20 +142,20 @@ def load_configuration(config_path: Path) -> None:
         setParam("wavePar1", config_file.config, "Erosion", "Wave1", wave0)
 
         useBankType = config_file.get_bool("Erosion", "Classes", default=True)
-        dialog["bankType"].setEnabled(useBankType)
-        dialog["bankTypeType"].setEnabled(useBankType)
-        dialog["bankTypeEdit"].setEnabled(useBankType)
-        dialog["bankTypeEditFile"].setEnabled(useBankType)
-        dialog["bankShear"].setEnabled(not useBankType)
-        dialog["bankShearType"].setEnabled(not useBankType)
-        dialog["bankShearEdit"].setEnabled(not useBankType)
-        dialog["bankShearEditFile"].setEnabled(not useBankType)
+        StateManagement["bankType"].setEnabled(useBankType)
+        StateManagement["bankTypeType"].setEnabled(useBankType)
+        StateManagement["bankTypeEdit"].setEnabled(useBankType)
+        StateManagement["bankTypeEditFile"].setEnabled(useBankType)
+        StateManagement["bankShear"].setEnabled(not useBankType)
+        StateManagement["bankShearType"].setEnabled(not useBankType)
+        StateManagement["bankShearEdit"].setEnabled(not useBankType)
+        StateManagement["bankShearEditFile"].setEnabled(not useBankType)
         if useBankType:
-            dialog["strengthPar"].setCurrentText("Bank Type")
+            StateManagement["strengthPar"].setCurrentText("Bank Type")
             bankStrengthSwitch()
             setParam("bankType", config_file.config, "Erosion", "BankType")
         else:
-            dialog["strengthPar"].setCurrentText("Critical Shear Stress")
+            StateManagement["strengthPar"].setCurrentText("Critical Shear Stress")
             bankStrengthSwitch()
             setParam("bankShear", config, "Erosion", "BankType")
         setParam("bankProtect", config, "Erosion", "ProtectionLevel", "-1000")
@@ -165,7 +165,7 @@ def load_configuration(config_path: Path) -> None:
         setFilter("velFilter", config, "Erosion", "VelFilterDist")
         setFilter("bedFilter", config, "Erosion", "BedFilterDist")
 
-        tabs = dialog["tabs"]
+        tabs = StateManagement["tabs"]
         for i in range(tabs.count() - 1, 4, -1):
             tabs.removeTab(i)
 
@@ -180,7 +180,7 @@ def load_configuration(config_path: Path) -> None:
             setOptParam(istr + "_bankSlope", config, "Erosion", "Slope" + istr)
             setOptParam(istr + "_bankReed", config, "Erosion", "Reed" + istr)
             txt = config_file.get_str("Erosion", "EroVol" + istr, default="")
-            dialog[istr + "_eroVolEdit"].setText(txt)
+            StateManagement[istr + "_eroVolEdit"].setText(txt)
 
     else:
         show_error(f"Unsupported version number {version} in the file {config_path}!")
@@ -194,117 +194,117 @@ def get_configuration() -> ConfigParser:
     config : ConfigParser
         Configuration for the D-FAST Bank Erosion analysis.
     """
-    from dfastbe.gui.gui import dialog
+    from dfastbe.gui.gui import StateManagement
     config = ConfigParser()
     config.optionxform = str  # case sensitive configuration
 
     config.add_section("General")
     config["General"]["Version"] = "1.0"
-    config["General"]["RiverKM"] = dialog["chainFileEdit"].text()
+    config["General"]["RiverKM"] = StateManagement["chainFileEdit"].text()
     config["General"]["Boundaries"] = (
-            dialog["startRange"].text() + ":" + dialog["endRange"].text()
+            StateManagement["startRange"].text() + ":" + StateManagement["endRange"].text()
     )
-    config["General"]["BankDir"] = dialog["bankDirEdit"].text()
-    config["General"]["BankFile"] = dialog["bankFileName"].text()
-    config["General"]["Plotting"] = str(dialog["makePlotsEdit"].isChecked())
-    config["General"]["SavePlots"] = str(dialog["savePlotsEdit"].isChecked())
-    config["General"]["SaveZoomPlots"] = str(dialog["saveZoomPlotsEdit"].isChecked())
-    config["General"]["ZoomStepKM"] = dialog["zoomPlotsRangeEdit"].text()
-    config["General"]["FigureDir"] = dialog["figureDirEdit"].text()
-    config["General"]["ClosePlots"] = str(dialog["closePlotsEdit"].isChecked())
-    config["General"]["DebugOutput"] = str(dialog["debugOutputEdit"].isChecked())
+    config["General"]["BankDir"] = StateManagement["bankDirEdit"].text()
+    config["General"]["BankFile"] = StateManagement["bankFileName"].text()
+    config["General"]["Plotting"] = str(StateManagement["makePlotsEdit"].isChecked())
+    config["General"]["SavePlots"] = str(StateManagement["savePlotsEdit"].isChecked())
+    config["General"]["SaveZoomPlots"] = str(StateManagement["saveZoomPlotsEdit"].isChecked())
+    config["General"]["ZoomStepKM"] = StateManagement["zoomPlotsRangeEdit"].text()
+    config["General"]["FigureDir"] = StateManagement["figureDirEdit"].text()
+    config["General"]["ClosePlots"] = str(StateManagement["closePlotsEdit"].isChecked())
+    config["General"]["DebugOutput"] = str(StateManagement["debugOutputEdit"].isChecked())
 
     config.add_section("Detect")
-    config["Detect"]["SimFile"] = dialog["simFileEdit"].text()
-    config["Detect"]["WaterDepth"] = dialog["waterDepth"].text()
-    nbank = dialog["searchLines"].topLevelItemCount()
+    config["Detect"]["SimFile"] = StateManagement["simFileEdit"].text()
+    config["Detect"]["WaterDepth"] = StateManagement["waterDepth"].text()
+    nbank = StateManagement["searchLines"].topLevelItemCount()
     config["Detect"]["NBank"] = str(nbank)
     dlines = "[ "
     for i in range(nbank):
         istr = str(i + 1)
-        config["Detect"]["Line" + istr] = dialog["searchLines"].topLevelItem(i).text(1)
-        dlines += dialog["searchLines"].topLevelItem(i).text(2) + ", "
+        config["Detect"]["Line" + istr] = StateManagement["searchLines"].topLevelItem(i).text(1)
+        dlines += StateManagement["searchLines"].topLevelItem(i).text(2) + ", "
     dlines = dlines[:-2] + " ]"
     config["Detect"]["DLines"] = dlines
 
     config.add_section("Erosion")
-    config["Erosion"]["TErosion"] = dialog["tErosion"].text()
-    config["Erosion"]["RiverAxis"] = dialog["riverAxisEdit"].text()
-    config["Erosion"]["Fairway"] = dialog["fairwayEdit"].text()
-    config["Erosion"]["OutputInterval"] = dialog["chainageOutStep"].text()
-    config["Erosion"]["OutputDir"] = dialog["outDirEdit"].text()
-    config["Erosion"]["BankNew"] = dialog["newBankFile"].text()
-    config["Erosion"]["BankEq"] = dialog["newEqBankFile"].text()
-    config["Erosion"]["EroVol"] = dialog["eroVol"].text()
-    config["Erosion"]["EroVolEqui"] = dialog["eroVolEqui"].text()
+    config["Erosion"]["TErosion"] = StateManagement["tErosion"].text()
+    config["Erosion"]["RiverAxis"] = StateManagement["riverAxisEdit"].text()
+    config["Erosion"]["Fairway"] = StateManagement["fairwayEdit"].text()
+    config["Erosion"]["OutputInterval"] = StateManagement["chainageOutStep"].text()
+    config["Erosion"]["OutputDir"] = StateManagement["outDirEdit"].text()
+    config["Erosion"]["BankNew"] = StateManagement["newBankFile"].text()
+    config["Erosion"]["BankEq"] = StateManagement["newEqBankFile"].text()
+    config["Erosion"]["EroVol"] = StateManagement["eroVol"].text()
+    config["Erosion"]["EroVolEqui"] = StateManagement["eroVolEqui"].text()
 
-    if dialog["shipTypeType"].currentText() == "Constant":
+    if StateManagement["shipTypeType"].currentText() == "Constant":
         config["Erosion"]["ShipType"] = str(
-            dialog["shipTypeSelect"].currentIndex() + 1
+            StateManagement["shipTypeSelect"].currentIndex() + 1
         )  # index 0 -> shipType 1
     else:
-        config["Erosion"]["ShipType"] = dialog["shipTypeEdit"].text()
-    config["Erosion"]["VShip"] = dialog["shipVelocEdit"].text()
-    config["Erosion"]["NShip"] = dialog["nShipsEdit"].text()
-    config["Erosion"]["NWaves"] = dialog["shipNWavesEdit"].text()
-    config["Erosion"]["Draught"] = dialog["shipDraughtEdit"].text()
-    config["Erosion"]["Wave0"] = dialog["wavePar0Edit"].text()
-    config["Erosion"]["Wave1"] = dialog["wavePar1Edit"].text()
+        config["Erosion"]["ShipType"] = StateManagement["shipTypeEdit"].text()
+    config["Erosion"]["VShip"] = StateManagement["shipVelocEdit"].text()
+    config["Erosion"]["NShip"] = StateManagement["nShipsEdit"].text()
+    config["Erosion"]["NWaves"] = StateManagement["shipNWavesEdit"].text()
+    config["Erosion"]["Draught"] = StateManagement["shipDraughtEdit"].text()
+    config["Erosion"]["Wave0"] = StateManagement["wavePar0Edit"].text()
+    config["Erosion"]["Wave1"] = StateManagement["wavePar1Edit"].text()
 
-    if dialog["strengthPar"].currentText() == "Bank Type":
+    if StateManagement["strengthPar"].currentText() == "Bank Type":
         config["Erosion"]["Classes"] = "true"
-        if dialog["bankTypeType"].currentText() == "Constant":
-            config["Erosion"]["BankType"] = dialog["bankTypeSelect"].currentIndex()
+        if StateManagement["bankTypeType"].currentText() == "Constant":
+            config["Erosion"]["BankType"] = StateManagement["bankTypeSelect"].currentIndex()
         else:
-            config["Erosion"]["BankType"] = dialog["bankTypeEdit"].text()
+            config["Erosion"]["BankType"] = StateManagement["bankTypeEdit"].text()
     else:
         config["Erosion"]["Classes"] = "false"
-        config["Erosion"]["BankType"] = dialog["bankShearEdit"].text()
-    config["Erosion"]["ProtectionLevel"] = dialog["bankProtectEdit"].text()
-    config["Erosion"]["Slope"] = dialog["bankSlopeEdit"].text()
-    config["Erosion"]["Reed"] = dialog["bankReedEdit"].text()
+        config["Erosion"]["BankType"] = StateManagement["bankShearEdit"].text()
+    config["Erosion"]["ProtectionLevel"] = StateManagement["bankProtectEdit"].text()
+    config["Erosion"]["Slope"] = StateManagement["bankSlopeEdit"].text()
+    config["Erosion"]["Reed"] = StateManagement["bankReedEdit"].text()
 
-    if dialog["velFilterActive"].isChecked():
-        config["Erosion"]["VelFilterDist"] = dialog["velFilterWidth"].text()
-    if dialog["bedFilterActive"].isChecked():
-        config["Erosion"]["BedFilterDist"] = dialog["bedFilterWidth"].text()
+    if StateManagement["velFilterActive"].isChecked():
+        config["Erosion"]["VelFilterDist"] = StateManagement["velFilterWidth"].text()
+    if StateManagement["bedFilterActive"].isChecked():
+        config["Erosion"]["BedFilterDist"] = StateManagement["bedFilterWidth"].text()
 
-    nlevel = dialog["discharges"].topLevelItemCount()
+    nlevel = StateManagement["discharges"].topLevelItemCount()
     config["Erosion"]["NLevel"] = str(nlevel)
-    config["Erosion"]["RefLevel"] = dialog["refLevel"].text()
+    config["Erosion"]["RefLevel"] = StateManagement["refLevel"].text()
     for i in range(nlevel):
         istr = str(i + 1)
         config["Erosion"]["SimFile" + istr] = (
-            dialog["discharges"].topLevelItem(i).text(1)
+            StateManagement["discharges"].topLevelItem(i).text(1)
         )
         config["Erosion"]["PDischarge" + istr] = (
-            dialog["discharges"].topLevelItem(i).text(2)
+            StateManagement["discharges"].topLevelItem(i).text(2)
         )
-        if dialog[istr + "_shipTypeType"].currentText() != "Use Default":
-            if dialog[istr + "_shipTypeType"].currentText() == "Constant":
+        if StateManagement[istr + "_shipTypeType"].currentText() != "Use Default":
+            if StateManagement[istr + "_shipTypeType"].currentText() == "Constant":
                 config["Erosion"]["ShipType" + istr] = (
-                        dialog[istr + "_shipTypeSelect"].currentIndex() + 1
+                        StateManagement[istr + "_shipTypeSelect"].currentIndex() + 1
                 )  # index 0 -> shipType 1
             else:
-                config["Erosion"]["ShipType" + istr] = dialog[
+                config["Erosion"]["ShipType" + istr] = StateManagement[
                     istr + "_shipTypeEdit"
                     ].text()
-        if dialog[istr + "_shipVelocType"].currentText() != "Use Default":
-            config["Erosion"]["VShip" + istr] = dialog[istr + "_shipVelocEdit"].text()
-        if dialog[istr + "_nShipsType"].currentText() != "Use Default":
-            config["Erosion"]["NShip" + istr] = dialog[istr + "_nShipsEdit"].text()
-        if dialog[istr + "_shipNWavesType"].currentText() != "Use Default":
-            config["Erosion"]["NWaves" + istr] = dialog[istr + "_shipNWavesEdit"].text()
-        if dialog[istr + "_shipDraughtType"].currentText() != "Use Default":
-            config["Erosion"]["Draught" + istr] = dialog[
+        if StateManagement[istr + "_shipVelocType"].currentText() != "Use Default":
+            config["Erosion"]["VShip" + istr] = StateManagement[istr + "_shipVelocEdit"].text()
+        if StateManagement[istr + "_nShipsType"].currentText() != "Use Default":
+            config["Erosion"]["NShip" + istr] = StateManagement[istr + "_nShipsEdit"].text()
+        if StateManagement[istr + "_shipNWavesType"].currentText() != "Use Default":
+            config["Erosion"]["NWaves" + istr] = StateManagement[istr + "_shipNWavesEdit"].text()
+        if StateManagement[istr + "_shipDraughtType"].currentText() != "Use Default":
+            config["Erosion"]["Draught" + istr] = StateManagement[
                 istr + "_shipDraughtEdit"
                 ].text()
-        if dialog[istr + "_bankSlopeType"].currentText() != "Use Default":
-            config["Erosion"]["Slope" + istr] = dialog[istr + "_bankSlopeEdit"].text()
-        if dialog[istr + "_bankReedType"].currentText() != "Use Default":
-            config["Erosion"]["Reed" + istr] = dialog[istr + "_bankReedEdit"].text()
-        if dialog[istr + "_eroVolEdit"].text() != "":
-            config["Erosion"]["EroVol" + istr] = dialog[istr + "_eroVolEdit"].text()
+        if StateManagement[istr + "_bankSlopeType"].currentText() != "Use Default":
+            config["Erosion"]["Slope" + istr] = StateManagement[istr + "_bankSlopeEdit"].text()
+        if StateManagement[istr + "_bankReedType"].currentText() != "Use Default":
+            config["Erosion"]["Reed" + istr] = StateManagement[istr + "_bankReedEdit"].text()
+        if StateManagement[istr + "_eroVolEdit"].text() != "":
+            config["Erosion"]["EroVol" + istr] = StateManagement[istr + "_eroVolEdit"].text()
     return config
 
 
@@ -326,23 +326,23 @@ def setParam(field: str, config, group: str, key: str, default: str = "??") -> N
         Default string if the group/key pair doesn't exist in the configuration.
 
     """
-    from dfastbe.gui.gui import dialog
+    from dfastbe.gui.gui import StateManagement
     config_file = ConfigFile(config)
     config_value = config_file.get_str(group, key, default)
 
     try:
         val = float(config_value)
-        cast(QComboBox, dialog[field + "Type"]).setCurrentText("Constant")
-        if field + "Select" in dialog.keys():
+        cast(QComboBox, StateManagement[field + "Type"]).setCurrentText("Constant")
+        if field + "Select" in StateManagement.keys():
             int_value = int(val)
             if field == "shipType":
                 int_value = int_value - 1
-            cast(QComboBox, dialog[field + "Select"]).setCurrentIndex(int_value)
+            cast(QComboBox, StateManagement[field + "Select"]).setCurrentIndex(int_value)
         else:
-            cast(QLineEdit, dialog[field + "Edit"]).setText(config_value)
+            cast(QLineEdit, StateManagement[field + "Edit"]).setText(config_value)
     except:
-        cast(QComboBox, dialog[field + "Type"]).setCurrentText("Variable")
-        cast(QLineEdit, dialog[field + "Edit"]).setText(config_value)
+        cast(QComboBox, StateManagement[field + "Type"]).setCurrentText("Variable")
+        cast(QLineEdit, StateManagement[field + "Edit"]).setText(config_value)
 
 
 def setOptParam(field: str, config, group: str, key: str) -> None:
@@ -359,50 +359,50 @@ def setOptParam(field: str, config, group: str, key: str) -> None:
     key : str
         Name of the key in the configuration group.
     """
-    from dfastbe.gui.gui import dialog
+    from dfastbe.gui.gui import StateManagement
     config_file = ConfigFile(config)
     str = config_file.get_str(group, key, "")
     if str == "":
-        dialog[field + "Type"].setCurrentText("Use Default")
-        dialog[field + "Edit"].setText("")
+        StateManagement[field + "Type"].setCurrentText("Use Default")
+        StateManagement[field + "Edit"].setText("")
     else:
         try:
             val = float(str)
-            dialog[field + "Type"].setCurrentText("Constant")
-            if field + "Select" in dialog.keys():
+            StateManagement[field + "Type"].setCurrentText("Constant")
+            if field + "Select" in StateManagement.keys():
                 ival = int(val) - 1  # shipType 1 -> index 0
-                dialog[field + "Select"].setCurrentIndex(ival)
+                StateManagement[field + "Select"].setCurrentIndex(ival)
             else:
-                dialog[field + "Edit"].setText(str)
+                StateManagement[field + "Edit"].setText(str)
         except:
-            dialog[field + "Type"].setCurrentText("Variable")
-            dialog[field + "Edit"].setText(str)
+            StateManagement[field + "Type"].setCurrentText("Variable")
+            StateManagement[field + "Edit"].setText(str)
 
 
 def bankStrengthSwitch() -> None:
     """Implements the dialog settings depending on the bank strength specification method."""
-    from dfastbe.gui.gui import dialog
-    type = dialog["strengthPar"].currentText()
+    from dfastbe.gui.gui import StateManagement
+    type = StateManagement["strengthPar"].currentText()
     if type == "Bank Type":
-        dialog["bankType"].setEnabled(True)
-        dialog["bankTypeType"].setEnabled(True)
+        StateManagement["bankType"].setEnabled(True)
+        StateManagement["bankTypeType"].setEnabled(True)
         typeUpdatePar("bankType")
-        dialog["bankShear"].setEnabled(False)
-        dialog["bankShearType"].setEnabled(False)
-        dialog["bankShearEdit"].setText("")
-        dialog["bankShearEdit"].setEnabled(False)
-        dialog["bankShearEditFile"].setEnabled(False)
+        StateManagement["bankShear"].setEnabled(False)
+        StateManagement["bankShearType"].setEnabled(False)
+        StateManagement["bankShearEdit"].setText("")
+        StateManagement["bankShearEdit"].setEnabled(False)
+        StateManagement["bankShearEditFile"].setEnabled(False)
     elif type == "Critical Shear Stress":
-        dialog["bankShear"].setEnabled(True)
-        dialog["bankShearType"].setEnabled(True)
-        dialog["bankShearEdit"].setEnabled(True)
+        StateManagement["bankShear"].setEnabled(True)
+        StateManagement["bankShearType"].setEnabled(True)
+        StateManagement["bankShearEdit"].setEnabled(True)
         typeUpdatePar("bankShear")
-        dialog["bankType"].setEnabled(False)
-        dialog["bankTypeType"].setEnabled(False)
-        dialog["bankTypeSelect"].setEnabled(False)
-        dialog["bankTypeEdit"].setText("")
-        dialog["bankTypeEdit"].setEnabled(False)
-        dialog["bankTypeEditFile"].setEnabled(False)
+        StateManagement["bankType"].setEnabled(False)
+        StateManagement["bankTypeType"].setEnabled(False)
+        StateManagement["bankTypeSelect"].setEnabled(False)
+        StateManagement["bankTypeEdit"].setText("")
+        StateManagement["bankTypeEdit"].setEnabled(False)
+        StateManagement["bankTypeEditFile"].setEnabled(False)
 
 
 def addTabForLevel(istr: str) -> None:
@@ -412,10 +412,10 @@ def addTabForLevel(istr: str) -> None:
         istr : str
             String representation of the simulation number.
     """
-    from dfastbe.gui.gui import dialog
+    from dfastbe.gui.gui import StateManagement
     newWidget = QWidget()
     newLayout = QGridLayout(newWidget)
-    dialog["tabs"].addTab(newWidget, "Level " + istr)
+    StateManagement["tabs"].addTab(newWidget, "Level " + istr)
 
     optionalParLayout(
         newLayout, 0, istr + "_shipType", "Ship Type", selectList=SHIP_TYPES
@@ -428,10 +428,10 @@ def addTabForLevel(istr: str) -> None:
     optionalParLayout(newLayout, 7, istr + "_bankReed", "Reed [-]")
 
     Label = QLabel("EroVol File Name")
-    dialog[istr + "_eroVol"] = Label
+    StateManagement[istr + "_eroVol"] = Label
     newLayout.addWidget(Label, 8, 0)
     Edit = QLineEdit()
-    dialog[istr + "_eroVolEdit"] = Edit
+    StateManagement[istr + "_eroVolEdit"] = Edit
     newLayout.addWidget(Edit, 8, 2)
 
     stretch = QSpacerItem(
@@ -449,30 +449,30 @@ def typeUpdatePar(key: str) -> None:
     key : str
         Short name of the parameter.
     """
-    from dfastbe.gui.gui import dialog
-    type = dialog[key + "Type"].currentText()
-    dialog[key + "Edit"].setText("")
+    from dfastbe.gui.gui import StateManagement
+    type = StateManagement[key + "Type"].currentText()
+    StateManagement[key + "Edit"].setText("")
     if type == "Use Default":
-        dialog[key + "Edit"].setValidator(None)
-        dialog[key + "Edit"].setEnabled(False)
-        dialog[key + "EditFile"].setEnabled(False)
-        if key + "Select" in dialog.keys():
-            dialog[key + "Select"].setEnabled(False)
+        StateManagement[key + "Edit"].setValidator(None)
+        StateManagement[key + "Edit"].setEnabled(False)
+        StateManagement[key + "EditFile"].setEnabled(False)
+        if key + "Select" in StateManagement.keys():
+            StateManagement[key + "Select"].setEnabled(False)
     elif type == "Constant":
-        if key + "Select" in dialog.keys():
-            dialog[key + "Select"].setEnabled(True)
-            dialog[key + "Edit"].setEnabled(False)
+        if key + "Select" in StateManagement.keys():
+            StateManagement[key + "Select"].setEnabled(True)
+            StateManagement[key + "Edit"].setEnabled(False)
         else:
             if key != "bankProtect":
-                dialog[key + "Edit"].setValidator(validator("positive_real"))
-            dialog[key + "Edit"].setEnabled(True)
-        dialog[key + "EditFile"].setEnabled(False)
+                StateManagement[key + "Edit"].setValidator(validator("positive_real"))
+            StateManagement[key + "Edit"].setEnabled(True)
+        StateManagement[key + "EditFile"].setEnabled(False)
     elif type == "Variable":
-        if key + "Select" in dialog.keys():
-            dialog[key + "Select"].setEnabled(False)
-        dialog[key + "Edit"].setEnabled(True)
-        dialog[key + "Edit"].setValidator(None)
-        dialog[key + "EditFile"].setEnabled(True)
+        if key + "Select" in StateManagement.keys():
+            StateManagement[key + "Select"].setEnabled(False)
+        StateManagement[key + "Edit"].setEnabled(True)
+        StateManagement[key + "Edit"].setValidator(None)
+        StateManagement[key + "EditFile"].setEnabled(True)
 
 
 def optionalParLayout(
@@ -493,31 +493,31 @@ def optionalParLayout(
             In case the parameter can only have a limited number of values: a list
             of strings describing the options.
     """
-    from dfastbe.gui.gui import dialog
+    from dfastbe.gui.gui import StateManagement
     Label = QLabel(labelString)
-    dialog[key + "Label"] = Label
+    StateManagement[key + "Label"] = Label
     gridLayout.addWidget(Label, row, 0)
 
     paramTypes = ("Use Default", "Constant", "Variable")
     Type = QComboBox()
     Type.addItems(paramTypes)
     Type.currentIndexChanged.connect(lambda: typeUpdatePar(key))
-    dialog[key + "Type"] = Type
+    StateManagement[key + "Type"] = Type
     gridLayout.addWidget(Type, row, 1)
 
     if selectList is None:
         fLayout = openFileLayout(key + "Edit", enabled=False)
-        dialog[key + "Edit"].setEnabled(False)
+        StateManagement[key + "Edit"].setEnabled(False)
         gridLayout.addWidget(fLayout, row, 2)
     else:
         Select = QComboBox()
         Select.addItems(selectList)
         Select.setEnabled(False)
-        dialog[key + "Select"] = Select
+        StateManagement[key + "Select"] = Select
         gridLayout.addWidget(Select, row, 2)
 
         fLayout = openFileLayout(key + "Edit", enabled=False)
-        dialog[key + "Edit"].setEnabled(False)
+        StateManagement[key + "Edit"].setEnabled(False)
         gridLayout.addWidget(fLayout, row + 1, 2)
 
 
@@ -537,14 +537,14 @@ def setFilter(field: str, config, group: str, key: str) -> None:
         Name of the key in the configuration group.
 
     """
-    from dfastbe.gui.gui import dialog
+    from dfastbe.gui.gui import StateManagement
     config_file = ConfigFile(config)
     val = config_file.get_float(group, key, 0.0)
     if val > 0.0:
-        dialog[field + "Active"].setChecked(True)
-        dialog[field + "Width"].setText(str(val))
+        StateManagement[field + "Active"].setChecked(True)
+        StateManagement[field + "Width"].setText(str(val))
     else:
-        dialog[field + "Active"].setChecked(False)
+        StateManagement[field + "Active"].setChecked(False)
 
 
 
@@ -564,19 +564,19 @@ def openFileLayout(key, enabled=True) -> QWidget:
     parent : QWidget
         Parent QtWidget that contains the edit field and selection button.
     """
-    from dfastbe.gui.gui import dialog
+    from dfastbe.gui.gui import StateManagement
     parent = QWidget()
     gridly = QGridLayout(parent)
     gridly.setContentsMargins(0, 0, 0, 0)
 
     myWidget = QLineEdit()
-    dialog[key] = myWidget
+    StateManagement[key] = myWidget
     gridly.addWidget(myWidget, 0, 0)
 
     openFile = QPushButton(get_icon(f"{ICONS_DIR}/open.png"), "")
     openFile.clicked.connect(lambda: selectFile(key))
     openFile.setEnabled(enabled)
-    dialog[key + "File"] = openFile
+    StateManagement[key + "File"] = openFile
     gridly.addWidget(openFile, 0, 2)
 
     return parent
@@ -589,9 +589,9 @@ def selectFile(key: str) -> None:
         key : str
             Short name of the parameter.
     """
-    from dfastbe.gui.gui import dialog
+    from dfastbe.gui.gui import StateManagement
     dnm: str
-    if not dialog[key + "File"].hasFocus():
+    if not StateManagement[key + "File"].hasFocus():
         # in the add/edit dialogs, the selectFile is triggered when the user presses enter in one of the lineEdit boxes ...
         # don't trigger the actual selectFile
         fil = ""
@@ -722,4 +722,4 @@ def selectFile(key: str) -> None:
             print(key)
             fil = ""
     if fil != "":
-        dialog[key].setText(fil)
+        StateManagement[key].setText(fil)

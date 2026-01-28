@@ -80,7 +80,7 @@ from dfastbe.gui.configs import (
 from dfastbe.gui.analysis_runner import run_detection, run_erosion
 
 
-dialog: Dict[str, QtCore.QObject]
+StateManagement: Dict[str, QtCore.QObject]
 
 
 class BaseTab:
@@ -112,7 +112,7 @@ class BaseTab:
         gridly = QGridLayout(parent)
         gridly.setContentsMargins(0, 0, 0, 0)
 
-        dialog[key] = main_widget
+        StateManagement[key] = main_widget
         gridly.addWidget(main_widget, 0, 0)
 
         button_bar = QWidget()
@@ -122,19 +122,19 @@ class BaseTab:
 
         add_button = QPushButton(get_icon(f"{ICONS_DIR}/add.png"), "")
         add_button.clicked.connect(lambda: addAnItem(key))
-        dialog[key + "Add"] = add_button
+        StateManagement[key + "Add"] = add_button
         button_bar_layout.addWidget(add_button)
 
         edit_button = QPushButton(get_icon(f"{ICONS_DIR}/edit.png"), "")
         edit_button.clicked.connect(lambda: self.edit_an_item(key))
         edit_button.setEnabled(False)
-        dialog[key + "Edit"] = edit_button
+        StateManagement[key + "Edit"] = edit_button
         button_bar_layout.addWidget(edit_button)
 
         delete_button = QPushButton(get_icon(f"{ICONS_DIR}/remove.png"), "")
         delete_button.clicked.connect(lambda: removeAnItem(key))
         delete_button.setEnabled(False)
-        dialog[key + "Remove"] = delete_button
+        StateManagement[key + "Remove"] = delete_button
         button_bar_layout.addWidget(delete_button)
 
         stretch = QSpacerItem(
@@ -155,7 +155,7 @@ class BaseTab:
         key : str
             Short name of the parameter.
         """
-        selected = dialog[key].selectedItems()
+        selected = StateManagement[key].selectedItems()
         # root = dialog[key].invisibleRootItem()
         if len(selected) > 0:
             istr = selected[0].text(0)
@@ -210,7 +210,7 @@ def editASearchLine(
     editLayout.addRow("Search Line Nr", label)
 
     addOpenFileRow(editLayout, "editSearchLine", "Search Line File")
-    dialog["editSearchLineEdit"].setText(fileName)
+    StateManagement["editSearchLineEdit"].setText(fileName)
 
     searchDistance = QLineEdit()
     searchDistance.setText(dist)
@@ -224,7 +224,7 @@ def editASearchLine(
 
     editDialog.exec()
 
-    fileName = dialog["editSearchLineEdit"].text()
+    fileName = StateManagement["editSearchLineEdit"].text()
     dist = searchDistance.text()
     return fileName, dist
 
@@ -260,11 +260,11 @@ class GeneralTab(BaseTab):
 
         gridly.addWidget(QLabel("From [km]", self.window), 0, 0)
         start_range = QLineEdit(self.window)
-        dialog["startRange"] = start_range
+        StateManagement["startRange"] = start_range
         gridly.addWidget(start_range, 0, 1)
         gridly.addWidget(QLabel("To [km]", self.window), 0, 2)
         end_range = QLineEdit(self.window)
-        dialog["endRange"] = end_range
+        StateManagement["endRange"] = end_range
         gridly.addWidget(end_range, 0, 3)
 
         general_layout.addRow("Study Range", chain_range)
@@ -272,14 +272,14 @@ class GeneralTab(BaseTab):
         addOpenFileRow(general_layout, "bankDir", "Bank Directory")
 
         bank_file_name = QLineEdit(self.window)
-        dialog["bankFileName"] = bank_file_name
+        StateManagement["bankFileName"] = bank_file_name
         general_layout.addRow("Bank File Name", bank_file_name)
 
         addCheckBox(general_layout, "makePlots", "Create Figures", True)
-        dialog["makePlotsEdit"].stateChanged.connect(updatePlotting)
+        StateManagement["makePlotsEdit"].stateChanged.connect(updatePlotting)
 
         addCheckBox(general_layout, "savePlots", "Save Figures", True)
-        dialog["savePlotsEdit"].stateChanged.connect(updatePlotting)
+        StateManagement["savePlotsEdit"].stateChanged.connect(updatePlotting)
 
         zoom_plots = QWidget()
         gridly = QGridLayout(zoom_plots)
@@ -289,22 +289,22 @@ class GeneralTab(BaseTab):
         save_zoom_plots_edit.stateChanged.connect(updatePlotting)
         save_zoom_plots_edit.setChecked(False)
         gridly.addWidget(save_zoom_plots_edit, 0, 0)
-        dialog["saveZoomPlotsEdit"] = save_zoom_plots_edit
+        StateManagement["saveZoomPlotsEdit"] = save_zoom_plots_edit
 
         zoom_plots_range_txt = QLabel("Zoom Range [km]", self.window)
         zoom_plots_range_txt.setEnabled(False)
         gridly.addWidget(zoom_plots_range_txt, 0, 1)
-        dialog["zoomPlotsRangeTxt"] = zoom_plots_range_txt
+        StateManagement["zoomPlotsRangeTxt"] = zoom_plots_range_txt
 
         zoom_plots_range_edit = QLineEdit("1.0",self.window)
         zoom_plots_range_edit.setValidator(validator("positive_real"))
         zoom_plots_range_edit.setEnabled(False)
         gridly.addWidget(zoom_plots_range_edit, 0, 2)
-        dialog["zoomPlotsRangeEdit"] = zoom_plots_range_edit
+        StateManagement["zoomPlotsRangeEdit"] = zoom_plots_range_edit
 
         save_zoom_plots = QLabel("Save Zoomed Figures", self.window)
         general_layout.addRow(save_zoom_plots, zoom_plots)
-        dialog["saveZoomPlots"] = save_zoom_plots
+        StateManagement["saveZoomPlots"] = save_zoom_plots
 
         addOpenFileRow(general_layout, "figureDir", "Figure Directory")
         addCheckBox(general_layout, "closePlots", "Close Figures")
@@ -332,10 +332,10 @@ def addCheckBox(
     """
     checkBox = QCheckBox("")
     checkBox.setChecked(isChecked)
-    dialog[key + "Edit"] = checkBox
+    StateManagement[key + "Edit"] = checkBox
 
     checkTxt = QLabel(labelString)
-    dialog[key] = checkTxt
+    StateManagement[key] = checkTxt
     formLayout.addRow(checkTxt, checkBox)
 
 
@@ -364,7 +364,7 @@ class DetectionTab(BaseTab):
 
         water_depth = QLineEdit(self.window)
         water_depth.setValidator(validator("positive_real"))
-        dialog["waterDepth"] = water_depth
+        StateManagement["waterDepth"] = water_depth
         detect_layout.addRow("Water Depth [m]", water_depth)
 
         search_lines = QTreeWidget(self.window)
@@ -399,7 +399,7 @@ class ErosionTab(BaseTab):
 
         tErosion = QLineEdit(self.window)
         tErosion.setValidator(validator("positive_real"))
-        dialog["tErosion"] = tErosion
+        StateManagement["tErosion"] = tErosion
         erosionLayout.addRow("Simulation Time [yr]", tErosion)
 
         addOpenFileRow(erosionLayout, "riverAxis", "River Axis File")
@@ -418,30 +418,30 @@ class ErosionTab(BaseTab):
 
         refLevel = QLineEdit(self.window)
         refLevel.setValidator(QIntValidator(1, 1))
-        dialog["refLevel"] = refLevel
+        StateManagement["refLevel"] = refLevel
         erosionLayout.addRow("Reference Case", refLevel)
 
         chainageOutStep = QLineEdit(self.window)
         chainageOutStep.setValidator(validator("positive_real"))
-        dialog["chainageOutStep"] = chainageOutStep
+        StateManagement["chainageOutStep"] = chainageOutStep
         erosionLayout.addRow("Chainage Output Step [km]", chainageOutStep)
 
         addOpenFileRow(erosionLayout, "outDir", "Output Directory")
 
         newBankFile = QLineEdit(self.window)
-        dialog["newBankFile"] = newBankFile
+        StateManagement["newBankFile"] = newBankFile
         erosionLayout.addRow("New Bank File Name", newBankFile)
 
         newEqBankFile = QLineEdit(self.window)
-        dialog["newEqBankFile"] = newEqBankFile
+        StateManagement["newEqBankFile"] = newEqBankFile
         erosionLayout.addRow("New Eq Bank File Name", newEqBankFile)
 
         eroVol = QLineEdit(self.window)
-        dialog["eroVol"] = eroVol
+        StateManagement["eroVol"] = eroVol
         erosionLayout.addRow("EroVol File Name", eroVol)
 
         eroVolEqui = QLineEdit(self.window)
-        dialog["eroVolEqui"] = eroVolEqui
+        StateManagement["eroVolEqui"] = eroVolEqui
         erosionLayout.addRow("EroVolEqui File Name", eroVolEqui)
 
 
@@ -498,7 +498,7 @@ class BankTab(BaseTab):
         strengthPar = QComboBox()
         strengthPar.addItems(("Bank Type", "Critical Shear Stress"))
         strengthPar.currentIndexChanged.connect(bankStrengthSwitch)
-        dialog["strengthPar"] = strengthPar
+        StateManagement["strengthPar"] = strengthPar
         eParamsLayout.addWidget(strengthPar, 0, 1, 1, 2)
 
         generalParLayout(
@@ -550,17 +550,17 @@ def addFilter(
     widthEdit = QLineEdit("0.3")
     widthEdit.setValidator(validator("positive_real"))
     gridLayout.addWidget(widthEdit, row, 2)
-    dialog[key + "Width"] = widthEdit
+    StateManagement[key + "Width"] = widthEdit
 
     useFilter = QCheckBox("")
     useFilter.setChecked(False)
     useFilter.stateChanged.connect(lambda: updateFilter(key))
     gridLayout.addWidget(useFilter, row, 1)
-    dialog[key + "Active"] = useFilter
+    StateManagement[key + "Active"] = useFilter
 
     filterTxt = QLabel(labelString)
     gridLayout.addWidget(filterTxt, row, 0)
-    dialog[key + "Txt"] = filterTxt
+    StateManagement[key + "Txt"] = filterTxt
 
     updateFilter(key)
 
@@ -574,10 +574,10 @@ def updateFilter(key: str) -> None:
     key : str
         Short name of the parameter.
     """
-    if dialog[key + "Active"].isChecked():
-        dialog[key + "Width"].setEnabled(True)
+    if StateManagement[key + "Active"].isChecked():
+        StateManagement[key + "Width"].setEnabled(True)
     else:
-        dialog[key + "Width"].setEnabled(False)
+        StateManagement[key + "Width"].setEnabled(False)
 
 
 def generalParLayout(
@@ -605,14 +605,14 @@ def generalParLayout(
         of strings describing the options.
     """
     Label = QLabel(labelString)
-    dialog[key] = Label
+    StateManagement[key] = Label
     gridLayout.addWidget(Label, row, 0)
 
     paramTypes = ("Constant", "Variable")
     Type = QComboBox()
     Type.addItems(paramTypes)
     Type.currentIndexChanged.connect(lambda: typeUpdatePar(key))
-    dialog[key + "Type"] = Type
+    StateManagement[key + "Type"] = Type
     gridLayout.addWidget(Type, row, 1)
 
     if selectList is None:
@@ -621,11 +621,11 @@ def generalParLayout(
     else:
         Select = QComboBox()
         Select.addItems(selectList)
-        dialog[key + "Select"] = Select
+        StateManagement[key + "Select"] = Select
         gridLayout.addWidget(Select, row, 2)
 
         fLayout = openFileLayout(key + "Edit", enabled=False)
-        dialog[key + "Edit"].setEnabled(False)
+        StateManagement[key + "Edit"].setEnabled(False)
         gridLayout.addWidget(fLayout, row + 1, 2)
 
     typeUpdatePar(key)
@@ -647,7 +647,7 @@ def addOpenFileRow(
         String describing the parameter to be displayed as label.
     """
     Label = QLabel(labelString)
-    dialog[key] = Label
+    StateManagement[key] = Label
     fLayout = openFileLayout(key + "Edit")
     formLayout.addRow(Label, fLayout)
 
@@ -655,24 +655,24 @@ def addOpenFileRow(
 def updatePlotting() -> None:
     """Update the plotting flags."""
 
-    plotFlag = dialog["makePlotsEdit"].isChecked()
-    dialog["savePlots"].setEnabled(plotFlag)
-    dialog["savePlotsEdit"].setEnabled(plotFlag)
+    plotFlag = StateManagement["makePlotsEdit"].isChecked()
+    StateManagement["savePlots"].setEnabled(plotFlag)
+    StateManagement["savePlotsEdit"].setEnabled(plotFlag)
 
-    saveFlag = dialog["savePlotsEdit"].isChecked() and plotFlag
-    dialog["saveZoomPlots"].setEnabled(saveFlag)
-    dialog["saveZoomPlotsEdit"].setEnabled(saveFlag)
+    saveFlag = StateManagement["savePlotsEdit"].isChecked() and plotFlag
+    StateManagement["saveZoomPlots"].setEnabled(saveFlag)
+    StateManagement["saveZoomPlotsEdit"].setEnabled(saveFlag)
 
-    saveZoomFlag = dialog["saveZoomPlotsEdit"].isChecked() and saveFlag
-    dialog["zoomPlotsRangeTxt"].setEnabled(saveZoomFlag)
-    dialog["zoomPlotsRangeEdit"].setEnabled(saveZoomFlag)
+    saveZoomFlag = StateManagement["saveZoomPlotsEdit"].isChecked() and saveFlag
+    StateManagement["zoomPlotsRangeTxt"].setEnabled(saveZoomFlag)
+    StateManagement["zoomPlotsRangeEdit"].setEnabled(saveZoomFlag)
 
-    dialog["figureDir"].setEnabled(saveFlag)
-    dialog["figureDirEdit"].setEnabled(saveFlag)
-    dialog["figureDirEditFile"].setEnabled(saveFlag)
+    StateManagement["figureDir"].setEnabled(saveFlag)
+    StateManagement["figureDirEdit"].setEnabled(saveFlag)
+    StateManagement["figureDirEditFile"].setEnabled(saveFlag)
 
-    dialog["closePlots"].setEnabled(plotFlag)
-    dialog["closePlotsEdit"].setEnabled(plotFlag)
+    StateManagement["closePlots"].setEnabled(plotFlag)
+    StateManagement["closePlotsEdit"].setEnabled(plotFlag)
 
 
 def addAnItem(key: str) -> None:
@@ -682,20 +682,20 @@ def addAnItem(key: str) -> None:
         key : str
             Short name of the parameter.
     """
-    nItems = dialog[key].invisibleRootItem().childCount()
+    nItems = StateManagement[key].invisibleRootItem().childCount()
     i = nItems + 1
     istr = str(i)
     if key == "searchLines":
         fileName, dist = editASearchLine(key, istr)
-        c1 = QTreeWidgetItem(dialog["searchLines"], [istr, fileName, dist])
+        c1 = QTreeWidgetItem(StateManagement["searchLines"], [istr, fileName, dist])
     elif key == "discharges":
         prob = str(1 / (nItems + 1))
         fileName, prob = editADischarge(key, istr, prob=prob)
-        c1 = QTreeWidgetItem(dialog["discharges"], [istr, fileName, prob])
+        c1 = QTreeWidgetItem(StateManagement["discharges"], [istr, fileName, prob])
         addTabForLevel(istr)
-        dialog["refLevel"].validator().setTop(i)
-    dialog[key + "Edit"].setEnabled(True)
-    dialog[key + "Remove"].setEnabled(True)
+        StateManagement["refLevel"].validator().setTop(i)
+    StateManagement[key + "Edit"].setEnabled(True)
+    StateManagement[key + "Remove"].setEnabled(True)
 
 
 def setDialogSize(editDialog: QDialog, width: int, height: int) -> None:
@@ -709,7 +709,7 @@ def setDialogSize(editDialog: QDialog, width: int, height: int) -> None:
         height : int
             Desired height of the dialog.
     """
-    parent = dialog["window"]
+    parent = StateManagement["window"]
     x = parent.x()
     y = parent.y()
     pw = parent.width()
@@ -744,7 +744,7 @@ def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
     editLayout.addRow("Level Nr", label)
 
     addOpenFileRow(editLayout, "editDischarge", "Simulation File")
-    dialog["editDischargeEdit"].setText(fileName)
+    StateManagement["editDischargeEdit"].setText(fileName)
 
     probability = QLineEdit()
     probability.setText(prob)
@@ -758,7 +758,7 @@ def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
 
     editDialog.exec()
 
-    fileName = dialog["editDischargeEdit"].text()
+    fileName = StateManagement["editDischargeEdit"].text()
     prob = probability.text()
     return fileName, prob
 
@@ -770,8 +770,8 @@ def removeAnItem(key: str) -> None:
         key : str
             Short name of the parameter.
     """
-    selected = dialog[key].selectedItems()
-    root = dialog[key].invisibleRootItem()
+    selected = StateManagement[key].selectedItems()
+    root = StateManagement[key].invisibleRootItem()
     if len(selected) > 0:
         istr = selected[0].text(0)
         root.removeChild(selected[0])
@@ -781,15 +781,15 @@ def removeAnItem(key: str) -> None:
     else:
         istr = ""
     if root.childCount() == 0:
-        dialog[key + "Edit"].setEnabled(False)
-        dialog[key + "Remove"].setEnabled(False)
+        StateManagement[key + "Edit"].setEnabled(False)
+        StateManagement[key + "Remove"].setEnabled(False)
     if istr == "":
         pass
     elif key == "searchLines":
         pass
     elif key == "discharges":
-        tabs = dialog["tabs"]
-        dialog["refLevel"].validator().setTop(root.childCount())
+        tabs = StateManagement["tabs"]
+        StateManagement["refLevel"].validator().setTop(root.childCount())
         dj = 0
         for j in range(tabs.count()):
             if dj > 0:
@@ -810,9 +810,9 @@ def updateTabKeys(i: int) -> None:
     iStart = str(i) + "_"
     newStart = str(i - 1) + "_"
     N = len(iStart)
-    keys = [key for key in dialog.keys() if key[:N] == iStart]
+    keys = [key for key in StateManagement.keys() if key[:N] == iStart]
     for key in keys:
-        obj = dialog.pop(key)
+        obj = StateManagement.pop(key)
         if key[-4:] == "Type":
             obj.currentIndexChanged.disconnect()
             obj.currentIndexChanged.connect(
@@ -821,7 +821,7 @@ def updateTabKeys(i: int) -> None:
         elif key[-4:] == "File":
             obj.clicked.disconnect()
             obj.clicked.connect(lambda: selectFile(newStart + key[N:-4]))
-        dialog[newStart + key[N:]] = obj
+        StateManagement[newStart + key[N:]] = obj
 
 
 def menu_load_configuration() -> None:
@@ -848,80 +848,6 @@ def menu_save_configuration() -> None:
         config_file = ConfigFile(config)
         config_file.relative_to(rootdir)
         config.write(filename)
-
-
-class GUI:
-
-    def __init__(self):
-        global dialog
-        dialog = {}
-
-        self.app = QApplication()
-        self.app.setStyle("fusion")
-        dialog["application"] = self.app
-        self.window, self.layout = self.create_window()
-        dialog["window"] = self.window
-
-        self.tabs = QTabWidget(self.window)
-        dialog["tabs"] = self.tabs
-        self.layout.addWidget(self.tabs)
-
-        self.menu_Bar = self.create_menu_bar()
-        self.button_bar = self.create_action_buttons()
-
-    @staticmethod
-    def create_window():
-        win = QMainWindow()
-        win.setWindowTitle("D-FAST Bank Erosion")
-        win.setGeometry(200, 200, 600, 300)
-        win.setWindowIcon(get_icon(f"{ICONS_DIR}/D-FASTBE.png"))
-
-        # win.resize(1000, 800)
-
-        central_widget = QWidget()
-        layout = QBoxLayout(QBoxLayout.Direction.TopToBottom, central_widget)
-        win.setCentralWidget(central_widget)
-        return win, layout
-
-    def create(self) -> None:
-        """Construct the D-FAST Bank Erosion user interface."""
-        self.general_tab = GeneralTab(self.tabs, self.window)
-        self.general_tab.create()
-
-        self.detection_tab = DetectionTab(self.tabs, self.window, self.app)
-        self.detection_tab.create()
-
-        self.erosion_tab = ErosionTab(self.tabs, self.window, self.app)
-        self.erosion_tab.create()
-
-        self.shipping_tab = ShippingTab(self.tabs)
-        self.shipping_tab.create()
-
-        self.bank_tab = BankTab(self.tabs)
-        self.bank_tab.create()
-
-    def create_menu_bar(self) -> MenuBar:
-        """Add the menus to the menubar."""
-        menu = MenuBar(window=self.window, app=self.app)
-        menu.create()
-        return menu
-
-    def create_action_buttons(self) -> ButtonBar:
-        button_bar = ButtonBar(window=self.window, app=self.app, layout=self.layout)
-        button_bar.create()
-        return button_bar
-
-    def activate(self) -> None:
-        """Activate the user interface and run the program."""
-        self.window.show()
-        sys.exit(self.app.exec())
-
-    def close(self) -> None:
-        """Close the dialog and program."""
-        plt.close("all")
-        self.window.close()
-        self.app.closeAllWindows()
-        self.app.quit()
 
 
 class BaseBar:
@@ -987,6 +913,80 @@ class ButtonBar(BaseBar):
         done = QPushButton(gui_text("action_close"), self.window)
         done.clicked.connect(self.close)
         button_bar_layout.addWidget(done)
+
+
+class GUI:
+
+    def __init__(self):
+        global StateManagement
+        StateManagement = {}
+
+        self.app = QApplication()
+        self.app.setStyle("fusion")
+        StateManagement["application"] = self.app
+        self.window, self.layout = self.create_window()
+        StateManagement["window"] = self.window
+
+        self.tabs = QTabWidget(self.window)
+        StateManagement["tabs"] = self.tabs
+        self.layout.addWidget(self.tabs)
+
+        self.menu_Bar = self.create_menu_bar()
+        self.button_bar = self.create_action_buttons()
+
+    @staticmethod
+    def create_window():
+        win = QMainWindow()
+        win.setWindowTitle("D-FAST Bank Erosion")
+        win.setGeometry(200, 200, 600, 300)
+        win.setWindowIcon(get_icon(f"{ICONS_DIR}/D-FASTBE.png"))
+
+        # win.resize(1000, 800)
+
+        central_widget = QWidget()
+        layout = QBoxLayout(QBoxLayout.Direction.TopToBottom, central_widget)
+        win.setCentralWidget(central_widget)
+        return win, layout
+
+    def create(self) -> None:
+        """Construct the D-FAST Bank Erosion user interface."""
+        self.general_tab = GeneralTab(self.tabs, self.window)
+        self.general_tab.create()
+
+        self.detection_tab = DetectionTab(self.tabs, self.window, self.app)
+        self.detection_tab.create()
+
+        self.erosion_tab = ErosionTab(self.tabs, self.window, self.app)
+        self.erosion_tab.create()
+
+        self.shipping_tab = ShippingTab(self.tabs)
+        self.shipping_tab.create()
+
+        self.bank_tab = BankTab(self.tabs)
+        self.bank_tab.create()
+
+    def create_menu_bar(self) -> MenuBar:
+        """Add the menus to the menubar."""
+        menu = MenuBar(window=self.window, app=self.app)
+        menu.create()
+        return menu
+
+    def create_action_buttons(self) -> ButtonBar:
+        button_bar = ButtonBar(window=self.window, app=self.app, layout=self.layout)
+        button_bar.create()
+        return button_bar
+
+    def activate(self) -> None:
+        """Activate the user interface and run the program."""
+        self.window.show()
+        sys.exit(self.app.exec())
+
+    def close(self) -> None:
+        """Close the dialog and program."""
+        plt.close("all")
+        self.window.close()
+        self.app.closeAllWindows()
+        self.app.quit()
 
 
 def main(config: Optional[Path] = None) -> None:
