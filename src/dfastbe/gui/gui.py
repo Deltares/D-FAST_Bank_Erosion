@@ -232,73 +232,72 @@ class DetectionTab(BaseTab):
         detectLayout.addRow("Search Lines", slLayout)
 
 
-def addErosionTab(
-    tabs: QTabWidget,
-    win: QMainWindow,
-    app: QApplication,
-) -> None:
-    """
-    Create the tab for the main bank erosion settings.
+class ErosionTab(BaseTab):
+    def  __init__(self, tabs: QTabWidget, window: QMainWindow, app: QApplication):
+        """Initialize the tab for the bank erosion settings.
 
-    Arguments
-    ---------
-    tabs : QTabWidget
-        Tabs object to which the tab should be added.
-    win : QMainWindow
-        The window object in which the tab item is located.
-    app : QApplication
-        The application object to which the window belongs, needed for font information.
-    """
-    erosionWidget = QWidget()
-    erosionLayout = QFormLayout(erosionWidget)
-    tabs.addTab(erosionWidget, "Erosion")
+        Args:
+            tabs : QTabWidget
+                Tabs object to which the tab should be added.
+            window : QMainWindow
+                The window object in which the tab item is located.
+            app : QApplication
+                The application object to which the window belongs, needed for font information.
+        """
+        super().__init__(tabs, window, app)
 
-    tErosion = QLineEdit(win)
-    tErosion.setValidator(validator("positive_real"))
-    dialog["tErosion"] = tErosion
-    erosionLayout.addRow("Simulation Time [yr]", tErosion)
+    def create(self) -> None:
+        """Create the tab for the main bank erosion settings."""
+        erosionWidget = QWidget()
+        erosionLayout = QFormLayout(erosionWidget)
+        self.tabs.addTab(erosionWidget, "Erosion")
 
-    addOpenFileRow(erosionLayout, "riverAxis", "River Axis File")
+        tErosion = QLineEdit(self.window)
+        tErosion.setValidator(validator("positive_real"))
+        dialog["tErosion"] = tErosion
+        erosionLayout.addRow("Simulation Time [yr]", tErosion)
 
-    addOpenFileRow(erosionLayout, "fairway", "Fairway File")
+        addOpenFileRow(erosionLayout, "riverAxis", "River Axis File")
 
-    discharges = QTreeWidget(win)
-    discharges.setHeaderLabels(["Level", "FileName", "Probability [-]"])
-    discharges.setFont(app.font())
-    discharges.setColumnWidth(0, 50)
-    discharges.setColumnWidth(1, 250)
-    # c1 = QTreeWidgetItem(discharges, ["0", "test\\filename", "0.5"])
+        addOpenFileRow(erosionLayout, "fairway", "Fairway File")
 
-    disLayout = addRemoveEditLayout(discharges, "discharges")
-    erosionLayout.addRow("Discharges", disLayout)
+        discharges = QTreeWidget(self.window)
+        discharges.setHeaderLabels(["Level", "FileName", "Probability [-]"])
+        discharges.setFont(self.app.font())
+        discharges.setColumnWidth(0, 50)
+        discharges.setColumnWidth(1, 250)
+        # c1 = QTreeWidgetItem(discharges, ["0", "test\\filename", "0.5"])
 
-    refLevel = QLineEdit(win)
-    refLevel.setValidator(QIntValidator(1, 1))
-    dialog["refLevel"] = refLevel
-    erosionLayout.addRow("Reference Case", refLevel)
+        disLayout = addRemoveEditLayout(discharges, "discharges")
+        erosionLayout.addRow("Discharges", disLayout)
 
-    chainageOutStep = QLineEdit(win)
-    chainageOutStep.setValidator(validator("positive_real"))
-    dialog["chainageOutStep"] = chainageOutStep
-    erosionLayout.addRow("Chainage Output Step [km]", chainageOutStep)
+        refLevel = QLineEdit(self.window)
+        refLevel.setValidator(QIntValidator(1, 1))
+        dialog["refLevel"] = refLevel
+        erosionLayout.addRow("Reference Case", refLevel)
 
-    addOpenFileRow(erosionLayout, "outDir", "Output Directory")
+        chainageOutStep = QLineEdit(self.window)
+        chainageOutStep.setValidator(validator("positive_real"))
+        dialog["chainageOutStep"] = chainageOutStep
+        erosionLayout.addRow("Chainage Output Step [km]", chainageOutStep)
 
-    newBankFile = QLineEdit(win)
-    dialog["newBankFile"] = newBankFile
-    erosionLayout.addRow("New Bank File Name", newBankFile)
+        addOpenFileRow(erosionLayout, "outDir", "Output Directory")
 
-    newEqBankFile = QLineEdit(win)
-    dialog["newEqBankFile"] = newEqBankFile
-    erosionLayout.addRow("New Eq Bank File Name", newEqBankFile)
+        newBankFile = QLineEdit(self.window)
+        dialog["newBankFile"] = newBankFile
+        erosionLayout.addRow("New Bank File Name", newBankFile)
 
-    eroVol = QLineEdit(win)
-    dialog["eroVol"] = eroVol
-    erosionLayout.addRow("EroVol File Name", eroVol)
+        newEqBankFile = QLineEdit(self.window)
+        dialog["newEqBankFile"] = newEqBankFile
+        erosionLayout.addRow("New Eq Bank File Name", newEqBankFile)
 
-    eroVolEqui = QLineEdit(win)
-    dialog["eroVolEqui"] = eroVolEqui
-    erosionLayout.addRow("EroVolEqui File Name", eroVolEqui)
+        eroVol = QLineEdit(self.window)
+        dialog["eroVol"] = eroVol
+        erosionLayout.addRow("EroVol File Name", eroVol)
+
+        eroVolEqui = QLineEdit(self.window)
+        dialog["eroVolEqui"] = eroVolEqui
+        erosionLayout.addRow("EroVolEqui File Name", eroVolEqui)
 
 
 def addShippingTab(
@@ -1838,7 +1837,9 @@ class GUI:
         detection_tab = DetectionTab(tabs, self.window, self.app)
         detection_tab.create()
 
-        addErosionTab(tabs, self.window, self.app)
+        erosion_tab = ErosionTab(tabs, self.window, self.app)
+        erosion_tab.create()
+
         addShippingTab(tabs, self.window)
         addBankTab(tabs, self.window)
 
