@@ -294,7 +294,7 @@ def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.nd
             # no erosion, so just a linear extension
             if verbose:
                 print("{}: no shifting, just linear extension".format(iseg))
-            poly = np.row_stack([xylines[iseg + 1], xylines[iseg],])
+            poly = np.vstack([xylines[iseg + 1], xylines[iseg],])
         elif dtheta <= 0:
             # right bend
             if -0.001 * math.pi < dtheta:
@@ -302,7 +302,7 @@ def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.nd
                 if verbose:
                     print("{}: slight bend to right".format(iseg))
                 if erosion_distance[iseg] > erosion_distance[iseg]:
-                    poly = np.row_stack(
+                    poly = np.vstack(
                         [
                             xylines[iseg + 1],
                             xylines[iseg + 1] + nxy[iseg],
@@ -312,7 +312,7 @@ def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.nd
                             ]
                     )
                 else:
-                    poly = np.row_stack(
+                    poly = np.vstack(
                         [
                             xylines[iseg + 1],
                             xylines[iseg + 1] + nxy[iseg],
@@ -324,7 +324,7 @@ def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.nd
                 # more significant bend
                 if verbose:
                     print("{}: bend to right".format(iseg))
-                poly = np.row_stack(
+                poly = np.vstack(
                     [
                         xylines[iseg + 1],
                         xylines[iseg + 1] + nxy[iseg],
@@ -336,7 +336,7 @@ def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.nd
             # left bend: previous segment isn't eroded, so nothing to connect to
             if verbose:
                 print("{}: bend to left".format(iseg))
-            poly = np.row_stack(
+            poly = np.vstack(
                 [
                     xylines[iseg + 1],
                     xylines[iseg + 1] + nxy[iseg],
@@ -348,7 +348,7 @@ def _move_line_right(xylines: np.ndarray, erosion_distance: np.ndarray) -> np.nd
             # left bend: connect it to the previous segment to avoid non eroded wedges
             if verbose:
                 print("{}: bend to left".format(iseg))
-            poly = np.row_stack(
+            poly = np.vstack(
                 [
                     xylines[iseg + 1],
                     xylines[iseg + 1] + nxy[iseg],
