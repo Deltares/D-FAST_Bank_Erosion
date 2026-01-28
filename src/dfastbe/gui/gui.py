@@ -28,12 +28,12 @@ This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Ban
 from __future__ import annotations
 import os
 import sys
+from collections.abc import Iterator, MutableMapping
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 
 import matplotlib.pyplot as plt
 from PySide6.QtGui import QIntValidator
-from PySide6 import QtCore
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QTabWidget,
@@ -78,9 +78,40 @@ from dfastbe.gui.configs import (
     selectFile,
 )
 from dfastbe.gui.analysis_runner import run_detection, run_erosion
+from dfastbe.gui.state_management import StateStore
 
 
-StateManagement: Dict[str, QtCore.QObject]
+class _StateProxy(MutableMapping[str, Any]):
+    """Lazy proxy that forwards mapping operations to the StateStore singleton.
+
+    This keeps existing `StateManagement[...]` call sites working without
+    reassigning a module-level global in `GUI.__init__`. Every access resolves
+    the current singleton via `StateStore.instance()`, so all reads and writes
+    target the same shared dictionary created by the GUI constructor.
+    """
+    def _state(self) -> StateStore:
+        return StateStore.instance()
+
+    def __getitem__(self, key: str) -> Any:
+        return self._state()[key]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self._state()[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        del self._state()[key]
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._state())
+
+    def __len__(self) -> int:
+        return len(self._state())
+
+    def __repr__(self) -> str:
+        return repr(self._state())
+
+
+StateManagement: MutableMapping[str, Any] = _StateProxy()
 
 
 class BaseTab:
@@ -160,21 +191,21 @@ class BaseTab:
         if len(selected) > 0:
             istr = selected[0].text(0)
             if key == "searchLines":
-                fileName = selected[0].text(1)
+                file_name = selected[0].text(1)
                 dist = selected[0].text(2)
-                fileName, dist = editASearchLine(key, istr, fileName=fileName, dist=dist)
-                selected[0].setText(1, fileName)
+                file_name, dist = edit_search_line(key, istr, file_name=file_name, dist=dist)
+                selected[0].setText(1, file_name)
                 selected[0].setText(2, dist)
             elif key == "discharges":
-                fileName = selected[0].text(1)
+                file_name = selected[0].text(1)
                 prob = selected[0].text(2)
-                fileName, prob = editADischarge(key, istr, fileName=fileName, prob=prob)
-                selected[0].setText(1, fileName)
+                file_name, prob = editADischarge(key, istr, fileName=file_name, prob=prob)
+                selected[0].setText(1, file_name)
                 selected[0].setText(2, prob)
 
 
-def editASearchLine(
-    key: str, istr: str, fileName: str = "", dist: str = "50"
+def edit_search_line(
+    key: str, istr: str, file_name: str = "", dist: str = "50"
 ) -> Tuple[str, str]:
     """
     Create an edit dialog for the search lines list.
@@ -185,7 +216,7 @@ def editASearchLine(
         Short name of the parameter.
     istr : str
         String representation of the search line in the list.
-    fileName : str
+    file_name : str
         Name of the search line file.
     dist : str
         String representation of the search distance.
@@ -198,35 +229,35 @@ def editASearchLine(
         Updated string representation of the search distance.
     """
 
-    editDialog = QDialog()
-    setDialogSize(editDialog, 600, 100)
-    editDialog.setWindowFlags(
+    edit_dialog = QDialog()
+    setDialogSize(edit_dialog, 600, 100)
+    edit_dialog.setWindowFlags(
         Qt.WindowTitleHint | Qt.WindowSystemMenuHint
     )
-    editDialog.setWindowTitle("Edit Search Line")
-    editLayout = QFormLayout(editDialog)
+    edit_dialog.setWindowTitle("Edit Search Line")
+    edit_layout = QFormLayout(edit_dialog)
 
     label = QLabel(istr)
-    editLayout.addRow("Search Line Nr", label)
+    edit_layout.addRow("Search Line Nr", label)
 
-    addOpenFileRow(editLayout, "editSearchLine", "Search Line File")
-    StateManagement["editSearchLineEdit"].setText(fileName)
+    addOpenFileRow(edit_layout, "editSearchLine", "Search Line File")
+    StateManagement["editSearchLineEdit"].setText(file_name)
 
-    searchDistance = QLineEdit()
-    searchDistance.setText(dist)
-    searchDistance.setValidator(validator("positive_real"))
-    editLayout.addRow("Search Distance [m]", searchDistance)
+    search_distance = QLineEdit()
+    search_distance.setText(dist)
+    search_distance.setValidator(validator("positive_real"))
+    edit_layout.addRow("Search Distance [m]", search_distance)
 
     done = QPushButton("Done")
-    done.clicked.connect(lambda: close_edit(editDialog))
+    done.clicked.connect(lambda: close_edit(edit_dialog))
     # edit_SearchDistance.setValidator(validator("positive_real"))
-    editLayout.addRow(" ", done)
+    edit_layout.addRow(" ", done)
 
-    editDialog.exec()
+    edit_dialog.exec()
 
-    fileName = StateManagement["editSearchLineEdit"].text()
-    dist = searchDistance.text()
-    return fileName, dist
+    file_name = StateManagement["editSearchLineEdit"].text()
+    dist = search_distance.text()
+    return file_name, dist
 
 
 class GeneralTab(BaseTab):
@@ -275,10 +306,10 @@ class GeneralTab(BaseTab):
         StateManagement["bankFileName"] = bank_file_name
         general_layout.addRow("Bank File Name", bank_file_name)
 
-        addCheckBox(general_layout, "makePlots", "Create Figures", True)
+        add_check_box(general_layout, "makePlots", "Create Figures", True)
         StateManagement["makePlotsEdit"].stateChanged.connect(updatePlotting)
 
-        addCheckBox(general_layout, "savePlots", "Save Figures", True)
+        add_check_box(general_layout, "savePlots", "Save Figures", True)
         StateManagement["savePlotsEdit"].stateChanged.connect(updatePlotting)
 
         zoom_plots = QWidget()
@@ -307,36 +338,36 @@ class GeneralTab(BaseTab):
         StateManagement["saveZoomPlots"] = save_zoom_plots
 
         addOpenFileRow(general_layout, "figureDir", "Figure Directory")
-        addCheckBox(general_layout, "closePlots", "Close Figures")
-        addCheckBox(general_layout, "debugOutput", "Debug Output")
+        add_check_box(general_layout, "closePlots", "Close Figures")
+        add_check_box(general_layout, "debugOutput", "Debug Output")
 
 
-def addCheckBox(
-    formLayout: QFormLayout,
+def add_check_box(
+    form_layout: QFormLayout,
     key: str,
-    labelString: str,
-    isChecked: bool = False,
+    label_string: str,
+    is_checked: bool = False,
 ) -> None:
     """
     Add a line of with checkbox control to a form layout.
 
     Args:
-        formLayout : QFormLayout
+        form_layout : QFormLayout
             Form layout object in which to position the edit controls.
         key : str
             Short name of the parameter.
-        labelString : str
+        label_string : str
             String describing the parameter to be displayed as label.
-        isChecked : bool
+        is_checked : bool
             Initial state of the check box.
     """
-    checkBox = QCheckBox("")
-    checkBox.setChecked(isChecked)
-    StateManagement[key + "Edit"] = checkBox
+    check_box = QCheckBox("")
+    check_box.setChecked(is_checked)
+    StateManagement[key + "Edit"] = check_box
 
-    checkTxt = QLabel(labelString)
-    StateManagement[key] = checkTxt
-    formLayout.addRow(checkTxt, checkBox)
+    check_txt = QLabel(label_string)
+    StateManagement[key] = check_txt
+    form_layout.addRow(check_txt, check_box)
 
 
 class DetectionTab(BaseTab):
@@ -373,8 +404,8 @@ class DetectionTab(BaseTab):
         search_lines.setColumnWidth(0, 50)
         search_lines.setColumnWidth(1, 200)
 
-        slLayout = self.add_remove_edit_layout(search_lines, "searchLines")
-        detect_layout.addRow("Search Lines", slLayout)
+        search_lines_layout = self.add_remove_edit_layout(search_lines, "searchLines")
+        detect_layout.addRow("Search Lines", search_lines_layout)
 
 
 class ErosionTab(BaseTab):
@@ -393,18 +424,18 @@ class ErosionTab(BaseTab):
 
     def create(self) -> None:
         """Create the tab for the main bank erosion settings."""
-        erosionWidget = QWidget()
-        erosionLayout = QFormLayout(erosionWidget)
-        self.tabs.addTab(erosionWidget, "Erosion")
+        erosion_widget = QWidget()
+        erosion_layout = QFormLayout(erosion_widget)
+        self.tabs.addTab(erosion_widget, "Erosion")
 
-        tErosion = QLineEdit(self.window)
-        tErosion.setValidator(validator("positive_real"))
-        StateManagement["tErosion"] = tErosion
-        erosionLayout.addRow("Simulation Time [yr]", tErosion)
+        erosion_time = QLineEdit(self.window)
+        erosion_time.setValidator(validator("positive_real"))
+        StateManagement["tErosion"] = erosion_time
+        erosion_layout.addRow("Simulation Time [yr]", erosion_time)
 
-        addOpenFileRow(erosionLayout, "riverAxis", "River Axis File")
+        addOpenFileRow(erosion_layout, "riverAxis", "River Axis File")
 
-        addOpenFileRow(erosionLayout, "fairway", "Fairway File")
+        addOpenFileRow(erosion_layout, "fairway", "Fairway File")
 
         discharges = QTreeWidget(self.window)
         discharges.setHeaderLabels(["Level", "FileName", "Probability [-]"])
@@ -413,36 +444,36 @@ class ErosionTab(BaseTab):
         discharges.setColumnWidth(1, 250)
         # c1 = QTreeWidgetItem(discharges, ["0", "test\\filename", "0.5"])
 
-        disLayout = self.add_remove_edit_layout(discharges, "discharges")
-        erosionLayout.addRow("Discharges", disLayout)
+        discharge_layout = self.add_remove_edit_layout(discharges, "discharges")
+        erosion_layout.addRow("Discharges", discharge_layout)
 
-        refLevel = QLineEdit(self.window)
-        refLevel.setValidator(QIntValidator(1, 1))
-        StateManagement["refLevel"] = refLevel
-        erosionLayout.addRow("Reference Case", refLevel)
+        ref_level = QLineEdit(self.window)
+        ref_level.setValidator(QIntValidator(1, 1))
+        StateManagement["refLevel"] = ref_level
+        erosion_layout.addRow("Reference Case", ref_level)
 
-        chainageOutStep = QLineEdit(self.window)
-        chainageOutStep.setValidator(validator("positive_real"))
-        StateManagement["chainageOutStep"] = chainageOutStep
-        erosionLayout.addRow("Chainage Output Step [km]", chainageOutStep)
+        chainage_out_step = QLineEdit(self.window)
+        chainage_out_step.setValidator(validator("positive_real"))
+        StateManagement["chainageOutStep"] = chainage_out_step
+        erosion_layout.addRow("Chainage Output Step [km]", chainage_out_step)
 
-        addOpenFileRow(erosionLayout, "outDir", "Output Directory")
+        addOpenFileRow(erosion_layout, "outDir", "Output Directory")
 
-        newBankFile = QLineEdit(self.window)
-        StateManagement["newBankFile"] = newBankFile
-        erosionLayout.addRow("New Bank File Name", newBankFile)
+        new_bank_file = QLineEdit(self.window)
+        StateManagement["newBankFile"] = new_bank_file
+        erosion_layout.addRow("New Bank File Name", new_bank_file)
 
-        newEqBankFile = QLineEdit(self.window)
-        StateManagement["newEqBankFile"] = newEqBankFile
-        erosionLayout.addRow("New Eq Bank File Name", newEqBankFile)
+        new_eq_bank_file = QLineEdit(self.window)
+        StateManagement["newEqBankFile"] = new_eq_bank_file
+        erosion_layout.addRow("New Eq Bank File Name", new_eq_bank_file)
 
-        eroVol = QLineEdit(self.window)
-        StateManagement["eroVol"] = eroVol
-        erosionLayout.addRow("EroVol File Name", eroVol)
+        erosion_volume = QLineEdit(self.window)
+        StateManagement["eroVol"] = erosion_volume
+        erosion_layout.addRow("EroVol File Name", erosion_volume)
 
-        eroVolEqui = QLineEdit(self.window)
-        StateManagement["eroVolEqui"] = eroVolEqui
-        erosionLayout.addRow("EroVolEqui File Name", eroVolEqui)
+        ero_vol_eq = QLineEdit(self.window)
+        StateManagement["eroVolEqui"] = ero_vol_eq
+        erosion_layout.addRow("EroVolEqui File Name", ero_vol_eq)
 
 
 class ShippingTab(BaseTab):
@@ -686,7 +717,7 @@ def addAnItem(key: str) -> None:
     i = nItems + 1
     istr = str(i)
     if key == "searchLines":
-        fileName, dist = editASearchLine(key, istr)
+        fileName, dist = edit_search_line(key, istr)
         c1 = QTreeWidgetItem(StateManagement["searchLines"], [istr, fileName, dist])
     elif key == "discharges":
         prob = str(1 / (nItems + 1))
@@ -918,8 +949,7 @@ class ButtonBar(BaseBar):
 class GUI:
 
     def __init__(self):
-        global StateManagement
-        StateManagement = {}
+        self.state = StateStore.initialize()
 
         self.app = QApplication()
         self.app.setStyle("fusion")

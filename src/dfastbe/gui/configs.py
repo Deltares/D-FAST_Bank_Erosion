@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 from dfastbe.io.config import ConfigFile
 from dfastbe.gui.utils import show_error, SHIP_TYPES, validator, get_icon, ICONS_DIR
 from dfastbe.io.file_utils import absolute_path
+from dfastbe.gui.state_management import StateStore
 
 __all__ = [
     "get_configuration",
@@ -40,7 +41,7 @@ def load_configuration(config_path: Path) -> None:
         config_path : str
             Name of the configuration file to be opened.
     """
-    from dfastbe.gui.gui import StateManagement
+    StateManagement = StateStore.instance()
     if not config_path.exists():
         if config_path != "dfastbe.cfg":
             show_error(f"The file {config_path} does not exist!")
@@ -194,7 +195,7 @@ def get_configuration() -> ConfigParser:
     config : ConfigParser
         Configuration for the D-FAST Bank Erosion analysis.
     """
-    from dfastbe.gui.gui import StateManagement
+    StateManagement = StateStore.instance()
     config = ConfigParser()
     config.optionxform = str  # case sensitive configuration
 
@@ -326,7 +327,7 @@ def setParam(field: str, config, group: str, key: str, default: str = "??") -> N
         Default string if the group/key pair doesn't exist in the configuration.
 
     """
-    from dfastbe.gui.gui import StateManagement
+    StateManagement = StateStore.instance()
     config_file = ConfigFile(config)
     config_value = config_file.get_str(group, key, default)
 
@@ -359,7 +360,7 @@ def setOptParam(field: str, config, group: str, key: str) -> None:
     key : str
         Name of the key in the configuration group.
     """
-    from dfastbe.gui.gui import StateManagement
+    StateManagement = StateStore.instance()
     config_file = ConfigFile(config)
     str = config_file.get_str(group, key, "")
     if str == "":
@@ -381,7 +382,7 @@ def setOptParam(field: str, config, group: str, key: str) -> None:
 
 def bankStrengthSwitch() -> None:
     """Implements the dialog settings depending on the bank strength specification method."""
-    from dfastbe.gui.gui import StateManagement
+    StateManagement = StateStore.instance()
     type = StateManagement["strengthPar"].currentText()
     if type == "Bank Type":
         StateManagement["bankType"].setEnabled(True)
@@ -412,7 +413,7 @@ def addTabForLevel(istr: str) -> None:
         istr : str
             String representation of the simulation number.
     """
-    from dfastbe.gui.gui import StateManagement
+    StateManagement = StateStore.instance()
     newWidget = QWidget()
     newLayout = QGridLayout(newWidget)
     StateManagement["tabs"].addTab(newWidget, "Level " + istr)
@@ -449,7 +450,7 @@ def typeUpdatePar(key: str) -> None:
     key : str
         Short name of the parameter.
     """
-    from dfastbe.gui.gui import StateManagement
+    StateManagement = StateStore.instance()
     type = StateManagement[key + "Type"].currentText()
     StateManagement[key + "Edit"].setText("")
     if type == "Use Default":
@@ -493,7 +494,7 @@ def optionalParLayout(
             In case the parameter can only have a limited number of values: a list
             of strings describing the options.
     """
-    from dfastbe.gui.gui import StateManagement
+    StateManagement = StateStore.instance()
     Label = QLabel(labelString)
     StateManagement[key + "Label"] = Label
     gridLayout.addWidget(Label, row, 0)
@@ -537,7 +538,7 @@ def setFilter(field: str, config, group: str, key: str) -> None:
         Name of the key in the configuration group.
 
     """
-    from dfastbe.gui.gui import StateManagement
+    StateManagement = StateStore.instance()
     config_file = ConfigFile(config)
     val = config_file.get_float(group, key, 0.0)
     if val > 0.0:
@@ -564,7 +565,7 @@ def openFileLayout(key, enabled=True) -> QWidget:
     parent : QWidget
         Parent QtWidget that contains the edit field and selection button.
     """
-    from dfastbe.gui.gui import StateManagement
+    StateManagement = StateStore.instance()
     parent = QWidget()
     gridly = QGridLayout(parent)
     gridly.setContentsMargins(0, 0, 0, 0)
@@ -589,7 +590,7 @@ def selectFile(key: str) -> None:
         key : str
             Short name of the parameter.
     """
-    from dfastbe.gui.gui import StateManagement
+    StateManagement = StateStore.instance()
     dnm: str
     if not StateManagement[key + "File"].hasFocus():
         # in the add/edit dialogs, the selectFile is triggered when the user presses enter in one of the lineEdit boxes ...
