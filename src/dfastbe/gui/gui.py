@@ -1788,8 +1788,12 @@ class GUI:
         self.app = QApplication()
         self.app.setStyle("fusion")
         dialog["application"] = self.app
-        self.window = self.create_window()
+        self.window, self.layout = self.create_window()
         dialog["window"] = self.window
+
+        self.tabs = QTabWidget(self.window)
+        dialog["tabs"] = self.tabs
+        self.layout.addWidget(self.tabs)
 
     @staticmethod
     def create_window():
@@ -1797,10 +1801,12 @@ class GUI:
         win.setWindowTitle("D-FAST Bank Erosion")
         win.setGeometry(200, 200, 600, 300)
         win.setWindowIcon(get_icon(f"{ICONS_DIR}/D-FASTBE.png"))
-
         # win.resize(1000, 800)
-        # win.setCentralWidget(QWidget())
-        return win
+
+        central_widget = QWidget()
+        layout = QBoxLayout(QBoxLayout.Direction.TopToBottom, central_widget)
+        win.setCentralWidget(central_widget)
+        return win, layout
 
     def create(self) -> None:
         """Construct the D-FAST Bank Erosion user interface."""
