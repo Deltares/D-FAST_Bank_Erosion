@@ -1855,8 +1855,8 @@ class GUI:
     def create_menu_bar(self) -> None:
         """Add the menus to the menubar."""
         menubar = self.window.menuBar()
-        menu = MenuBar(menubar, self.window)
-        menu.create()
+        self.menu = MenuBar(menubar, self.window, self.app)
+        self.menu.create()
 
     def activate(self) -> None:
         """Activate the user interface and run the program."""
@@ -1867,12 +1867,15 @@ class GUI:
         """Close the dialog and program."""
         plt.close("all")
         self.window.close()
+        self.app.closeAllWindows()
+        self.app.quit()
 
 
 class MenuBar:
-    def __init__(self, menubar: QMenuBar, window: QMainWindow):
+    def __init__(self, menubar: QMenuBar, window: QMainWindow, app: QApplication):
         self.window = window
         self.menubar = menubar
+        self.app = app
 
     def create(self):
         menu = self.menubar.addMenu(gui_text("File"))
@@ -1897,3 +1900,5 @@ class MenuBar:
         """Close the dialog and program."""
         plt.close("all")
         self.window.close()
+        self.app.closeAllWindows()
+        self.app.quit()
