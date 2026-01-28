@@ -73,7 +73,7 @@ DialogObject = Dict[str, QtCore.QObject]
 dialog: DialogObject
 
 r_dir = Path(__file__).resolve().parent
-ICONS_DIR = "gui/icons"
+ICONS_DIR = r_dir / "gui/icons"
 
 
 def addGeneralTab(
