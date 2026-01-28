@@ -34,8 +34,10 @@ from pathlib import Path
 from typing import Callable, Dict, List, Optional, Tuple, cast
 
 import matplotlib.pyplot as plt
-from PySide6 import QtCore, QtWidgets, QtGui
+from PySide6.QtGui import QValidator, QIntValidator, QDoubleValidator
+from PySide6 import QtCore
 from PySide6.QtWidgets import (
+    QTabWidget,
     QSizePolicy,
     QComboBox,
     QLineEdit,
@@ -44,7 +46,17 @@ from PySide6.QtWidgets import (
     QBoxLayout,
     QPushButton,
     QDialog,
-    QMainWindow
+    QMainWindow,
+    QFormLayout,
+    QGridLayout,
+    QWidget,
+    QSpacerItem,
+    QCheckBox,
+    QTreeWidget,
+    QTreeWidgetItem,
+    QFileDialog,
+    QMessageBox,
+    QMenuBar
 )
 
 from dfastbe import __file__, __version__
@@ -65,7 +77,7 @@ ICONS_DIR = "gui/icons"
 
 
 def addGeneralTab(
-    tabs: QtWidgets.QTabWidget, win: QtWidgets.QMainWindow
+    tabs: QTabWidget, win: QMainWindow
 ) -> None:
     """
     Create the tab for the general settings.
@@ -75,27 +87,27 @@ def addGeneralTab(
 
     Arguments
     ---------
-    tabs : QtWidgets.QTabWidget
+    tabs : QTabWidget
         Tabs object to which the tab should be added.
     win : QtWidgets.QMainWindow
         Windows in which the tab item is located.
     """
-    generalWidget = QtWidgets.QWidget()
-    generalLayout = QtWidgets.QFormLayout(generalWidget)
+    generalWidget = QWidget()
+    generalLayout = QFormLayout(generalWidget)
     tabs.addTab(generalWidget, "General")
 
     addOpenFileRow(generalLayout, "chainFile", "Chain File")
 
-    chainRange = QtWidgets.QWidget()
-    gridly = QtWidgets.QGridLayout(chainRange)
+    chainRange = QWidget()
+    gridly = QGridLayout(chainRange)
     gridly.setContentsMargins(0, 0, 0, 0)
 
-    gridly.addWidget(QtWidgets.QLabel("From [km]", win), 0, 0)
-    startRange = QtWidgets.QLineEdit(win)
+    gridly.addWidget(QLabel("From [km]", win), 0, 0)
+    startRange = QLineEdit(win)
     dialog["startRange"] = startRange
     gridly.addWidget(startRange, 0, 1)
-    gridly.addWidget(QtWidgets.QLabel("To [km]", win), 0, 2)
-    endRange = QtWidgets.QLineEdit(win)
+    gridly.addWidget(QLabel("To [km]", win), 0, 2)
+    endRange = QLineEdit(win)
     dialog["endRange"] = endRange
     gridly.addWidget(endRange, 0, 3)
 
@@ -103,7 +115,7 @@ def addGeneralTab(
 
     addOpenFileRow(generalLayout, "bankDir", "Bank Directory")
 
-    bankFileName = QtWidgets.QLineEdit(win)
+    bankFileName = QLineEdit(win)
     dialog["bankFileName"] = bankFileName
     generalLayout.addRow("Bank File Name", bankFileName)
 
@@ -113,28 +125,28 @@ def addGeneralTab(
     addCheckBox(generalLayout, "savePlots", "Save Figures", True)
     dialog["savePlotsEdit"].stateChanged.connect(updatePlotting)
 
-    zoomPlots = QtWidgets.QWidget()
-    gridly = QtWidgets.QGridLayout(zoomPlots)
+    zoomPlots = QWidget()
+    gridly = QGridLayout(zoomPlots)
     gridly.setContentsMargins(0, 0, 0, 0)
 
-    saveZoomPlotsEdit = QtWidgets.QCheckBox("", win)
+    saveZoomPlotsEdit = QCheckBox("", win)
     saveZoomPlotsEdit.stateChanged.connect(updatePlotting)
     saveZoomPlotsEdit.setChecked(False)
     gridly.addWidget(saveZoomPlotsEdit, 0, 0)
     dialog["saveZoomPlotsEdit"] = saveZoomPlotsEdit
 
-    zoomPlotsRangeTxt = QtWidgets.QLabel("Zoom Range [km]", win)
+    zoomPlotsRangeTxt = QLabel("Zoom Range [km]", win)
     zoomPlotsRangeTxt.setEnabled(False)
     gridly.addWidget(zoomPlotsRangeTxt, 0, 1)
     dialog["zoomPlotsRangeTxt"] = zoomPlotsRangeTxt
 
-    zoomPlotsRangeEdit = QtWidgets.QLineEdit("1.0",win)
+    zoomPlotsRangeEdit = QLineEdit("1.0",win)
     zoomPlotsRangeEdit.setValidator(validator("positive_real"))
     zoomPlotsRangeEdit.setEnabled(False)
     gridly.addWidget(zoomPlotsRangeEdit, 0, 2)
     dialog["zoomPlotsRangeEdit"] = zoomPlotsRangeEdit
 
-    saveZoomPlots = QtWidgets.QLabel("Save Zoomed Figures", win)
+    saveZoomPlots = QLabel("Save Zoomed Figures", win)
     generalLayout.addRow(saveZoomPlots, zoomPlots)
     dialog["saveZoomPlots"] = saveZoomPlots
 
@@ -144,7 +156,7 @@ def addGeneralTab(
 
 
 def addCheckBox(
-    formLayout: QtWidgets.QFormLayout,
+    formLayout: QFormLayout,
     key: str,
     labelString: str,
     isChecked: bool = False,
@@ -154,7 +166,7 @@ def addCheckBox(
 
     Arguments
     ---------
-    formLayout : QtWidgets.QFormLayout
+    formLayout : QFormLayout
         Form layout object in which to position the edit controls.
     key : str
         Short name of the parameter.
@@ -163,76 +175,76 @@ def addCheckBox(
     isChecked : bool
         Initial state of the check box.
     """
-    checkBox = QtWidgets.QCheckBox("")
+    checkBox = QCheckBox("")
     checkBox.setChecked(isChecked)
     dialog[key + "Edit"] = checkBox
 
-    checkTxt = QtWidgets.QLabel(labelString)
+    checkTxt = QLabel(labelString)
     dialog[key] = checkTxt
     formLayout.addRow(checkTxt, checkBox)
 
 
 def addDetectTab(
-    tabs: QtWidgets.QTabWidget,
-    win: QtWidgets.QMainWindow,
-    app: QtWidgets.QApplication,
+    tabs: QTabWidget,
+    win: QMainWindow,
+    app: QApplication,
 ) -> None:
     """
     Create the tab for the bank line detection settings.
 
     Arguments
     ---------
-    tabs : QtWidgets.QTabWidget
+    tabs : QTabWidget
         Tabs object to which the tab should be added.
-    win : QtWidgets.QMainWindow
+    win : QMainWindow
         The window object in which the tab item is located.
-    app : QtWidgets.QApplication
+    app : QApplication
         The application object to which the window belongs, needed for font information.
     """
-    detectWidget = QtWidgets.QWidget()
-    detectLayout = QtWidgets.QFormLayout(detectWidget)
+    detectWidget = QWidget()
+    detectLayout = QFormLayout(detectWidget)
     tabs.addTab(detectWidget, "Detection")
 
     addOpenFileRow(detectLayout, "simFile", "Simulation File")
 
-    waterDepth = QtWidgets.QLineEdit(win)
+    waterDepth = QLineEdit(win)
     waterDepth.setValidator(validator("positive_real"))
     dialog["waterDepth"] = waterDepth
     detectLayout.addRow("Water Depth [m]", waterDepth)
 
-    searchLines = QtWidgets.QTreeWidget(win)
+    searchLines = QTreeWidget(win)
     searchLines.setHeaderLabels(["Index", "FileName", "Search Distance [m]"])
     searchLines.setFont(app.font())
     searchLines.setColumnWidth(0, 50)
     searchLines.setColumnWidth(1, 200)
-    # c1 = QtWidgets.QTreeWidgetItem(searchLines, ["0", "test\\filename", "50"])
+    # c1 = QTreeWidgetItem(searchLines, ["0", "test\\filename", "50"])
 
     slLayout = addRemoveEditLayout(searchLines, "searchLines")
     detectLayout.addRow("Search Lines", slLayout)
 
 
 def addErosionTab(
-    tabs: QtWidgets.QTabWidget,
-    win: QtWidgets.QMainWindow,
-    app: QtWidgets.QApplication,
+    tabs: QTabWidget,
+    win: QMainWindow,
+    app: QApplication,
 ) -> None:
     """
     Create the tab for the main bank erosion settings.
 
     Arguments
     ---------
-    tabs : QtWidgets.QTabWidget
+    tabs : QTabWidget
         Tabs object to which the tab should be added.
-    win : QtWidgets.QMainWindow
+    win : QMainWindow
         The window object in which the tab item is located.
-    app : QtWidgets.QApplication
+    app : QApplication
         The application object to which the window belongs, needed for font information.
     """
-    erosionWidget = QtWidgets.QWidget()
-    erosionLayout = QtWidgets.QFormLayout(erosionWidget)
+    erosionWidget = QWidget()
+    erosionLayout = QFormLayout(erosionWidget)
     tabs.addTab(erosionWidget, "Erosion")
 
-    tErosion = QtWidgets.QLineEdit(win)
+    tErosion = QLineEdit(win)
     tErosion.setValidator(validator("positive_real"))
     dialog["tErosion"] = tErosion
     erosionLayout.addRow("Simulation Time [yr]", tErosion)
@@ -241,60 +253,60 @@ def addErosionTab(
 
     addOpenFileRow(erosionLayout, "fairway", "Fairway File")
 
-    discharges = QtWidgets.QTreeWidget(win)
+    discharges = QTreeWidget(win)
     discharges.setHeaderLabels(["Level", "FileName", "Probability [-]"])
     discharges.setFont(app.font())
     discharges.setColumnWidth(0, 50)
     discharges.setColumnWidth(1, 250)
-    # c1 = QtWidgets.QTreeWidgetItem(discharges, ["0", "test\\filename", "0.5"])
+    # c1 = QTreeWidgetItem(discharges, ["0", "test\\filename", "0.5"])
 
     disLayout = addRemoveEditLayout(discharges, "discharges")
     erosionLayout.addRow("Discharges", disLayout)
 
-    refLevel = QtWidgets.QLineEdit(win)
-    refLevel.setValidator(QtGui.QIntValidator(1, 1))
+    refLevel = QLineEdit(win)
+    refLevel.setValidator(QIntValidator(1, 1))
     dialog["refLevel"] = refLevel
     erosionLayout.addRow("Reference Case", refLevel)
 
-    chainageOutStep = QtWidgets.QLineEdit(win)
+    chainageOutStep = QLineEdit(win)
     chainageOutStep.setValidator(validator("positive_real"))
     dialog["chainageOutStep"] = chainageOutStep
     erosionLayout.addRow("Chainage Output Step [km]", chainageOutStep)
 
     addOpenFileRow(erosionLayout, "outDir", "Output Directory")
 
-    newBankFile = QtWidgets.QLineEdit(win)
+    newBankFile = QLineEdit(win)
     dialog["newBankFile"] = newBankFile
     erosionLayout.addRow("New Bank File Name", newBankFile)
 
-    newEqBankFile = QtWidgets.QLineEdit(win)
+    newEqBankFile = QLineEdit(win)
     dialog["newEqBankFile"] = newEqBankFile
     erosionLayout.addRow("New Eq Bank File Name", newEqBankFile)
 
-    eroVol = QtWidgets.QLineEdit(win)
+    eroVol = QLineEdit(win)
     dialog["eroVol"] = eroVol
     erosionLayout.addRow("EroVol File Name", eroVol)
 
-    eroVolEqui = QtWidgets.QLineEdit(win)
+    eroVolEqui = QLineEdit(win)
     dialog["eroVolEqui"] = eroVolEqui
     erosionLayout.addRow("EroVolEqui File Name", eroVolEqui)
 
 
 def addShippingTab(
-    tabs: QtWidgets.QTabWidget, win: QtWidgets.QMainWindow
+    tabs: QTabWidget, win: QMainWindow
 ) -> None:
     """
     Create the tab for the general shipping settings.
 
     Arguments
     ---------
-    tabs : QtWidgets.QTabWidget
+    tabs : QTabWidget
         Tabs object to which the tab should be added.
-    win : QtWidgets.QMainWindow
+    win : QMainWindow
         The window object in which the tab item is located.
     """
-    eParamsWidget = QtWidgets.QWidget()
-    eParamsLayout = QtWidgets.QGridLayout(eParamsWidget)
+    eParamsWidget = QWidget()
+    eParamsLayout = QGridLayout(eParamsWidget)
     tabs.addTab(eParamsWidget, "Shipping Parameters")
 
     generalParLayout(eParamsLayout, 0, "shipType", "Ship Type", selectList=SHIP_TYPES)
@@ -305,32 +317,32 @@ def addShippingTab(
     generalParLayout(eParamsLayout, 6, "wavePar0", "Wave0 [m]")
     generalParLayout(eParamsLayout, 7, "wavePar1", "Wave1 [m]")
 
-    stretch = QtWidgets.QSpacerItem(
+    stretch = QSpacerItem(
         10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
     )
     eParamsLayout.addItem(stretch, 8, 0)
 
 
 def addBankTab(
-    tabs: QtWidgets.QTabWidget, win: QtWidgets.QMainWindow
+    tabs: QTabWidget, win: QMainWindow
 ) -> None:
     """
     Create the tab for the general bank properties.
 
     Arguments
     ---------
-    tabs : QtWidgets.QTabWidget
+    tabs : QTabWidget
         Tabs object to which the tab should be added.
-    win : QtWidgets.QMainWindow
+    win : QMainWindow
         The window object in which the tab item is located.
     """
-    eParamsWidget = QtWidgets.QWidget()
-    eParamsLayout = QtWidgets.QGridLayout(eParamsWidget)
+    eParamsWidget = QWidget()
+    eParamsLayout = QGridLayout(eParamsWidget)
     tabs.addTab(eParamsWidget, "Bank Parameters")
 
-    strength = QtWidgets.QLabel("Strength Parameter")
+    strength = QLabel("Strength Parameter")
     eParamsLayout.addWidget(strength, 0, 0)
-    strengthPar = QtWidgets.QComboBox()
+    strengthPar = QComboBox()
     strengthPar.addItems(("Bank Type", "Critical Shear Stress"))
     strengthPar.currentIndexChanged.connect(bankStrengthSwitch)
     dialog["strengthPar"] = strengthPar
@@ -358,21 +370,21 @@ def addBankTab(
     addFilter(eParamsLayout, 7, "velFilter", "Velocity Filter [km]")
     addFilter(eParamsLayout, 8, "bedFilter", "Bank Elevation Filter [km]")
 
-    stretch = QtWidgets.QSpacerItem(
+    stretch = QSpacerItem(
         10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
     )
     eParamsLayout.addItem(stretch, 9, 0)
 
 
 def addFilter(
-    gridLayout: QtWidgets.QGridLayout, row: int, key: str, labelString: str
+    gridLayout: QGridLayout, row: int, key: str, labelString: str
 ) -> None:
     """
     Add a line of controls for a filter
 
     Arguments
     ---------
-    gridLayout : QtWidgets.QGridLayout
+    gridLayout : QGridLayout
         Grid layout object in which to position the edit controls.
     row : int
         Grid row number to be used for this parameter.
@@ -382,18 +394,18 @@ def addFilter(
         String describing the parameter to be displayed as label.
     """
 
-    widthEdit = QtWidgets.QLineEdit("0.3")
+    widthEdit = QLineEdit("0.3")
     widthEdit.setValidator(validator("positive_real"))
     gridLayout.addWidget(widthEdit, row, 2)
     dialog[key + "Width"] = widthEdit
 
-    useFilter = QtWidgets.QCheckBox("")
+    useFilter = QCheckBox("")
     useFilter.setChecked(False)
     useFilter.stateChanged.connect(lambda: updateFilter(key))
     gridLayout.addWidget(useFilter, row, 1)
     dialog[key + "Active"] = useFilter
 
-    filterTxt = QtWidgets.QLabel(labelString)
+    filterTxt = QLabel(labelString)
     gridLayout.addWidget(filterTxt, row, 0)
     dialog[key + "Txt"] = filterTxt
 
@@ -416,13 +428,7 @@ def updateFilter(key: str) -> None:
 
 
 def bankStrengthSwitch() -> None:
-    """
-    Implements the dialog settings depending on the bank strength specification method.
-
-    Arguments
-    ---------
-    None
-    """
+    """Implements the dialog settings depending on the bank strength specification method."""
     type = dialog["strengthPar"].currentText()
     if type == "Bank Type":
         dialog["bankType"].setEnabled(True)
@@ -446,7 +452,7 @@ def bankStrengthSwitch() -> None:
         dialog["bankTypeEditFile"].setEnabled(False)
 
 
-def validator(validstr: str) -> QtGui.QValidator:
+def validator(validstr: str) -> QValidator:
     """
     Wrapper to easily create a validator.
 
@@ -457,11 +463,11 @@ def validator(validstr: str) -> QtGui.QValidator:
 
     Returns
     -------
-    validator : QtGui.QValidator
+    validator : QValidator
         Validator for the requested validation method.
     """
     if validstr == "positive_real":
-        validator = QtGui.QDoubleValidator()
+        validator = QDoubleValidator()
         validator.setBottom(0)
     else:
         raise ValueError(f"Unknown validator type: {validstr}")
@@ -469,7 +475,7 @@ def validator(validstr: str) -> QtGui.QValidator:
 
 
 def generalParLayout(
-    gridLayout: QtWidgets.QGridLayout,
+    gridLayout: QGridLayout,
     row: int,
     key: str,
     labelString: str,
@@ -480,7 +486,7 @@ def generalParLayout(
 
     Arguments
     ---------
-    gridLayout : QtWidgets.QGridLayout
+    gridLayout : QGridLayout
         Grid layout object in which to position the edit controls.
     row : int
         Grid row number to be used for this parameter.
@@ -507,7 +513,7 @@ def generalParLayout(
         fLayout = openFileLayout(key + "Edit", enabled=False)
         gridLayout.addWidget(fLayout, row, 2)
     else:
-        Select = QtWidgets.QComboBox()
+        Select = QComboBox()
         Select.addItems(selectList)
         dialog[key + "Select"] = Select
         gridLayout.addWidget(Select, row, 2)
@@ -520,27 +526,27 @@ def generalParLayout(
 
 
 def addOpenFileRow(
-    formLayout: QtWidgets.QFormLayout, key: str, labelString: str
+    formLayout: QFormLayout, key: str, labelString: str
 ) -> None:
     """
     Add a line of controls for selecting a file or folder in a form layout.
 
     Arguments
     ---------
-    formLayout : QtWidgets.QFormLayout
+    formLayout : QFormLayout
         Form layout object in which to position the edit controls.
     key : str
         Short name of the parameter.
     labelString : str
         String describing the parameter to be displayed as label.
     """
-    Label = QtWidgets.QLabel(labelString)
+    Label = QLabel(labelString)
     dialog[key] = Label
     fLayout = openFileLayout(key + "Edit")
     formLayout.addRow(Label, fLayout)
 
 
-def openFileLayout(key, enabled=True) -> QtWidgets.QWidget:
+def openFileLayout(key, enabled=True) -> QWidget:
     """
     Create a standard layout with a file or folder edit field and selection button.
 
@@ -553,14 +559,14 @@ def openFileLayout(key, enabled=True) -> QtWidgets.QWidget:
 
     Returns
     ------
-    parent : QtWidgets.QWidget
+    parent : QWidget
         Parent QtWidget that contains the edit field and selection button.
     """
-    parent = QtWidgets.QWidget()
-    gridly = QtWidgets.QGridLayout(parent)
+    parent = QWidget()
+    gridly = QGridLayout(parent)
     gridly.setContentsMargins(0, 0, 0, 0)
 
-    myWidget = QtWidgets.QLineEdit()
+    myWidget = QLineEdit()
     dialog[key] = myWidget
     gridly.addWidget(myWidget, 0, 0)
 
@@ -574,31 +580,31 @@ def openFileLayout(key, enabled=True) -> QtWidgets.QWidget:
 
 
 def addRemoveEditLayout(
-    mainWidget: QtWidgets.QWidget, key: str
-) -> QtWidgets.QWidget:
+    mainWidget: QWidget, key: str
+) -> QWidget:
     """
     Create a standard layout with list control and add, edit and remove buttons.
 
     Arguments
     ---------
-    mainWidget : QtWidgets.QWidget
+    mainWidget : QWidget
         Main object on which the add, edit and remove buttons should operate.
     key : str
         Short name of the parameter.
 
     Returns
     -------
-    parent : QtWidgets.QWidget
+    parent : QWidget
         Parent QtWidget that contains the add, edit and remove buttons.
     """
-    parent = QtWidgets.QWidget()
-    gridly = QtWidgets.QGridLayout(parent)
+    parent = QWidget()
+    gridly = QGridLayout(parent)
     gridly.setContentsMargins(0, 0, 0, 0)
 
     dialog[key] = mainWidget
     gridly.addWidget(mainWidget, 0, 0)
 
-    buttonBar = QtWidgets.QWidget()
+    buttonBar = QWidget()
     buttonBarLayout = QBoxLayout(QBoxLayout.Direction.TopToBottom, buttonBar)
     buttonBarLayout.setContentsMargins(0, 0, 0, 0)
     gridly.addWidget(buttonBar, 0, 1)
@@ -620,7 +626,7 @@ def addRemoveEditLayout(
     dialog[key + "Remove"] = delBtn
     buttonBarLayout.addWidget(delBtn)
 
-    stretch = QtWidgets.QSpacerItem(
+    stretch = QSpacerItem(
         10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
     )
     buttonBarLayout.addItem(stretch)
@@ -670,24 +676,24 @@ def addAnItem(key: str) -> None:
     istr = str(i)
     if key == "searchLines":
         fileName, dist = editASearchLine(key, istr)
-        c1 = QtWidgets.QTreeWidgetItem(dialog["searchLines"], [istr, fileName, dist])
+        c1 = QTreeWidgetItem(dialog["searchLines"], [istr, fileName, dist])
     elif key == "discharges":
         prob = str(1 / (nItems + 1))
         fileName, prob = editADischarge(key, istr, prob=prob)
-        c1 = QtWidgets.QTreeWidgetItem(dialog["discharges"], [istr, fileName, prob])
+        c1 = QTreeWidgetItem(dialog["discharges"], [istr, fileName, prob])
         addTabForLevel(istr)
         dialog["refLevel"].validator().setTop(i)
     dialog[key + "Edit"].setEnabled(True)
     dialog[key + "Remove"].setEnabled(True)
 
 
-def setDialogSize(editDialog: QtWidgets.QDialog, width: int, height: int) -> None:
+def setDialogSize(editDialog: QDialog, width: int, height: int) -> None:
     """
     Set the width and height of a dialog and position it centered relative to the main window.
     
     Arguments
     ---------
-    editDialog : QtWidgets.QDialog
+    editDialog : QDialog
         Dialog object to be positioned correctly.
     width : int
         Desired width of the dialog.
@@ -734,15 +740,15 @@ def editASearchLine(
         QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint
     )
     editDialog.setWindowTitle("Edit Search Line")
-    editLayout = QtWidgets.QFormLayout(editDialog)
+    editLayout = QFormLayout(editDialog)
 
-    label = QtWidgets.QLabel(istr)
+    label = QLabel(istr)
     editLayout.addRow("Search Line Nr", label)
 
     addOpenFileRow(editLayout, "editSearchLine", "Search Line File")
     dialog["editSearchLineEdit"].setText(fileName)
 
-    searchDistance = QtWidgets.QLineEdit()
+    searchDistance = QLineEdit()
     searchDistance.setText(dist)
     searchDistance.setValidator(validator("positive_real"))
     editLayout.addRow("Search Distance [m]", searchDistance)
@@ -780,15 +786,15 @@ def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
         QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint
     )
     editDialog.setWindowTitle("Edit Discharge")
-    editLayout = QtWidgets.QFormLayout(editDialog)
+    editLayout = QFormLayout(editDialog)
 
-    label = QtWidgets.QLabel(istr)
+    label = QLabel(istr)
     editLayout.addRow("Level Nr", label)
 
     addOpenFileRow(editLayout, "editDischarge", "Simulation File")
     dialog["editDischargeEdit"].setText(fileName)
 
-    probability = QtWidgets.QLineEdit()
+    probability = QLineEdit()
     probability.setText(prob)
     probability.setValidator(validator("positive_real"))
     editLayout.addRow("Probability [-]", probability)
@@ -926,40 +932,40 @@ def selectFile(key: str) -> None:
         # don't trigger the actual selectFile
         fil = ""
     elif key == "simFileEdit":
-        fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
+        fil, fltr = QFileDialog.getOpenFileName(
             caption="Select D-Flow FM Map File", filter="D-Flow FM Map Files (*map.nc)"
         )
         # getOpenFileName returns a tuple van file name and active file filter.
     elif key == "chainFileEdit":
-        fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
+        fil, fltr = QFileDialog.getOpenFileName(
             caption="Select Chainage File", filter="Chainage Files (*.xyc)"
         )
     elif key == "riverAxisEdit":
-        fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
+        fil, fltr = QFileDialog.getOpenFileName(
             caption="Select River Axis File", filter="River Axis Files (*.xyc)"
         )
     elif key == "fairwayEdit":
-        fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
+        fil, fltr = QFileDialog.getOpenFileName(
             caption="Select Fairway File", filter="Fairway Files (*.xyc)"
         )
     elif key == "editSearchLineEdit":
-        fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
+        fil, fltr = QFileDialog.getOpenFileName(
             caption="Select Search Line File", filter="Search Line Files (*.xyc)"
         )
     elif key == "editDischargeEdit":
-        fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
+        fil, fltr = QFileDialog.getOpenFileName(
             caption="Select Simulation File", filter="Simulation File (*map.nc)"
         )
     elif key == "bankDirEdit":
-        fil = QtWidgets.QFileDialog.getExistingDirectory(
+        fil = QFileDialog.getExistingDirectory(
             caption="Select Bank Directory"
         )
     elif key == "figureDirEdit":
-        fil = QtWidgets.QFileDialog.getExistingDirectory(
+        fil = QFileDialog.getExistingDirectory(
             caption="Select Figure Output Directory"
         )
     elif key == "outDirEdit":
-        fil = QtWidgets.QFileDialog.getExistingDirectory(
+        fil = QFileDialog.getExistingDirectory(
             caption="Select Output Directory"
         )
     else:
@@ -1025,7 +1031,7 @@ def selectFile(key: str) -> None:
                 ftype = "Parameter"
                 ext = "*"
             ftype = ftype + " File"
-            fil, fltr = QtWidgets.QFileDialog.getOpenFileName(
+            fil, fltr = QFileDialog.getOpenFileName(
                 caption="Select " + ftype + nr, filter=ftype + " (*" + ext + ")"
             )
             if fil != "":
@@ -1151,7 +1157,7 @@ def menu_load_configuration() -> None:
     ---------
     None
     """
-    fil = QtWidgets.QFileDialog.getOpenFileName(
+    fil = QFileDialog.getOpenFileName(
         caption="Select Configuration File", filter="Config Files (*.cfg)"
     )
     filename = fil[0]
@@ -1227,7 +1233,7 @@ def load_configuration(config_path: Path) -> None:
         for i in range(NBank):
             istr = str(i + 1)
             fileName = config_file.get_str("Detect", "Line" + istr)
-            c1 = QtWidgets.QTreeWidgetItem(
+            c1 = QTreeWidgetItem(
                 dialog["searchLines"], [istr, fileName, str(DLines[i])]
             )
         if NBank > 0:
@@ -1255,7 +1261,7 @@ def load_configuration(config_path: Path) -> None:
             istr = str(i + 1)
             fileName = config_file.get_str("Erosion", "SimFile" + istr)
             prob = config_file.get_str("Erosion", "PDischarge" + istr)
-            c1 = QtWidgets.QTreeWidgetItem(dialog["discharges"], [istr, fileName, prob])
+            c1 = QTreeWidgetItem(dialog["discharges"], [istr, fileName, prob])
         if NLevel > 0:
             dialog["dischargesEdit"].setEnabled(True)
             dialog["dischargesRemove"].setEnabled(True)
@@ -1329,8 +1335,8 @@ def addTabForLevel(istr: str) -> None:
     ---------
     None
     """
-    newWidget = QtWidgets.QWidget()
-    newLayout = QtWidgets.QGridLayout(newWidget)
+    newWidget = QWidget()
+    newLayout = QGridLayout(newWidget)
     dialog["tabs"].addTab(newWidget, "Level " + istr)
 
     optionalParLayout(
@@ -1343,28 +1349,28 @@ def addTabForLevel(istr: str) -> None:
     optionalParLayout(newLayout, 6, istr + "_bankSlope", "Slope [-]")
     optionalParLayout(newLayout, 7, istr + "_bankReed", "Reed [-]")
 
-    Label = QtWidgets.QLabel("EroVol File Name")
+    Label = QLabel("EroVol File Name")
     dialog[istr + "_eroVol"] = Label
     newLayout.addWidget(Label, 8, 0)
-    Edit = QtWidgets.QLineEdit()
+    Edit = QLineEdit()
     dialog[istr + "_eroVolEdit"] = Edit
     newLayout.addWidget(Edit, 8, 2)
 
-    stretch = QtWidgets.QSpacerItem(
+    stretch = QSpacerItem(
         10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
     )
     newLayout.addItem(stretch, 9, 0)
 
 
 def optionalParLayout(
-    gridLayout: QtWidgets.QGridLayout, row: int, key, labelString, selectList=None
+    gridLayout: QGridLayout, row: int, key, labelString, selectList=None
 ) -> None:
     """
     Add a line of controls for editing an optional parameter.
 
     Arguments
     ---------
-    gridLayout : QtWidgets.QGridLayout
+    gridLayout : QGridLayout
         Grid layout object in which to position the edit controls.
     row : int
         Grid row number to be used for this parameter.
@@ -1376,12 +1382,12 @@ def optionalParLayout(
         In case the parameter can only have a limited number of values: a list
         of strings describing the options.
     """
-    Label = QtWidgets.QLabel(labelString)
+    Label = QLabel(labelString)
     dialog[key + "Label"] = Label
     gridLayout.addWidget(Label, row, 0)
 
     paramTypes = ("Use Default", "Constant", "Variable")
-    Type = QtWidgets.QComboBox()
+    Type = QComboBox()
     Type.addItems(paramTypes)
     Type.currentIndexChanged.connect(lambda: typeUpdatePar(key))
     dialog[key + "Type"] = Type
@@ -1392,7 +1398,7 @@ def optionalParLayout(
         dialog[key + "Edit"].setEnabled(False)
         gridLayout.addWidget(fLayout, row, 2)
     else:
-        Select = QtWidgets.QComboBox()
+        Select = QComboBox()
         Select.addItems(selectList)
         Select.setEnabled(False)
         dialog[key + "Select"] = Select
@@ -1540,7 +1546,7 @@ def menu_save_configuration() -> None:
     ---------
     None
     """
-    fil = QtWidgets.QFileDialog.getSaveFileName(
+    fil = QFileDialog.getSaveFileName(
         caption="Save Configuration As", filter="Config Files (*.cfg)"
     )
     filename = fil[0]
@@ -1687,13 +1693,13 @@ def show_error(message: str, detailed_message: Optional[str] = None) -> None:
         detailed_message : Option[str]
             Text to be displayed when the user clicks the Details button.
     """
-    msg = QtWidgets.QMessageBox()
-    msg.setIcon(QtWidgets.QMessageBox.Critical)
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Critical)
     msg.setText(message)
     if detailed_message:
         msg.setDetailedText(detailed_message)
     msg.setWindowTitle("Error")
-    msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+    msg.setStandardButtons(QMessageBox.Ok)
     msg.exec()
 
 
@@ -1705,12 +1711,12 @@ def menu_about_self():
     ---------
     None
     """
-    msg = QtWidgets.QMessageBox()
+    msg = QMessageBox()
     msg.setText(f"D-FAST Bank Erosion {__version__}")
     msg.setInformativeText("Copyright (c) 2025 Deltares.")
     msg.setDetailedText(gui_text("license"))
     msg.setWindowTitle(gui_text("about"))
-    msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+    msg.setStandardButtons(QMessageBox.Ok)
     
     dfast_icon = get_icon(f"{ICONS_DIR}/D-FASTBE.png")
     available_sizes = dfast_icon.availableSizes()
@@ -1730,7 +1736,7 @@ def menu_about_qt():
     ---------
     None
     """
-    QtWidgets.QApplication.aboutQt()
+    QApplication.aboutQt()
 
 
 def menu_open_manual():
@@ -1785,7 +1791,7 @@ class GUI:
         win.setWindowIcon(get_icon(f"{ICONS_DIR}/D-FASTBE.png"))
 
         # win.resize(1000, 800)
-        # win.setCentralWidget(QtWidgets.QWidget())
+        # win.setCentralWidget(QWidget())
         return win
 
     def create(self) -> None:
@@ -1797,15 +1803,15 @@ class GUI:
         menubar = win.menuBar()
         self.create_menus(menubar)
 
-        centralWidget = QtWidgets.QWidget()
+        centralWidget = QWidget()
         layout = QBoxLayout(QBoxLayout.Direction.TopToBottom, centralWidget)
         win.setCentralWidget(centralWidget)
 
-        tabs = QtWidgets.QTabWidget(win)
+        tabs = QTabWidget(win)
         dialog["tabs"] = tabs
         layout.addWidget(tabs)
 
-        buttonBar = QtWidgets.QWidget(win)
+        buttonBar = QWidget(win)
         buttonBarLayout = QBoxLayout(QBoxLayout.Direction.LeftToRight, buttonBar)
         buttonBarLayout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(buttonBar)
@@ -1828,13 +1834,13 @@ class GUI:
         addShippingTab(tabs, win)
         addBankTab(tabs, win)
 
-    def create_menus(self, menubar: QtWidgets.QMenuBar) -> None:
+    def create_menus(self, menubar: QMenuBar) -> None:
         """
         Add the menus to the menubar.
 
         Arguments
         ---------
-        menubar : QtWidgets.QMenuBar
+        menubar : QMenuBar
             Menubar to which menus should be added.
         """
         menu = menubar.addMenu(gui_text("File"))
