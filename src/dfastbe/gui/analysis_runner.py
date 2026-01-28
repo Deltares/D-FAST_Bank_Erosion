@@ -1,16 +1,18 @@
+"""Analysis runner for the ui."""
+
 import os
 import traceback
 from typing import Callable
 
 import matplotlib.pyplot as plt
-from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QApplication
 
-from dfastbe.io.config import ConfigFile
 from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.gui.configs import get_configuration
 from dfastbe.gui.utils import show_error
+from dfastbe.io.config import ConfigFile
 
 __all__ = ["run_erosion", "run_detection"]
 
