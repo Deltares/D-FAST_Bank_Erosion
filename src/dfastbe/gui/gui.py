@@ -1795,6 +1795,9 @@ class GUI:
         dialog["tabs"] = self.tabs
         self.layout.addWidget(self.tabs)
 
+        self.menu_Bar = self.create_menu_bar()
+        self.button_bar = self.create_action_buttons()
+
     @staticmethod
     def create_window():
         win = QMainWindow()
@@ -1811,56 +1814,31 @@ class GUI:
 
     def create(self) -> None:
         """Construct the D-FAST Bank Erosion user interface."""
-        self.create_menu_bar()
-
-        central_widget = QWidget()
-        layout = QBoxLayout(QBoxLayout.Direction.TopToBottom, central_widget)
-        self.window.setCentralWidget(central_widget)
-
-        tabs = QTabWidget(self.window)
-        dialog["tabs"] = tabs
-        layout.addWidget(tabs)
-
-        buttonBar = QWidget(self.window)
-        buttonBarLayout = QBoxLayout(QBoxLayout.Direction.LeftToRight, buttonBar)
-        buttonBarLayout.setContentsMargins(0, 0, 0, 0)
-        layout.addWidget(buttonBar)
-
-        detect = QPushButton(gui_text("action_detect"), self.window)
-        detect.clicked.connect(run_detection)
-        buttonBarLayout.addWidget(detect)
-
-        erode = QPushButton(gui_text("action_erode"), self.window)
-        erode.clicked.connect(run_erosion)
-        buttonBarLayout.addWidget(erode)
-
-        done = QPushButton(gui_text("action_close"), self.window)
-        done.clicked.connect(self.close)
-        buttonBarLayout.addWidget(done)
-
-        general_tab = GeneralTab(tabs, self.window)
+        general_tab = GeneralTab(self.tabs, self.window)
         general_tab.create()
 
-        detection_tab = DetectionTab(tabs, self.window, self.app)
+        detection_tab = DetectionTab(self.tabs, self.window, self.app)
         detection_tab.create()
 
-        erosion_tab = ErosionTab(tabs, self.window, self.app)
+        erosion_tab = ErosionTab(self.tabs, self.window, self.app)
         erosion_tab.create()
 
-        shipping_tab = ShippingTab(tabs)
+        shipping_tab = ShippingTab(self.tabs)
         shipping_tab.create()
 
-        bank_tab = BankTab(tabs)
+        bank_tab = BankTab(self.tabs)
         bank_tab.create()
 
-    def create_menu_bar(self) -> None:
+    def create_menu_bar(self) -> MenuBar:
         """Add the menus to the menubar."""
-        self.menu = MenuBar(window=self.window, app=self.app)
-        self.menu.create()
+        menu = MenuBar(window=self.window, app=self.app)
+        menu.create()
+        return menu
 
-    def create_action_buttons(self):
-        self.button_bar = ButtonBar(window=self.window, app=self.app, layout=self.layout)
-        self.button_bar.create()
+    def create_action_buttons(self) -> ButtonBar:
+        button_bar = ButtonBar(window=self.window, app=self.app, layout=self.layout)
+        button_bar.create()
+        return button_bar
 
     def activate(self) -> None:
         """Activate the user interface and run the program."""
