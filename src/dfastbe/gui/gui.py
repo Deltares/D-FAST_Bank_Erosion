@@ -641,13 +641,8 @@ def openFileLayout(key, enabled=True) -> QWidget:
 
 
 def updatePlotting() -> None:
-    """
-    Update the plotting flags.
-    
-    Arguments
-    ---------
-    None
-    """
+    """Update the plotting flags."""
+
     plotFlag = dialog["makePlotsEdit"].isChecked()
     dialog["savePlots"].setEnabled(plotFlag)
     dialog["savePlotsEdit"].setEnabled(plotFlag)
@@ -1812,20 +1807,20 @@ class GUI:
 
     def create(self) -> None:
         """Construct the D-FAST Bank Erosion user interface."""
-        general_tab = GeneralTab(self.tabs, self.window)
-        general_tab.create()
+        self.general_tab = GeneralTab(self.tabs, self.window)
+        self.general_tab.create()
 
-        detection_tab = DetectionTab(self.tabs, self.window, self.app)
-        detection_tab.create()
+        self.detection_tab = DetectionTab(self.tabs, self.window, self.app)
+        self.detection_tab.create()
 
-        erosion_tab = ErosionTab(self.tabs, self.window, self.app)
-        erosion_tab.create()
+        self.erosion_tab = ErosionTab(self.tabs, self.window, self.app)
+        self.erosion_tab.create()
 
-        shipping_tab = ShippingTab(self.tabs)
-        shipping_tab.create()
+        self.shipping_tab = ShippingTab(self.tabs)
+        self.shipping_tab.create()
 
-        bank_tab = BankTab(self.tabs)
-        bank_tab.create()
+        self.bank_tab = BankTab(self.tabs)
+        self.bank_tab.create()
 
     def create_menu_bar(self) -> MenuBar:
         """Add the menus to the menubar."""
@@ -1866,6 +1861,7 @@ class BaseBar:
         self.window.close()
         self.app.closeAllWindows()
         self.app.quit()
+
 
 class MenuBar(BaseBar):
     def __init__(self, window: QMainWindow, app: QApplication):
