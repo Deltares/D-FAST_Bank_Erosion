@@ -12,6 +12,8 @@ from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.gui.configs import get_configuration
 from dfastbe.gui.utils import show_error
 
+__all__ = ["run_erosion", "run_detection"]
+
 
 class Invoker:
 

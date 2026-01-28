@@ -7,10 +7,10 @@ from PySide6.QtGui import QValidator, QDoubleValidator
 
 from dfastbe.io.logger import LogData
 
-from dfastbe import __version__
+from dfastbe import __version__, __path__
 
 SHIP_TYPES = ["1 (multiple barge convoy set)", "2 (RHK ship / motorship)", "3 (towboat)"]
-r_dir = Path(__file__).resolve().parent
+r_dir = Path(__path__[0])
 ICONS_DIR = r_dir / "gui/icons"
 USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
 

@@ -56,7 +56,6 @@ from PySide6.QtWidgets import (
     QFileDialog,
 )
 
-from dfastbe import __file__
 from dfastbe.io.config import ConfigFile
 from dfastbe.gui.utils import (
     get_icon,
@@ -81,11 +80,7 @@ from dfastbe.gui.configs import (
 from dfastbe.gui.analysis_runner import run_detection, run_erosion
 
 
-DialogObject = Dict[str, QtCore.QObject]
-
-dialog: DialogObject
-
-r_dir = Path(__file__).resolve().parent
+dialog: Dict[str, QtCore.QObject]
 
 
 class BaseTab:
@@ -855,23 +850,6 @@ def menu_save_configuration() -> None:
         config.write(filename)
 
 
-def main(config: Optional[Path] = None) -> None:
-    """
-    Start the user interface using default settings or optional configuration.
-
-    Arguments
-    ---------
-    config : Optional[str]
-        Optional name of configuration file.
-    """
-    gui = GUI()
-    gui.create()
-    if not config is None:
-        load_configuration(config)
-
-    gui.activate()
-
-
 class GUI:
 
     def __init__(self):
@@ -1009,3 +987,20 @@ class ButtonBar(BaseBar):
         done = QPushButton(gui_text("action_close"), self.window)
         done.clicked.connect(self.close)
         button_bar_layout.addWidget(done)
+
+
+def main(config: Optional[Path] = None) -> None:
+    """
+    Start the user interface using default settings or optional configuration.
+
+    Arguments
+    ---------
+    config : Optional[str]
+        Optional name of configuration file.
+    """
+    gui = GUI()
+    gui.create()
+    if not config is None:
+        load_configuration(config)
+
+    gui.activate()
