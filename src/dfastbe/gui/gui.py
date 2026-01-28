@@ -85,12 +85,11 @@ def addGeneralTab(
     These settings are used by both the bank line detection and the bank
     erosion analysis.
 
-    Arguments
-    ---------
-    tabs : QTabWidget
-        Tabs object to which the tab should be added.
-    win : QtWidgets.QMainWindow
-        Windows in which the tab item is located.
+    Args:
+        tabs : QTabWidget
+            Tabs object to which the tab should be added.
+        win : QtWidgets.QMainWindow
+            Windows in which the tab item is located.
     """
     generalWidget = QWidget()
     generalLayout = QFormLayout(generalWidget)
@@ -164,16 +163,15 @@ def addCheckBox(
     """
     Add a line of with checkbox control to a form layout.
 
-    Arguments
-    ---------
-    formLayout : QFormLayout
-        Form layout object in which to position the edit controls.
-    key : str
-        Short name of the parameter.
-    labelString : str
-        String describing the parameter to be displayed as label.
-    isChecked : bool
-        Initial state of the check box.
+    Args:
+        formLayout : QFormLayout
+            Form layout object in which to position the edit controls.
+        key : str
+            Short name of the parameter.
+        labelString : str
+            String describing the parameter to be displayed as label.
+        isChecked : bool
+            Initial state of the check box.
     """
     checkBox = QCheckBox("")
     checkBox.setChecked(isChecked)
@@ -1795,53 +1793,48 @@ class GUI:
         return win
 
     def create(self) -> None:
-        """
-        Construct the D-FAST Bank Erosion user interface.
-        """
-        win = self.window
-
-        menubar = win.menuBar()
+        """Construct the D-FAST Bank Erosion user interface."""
+        menubar = self.window.menuBar()
         self.create_menus(menubar)
 
         centralWidget = QWidget()
         layout = QBoxLayout(QBoxLayout.Direction.TopToBottom, centralWidget)
-        win.setCentralWidget(centralWidget)
+        self.window.setCentralWidget(centralWidget)
 
-        tabs = QTabWidget(win)
+        tabs = QTabWidget(self.window)
         dialog["tabs"] = tabs
         layout.addWidget(tabs)
 
-        buttonBar = QWidget(win)
+        buttonBar = QWidget(self.window)
         buttonBarLayout = QBoxLayout(QBoxLayout.Direction.LeftToRight, buttonBar)
         buttonBarLayout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(buttonBar)
 
-        detect = QPushButton(gui_text("action_detect"), win)
+        detect = QPushButton(gui_text("action_detect"), self.window)
         detect.clicked.connect(run_detection)
         buttonBarLayout.addWidget(detect)
 
-        erode = QPushButton(gui_text("action_erode"), win)
+        erode = QPushButton(gui_text("action_erode"), self.window)
         erode.clicked.connect(run_erosion)
         buttonBarLayout.addWidget(erode)
 
-        done = QPushButton(gui_text("action_close"), win)
+        done = QPushButton(gui_text("action_close"), self.window)
         done.clicked.connect(self.close)
         buttonBarLayout.addWidget(done)
 
-        addGeneralTab(tabs, win)
-        addDetectTab(tabs, win, self.app)
-        addErosionTab(tabs, win, self.app)
-        addShippingTab(tabs, win)
-        addBankTab(tabs, win)
+        addGeneralTab(tabs, self.window)
+        addDetectTab(tabs, self.window, self.app)
+        addErosionTab(tabs, self.window, self.app)
+        addShippingTab(tabs, self.window)
+        addBankTab(tabs, self.window)
 
     def create_menus(self, menubar: QMenuBar) -> None:
         """
         Add the menus to the menubar.
 
-        Arguments
-        ---------
-        menubar : QMenuBar
-            Menubar to which menus should be added.
+        Args:
+            menubar : QMenuBar
+                Menubar to which menus should be added.
         """
         menu = menubar.addMenu(gui_text("File"))
         item = menu.addAction(gui_text("Load"))
