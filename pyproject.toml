@@ -7,7 +7,7 @@ readme = "README.md"
 packages = [{ include = "dfastbe", from= "src"}]
 
 [tool.poetry.dependencies]
-python = "~3.11.0"
+python = ">=3.11.0,<3.15"
 numpy = ">=1.26.4"
 netcdf4 = "^1.7.3"
 pandas = ">=1.5.3"
@@ -19,8 +19,7 @@ dfastio = { git = "https://github.com/Deltares/D-FAST_Commons.git", rev = "0.1.0
 certifi = "2025.1.31"
 
 [tool.poetry.group.gui.dependencies]
-pyqt5 = "^5.15.11"
-pyqt5-qt5 = "5.15.2"
+pyside6 = "^6.10.1"
 
 [tool.poetry.group.binary.dependencies]
 cftime  = ">=1.6.3"

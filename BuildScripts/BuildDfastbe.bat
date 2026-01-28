@@ -39,7 +39,7 @@ START /B /WAIT python -m nuitka ^
  --enable-plugin=anti-bloat ^
  --report=compilation-report.xml ^
  --show-progress ^
- --enable-plugin=pyqt5 ^
+ --enable-plugin=pyside6 ^
  --file-reference-choice=runtime ^
  --include-package=unittest ^
  --include-package=numpy ^
