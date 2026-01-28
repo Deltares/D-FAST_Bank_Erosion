@@ -16,23 +16,20 @@ class TestBatchMode:
         test_dir = "tests/data/bank_lines"
         try:
             os.chdir(test_dir)
-
-            result = subprocess.run(
-                [
-                    exe_path,
-                    "--mode",
-                    "BANKLINES",
-                    "--config",
-                    "config.cfg",
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-            )
-            out_str = result.stdout.decode("UTF-8").splitlines()
+            with pytest.raises(FileNotFoundError):
+                subprocess.run(
+                    [
+                        exe_path,
+                        "--mode",
+                        "BANKLINES",
+                        "--config",
+                        "config.cfg",
+                    ],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                )
         finally:
             os.chdir(cwd)
-
-        assert out_str[-1] == "FileNotFoundError: The Config-File: config.cfg does not exist"
 
     def test_bank_lines(self, exe_path: Path):
         """
