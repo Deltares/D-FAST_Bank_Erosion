@@ -76,82 +76,94 @@ r_dir = Path(__file__).resolve().parent
 ICONS_DIR = r_dir / "gui/icons"
 
 
-def addGeneralTab(
-    tabs: QTabWidget, win: QMainWindow
-) -> None:
-    """
-    Create the tab for the general settings.
+class BaseTab:
 
-    These settings are used by both the bank line detection and the bank
-    erosion analysis.
+    def __init__(self, tabs: QTabWidget, window: QMainWindow, app: QApplication | None = None):
+        self.tabs = tabs
+        self.window = window
+        self.app = app
 
-    Args:
-        tabs : QTabWidget
-            Tabs object to which the tab should be added.
-        win : QtWidgets.QMainWindow
-            Windows in which the tab item is located.
-    """
-    generalWidget = QWidget()
-    generalLayout = QFormLayout(generalWidget)
-    tabs.addTab(generalWidget, "General")
 
-    addOpenFileRow(generalLayout, "chainFile", "Chain File")
+class GeneralTab(BaseTab):
 
-    chainRange = QWidget()
-    gridly = QGridLayout(chainRange)
-    gridly.setContentsMargins(0, 0, 0, 0)
+    def __init__(self, tabs: QTabWidget, window: QMainWindow):
+        """Initializer.
 
-    gridly.addWidget(QLabel("From [km]", win), 0, 0)
-    startRange = QLineEdit(win)
-    dialog["startRange"] = startRange
-    gridly.addWidget(startRange, 0, 1)
-    gridly.addWidget(QLabel("To [km]", win), 0, 2)
-    endRange = QLineEdit(win)
-    dialog["endRange"] = endRange
-    gridly.addWidget(endRange, 0, 3)
+        Args:
+            tabs : QTabWidget
+                Tabs object to which the tab should be added.
+            window : QMainWindow
+                Windows in which the tab item is located.
+        """
+        super().__init__(tabs, window)
 
-    generalLayout.addRow("Study Range", chainRange)
+    def create(self,) -> None:
+        """Create the tab for the general settings.
 
-    addOpenFileRow(generalLayout, "bankDir", "Bank Directory")
+        These settings are used by both the bank line detection and the bank
+        erosion analysis.
+        """
+        generalWidget = QWidget()
+        generalLayout = QFormLayout(generalWidget)
+        self.tabs.addTab(generalWidget, "General")
 
-    bankFileName = QLineEdit(win)
-    dialog["bankFileName"] = bankFileName
-    generalLayout.addRow("Bank File Name", bankFileName)
+        addOpenFileRow(generalLayout, "chainFile", "Chain File")
 
-    addCheckBox(generalLayout, "makePlots", "Create Figures", True)
-    dialog["makePlotsEdit"].stateChanged.connect(updatePlotting)
+        chainRange = QWidget()
+        gridly = QGridLayout(chainRange)
+        gridly.setContentsMargins(0, 0, 0, 0)
 
-    addCheckBox(generalLayout, "savePlots", "Save Figures", True)
-    dialog["savePlotsEdit"].stateChanged.connect(updatePlotting)
+        gridly.addWidget(QLabel("From [km]", self.window), 0, 0)
+        startRange = QLineEdit(self.window)
+        dialog["startRange"] = startRange
+        gridly.addWidget(startRange, 0, 1)
+        gridly.addWidget(QLabel("To [km]", self.window), 0, 2)
+        endRange = QLineEdit(self.window)
+        dialog["endRange"] = endRange
+        gridly.addWidget(endRange, 0, 3)
 
-    zoomPlots = QWidget()
-    gridly = QGridLayout(zoomPlots)
-    gridly.setContentsMargins(0, 0, 0, 0)
+        generalLayout.addRow("Study Range", chainRange)
 
-    saveZoomPlotsEdit = QCheckBox("", win)
-    saveZoomPlotsEdit.stateChanged.connect(updatePlotting)
-    saveZoomPlotsEdit.setChecked(False)
-    gridly.addWidget(saveZoomPlotsEdit, 0, 0)
-    dialog["saveZoomPlotsEdit"] = saveZoomPlotsEdit
+        addOpenFileRow(generalLayout, "bankDir", "Bank Directory")
 
-    zoomPlotsRangeTxt = QLabel("Zoom Range [km]", win)
-    zoomPlotsRangeTxt.setEnabled(False)
-    gridly.addWidget(zoomPlotsRangeTxt, 0, 1)
-    dialog["zoomPlotsRangeTxt"] = zoomPlotsRangeTxt
+        bankFileName = QLineEdit(self.window)
+        dialog["bankFileName"] = bankFileName
+        generalLayout.addRow("Bank File Name", bankFileName)
 
-    zoomPlotsRangeEdit = QLineEdit("1.0",win)
-    zoomPlotsRangeEdit.setValidator(validator("positive_real"))
-    zoomPlotsRangeEdit.setEnabled(False)
-    gridly.addWidget(zoomPlotsRangeEdit, 0, 2)
-    dialog["zoomPlotsRangeEdit"] = zoomPlotsRangeEdit
+        addCheckBox(generalLayout, "makePlots", "Create Figures", True)
+        dialog["makePlotsEdit"].stateChanged.connect(updatePlotting)
 
-    saveZoomPlots = QLabel("Save Zoomed Figures", win)
-    generalLayout.addRow(saveZoomPlots, zoomPlots)
-    dialog["saveZoomPlots"] = saveZoomPlots
+        addCheckBox(generalLayout, "savePlots", "Save Figures", True)
+        dialog["savePlotsEdit"].stateChanged.connect(updatePlotting)
 
-    addOpenFileRow(generalLayout, "figureDir", "Figure Directory")
-    addCheckBox(generalLayout, "closePlots", "Close Figures")
-    addCheckBox(generalLayout, "debugOutput", "Debug Output")
+        zoomPlots = QWidget()
+        gridly = QGridLayout(zoomPlots)
+        gridly.setContentsMargins(0, 0, 0, 0)
+
+        saveZoomPlotsEdit = QCheckBox("", self.window)
+        saveZoomPlotsEdit.stateChanged.connect(updatePlotting)
+        saveZoomPlotsEdit.setChecked(False)
+        gridly.addWidget(saveZoomPlotsEdit, 0, 0)
+        dialog["saveZoomPlotsEdit"] = saveZoomPlotsEdit
+
+        zoomPlotsRangeTxt = QLabel("Zoom Range [km]", self.window)
+        zoomPlotsRangeTxt.setEnabled(False)
+        gridly.addWidget(zoomPlotsRangeTxt, 0, 1)
+        dialog["zoomPlotsRangeTxt"] = zoomPlotsRangeTxt
+
+        zoomPlotsRangeEdit = QLineEdit("1.0",self.window)
+        zoomPlotsRangeEdit.setValidator(validator("positive_real"))
+        zoomPlotsRangeEdit.setEnabled(False)
+        gridly.addWidget(zoomPlotsRangeEdit, 0, 2)
+        dialog["zoomPlotsRangeEdit"] = zoomPlotsRangeEdit
+
+        saveZoomPlots = QLabel("Save Zoomed Figures", self.window)
+        generalLayout.addRow(saveZoomPlots, zoomPlots)
+        dialog["saveZoomPlots"] = saveZoomPlots
+
+        addOpenFileRow(generalLayout, "figureDir", "Figure Directory")
+        addCheckBox(generalLayout, "closePlots", "Close Figures")
+        addCheckBox(generalLayout, "debugOutput", "Debug Output")
 
 
 def addCheckBox(
@@ -1794,8 +1806,7 @@ class GUI:
 
     def create(self) -> None:
         """Construct the D-FAST Bank Erosion user interface."""
-        menubar = self.window.menuBar()
-        self.create_menus(menubar)
+        self.create_menu_bar()
 
         centralWidget = QWidget()
         layout = QBoxLayout(QBoxLayout.Direction.TopToBottom, centralWidget)
@@ -1822,21 +1833,18 @@ class GUI:
         done.clicked.connect(self.close)
         buttonBarLayout.addWidget(done)
 
-        addGeneralTab(tabs, self.window)
+        general_tab = GeneralTab(tabs, self.window)
+        general_tab.create()
+
         addDetectTab(tabs, self.window, self.app)
         addErosionTab(tabs, self.window, self.app)
         addShippingTab(tabs, self.window)
         addBankTab(tabs, self.window)
 
-    def create_menus(self, menubar: QMenuBar) -> None:
-        """
-        Add the menus to the menubar.
-
-        Args:
-            menubar : QMenuBar
-                Menubar to which menus should be added.
-        """
-        menu = Menus(menubar, self.window)
+    def create_menu_bar(self) -> None:
+        """Add the menus to the menubar."""
+        menubar = self.window.menuBar()
+        menu = MenuBar(menubar, self.window)
         menu.create()
 
     def activate(self) -> None:
@@ -1850,7 +1858,7 @@ class GUI:
         self.window.close()
 
 
-class Menus:
+class MenuBar:
     def __init__(self, menubar: QMenuBar, window: QMainWindow):
         self.window = window
         self.menubar = menubar
