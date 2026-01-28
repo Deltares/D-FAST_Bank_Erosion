@@ -9,7 +9,7 @@ from PySide6.QtCore import Qt
 from dfastbe.io.config import ConfigFile
 from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_lines.bank_lines import BankLines
-
+from dfastbe.gui.configs import get_configuration
 from dfastbe.gui.utils import show_error
 
 
@@ -29,7 +29,6 @@ class Invoker:
             run_analysis_steps : Callable[[configparser.ConfigParser], None]
                 function containing the plain analysis steps
         """
-        from dfastbe.gui.gui import get_configuration
         config = get_configuration()
         rootdir = os.getcwd()
         config_file = ConfigFile(config)

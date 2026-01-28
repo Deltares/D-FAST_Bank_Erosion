@@ -2,7 +2,9 @@ import os
 from typing import Any, Dict
 from pathlib import Path
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QMessageBox, QApplication
+from PySide6.QtWidgets import QMessageBox, QApplication, QDialog
+from PySide6.QtGui import QValidator, QDoubleValidator
+
 from dfastbe.io.logger import LogData
 
 from dfastbe import __version__
@@ -20,7 +22,10 @@ __all__ = [
     "menu_open_manual",
     "show_error",
     "menu_about_qt",
-    "menu_about_self"
+    "menu_about_self",
+    "validator",
+    "close_edit",
+    "ICONS_DIR"
 ]
 
 
@@ -124,3 +129,32 @@ def menu_about_self():
 def menu_about_qt():
     """Show the about dialog for Qt."""
     QApplication.aboutQt()
+
+
+def validator(valid_str: str) -> QValidator:
+    """Wrapper to easily create a validator.
+
+    Args:
+        valid_str : str
+            Identifier for the requested validation method.
+
+    Returns:
+        validator : QValidator
+            Validator for the requested validation method.
+    """
+    if valid_str == "positive_real":
+        validator = QDoubleValidator()
+        validator.setBottom(0)
+    else:
+        raise ValueError(f"Unknown validator type: {valid_str}")
+    return validator
+
+
+def close_edit(q_dialog: QDialog) -> None:
+    """Generic close function for edit dialogs.
+
+    Args:
+        q_dialog : QDialog
+            Dialog object to be closed.
+    """
+    q_dialog.close()
