@@ -1801,6 +1801,7 @@ class GUI:
         win.setWindowTitle("D-FAST Bank Erosion")
         win.setGeometry(200, 200, 600, 300)
         win.setWindowIcon(get_icon(f"{ICONS_DIR}/D-FASTBE.png"))
+
         # win.resize(1000, 800)
 
         central_widget = QWidget()
@@ -1854,9 +1855,12 @@ class GUI:
 
     def create_menu_bar(self) -> None:
         """Add the menus to the menubar."""
-        menubar = self.window.menuBar()
-        self.menu = MenuBar(menubar, self.window, self.app)
+        self.menu = MenuBar(window=self.window, app=self.app)
         self.menu.create()
+
+    def create_action_buttons(self):
+        self.button_bar = ButtonBar(window=self.window, app=self.app, layout=self.layout)
+        self.button_bar.create()
 
     def activate(self) -> None:
         """Activate the user interface and run the program."""
@@ -1871,11 +1875,26 @@ class GUI:
         self.app.quit()
 
 
-class MenuBar:
-    def __init__(self, menubar: QMenuBar, window: QMainWindow, app: QApplication):
+class BaseBar:
+    def __init__(self, *, window: QMainWindow, app: QApplication, layout: QBoxLayout | None = None):
         self.window = window
-        self.menubar = menubar
+        self.layout = layout
         self.app = app
+
+    def create(self):
+        ...
+
+    def close(self) -> None:
+        """Close the dialog and program."""
+        plt.close("all")
+        self.window.close()
+        self.app.closeAllWindows()
+        self.app.quit()
+
+class MenuBar(BaseBar):
+    def __init__(self, window: QMainWindow, app: QApplication):
+        super().__init__(window=window, app=app)
+        self.menubar = self.window.menuBar()
 
     def create(self):
         menu = self.menubar.addMenu(gui_text("File"))
@@ -1896,9 +1915,25 @@ class MenuBar:
         item = menu.addAction(gui_text("AboutQt"))
         item.triggered.connect(menu_about_qt)
 
-    def close(self) -> None:
-        """Close the dialog and program."""
-        plt.close("all")
-        self.window.close()
-        self.app.closeAllWindows()
-        self.app.quit()
+
+class ButtonBar(BaseBar):
+    def __init__(self, window: QMainWindow, layout: QBoxLayout, app: QApplication | None = None):
+        super().__init__(window=window, app=app, layout=layout)
+
+    def create(self):
+        button_bar = QWidget(self.window)
+        button_bar_layout = QBoxLayout(QBoxLayout.Direction.LeftToRight, button_bar)
+        button_bar_layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.addWidget(button_bar)
+
+        detect = QPushButton(gui_text("action_detect"), self.window)
+        detect.clicked.connect(run_detection)
+        button_bar_layout.addWidget(detect)
+
+        erode = QPushButton(gui_text("action_erode"), self.window)
+        erode.clicked.connect(run_erosion)
+        button_bar_layout.addWidget(erode)
+
+        done = QPushButton(gui_text("action_close"), self.window)
+        done.clicked.connect(self.close)
+        button_bar_layout.addWidget(done)
