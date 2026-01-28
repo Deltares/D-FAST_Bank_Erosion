@@ -29,13 +29,13 @@ from __future__ import annotations
 import configparser
 import os
 import sys
-import traceback
 from pathlib import Path
-from typing import Callable, Dict, List, Optional, Tuple, cast
+from typing import Dict, List, Optional, Tuple, cast
 
 import matplotlib.pyplot as plt
 from PySide6.QtGui import QValidator, QIntValidator, QDoubleValidator
 from PySide6 import QtCore
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QTabWidget,
     QSizePolicy,
@@ -59,11 +59,10 @@ from PySide6.QtWidgets import (
 )
 
 from dfastbe import __file__, __version__
-from dfastbe.bank_erosion.bank_erosion import Erosion
-from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.file_utils import absolute_path
-from dfastbe.gui.utils import get_icon, gui_text, SHIP_TYPES
+from dfastbe.gui.utils import get_icon, gui_text, SHIP_TYPES, show_error
+from dfastbe.gui.analysis_runner import run_detection, run_erosion
 
 
 USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
@@ -118,7 +117,7 @@ class BaseTab:
         button_bar_layout.addWidget(add_button)
 
         edit_button = QPushButton(get_icon(f"{ICONS_DIR}/edit.png"), "")
-        edit_button.clicked.connect(lambda: editAnItem(key))
+        edit_button.clicked.connect(lambda: self.edit_an_item(key))
         edit_button.setEnabled(False)
         dialog[key + "Edit"] = edit_button
         button_bar_layout.addWidget(edit_button)
@@ -135,6 +134,90 @@ class BaseTab:
         button_bar_layout.addItem(stretch)
 
         return parent
+
+    def edit_an_item(self, key: str) -> None:
+        """
+        Implements the actions for the edit item button.
+
+        Dialog implemented in separate routines.
+
+        Arguments
+        ---------
+        key : str
+            Short name of the parameter.
+        """
+        selected = dialog[key].selectedItems()
+        # root = dialog[key].invisibleRootItem()
+        if len(selected) > 0:
+            istr = selected[0].text(0)
+            if key == "searchLines":
+                fileName = selected[0].text(1)
+                dist = selected[0].text(2)
+                fileName, dist = editASearchLine(key, istr, fileName=fileName, dist=dist)
+                selected[0].setText(1, fileName)
+                selected[0].setText(2, dist)
+            elif key == "discharges":
+                fileName = selected[0].text(1)
+                prob = selected[0].text(2)
+                fileName, prob = editADischarge(key, istr, fileName=fileName, prob=prob)
+                selected[0].setText(1, fileName)
+                selected[0].setText(2, prob)
+
+
+def editASearchLine(
+    key: str, istr: str, fileName: str = "", dist: str = "50"
+) -> Tuple[str, str]:
+    """
+    Create an edit dialog for the search lines list.
+
+    Arguments
+    ---------
+    key : str
+        Short name of the parameter.
+    istr : str
+        String representation of the search line in the list.
+    fileName : str
+        Name of the search line file.
+    dist : str
+        String representation of the search distance.
+
+    Returns
+    -------
+    fileName1 : str
+        Updated name of the search line file.
+    dist1 : str
+        Updated string representation of the search distance.
+    """
+
+    editDialog = QDialog()
+    setDialogSize(editDialog, 600, 100)
+    editDialog.setWindowFlags(
+        Qt.WindowTitleHint | Qt.WindowSystemMenuHint
+    )
+    editDialog.setWindowTitle("Edit Search Line")
+    editLayout = QFormLayout(editDialog)
+
+    label = QLabel(istr)
+    editLayout.addRow("Search Line Nr", label)
+
+    addOpenFileRow(editLayout, "editSearchLine", "Search Line File")
+    dialog["editSearchLineEdit"].setText(fileName)
+
+    searchDistance = QLineEdit()
+    searchDistance.setText(dist)
+    searchDistance.setValidator(validator("positive_real"))
+    editLayout.addRow("Search Distance [m]", searchDistance)
+
+    done = QPushButton("Done")
+    done.clicked.connect(lambda: close_edit(editDialog))
+    # edit_SearchDistance.setValidator(validator("positive_real"))
+    editLayout.addRow(" ", done)
+
+    editDialog.exec()
+
+    fileName = dialog["editSearchLineEdit"].text()
+    dist = searchDistance.text()
+    return fileName, dist
 
 
 class GeneralTab(BaseTab):
@@ -711,61 +794,6 @@ def setDialogSize(editDialog: QDialog, width: int, height: int) -> None:
     )
 
 
-def editASearchLine(
-    key: str, istr: str, fileName: str = "", dist: str = "50"
-) -> Tuple[str, str]:
-    """
-    Create an edit dialog for the search lines list.
-
-    Arguments
-    ---------
-    key : str
-        Short name of the parameter.
-    istr : str
-        String representation of the search line in the list.
-    fileName : str
-        Name of the search line file.
-    dist : str
-        String representation of the search distance.
-
-    Returns
-    -------
-    fileName1 : str
-        Updated name of the search line file.
-    dist1 : str
-        Updated string representation of the search distance.
-    """
-    editDialog = QDialog()
-    setDialogSize(editDialog, 600, 100)
-    editDialog.setWindowFlags(
-        QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint
-    )
-    editDialog.setWindowTitle("Edit Search Line")
-    editLayout = QFormLayout(editDialog)
-
-    label = QLabel(istr)
-    editLayout.addRow("Search Line Nr", label)
-
-    addOpenFileRow(editLayout, "editSearchLine", "Search Line File")
-    dialog["editSearchLineEdit"].setText(fileName)
-
-    searchDistance = QLineEdit()
-    searchDistance.setText(dist)
-    searchDistance.setValidator(validator("positive_real"))
-    editLayout.addRow("Search Distance [m]", searchDistance)
-
-    done = QPushButton("Done")
-    done.clicked.connect(lambda: close_edit(editDialog))
-    # edit_SearchDistance.setValidator(validator("positive_real"))
-    editLayout.addRow(" ", done)
-
-    editDialog.exec()
-
-    fileName = dialog["editSearchLineEdit"].text()
-    dist = searchDistance.text()
-    return fileName, dist
-
-
 def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
     """
     Create an edit dialog for simulation file and weighing.
@@ -784,7 +812,7 @@ def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
     editDialog = QDialog()
     setDialogSize(editDialog, 600, 100)
     editDialog.setWindowFlags(
-        QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowSystemMenuHint
+        Qt.WindowTitleHint | Qt.WindowSystemMenuHint
     )
     editDialog.setWindowTitle("Edit Discharge")
     editLayout = QFormLayout(editDialog)
@@ -822,35 +850,6 @@ def close_edit(hDialog: QDialog) -> None:
         Dialog object to be closed.
     """
     hDialog.close()
-
-
-def editAnItem(key: str) -> None:
-    """
-    Implements the actions for the edit item button.
-
-    Dialog implemented in separate routines.
-
-    Arguments
-    ---------
-    key : str
-        Short name of the parameter.
-    """
-    selected = dialog[key].selectedItems()
-    root = dialog[key].invisibleRootItem()
-    if len(selected) > 0:
-        istr = selected[0].text(0)
-        if key == "searchLines":
-            fileName = selected[0].text(1)
-            dist = selected[0].text(2)
-            fileName, dist = editASearchLine(key, istr, fileName=fileName, dist=dist)
-            selected[0].setText(1, fileName)
-            selected[0].setText(2, dist)
-        elif key == "discharges":
-            fileName = selected[0].text(1)
-            prob = selected[0].text(2)
-            fileName, prob = editADischarge(key, istr, fileName=fileName, prob=prob)
-            selected[0].setText(1, fileName)
-            selected[0].setText(2, prob)
 
 
 def removeAnItem(key: str) -> None:
@@ -1060,94 +1059,6 @@ def selectFile(key: str) -> None:
             fil = ""
     if fil != "":
         dialog[key].setText(fil)
-
-
-def try_run_and_catch(run_analysis_steps: Callable[[ConfigFile], None]) -> None:
-    """
-    Run an analysis based on settings in the GUI.
-    
-    Use a dummy configuration name in the current work directory to create
-    relative paths.
-
-    Arguments
-    ---------
-    run_analysis_steps : Callable[[configparser.ConfigParser], None]
-        function containing the plain analysis steps
-    """
-    config = get_configuration()
-    rootdir = os.getcwd()
-    config_file = ConfigFile(config)
-    config_file.root_dir = rootdir
-    config_file.relative_to(rootdir)
-    dialog["application"].setOverrideCursor(QtCore.Qt.WaitCursor)
-    plt.close("all")
-    # should maybe use a separate thread for this ...
-    try:
-        run_analysis_steps(config_file)
-    except (SystemExit, KeyboardInterrupt) as exception:
-        raise exception
-    except:
-        dialog["application"].restoreOverrideCursor()
-        stack_trace = traceback.format_exc()
-        show_error(
-            "A run-time exception occurred. Press 'Show Details...' for the full stack trace.",
-            stack_trace,
-        )
-    else:
-        dialog["application"].restoreOverrideCursor()
-
-
-def run_detection() -> None:
-    """
-    Trigger the bank line detection analysis with error handling.
-
-    Arguments
-    ---------
-    None
-    """
-    try_run_and_catch(run_detection_steps)
-
-
-def run_detection_steps(config_file: ConfigFile) -> None:
-    """
-    Create bank line detection object and run the analysis.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Analysis configuration settings.
-    """
-    bank_line = BankLines(config_file, gui=True)
-    bank_line.detect()
-    bank_line.plot()
-    bank_line.save()
-
-
-def run_erosion() -> None:
-    """
-    Trigger the bank line erosion analysis with error handling.
-
-    Arguments
-    ---------
-    None
-    """
-    try_run_and_catch(run_erosion_steps)
-    
-
-
-def run_erosion_steps(config_file: ConfigFile) -> None:
-    """
-    Create bank line erosion object and run the analysis.
-
-    Arguments
-    ---------
-    config : configparser.ConfigParser
-        Analysis configuration settings.
-    """
-    erosion = Erosion(config_file, gui=True)
-    erosion.run()
-    erosion.plot()
-    erosion.save()
 
 
 def menu_load_configuration() -> None:
@@ -1560,12 +1471,7 @@ def menu_save_configuration() -> None:
 
 
 def get_configuration() -> configparser.ConfigParser:
-    """
-    Extract a configuration from the GUI.
-
-    Arguments
-    ---------
-    None
+    """Extract a configuration from the GUI.
 
     Returns
     -------
@@ -1685,25 +1591,6 @@ def get_configuration() -> configparser.ConfigParser:
     return config
 
 
-def show_error(message: str, detailed_message: Optional[str] = None) -> None:
-    """Display an error message box with specified string.
-
-    Args:
-        message : str
-            Text to be displayed in the message box.
-        detailed_message : Option[str]
-            Text to be displayed when the user clicks the Details button.
-    """
-    msg = QMessageBox()
-    msg.setIcon(QMessageBox.Critical)
-    msg.setText(message)
-    if detailed_message:
-        msg.setDetailedText(detailed_message)
-    msg.setWindowTitle("Error")
-    msg.setStandardButtons(QMessageBox.Ok)
-    msg.exec()
-
-
 def menu_about_self():
     """
     Show the about dialog for D-FAST Bank Erosion.
@@ -1730,13 +1617,7 @@ def menu_about_self():
 
 
 def menu_about_qt():
-    """
-    Show the about dialog for Qt.
-
-    Arguments
-    ---------
-    None
-    """
+    """Show the about dialog for Qt."""
     QApplication.aboutQt()
 
 
@@ -1899,11 +1780,11 @@ class ButtonBar(BaseBar):
         self.layout.addWidget(button_bar)
 
         detect = QPushButton(gui_text("action_detect"), self.window)
-        detect.clicked.connect(run_detection)
+        detect.clicked.connect(lambda: run_detection(self.app))
         button_bar_layout.addWidget(detect)
 
         erode = QPushButton(gui_text("action_erode"), self.window)
-        erode.clicked.connect(run_erosion)
+        erode.clicked.connect(lambda: run_erosion(self.app))
         button_bar_layout.addWidget(erode)
 
         done = QPushButton(gui_text("action_close"), self.window)

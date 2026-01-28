@@ -1,8 +1,11 @@
 from typing import Any, Dict
 from pathlib import Path
 from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QMessageBox
 
 from dfastbe.io.logger import LogData
+
+
 SHIP_TYPES = ["1 (multiple barge convoy set)", "2 (RHK ship / motorship)", "3 (towboat)"]
 
 
@@ -50,3 +53,22 @@ def gui_text(
     text = LogData().get_text(prefix + key)
     text_str = text[0].format(**placeholder_dict)
     return text_str
+
+
+def show_error(message: str, detailed_message: str | None = None) -> None:
+    """Display an error message box with specified string.
+
+    Args:
+        message : str
+            Text to be displayed in the message box.
+        detailed_message : Option[str]
+            Text to be displayed when the user clicks the Details button.
+    """
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Critical)
+    msg.setText(message)
+    if detailed_message:
+        msg.setDetailedText(detailed_message)
+    msg.setWindowTitle("Error")
+    msg.setStandardButtons(QMessageBox.Ok)
+    msg.exec()
