@@ -993,10 +993,9 @@ def main(config: Optional[Path] = None) -> None:
     """
     Start the user interface using default settings or optional configuration.
 
-    Arguments
-    ---------
-    config : Optional[str]
-        Optional name of configuration file.
+    Args:
+        config : Optional[str]
+            Optional name of configuration file.
     """
     gui = GUI()
     gui.create()

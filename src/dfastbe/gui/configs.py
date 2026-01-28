@@ -62,26 +62,26 @@ def load_configuration(config_path: Path) -> None:
     if version == "1.0":
         section = config["General"]
         dialog["chainFileEdit"].setText(section["RiverKM"])
-        studyRange = config_file.get_range("General", "Boundaries")
-        dialog["startRange"].setText(str(studyRange[0]))
-        dialog["endRange"].setText(str(studyRange[1]))
+        study_range = config_file.get_range("General", "Boundaries")
+        dialog["startRange"].setText(str(study_range[0]))
+        dialog["endRange"].setText(str(study_range[1]))
         dialog["bankDirEdit"].setText(section["BankDir"])
-        bankFile = config_file.get_str("General", "BankFile", default="bankfile")
-        dialog["bankFileName"].setText(bankFile)
+        bank_file = config_file.get_str("General", "BankFile", default="bankfile")
+        dialog["bankFileName"].setText(bank_file)
         flag = config_file.get_bool("General", "Plotting", default=True)
         dialog["makePlotsEdit"].setChecked(flag)
         flag = config_file.get_bool("General", "SavePlots", default=True)
         dialog["savePlotsEdit"].setChecked(flag)
         flag = config_file.get_bool("General", "SaveZoomPlots", default=False)
         dialog["saveZoomPlotsEdit"].setChecked(flag)
-        zoomStepKM = config_file.get_float("General", "ZoomStepKM", default=1.0)
-        dialog["zoomPlotsRangeEdit"].setText(str(zoomStepKM))
-        figDir = config_file.get_str(
+        zoom_step_km = config_file.get_float("General", "ZoomStepKM", default=1.0)
+        dialog["zoomPlotsRangeEdit"].setText(str(zoom_step_km))
+        fig_dir = config_file.get_str(
             "General",
             "FigureDir",
             default=absolute_path(rootdir, "figures"),
         )
-        dialog["figureDirEdit"].setText(figDir)
+        dialog["figureDirEdit"].setText(fig_dir)
         flag = config_file.get_bool("General", "ClosePlots", default=False)
         dialog["closePlotsEdit"].setChecked(flag)
         flag = config_file.get_bool("General", "DebugOutput", default=False)
@@ -89,18 +89,18 @@ def load_configuration(config_path: Path) -> None:
 
         section = config["Detect"]
         dialog["simFileEdit"].setText(section["SimFile"])
-        waterDepth = config_file.get_float("Detect", "WaterDepth", default=0.0)
-        dialog["waterDepth"].setText(str(waterDepth))
-        NBank = config_file.get_int("Detect", "NBank", default=0, positive=True)
-        DLines = config_file.get_bank_search_distances(NBank)
+        water_depth = config_file.get_float("Detect", "WaterDepth", default=0.0)
+        dialog["waterDepth"].setText(str(water_depth))
+        n_bank = config_file.get_int("Detect", "NBank", default=0, positive=True)
+        d_lines = config_file.get_bank_search_distances(n_bank)
         dialog["searchLines"].invisibleRootItem().takeChildren()
-        for i in range(NBank):
+        for i in range(n_bank):
             istr = str(i + 1)
-            fileName = config_file.get_str("Detect", "Line" + istr)
+            file_name = config_file.get_str("Detect", "Line" + istr)
             c1 = QTreeWidgetItem(
-                dialog["searchLines"], [istr, fileName, str(DLines[i])]
+                dialog["searchLines"], [istr, file_name, str(d_lines[i])]
             )
-        if NBank > 0:
+        if n_bank > 0:
             dialog["searchLinesEdit"].setEnabled(True)
             dialog["searchLinesRemove"].setEnabled(True)
 
@@ -123,9 +123,9 @@ def load_configuration(config_path: Path) -> None:
         dialog["discharges"].invisibleRootItem().takeChildren()
         for i in range(NLevel):
             istr = str(i + 1)
-            fileName = config_file.get_str("Erosion", "SimFile" + istr)
+            file_name = config_file.get_str("Erosion", "SimFile" + istr)
             prob = config_file.get_str("Erosion", "PDischarge" + istr)
-            c1 = QTreeWidgetItem(dialog["discharges"], [istr, fileName, prob])
+            c1 = QTreeWidgetItem(dialog["discharges"], [istr, file_name, prob])
         if NLevel > 0:
             dialog["dischargesEdit"].setEnabled(True)
             dialog["dischargesRemove"].setEnabled(True)
