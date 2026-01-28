@@ -1836,7 +1836,27 @@ class GUI:
             menubar : QMenuBar
                 Menubar to which menus should be added.
         """
-        menu = menubar.addMenu(gui_text("File"))
+        menu = Menus(menubar, self.window)
+        menu.create()
+
+    def activate(self) -> None:
+        """Activate the user interface and run the program."""
+        self.window.show()
+        sys.exit(self.app.exec())
+
+    def close(self) -> None:
+        """Close the dialog and program."""
+        plt.close("all")
+        self.window.close()
+
+
+class Menus:
+    def __init__(self, menubar: QMenuBar, window: QMainWindow):
+        self.window = window
+        self.menubar = menubar
+
+    def create(self):
+        menu = self.menubar.addMenu(gui_text("File"))
         item = menu.addAction(gui_text("Load"))
         item.triggered.connect(menu_load_configuration)
         item = menu.addAction(gui_text("Save"))
@@ -1845,7 +1865,7 @@ class GUI:
         item = menu.addAction(gui_text("Close"))
         item.triggered.connect(self.close)
 
-        menu = menubar.addMenu(gui_text("Help"))
+        menu = self.menubar.addMenu(gui_text("Help"))
         item = menu.addAction(gui_text("Manual"))
         item.triggered.connect(menu_open_manual)
         menu.addSeparator()
@@ -1853,11 +1873,6 @@ class GUI:
         item.triggered.connect(menu_about_self)
         item = menu.addAction(gui_text("AboutQt"))
         item.triggered.connect(menu_about_qt)
-
-    def activate(self) -> None:
-        """Activate the user interface and run the program."""
-        self.window.show()
-        sys.exit(self.app.exec())
 
     def close(self) -> None:
         """Close the dialog and program."""
