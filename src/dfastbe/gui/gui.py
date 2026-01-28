@@ -55,8 +55,7 @@ from PySide6.QtWidgets import (
     QTreeWidget,
     QTreeWidgetItem,
     QFileDialog,
-    QMessageBox,
-    QMenuBar
+    QMessageBox
 )
 
 from dfastbe import __file__, __version__
@@ -82,6 +81,60 @@ class BaseTab:
         self.tabs = tabs
         self.window = window
         self.app = app
+
+    def add_remove_edit_layout(
+        self, main_widget: QWidget, key: str
+    ) -> QWidget:
+        """
+        Create a standard layout with list control and add, edit and remove buttons.
+
+        Arguments
+        ---------
+        main_widget : QWidget
+            Main object on which the add, edit and remove buttons should operate.
+        key : str
+            Short name of the parameter.
+
+        Returns
+        -------
+        parent : QWidget
+            Parent QtWidget that contains the add, edit and remove buttons.
+        """
+        parent = QWidget()
+        gridly = QGridLayout(parent)
+        gridly.setContentsMargins(0, 0, 0, 0)
+
+        dialog[key] = main_widget
+        gridly.addWidget(main_widget, 0, 0)
+
+        button_bar = QWidget()
+        button_bar_layout = QBoxLayout(QBoxLayout.Direction.TopToBottom, button_bar)
+        button_bar_layout.setContentsMargins(0, 0, 0, 0)
+        gridly.addWidget(button_bar, 0, 1)
+
+        add_button = QPushButton(get_icon(f"{ICONS_DIR}/add.png"), "")
+        add_button.clicked.connect(lambda: addAnItem(key))
+        dialog[key + "Add"] = add_button
+        button_bar_layout.addWidget(add_button)
+
+        edit_button = QPushButton(get_icon(f"{ICONS_DIR}/edit.png"), "")
+        edit_button.clicked.connect(lambda: editAnItem(key))
+        edit_button.setEnabled(False)
+        dialog[key + "Edit"] = edit_button
+        button_bar_layout.addWidget(edit_button)
+
+        delete_button = QPushButton(get_icon(f"{ICONS_DIR}/remove.png"), "")
+        delete_button.clicked.connect(lambda: removeAnItem(key))
+        delete_button.setEnabled(False)
+        dialog[key + "Remove"] = delete_button
+        button_bar_layout.addWidget(delete_button)
+
+        stretch = QSpacerItem(
+            10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
+        )
+        button_bar_layout.addItem(stretch)
+
+        return parent
 
 
 class GeneralTab(BaseTab):
@@ -195,6 +248,7 @@ def addCheckBox(
 
 
 class DetectionTab(BaseTab):
+
     def __init__(self, tabs: QTabWidget, window: QMainWindow, app: QApplication):
         """Initialize the tab for the bank line detection settings.
 
@@ -210,26 +264,25 @@ class DetectionTab(BaseTab):
 
     def create(self) -> None:
         """Create the tab for the bank line detection settings."""
-        detectWidget = QWidget()
-        detectLayout = QFormLayout(detectWidget)
-        self.tabs.addTab(detectWidget, "Detection")
+        detect_widget = QWidget()
+        detect_layout = QFormLayout(detect_widget)
+        self.tabs.addTab(detect_widget, "Detection")
 
-        addOpenFileRow(detectLayout, "simFile", "Simulation File")
+        addOpenFileRow(detect_layout, "simFile", "Simulation File")
 
-        waterDepth = QLineEdit(self.window)
-        waterDepth.setValidator(validator("positive_real"))
-        dialog["waterDepth"] = waterDepth
-        detectLayout.addRow("Water Depth [m]", waterDepth)
+        water_depth = QLineEdit(self.window)
+        water_depth.setValidator(validator("positive_real"))
+        dialog["waterDepth"] = water_depth
+        detect_layout.addRow("Water Depth [m]", water_depth)
 
-        searchLines = QTreeWidget(self.window)
-        searchLines.setHeaderLabels(["Index", "FileName", "Search Distance [m]"])
-        searchLines.setFont(self.app.font())
-        searchLines.setColumnWidth(0, 50)
-        searchLines.setColumnWidth(1, 200)
-        # c1 = QTreeWidgetItem(searchLines, ["0", "test\\filename", "50"])
+        search_lines = QTreeWidget(self.window)
+        search_lines.setHeaderLabels(["Index", "FileName", "Search Distance [m]"])
+        search_lines.setFont(self.app.font())
+        search_lines.setColumnWidth(0, 50)
+        search_lines.setColumnWidth(1, 200)
 
-        slLayout = addRemoveEditLayout(searchLines, "searchLines")
-        detectLayout.addRow("Search Lines", slLayout)
+        slLayout = self.add_remove_edit_layout(search_lines, "searchLines")
+        detect_layout.addRow("Search Lines", slLayout)
 
 
 class ErosionTab(BaseTab):
@@ -268,7 +321,7 @@ class ErosionTab(BaseTab):
         discharges.setColumnWidth(1, 250)
         # c1 = QTreeWidgetItem(discharges, ["0", "test\\filename", "0.5"])
 
-        disLayout = addRemoveEditLayout(discharges, "discharges")
+        disLayout = self.add_remove_edit_layout(discharges, "discharges")
         erosionLayout.addRow("Discharges", disLayout)
 
         refLevel = QLineEdit(self.window)
@@ -583,61 +636,6 @@ def openFileLayout(key, enabled=True) -> QWidget:
     openFile.setEnabled(enabled)
     dialog[key + "File"] = openFile
     gridly.addWidget(openFile, 0, 2)
-
-    return parent
-
-
-def addRemoveEditLayout(
-    mainWidget: QWidget, key: str
-) -> QWidget:
-    """
-    Create a standard layout with list control and add, edit and remove buttons.
-
-    Arguments
-    ---------
-    mainWidget : QWidget
-        Main object on which the add, edit and remove buttons should operate.
-    key : str
-        Short name of the parameter.
-
-    Returns
-    -------
-    parent : QWidget
-        Parent QtWidget that contains the add, edit and remove buttons.
-    """
-    parent = QWidget()
-    gridly = QGridLayout(parent)
-    gridly.setContentsMargins(0, 0, 0, 0)
-
-    dialog[key] = mainWidget
-    gridly.addWidget(mainWidget, 0, 0)
-
-    buttonBar = QWidget()
-    buttonBarLayout = QBoxLayout(QBoxLayout.Direction.TopToBottom, buttonBar)
-    buttonBarLayout.setContentsMargins(0, 0, 0, 0)
-    gridly.addWidget(buttonBar, 0, 1)
-
-    addBtn = QPushButton(get_icon(f"{ICONS_DIR}/add.png"), "")
-    addBtn.clicked.connect(lambda: addAnItem(key))
-    dialog[key + "Add"] = addBtn
-    buttonBarLayout.addWidget(addBtn)
-
-    editBtn = QPushButton(get_icon(f"{ICONS_DIR}/edit.png"), "")
-    editBtn.clicked.connect(lambda: editAnItem(key))
-    editBtn.setEnabled(False)
-    dialog[key + "Edit"] = editBtn
-    buttonBarLayout.addWidget(editBtn)
-
-    delBtn = QPushButton(get_icon(f"{ICONS_DIR}/remove.png"), "")
-    delBtn.clicked.connect(lambda: removeAnItem(key))
-    delBtn.setEnabled(False)
-    dialog[key + "Remove"] = delBtn
-    buttonBarLayout.addWidget(delBtn)
-
-    stretch = QSpacerItem(
-        10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
-    )
-    buttonBarLayout.addItem(stretch)
 
     return parent
 
