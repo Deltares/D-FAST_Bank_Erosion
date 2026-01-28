@@ -78,7 +78,7 @@ ICONS_DIR = r_dir / "gui/icons"
 
 class BaseTab:
 
-    def __init__(self, tabs: QTabWidget, window: QMainWindow, app: QApplication | None = None):
+    def __init__(self, tabs: QTabWidget, window: QMainWindow | None = None, app: QApplication | None = None):
         self.tabs = tabs
         self.window = window
         self.app = app
@@ -195,7 +195,7 @@ def addCheckBox(
 
 
 class DetectionTab(BaseTab):
-    def  __init__(self, tabs: QTabWidget, window: QMainWindow, app: QApplication):
+    def __init__(self, tabs: QTabWidget, window: QMainWindow, app: QApplication):
         """Initialize the tab for the bank line detection settings.
 
         Args:
@@ -233,7 +233,7 @@ class DetectionTab(BaseTab):
 
 
 class ErosionTab(BaseTab):
-    def  __init__(self, tabs: QTabWidget, window: QMainWindow, app: QApplication):
+    def __init__(self, tabs: QTabWidget, window: QMainWindow, app: QApplication):
         """Initialize the tab for the bank erosion settings.
 
         Args:
@@ -300,35 +300,36 @@ class ErosionTab(BaseTab):
         erosionLayout.addRow("EroVolEqui File Name", eroVolEqui)
 
 
-def addShippingTab(
-    tabs: QTabWidget, win: QMainWindow
-) -> None:
-    """
-    Create the tab for the general shipping settings.
+class ShippingTab(BaseTab):
+    def __init__(self, tabs: QTabWidget):
+        """Initialize the tab for the bank erosion settings.
 
-    Arguments
-    ---------
-    tabs : QTabWidget
-        Tabs object to which the tab should be added.
-    win : QMainWindow
-        The window object in which the tab item is located.
-    """
-    eParamsWidget = QWidget()
-    eParamsLayout = QGridLayout(eParamsWidget)
-    tabs.addTab(eParamsWidget, "Shipping Parameters")
+        Args:
+            tabs : QTabWidget
+                Tabs object to which the tab should be added.
+        """
+        super().__init__(tabs)
 
-    generalParLayout(eParamsLayout, 0, "shipType", "Ship Type", selectList=SHIP_TYPES)
-    generalParLayout(eParamsLayout, 2, "shipVeloc", "Velocity [m/s]")
-    generalParLayout(eParamsLayout, 3, "nShips", "# Ships [1/yr]")
-    generalParLayout(eParamsLayout, 4, "shipNWaves", "# Waves [1/ship]")
-    generalParLayout(eParamsLayout, 5, "shipDraught", "Draught [m]")
-    generalParLayout(eParamsLayout, 6, "wavePar0", "Wave0 [m]")
-    generalParLayout(eParamsLayout, 7, "wavePar1", "Wave1 [m]")
+    def create(self) -> None:
+        """
+        Create the tab for the general shipping settings.
+        """
+        eParamsWidget = QWidget()
+        eParamsLayout = QGridLayout(eParamsWidget)
+        self.tabs.addTab(eParamsWidget, "Shipping Parameters")
 
-    stretch = QSpacerItem(
-        10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
-    )
-    eParamsLayout.addItem(stretch, 8, 0)
+        generalParLayout(eParamsLayout, 0, "shipType", "Ship Type", selectList=SHIP_TYPES)
+        generalParLayout(eParamsLayout, 2, "shipVeloc", "Velocity [m/s]")
+        generalParLayout(eParamsLayout, 3, "nShips", "# Ships [1/yr]")
+        generalParLayout(eParamsLayout, 4, "shipNWaves", "# Waves [1/ship]")
+        generalParLayout(eParamsLayout, 5, "shipDraught", "Draught [m]")
+        generalParLayout(eParamsLayout, 6, "wavePar0", "Wave0 [m]")
+        generalParLayout(eParamsLayout, 7, "wavePar1", "Wave1 [m]")
+
+        stretch = QSpacerItem(
+            10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
+        )
+        eParamsLayout.addItem(stretch, 8, 0)
 
 
 def addBankTab(
@@ -1840,7 +1841,9 @@ class GUI:
         erosion_tab = ErosionTab(tabs, self.window, self.app)
         erosion_tab.create()
 
-        addShippingTab(tabs, self.window)
+        shipping_tab = ShippingTab(tabs)
+        shipping_tab.create()
+
         addBankTab(tabs, self.window)
 
     def create_menu_bar(self) -> None:
