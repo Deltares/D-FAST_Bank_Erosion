@@ -89,6 +89,7 @@ class _StateProxy(MutableMapping[str, Any]):
     the current singleton via `StateStore.instance()`, so all reads and writes
     target the same shared dictionary created by the GUI constructor.
     """
+
     def _state(self) -> StateStore:
         return StateStore.instance()
 
@@ -152,7 +153,7 @@ class BaseTab:
         gridly.addWidget(button_bar, 0, 1)
 
         add_button = QPushButton(get_icon(f"{ICONS_DIR}/add.png"), "")
-        add_button.clicked.connect(lambda: addAnItem(key))
+        add_button.clicked.connect(lambda: add_an_item(key))
         StateManagement[key + "Add"] = add_button
         button_bar_layout.addWidget(add_button)
 
@@ -163,7 +164,7 @@ class BaseTab:
         button_bar_layout.addWidget(edit_button)
 
         delete_button = QPushButton(get_icon(f"{ICONS_DIR}/remove.png"), "")
-        delete_button.clicked.connect(lambda: removeAnItem(key))
+        delete_button.clicked.connect(lambda: remove_an_item(key))
         delete_button.setEnabled(False)
         StateManagement[key + "Remove"] = delete_button
         button_bar_layout.addWidget(delete_button)
@@ -199,7 +200,7 @@ class BaseTab:
             elif key == "discharges":
                 file_name = selected[0].text(1)
                 prob = selected[0].text(2)
-                file_name, prob = editADischarge(key, istr, fileName=file_name, prob=prob)
+                file_name, prob = editADischarge(key, istr, file_name=file_name, prob=prob)
                 selected[0].setText(1, file_name)
                 selected[0].setText(2, prob)
 
@@ -230,7 +231,7 @@ def edit_search_line(
     """
 
     edit_dialog = QDialog()
-    setDialogSize(edit_dialog, 600, 100)
+    set_dialog_size(edit_dialog, 600, 100)
     edit_dialog.setWindowFlags(
         Qt.WindowTitleHint | Qt.WindowSystemMenuHint
     )
@@ -327,7 +328,7 @@ class GeneralTab(BaseTab):
         gridly.addWidget(zoom_plots_range_txt, 0, 1)
         StateManagement["zoomPlotsRangeTxt"] = zoom_plots_range_txt
 
-        zoom_plots_range_edit = QLineEdit("1.0",self.window)
+        zoom_plots_range_edit = QLineEdit("1.0", self.window)
         zoom_plots_range_edit.setValidator(validator("positive_real"))
         zoom_plots_range_edit.setEnabled(False)
         gridly.addWidget(zoom_plots_range_edit, 0, 2)
@@ -706,34 +707,35 @@ def updatePlotting() -> None:
     StateManagement["closePlotsEdit"].setEnabled(plotFlag)
 
 
-def addAnItem(key: str) -> None:
+def add_an_item(key: str) -> None:
     """Implements the actions for the add item button.
 
     Args:
         key : str
             Short name of the parameter.
     """
-    nItems = StateManagement[key].invisibleRootItem().childCount()
-    i = nItems + 1
+    n_items = StateManagement[key].invisibleRootItem().childCount()
+    i = n_items + 1
     istr = str(i)
     if key == "searchLines":
-        fileName, dist = edit_search_line(key, istr)
-        c1 = QTreeWidgetItem(StateManagement["searchLines"], [istr, fileName, dist])
+        file_name, dist = edit_search_line(key, istr)
+        c1 = QTreeWidgetItem(StateManagement["searchLines"], [istr, file_name, dist])
     elif key == "discharges":
-        prob = str(1 / (nItems + 1))
-        fileName, prob = editADischarge(key, istr, prob=prob)
-        c1 = QTreeWidgetItem(StateManagement["discharges"], [istr, fileName, prob])
+        prob = str(1 / (n_items + 1))
+        file_name, prob = editADischarge(key, istr, prob=prob)
+        c1 = QTreeWidgetItem(StateManagement["discharges"], [istr, file_name, prob])
         addTabForLevel(istr)
         StateManagement["refLevel"].validator().setTop(i)
+
     StateManagement[key + "Edit"].setEnabled(True)
     StateManagement[key + "Remove"].setEnabled(True)
 
 
-def setDialogSize(editDialog: QDialog, width: int, height: int) -> None:
+def set_dialog_size(edit_dialog: QDialog, width: int, height: int) -> None:
     """Set the width and height of a dialog and position it centered relative to the main window.
-    
+
     Args:
-        editDialog : QDialog
+        edit_dialog : QDialog
             Dialog object to be positioned correctly.
         width : int
             Desired width of the dialog.
@@ -745,12 +747,12 @@ def setDialogSize(editDialog: QDialog, width: int, height: int) -> None:
     y = parent.y()
     pw = parent.width()
     ph = parent.height()
-    editDialog.setGeometry(
+    edit_dialog.setGeometry(
         x + pw / 2 - width / 2, y + ph / 2 - height / 2, width, height
     )
 
 
-def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
+def editADischarge(key: str, istr: str, file_name: str = "", prob: str = ""):
     """Create an edit dialog for simulation file and weighing.
 
     Args:
@@ -758,43 +760,43 @@ def editADischarge(key: str, istr: str, fileName: str = "", prob: str = ""):
             Short name of the parameter.
         istr : str
             String representation of the simulation in the list.
-        fileName : str
+        file_name : str
             Name of the simulation file.
         prob : str
             String representation of the weight for this simulation.
     """
-    editDialog = QDialog()
-    setDialogSize(editDialog, 600, 100)
-    editDialog.setWindowFlags(
+    edit_dialog = QDialog()
+    set_dialog_size(edit_dialog, 600, 100)
+    edit_dialog.setWindowFlags(
         Qt.WindowTitleHint | Qt.WindowSystemMenuHint
     )
-    editDialog.setWindowTitle("Edit Discharge")
-    editLayout = QFormLayout(editDialog)
+    edit_dialog.setWindowTitle("Edit Discharge")
+    edit_layout = QFormLayout(edit_dialog)
 
     label = QLabel(istr)
-    editLayout.addRow("Level Nr", label)
+    edit_layout.addRow("Level Nr", label)
 
-    addOpenFileRow(editLayout, "editDischarge", "Simulation File")
-    StateManagement["editDischargeEdit"].setText(fileName)
+    addOpenFileRow(edit_layout, "editDischarge", "Simulation File")
+    StateManagement["editDischargeEdit"].setText(file_name)
 
     probability = QLineEdit()
     probability.setText(prob)
     probability.setValidator(validator("positive_real"))
-    editLayout.addRow("Probability [-]", probability)
+    edit_layout.addRow("Probability [-]", probability)
 
     done = QPushButton("Done")
-    done.clicked.connect(lambda: close_edit(editDialog))
+    done.clicked.connect(lambda: close_edit(edit_dialog))
     # edit_SearchDistance.setValidator(validator("positive_real"))
-    editLayout.addRow(" ", done)
+    edit_layout.addRow(" ", done)
 
-    editDialog.exec()
+    edit_dialog.exec()
 
-    fileName = StateManagement["editDischargeEdit"].text()
+    file_name = StateManagement["editDischargeEdit"].text()
     prob = probability.text()
-    return fileName, prob
+    return file_name, prob
 
 
-def removeAnItem(key: str) -> None:
+def remove_an_item(key: str) -> None:
     """Implements the actions for the remove item button.
 
     Args:
@@ -825,13 +827,13 @@ def removeAnItem(key: str) -> None:
         for j in range(tabs.count()):
             if dj > 0:
                 tabs.setTabText(j - 1, "Level " + str(j + dj))
-                updateTabKeys(j + dj + 1)
+                update_tab_keys(j + dj + 1)
             elif tabs.tabText(j) == "Level " + istr:
                 tabs.removeTab(j)
                 dj = i - j
 
 
-def updateTabKeys(i: int) -> None:
+def update_tab_keys(i: int) -> None:
     """Renumber tab i to tab i-1.
 
     Args:
@@ -858,10 +860,10 @@ def updateTabKeys(i: int) -> None:
 def menu_load_configuration() -> None:
     """Select and load a configuration file."""
 
-    fil = QFileDialog.getOpenFileName(
+    file = QFileDialog.getOpenFileName(
         caption="Select Configuration File", filter="Config Files (*.cfg)"
     )
-    filename = fil[0]
+    filename = file[0]
     if filename != "":
         load_configuration(filename)
 
@@ -1029,7 +1031,7 @@ def main(config: Optional[Path] = None) -> None:
     """
     gui = GUI()
     gui.create()
-    if not config is None:
+    if config is not None:
         load_configuration(config)
 
     gui.activate()
