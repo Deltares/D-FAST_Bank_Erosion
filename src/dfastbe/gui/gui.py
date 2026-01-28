@@ -194,43 +194,42 @@ def addCheckBox(
     formLayout.addRow(checkTxt, checkBox)
 
 
-def addDetectTab(
-    tabs: QTabWidget,
-    win: QMainWindow,
-    app: QApplication,
-) -> None:
-    """
-    Create the tab for the bank line detection settings.
+class DetectionTab(BaseTab):
+    def  __init__(self, tabs: QTabWidget, window: QMainWindow, app: QApplication):
+        """Initialize the tab for the bank line detection settings.
 
-    Arguments
-    ---------
-    tabs : QTabWidget
-        Tabs object to which the tab should be added.
-    win : QMainWindow
-        The window object in which the tab item is located.
-    app : QApplication
-        The application object to which the window belongs, needed for font information.
-    """
-    detectWidget = QWidget()
-    detectLayout = QFormLayout(detectWidget)
-    tabs.addTab(detectWidget, "Detection")
+        Args:
+            tabs : QTabWidget
+                Tabs object to which the tab should be added.
+            window : QMainWindow
+                The window object in which the tab item is located.
+            app : QApplication
+                The application object to which the window belongs, needed for font information.
+        """
+        super().__init__(tabs, window, app)
 
-    addOpenFileRow(detectLayout, "simFile", "Simulation File")
+    def create(self) -> None:
+        """Create the tab for the bank line detection settings."""
+        detectWidget = QWidget()
+        detectLayout = QFormLayout(detectWidget)
+        self.tabs.addTab(detectWidget, "Detection")
 
-    waterDepth = QLineEdit(win)
-    waterDepth.setValidator(validator("positive_real"))
-    dialog["waterDepth"] = waterDepth
-    detectLayout.addRow("Water Depth [m]", waterDepth)
+        addOpenFileRow(detectLayout, "simFile", "Simulation File")
 
-    searchLines = QTreeWidget(win)
-    searchLines.setHeaderLabels(["Index", "FileName", "Search Distance [m]"])
-    searchLines.setFont(app.font())
-    searchLines.setColumnWidth(0, 50)
-    searchLines.setColumnWidth(1, 200)
-    # c1 = QTreeWidgetItem(searchLines, ["0", "test\\filename", "50"])
+        waterDepth = QLineEdit(self.window)
+        waterDepth.setValidator(validator("positive_real"))
+        dialog["waterDepth"] = waterDepth
+        detectLayout.addRow("Water Depth [m]", waterDepth)
 
-    slLayout = addRemoveEditLayout(searchLines, "searchLines")
-    detectLayout.addRow("Search Lines", slLayout)
+        searchLines = QTreeWidget(self.window)
+        searchLines.setHeaderLabels(["Index", "FileName", "Search Distance [m]"])
+        searchLines.setFont(self.app.font())
+        searchLines.setColumnWidth(0, 50)
+        searchLines.setColumnWidth(1, 200)
+        # c1 = QTreeWidgetItem(searchLines, ["0", "test\\filename", "50"])
+
+        slLayout = addRemoveEditLayout(searchLines, "searchLines")
+        detectLayout.addRow("Search Lines", slLayout)
 
 
 def addErosionTab(
@@ -1836,7 +1835,9 @@ class GUI:
         general_tab = GeneralTab(tabs, self.window)
         general_tab.create()
 
-        addDetectTab(tabs, self.window, self.app)
+        detection_tab = DetectionTab(tabs, self.window, self.app)
+        detection_tab.create()
+
         addErosionTab(tabs, self.window, self.app)
         addShippingTab(tabs, self.window)
         addBankTab(tabs, self.window)
