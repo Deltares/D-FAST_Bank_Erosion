@@ -9,6 +9,8 @@ from dfastbe import __path__
 from dfastbe.io.logger import LogData
 from dfastbe.gui import gui
 from dfastbe.gui.gui import dialog
+from PyQt5 import QtWidgets
+
 
 @pytest.fixture(autouse=True)
 def initialize_log_data() -> LogData:
@@ -25,7 +27,7 @@ def initialize_log_data() -> LogData:
 
 
 @pytest.fixture
-def dialog_window(qtbot):
+def setup_dialog(qtbot):
     """
     Fixture that creates the dialog and provides qtbot.
 
@@ -38,3 +40,10 @@ def dialog_window(qtbot):
     gui.create_dialog()
 
     yield dialog
+
+
+@pytest.fixture
+def mock_menubar():
+    """Create a mock menubar for testing."""
+    menubar = QtWidgets.QMenuBar()
+    return menubar
