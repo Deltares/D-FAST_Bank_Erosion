@@ -151,4 +151,4 @@ def test_createMenus_creates_file_menu(mock_menubar, setup_dialog):
 
     actions = mock_menubar.actions()
     assert len(actions) >= 2
-    assert actions[0].text() == "File"
+    assert gui_text("File") in actions[0].text()
