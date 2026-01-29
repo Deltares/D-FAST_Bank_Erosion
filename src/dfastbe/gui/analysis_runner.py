@@ -20,6 +20,14 @@ __all__ = ["run_erosion", "run_detection"]
 class Invoker:
 
     def __init__(self, func: Callable[[ConfigFile], None], app: QApplication):
+        """
+
+        Args:
+            func (Callable[[configparser.ConfigParser], None]):
+                function containing the plain analysis steps
+            app (QApplication):
+                pyside6 application
+        """
         self.callable = func
         self.app = app
 
@@ -28,10 +36,6 @@ class Invoker:
 
         Use a dummy configuration name in the current work directory to create
         relative paths.
-
-        Args:
-            run_analysis_steps : Callable[[configparser.ConfigParser], None]
-                function containing the plain analysis steps
         """
         config = get_configuration()
         rootdir = os.getcwd()
