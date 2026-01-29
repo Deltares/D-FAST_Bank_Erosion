@@ -34,22 +34,15 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 from PySide6.QtWidgets import (
     QTabWidget,
-    QLineEdit,
-    QLabel,
     QApplication,
     QBoxLayout,
     QMainWindow,
-    QFormLayout,
-    QGridLayout,
-    QWidget,
-    QCheckBox,
+    QWidget
 )
 
 from dfastbe.gui.utils import (
     get_icon,
-    validator,
     ICONS_DIR,
-    addOpenFileRow,
 )
 from dfastbe.gui.configs import (
     load_configuration,
@@ -60,7 +53,7 @@ from dfastbe.gui.tabs.erosion import ErosionTab
 from dfastbe.gui.tabs.shipping import ShippingTab
 from dfastbe.gui.tabs.bank import BankTab
 from dfastbe.gui.tabs.main_components import ButtonBar, MenuBar
-from dfastbe.gui.base import BaseTab
+from dfastbe.gui.tabs.general import GeneralTab
 from dfastbe.gui.state_management import StateStore
 
 __all__ = ["GUI", "main"]
@@ -97,139 +90,6 @@ class _StateProxy(MutableMapping[str, Any]):
 
 
 StateManagement: MutableMapping[str, Any] = _StateProxy()
-
-
-class GeneralTab(BaseTab):
-
-    def __init__(self, tabs: QTabWidget, window: QMainWindow):
-        """Initializer.
-
-        Args:
-            tabs : QTabWidget
-                Tabs object to which the tab should be added.
-            window : QMainWindow
-                Windows in which the tab item is located.
-        """
-        super().__init__(tabs, window)
-
-    def create(self,) -> None:
-        """Create the tab for the general settings.
-
-        These settings are used by both the bank line detection and the bank
-        erosion analysis.
-        """
-        general_widget = QWidget()
-        general_layout = QFormLayout(general_widget)
-        self.tabs.addTab(general_widget, "General")
-
-        addOpenFileRow(general_layout, "chainFile", "Chain File")
-
-        chain_range = QWidget()
-        gridly = QGridLayout(chain_range)
-        gridly.setContentsMargins(0, 0, 0, 0)
-
-        gridly.addWidget(QLabel("From [km]", self.window), 0, 0)
-        start_range = QLineEdit(self.window)
-        StateManagement["startRange"] = start_range
-        gridly.addWidget(start_range, 0, 1)
-        gridly.addWidget(QLabel("To [km]", self.window), 0, 2)
-        end_range = QLineEdit(self.window)
-        StateManagement["endRange"] = end_range
-        gridly.addWidget(end_range, 0, 3)
-
-        general_layout.addRow("Study Range", chain_range)
-
-        addOpenFileRow(general_layout, "bankDir", "Bank Directory")
-
-        bank_file_name = QLineEdit(self.window)
-        StateManagement["bankFileName"] = bank_file_name
-        general_layout.addRow("Bank File Name", bank_file_name)
-
-        add_check_box(general_layout, "makePlots", "Create Figures", True)
-        StateManagement["makePlotsEdit"].stateChanged.connect(updatePlotting)
-
-        add_check_box(general_layout, "savePlots", "Save Figures", True)
-        StateManagement["savePlotsEdit"].stateChanged.connect(updatePlotting)
-
-        zoom_plots = QWidget()
-        gridly = QGridLayout(zoom_plots)
-        gridly.setContentsMargins(0, 0, 0, 0)
-
-        save_zoom_plots_edit = QCheckBox("", self.window)
-        save_zoom_plots_edit.stateChanged.connect(updatePlotting)
-        save_zoom_plots_edit.setChecked(False)
-        gridly.addWidget(save_zoom_plots_edit, 0, 0)
-        StateManagement["saveZoomPlotsEdit"] = save_zoom_plots_edit
-
-        zoom_plots_range_txt = QLabel("Zoom Range [km]", self.window)
-        zoom_plots_range_txt.setEnabled(False)
-        gridly.addWidget(zoom_plots_range_txt, 0, 1)
-        StateManagement["zoomPlotsRangeTxt"] = zoom_plots_range_txt
-
-        zoom_plots_range_edit = QLineEdit("1.0", self.window)
-        zoom_plots_range_edit.setValidator(validator("positive_real"))
-        zoom_plots_range_edit.setEnabled(False)
-        gridly.addWidget(zoom_plots_range_edit, 0, 2)
-        StateManagement["zoomPlotsRangeEdit"] = zoom_plots_range_edit
-
-        save_zoom_plots = QLabel("Save Zoomed Figures", self.window)
-        general_layout.addRow(save_zoom_plots, zoom_plots)
-        StateManagement["saveZoomPlots"] = save_zoom_plots
-
-        addOpenFileRow(general_layout, "figureDir", "Figure Directory")
-        add_check_box(general_layout, "closePlots", "Close Figures")
-        add_check_box(general_layout, "debugOutput", "Debug Output")
-
-
-def add_check_box(
-    form_layout: QFormLayout,
-    key: str,
-    label_string: str,
-    is_checked: bool = False,
-) -> None:
-    """
-    Add a line of with checkbox control to a form layout.
-
-    Args:
-        form_layout : QFormLayout
-            Form layout object in which to position the edit controls.
-        key : str
-            Short name of the parameter.
-        label_string : str
-            String describing the parameter to be displayed as label.
-        is_checked : bool
-            Initial state of the check box.
-    """
-    check_box = QCheckBox("")
-    check_box.setChecked(is_checked)
-    StateManagement[key + "Edit"] = check_box
-
-    check_txt = QLabel(label_string)
-    StateManagement[key] = check_txt
-    form_layout.addRow(check_txt, check_box)
-
-
-def updatePlotting() -> None:
-    """Update the plotting flags."""
-
-    plotFlag = StateManagement["makePlotsEdit"].isChecked()
-    StateManagement["savePlots"].setEnabled(plotFlag)
-    StateManagement["savePlotsEdit"].setEnabled(plotFlag)
-
-    saveFlag = StateManagement["savePlotsEdit"].isChecked() and plotFlag
-    StateManagement["saveZoomPlots"].setEnabled(saveFlag)
-    StateManagement["saveZoomPlotsEdit"].setEnabled(saveFlag)
-
-    saveZoomFlag = StateManagement["saveZoomPlotsEdit"].isChecked() and saveFlag
-    StateManagement["zoomPlotsRangeTxt"].setEnabled(saveZoomFlag)
-    StateManagement["zoomPlotsRangeEdit"].setEnabled(saveZoomFlag)
-
-    StateManagement["figureDir"].setEnabled(saveFlag)
-    StateManagement["figureDirEdit"].setEnabled(saveFlag)
-    StateManagement["figureDirEditFile"].setEnabled(saveFlag)
-
-    StateManagement["closePlots"].setEnabled(plotFlag)
-    StateManagement["closePlotsEdit"].setEnabled(plotFlag)
 
 
 class GUI:
