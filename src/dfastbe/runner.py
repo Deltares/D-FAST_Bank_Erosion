@@ -31,7 +31,7 @@ from dfastbe.io.config import ConfigFile
 from dfastbe.bank_erosion.bank_erosion import Erosion
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.io.logger import timed_logger, LogData
-from dfastbe.gui.gui import main
+from dfastbe.gui.application import main
 from dfastbe import __file__
 R_DIR = Path(__file__).resolve().parent
 LOG_DATA_DIR = R_DIR / "io/log_data"

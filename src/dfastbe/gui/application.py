@@ -63,6 +63,7 @@ from dfastbe.gui.tabs.main_components import ButtonBar, MenuBar
 from dfastbe.gui.base import BaseTab
 from dfastbe.gui.state_management import StateStore
 
+__all__ = ["GUI", "main"]
 
 class _StateProxy(MutableMapping[str, Any]):
     """Lazy proxy that forwards mapping operations to the StateStore singleton.
