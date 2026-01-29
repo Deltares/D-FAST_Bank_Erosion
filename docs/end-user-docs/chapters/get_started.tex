@@ -666,7 +666,11 @@ python -m dfastbe ...options...
 or from within a running Python environment as
 
 \begin{Verbatim}
-import dfastbe.runner
+from dfastbe.runner import Runner
+language = 'NL'
+run_mode = 'GUI'
+configfile = 'dfastbe.cfg'
+runner = Runner(language, run_mode, configfile)
 dfastbe.runner.run()
 \end{Verbatim}
 
