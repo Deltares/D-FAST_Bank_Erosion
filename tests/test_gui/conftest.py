@@ -57,7 +57,7 @@ def setup_dialog(qtbot):
 
 
 @pytest.fixture
-def mock_menubar():
+def mock_menubar(qapp):
     """Create a mock menubar for testing."""
     menubar = QtWidgets.QMenuBar()
     return menubar
