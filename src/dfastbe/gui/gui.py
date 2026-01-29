@@ -73,7 +73,7 @@ from dfastbe.gui.configs import (
     bankStrengthSwitch,
 )
 from dfastbe.gui.analysis_runner import run_detection, run_erosion
-from dfastbe.gui.detection_tab import DetectionTab
+from dfastbe.gui.tabs.detection_tab import DetectionTab
 from dfastbe.gui.base import BaseTab
 from dfastbe.gui.state_management import StateStore
 
