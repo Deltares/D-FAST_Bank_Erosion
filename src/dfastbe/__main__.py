@@ -75,8 +75,6 @@ def _upper(value: str) -> str:
 def parse_arguments() -> Tuple[str, str, Optional[Path]]:
     """Parse the command line arguments.
 
-    Raises:
-        LanguageError: If invalid language is specified.
     Returns:
         language (str):
             Language identifier ("NL" or "UK").
@@ -84,6 +82,9 @@ def parse_arguments() -> Tuple[str, str, Optional[Path]]:
             Specification of the run mode ("BANKLINES", "BANKEROSION" or "GUI")
         config_name (Path | None):
             Path to the configuration file, required for non-GUI modes.
+
+    Note:
+        Exits with status code 2 via SystemExit if arguments are invalid.
     """
     parser = argparse.ArgumentParser(
         description="D-FAST Bank Erosion. Example: python -m dfastbe --mode BANKEROSION --config settings.cfg"
@@ -113,7 +114,7 @@ def parse_arguments() -> Tuple[str, str, Optional[Path]]:
     )
     args = parser.parse_args()
     if args.mode != "GUI" and args.config is None:
-        raise ValueError("--config is required when --mode is BANKLINES or BANKEROSION")
+        parser.error("--config is required when --mode is BANKLINES or BANKEROSION")
 
     language = args.language
     run_mode = args.mode

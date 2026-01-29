@@ -40,7 +40,7 @@ def test_parse_arguments_valid(args, expected, success, monkeypatch):
 
     with patch("pathlib.Path.exists", return_value=True):
         if not success:
-            with pytest.raises(ValueError):
+            with pytest.raises(SystemExit):
                 assert parse_arguments() == expected
         else:
             assert parse_arguments() == expected
