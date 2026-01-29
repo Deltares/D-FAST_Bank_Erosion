@@ -1,9 +1,8 @@
 """
 Tests for the create_dialog() function in dfastbe.gui.gui module.
 """
-from PyQt5 import QtWidgets
+from PySide6 import QtWidgets
 from dfastbe.gui.gui import (
-    dialog,
     gui_text,
     createMenus,
 )
@@ -49,13 +48,15 @@ def test_create_setup_dialog_has_icon(setup_dialog):
 
 def test_create_dialog_has_central_widget(setup_dialog):
     """Test that central widget is properly configured."""
-    win = dialog["window"]
+    win = setup_dialog["window"]
     central_widget = win.centralWidget()
 
     assert central_widget is not None
     assert isinstance(central_widget, QtWidgets.QWidget)
-    assert central_widget.layout() is not None
-    assert central_widget.layout().direction() == 2
+    layout = central_widget.layout()
+    assert layout is not None
+    assert isinstance(layout, QtWidgets.QBoxLayout)
+    assert layout.direction() == QtWidgets.QBoxLayout.Direction.TopToBottom
 
 
 def test_create_dialog_creates_tabs(setup_dialog):

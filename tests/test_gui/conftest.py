@@ -11,7 +11,7 @@ from dfastbe import __path__
 from dfastbe.io.logger import LogData
 from dfastbe.gui import gui
 from dfastbe.gui.gui import dialog
-from PyQt5 import QtWidgets
+from PySide6 import QtWidgets
 
 
 @pytest.fixture(autouse=True)
