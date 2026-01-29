@@ -237,11 +237,11 @@ def addOpenFileRow(
     state_management = StateStore.instance()
     Label = QLabel(labelString)
     state_management[key] = Label
-    fLayout = openFileLayout(key + "Edit")
+    fLayout = open_file_layout(key + "Edit")
     formLayout.addRow(Label, fLayout)
 
 
-def openFileLayout(key, enabled=True) -> QWidget:
+def open_file_layout(key, enabled=True) -> QWidget:
     """
     Create a standard layout with a file or folder edit field and selection button.
 
@@ -482,7 +482,7 @@ def optionalParLayout(
     gridLayout.addWidget(Type, row, 1)
 
     if selectList is None:
-        fLayout = openFileLayout(key + "Edit", enabled=False)
+        fLayout = open_file_layout(key + "Edit", enabled=False)
         state_management[key + "Edit"].setEnabled(False)
         gridLayout.addWidget(fLayout, row, 2)
     else:
@@ -492,7 +492,7 @@ def optionalParLayout(
         state_management[key + "Select"] = Select
         gridLayout.addWidget(Select, row, 2)
 
-        fLayout = openFileLayout(key + "Edit", enabled=False)
+        fLayout = open_file_layout(key + "Edit", enabled=False)
         state_management[key + "Edit"].setEnabled(False)
         gridLayout.addWidget(fLayout, row + 1, 2)
 
@@ -569,7 +569,7 @@ def generalParLayout(
     gridLayout.addWidget(Type, row, 1)
 
     if selectList is None:
-        fLayout = openFileLayout(key + "Edit", enabled=False)
+        fLayout = open_file_layout(key + "Edit", enabled=False)
         gridLayout.addWidget(fLayout, row, 2)
     else:
         Select = QComboBox()
@@ -577,7 +577,7 @@ def generalParLayout(
         state_management[key + "Select"] = Select
         gridLayout.addWidget(Select, row, 2)
 
-        fLayout = openFileLayout(key + "Edit", enabled=False)
+        fLayout = open_file_layout(key + "Edit", enabled=False)
         state_management[key + "Edit"].setEnabled(False)
         gridLayout.addWidget(fLayout, row + 1, 2)
 
