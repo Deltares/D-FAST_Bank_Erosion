@@ -4,7 +4,6 @@ from pathlib import Path
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
     QMessageBox,
-    QApplication,
     QDialog,
     QPushButton,
     QLabel,
@@ -23,7 +22,7 @@ from PySide6.QtCore import Qt
 
 from dfastbe.io.logger import LogData
 
-from dfastbe import __version__, __path__
+from dfastbe import __path__
 from dfastbe.gui.state_management import StateStore
 
 
@@ -37,16 +36,10 @@ __all__ = [
     "gui_text",
     "SHIP_TYPES",
     "show_error",
-    "menu_about_qt",
-    "menu_about_self",
     "validator",
-    "close_edit",
     "ICONS_DIR",
-    "selectFile",
-    "openFileLayout",
     "edit_search_line",
     "addOpenFileRow",
-    "set_dialog_size",
     "typeUpdatePar",
     "addTabForLevel",
     "add_an_item",
@@ -117,31 +110,6 @@ def show_error(message: str, detailed_message: str | None = None) -> None:
     msg.setWindowTitle("Error")
     msg.setStandardButtons(QMessageBox.Ok)
     msg.exec()
-
-
-def menu_about_self():
-    """Show the about dialog for D-FAST Bank Erosion."""
-
-    msg = QMessageBox()
-    msg.setText(f"D-FAST Bank Erosion {__version__}")
-    msg.setInformativeText("Copyright (c) 2025 Deltares.")
-    msg.setDetailedText(gui_text("license"))
-    msg.setWindowTitle(gui_text("about"))
-    msg.setStandardButtons(QMessageBox.Ok)
-
-    dfast_icon = get_icon(f"{ICONS_DIR}/D-FASTBE.png")
-    available_sizes = dfast_icon.availableSizes()
-    if available_sizes:
-        icon_size = available_sizes[0]
-        pixmap = dfast_icon.pixmap(icon_size).scaled(64,64)
-        msg.setIconPixmap(pixmap)
-    msg.setWindowIcon(dfast_icon)
-    msg.exec()
-
-
-def menu_about_qt():
-    """Show the about dialog for Qt."""
-    QApplication.aboutQt()
 
 
 def validator(valid_str: str) -> QValidator:

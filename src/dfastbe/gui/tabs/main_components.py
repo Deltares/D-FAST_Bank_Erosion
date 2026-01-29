@@ -7,14 +7,14 @@ from PySide6.QtWidgets import (
     QBoxLayout,
     QApplication,
     QMainWindow,
-    QFileDialog
+    QFileDialog,
+    QMessageBox
 )
 import matplotlib.pyplot as plt
 from dfastbe.gui.utils import (
     gui_text,
-    menu_about_self,
-    menu_about_qt,
-    show_error
+    show_error,
+    get_icon
 )
 from dfastbe.gui.configs import (
     get_configuration,
@@ -22,11 +22,12 @@ from dfastbe.gui.configs import (
 )
 from dfastbe.gui.tabs.analysis_runner import run_detection, run_erosion
 from dfastbe.io.config import ConfigFile
-from dfastbe import __path__
+from dfastbe import __path__, __version__
 
 
 r_dir = Path(__path__[0])
 USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
+ICONS_DIR = r_dir / "gui/icons"
 
 
 class BaseBar:
@@ -132,3 +133,28 @@ def menu_open_manual():
             show_error(f"Failed to open the user manual: {e}")
     else:
         show_error(f"User manual not found: {manual_path}")
+
+
+def menu_about_qt():
+    """Show the about dialog for Qt."""
+    QApplication.aboutQt()
+
+
+def menu_about_self():
+    """Show the about dialog for D-FAST Bank Erosion."""
+
+    msg = QMessageBox()
+    msg.setText(f"D-FAST Bank Erosion {__version__}")
+    msg.setInformativeText("Copyright (c) 2025 Deltares.")
+    msg.setDetailedText(gui_text("license"))
+    msg.setWindowTitle(gui_text("about"))
+    msg.setStandardButtons(QMessageBox.Ok)
+
+    dfast_icon = get_icon(f"{ICONS_DIR}/D-FASTBE.png")
+    available_sizes = dfast_icon.availableSizes()
+    if available_sizes:
+        icon_size = available_sizes[0]
+        pixmap = dfast_icon.pixmap(icon_size).scaled(64,64)
+        msg.setIconPixmap(pixmap)
+    msg.setWindowIcon(dfast_icon)
+    msg.exec()
