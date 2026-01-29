@@ -35,8 +35,6 @@ from typing import Any, Optional
 import matplotlib.pyplot as plt
 from PySide6.QtWidgets import (
     QTabWidget,
-    QSizePolicy,
-    QComboBox,
     QLineEdit,
     QLabel,
     QApplication,
@@ -46,7 +44,6 @@ from PySide6.QtWidgets import (
     QFormLayout,
     QGridLayout,
     QWidget,
-    QSpacerItem,
     QCheckBox,
     QFileDialog,
 )
@@ -61,17 +58,16 @@ from dfastbe.gui.utils import (
     validator,
     ICONS_DIR,
     addOpenFileRow,
-    generalParLayout
 )
 from dfastbe.gui.configs import (
     get_configuration,
     load_configuration,
-    bankStrengthSwitch,
 )
 from dfastbe.gui.analysis_runner import run_detection, run_erosion
 from dfastbe.gui.tabs.detection import DetectionTab
 from dfastbe.gui.tabs.erosion import ErosionTab
 from dfastbe.gui.tabs.shipping import ShippingTab
+from dfastbe.gui.tabs.bank import BankTab
 from dfastbe.gui.base import BaseTab
 from dfastbe.gui.state_management import StateStore
 
@@ -218,109 +214,6 @@ def add_check_box(
     check_txt = QLabel(label_string)
     StateManagement[key] = check_txt
     form_layout.addRow(check_txt, check_box)
-
-
-class BankTab(BaseTab):
-    def __init__(self, tabs: QTabWidget):
-        """Initialize the tab for the bank erosion settings.
-
-        Args:
-            tabs : QTabWidget
-                Tabs object to which the tab should be added.
-        """
-        super().__init__(tabs)
-
-    def create(self) -> None:
-        """Create the tab for the general bank properties."""
-        eParamsWidget = QWidget()
-        eParamsLayout = QGridLayout(eParamsWidget)
-        self.tabs.addTab(eParamsWidget, "Bank Parameters")
-
-        strength = QLabel("Strength Parameter")
-        eParamsLayout.addWidget(strength, 0, 0)
-        strengthPar = QComboBox()
-        strengthPar.addItems(("Bank Type", "Critical Shear Stress"))
-        strengthPar.currentIndexChanged.connect(bankStrengthSwitch)
-        StateManagement["strengthPar"] = strengthPar
-        eParamsLayout.addWidget(strengthPar, 0, 1, 1, 2)
-
-        generalParLayout(
-            eParamsLayout,
-            1,
-            "bankType",
-            "Bank Type",
-            selectList=[
-                "0 (Beschermde oeverlijn)",
-                "1 (Begroeide oeverlijn)",
-                "2 (Goede klei)",
-                "3 (Matig / slechte klei)",
-                "4 (Zand)",
-            ],
-        )
-        generalParLayout(eParamsLayout, 3, "bankShear", "Critical Shear Stress [N/m2]")
-        bankStrengthSwitch()
-        generalParLayout(eParamsLayout, 4, "bankProtect", "Protection [m]")
-        generalParLayout(eParamsLayout, 5, "bankSlope", "Slope [-]")
-        generalParLayout(eParamsLayout, 6, "bankReed", "Reed [-]")
-
-        addFilter(eParamsLayout, 7, "velFilter", "Velocity Filter [km]")
-        addFilter(eParamsLayout, 8, "bedFilter", "Bank Elevation Filter [km]")
-
-        stretch = QSpacerItem(
-            10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
-        )
-        eParamsLayout.addItem(stretch, 9, 0)
-
-
-def addFilter(
-    gridLayout: QGridLayout, row: int, key: str, labelString: str
-) -> None:
-    """
-    Add a line of controls for a filter
-
-    Arguments
-    ---------
-    gridLayout : QGridLayout
-        Grid layout object in which to position the edit controls.
-    row : int
-        Grid row number to be used for this parameter.
-    key : str
-        Short name of the parameter.
-    labelString : str
-        String describing the parameter to be displayed as label.
-    """
-
-    widthEdit = QLineEdit("0.3")
-    widthEdit.setValidator(validator("positive_real"))
-    gridLayout.addWidget(widthEdit, row, 2)
-    StateManagement[key + "Width"] = widthEdit
-
-    useFilter = QCheckBox("")
-    useFilter.setChecked(False)
-    useFilter.stateChanged.connect(lambda: updateFilter(key))
-    gridLayout.addWidget(useFilter, row, 1)
-    StateManagement[key + "Active"] = useFilter
-
-    filterTxt = QLabel(labelString)
-    gridLayout.addWidget(filterTxt, row, 0)
-    StateManagement[key + "Txt"] = filterTxt
-
-    updateFilter(key)
-
-
-def updateFilter(key: str) -> None:
-    """
-    Implements the dialog setting switching for both general and optional parameters.
-
-    Arguments
-    ---------
-    key : str
-        Short name of the parameter.
-    """
-    if StateManagement[key + "Active"].isChecked():
-        StateManagement[key + "Width"].setEnabled(True)
-    else:
-        StateManagement[key + "Width"].setEnabled(False)
 
 
 def updatePlotting() -> None:
