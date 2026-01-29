@@ -2,6 +2,7 @@ import os
 import subprocess
 import pytest
 from pathlib import Path
+import argparse
 
 
 @pytest.mark.binaries
@@ -32,7 +33,7 @@ class TestBatchMode:
         finally:
             os.chdir(cwd)
 
-        assert out_str[-1] == "FileNotFoundError: The Config-File: config.cfg does not exist"
+        assert out_str[-1] == "dfastbe.exe: error: argument --config: config file not found: config.cfg"
 
     def test_bank_lines(self, exe_path: Path):
         """

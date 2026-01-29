@@ -1,4 +1,4 @@
 # gui
 
 ## gui
-::: dfastbe.gui.gui
+::: dfastbe.gui.application
