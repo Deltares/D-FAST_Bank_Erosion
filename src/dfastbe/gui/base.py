@@ -194,21 +194,21 @@ def update_tab_keys(i: int) -> None:
             Number of the tab to be updated.
     """
     state_management = StateStore.instance()
-    iStart = str(i) + "_"
-    newStart = str(i - 1) + "_"
-    N = len(iStart)
-    keys = [key for key in state_management.keys() if key[:N] == iStart]
+    i_start = str(i) + "_"
+    new_start = str(i - 1) + "_"
+    N = len(i_start)
+    keys = [key for key in state_management.keys() if key[:N] == i_start]
     for key in keys:
         obj = state_management.pop(key)
         if key[-4:] == "Type":
             obj.currentIndexChanged.disconnect()
             obj.currentIndexChanged.connect(
-                lambda: typeUpdatePar(newStart + key[N:-4])
+                lambda: typeUpdatePar(new_start + key[N:-4])
             )
         elif key[-4:] == "File":
             obj.clicked.disconnect()
-            obj.clicked.connect(lambda: selectFile(newStart + key[N:-4]))
-        state_management[newStart + key[N:]] = obj
+            obj.clicked.connect(lambda: selectFile(new_start + key[N:-4]))
+        state_management[new_start + key[N:]] = obj
 
 
 def editADischarge(key: str, istr: str, file_name: str = "", prob: str = ""):
