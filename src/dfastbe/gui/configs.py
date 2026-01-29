@@ -38,7 +38,7 @@ def load_configuration(config_path: Path) -> None:
     to reflect it contents.
 
     Args:
-        config_path : str
+        config_path (Path):
             Name of the configuration file to be opened.
     """
     state_management = StateStore.instance()
