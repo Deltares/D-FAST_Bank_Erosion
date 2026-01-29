@@ -26,7 +26,6 @@ INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
 from __future__ import annotations
-import os
 import sys
 from collections.abc import Iterator, MutableMapping
 from pathlib import Path
@@ -39,35 +38,28 @@ from PySide6.QtWidgets import (
     QLabel,
     QApplication,
     QBoxLayout,
-    QPushButton,
     QMainWindow,
     QFormLayout,
     QGridLayout,
     QWidget,
     QCheckBox,
-    QFileDialog,
 )
 
-from dfastbe.io.config import ConfigFile
 from dfastbe.gui.utils import (
     get_icon,
-    gui_text,
-    menu_open_manual,
-    menu_about_self,
-    menu_about_qt,
     validator,
     ICONS_DIR,
     addOpenFileRow,
 )
 from dfastbe.gui.configs import (
-    get_configuration,
     load_configuration,
 )
-from dfastbe.gui.analysis_runner import run_detection, run_erosion
+
 from dfastbe.gui.tabs.detection import DetectionTab
 from dfastbe.gui.tabs.erosion import ErosionTab
 from dfastbe.gui.tabs.shipping import ShippingTab
 from dfastbe.gui.tabs.bank import BankTab
+from dfastbe.gui.tabs.main_components import ButtonBar, MenuBar
 from dfastbe.gui.base import BaseTab
 from dfastbe.gui.state_management import StateStore
 
@@ -237,97 +229,6 @@ def updatePlotting() -> None:
 
     StateManagement["closePlots"].setEnabled(plotFlag)
     StateManagement["closePlotsEdit"].setEnabled(plotFlag)
-
-
-def menu_load_configuration() -> None:
-    """Select and load a configuration file."""
-
-    file = QFileDialog.getOpenFileName(
-        caption="Select Configuration File", filter="Config Files (*.cfg)"
-    )
-    filename = file[0]
-    if filename != "":
-        load_configuration(Path(filename))
-
-
-def menu_save_configuration() -> None:
-    """Ask for a configuration file name and save GUI selection to that file."""
-
-    fil = QFileDialog.getSaveFileName(
-        caption="Save Configuration As", filter="Config Files (*.cfg)"
-    )
-    filename = fil[0]
-    if filename != "":
-        config = get_configuration()
-        rootdir = os.path.dirname(filename)
-        config_file = ConfigFile(config)
-        config_file.relative_to(rootdir)
-        config.write(filename)
-
-
-class BaseBar:
-    def __init__(self, *, window: QMainWindow, app: QApplication, layout: QBoxLayout | None = None):
-        self.window = window
-        self.layout = layout
-        self.app = app
-
-    def create(self):
-        ...
-
-    def close(self) -> None:
-        """Close the dialog and program."""
-        plt.close("all")
-        self.window.close()
-        self.app.closeAllWindows()
-        self.app.quit()
-
-
-class MenuBar(BaseBar):
-    def __init__(self, window: QMainWindow, app: QApplication):
-        super().__init__(window=window, app=app)
-        self.menubar = self.window.menuBar()
-
-    def create(self):
-        menu = self.menubar.addMenu(gui_text("File"))
-        item = menu.addAction(gui_text("Load"))
-        item.triggered.connect(menu_load_configuration)
-        item = menu.addAction(gui_text("Save"))
-        item.triggered.connect(menu_save_configuration)
-        menu.addSeparator()
-        item = menu.addAction(gui_text("Close"))
-        item.triggered.connect(self.close)
-
-        menu = self.menubar.addMenu(gui_text("Help"))
-        item = menu.addAction(gui_text("Manual"))
-        item.triggered.connect(menu_open_manual)
-        menu.addSeparator()
-        item = menu.addAction(gui_text("Version"))
-        item.triggered.connect(menu_about_self)
-        item = menu.addAction(gui_text("AboutQt"))
-        item.triggered.connect(menu_about_qt)
-
-
-class ButtonBar(BaseBar):
-    def __init__(self, window: QMainWindow, layout: QBoxLayout, app: QApplication | None = None):
-        super().__init__(window=window, app=app, layout=layout)
-
-    def create(self):
-        button_bar = QWidget(self.window)
-        button_bar_layout = QBoxLayout(QBoxLayout.Direction.LeftToRight, button_bar)
-        button_bar_layout.setContentsMargins(0, 0, 0, 0)
-        self.layout.addWidget(button_bar)
-
-        detect = QPushButton(gui_text("action_detect"), self.window)
-        detect.clicked.connect(lambda: run_detection(self.app))
-        button_bar_layout.addWidget(detect)
-
-        erode = QPushButton(gui_text("action_erode"), self.window)
-        erode.clicked.connect(lambda: run_erosion(self.app))
-        button_bar_layout.addWidget(erode)
-
-        done = QPushButton(gui_text("action_close"), self.window)
-        done.clicked.connect(self.close)
-        button_bar_layout.addWidget(done)
 
 
 class GUI:
