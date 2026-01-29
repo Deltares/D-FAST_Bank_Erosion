@@ -30,14 +30,12 @@ from dfastbe.gui.state_management import StateStore
 SHIP_TYPES = ["1 (multiple barge convoy set)", "2 (RHK ship / motorship)", "3 (towboat)"]
 r_dir = Path(__path__[0])
 ICONS_DIR = r_dir / "gui/icons"
-USER_MANUAL_FILE_NAME = "dfastbe_usermanual.pdf"
 
 
 __all__ = [
     "get_icon",
     "gui_text",
     "SHIP_TYPES",
-    "menu_open_manual",
     "show_error",
     "menu_about_qt",
     "menu_about_self",
@@ -119,20 +117,6 @@ def show_error(message: str, detailed_message: str | None = None) -> None:
     msg.setWindowTitle("Error")
     msg.setStandardButtons(QMessageBox.Ok)
     msg.exec()
-
-
-def menu_open_manual():
-    """Open the user manual."""
-    manual_path = r_dir / USER_MANUAL_FILE_NAME
-    if manual_path.exists():
-        try:
-            # bandit complains about os.startfile, but it is the only way to open a file in the default application on Windows.
-            # On Linux and MacOS, opening the file might give a security warning.
-            os.startfile(str(manual_path)) # nosec
-        except Exception as e:
-            show_error(f"Failed to open the user manual: {e}")
-    else:
-        show_error(f"User manual not found: {manual_path}")
 
 
 def menu_about_self():
