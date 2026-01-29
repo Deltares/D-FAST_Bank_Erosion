@@ -30,11 +30,10 @@ import os
 import sys
 from collections.abc import Iterator, MutableMapping
 from pathlib import Path
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional
 
 import matplotlib.pyplot as plt
 from PySide6.QtGui import QIntValidator
-from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QTabWidget,
     QSizePolicy,
@@ -44,7 +43,6 @@ from PySide6.QtWidgets import (
     QApplication,
     QBoxLayout,
     QPushButton,
-    QDialog,
     QMainWindow,
     QFormLayout,
     QGridLayout,
@@ -52,7 +50,6 @@ from PySide6.QtWidgets import (
     QSpacerItem,
     QCheckBox,
     QTreeWidget,
-    QTreeWidgetItem,
     QFileDialog,
 )
 
@@ -65,19 +62,19 @@ from dfastbe.gui.utils import (
     menu_about_self,
     menu_about_qt,
     validator,
-    close_edit,
-    ICONS_DIR
+    ICONS_DIR,
+    openFileLayout,
+    addOpenFileRow,
+    typeUpdatePar
 )
 from dfastbe.gui.configs import (
     get_configuration,
     load_configuration,
     bankStrengthSwitch,
-    typeUpdatePar,
-    openFileLayout,
-    addTabForLevel,
-    selectFile,
 )
 from dfastbe.gui.analysis_runner import run_detection, run_erosion
+from dfastbe.gui.detection_tab import DetectionTab
+from dfastbe.gui.base import BaseTab
 from dfastbe.gui.state_management import StateStore
 
 
@@ -113,152 +110,6 @@ class _StateProxy(MutableMapping[str, Any]):
 
 
 StateManagement: MutableMapping[str, Any] = _StateProxy()
-
-
-class BaseTab:
-
-    def __init__(self, tabs: QTabWidget, window: QMainWindow | None = None, app: QApplication | None = None):
-        self.tabs = tabs
-        self.window = window
-        self.app = app
-
-    def add_remove_edit_layout(
-        self, main_widget: QWidget, key: str
-    ) -> QWidget:
-        """
-        Create a standard layout with list control and add, edit and remove buttons.
-
-        Arguments
-        ---------
-        main_widget : QWidget
-            Main object on which the add, edit and remove buttons should operate.
-        key : str
-            Short name of the parameter.
-
-        Returns
-        -------
-        parent : QWidget
-            Parent QtWidget that contains the add, edit and remove buttons.
-        """
-        parent = QWidget()
-        gridly = QGridLayout(parent)
-        gridly.setContentsMargins(0, 0, 0, 0)
-
-        StateManagement[key] = main_widget
-        gridly.addWidget(main_widget, 0, 0)
-
-        button_bar = QWidget()
-        button_bar_layout = QBoxLayout(QBoxLayout.Direction.TopToBottom, button_bar)
-        button_bar_layout.setContentsMargins(0, 0, 0, 0)
-        gridly.addWidget(button_bar, 0, 1)
-
-        add_button = QPushButton(get_icon(f"{ICONS_DIR}/add.png"), "")
-        add_button.clicked.connect(lambda: add_an_item(key))
-        StateManagement[key + "Add"] = add_button
-        button_bar_layout.addWidget(add_button)
-
-        edit_button = QPushButton(get_icon(f"{ICONS_DIR}/edit.png"), "")
-        edit_button.clicked.connect(lambda: self.edit_an_item(key))
-        edit_button.setEnabled(False)
-        StateManagement[key + "Edit"] = edit_button
-        button_bar_layout.addWidget(edit_button)
-
-        delete_button = QPushButton(get_icon(f"{ICONS_DIR}/remove.png"), "")
-        delete_button.clicked.connect(lambda: remove_an_item(key))
-        delete_button.setEnabled(False)
-        StateManagement[key + "Remove"] = delete_button
-        button_bar_layout.addWidget(delete_button)
-
-        stretch = QSpacerItem(
-            10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
-        )
-        button_bar_layout.addItem(stretch)
-
-        return parent
-
-    def edit_an_item(self, key: str) -> None:
-        """
-        Implements the actions for the edit item button.
-
-        Dialog implemented in separate routines.
-
-        Arguments
-        ---------
-        key : str
-            Short name of the parameter.
-        """
-        selected = StateManagement[key].selectedItems()
-        # root = dialog[key].invisibleRootItem()
-        if len(selected) > 0:
-            istr = selected[0].text(0)
-            if key == "searchLines":
-                file_name = selected[0].text(1)
-                dist = selected[0].text(2)
-                file_name, dist = edit_search_line(key, istr, file_name=file_name, dist=dist)
-                selected[0].setText(1, file_name)
-                selected[0].setText(2, dist)
-            elif key == "discharges":
-                file_name = selected[0].text(1)
-                prob = selected[0].text(2)
-                file_name, prob = editADischarge(key, istr, file_name=file_name, prob=prob)
-                selected[0].setText(1, file_name)
-                selected[0].setText(2, prob)
-
-
-def edit_search_line(
-    key: str, istr: str, file_name: str = "", dist: str = "50"
-) -> Tuple[str, str]:
-    """
-    Create an edit dialog for the search lines list.
-
-    Arguments
-    ---------
-    key : str
-        Short name of the parameter.
-    istr : str
-        String representation of the search line in the list.
-    file_name : str
-        Name of the search line file.
-    dist : str
-        String representation of the search distance.
-
-    Returns
-    -------
-    fileName1 : str
-        Updated name of the search line file.
-    dist1 : str
-        Updated string representation of the search distance.
-    """
-
-    edit_dialog = QDialog()
-    set_dialog_size(edit_dialog, 600, 100)
-    edit_dialog.setWindowFlags(
-        Qt.WindowTitleHint | Qt.WindowSystemMenuHint
-    )
-    edit_dialog.setWindowTitle("Edit Search Line")
-    edit_layout = QFormLayout(edit_dialog)
-
-    label = QLabel(istr)
-    edit_layout.addRow("Search Line Nr", label)
-
-    addOpenFileRow(edit_layout, "editSearchLine", "Search Line File")
-    StateManagement["editSearchLineEdit"].setText(file_name)
-
-    search_distance = QLineEdit()
-    search_distance.setText(dist)
-    search_distance.setValidator(validator("positive_real"))
-    edit_layout.addRow("Search Distance [m]", search_distance)
-
-    done = QPushButton("Done")
-    done.clicked.connect(lambda: close_edit(edit_dialog))
-    # edit_SearchDistance.setValidator(validator("positive_real"))
-    edit_layout.addRow(" ", done)
-
-    edit_dialog.exec()
-
-    file_name = StateManagement["editSearchLineEdit"].text()
-    dist = search_distance.text()
-    return file_name, dist
 
 
 class GeneralTab(BaseTab):
@@ -369,44 +220,6 @@ def add_check_box(
     check_txt = QLabel(label_string)
     StateManagement[key] = check_txt
     form_layout.addRow(check_txt, check_box)
-
-
-class DetectionTab(BaseTab):
-
-    def __init__(self, tabs: QTabWidget, window: QMainWindow, app: QApplication):
-        """Initialize the tab for the bank line detection settings.
-
-        Args:
-            tabs : QTabWidget
-                Tabs object to which the tab should be added.
-            window : QMainWindow
-                The window object in which the tab item is located.
-            app : QApplication
-                The application object to which the window belongs, needed for font information.
-        """
-        super().__init__(tabs, window, app)
-
-    def create(self) -> None:
-        """Create the tab for the bank line detection settings."""
-        detect_widget = QWidget()
-        detect_layout = QFormLayout(detect_widget)
-        self.tabs.addTab(detect_widget, "Detection")
-
-        addOpenFileRow(detect_layout, "simFile", "Simulation File")
-
-        water_depth = QLineEdit(self.window)
-        water_depth.setValidator(validator("positive_real"))
-        StateManagement["waterDepth"] = water_depth
-        detect_layout.addRow("Water Depth [m]", water_depth)
-
-        search_lines = QTreeWidget(self.window)
-        search_lines.setHeaderLabels(["Index", "FileName", "Search Distance [m]"])
-        search_lines.setFont(self.app.font())
-        search_lines.setColumnWidth(0, 50)
-        search_lines.setColumnWidth(1, 200)
-
-        search_lines_layout = self.add_remove_edit_layout(search_lines, "searchLines")
-        detect_layout.addRow("Search Lines", search_lines_layout)
 
 
 class ErosionTab(BaseTab):
@@ -663,27 +476,6 @@ def generalParLayout(
     typeUpdatePar(key)
 
 
-def addOpenFileRow(
-    formLayout: QFormLayout, key: str, labelString: str
-) -> None:
-    """
-    Add a line of controls for selecting a file or folder in a form layout.
-
-    Arguments
-    ---------
-    formLayout : QFormLayout
-        Form layout object in which to position the edit controls.
-    key : str
-        Short name of the parameter.
-    labelString : str
-        String describing the parameter to be displayed as label.
-    """
-    Label = QLabel(labelString)
-    StateManagement[key] = Label
-    fLayout = openFileLayout(key + "Edit")
-    formLayout.addRow(Label, fLayout)
-
-
 def updatePlotting() -> None:
     """Update the plotting flags."""
 
@@ -707,156 +499,6 @@ def updatePlotting() -> None:
     StateManagement["closePlotsEdit"].setEnabled(plotFlag)
 
 
-def add_an_item(key: str) -> None:
-    """Implements the actions for the add item button.
-
-    Args:
-        key : str
-            Short name of the parameter.
-    """
-    n_items = StateManagement[key].invisibleRootItem().childCount()
-    i = n_items + 1
-    istr = str(i)
-    if key == "searchLines":
-        file_name, dist = edit_search_line(key, istr)
-        c1 = QTreeWidgetItem(StateManagement["searchLines"], [istr, file_name, dist])
-    elif key == "discharges":
-        prob = str(1 / (n_items + 1))
-        file_name, prob = editADischarge(key, istr, prob=prob)
-        c1 = QTreeWidgetItem(StateManagement["discharges"], [istr, file_name, prob])
-        addTabForLevel(istr)
-        StateManagement["refLevel"].validator().setTop(i)
-
-    StateManagement[key + "Edit"].setEnabled(True)
-    StateManagement[key + "Remove"].setEnabled(True)
-
-
-def set_dialog_size(edit_dialog: QDialog, width: int, height: int) -> None:
-    """Set the width and height of a dialog and position it centered relative to the main window.
-
-    Args:
-        edit_dialog : QDialog
-            Dialog object to be positioned correctly.
-        width : int
-            Desired width of the dialog.
-        height : int
-            Desired height of the dialog.
-    """
-    parent = StateManagement["window"]
-    x = parent.x()
-    y = parent.y()
-    pw = parent.width()
-    ph = parent.height()
-    edit_dialog.setGeometry(
-        x + pw / 2 - width / 2, y + ph / 2 - height / 2, width, height
-    )
-
-
-def editADischarge(key: str, istr: str, file_name: str = "", prob: str = ""):
-    """Create an edit dialog for simulation file and weighing.
-
-    Args:
-        key : str
-            Short name of the parameter.
-        istr : str
-            String representation of the simulation in the list.
-        file_name : str
-            Name of the simulation file.
-        prob : str
-            String representation of the weight for this simulation.
-    """
-    edit_dialog = QDialog()
-    set_dialog_size(edit_dialog, 600, 100)
-    edit_dialog.setWindowFlags(
-        Qt.WindowTitleHint | Qt.WindowSystemMenuHint
-    )
-    edit_dialog.setWindowTitle("Edit Discharge")
-    edit_layout = QFormLayout(edit_dialog)
-
-    label = QLabel(istr)
-    edit_layout.addRow("Level Nr", label)
-
-    addOpenFileRow(edit_layout, "editDischarge", "Simulation File")
-    StateManagement["editDischargeEdit"].setText(file_name)
-
-    probability = QLineEdit()
-    probability.setText(prob)
-    probability.setValidator(validator("positive_real"))
-    edit_layout.addRow("Probability [-]", probability)
-
-    done = QPushButton("Done")
-    done.clicked.connect(lambda: close_edit(edit_dialog))
-    # edit_SearchDistance.setValidator(validator("positive_real"))
-    edit_layout.addRow(" ", done)
-
-    edit_dialog.exec()
-
-    file_name = StateManagement["editDischargeEdit"].text()
-    prob = probability.text()
-    return file_name, prob
-
-
-def remove_an_item(key: str) -> None:
-    """Implements the actions for the remove item button.
-
-    Args:
-        key : str
-            Short name of the parameter.
-    """
-    selected = StateManagement[key].selectedItems()
-    root = StateManagement[key].invisibleRootItem()
-    if len(selected) > 0:
-        istr = selected[0].text(0)
-        root.removeChild(selected[0])
-        i = int(istr) - 1
-        for j in range(i, root.childCount()):
-            root.child(j).setText(0, str(j + 1))
-    else:
-        istr = ""
-    if root.childCount() == 0:
-        StateManagement[key + "Edit"].setEnabled(False)
-        StateManagement[key + "Remove"].setEnabled(False)
-    if istr == "":
-        pass
-    elif key == "searchLines":
-        pass
-    elif key == "discharges":
-        tabs = StateManagement["tabs"]
-        StateManagement["refLevel"].validator().setTop(root.childCount())
-        dj = 0
-        for j in range(tabs.count()):
-            if dj > 0:
-                tabs.setTabText(j - 1, "Level " + str(j + dj))
-                update_tab_keys(j + dj + 1)
-            elif tabs.tabText(j) == "Level " + istr:
-                tabs.removeTab(j)
-                dj = i - j
-
-
-def update_tab_keys(i: int) -> None:
-    """Renumber tab i to tab i-1.
-
-    Args:
-        i : str
-            Number of the tab to be updated.
-    """
-    iStart = str(i) + "_"
-    newStart = str(i - 1) + "_"
-    N = len(iStart)
-    keys = [key for key in StateManagement.keys() if key[:N] == iStart]
-    for key in keys:
-        obj = StateManagement.pop(key)
-        if key[-4:] == "Type":
-            obj.currentIndexChanged.disconnect()
-            obj.currentIndexChanged.connect(
-                lambda: typeUpdatePar(newStart + key[N:-4])
-            )
-        elif key[-4:] == "File":
-            obj.clicked.disconnect()
-            obj.clicked.connect(lambda: selectFile(newStart + key[N:-4]))
-        StateManagement[newStart + key[N:]] = obj
-
-
 def menu_load_configuration() -> None:
     """Select and load a configuration file."""
 
@@ -865,7 +507,7 @@ def menu_load_configuration() -> None:
     )
     filename = file[0]
     if filename != "":
-        load_configuration(filename)
+        load_configuration(Path(filename))
 
 
 def menu_save_configuration() -> None:
