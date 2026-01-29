@@ -168,38 +168,32 @@ class TestCreateMenus:
         assert gui_text("Help") in actions[1].text()
 
 
-    def test_file_dropdown_contains_load_option(self, mock_menubar):
-        """Test that File menu contains Load action."""
+    def test_menu_structure_file_dropdown(self, mock_menubar):
+        """Test that File menu dropdown contains `Save`, `Load` and `Close`."""
         createMenus(mock_menubar)
 
         file_menu_action = mock_menubar.actions()[0]
         file_menu = file_menu_action.menu()
         file_actions = file_menu.actions()
 
-        load_action = file_actions[0]
-        assert "Load" in load_action.text()
+        assert len(file_actions) == 4
+        assert file_actions[0].text() == gui_text("Load")
+        assert file_actions[1].text() == gui_text("Save")
+        assert file_actions[2].isSeparator()
+        assert file_actions[3].text() == gui_text("Close")
 
 
-    def test_file_dropdown_contains_save_option(self, mock_menubar):
-        """Test that File menu contains Save action."""
+    def test_menu_structure_help_dropdown(self, mock_menubar):
+        """Test that Help menu dropdown contains `Open User Manual`, `Version` and
+        `About Qt`."""
         createMenus(mock_menubar)
 
-        file_menu_action = mock_menubar.actions()[0]
-        file_menu = file_menu_action.menu()
-        file_actions = file_menu.actions()
+        help_menu_action = mock_menubar.actions()[1]
+        help_menu = help_menu_action.menu()
+        help_actions = help_menu.actions()
 
-        save_action = file_actions[1]
-        assert "Save" in save_action.text()
-
-
-
-    def test_file_dropdown_contains_close_option(self, mock_menubar):
-        """Test that File menu contains Close action as the last one."""
-        createMenus(mock_menubar)
-
-        file_menu_action = mock_menubar.actions()[0]
-        file_menu = file_menu_action.menu()
-        file_actions = file_menu.actions()
-
-        close_action = file_actions[3]
-        assert "Close" in close_action.text()
+        assert len(help_actions) == 4
+        assert help_actions[0].text() == "Open User Manual"
+        assert help_actions[1].isSeparator()
+        assert help_actions[2].text() == gui_text("Version")
+        assert help_actions[3].text() == gui_text("AboutQt")
