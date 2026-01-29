@@ -64,7 +64,7 @@ class Runner:
                 - 'BANKEROSION': Runs the bank erosion processing.
                 - 'GUI': Launches the graphical user interface.
                 Defaults to 'GUI'.
-            configfile (str, optional):
+            configfile (Path | None):
                 Path to the configuration file. Defaults to None.
 
 
