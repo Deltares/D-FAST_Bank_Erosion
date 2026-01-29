@@ -1,5 +1,5 @@
 import os
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, Tuple, List
 from pathlib import Path
 from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (
@@ -53,7 +53,8 @@ __all__ = [
     "addTabForLevel",
     "add_an_item",
     "remove_an_item",
-    "editADischarge"
+    "editADischarge",
+    "generalParLayout"
 ]
 
 
@@ -711,3 +712,55 @@ def update_tab_keys(i: int) -> None:
             obj.clicked.disconnect()
             obj.clicked.connect(lambda: selectFile(newStart + key[N:-4]))
         state_management[newStart + key[N:]] = obj
+
+
+def generalParLayout(
+    gridLayout: QGridLayout,
+    row: int,
+    key: str,
+    labelString: str,
+    selectList: List[str] | None = None,
+) -> None:
+    """
+    Add a line of controls for editing a general parameter.
+
+    Arguments
+    ---------
+    gridLayout : QGridLayout
+        Grid layout object in which to position the edit controls.
+    row : int
+        Grid row number to be used for this parameter.
+    key : str
+        Short name of the parameter.
+    labelString : str
+        String describing the parameter to be displayed as label.
+    selectList : Optional[List[str]]
+        In case the parameter can only have a limited number of values: a list
+        of strings describing the options.
+    """
+    state_management = StateStore.instance()
+    Label = QLabel(labelString)
+    state_management[key] = Label
+    gridLayout.addWidget(Label, row, 0)
+
+    paramTypes = ("Constant", "Variable")
+    Type = QComboBox()
+    Type.addItems(paramTypes)
+    Type.currentIndexChanged.connect(lambda: typeUpdatePar(key))
+    state_management[key + "Type"] = Type
+    gridLayout.addWidget(Type, row, 1)
+
+    if selectList is None:
+        fLayout = openFileLayout(key + "Edit", enabled=False)
+        gridLayout.addWidget(fLayout, row, 2)
+    else:
+        Select = QComboBox()
+        Select.addItems(selectList)
+        state_management[key + "Select"] = Select
+        gridLayout.addWidget(Select, row, 2)
+
+        fLayout = openFileLayout(key + "Edit", enabled=False)
+        state_management[key + "Edit"].setEnabled(False)
+        gridLayout.addWidget(fLayout, row + 1, 2)
+
+    typeUpdatePar(key)

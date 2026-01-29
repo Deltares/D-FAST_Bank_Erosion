@@ -30,7 +30,7 @@ import os
 import sys
 from collections.abc import Iterator, MutableMapping
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 import matplotlib.pyplot as plt
 from PySide6.QtWidgets import (
@@ -48,7 +48,6 @@ from PySide6.QtWidgets import (
     QWidget,
     QSpacerItem,
     QCheckBox,
-    QTreeWidget,
     QFileDialog,
 )
 
@@ -56,15 +55,13 @@ from dfastbe.io.config import ConfigFile
 from dfastbe.gui.utils import (
     get_icon,
     gui_text,
-    SHIP_TYPES,
     menu_open_manual,
     menu_about_self,
     menu_about_qt,
     validator,
     ICONS_DIR,
-    openFileLayout,
     addOpenFileRow,
-    typeUpdatePar
+    generalParLayout
 )
 from dfastbe.gui.configs import (
     get_configuration,
@@ -74,6 +71,7 @@ from dfastbe.gui.configs import (
 from dfastbe.gui.analysis_runner import run_detection, run_erosion
 from dfastbe.gui.tabs.detection import DetectionTab
 from dfastbe.gui.tabs.erosion import ErosionTab
+from dfastbe.gui.tabs.shipping import ShippingTab
 from dfastbe.gui.base import BaseTab
 from dfastbe.gui.state_management import StateStore
 
@@ -222,38 +220,6 @@ def add_check_box(
     form_layout.addRow(check_txt, check_box)
 
 
-class ShippingTab(BaseTab):
-    def __init__(self, tabs: QTabWidget):
-        """Initialize the tab for the bank erosion settings.
-
-        Args:
-            tabs : QTabWidget
-                Tabs object to which the tab should be added.
-        """
-        super().__init__(tabs)
-
-    def create(self) -> None:
-        """
-        Create the tab for the general shipping settings.
-        """
-        eParamsWidget = QWidget()
-        eParamsLayout = QGridLayout(eParamsWidget)
-        self.tabs.addTab(eParamsWidget, "Shipping Parameters")
-
-        generalParLayout(eParamsLayout, 0, "shipType", "Ship Type", selectList=SHIP_TYPES)
-        generalParLayout(eParamsLayout, 2, "shipVeloc", "Velocity [m/s]")
-        generalParLayout(eParamsLayout, 3, "nShips", "# Ships [1/yr]")
-        generalParLayout(eParamsLayout, 4, "shipNWaves", "# Waves [1/ship]")
-        generalParLayout(eParamsLayout, 5, "shipDraught", "Draught [m]")
-        generalParLayout(eParamsLayout, 6, "wavePar0", "Wave0 [m]")
-        generalParLayout(eParamsLayout, 7, "wavePar1", "Wave1 [m]")
-
-        stretch = QSpacerItem(
-            10, 10, QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Expanding
-        )
-        eParamsLayout.addItem(stretch, 8, 0)
-
-
 class BankTab(BaseTab):
     def __init__(self, tabs: QTabWidget):
         """Initialize the tab for the bank erosion settings.
@@ -355,57 +321,6 @@ def updateFilter(key: str) -> None:
         StateManagement[key + "Width"].setEnabled(True)
     else:
         StateManagement[key + "Width"].setEnabled(False)
-
-
-def generalParLayout(
-    gridLayout: QGridLayout,
-    row: int,
-    key: str,
-    labelString: str,
-    selectList: Optional[List[str]] = None,
-) -> None:
-    """
-    Add a line of controls for editing a general parameter.
-
-    Arguments
-    ---------
-    gridLayout : QGridLayout
-        Grid layout object in which to position the edit controls.
-    row : int
-        Grid row number to be used for this parameter.
-    key : str
-        Short name of the parameter.
-    labelString : str
-        String describing the parameter to be displayed as label.
-    selectList : Optional[List[str]]
-        In case the parameter can only have a limited number of values: a list
-        of strings describing the options.
-    """
-    Label = QLabel(labelString)
-    StateManagement[key] = Label
-    gridLayout.addWidget(Label, row, 0)
-
-    paramTypes = ("Constant", "Variable")
-    Type = QComboBox()
-    Type.addItems(paramTypes)
-    Type.currentIndexChanged.connect(lambda: typeUpdatePar(key))
-    StateManagement[key + "Type"] = Type
-    gridLayout.addWidget(Type, row, 1)
-
-    if selectList is None:
-        fLayout = openFileLayout(key + "Edit", enabled=False)
-        gridLayout.addWidget(fLayout, row, 2)
-    else:
-        Select = QComboBox()
-        Select.addItems(selectList)
-        StateManagement[key + "Select"] = Select
-        gridLayout.addWidget(Select, row, 2)
-
-        fLayout = openFileLayout(key + "Edit", enabled=False)
-        StateManagement[key + "Edit"].setEnabled(False)
-        gridLayout.addWidget(fLayout, row + 1, 2)
-
-    typeUpdatePar(key)
 
 
 def updatePlotting() -> None:
