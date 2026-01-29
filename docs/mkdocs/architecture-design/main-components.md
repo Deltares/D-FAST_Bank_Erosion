@@ -33,7 +33,7 @@ D-FAST_Bank_Erosion/
 │       ├───io                # Input/output handling modules
 │       │   └───log_data      # Logging data and resources
 │       ├───__main__.py       # Entry point for CLI
-│       ├───cmd.py            # Command processing
+│       ├───runner.py            # Command processing
 │       ├───plotting.py       # Plotting utilities
 │       └───utils.py          # General utilities
 ├───tests                     # Test suite
@@ -50,7 +50,7 @@ The D-FAST Bank Erosion software is organized into several key components, each 
 graph TD
     subgraph Presentation_Layer
         GUI["GUI (gui.py)"]
-        CLI["CLI (__main__.py, cmd.py)"]
+        CLI["CLI (__main__.py, runner.py)"]
     end
 
     subgraph Domain_Layer
@@ -64,11 +64,11 @@ graph TD
         Plotting["Plotting (plotting.py)"]
     end
 
-    CLI --> cmd
-    GUI --> cmd
+    CLI --> runner
+    GUI --> runner
 
-    cmd --> BankErosion
-    cmd --> BankLines
+    runner --> BankErosion
+    runner --> BankLines
 
     BankErosion --> IO
     BankErosion --> Utils

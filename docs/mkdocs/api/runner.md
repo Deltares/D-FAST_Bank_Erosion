@@ -12,7 +12,7 @@ The Command module consists of the following components:
 
 ### Run Function
 
-::: dfastbe.cmd
+::: dfastbe.runner
 
 The `run` function is the main entry point for the D-FAST Bank Erosion software. It initializes the language settings and launches the requested operational mode.
 
@@ -38,16 +38,18 @@ The typical workflow for using the Command module is:
 ## Usage Example
 
 ```python
-from dfastbe.cmd import run
+from dfastbe.runner import Runner
 
 # Run in GUI mode with English language
-run(language="UK", run_mode="GUI", configfile="config.cfg")
+runner = Runner(language="UK", run_mode="GUI", configfile="config.cfg")
+runner.run()
 
 # Run bank line detection with Dutch language
-run(language="NL", run_mode="BANKLINES", configfile="config.cfg")
-
+runner = Runner(language="NL", run_mode="BANKLINES", configfile="config.cfg")
+runner.run()
 # Run bank erosion calculation with English language
-run(language="UK", run_mode="BANKEROSION", configfile="config.cfg")
+runner = Runner(language="UK", run_mode="BANKEROSION", configfile="config.cfg")
+runner.run()
 ```
 
 For more details on the specific functions, refer to the API reference below.

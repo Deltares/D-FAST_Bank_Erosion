@@ -132,7 +132,7 @@ nav:
               - api/bank_erosion/data_models/calculation.md
               - api/bank_erosion/data_models/inputs.md
       - api/io.md
-      - api/cmd.md
+      - api/runner.md
       - api/utils.md
       - api/plotting.md
   - User Interface:

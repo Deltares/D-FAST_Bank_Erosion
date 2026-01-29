@@ -666,8 +666,12 @@ python -m dfastbe ...options...
 or from within a running Python environment as
 
 \begin{Verbatim}
-import dfastbe.cmd
-dfastbe.cmd.run()
+from dfastbe.runner import Runner
+language = 'NL'
+run_mode = 'GUI'
+configfile = 'dfastbe.cfg'
+runner = Runner(language, run_mode, configfile)
+runner.run()
 \end{Verbatim}
 
 where optionally the \command{language} (default \command{UK}), \command{runmode} (default \command{GUI}) and \command{configfile} (default \command{dfastbe.cfg}) can be specified as arguments.

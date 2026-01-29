@@ -5,7 +5,7 @@ These tests cover pure functions that don't require Qt event loop or complex set
 """
 
 import pytest
-from dfastbe.gui.gui import gui_text, validator, shipTypes
+from dfastbe.gui.utils import SHIP_TYPES, gui_text, validator
 from PySide6.QtGui import QDoubleValidator
 
 
@@ -53,7 +53,7 @@ class TestShipTypes:
 
     def test_amount_of_ship_types(self):
         """Test that shipTypes returns a list of 3 elements."""
-        types = shipTypes()
+        types = SHIP_TYPES
         assert isinstance(types, list)
         assert len(types) == 3
 
@@ -69,5 +69,5 @@ class TestShipTypes:
     ])
     def test_ship_types_contains_expected_values(self, index, expected):
         """Test that shipTypes returns the correct ship type strings."""
-        result = shipTypes()
+        result = SHIP_TYPES
         assert result[index] == expected

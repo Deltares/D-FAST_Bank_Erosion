@@ -26,7 +26,7 @@ from dfastbe.bank_erosion.data_models.inputs import (
 )
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.bank_erosion.mesh.processor import MeshProcessor
-from dfastbe.cmd import run
+from dfastbe.runner import Runner
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.data_models import LineGeometry
 
@@ -68,9 +68,11 @@ def test_bank_erosion(image_list: List[str], case: str, config_file: str):
     folder = f"./tests/data/erosion/{case}/"
     language = "UK"
     folder_and_config_file = f"{folder}{config_file}"
-    run(language, "BANKLINES", folder_and_config_file)
+    runner = Runner(language, "BANKLINES", folder_and_config_file)
+    runner.run()
     print("Banklines done")
-    run(language, "BANKEROSION", folder_and_config_file)
+    runner = Runner(language, "BANKEROSION", folder_and_config_file)
+    runner.run()
     print("Bank erosion done")
     test_path = Path(folder)
 
