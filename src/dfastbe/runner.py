@@ -45,22 +45,8 @@ class Runner:
         run_mode: str = "GUI",
         configfile: Path | None = None,
     ):
+        """Initialize the Runner class.
 
-        self.language = language.upper()
-        self.run_mode = self._validate_run_mode(run_mode)
-        self.log_data = LogData(LOG_DATA_DIR / f"messages.{language}.ini")
-        self.configfile = configfile
-
-    @staticmethod
-    def _validate_run_mode(run_mode: str) -> str:
-        if run_mode not in AVAILABLE_RUN_MODES:
-            raise ValueError(f"Invalid run mode {run_mode} specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'.")
-        else:
-            run_mode = run_mode.upper()
-        return run_mode
-
-    def run(self) -> None:
-        """
         Initializes the language file and starts the chosen run mode.
 
         This function loads the appropriate language file and executes one of the
@@ -77,10 +63,10 @@ class Runner:
                 - 'BANKLINES': Runs the bank lines processing.
                 - 'BANKEROSION': Runs the bank erosion processing.
                 - 'GUI': Launches the graphical user interface.
-
                 Defaults to 'GUI'.
             configfile (str, optional):
                 Path to the configuration file. Defaults to None.
+
 
         Raises:
             Exception: If an invalid `run_mode` is provided. The valid options are
@@ -99,6 +85,21 @@ class Runner:
             run()
             ```
         """
+        self.language = language.upper()
+        self.run_mode = self._validate_run_mode(run_mode)
+        self.log_data = LogData(LOG_DATA_DIR / f"messages.{language}.ini")
+        self.configfile = configfile
+
+    @staticmethod
+    def _validate_run_mode(run_mode: str) -> str:
+        if run_mode not in AVAILABLE_RUN_MODES:
+            raise ValueError(f"Invalid run mode {run_mode} specified. Should read 'BANKLINES', 'BANKEROSION' or 'GUI'.")
+        else:
+            run_mode = run_mode.upper()
+        return run_mode
+
+    def run(self) -> None:
+        """Run analysis based on the specified run mode."""
 
         if self.run_mode == "GUI":
             main(self.configfile)
