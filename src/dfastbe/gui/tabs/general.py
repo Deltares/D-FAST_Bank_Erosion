@@ -29,7 +29,7 @@ class GeneralTab(BaseTab):
         """
         super().__init__(tabs, window)
 
-    def create(self,) -> None:
+    def create(self) -> None:
         """Create the tab for the general settings.
 
         These settings are used by both the bank line detection and the bank
