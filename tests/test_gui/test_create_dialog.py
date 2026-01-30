@@ -1,41 +1,37 @@
 """
-Tests for the create_dialog() function in dfastbe.gui.gui module.
+Tests for the GUI creation using the new GUI class with StateManagement.
 """
 from unittest.mock import patch
 from PySide6 import QtWidgets
-from dfastbe.gui.gui import (
-    gui_text,
-    createMenus,
-)
+from dfastbe.gui.utils import gui_text
+from dfastbe.gui.tabs.main_components import MenuBar
 
 
 class TestCreateDialog:
 
-    def test_dialog_contains_expected_elements(self, setup_dialog):
+    def test_dialog_contains_expected_elements(self, setup_gui):
         """Test that create_dialog instantiates window, tabs and application."""
-        assert isinstance(setup_dialog, dict)
-        assert len(setup_dialog) > 0
-        assert "application" in setup_dialog
-        assert "window" in setup_dialog
-        assert "tabs" in setup_dialog
+        assert "application" in setup_gui
+        assert "window" in setup_gui
+        assert "tabs" in setup_gui
 
 
-    def test_dialog_sets_fusion_style(self, setup_dialog):
+    def test_dialog_sets_fusion_style(self, setup_gui):
         """Test that the application style is set to fusion."""
-        app = setup_dialog["application"]
+        app = setup_gui["application"]
         assert app.style().objectName() == "fusion"
 
 
-    def test_dialog_has_main_window(self, setup_dialog):
+    def test_dialog_has_main_window(self, setup_gui):
         """Test that main window is created with correct properties."""
-        win = setup_dialog["window"]
+        win = setup_gui["window"]
         assert isinstance(win, QtWidgets.QMainWindow)
         assert win.windowTitle() == "D-FAST Bank Erosion"
 
 
-    def test_dialog_has_expected_window_geometry(self, setup_dialog):
+    def test_dialog_has_expected_window_geometry(self, setup_gui):
         """Test that window has correct initial geometry."""
-        win = setup_dialog["window"]
+        win = setup_gui["window"]
         geometry = win.geometry()
         assert geometry.x() == 200
         assert geometry.y() == 200
@@ -43,15 +39,15 @@ class TestCreateDialog:
         assert geometry.height() == 300
 
 
-    def test_dialog_has_icon(self, setup_dialog):
+    def test_dialog_has_icon(self, setup_gui):
         """Test that window icon is set."""
-        win = setup_dialog["window"]
+        win = setup_gui["window"]
         assert not win.windowIcon().isNull()
 
 
-    def test_dialog_has_central_widget(self, setup_dialog):
+    def test_dialog_has_central_widget(self, setup_gui):
         """Test that central widget is properly configured."""
-        win = setup_dialog["window"]
+        win = setup_gui["window"]
         central_widget = win.centralWidget()
 
         assert central_widget is not None
@@ -62,30 +58,30 @@ class TestCreateDialog:
         assert layout.direction() == QtWidgets.QBoxLayout.Direction.TopToBottom
 
 
-    def test_dialog_creates_tabs(self, setup_dialog):
+    def test_dialog_creates_tabs(self, setup_gui):
         """Test that tab widget is created and stored in dialog dict."""
-        tabs = setup_dialog["tabs"]
+        tabs = setup_gui["tabs"]
         assert isinstance(tabs, QtWidgets.QTabWidget)
 
 
-    def test_dialog_tab_count(self, setup_dialog):
+    def test_dialog_tab_count(self, setup_gui):
         """Test that the correct number of tabs are created."""
-        tabs = setup_dialog["tabs"]
+        tabs = setup_gui["tabs"]
         # Should have 5 tabs: General, Detection, Erosion, Shipping Parameters, Bank Parameters
         assert tabs.count() == 5
 
 
-    def test_dialog_tab_names(self, setup_dialog):
+    def test_dialog_tab_names(self, setup_gui):
         """Test that tabs have the expected names."""
-        tabs = setup_dialog["tabs"]
+        tabs = setup_gui["tabs"]
         expected_tab_names = ["General", "Detection", "Erosion", "Shipping Parameters", "Bank Parameters"]
         actual_tabs = [tabs.tabText(i) for i in range(tabs.count())]
         assert actual_tabs == expected_tab_names
 
 
-    def test_dialog_creates_buttons(self, setup_dialog):
+    def test_dialog_creates_buttons(self, setup_gui):
         """Test that action buttons are created."""
-        win = setup_dialog["window"]
+        win = setup_gui["window"]
         buttons = win.findChildren(QtWidgets.QPushButton)
 
         assert len(buttons) >= 3
@@ -96,9 +92,9 @@ class TestCreateDialog:
         assert gui_text("action_close") in button_texts
 
 
-    def test_dialog_has_expected_buttons(self, setup_dialog):
+    def test_dialog_has_expected_buttons(self, setup_gui):
         """Test that buttons are enabled."""
-        win = setup_dialog["window"]
+        win = setup_gui["window"]
         buttons = win.findChildren(QtWidgets.QPushButton)
 
         detect_btn = next(btn for btn in buttons if btn.text() == gui_text("action_detect"))
@@ -110,17 +106,17 @@ class TestCreateDialog:
         assert close_btn.isEnabled()
 
 
-    def test_dialog_creates_menubar(self, setup_dialog):
+    def test_dialog_creates_menubar(self, setup_gui):
         """Test that menubar is created."""
-        win = setup_dialog["window"]
+        win = setup_gui["window"]
         menubar = win.menuBar()
 
         assert isinstance(menubar, QtWidgets.QMenuBar)
 
 
-    def test_dialog_menu_texts_in_menubar(self, setup_dialog):
+    def test_dialog_menu_texts_in_menubar(self, setup_gui):
         """Test that menubar has the expected menus."""
-        win = setup_dialog["window"]
+        win = setup_gui["window"]
         menubar = win.menuBar()
 
         menus = menubar.actions()
@@ -132,9 +128,9 @@ class TestCreateDialog:
         assert gui_text("Help") in menu_texts
 
 
-    def test_dialog_tabs_widget_in_layout(self, setup_dialog):
+    def test_dialog_tabs_widget_in_layout(self, setup_gui):
         """Test that tabs widget is properly added to the layout."""
-        win = setup_dialog["window"]
+        win = setup_gui["window"]
         central_widget = win.centralWidget()
         expected_tab_names = ["General", "Detection", "Erosion", "Shipping Parameters", "Bank Parameters"]
 
@@ -151,27 +147,39 @@ class TestCreateDialog:
 
 class TestCreateMenus:
 
-    def test_menu_contains_file_option(self, mock_menubar):
-        """Test that createMenus creates a File menu."""
-        createMenus(mock_menubar)
+    def test_menu_contains_file_option(self, mock_menubar, qapp):
+        """Test that MenuBar.create() creates a File menu."""
+        from PySide6.QtWidgets import QMainWindow
+        window = QMainWindow()
+        window.setMenuBar(mock_menubar)
+        menu_bar = MenuBar(window=window, app=qapp)
+        menu_bar.create()
 
         actions = mock_menubar.actions()
         assert len(actions) >= 2
         assert gui_text("File") in actions[0].text()
 
 
-    def test_menu_contains_help_option(self, mock_menubar):
-        """Test that createMenus creates a Help menu."""
-        createMenus(mock_menubar)
+    def test_menu_contains_help_option(self, mock_menubar, qapp):
+        """Test that MenuBar.create() creates a Help menu."""
+        from PySide6.QtWidgets import QMainWindow
+        window = QMainWindow()
+        window.setMenuBar(mock_menubar)
+        menu_bar = MenuBar(window=window, app=qapp)
+        menu_bar.create()
 
         actions = mock_menubar.actions()
         assert len(actions) >= 2
         assert gui_text("Help") in actions[1].text()
 
 
-    def test_menu_structure_file_dropdown(self, mock_menubar):
+    def test_menu_structure_file_dropdown(self, mock_menubar, qapp):
         """Test that File menu dropdown contains `Save`, `Load` and `Close`."""
-        createMenus(mock_menubar)
+        from PySide6.QtWidgets import QMainWindow
+        window = QMainWindow()
+        window.setMenuBar(mock_menubar)
+        menu_bar = MenuBar(window=window, app=qapp)
+        menu_bar.create()
 
         file_menu_action = mock_menubar.actions()[0]
         file_menu = file_menu_action.menu()
@@ -184,17 +192,21 @@ class TestCreateMenus:
         assert file_actions[3].text() == gui_text("Close")
 
 
-    def test_menu_structure_help_dropdown(self, mock_menubar):
-        """Test that Help menu dropdown contains `Open User Manual`, `Version` and
+    def test_menu_structure_help_dropdown(self, mock_menubar, qapp):
+        """Test that Help menu dropdown contains `Manual`, `Version` and
         `About Qt`."""
-        createMenus(mock_menubar)
+        from PySide6.QtWidgets import QMainWindow
+        window = QMainWindow()
+        window.setMenuBar(mock_menubar)
+        menu_bar = MenuBar(window=window, app=qapp)
+        menu_bar.create()
 
         help_menu_action = mock_menubar.actions()[1]
         help_menu = help_menu_action.menu()
         help_actions = help_menu.actions()
 
         assert len(help_actions) == 4
-        assert help_actions[0].text() == "Open User Manual"
+        assert help_actions[0].text() == gui_text("Manual")
         assert help_actions[1].isSeparator()
         assert help_actions[2].text() == gui_text("Version")
         assert help_actions[3].text() == gui_text("AboutQt")
@@ -203,10 +215,14 @@ class TestCreateMenus:
 class TestMenuActions:
     """Test class for mocking menu button presses."""
 
-    @patch('dfastbe.gui.gui.menu_load_configuration')
-    def test_file_menu_load_action_triggered(self, mock_load, mock_menubar):
+    @patch('dfastbe.gui.tabs.main_components.menu_load_configuration')
+    def test_file_menu_load_action_triggered(self, mock_load, mock_menubar, qapp):
         """Test that triggering Load menu action calls menu_load_configuration."""
-        createMenus(mock_menubar)
+        from PySide6.QtWidgets import QMainWindow
+        window = QMainWindow()
+        window.setMenuBar(mock_menubar)
+        menu_bar = MenuBar(window=window, app=qapp)
+        menu_bar.create()
 
         file_menu_action = mock_menubar.actions()[0]
         file_menu = file_menu_action.menu()
@@ -218,10 +234,14 @@ class TestMenuActions:
         # Verify the function was called
         mock_load.assert_called_once()
 
-    @patch('dfastbe.gui.gui.menu_save_configuration')
-    def test_file_menu_save_action_triggered(self, mock_save, mock_menubar):
+    @patch('dfastbe.gui.tabs.main_components.menu_save_configuration')
+    def test_file_menu_save_action_triggered(self, mock_save, mock_menubar, qapp):
         """Test that triggering Save menu action calls menu_save_configuration."""
-        createMenus(mock_menubar)
+        from PySide6.QtWidgets import QMainWindow
+        window = QMainWindow()
+        window.setMenuBar(mock_menubar)
+        menu_bar = MenuBar(window=window, app=qapp)
+        menu_bar.create()
 
         file_menu_action = mock_menubar.actions()[0]
         file_menu = file_menu_action.menu()
@@ -233,10 +253,14 @@ class TestMenuActions:
         # Verify the function was called
         mock_save.assert_called_once()
 
-    @patch('dfastbe.gui.gui.close_dialog')
-    def test_file_menu_close_action_triggered(self, mock_close, mock_menubar):
-        """Test that triggering Close menu action calls close_dialog."""
-        createMenus(mock_menubar)
+    @patch.object(MenuBar, 'close')
+    def test_file_menu_close_action_triggered(self, mock_close, mock_menubar, qapp):
+        """Test that triggering Close menu action calls MenuBar.close()."""
+        from PySide6.QtWidgets import QMainWindow
+        window = QMainWindow()
+        window.setMenuBar(mock_menubar)
+        menu_bar = MenuBar(window=window, app=qapp)
+        menu_bar.create()
 
         file_menu_action = mock_menubar.actions()[0]
         file_menu = file_menu_action.menu()
@@ -248,10 +272,14 @@ class TestMenuActions:
         # Verify the function was called
         mock_close.assert_called_once()
 
-    @patch('dfastbe.gui.gui.menu_open_manual')
-    def test_help_menu_open_manual_action_triggered(self, mock_open_manual, mock_menubar):
-        """Test that triggering Open User Manual menu action calls menu_open_manual."""
-        createMenus(mock_menubar)
+    @patch('dfastbe.gui.tabs.main_components.menu_open_manual')
+    def test_help_menu_open_manual_action_triggered(self, mock_open_manual, mock_menubar, qapp):
+        """Test that triggering Manual menu action calls menu_open_manual."""
+        from PySide6.QtWidgets import QMainWindow
+        window = QMainWindow()
+        window.setMenuBar(mock_menubar)
+        menu_bar = MenuBar(window=window, app=qapp)
+        menu_bar.create()
 
         help_menu_action = mock_menubar.actions()[1]
         help_menu = help_menu_action.menu()
@@ -263,10 +291,14 @@ class TestMenuActions:
         # Verify the function was called
         mock_open_manual.assert_called_once()
 
-    @patch('dfastbe.gui.gui.menu_about_self')
-    def test_help_menu_version_action_triggered(self, mock_version, mock_menubar):
+    @patch('dfastbe.gui.tabs.main_components.menu_about_self')
+    def test_help_menu_version_action_triggered(self, mock_version, mock_menubar, qapp):
         """Test that triggering Version menu action calls menu_about_self."""
-        createMenus(mock_menubar)
+        from PySide6.QtWidgets import QMainWindow
+        window = QMainWindow()
+        window.setMenuBar(mock_menubar)
+        menu_bar = MenuBar(window=window, app=qapp)
+        menu_bar.create()
 
         help_menu_action = mock_menubar.actions()[1]
         help_menu = help_menu_action.menu()
@@ -278,10 +310,14 @@ class TestMenuActions:
         # Verify the function was called
         mock_version.assert_called_once()
 
-    @patch('dfastbe.gui.gui.menu_about_qt')
-    def test_help_menu_about_qt_action_triggered(self, mock_about_qt, mock_menubar):
+    @patch('dfastbe.gui.tabs.main_components.menu_about_qt')
+    def test_help_menu_about_qt_action_triggered(self, mock_about_qt, mock_menubar, qapp):
         """Test that triggering About Qt menu action calls menu_about_qt."""
-        createMenus(mock_menubar)
+        from PySide6.QtWidgets import QMainWindow
+        window = QMainWindow()
+        window.setMenuBar(mock_menubar)
+        menu_bar = MenuBar(window=window, app=qapp)
+        menu_bar.create()
 
         help_menu_action = mock_menubar.actions()[1]
         help_menu = help_menu_action.menu()

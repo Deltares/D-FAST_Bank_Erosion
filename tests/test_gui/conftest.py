@@ -7,11 +7,10 @@ import pytest
 import sys
 
 from pathlib import Path
+
 from dfastbe import __path__
 from dfastbe.io.logger import LogData
-from dfastbe.gui import gui
-from dfastbe.gui.gui import dialog
-from PySide6 import QtWidgets
+from dfastbe.gui.application import GUI, StateStore
 
 
 @pytest.fixture(autouse=True)
@@ -41,23 +40,68 @@ def qapp_args():
 
 
 @pytest.fixture
-def setup_dialog(qtbot):
+def setup_gui(qapp, monkeypatch):
     """
-    Fixture that creates the dialog and provides qtbot.
+    Create and initialize a complete GUI instance for testing.
 
-    The create_dialog function will use the existing QApplication.
+    This fixture:
+    - Resets the StateStore singleton to ensure clean state
+    - Patches QApplication to use the existing qapp instance from pytest-qt
+    - Creates a GUI instance with all tabs and components
+    - Returns the StateManagement dictionary containing all GUI elements
+    - Ensures proper cleanup after each test
+
+    The returned dictionary contains:
+        - 'application': QApplication instance
+        - 'window': Main QMainWindow
+        - 'tabs': QTabWidget containing all tabs
+        - And all other GUI components registered in StateManagement
+
+    Args:
+        qapp: QApplication fixture from pytest-qt
+        monkeypatch: pytest fixture for patching
+
+    Yields:
+        StateStore: Dictionary-like object containing all GUI components
+
+    Example:
+        def test_gui_feature(setup_gui):
+            window = setup_gui["window"]
+            tabs = setup_gui["tabs"]
+            assert tabs.count() == 5
     """
-    # TODO: this fixture would need an update when switching to OOP in gui.py
-    # setUp phase
-    dialog.clear()
+    # Patch QApplication to return the existing qapp instance
+    # This prevents creating multiple QApplication instances which causes errors
+    monkeypatch.setattr(
+        "dfastbe.gui.application.QApplication",
+        lambda: qapp
+    )
 
-    gui.create_dialog()
+    # Create GUI instance
+    gui = GUI()
 
-    yield dialog
+    # Create all tabs and components
+    gui.create()
+
+    # Yield the StateManagement (which is accessible via StateStore.instance())
+    yield gui.state
+
+    # Cleanup: close the GUI properly
+    gui.close()
+
 
 
 @pytest.fixture
 def mock_menubar(qapp):
     """Create a mock menubar for testing."""
-    menubar = QtWidgets.QMenuBar()
-    return menubar
+    from PySide6.QtWidgets import QMainWindow
+
+    # Create a minimal window for the menubar
+    window = QMainWindow()
+    menubar_instance = window.menuBar()
+
+    # Return both the menubar and window for cleanup
+    yield menubar_instance
+
+    # Cleanup
+    window.close()
