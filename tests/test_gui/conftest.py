@@ -7,10 +7,11 @@ import pytest
 import sys
 
 from pathlib import Path
-
+from PySide6.QtWidgets import QMainWindow
+from dfastbe.gui.tabs.main_components import MenuBar
 from dfastbe import __path__
 from dfastbe.io.logger import LogData
-from dfastbe.gui.application import GUI, StateStore
+from dfastbe.gui.application import GUI
 
 
 @pytest.fixture(autouse=True)
@@ -90,18 +91,47 @@ def setup_gui(qapp, monkeypatch):
     gui.close()
 
 
-
 @pytest.fixture
-def mock_menubar(qapp):
-    """Create a mock menubar for testing."""
-    from PySide6.QtWidgets import QMainWindow
+def setup_menubar(qapp):
+    """
+    Create and initialize a MenuBar instance with a window for testing.
 
-    # Create a minimal window for the menubar
+    This fixture sets up all the components needed to test MenuBar functionality:
+    - Creates a QMainWindow with a menubar
+    - Instantiates and initializes a MenuBar instance
+    - Returns a dictionary with the window, menubar widget, and MenuBar instance
+
+    Returns:
+        dict: Dictionary containing:
+            - 'window': QMainWindow instance
+            - 'menubar': QMenuBar widget
+            - 'menu_bar_instance': MenuBar instance (from tabs.main_components)
+
+    Example:
+        def test_menu_feature(setup_menubar):
+            menubar = setup_menubar["menubar"]
+            actions = menubar.actions()
+            assert len(actions) > 0
+    """
+
+    # Create window and menubar
     window = QMainWindow()
-    menubar_instance = window.menuBar()
+    menubar_widget = window.menuBar()
 
-    # Return both the menubar and window for cleanup
-    yield menubar_instance
+    # Create and initialize MenuBar instance
+    menu_bar_instance = MenuBar(window=window, app=qapp)
+    menu_bar_instance.create()
+
+    # Return all components in a dictionary
+    result = {
+        'window': window,
+        'menubar': menubar_widget,
+        'menu_bar_instance': menu_bar_instance
+    }
+
+    yield result
 
     # Cleanup
     window.close()
+
+

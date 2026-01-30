@@ -2,7 +2,11 @@
 Tests for the GUI creation using the new GUI class with StateManagement.
 """
 from unittest.mock import patch
+
+import pytest
 from PySide6 import QtWidgets
+from PySide6.QtWidgets import QMainWindow
+
 from dfastbe.gui.utils import gui_text
 from dfastbe.gui.tabs.main_components import MenuBar
 
@@ -147,41 +151,29 @@ class TestCreateDialog:
 
 class TestCreateMenus:
 
-    def test_menu_contains_file_option(self, mock_menubar, qapp):
+    def test_menu_contains_file_option(self, setup_menubar):
         """Test that MenuBar.create() creates a File menu."""
-        from PySide6.QtWidgets import QMainWindow
-        window = QMainWindow()
-        window.setMenuBar(mock_menubar)
-        menu_bar = MenuBar(window=window, app=qapp)
-        menu_bar.create()
+        menubar = setup_menubar["menubar"]
 
-        actions = mock_menubar.actions()
+        actions = menubar.actions()
         assert len(actions) >= 2
         assert gui_text("File") in actions[0].text()
 
 
-    def test_menu_contains_help_option(self, mock_menubar, qapp):
+    def test_menu_contains_help_option(self, setup_menubar):
         """Test that MenuBar.create() creates a Help menu."""
-        from PySide6.QtWidgets import QMainWindow
-        window = QMainWindow()
-        window.setMenuBar(mock_menubar)
-        menu_bar = MenuBar(window=window, app=qapp)
-        menu_bar.create()
+        menubar = setup_menubar["menubar"]
 
-        actions = mock_menubar.actions()
+        actions = menubar.actions()
         assert len(actions) >= 2
         assert gui_text("Help") in actions[1].text()
 
 
-    def test_menu_structure_file_dropdown(self, mock_menubar, qapp):
+    def test_menu_structure_file_dropdown(self, setup_menubar):
         """Test that File menu dropdown contains `Save`, `Load` and `Close`."""
-        from PySide6.QtWidgets import QMainWindow
-        window = QMainWindow()
-        window.setMenuBar(mock_menubar)
-        menu_bar = MenuBar(window=window, app=qapp)
-        menu_bar.create()
+        menubar = setup_menubar["menubar"]
 
-        file_menu_action = mock_menubar.actions()[0]
+        file_menu_action = menubar.actions()[0]
         file_menu = file_menu_action.menu()
         file_actions = file_menu.actions()
 
@@ -192,16 +184,12 @@ class TestCreateMenus:
         assert file_actions[3].text() == gui_text("Close")
 
 
-    def test_menu_structure_help_dropdown(self, mock_menubar, qapp):
+    def test_menu_structure_help_dropdown(self, setup_menubar):
         """Test that Help menu dropdown contains `Manual`, `Version` and
         `About Qt`."""
-        from PySide6.QtWidgets import QMainWindow
-        window = QMainWindow()
-        window.setMenuBar(mock_menubar)
-        menu_bar = MenuBar(window=window, app=qapp)
-        menu_bar.create()
+        menubar = setup_menubar["menubar"]
 
-        help_menu_action = mock_menubar.actions()[1]
+        help_menu_action = menubar.actions()[1]
         help_menu = help_menu_action.menu()
         help_actions = help_menu.actions()
 
@@ -215,116 +203,70 @@ class TestCreateMenus:
 class TestMenuActions:
     """Test class for mocking menu button presses."""
 
-    @patch('dfastbe.gui.tabs.main_components.menu_load_configuration')
-    def test_file_menu_load_action_triggered(self, mock_load, mock_menubar, qapp):
-        """Test that triggering Load menu action calls menu_load_configuration."""
-        from PySide6.QtWidgets import QMainWindow
+    def _create_menu_window_with_patch(self, qapp, patch_target):
+        """Helper to create MenuBar with a specific function patched.
+
+        Args:
+            qapp: The QApplication instance
+            patch_target: The target function to patch
+
+        Returns:
+            tuple: (window, menubar, mock_func) - The window, menubar, and mocked function
+        """
+        patcher = patch(patch_target)
+        mock_func = patcher.start()
+
         window = QMainWindow()
-        window.setMenuBar(mock_menubar)
-        menu_bar = MenuBar(window=window, app=qapp)
-        menu_bar.create()
+        menubar = window.menuBar()
+        menu_bar_instance = MenuBar(window=window, app=qapp)
+        menu_bar_instance.create()
 
-        file_menu_action = mock_menubar.actions()[0]
-        file_menu = file_menu_action.menu()
-        load_action = file_menu.actions()[0]
+        return window, menubar, mock_func, patcher
 
-        # Trigger the action
-        load_action.trigger()
+    def _trigger_menu_action(self, menubar, menu_index: int, action_index: int):
+        """Helper method to navigate and trigger a specific menu action.
 
-        # Verify the function was called
-        mock_load.assert_called_once()
+        Args:
+            menubar: The QMenuBar instance
+            menu_index: Index of the menu in the menubar (0 for File, 1 for Help)
+            action_index: Index of the action within the menu
+        """
+        menu_action = menubar.actions()[menu_index]
+        menu = menu_action.menu()
+        action = menu.actions()[action_index]
+        action.trigger()
 
-    @patch('dfastbe.gui.tabs.main_components.menu_save_configuration')
-    def test_file_menu_save_action_triggered(self, mock_save, mock_menubar, qapp):
-        """Test that triggering Save menu action calls menu_save_configuration."""
-        from PySide6.QtWidgets import QMainWindow
-        window = QMainWindow()
-        window.setMenuBar(mock_menubar)
-        menu_bar = MenuBar(window=window, app=qapp)
-        menu_bar.create()
+    @pytest.mark.parametrize(
+        "patch_target, menu_index, action_index",
+        [
+            ('dfastbe.gui.tabs.main_components.menu_load_configuration', 0, 0),
+            ('dfastbe.gui.tabs.main_components.menu_save_configuration', 0, 1),
+            ('dfastbe.gui.tabs.main_components.menu_open_manual', 1, 0),
+            ('dfastbe.gui.tabs.main_components.menu_about_self', 1, 2),
+            ('dfastbe.gui.tabs.main_components.menu_about_qt', 1, 3),
+            ('dfastbe.gui.tabs.main_components.BaseBar.close', 0, 3),
+        ],
+        ids=[
+            "file_load_action",
+            "file_save_action",
+            "help_manual_action",
+            "help_version_action",
+            "help_about_qt_action",
+            "file_close_action",
+        ]
+    )
+    def test_menu_action_triggered(self, qapp, patch_target, menu_index, action_index):
+        """Test that triggering menu actions calls the expected functions.
 
-        file_menu_action = mock_menubar.actions()[0]
-        file_menu = file_menu_action.menu()
-        save_action = file_menu.actions()[1]
+        This parametrized test covers multiple menu actions to reduce code duplication.
+        """
+        window, menubar, mock_func, patcher = self._create_menu_window_with_patch(
+            qapp, patch_target
+        )
 
-        # Trigger the action
-        save_action.trigger()
-
-        # Verify the function was called
-        mock_save.assert_called_once()
-
-    @patch.object(MenuBar, 'close')
-    def test_file_menu_close_action_triggered(self, mock_close, mock_menubar, qapp):
-        """Test that triggering Close menu action calls MenuBar.close()."""
-        from PySide6.QtWidgets import QMainWindow
-        window = QMainWindow()
-        window.setMenuBar(mock_menubar)
-        menu_bar = MenuBar(window=window, app=qapp)
-        menu_bar.create()
-
-        file_menu_action = mock_menubar.actions()[0]
-        file_menu = file_menu_action.menu()
-        close_action = file_menu.actions()[3]  # After Load, Save, and separator
-
-        # Trigger the action
-        close_action.trigger()
-
-        # Verify the function was called
-        mock_close.assert_called_once()
-
-    @patch('dfastbe.gui.tabs.main_components.menu_open_manual')
-    def test_help_menu_open_manual_action_triggered(self, mock_open_manual, mock_menubar, qapp):
-        """Test that triggering Manual menu action calls menu_open_manual."""
-        from PySide6.QtWidgets import QMainWindow
-        window = QMainWindow()
-        window.setMenuBar(mock_menubar)
-        menu_bar = MenuBar(window=window, app=qapp)
-        menu_bar.create()
-
-        help_menu_action = mock_menubar.actions()[1]
-        help_menu = help_menu_action.menu()
-        manual_action = help_menu.actions()[0]
-
-        # Trigger the action
-        manual_action.trigger()
-
-        # Verify the function was called
-        mock_open_manual.assert_called_once()
-
-    @patch('dfastbe.gui.tabs.main_components.menu_about_self')
-    def test_help_menu_version_action_triggered(self, mock_version, mock_menubar, qapp):
-        """Test that triggering Version menu action calls menu_about_self."""
-        from PySide6.QtWidgets import QMainWindow
-        window = QMainWindow()
-        window.setMenuBar(mock_menubar)
-        menu_bar = MenuBar(window=window, app=qapp)
-        menu_bar.create()
-
-        help_menu_action = mock_menubar.actions()[1]
-        help_menu = help_menu_action.menu()
-        version_action = help_menu.actions()[2]  # After manual and separator
-
-        # Trigger the action
-        version_action.trigger()
-
-        # Verify the function was called
-        mock_version.assert_called_once()
-
-    @patch('dfastbe.gui.tabs.main_components.menu_about_qt')
-    def test_help_menu_about_qt_action_triggered(self, mock_about_qt, mock_menubar, qapp):
-        """Test that triggering About Qt menu action calls menu_about_qt."""
-        from PySide6.QtWidgets import QMainWindow
-        window = QMainWindow()
-        window.setMenuBar(mock_menubar)
-        menu_bar = MenuBar(window=window, app=qapp)
-        menu_bar.create()
-
-        help_menu_action = mock_menubar.actions()[1]
-        help_menu = help_menu_action.menu()
-        about_qt_action = help_menu.actions()[3]
-
-        # Trigger the action
-        about_qt_action.trigger()
-
-        # Verify the function was called
-        mock_about_qt.assert_called_once()
+        try:
+            self._trigger_menu_action(menubar, menu_index, action_index)
+            mock_func.assert_called_once()
+        finally:
+            patcher.stop()
+            window.close()
