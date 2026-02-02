@@ -7,12 +7,18 @@ import pytest
 import sys
 
 from pathlib import Path
-from PySide6.QtWidgets import QMainWindow
-from dfastbe.gui.tabs.main_components import MenuBar
+from PySide6.QtWidgets import (
+    QMainWindow,
+    QWidget,
+    QBoxLayout
+)
+from dfastbe.gui.tabs.main_components import (
+    MenuBar,
+    ButtonBar
+)
 from dfastbe import __path__
 from dfastbe.io.logger import LogData
 from dfastbe.gui.application import GUI
-
 
 @pytest.fixture(autouse=True)
 def initialize_log_data() -> LogData:
@@ -26,6 +32,7 @@ def initialize_log_data() -> LogData:
     LogData.reset()
 
     return LogData(Path(__path__[0]) / "io/log_data/messages.UK.ini")
+
 
 @pytest.fixture(scope="session")
 def qapp_args():
@@ -157,9 +164,6 @@ def setup_button_bar(qapp):
             buttons = window.findChildren(QtWidgets.QPushButton)
             assert len(buttons) == 3
     """
-    from PySide6.QtWidgets import QWidget, QBoxLayout
-    from dfastbe.gui.tabs.main_components import ButtonBar
-
     # Create window with central widget and layout
     window = QMainWindow()
     central_widget = QWidget()

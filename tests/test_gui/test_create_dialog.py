@@ -5,10 +5,17 @@ from unittest.mock import patch
 
 import pytest
 from PySide6 import QtWidgets
+
 from PySide6.QtWidgets import QMainWindow
 
 from dfastbe.gui.utils import gui_text
-from dfastbe.gui.tabs.main_components import MenuBar
+from dfastbe.gui.tabs.main_components import (
+    MenuBar,
+    ButtonBar
+)
+
+# Expected tab names in the GUI
+EXPECTED_TAB_NAMES = ["General", "Detection", "Erosion", "Shipping Parameters", "Bank Parameters"]
 
 
 class TestCreateDialog:
@@ -78,9 +85,8 @@ class TestCreateDialog:
     def test_dialog_tab_names(self, setup_gui):
         """Test that tabs have the expected names."""
         tabs = setup_gui["tabs"]
-        expected_tab_names = ["General", "Detection", "Erosion", "Shipping Parameters", "Bank Parameters"]
         actual_tabs = [tabs.tabText(i) for i in range(tabs.count())]
-        assert actual_tabs == expected_tab_names
+        assert actual_tabs == EXPECTED_TAB_NAMES
 
 
     def test_dialog_creates_buttons(self, setup_gui):
@@ -136,7 +142,6 @@ class TestCreateDialog:
         """Test that tabs widget is properly added to the layout."""
         win = setup_gui["window"]
         central_widget = win.centralWidget()
-        expected_tab_names = ["General", "Detection", "Erosion", "Shipping Parameters", "Bank Parameters"]
 
         layout = central_widget.layout()
         assert layout is not None
@@ -146,7 +151,7 @@ class TestCreateDialog:
         actual_tab_names = [item.widget().tabText(idx)
                             for idx in range(item.widget().count())]
 
-        assert expected_tab_names == actual_tab_names
+        assert EXPECTED_TAB_NAMES == actual_tab_names
 
 
 class TestCreateMenus:
@@ -294,7 +299,6 @@ class TestButtonActions:
         layout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.Direction.TopToBottom, central_widget)
         window.setCentralWidget(central_widget)
 
-        from dfastbe.gui.tabs.main_components import ButtonBar
         button_bar_instance = ButtonBar(window=window, layout=layout, app=qapp)
         button_bar_instance.create()
 
