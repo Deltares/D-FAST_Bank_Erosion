@@ -200,6 +200,151 @@ class TestCreateMenus:
         assert help_actions[3].text() == gui_text("AboutQt")
 
 
+class TestCreateButtons:
+    """Test class for ButtonBar creation and structure."""
+
+    def test_button_bar_creates_widget(self, setup_button_bar):
+        """Test that ButtonBar.create() creates a button bar widget."""
+        window = setup_button_bar["window"]
+
+        # Find the button bar widget in the layout
+        buttons = window.findChildren(QtWidgets.QPushButton)
+        assert len(buttons) == 3
+
+
+    def test_button_bar_has_detect_button(self, setup_button_bar):
+        """Test that ButtonBar contains a Detect button."""
+        window = setup_button_bar["window"]
+        buttons = window.findChildren(QtWidgets.QPushButton)
+
+        button_texts = [btn.text() for btn in buttons]
+        assert gui_text("action_detect") in button_texts
+
+
+    def test_button_bar_has_erode_button(self, setup_button_bar):
+        """Test that ButtonBar contains an Erode button."""
+        window = setup_button_bar["window"]
+        buttons = window.findChildren(QtWidgets.QPushButton)
+
+        button_texts = [btn.text() for btn in buttons]
+        assert gui_text("action_erode") in button_texts
+
+
+    def test_button_bar_has_close_button(self, setup_button_bar):
+        """Test that ButtonBar contains a Close button."""
+        window = setup_button_bar["window"]
+        buttons = window.findChildren(QtWidgets.QPushButton)
+
+        button_texts = [btn.text() for btn in buttons]
+        assert gui_text("action_close") in button_texts
+
+
+    def test_button_bar_buttons_are_enabled(self, setup_button_bar):
+        """Test that all buttons in ButtonBar are enabled."""
+        window = setup_button_bar["window"]
+        buttons = window.findChildren(QtWidgets.QPushButton)
+
+        detect_btn = next(btn for btn in buttons if btn.text() == gui_text("action_detect"))
+        erode_btn = next(btn for btn in buttons if btn.text() == gui_text("action_erode"))
+        close_btn = next(btn for btn in buttons if btn.text() == gui_text("action_close"))
+
+        assert detect_btn.isEnabled()
+        assert erode_btn.isEnabled()
+        assert close_btn.isEnabled()
+
+
+    def test_button_bar_layout_is_horizontal(self, setup_button_bar):
+        """Test that ButtonBar uses a horizontal layout."""
+        window = setup_button_bar["window"]
+
+        # Find all buttons first
+        buttons = window.findChildren(QtWidgets.QPushButton)
+        assert len(buttons) == 3
+
+        # Get the parent widget of the first button (should be the button bar)
+        button_bar_widget = buttons[0].parentWidget()
+
+        # Verify all buttons have the same parent
+        assert all(btn.parentWidget() == button_bar_widget for btn in buttons)
+
+        # Check the layout of the button bar
+        layout = button_bar_widget.layout()
+        assert layout is not None
+        assert layout.direction() == QtWidgets.QBoxLayout.Direction.LeftToRight
+
+
+class TestButtonActions:
+    """Test class for mocking button clicks."""
+
+    def _create_button_bar_with_patch(self, qapp, patch_target):
+        """Helper to create ButtonBar with a specific function patched.
+
+        Args:
+            qapp: The QApplication instance
+            patch_target: The target function to patch
+
+        Returns:
+            tuple: (window, buttons, mock_func, patcher) - The window, buttons list, mocked function, and patcher
+        """
+        patcher = patch(patch_target)
+        mock_func = patcher.start()
+
+        window = QMainWindow()
+        central_widget = QtWidgets.QWidget()
+        layout = QtWidgets.QBoxLayout(QtWidgets.QBoxLayout.Direction.TopToBottom, central_widget)
+        window.setCentralWidget(central_widget)
+
+        from dfastbe.gui.tabs.main_components import ButtonBar
+        button_bar_instance = ButtonBar(window=window, layout=layout, app=qapp)
+        button_bar_instance.create()
+
+        buttons = window.findChildren(QtWidgets.QPushButton)
+
+        return window, buttons, mock_func, patcher
+
+    def _click_button(self, buttons: list, button_text: str):
+        """Helper method to find and click a specific button.
+
+        Args:
+            buttons: List of QPushButton instances
+            button_text: The text of the button to click
+        """
+        button = next(btn for btn in buttons if btn.text() == button_text)
+        button.click()
+
+    @pytest.mark.parametrize(
+        "patch_target, button_text_key",
+        [
+            ('dfastbe.gui.tabs.main_components.run_detection', "action_detect"),
+            ('dfastbe.gui.tabs.main_components.run_erosion', "action_erode"),
+            ('dfastbe.gui.tabs.main_components.BaseBar.close', "action_close"),
+        ],
+        ids=[
+            "detect_button_action",
+            "erode_button_action",
+            "close_button_action",
+        ]
+    )
+    def test_button_action_triggered(self, qapp, patch_target, button_text_key):
+        """Test that clicking buttons calls the expected functions.
+
+        This parametrized test covers all button actions to reduce code duplication.
+        """
+        window, buttons, mock_func, patcher = self._create_button_bar_with_patch(
+            qapp, patch_target
+        )
+
+        try:
+            button_text = gui_text(button_text_key)
+            self._click_button(buttons, button_text)
+            # Process Qt events to ensure the button click signal is handled
+            qapp.processEvents()
+            mock_func.assert_called_once()
+        finally:
+            patcher.stop()
+            window.close()
+
+
 class TestMenuActions:
     """Test class for mocking menu button presses."""
 

@@ -135,3 +135,50 @@ def setup_menubar(qapp):
     window.close()
 
 
+@pytest.fixture
+def setup_button_bar(qapp):
+    """
+    Create and initialize a ButtonBar instance with a window for testing.
+
+    This fixture sets up all the components needed to test ButtonBar functionality:
+    - Creates a QMainWindow with a central widget and layout
+    - Instantiates and initializes a ButtonBar instance
+    - Returns a dictionary with the window, layout, and ButtonBar instance
+
+    Returns:
+        dict: Dictionary containing:
+            - 'window': QMainWindow instance
+            - 'layout': QBoxLayout instance
+            - 'button_bar_instance': ButtonBar instance (from tabs.main_components)
+
+    Example:
+        def test_button_feature(setup_button_bar):
+            window = setup_button_bar["window"]
+            buttons = window.findChildren(QtWidgets.QPushButton)
+            assert len(buttons) == 3
+    """
+    from PySide6.QtWidgets import QWidget, QBoxLayout
+    from dfastbe.gui.tabs.main_components import ButtonBar
+
+    # Create window with central widget and layout
+    window = QMainWindow()
+    central_widget = QWidget()
+    layout = QBoxLayout(QBoxLayout.Direction.TopToBottom, central_widget)
+    window.setCentralWidget(central_widget)
+
+    # Create and initialize ButtonBar instance
+    button_bar_instance = ButtonBar(window=window, layout=layout, app=qapp)
+    button_bar_instance.create()
+
+    # Return all components in a dictionary
+    result = {
+        'window': window,
+        'layout': layout,
+        'button_bar_instance': button_bar_instance
+    }
+
+    yield result
+
+    # Cleanup
+    window.close()
+
