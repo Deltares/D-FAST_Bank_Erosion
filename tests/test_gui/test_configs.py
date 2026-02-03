@@ -252,99 +252,36 @@ class TestConfigurationLoader:
         mock_state_store["figureDirEdit"].setText.assert_called_once_with(
             "output/figures")
 
-    @pytest.mark.parametrize(
-        "n_bank,search_distances,expected_lines,buttons_enabled",
-        [
-            (
-                2,
-                [50.0, 75.0],
-                [
-                    ("1", "bank_line_1.xyc", "50.0"),
-                    ("2", "bank_line_2.xyc", "75.0"),
-                ],
-                True,
-            ),
-            (
-                0,
-                [],
-                [],
-                False,
-            ),
-        ],
-        ids=["n_bank_greater_than_0", "n_bank_equals_0"],
-    )
-    def test_load_detect_section_sets_parameters(
-            self,
-            config_loader,
-            mock_state_store,
-            n_bank,
-            search_distances,
-            expected_lines,
-            buttons_enabled
-    ):
-        """Test that _load_detect_section sets parameters correctly for different n_bank values.
-
-        Args:
-            n_bank: Number of bank lines.
-            search_distances: List of search distances for each bank line.
-            expected_lines: Expected tree widget items (line number, file name, distance).
-            buttons_enabled: Whether edit/remove buttons should be enabled.
-        """
-        # Configure mock to return the specified n_bank value
-        config_loader.config_file.get_int = Mock(side_effect=lambda section, key, default=None, positive=False: {
-            ("Detect", "NBank"): n_bank,
-            ("Erosion", "NLevel"): 2,
-        }.get((section, key), default))
-        config_loader.config_file.get_bank_search_distances = Mock(return_value=search_distances)
-
-        with patch('dfastbe.gui.configs.QTreeWidgetItem') as mock_tree_item:
+    def test_load_detect_section_sets_parameters(self, config_loader, mock_state_store):
+        """Test that _load_detect_section sets the parameters fields correctly."""
+        with patch.object(config_loader, '_load_search_lines') as mock_load_search_lines:
             config_loader._load_detect_section()
 
-            # Verify SimFile is set
+            # Verify simFileEdit was set
             mock_state_store["simFileEdit"].setText.assert_called_once_with("test_sim.nc")
 
-            # Verify WaterDepth is set
+            # Verify waterDepth was set
+            config_loader.config_file.get_float.assert_any_call("Detect", "WaterDepth", default=0.0)
             mock_state_store["waterDepth"].setText.assert_called_once_with("0.5")
 
-            # Verify get_int was called with correct parameters
-            config_loader.config_file.get_int.assert_called_with(
-                "Detect", "NBank", default=0, positive=True
-            )
+            # Verify n_bank was retrieved
+            config_loader.config_file.get_int.assert_any_call("Detect", "NBank", default=0, positive=True)
 
-            # Verify get_bank_search_distances was called with correct n_bank
-            config_loader.config_file.get_bank_search_distances.assert_called_once_with(n_bank)
-
-            # Verify search lines tree was cleared
-            mock_state_store["searchLines"].invisibleRootItem().takeChildren.assert_called_once()
-
-            # Verify tree items were created for search lines
-            if expected_lines:
-                assert mock_tree_item.call_count == len(expected_lines)
-                for line_data in expected_lines:
-                    mock_tree_item.assert_any_call(
-                        mock_state_store["searchLines"],
-                        list(line_data)
-                    )
-            else:
-                mock_tree_item.assert_not_called()
-
-            # Verify buttons enabled/disabled state
-            if buttons_enabled:
-                mock_state_store["searchLinesEdit"].setEnabled.assert_called_once_with(True)
-                mock_state_store["searchLinesRemove"].setEnabled.assert_called_once_with(True)
-            else:
-                mock_state_store["searchLinesEdit"].setEnabled.assert_not_called()
-                mock_state_store["searchLinesRemove"].setEnabled.assert_not_called()
-
+            # Verify _load_search_lines was called with the correct n_bank value
+            mock_load_search_lines.assert_called_once_with(2)
 
     def test_load_erosion_section_sets_basic_parameters(self, config_loader, mock_state_store):
         """Test that _load_erosion_section sets basic erosion parameters correctly."""
-        with patch('dfastbe.gui.configs.QTreeWidgetItem'), \
+        with (patch('dfastbe.gui.configs.QTreeWidgetItem'), \
              patch('dfastbe.gui.configs.setParam') as mock_set_param, \
              patch('dfastbe.gui.configs.setOptParam'), \
              patch('dfastbe.gui.configs.setFilter') as mock_set_filter, \
              patch('dfastbe.gui.configs.bankStrengthSwitch'), \
-             patch('dfastbe.gui.configs.addTabForLevel'):
+             patch('dfastbe.gui.configs.addTabForLevel'), \
+             patch.object(config_loader, '_configure_tabs_for_levels') as mock_configure_tabs,  \
+             patch.object(config_loader, '_load_ship_parameters') as mock_load_ship_params, \
+             patch.object(config_loader, '_configure_bank_strength') as mock_configure_bank_strength, \
+             patch.object(config_loader, '_load_discharges') as mock_load_discharges):
 
             config_loader._load_erosion_section()
 
@@ -361,21 +298,17 @@ class TestConfigurationLoader:
             mock_state_store["eroVol"].setText.assert_called_once_with("erovol_standard.evo")
             mock_state_store["eroVolEqui"].setText.assert_called_once_with("erovol_eq.evo")
 
-            # Verify setParam calls for ship parameters (from _load_ship_parameters)
+            # Assert that helper methods were called correctly
+            mock_load_ship_params.assert_called_once()
+            mock_load_discharges.assert_called_once_with(2, config_loader.config["Erosion"])
+            mock_configure_bank_strength.assert_called_once_with(True)
+            mock_configure_tabs.assert_called_once_with(2)
+
+            # Verify setParam calls made directly in _load_erosion_section (not in mocked methods)
             expected_set_param_calls = [
-                (("shipType", config_loader.config, "Erosion", "ShipType"), {}),
-                (("shipVeloc", config_loader.config, "Erosion", "VShip"), {}),
-                (("nShips", config_loader.config, "Erosion", "NShip"), {}),
-                (("shipNWaves", config_loader.config, "Erosion", "NWave", "5"), {}),
-                (("shipDraught", config_loader.config, "Erosion", "Draught"), {}),
-                (("wavePar0", config_loader.config, "Erosion", "Wave0", "200.0"), {}),
-                (("wavePar1", config_loader.config_file.config, "Erosion", "Wave1", "200.0"), {}),
-                # setParam calls for additional erosion parameters
                 (("bankProtect", config_loader.config, "Erosion", "ProtectionLevel", "-1000"), {}),
                 (("bankSlope", config_loader.config, "Erosion", "Slope", "20.0"), {}),
                 (("bankReed", config_loader.config, "Erosion", "Reed", "0.0"), {}),
-                # setParam call for bank strength (since Classes=true, uses bankType)
-                (("bankType", config_loader.config_file.config, "Erosion", "BankType"), {}),
             ]
 
             # Check that setParam was called with the expected arguments
@@ -475,5 +408,6 @@ class TestConfigurationLoader:
 
             # Verify bankStrengthSwitch was called
             mock_bank_strength_switch.assert_called_once()
+
 
 
