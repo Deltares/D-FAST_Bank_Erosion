@@ -143,27 +143,6 @@ class ConfigurationLoader:
         n_bank = self.config_file.get_int("Detect", "NBank", default=0, positive=True)
         self._load_search_lines(n_bank)
 
-    def _load_search_lines(self, n_bank: int) -> None:
-        """Load search lines from configuration.
-
-        Args:
-            n_bank (int): Number of bank lines to load.
-        """
-        d_lines = self.config_file.get_bank_search_distances(n_bank)
-        self.state_management["searchLines"].invisibleRootItem().takeChildren()
-
-        for i in range(n_bank):
-            istr = str(i + 1)
-            file_name = self.config_file.get_str("Detect", "Line" + istr)
-            QTreeWidgetItem(
-                self.state_management["searchLines"],
-                [istr, file_name, str(d_lines[i])]
-            )
-
-        if n_bank > 0:
-            self.state_management["searchLinesEdit"].setEnabled(True)
-            self.state_management["searchLinesRemove"].setEnabled(True)
-
     def _load_erosion_section(self) -> None:
         """Load the Erosion section from configuration."""
         section = self.config["Erosion"]
@@ -209,6 +188,27 @@ class ConfigurationLoader:
 
         # Configure tabs for discharge levels
         self._configure_tabs_for_levels(n_level)
+
+    def _load_search_lines(self, n_bank: int) -> None:
+        """Load search lines from configuration.
+
+        Args:
+            n_bank (int): Number of bank lines to load.
+        """
+        d_lines = self.config_file.get_bank_search_distances(n_bank)
+        self.state_management["searchLines"].invisibleRootItem().takeChildren()
+
+        for i in range(n_bank):
+            istr = str(i + 1)
+            file_name = self.config_file.get_str("Detect", "Line" + istr)
+            QTreeWidgetItem(
+                self.state_management["searchLines"],
+                [istr, file_name, str(d_lines[i])]
+            )
+
+        if n_bank > 0:
+            self.state_management["searchLinesEdit"].setEnabled(True)
+            self.state_management["searchLinesRemove"].setEnabled(True)
 
     def _load_discharges(self, n_level: int, section) -> None:
         """Load discharge levels from configuration.
