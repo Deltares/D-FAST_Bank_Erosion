@@ -3,6 +3,11 @@ on:
   push:
     branches:
       - master
+
+permissions:
+  pages: write        # required to publish to GitHub Pages
+  id-token: write     # required for actions/deploy-pages
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
