@@ -10,7 +10,11 @@ from PySide6.QtWidgets import (
 )
 
 from dfastbe.io.config import ConfigFile
-from dfastbe.gui.utils import show_error, typeUpdatePar, addTabForLevel
+from dfastbe.gui.utils import (
+    show_error,
+    typeUpdatePar,
+    addTabForLevel
+)
 from dfastbe.io.file_utils import absolute_path
 from dfastbe.gui.state_management import StateStore
 
@@ -18,165 +22,298 @@ __all__ = [
     "get_configuration",
     "load_configuration",
     "bankStrengthSwitch",
+    "ConfigurationLoader",
 ]
+
+
+class ConfigurationLoader:
+    """Responsible for loading and applying configuration data to GUI state."""
+
+    def __init__(self, config_path: Path):
+        """Initialize the configuration loader.
+
+        Args:
+            config_path (Path): Path to the configuration file.
+        """
+        self.config_path = config_path
+        self.config_file: ConfigFile | None = None
+        self.config: ConfigParser | None = None
+        self.rootdir: str = ""
+        self.state_management = StateStore.instance()
+
+    def load(self) -> None:
+        """Load configuration file and apply to GUI state."""
+        if not self._validate_path():
+            return
+
+        if not self._read_config_file():
+            return
+
+        version = self.config_file.version
+        if version == "1.0":
+            self._load_general_section()
+            self._load_detect_section()
+            self._load_erosion_section()
+        else:
+            show_error(
+                f"Unsupported version number {version} in the file {self.config_path}!"
+            )
+
+    def _validate_path(self) -> bool:
+        """Validate that the configuration file exists.
+
+        Returns:
+            bool: True if path is valid, False otherwise.
+        """
+        if not self.config_path.exists():
+            if self.config_path != Path("dfastbe.cfg"):
+                show_error(f"The file {self.config_path} does not exist!")
+            return False
+        return True
+
+    def _read_config_file(self) -> bool:
+        """Read and validate the configuration file.
+
+        Returns:
+            bool: True if file was read successfully, False otherwise.
+        """
+        config_path_abs = absolute_path(os.getcwd(), self.config_path)
+        self.rootdir = os.path.dirname(config_path_abs)
+        self.config_file = ConfigFile.read(config_path_abs)
+        self.config_file.path = config_path_abs
+
+        try:
+            _ = self.config_file.version
+        except KeyError:
+            show_error(
+                f"No version information in the file {self.config_path}!"
+            )
+            return False
+
+        self.config = self.config_file.config
+        return True
+
+    def _load_general_section(self) -> None:
+        """Load the General section from configuration."""
+        section = self.config["General"]
+        self.state_management["chainFileEdit"].setText(section["RiverKM"])
+
+        study_range = self.config_file.get_range("General", "Boundaries")
+        self.state_management["startRange"].setText(str(study_range[0]))
+        self.state_management["endRange"].setText(str(study_range[1]))
+
+        self.state_management["bankDirEdit"].setText(section["BankDir"])
+
+        bank_file = self.config_file.get_str("General", "BankFile", default="bankfile")
+        self.state_management["bankFileName"].setText(bank_file)
+
+        flag = self.config_file.get_bool("General", "Plotting", default=True)
+        self.state_management["makePlotsEdit"].setChecked(flag)
+
+        flag = self.config_file.get_bool("General", "SavePlots", default=True)
+        self.state_management["savePlotsEdit"].setChecked(flag)
+
+        flag = self.config_file.get_bool("General", "SaveZoomPlots", default=False)
+        self.state_management["saveZoomPlotsEdit"].setChecked(flag)
+
+        zoom_step_km = self.config_file.get_float("General", "ZoomStepKM", default=1.0)
+        self.state_management["zoomPlotsRangeEdit"].setText(str(zoom_step_km))
+
+        fig_dir = self.config_file.get_str(
+            "General",
+            "FigureDir",
+            default=absolute_path(self.rootdir, "figures"),
+        )
+        self.state_management["figureDirEdit"].setText(fig_dir)
+
+        flag = self.config_file.get_bool("General", "ClosePlots", default=False)
+        self.state_management["closePlotsEdit"].setChecked(flag)
+
+        flag = self.config_file.get_bool("General", "DebugOutput", default=False)
+        self.state_management["debugOutputEdit"].setChecked(flag)
+
+    def _load_detect_section(self) -> None:
+        """Load the Detect section from configuration."""
+        section = self.config["Detect"]
+        self.state_management["simFileEdit"].setText(section["SimFile"])
+
+        water_depth = self.config_file.get_float("Detect", "WaterDepth", default=0.0)
+        self.state_management["waterDepth"].setText(str(water_depth))
+
+        n_bank = self.config_file.get_int("Detect", "NBank", default=0, positive=True)
+        self._load_search_lines(n_bank)
+
+    def _load_erosion_section(self) -> None:
+        """Load the Erosion section from configuration."""
+        section = self.config["Erosion"]
+
+        # Load basic erosion parameters
+        self.state_management["tErosion"].setText(section["TErosion"])
+        self.state_management["riverAxisEdit"].setText(section["RiverAxis"])
+        self.state_management["fairwayEdit"].setText(section["Fairway"])
+        self.state_management["chainageOutStep"].setText(section["OutputInterval"])
+        self.state_management["outDirEdit"].setText(section["OutputDir"])
+
+        bank_new = self.config_file.get_str("Erosion", "BankNew", default="banknew")
+        self.state_management["newBankFile"].setText(bank_new)
+
+        bank_eq = self.config_file.get_str("Erosion", "BankEq", default="bankeq")
+        self.state_management["newEqBankFile"].setText(bank_eq)
+
+        txt = self.config_file.get_str("Erosion", "EroVol", default="erovol_standard.evo")
+        self.state_management["eroVol"].setText(txt)
+
+        txt = self.config_file.get_str("Erosion", "EroVolEqui", default="erovol_eq.evo")
+        self.state_management["eroVolEqui"].setText(txt)
+
+        # Load discharge levels
+        n_level = self.config_file.get_int("Erosion", "NLevel", default=0, positive=True)
+        self._load_discharges(n_level, section)
+
+        # Load ship and erosion parameters
+        self._load_ship_parameters()
+
+        # Load bank strength configuration
+        use_bank_type = self.config_file.get_bool("Erosion", "Classes", default=True)
+        self._configure_bank_strength(use_bank_type)
+
+        # Load additional erosion parameters
+        setParam("bankProtect", self.config, "Erosion", "ProtectionLevel", "-1000")
+        setParam("bankSlope", self.config, "Erosion", "Slope", "20.0")
+        setParam("bankReed", self.config, "Erosion", "Reed", "0.0")
+
+        # Load filters
+        setFilter("velFilter", self.config, "Erosion", "VelFilterDist")
+        setFilter("bedFilter", self.config, "Erosion", "BedFilterDist")
+
+        # Configure tabs for discharge levels
+        self._configure_tabs_for_levels(n_level)
+
+    def _load_search_lines(self, n_bank: int) -> None:
+        """Load search lines from configuration.
+
+        Args:
+            n_bank (int): Number of bank lines to load.
+        """
+        d_lines = self.config_file.get_bank_search_distances(n_bank)
+        self.state_management["searchLines"].invisibleRootItem().takeChildren()
+
+        for i in range(n_bank):
+            istr = str(i + 1)
+            file_name = self.config_file.get_str("Detect", "Line" + istr)
+            QTreeWidgetItem(
+                self.state_management["searchLines"],
+                [istr, file_name, str(d_lines[i])]
+            )
+
+        if n_bank > 0:
+            self.state_management["searchLinesEdit"].setEnabled(True)
+            self.state_management["searchLinesRemove"].setEnabled(True)
+
+    def _load_discharges(self, n_level: int, section) -> None:
+        """Load discharge levels from configuration.
+
+        Args:
+            n_level (int): Number of discharge levels.
+            section: Configuration section containing RefLevel.
+        """
+        self.state_management["discharges"].invisibleRootItem().takeChildren()
+
+        for i in range(n_level):
+            istr = str(i + 1)
+            file_name = self.config_file.get_str("Erosion", "SimFile" + istr)
+            prob = self.config_file.get_str("Erosion", "PDischarge" + istr)
+            QTreeWidgetItem(
+                self.state_management["discharges"],
+                [istr, file_name, prob]
+            )
+
+        if n_level > 0:
+            self.state_management["dischargesEdit"].setEnabled(True)
+            self.state_management["dischargesRemove"].setEnabled(True)
+
+        self.state_management["refLevel"].validator().setTop(n_level)
+        self.state_management["refLevel"].setText(section["RefLevel"])
+
+    def _load_ship_parameters(self) -> None:
+        """Load ship-related parameters from configuration."""
+        setParam("shipType", self.config, "Erosion", "ShipType")
+        setParam("shipVeloc", self.config, "Erosion", "VShip")
+        setParam("nShips", self.config, "Erosion", "NShip")
+        setParam("shipNWaves", self.config, "Erosion", "NWave", "5")
+        setParam("shipDraught", self.config, "Erosion", "Draught")
+        setParam("wavePar0", self.config, "Erosion", "Wave0", "200.0")
+
+        wave0 = self.config_file.get_str("Erosion", "Wave0", "200.0")
+        setParam("wavePar1", self.config_file.config, "Erosion", "Wave1", wave0)
+
+    def _configure_bank_strength(self, use_bank_type: bool) -> None:
+        """Configure bank strength settings based on configuration.
+
+        Args:
+            use_bank_type (bool): Whether to use bank type or critical shear stress.
+        """
+        # Enable/disable appropriate controls
+        self.state_management["bankType"].setEnabled(use_bank_type)
+        self.state_management["bankTypeType"].setEnabled(use_bank_type)
+        self.state_management["bankTypeEdit"].setEnabled(use_bank_type)
+        self.state_management["bankTypeEditFile"].setEnabled(use_bank_type)
+        self.state_management["bankShear"].setEnabled(not use_bank_type)
+        self.state_management["bankShearType"].setEnabled(not use_bank_type)
+        self.state_management["bankShearEdit"].setEnabled(not use_bank_type)
+        self.state_management["bankShearEditFile"].setEnabled(not use_bank_type)
+
+        if use_bank_type:
+            self.state_management["strengthPar"].setCurrentText("Bank Type")
+            bankStrengthSwitch()
+            setParam("bankType", self.config_file.config, "Erosion", "BankType")
+        else:
+            self.state_management["strengthPar"].setCurrentText("Critical Shear Stress")
+            bankStrengthSwitch()
+            setParam("bankShear", self.config, "Erosion", "BankType")
+
+    def _configure_tabs_for_levels(self, n_level: int) -> None:
+        """Configure tabs for discharge levels.
+
+        Args:
+            n_level (int): Number of discharge levels.
+        """
+        tabs = self.state_management["tabs"]
+
+        # Remove existing level tabs
+        for i in range(tabs.count() - 1, 4, -1):
+            tabs.removeTab(i)
+
+        # Add tabs for each level and load parameters
+        for i in range(n_level):
+            istr = str(i + 1)
+            addTabForLevel(istr)
+
+            # Load level-specific parameters
+            setOptParam(istr + "_shipType", self.config, "Erosion", "ShipType" + istr)
+            setOptParam(istr + "_shipVeloc", self.config, "Erosion", "VShip" + istr)
+            setOptParam(istr + "_nShips", self.config, "Erosion", "NShip" + istr)
+            setOptParam(istr + "_shipNWaves", self.config, "Erosion", "NWave" + istr)
+            setOptParam(istr + "_shipDraught", self.config, "Erosion", "Draught" + istr)
+            setOptParam(istr + "_bankSlope", self.config, "Erosion", "Slope" + istr)
+            setOptParam(istr + "_bankReed", self.config, "Erosion", "Reed" + istr)
+
+            txt = self.config_file.get_str("Erosion", "EroVol" + istr, default="")
+            self.state_management[istr + "_eroVolEdit"].setText(txt)
 
 
 def load_configuration(config_path: Path) -> None:
     """Open a configuration file and update the GUI accordingly.
 
-    This routines opens the specified configuration file and updates the GUI
-    to reflect it contents.
+    This routine opens the specified configuration file and updates the GUI
+    to reflect its contents.
 
     Args:
         config_path (Path):
             Name of the configuration file to be opened.
     """
-    state_management = StateStore.instance()
-    if not config_path.exists():
-        if config_path != "dfastbe.cfg":
-            show_error(f"The file {config_path} does not exist!")
-        return
-
-    config_path_abs = absolute_path(os.getcwd(), config_path)
-    rootdir = os.path.dirname(config_path_abs)
-    config_file = ConfigFile.read(config_path_abs)
-
-    config_file.path = config_path_abs
-
-    try:
-        version = config_file.version
-    except KeyError:
-        show_error(f"No version information in the file {config_path}!")
-        return
-
-    config = config_file.config
-    if version == "1.0":
-        section = config["General"]
-        state_management["chainFileEdit"].setText(section["RiverKM"])
-        study_range = config_file.get_range("General", "Boundaries")
-        state_management["startRange"].setText(str(study_range[0]))
-        state_management["endRange"].setText(str(study_range[1]))
-        state_management["bankDirEdit"].setText(section["BankDir"])
-        bank_file = config_file.get_str("General", "BankFile", default="bankfile")
-        state_management["bankFileName"].setText(bank_file)
-        flag = config_file.get_bool("General", "Plotting", default=True)
-        state_management["makePlotsEdit"].setChecked(flag)
-        flag = config_file.get_bool("General", "SavePlots", default=True)
-        state_management["savePlotsEdit"].setChecked(flag)
-        flag = config_file.get_bool("General", "SaveZoomPlots", default=False)
-        state_management["saveZoomPlotsEdit"].setChecked(flag)
-        zoom_step_km = config_file.get_float("General", "ZoomStepKM", default=1.0)
-        state_management["zoomPlotsRangeEdit"].setText(str(zoom_step_km))
-        fig_dir = config_file.get_str(
-            "General",
-            "FigureDir",
-            default=absolute_path(rootdir, "figures"),
-        )
-        state_management["figureDirEdit"].setText(fig_dir)
-        flag = config_file.get_bool("General", "ClosePlots", default=False)
-        state_management["closePlotsEdit"].setChecked(flag)
-        flag = config_file.get_bool("General", "DebugOutput", default=False)
-        state_management["debugOutputEdit"].setChecked(flag)
-
-        section = config["Detect"]
-        state_management["simFileEdit"].setText(section["SimFile"])
-        water_depth = config_file.get_float("Detect", "WaterDepth", default=0.0)
-        state_management["waterDepth"].setText(str(water_depth))
-        n_bank = config_file.get_int("Detect", "NBank", default=0, positive=True)
-        d_lines = config_file.get_bank_search_distances(n_bank)
-        state_management["searchLines"].invisibleRootItem().takeChildren()
-        for i in range(n_bank):
-            istr = str(i + 1)
-            file_name = config_file.get_str("Detect", "Line" + istr)
-            c1 = QTreeWidgetItem(
-                state_management["searchLines"], [istr, file_name, str(d_lines[i])]
-            )
-        if n_bank > 0:
-            state_management["searchLinesEdit"].setEnabled(True)
-            state_management["searchLinesRemove"].setEnabled(True)
-
-        section = config["Erosion"]
-        state_management["tErosion"].setText(section["TErosion"])
-        state_management["riverAxisEdit"].setText(section["RiverAxis"])
-        state_management["fairwayEdit"].setText(section["Fairway"])
-        state_management["chainageOutStep"].setText(section["OutputInterval"])
-        state_management["outDirEdit"].setText(section["OutputDir"])
-        bank_new = config_file.get_str("Erosion", "BankNew", default="banknew")
-        state_management["newBankFile"].setText(bank_new)
-        bank_eq = config_file.get_str("Erosion", "BankEq", default="bankeq")
-        state_management["newEqBankFile"].setText(bank_eq)
-        txt = config_file.get_str("Erosion", "EroVol", default="erovol_standard.evo")
-        state_management["eroVol"].setText(txt)
-        txt = config_file.get_str("Erosion", "EroVolEqui", default="erovol_eq.evo")
-        state_management["eroVolEqui"].setText(txt)
-
-        n_level = config_file.get_int("Erosion", "NLevel", default=0, positive=True)
-        state_management["discharges"].invisibleRootItem().takeChildren()
-        for i in range(n_level):
-            istr = str(i + 1)
-            file_name = config_file.get_str("Erosion", "SimFile" + istr)
-            prob = config_file.get_str("Erosion", "PDischarge" + istr)
-            c1 = QTreeWidgetItem(state_management["discharges"], [istr, file_name, prob])
-        if n_level > 0:
-            state_management["dischargesEdit"].setEnabled(True)
-            state_management["dischargesRemove"].setEnabled(True)
-
-        state_management["refLevel"].validator().setTop(n_level)
-        state_management["refLevel"].setText(section["RefLevel"])
-
-        setParam("shipType", config, "Erosion", "ShipType")
-        setParam("shipVeloc", config, "Erosion", "VShip")
-        setParam("nShips", config, "Erosion", "NShip")
-        setParam("shipNWaves", config, "Erosion", "NWave", "5")
-        setParam("shipDraught", config, "Erosion", "Draught")
-        setParam("wavePar0", config, "Erosion", "Wave0", "200.0")
-        wave0 = config_file.get_str("Erosion", "Wave0", "200.0")
-        setParam("wavePar1", config_file.config, "Erosion", "Wave1", wave0)
-
-        use_bank_type = config_file.get_bool("Erosion", "Classes", default=True)
-        state_management["bankType"].setEnabled(use_bank_type)
-        state_management["bankTypeType"].setEnabled(use_bank_type)
-        state_management["bankTypeEdit"].setEnabled(use_bank_type)
-        state_management["bankTypeEditFile"].setEnabled(use_bank_type)
-        state_management["bankShear"].setEnabled(not use_bank_type)
-        state_management["bankShearType"].setEnabled(not use_bank_type)
-        state_management["bankShearEdit"].setEnabled(not use_bank_type)
-        state_management["bankShearEditFile"].setEnabled(not use_bank_type)
-
-        if use_bank_type:
-            state_management["strengthPar"].setCurrentText("Bank Type")
-            bankStrengthSwitch()
-            setParam("bankType", config_file.config, "Erosion", "BankType")
-        else:
-            state_management["strengthPar"].setCurrentText("Critical Shear Stress")
-            bankStrengthSwitch()
-            setParam("bankShear", config, "Erosion", "BankType")
-        setParam("bankProtect", config, "Erosion", "ProtectionLevel", "-1000")
-        setParam("bankSlope", config, "Erosion", "Slope", "20.0")
-        setParam("bankReed", config, "Erosion", "Reed", "0.0")
-
-        setFilter("velFilter", config, "Erosion", "VelFilterDist")
-        setFilter("bedFilter", config, "Erosion", "BedFilterDist")
-
-        tabs = state_management["tabs"]
-        for i in range(tabs.count() - 1, 4, -1):
-            tabs.removeTab(i)
-
-        for i in range(n_level):
-            istr = str(i + 1)
-            addTabForLevel(istr)
-            setOptParam(istr + "_shipType", config, "Erosion", "ShipType" + istr)
-            setOptParam(istr + "_shipVeloc", config, "Erosion", "VShip" + istr)
-            setOptParam(istr + "_nShips", config, "Erosion", "NShip" + istr)
-            setOptParam(istr + "_shipNWaves", config, "Erosion", "NWave" + istr)
-            setOptParam(istr + "_shipDraught", config, "Erosion", "Draught" + istr)
-            setOptParam(istr + "_bankSlope", config, "Erosion", "Slope" + istr)
-            setOptParam(istr + "_bankReed", config, "Erosion", "Reed" + istr)
-            txt = config_file.get_str("Erosion", "EroVol" + istr, default="")
-            state_management[istr + "_eroVolEdit"].setText(txt)
-
-    else:
-        show_error(f"Unsupported version number {version} in the file {config_path}!")
+    loader = ConfigurationLoader(config_path)
+    loader.load()
 
 
 def get_configuration() -> ConfigParser:
