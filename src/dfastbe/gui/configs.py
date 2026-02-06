@@ -18,6 +18,7 @@ __all__ = [
     "get_configuration",
     "load_configuration",
     "bankStrengthSwitch",
+    "ConfigurationExporter",
 ]
 
 
@@ -179,6 +180,209 @@ def load_configuration(config_path: Path) -> None:
         show_error(f"Unsupported version number {version} in the file {config_path}!")
 
 
+class ConfigurationExporter:
+    """Exports GUI state to a ConfigParser configuration.
+
+    This class encapsulates the logic for building a configuration from the
+    StateStore, organizing it into logical sections with single-responsibility methods.
+    """
+
+    def __init__(self, state_store: StateStore):
+        """Initialize the exporter with a state store.
+
+        Args:
+            state_store: The StateStore instance containing GUI state.
+        """
+        self.state = state_store
+        self.config = ConfigParser()
+        self.config.optionxform = str  # case sensitive configuration
+
+    def build(self) -> ConfigParser:
+        """Build and return the complete configuration.
+
+        Returns:
+            ConfigParser: Complete configuration for D-FAST Bank Erosion analysis.
+        """
+        self._build_general_section()
+        self._build_detect_section()
+        self._build_erosion_section()
+        return self.config
+
+    def _build_general_section(self) -> None:
+        """Build the [General] section of the configuration."""
+        self.config.add_section("General")
+        section = self.config["General"]
+
+        section["Version"] = "1.0"
+        section["RiverKM"] = self.state["chainFileEdit"].text()
+        section["Boundaries"] = (
+            self.state["startRange"].text() + ":" + self.state["endRange"].text()
+        )
+        section["BankDir"] = self.state["bankDirEdit"].text()
+        section["BankFile"] = self.state["bankFileName"].text()
+        section["Plotting"] = str(self.state["makePlotsEdit"].isChecked())
+        section["SavePlots"] = str(self.state["savePlotsEdit"].isChecked())
+        section["SaveZoomPlots"] = str(self.state["saveZoomPlotsEdit"].isChecked())
+        section["ZoomStepKM"] = self.state["zoomPlotsRangeEdit"].text()
+        section["FigureDir"] = self.state["figureDirEdit"].text()
+        section["ClosePlots"] = str(self.state["closePlotsEdit"].isChecked())
+        section["DebugOutput"] = str(self.state["debugOutputEdit"].isChecked())
+
+    def _build_detect_section(self) -> None:
+        """Build the [Detect] section of the configuration."""
+        self.config.add_section("Detect")
+        section = self.config["Detect"]
+
+        section["SimFile"] = self.state["simFileEdit"].text()
+        section["WaterDepth"] = self.state["waterDepth"].text()
+
+        nbank = self.state["searchLines"].topLevelItemCount()
+        section["NBank"] = str(nbank)
+
+        dlines = "[ "
+        for i in range(nbank):
+            istr = str(i + 1)
+            section["Line" + istr] = self.state["searchLines"].topLevelItem(i).text(1)
+            dlines += self.state["searchLines"].topLevelItem(i).text(2) + ", "
+        dlines = dlines[:-2] + " ]"
+        section["DLines"] = dlines
+
+    def _build_erosion_section(self) -> None:
+        """Build the [Erosion] section of the configuration."""
+        self.config.add_section("Erosion")
+        section = self.config["Erosion"]
+
+        # Basic erosion parameters
+        section["TErosion"] = self.state["tErosion"].text()
+        section["RiverAxis"] = self.state["riverAxisEdit"].text()
+        section["Fairway"] = self.state["fairwayEdit"].text()
+        section["OutputInterval"] = self.state["chainageOutStep"].text()
+        section["OutputDir"] = self.state["outDirEdit"].text()
+        section["BankNew"] = self.state["newBankFile"].text()
+        section["BankEq"] = self.state["newEqBankFile"].text()
+        section["EroVol"] = self.state["eroVol"].text()
+        section["EroVolEqui"] = self.state["eroVolEqui"].text()
+
+        # Ship parameters
+        self._build_ship_parameters(section)
+
+        # Bank strength parameters
+        self._build_bank_strength_parameters(section)
+
+        # Filter parameters
+        self._build_filters(section)
+
+        # Discharge levels
+        self._build_erosion_levels(section)
+
+    def _build_ship_parameters(self, section) -> None:
+        """Build ship-related parameters in the Erosion section.
+
+        Args:
+            section: The ConfigParser section to populate.
+        """
+        if self.state["shipTypeType"].currentText() == "Constant":
+            section["ShipType"] = str(
+                self.state["shipTypeSelect"].currentIndex() + 1
+            )  # index 0 -> shipType 1
+        else:
+            section["ShipType"] = self.state["shipTypeEdit"].text()
+
+        section["VShip"] = self.state["shipVelocEdit"].text()
+        section["NShip"] = self.state["nShipsEdit"].text()
+        section["NWaves"] = self.state["shipNWavesEdit"].text()
+        section["Draught"] = self.state["shipDraughtEdit"].text()
+        section["Wave0"] = self.state["wavePar0Edit"].text()
+        section["Wave1"] = self.state["wavePar1Edit"].text()
+
+    def _build_bank_strength_parameters(self, section) -> None:
+        """Build bank strength parameters in the Erosion section.
+
+        Args:
+            section: The ConfigParser section to populate.
+        """
+        if self.state["strengthPar"].currentText() == "Bank Type":
+            section["Classes"] = "true"
+            if self.state["bankTypeType"].currentText() == "Constant":
+                section["BankType"] = str(self.state["bankTypeSelect"].currentIndex())
+            else:
+                section["BankType"] = self.state["bankTypeEdit"].text()
+        else:
+            section["Classes"] = "false"
+            section["BankType"] = self.state["bankShearEdit"].text()
+
+        section["ProtectionLevel"] = self.state["bankProtectEdit"].text()
+        section["Slope"] = self.state["bankSlopeEdit"].text()
+        section["Reed"] = self.state["bankReedEdit"].text()
+
+    def _build_filters(self, section) -> None:
+        """Build filter parameters in the Erosion section.
+
+        Args:
+            section: The ConfigParser section to populate.
+        """
+        if self.state["velFilterActive"].isChecked():
+            section["VelFilterDist"] = self.state["velFilterWidth"].text()
+        if self.state["bedFilterActive"].isChecked():
+            section["BedFilterDist"] = self.state["bedFilterWidth"].text()
+
+    def _build_erosion_levels(self, section) -> None:
+        """Build discharge level parameters in the Erosion section.
+
+        Args:
+            section: The ConfigParser section to populate.
+        """
+        nlevel = self.state["discharges"].topLevelItemCount()
+        section["NLevel"] = str(nlevel)
+        section["RefLevel"] = self.state["refLevel"].text()
+
+        for i in range(nlevel):
+            istr = str(i + 1)
+            section["SimFile" + istr] = (
+                self.state["discharges"].topLevelItem(i).text(1)
+            )
+            section["PDischarge" + istr] = (
+                self.state["discharges"].topLevelItem(i).text(2)
+            )
+
+            # Optional ship type parameter
+            if self.state[istr + "_shipTypeType"].currentText() != "Use Default":
+                if self.state[istr + "_shipTypeType"].currentText() == "Constant":
+                    section["ShipType" + istr] = str(
+                        self.state[istr + "_shipTypeSelect"].currentIndex() + 1
+                    )  # index 0 -> shipType 1
+                else:
+                    section["ShipType" + istr] = self.state[istr + "_shipTypeEdit"].text()
+
+            # Optional velocity parameter
+            if self.state[istr + "_shipVelocType"].currentText() != "Use Default":
+                section["VShip" + istr] = self.state[istr + "_shipVelocEdit"].text()
+
+            # Optional number of ships parameter
+            if self.state[istr + "_nShipsType"].currentText() != "Use Default":
+                section["NShip" + istr] = self.state[istr + "_nShipsEdit"].text()
+
+            # Optional number of waves parameter
+            if self.state[istr + "_shipNWavesType"].currentText() != "Use Default":
+                section["NWaves" + istr] = self.state[istr + "_shipNWavesEdit"].text()
+
+            # Optional draught parameter
+            if self.state[istr + "_shipDraughtType"].currentText() != "Use Default":
+                section["Draught" + istr] = self.state[istr + "_shipDraughtEdit"].text()
+
+            # Optional slope parameter
+            if self.state[istr + "_bankSlopeType"].currentText() != "Use Default":
+                section["Slope" + istr] = self.state[istr + "_bankSlopeEdit"].text()
+
+            # Optional reed parameter
+            if self.state[istr + "_bankReedType"].currentText() != "Use Default":
+                section["Reed" + istr] = self.state[istr + "_bankReedEdit"].text()
+
+            # Optional erosion volume file
+            if self.state[istr + "_eroVolEdit"].text() != "":
+                section["EroVol" + istr] = self.state[istr + "_eroVolEdit"].text()
+
+
 def get_configuration() -> ConfigParser:
     """Extract a configuration from the GUI.
 
@@ -187,118 +391,8 @@ def get_configuration() -> ConfigParser:
     config : ConfigParser
         Configuration for the D-FAST Bank Erosion analysis.
     """
-    state_management = StateStore.instance()
-    config = ConfigParser()
-    config.optionxform = str  # case sensitive configuration
-
-    config.add_section("General")
-    config["General"]["Version"] = "1.0"
-    config["General"]["RiverKM"] = state_management["chainFileEdit"].text()
-    config["General"]["Boundaries"] = (
-            state_management["startRange"].text() + ":" + state_management["endRange"].text()
-    )
-    config["General"]["BankDir"] = state_management["bankDirEdit"].text()
-    config["General"]["BankFile"] = state_management["bankFileName"].text()
-    config["General"]["Plotting"] = str(state_management["makePlotsEdit"].isChecked())
-    config["General"]["SavePlots"] = str(state_management["savePlotsEdit"].isChecked())
-    config["General"]["SaveZoomPlots"] = str(state_management["saveZoomPlotsEdit"].isChecked())
-    config["General"]["ZoomStepKM"] = state_management["zoomPlotsRangeEdit"].text()
-    config["General"]["FigureDir"] = state_management["figureDirEdit"].text()
-    config["General"]["ClosePlots"] = str(state_management["closePlotsEdit"].isChecked())
-    config["General"]["DebugOutput"] = str(state_management["debugOutputEdit"].isChecked())
-
-    config.add_section("Detect")
-    config["Detect"]["SimFile"] = state_management["simFileEdit"].text()
-    config["Detect"]["WaterDepth"] = state_management["waterDepth"].text()
-    nbank = state_management["searchLines"].topLevelItemCount()
-    config["Detect"]["NBank"] = str(nbank)
-    dlines = "[ "
-    for i in range(nbank):
-        istr = str(i + 1)
-        config["Detect"]["Line" + istr] = state_management["searchLines"].topLevelItem(i).text(1)
-        dlines += state_management["searchLines"].topLevelItem(i).text(2) + ", "
-    dlines = dlines[:-2] + " ]"
-    config["Detect"]["DLines"] = dlines
-
-    config.add_section("Erosion")
-    config["Erosion"]["TErosion"] = state_management["tErosion"].text()
-    config["Erosion"]["RiverAxis"] = state_management["riverAxisEdit"].text()
-    config["Erosion"]["Fairway"] = state_management["fairwayEdit"].text()
-    config["Erosion"]["OutputInterval"] = state_management["chainageOutStep"].text()
-    config["Erosion"]["OutputDir"] = state_management["outDirEdit"].text()
-    config["Erosion"]["BankNew"] = state_management["newBankFile"].text()
-    config["Erosion"]["BankEq"] = state_management["newEqBankFile"].text()
-    config["Erosion"]["EroVol"] = state_management["eroVol"].text()
-    config["Erosion"]["EroVolEqui"] = state_management["eroVolEqui"].text()
-
-    if state_management["shipTypeType"].currentText() == "Constant":
-        config["Erosion"]["ShipType"] = str(
-            state_management["shipTypeSelect"].currentIndex() + 1
-        )  # index 0 -> shipType 1
-    else:
-        config["Erosion"]["ShipType"] = state_management["shipTypeEdit"].text()
-    config["Erosion"]["VShip"] = state_management["shipVelocEdit"].text()
-    config["Erosion"]["NShip"] = state_management["nShipsEdit"].text()
-    config["Erosion"]["NWaves"] = state_management["shipNWavesEdit"].text()
-    config["Erosion"]["Draught"] = state_management["shipDraughtEdit"].text()
-    config["Erosion"]["Wave0"] = state_management["wavePar0Edit"].text()
-    config["Erosion"]["Wave1"] = state_management["wavePar1Edit"].text()
-
-    if state_management["strengthPar"].currentText() == "Bank Type":
-        config["Erosion"]["Classes"] = "true"
-        if state_management["bankTypeType"].currentText() == "Constant":
-            config["Erosion"]["BankType"] = state_management["bankTypeSelect"].currentIndex()
-        else:
-            config["Erosion"]["BankType"] = state_management["bankTypeEdit"].text()
-    else:
-        config["Erosion"]["Classes"] = "false"
-        config["Erosion"]["BankType"] = state_management["bankShearEdit"].text()
-    config["Erosion"]["ProtectionLevel"] = state_management["bankProtectEdit"].text()
-    config["Erosion"]["Slope"] = state_management["bankSlopeEdit"].text()
-    config["Erosion"]["Reed"] = state_management["bankReedEdit"].text()
-
-    if state_management["velFilterActive"].isChecked():
-        config["Erosion"]["VelFilterDist"] = state_management["velFilterWidth"].text()
-    if state_management["bedFilterActive"].isChecked():
-        config["Erosion"]["BedFilterDist"] = state_management["bedFilterWidth"].text()
-
-    nlevel = state_management["discharges"].topLevelItemCount()
-    config["Erosion"]["NLevel"] = str(nlevel)
-    config["Erosion"]["RefLevel"] = state_management["refLevel"].text()
-    for i in range(nlevel):
-        istr = str(i + 1)
-        config["Erosion"]["SimFile" + istr] = (
-            state_management["discharges"].topLevelItem(i).text(1)
-        )
-        config["Erosion"]["PDischarge" + istr] = (
-            state_management["discharges"].topLevelItem(i).text(2)
-        )
-        if state_management[istr + "_shipTypeType"].currentText() != "Use Default":
-            if state_management[istr + "_shipTypeType"].currentText() == "Constant":
-                config["Erosion"]["ShipType" + istr] = (
-                        state_management[istr + "_shipTypeSelect"].currentIndex() + 1
-                )  # index 0 -> shipType 1
-            else:
-                config["Erosion"]["ShipType" + istr] = state_management[
-                    istr + "_shipTypeEdit"
-                    ].text()
-        if state_management[istr + "_shipVelocType"].currentText() != "Use Default":
-            config["Erosion"]["VShip" + istr] = state_management[istr + "_shipVelocEdit"].text()
-        if state_management[istr + "_nShipsType"].currentText() != "Use Default":
-            config["Erosion"]["NShip" + istr] = state_management[istr + "_nShipsEdit"].text()
-        if state_management[istr + "_shipNWavesType"].currentText() != "Use Default":
-            config["Erosion"]["NWaves" + istr] = state_management[istr + "_shipNWavesEdit"].text()
-        if state_management[istr + "_shipDraughtType"].currentText() != "Use Default":
-            config["Erosion"]["Draught" + istr] = state_management[
-                istr + "_shipDraughtEdit"
-                ].text()
-        if state_management[istr + "_bankSlopeType"].currentText() != "Use Default":
-            config["Erosion"]["Slope" + istr] = state_management[istr + "_bankSlopeEdit"].text()
-        if state_management[istr + "_bankReedType"].currentText() != "Use Default":
-            config["Erosion"]["Reed" + istr] = state_management[istr + "_bankReedEdit"].text()
-        if state_management[istr + "_eroVolEdit"].text() != "":
-            config["Erosion"]["EroVol" + istr] = state_management[istr + "_eroVolEdit"].text()
-    return config
+    exporter = ConfigurationExporter(StateStore.instance())
+    return exporter.build()
 
 
 def setParam(field: str, config, group: str, key: str, default: str = "??") -> None:
