@@ -4,13 +4,13 @@ on:
     branches:
       - master
 
-permissions:
-  pages: write        # required to publish to GitHub Pages
-  id-token: write     # required for actions/deploy-pages
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write     # required for publishing to gh-pages
+      pages: write        # required to publish to GitHub Pages
+      id-token: write     # required for actions/deploy-pages
     steps:
       - uses: actions/checkout@v6
         with:
