@@ -11,6 +11,11 @@ on:
       types:
         - published
 
+permissions:
+  contents: write     # Required to push to gh-pages
+  pages: write        # Required for GitHub Pages deployments
+  id-token: write     # Required for OIDC authentication
+
 jobs:
   deploy-pr:
       if: github.event_name == 'pull_request'
