@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 from PySide6.QtWidgets import QApplication, QTabWidget, QMainWindow, QCheckBox, QLineEdit, QLabel
 from PySide6.QtGui import QDoubleValidator
 from dfastbe.gui.tabs.general import GeneralTab, update_plotting
@@ -8,17 +8,13 @@ from dfastbe.gui.utils import validator
 
 class TestGeneralTab:
     @pytest.fixture(autouse=True)
-    def setup_method(self, qtbot):
-        # Ensure QApplication exists
-        self.app = QApplication.instance() or QApplication([])
-        # Initialize StateStore singleton
+    def setup_method(self, qapp, qtbot):
+        # qapp fixture ensures QApplication exists (do not create manually)
         StateStore._instance = None
         self.state = StateStore.initialize()
-        # Create main window and tabs
         self.window = QMainWindow()
         self.tabs = QTabWidget(self.window)
         yield
-        # Clean up StateStore after each test
         StateStore._instance = None
 
     def test_widgets_registered(self, qtbot):
@@ -63,7 +59,7 @@ class TestGeneralTab:
 
 class TestUpdatePlotting:
     @pytest.fixture(autouse=True)
-    def setup_widgets_and_state(self):
+    def setup_widgets_and_state(self, qapp):
         # Patch StateStore.instance to return our test state dict
         self.state = {}
         # Helper to create a widget with setEnabled and isEnabled
