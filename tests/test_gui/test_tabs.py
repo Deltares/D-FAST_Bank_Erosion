@@ -8,14 +8,11 @@ from dfastbe.gui.utils import validator
 
 class TestGeneralTab:
     @pytest.fixture(autouse=True)
-    def setup_method(self, qapp, qtbot):
-        # qapp fixture ensures QApplication exists (do not create manually)
-        StateStore._instance = None
-        self.state = StateStore.initialize()
-        self.window = QMainWindow()
-        self.tabs = QTabWidget(self.window)
+    def use_general_tab_state(self, setup_general_tab_state):
+        self.state = setup_general_tab_state['state']
+        self.window = setup_general_tab_state['window']
+        self.tabs = setup_general_tab_state['tabs']
         yield
-        StateStore._instance = None
 
     def test_widgets_registered(self, qtbot):
         general_tab = GeneralTab(self.tabs, self.window)
