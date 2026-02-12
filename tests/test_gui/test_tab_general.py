@@ -100,7 +100,11 @@ class TestGeneralTab:
         assert isinstance(zoom_range_edit, QLineEdit)
         assert zoom_range_edit.text() == "1.0"
 
-    def test_zoomplotsrangeedit_has_positive_real_validator(self, qtbot, initialize_general_tab):
+    def test_zoom_plots_range_edit_has_positive_real_validator(
+            self,
+            qtbot,
+            initialize_general_tab
+    ):
         general_tab = initialize_general_tab
         general_tab.create()
         state = StateStore.instance()
