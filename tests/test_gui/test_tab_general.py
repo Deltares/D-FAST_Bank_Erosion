@@ -66,16 +66,17 @@ IDS = [
 ]
 
 
-class TestGeneralTab:
-    @pytest.fixture(autouse=True)
-    def use_general_tab_state(self, setup_tab_state):
-        self.state = setup_tab_state['state']
-        self.window = setup_tab_state['window']
-        self.tabs = setup_tab_state['tabs']
-        yield
+@pytest.fixture
+def initialize_general_tab(setup_tab_state, qtbot):
+    general_tab = GeneralTab(
+        setup_tab_state['tabs'],
+        setup_tab_state['window']
+    )
+    return general_tab
 
-    def test_widgets_registered(self, qtbot):
-        general_tab = GeneralTab(self.tabs, self.window)
+class TestGeneralTab:
+    def test_widgets_registered(self, qtbot, initialize_general_tab):
+        general_tab = initialize_general_tab
         general_tab.create()
         state = StateStore.instance()
         # Check all important widgets are registered
@@ -85,8 +86,8 @@ class TestGeneralTab:
         ]:
             assert key in state
 
-    def test_widget_defaults(self, qtbot):
-        general_tab = GeneralTab(self.tabs, self.window)
+    def test_widget_defaults(self, qtbot, initialize_general_tab):
+        general_tab = initialize_general_tab
         general_tab.create()
         state = StateStore.instance()
         # Check saveZoomPlotsEdit is a QCheckBox and unchecked
@@ -98,8 +99,8 @@ class TestGeneralTab:
         assert isinstance(zoom_range_edit, QLineEdit)
         assert zoom_range_edit.text() == "1.0"
 
-    def test_zoomplotsrangeedit_has_positive_real_validator(self, qtbot):
-        general_tab = GeneralTab(self.tabs, self.window)
+    def test_zoomplotsrangeedit_has_positive_real_validator(self, qtbot, initialize_general_tab):
+        general_tab = initialize_general_tab
         general_tab.create()
         state = StateStore.instance()
         zoom_range_edit = state["zoomPlotsRangeEdit"]
@@ -182,16 +183,25 @@ class TestGuiBehaviourGeneralTab:
         SCENARIOS,
         ids=IDS
     )
-    def test_general_tab_integration_enabling_logic(self, qtbot, setup_tab_state, make_plots, save_plots, save_zoom_plots, expected):
+    def test_general_tab_integration_enabling_logic(
+            self,
+            qtbot,
+            setup_tab_state,
+            initialize_general_tab,
+            make_plots,
+            save_plots,
+            save_zoom_plots,
+            expected):
         """
-        Parametrized integration test: Build GeneralTab with real widgets, simulate toggling checkboxes,
-        and assert GUI enable/disable state matches update_plotting logic.
+        Parametrized integration test: Build GeneralTab with real widgets, simulate
+        toggling checkboxes, and assert GUI enable/disable state matches update_plotting
+        logic.
         """
         window = setup_tab_state['window']
         tabs = setup_tab_state['tabs']
         qtbot.addWidget(window)
         qtbot.addWidget(tabs)
-        general_tab = GeneralTab(tabs, window)
+        general_tab = initialize_general_tab
         general_tab.create()
         state = StateStore.instance()
         state["makePlotsEdit"].setChecked(make_plots)
@@ -204,11 +214,16 @@ class TestGuiBehaviourGeneralTab:
             widget = state[key]
             assert widget.isEnabled() is should_be_enabled, (
                 f"{key} enabled={widget.isEnabled()} expected={should_be_enabled} "
-                f"for makePlotsEdit={make_plots}, savePlotsEdit={save_plots}, saveZoomPlotsEdit={save_zoom_plots}"
+                f"for makePlotsEdit={make_plots}, savePlotsEdit={save_plots}, "
+                f"saveZoomPlotsEdit={save_zoom_plots}"
             )
 
 
-# def test_menu_save_configuration_saves_general_tab_state(qtbot, setup_tab_state, tmp_path):
+# def test_menu_save_configuration_saves_general_tab_state(
+#         qtbot,
+#         setup_tab_state,
+#         initialize_general_tab,
+#         tmp_path):
 #     """
 #     Alters widgets in the General tab, calls menu_save_configuration, and checks
 #     that the saved config file contains the correct state.
@@ -219,7 +234,7 @@ class TestGuiBehaviourGeneralTab:
 #     tabs = setup_tab_state['tabs']
 #     qtbot.addWidget(window)
 #     qtbot.addWidget(tabs)
-#     general_tab = GeneralTab(tabs, window)
+#     general_tab = initialize_general_tab
 #     general_tab.create()
 #     state = StateStore.instance()
 #

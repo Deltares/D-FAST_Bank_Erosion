@@ -42,7 +42,7 @@ def initialize_log_data() -> LogData:
 
 
 @pytest.fixture(autouse=True)
-def setup_tab_state():
+def setup_tab_state(qapp, qtbot):
     """
     Ensures QApplication exists and sets up StateStore, QMainWindow, and QTabWidget
     for TestGeneralTab.
