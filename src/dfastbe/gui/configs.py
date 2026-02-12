@@ -247,7 +247,8 @@ def get_configuration() -> ConfigParser:
     if state_management["strengthPar"].currentText() == "Bank Type":
         config["Erosion"]["Classes"] = "true"
         if state_management["bankTypeType"].currentText() == "Constant":
-            config["Erosion"]["BankType"] = state_management["bankTypeSelect"].currentIndex()
+            config["Erosion"]["BankType"] = str(state_management[
+                                                    "bankTypeSelect"].currentIndex())
         else:
             config["Erosion"]["BankType"] = state_management["bankTypeEdit"].text()
     else:
@@ -422,3 +423,4 @@ def setFilter(field: str, config, group: str, key: str) -> None:
         state_management[field + "Width"].setText(str(val))
     else:
         state_management[field + "Active"].setChecked(False)
+

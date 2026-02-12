@@ -1,5 +1,6 @@
 import pytest
 import configparser
+from pathlib import Path
 
 from unittest.mock import patch
 from PySide6.QtWidgets import QCheckBox, QLineEdit, QLabel
@@ -219,57 +220,53 @@ class TestGuiBehaviourGeneralTab:
             )
 
 
-# def test_menu_save_configuration_saves_general_tab_state(
-#         qtbot,
-#         setup_tab_state,
-#         initialize_general_tab,
-#         tmp_path):
-#     """
-#     Alters widgets in the General tab, calls menu_save_configuration, and checks
-#     that the saved config file contains the correct state.
-#     """
-#
-#     # Setup GeneralTab and widgets
-#     window = setup_tab_state['window']
-#     tabs = setup_tab_state['tabs']
-#     qtbot.addWidget(window)
-#     qtbot.addWidget(tabs)
-#     general_tab = initialize_general_tab
-#     general_tab.create()
-#     state = StateStore.instance()
-#
-#     # Alter some widgets
-#     state["makePlotsEdit"].setChecked(True)
-#     state["savePlotsEdit"].setChecked(True)
-#     state["saveZoomPlotsEdit"].setChecked(False)
-#     state["zoomPlotsRangeEdit"].setText("2.5")
-#     state["figureDirEdit"].setText("my_figures")
-#     state["closePlotsEdit"].setChecked(True)
-#     state["debugOutputEdit"].setChecked(False)
-#     state["bankFileName"].setText("bankfile.txt")
-#     state["startRange"].setText("10")
-#     state["endRange"].setText("20")
-#     state["chainFileEdit"].setText("chain.km")
-#     state["bankDirEdit"].setText("banks/")
-#
-#     # Patch QFileDialog.getSaveFileName to return a temp file path
-#     save_path = tmp_path / "saved_config.cfg"
-#     with patch("PySide6.QtWidgets.QFileDialog.getSaveFileName", return_value=(str(save_path), "")):
-#         menu_save_configuration()
-#
-#
-#     # Read the saved config and check values
-#     config = configparser.ConfigParser()
-#     config.optionxform = str  # preserve case
-#     config.read(str(save_path))
-#
-#     assert config["General"]["BankFile"] == "bankfile.txt"
-#     assert config["General"]["Plotting"] == "True"
-#     assert config["General"]["SavePlots"] == "True"
-#     assert config["General"]["SaveZoomPlots"] == "False"
-#     assert config["General"]["ZoomStepKM"] == "2.5"
-#     assert config["General"]["FigureDir"] == "my_figures"
-#     assert config["General"]["ClosePlots"] == "True"
-#     assert config["General"]["RiverKM"] == "chain.km"
-#     assert config["General"]["Boundaries"] == "10:20"
-#     assert config["General"]["BankDir"] == "banks/"
+def test_menu_save_configuration_saves_general_tab_state(
+        qtbot,
+        setup_tab_state,
+        initialize_general_tab,
+        tmp_path,
+        create_widget_configuration):
+    """
+    Alters widgets in the General tab, calls menu_save_configuration, and checks
+    that the saved config file contains the correct state.
+    """
+    window = setup_tab_state['window']
+    tabs = setup_tab_state['tabs']
+    qtbot.addWidget(window)
+    qtbot.addWidget(tabs)
+    general_tab = initialize_general_tab
+    general_tab.create()
+    state = create_widget_configuration
+    # Set only the values needed for this test
+    state["makePlotsEdit"].setChecked(True)
+    state["savePlotsEdit"].setChecked(True)
+    state["saveZoomPlotsEdit"].setChecked(False)
+    state["zoomPlotsRangeEdit"].setText("2.5")
+    state["figureDirEdit"].setText("my_figures")
+    state["closePlotsEdit"].setChecked(True)
+    state["debugOutputEdit"].setChecked(False)
+    state["bankFileName"].setText("bankfile.txt")
+    state["startRange"].setText("10")
+    state["endRange"].setText("20")
+    state["chainFileEdit"].setText("chain.km")
+    state["bankDirEdit"].setText("banks/")
+    # Ensure StateStore uses this widget state
+    StateStore._instance = state
+    # Patch QFileDialog.getSaveFileName to return a temp file path
+    save_path = tmp_path / "saved_config.cfg"
+    with patch("PySide6.QtWidgets.QFileDialog.getSaveFileName", return_value=(str(save_path), "")):
+        menu_save_configuration()
+    # Read the saved config and check values
+    config = configparser.ConfigParser()
+    config.optionxform = str  # preserve case
+    config.read(str(save_path))
+    assert config["General"]["BankFile"] == "bankfile.txt"
+    assert config["General"]["Plotting"] == "True"
+    assert config["General"]["SavePlots"] == "True"
+    assert config["General"]["SaveZoomPlots"] == "False"
+    assert config["General"]["ZoomStepKM"] == "2.5"
+    assert Path(config["General"]["FigureDir"]).name == "my_figures"
+    assert config["General"]["ClosePlots"] == "True"
+    assert Path(config["General"]["RiverKM"]).name == "chain.km"
+    assert config["General"]["Boundaries"] == "10:20"
+    assert Path(config["General"]["BankDir"]).name == "banks"
