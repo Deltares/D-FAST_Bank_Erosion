@@ -118,7 +118,8 @@ def menu_save_configuration() -> None:
         rootdir = os.path.dirname(filename)
         config_file = ConfigFile(config)
         config_file.relative_to(rootdir)
-        config.write(filename)
+        with open(filename, "w") as f:
+            config.write(f)
 
 
 def menu_open_manual():
@@ -148,7 +149,7 @@ def menu_about_self():
     msg.setInformativeText("Copyright (c) 2025 Deltares.")
     msg.setDetailedText(gui_text("license"))
     msg.setWindowTitle(gui_text("about"))
-    msg.setStandardButtons(QMessageBox.Ok)
+    msg.setStandardButtons(QMessageBox.StandardButton.Ok)
 
     dfast_icon = get_icon(f"{ICONS_DIR}/D-FASTBE.png")
     available_sizes = dfast_icon.availableSizes()
