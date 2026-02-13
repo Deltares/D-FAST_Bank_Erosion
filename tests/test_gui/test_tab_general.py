@@ -100,7 +100,7 @@ class TestGeneralTab:
         assert isinstance(zoom_range_edit, QLineEdit)
         assert zoom_range_edit.text() == "1.0"
 
-    def test_zoom_plots_range_edit_has_positive_real_validator(
+    def test_zoom_plots_range_validator(
             self,
             qtbot,
             initialize_general_tab
@@ -110,14 +110,14 @@ class TestGeneralTab:
         state = StateStore.instance()
         zoom_range_edit = state["zoomPlotsRangeEdit"]
         assert isinstance(zoom_range_edit, QLineEdit)
-        edit_validator = zoom_range_edit.validator()
+        zoom_range_edit_validator = zoom_range_edit.validator()
         # Should be a QDoubleValidator and have bottom set to 0 (positive real)
-        assert isinstance(edit_validator, QDoubleValidator)
+        assert isinstance(zoom_range_edit_validator, QDoubleValidator)
         # The bottom value should be 0 for positive real
-        assert edit_validator.bottom() == 0
+        assert zoom_range_edit_validator.bottom() == 0
         # Should be the same type as returned by validator("positive_real")
         ref_validator = validator("positive_real")
-        assert type(edit_validator) is type(ref_validator)
+        assert type(zoom_range_edit_validator) is type(ref_validator)
 
 
 class TestUpdatePlotting:
@@ -223,54 +223,54 @@ class TestGuiBehaviourGeneralTab:
                 f"saveZoomPlotsEdit={save_zoom_plots}"
             )
 
-
-def test_menu_save_configuration_saves_general_tab_state(
-        qtbot,
-        setup_tab_state,
-        initialize_general_tab,
-        tmp_path,
-        create_widget_configuration):
-    """
-    Alters widgets in the General tab, calls menu_save_configuration, and checks
-    that the saved config file contains the correct state.
-    """
-    window = setup_tab_state['window']
-    tabs = setup_tab_state['tabs']
-    qtbot.addWidget(window)
-    qtbot.addWidget(tabs)
-    general_tab = initialize_general_tab
-    general_tab.create()
-    state = create_widget_configuration
-    # Set only the values needed for this test
-    state["makePlotsEdit"].setChecked(True)
-    state["savePlotsEdit"].setChecked(True)
-    state["saveZoomPlotsEdit"].setChecked(False)
-    state["zoomPlotsRangeEdit"].setText("2.5")
-    state["figureDirEdit"].setText("my_figures")
-    state["closePlotsEdit"].setChecked(True)
-    state["debugOutputEdit"].setChecked(False)
-    state["bankFileName"].setText("bankfile.txt")
-    state["startRange"].setText("10")
-    state["endRange"].setText("20")
-    state["chainFileEdit"].setText("chain.km")
-    state["bankDirEdit"].setText("banks/")
-    # Ensure StateStore uses this widget state
-    StateStore._instance = state
-    # Patch QFileDialog.getSaveFileName to return a temp file path
-    save_path = tmp_path / "saved_config.cfg"
-    with patch("PySide6.QtWidgets.QFileDialog.getSaveFileName", return_value=(str(save_path), "")):
-        menu_save_configuration()
-    # Read the saved config and check values
-    config = configparser.ConfigParser()
-    config.optionxform = str  # preserve case
-    config.read(str(save_path))
-    assert config["General"]["BankFile"] == "bankfile.txt"
-    assert config["General"]["Plotting"] == "True"
-    assert config["General"]["SavePlots"] == "True"
-    assert config["General"]["SaveZoomPlots"] == "False"
-    assert config["General"]["ZoomStepKM"] == "2.5"
-    assert Path(config["General"]["FigureDir"]).name == "my_figures"
-    assert config["General"]["ClosePlots"] == "True"
-    assert Path(config["General"]["RiverKM"]).name == "chain.km"
-    assert config["General"]["Boundaries"] == "10:20"
-    assert Path(config["General"]["BankDir"]).name == "banks"
+    def test_menu_save_configuration_saves_general_tab_state(
+            self,
+            qtbot,
+            setup_tab_state,
+            initialize_general_tab,
+            tmp_path,
+            create_widget_configuration):
+        """
+        Alters widgets in the General tab, calls menu_save_configuration, and checks
+        that the saved config file contains the correct state.
+        """
+        window = setup_tab_state['window']
+        tabs = setup_tab_state['tabs']
+        qtbot.addWidget(window)
+        qtbot.addWidget(tabs)
+        general_tab = initialize_general_tab
+        general_tab.create()
+        state = create_widget_configuration
+        # Set only the values needed for this test
+        state["makePlotsEdit"].setChecked(True)
+        state["savePlotsEdit"].setChecked(True)
+        state["saveZoomPlotsEdit"].setChecked(False)
+        state["zoomPlotsRangeEdit"].setText("2.5")
+        state["figureDirEdit"].setText("my_figures")
+        state["closePlotsEdit"].setChecked(True)
+        state["debugOutputEdit"].setChecked(False)
+        state["bankFileName"].setText("bankfile.txt")
+        state["startRange"].setText("10")
+        state["endRange"].setText("20")
+        state["chainFileEdit"].setText("chain.km")
+        state["bankDirEdit"].setText("banks/")
+        # Ensure StateStore uses this widget state
+        StateStore._instance = state
+        # Patch QFileDialog.getSaveFileName to return a temp file path
+        save_path = tmp_path / "saved_config.cfg"
+        with patch("PySide6.QtWidgets.QFileDialog.getSaveFileName", return_value=(str(save_path), "")):
+            menu_save_configuration()
+        # Read the saved config and check values
+        config = configparser.ConfigParser()
+        config.optionxform = str  # preserve case
+        config.read(str(save_path))
+        assert config["General"]["BankFile"] == "bankfile.txt"
+        assert config["General"]["Plotting"] == "True"
+        assert config["General"]["SavePlots"] == "True"
+        assert config["General"]["SaveZoomPlots"] == "False"
+        assert config["General"]["ZoomStepKM"] == "2.5"
+        assert Path(config["General"]["FigureDir"]).name == "my_figures"
+        assert config["General"]["ClosePlots"] == "True"
+        assert Path(config["General"]["RiverKM"]).name == "chain.km"
+        assert config["General"]["Boundaries"] == "10:20"
+        assert Path(config["General"]["BankDir"]).name == "banks"

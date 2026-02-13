@@ -6,7 +6,15 @@ import os
 import pytest
 import sys
 
-from PySide6.QtWidgets import QTabWidget, QMainWindow
+from PySide6.QtWidgets import (
+    QTabWidget,
+    QMainWindow,
+    QCheckBox,
+    QLineEdit,
+    QComboBox,
+    QTreeWidget,
+    QTreeWidgetItem
+)
 from pathlib import Path
 
 from dfastbe import __path__
@@ -58,7 +66,6 @@ def widget_specifications():
     Returns a list of widget specifications for automated creation.
     Each entry is a tuple: (key, widget_type, optional_args)
     """
-    from PySide6.QtWidgets import QCheckBox, QLineEdit, QComboBox, QTreeWidget, QTreeWidgetItem
     specs = [
         ("makePlotsEdit", QCheckBox, {}),
         ("savePlotsEdit", QCheckBox, {}),
@@ -137,7 +144,6 @@ def widget_factory():
     """
     Creates widgets based on widget_specifications and returns a state dict.
     """
-    from PySide6.QtWidgets import QComboBox, QTreeWidget, QTreeWidgetItem
     state = {}
     for key, widget_type, args in widget_specifications():
         if widget_type is QComboBox:
