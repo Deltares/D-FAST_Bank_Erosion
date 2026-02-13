@@ -29,7 +29,7 @@ class TestErosionTab:
         ]:
             assert key in state
 
-    def test_t_erosion_validator(self, qtbot, initialize_erosion_tab):
+    def test_t_erosion_validator(self, initialize_erosion_tab):
         erosion_tab = initialize_erosion_tab
         erosion_tab.create()
         state = StateStore.instance()
@@ -44,7 +44,7 @@ class TestErosionTab:
         ref_validator = validator("positive_real")
         assert type(t_erosion_validator) is type(ref_validator)
 
-    def test_chainage_output_validator(self, qtbot, initialize_erosion_tab):
+    def test_chainage_output_validator(self, initialize_erosion_tab):
         erosion_tab = initialize_erosion_tab
         erosion_tab.create()
         state = StateStore.instance()
@@ -59,7 +59,7 @@ class TestErosionTab:
         ref_validator = validator("positive_real")
         assert type(chainage_output_validator) is type(ref_validator)
 
-    def test_ref_level_validator(self, qtbot, initialize_erosion_tab):
+    def test_ref_level_validator(self, initialize_erosion_tab):
         erosion_tab = initialize_erosion_tab
         erosion_tab.create()
         state = StateStore.instance()
@@ -110,7 +110,7 @@ class TestGuiBehaviorErosionTab:
         assert state["tabs"].count() == 1
 
         # Add a discharge row
-        with patch("dfastbe.gui.base.editADischarge", side_effect=mock_edit_discharge_dialog):
+        with patch("dfastbe.gui.base.editADischarge", mock_edit_discharge_dialog):
             qtbot.mouseClick(state["dischargesAdd"], Qt.LeftButton)
 
         assert state["discharges"].topLevelItemCount() == 1
@@ -133,7 +133,7 @@ class TestGuiBehaviorErosionTab:
 
         state["tabs"] = setup_tab_state['tabs']
         # Add a discharge row
-        with patch("dfastbe.gui.base.editADischarge", side_effect=mock_edit_discharge_dialog):
+        with patch("dfastbe.gui.base.editADischarge", mock_edit_discharge_dialog):
             qtbot.mouseClick(state["dischargesAdd"], Qt.LeftButton)
 
         # Check if there is indeed one discharge item before removal
