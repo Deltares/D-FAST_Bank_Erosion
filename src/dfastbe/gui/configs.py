@@ -423,4 +423,3 @@ def setFilter(field: str, config, group: str, key: str) -> None:
         state_management[field + "Width"].setText(str(val))
     else:
         state_management[field + "Active"].setChecked(False)
-
