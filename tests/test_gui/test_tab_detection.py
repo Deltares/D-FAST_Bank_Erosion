@@ -54,7 +54,7 @@ class TestDetectionTab:
         assert search_lines.headerItem().text(1) == "FileName"
         assert search_lines.headerItem().text(2) == "Search Distance [m]"
 
-    def test_discharge_widget_column_widths(self, initialize_detection_tab):
+    def test_search_lines_widget_column_widths(self, initialize_detection_tab):
         """Check that searchLines widget has correct column widths."""
         initialize_detection_tab.create()
         state = StateStore.instance()
@@ -94,11 +94,11 @@ class TestGuiBehaviorDetectionTab:
 
         state["tabs"] = setup_tab_state['tabs']
 
-        # Add a discharge row
+        # Add a search line row
         with patch("dfastbe.gui.base.edit_search_line", mock_edit_search_lines_dialog):
             qtbot.mouseClick(state["searchLinesAdd"], Qt.LeftButton)
 
-        # Check if there is indeed one discharge item before removal
+        # Check if there is indeed one search line item before removal
         assert state["searchLines"].topLevelItemCount() == 1
 
         # Select the item to be removed using selection model
@@ -135,8 +135,7 @@ class TestGuiBehaviorDetectionTab:
         tabs = setup_tab_state['tabs']
         qtbot.addWidget(window)
         qtbot.addWidget(tabs)
-        erosion_tab = initialize_detection_tab
-        erosion_tab.create()
+        initialize_detection_tab.create()
         state = create_widget_configuration
         # Set values for detection widgets
         state["waterDepth"].setText("5.0")
@@ -144,7 +143,7 @@ class TestGuiBehaviorDetectionTab:
         # Ensure StateStore uses this widget state
         StateStore._instance = state
         # Patch QFileDialog.getSaveFileName to return a temp file path
-        save_path = tmp_path / "saved_erosion_config.cfg"
+        save_path = tmp_path / "saved_detection_config.cfg"
         with patch("PySide6.QtWidgets.QFileDialog.getSaveFileName", return_value=(str(save_path), "")):
             menu_save_configuration()
 

@@ -59,10 +59,10 @@ SCENARIOS = [
 
 IDS = [
     "none_enabled",
-    "only_make_lots_enabled",
+    "only_make_plots_enabled",
     "make_plots_and_save_plots_enabled",
     "all_enabled",
-    "make_lots_and_save_zoom_enabled",
+    "make_plots_and_save_zoom_enabled",
     "only_save_zoom_enabled",
 ]
 

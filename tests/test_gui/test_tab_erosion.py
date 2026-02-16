@@ -51,7 +51,7 @@ class TestErosionTab:
         erosion_tab = initialize_erosion_tab
         erosion_tab.create()
         state = StateStore.instance()
-        chainage_output = state["tErosion"]
+        chainage_output = state["chainageOutStep"]
         assert isinstance(chainage_output, QLineEdit)
         chainage_output_validator = chainage_output.validator()
         # Should be a QDoubleValidator and have bottom set to 0 (positive real)
@@ -109,8 +109,8 @@ class TestGuiBehaviorErosionTab:
         edit_button =  state["dischargesEdit"]
         ref_level_validator = state["refLevel"].validator()
 
-        assert remove_button.isEnabled() == False
-        assert edit_button.isEnabled() == False
+        assert remove_button.isEnabled() is False
+        assert edit_button.isEnabled() is False
 
         # Check if only the Erosion tab exists before adding discharge rows
         assert state["tabs"].count() == 1
@@ -124,8 +124,8 @@ class TestGuiBehaviorErosionTab:
         assert state["discharges"].topLevelItem(0).text(2) == "0.42"
 
         # The delete and edit buttons should now be enabled after adding a discharge row
-        assert remove_button.isEnabled() == True
-        assert edit_button.isEnabled() == True
+        assert remove_button.isEnabled() is True
+        assert edit_button.isEnabled() is True
 
         # Adding a discharge row should update the reference level validator
         assert ref_level_validator.top() == 1
@@ -163,8 +163,8 @@ class TestGuiBehaviorErosionTab:
         qtbot.mouseClick(remove_btn, Qt.LeftButton)
 
         assert state["discharges"].topLevelItemCount() == 0
-        assert remove_btn.isEnabled() == False
-        assert edit_btn.isEnabled() == False
+        assert remove_btn.isEnabled() is False
+        assert edit_btn.isEnabled() is False
         assert state["tabs"].count() == 1
 
     def test_menu_save_configuration_saves_erosion_tab_state(
