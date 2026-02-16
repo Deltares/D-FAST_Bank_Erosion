@@ -1,6 +1,5 @@
 import pytest
 import configparser
-from pathlib import Path
 
 from unittest.mock import patch
 from PySide6.QtWidgets import QCheckBox, QLineEdit, QLabel

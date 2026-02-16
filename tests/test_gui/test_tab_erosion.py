@@ -90,7 +90,6 @@ class TestErosionTab:
 def mock_edit_discharge_dialog(key, istr, file_name="", prob=""):
     return "test_file.nc", "0.42"
 
-
 class TestGuiBehaviorErosionTab:
     def test_adding_discharge_rows(self, qtbot, setup_tab_state, initialize_erosion_tab):
         erosion_tab = initialize_erosion_tab
