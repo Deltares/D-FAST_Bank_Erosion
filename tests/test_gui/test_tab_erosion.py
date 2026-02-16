@@ -2,7 +2,7 @@ import pytest
 import configparser
 
 from unittest.mock import patch
-from PySide6.QtWidgets import QLineEdit, QTreeWidgetItem
+from PySide6.QtWidgets import QLineEdit
 from PySide6.QtGui import QDoubleValidator, QIntValidator, Qt
 
 from dfastbe.gui.tabs.main_components import menu_save_configuration

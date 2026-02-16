@@ -1,12 +1,15 @@
 import pytest
+import configparser
 
 from unittest.mock import patch
+from pathlib import Path
 
 from PySide6.QtWidgets import QLineEdit
 from PySide6.QtGui import QDoubleValidator, Qt
 
 from dfastbe.gui.tabs.detection import DetectionTab
 from dfastbe.gui.state_management import StateStore
+from dfastbe.gui.tabs.main_components import menu_save_configuration
 from dfastbe.gui.utils import validator
 
 @pytest.fixture
@@ -80,3 +83,74 @@ class TestGuiBehaviorDetectionTab:
         assert item.text(1) == "test_file.xyc"  # File name from mock dialog
         assert item.text(2) == "50.0"  # Search distance from mock dialog
 
+    def test_removing_search_line(self, qtbot, setup_tab_state, initialize_detection_tab):
+        detection_tab = initialize_detection_tab
+        detection_tab.create()
+        state = StateStore.instance()
+
+        state["tabs"] = setup_tab_state['tabs']
+
+        # Add a discharge row
+        with patch("dfastbe.gui.base.edit_search_line", mock_edit_search_lines_dialog):
+            qtbot.mouseClick(state["searchLinesAdd"], Qt.LeftButton)
+
+        # Check if there is indeed one discharge item before removal
+        assert state["searchLines"].topLevelItemCount() == 1
+
+        # Select the item to be removed using selection model
+        item = state["searchLines"].topLevelItem(0)
+        state["searchLines"].setCurrentItem(item)
+
+        # Ensure the remove button is enabled
+        remove_btn = state["searchLinesRemove"]
+        edit_btn = state["searchLinesEdit"]
+        if not remove_btn.isEnabled():
+            remove_btn.setEnabled(True)
+            edit_btn.setEnabled(True)
+
+        qtbot.mouseClick(remove_btn, Qt.LeftButton)
+
+        assert state["searchLines"].topLevelItemCount() == 0
+        assert remove_btn.isEnabled() == False
+        assert edit_btn.isEnabled() == False
+        assert state["tabs"].count() == 1
+
+    def test_menu_save_configuration_saves_detection_tab_state(
+            self,
+            qtbot,
+            setup_tab_state,
+            initialize_detection_tab,
+            tmp_path,
+            create_widget_configuration
+        ):
+        """
+        Alters widgets in the Detection tab, calls menu_save_configuration, and checks
+        that the saved config file contains the correct state.
+        """
+        window = setup_tab_state['window']
+        tabs = setup_tab_state['tabs']
+        qtbot.addWidget(window)
+        qtbot.addWidget(tabs)
+        erosion_tab = initialize_detection_tab
+        erosion_tab.create()
+        state = create_widget_configuration
+        # Set values for detection widgets
+        state["waterDepth"].setText("5.0")
+
+        # Ensure StateStore uses this widget state
+        StateStore._instance = state
+        # Patch QFileDialog.getSaveFileName to return a temp file path
+        save_path = tmp_path / "saved_erosion_config.cfg"
+        with patch("PySide6.QtWidgets.QFileDialog.getSaveFileName", return_value=(str(save_path), "")):
+            menu_save_configuration()
+
+        # Read the saved config file and check for expected values
+        config = configparser.ConfigParser()
+        config.optionxform = str  # preserve case
+        config.read(str(save_path))
+
+        assert config["Detect"]["WaterDepth"] == "5.0"
+        assert config["Detect"]["NBank"] == "2"
+        assert Path(config["Detect"]["Line1"]).name == "line1.xy"
+        assert Path(config["Detect"]["Line2"]).name == "line2.xy"
+        assert config["Detect"]["DLines"] == "[ 50.0, 100.0 ]"
