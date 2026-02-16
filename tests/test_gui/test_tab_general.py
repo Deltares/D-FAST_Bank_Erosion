@@ -2,6 +2,7 @@ import pytest
 import configparser
 
 from unittest.mock import patch
+from pathlib import Path
 from PySide6.QtWidgets import QCheckBox, QLineEdit, QLabel
 from PySide6.QtGui import QDoubleValidator
 
@@ -76,6 +77,7 @@ def initialize_general_tab(setup_tab_state, qtbot):
 
 class TestGeneralTab:
     def test_widgets_registered(self, qtbot, initialize_general_tab):
+        """Check that all expected widgets are registered in the state."""
         general_tab = initialize_general_tab
         general_tab.create()
         state = StateStore.instance()
@@ -87,6 +89,7 @@ class TestGeneralTab:
             assert key in state
 
     def test_widget_defaults(self, qtbot, initialize_general_tab):
+        """Check default values and types for key widgets."""
         general_tab = initialize_general_tab
         general_tab.create()
         state = StateStore.instance()
@@ -104,6 +107,7 @@ class TestGeneralTab:
             qtbot,
             initialize_general_tab
     ):
+        """Check that zoomPlotsRangeEdit uses QLineEdit with QDoubleValidator (bottom=0)."""
         general_tab = initialize_general_tab
         general_tab.create()
         state = StateStore.instance()

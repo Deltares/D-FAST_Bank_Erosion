@@ -21,6 +21,7 @@ def initialize_erosion_tab(setup_tab_state, qapp):
 
 class TestErosionTab:
     def test_widgets_registered(self, initialize_erosion_tab):
+        """Check that all expected widgets are registered in the state."""
         initialize_erosion_tab.create()
         state = StateStore.instance()
         for key in [
@@ -30,6 +31,7 @@ class TestErosionTab:
             assert key in state
 
     def test_t_erosion_validator(self, initialize_erosion_tab):
+        """Check that tErosion uses QLineEdit with QDoubleValidator (bottom=0)."""
         erosion_tab = initialize_erosion_tab
         erosion_tab.create()
         state = StateStore.instance()
@@ -45,6 +47,7 @@ class TestErosionTab:
         assert type(t_erosion_validator) is type(ref_validator)
 
     def test_chainage_output_validator(self, initialize_erosion_tab):
+        """Check that chainageOutStep uses QLineEdit with QDoubleValidator (bottom=0)."""
         erosion_tab = initialize_erosion_tab
         erosion_tab.create()
         state = StateStore.instance()
@@ -60,6 +63,7 @@ class TestErosionTab:
         assert type(chainage_output_validator) is type(ref_validator)
 
     def test_ref_level_validator(self, initialize_erosion_tab):
+        """Check that refLevel uses QLineEdit with QIntValidator (range 1-1)."""
         erosion_tab = initialize_erosion_tab
         erosion_tab.create()
         state = StateStore.instance()
@@ -72,6 +76,7 @@ class TestErosionTab:
         assert ref_level_validator.top() == 1
 
     def test_discharge_widget_column_headers(self, initialize_erosion_tab):
+        """Check that discharge widget has correct column headers."""
         initialize_erosion_tab.create()
         state = StateStore.instance()
         discharges = state["discharges"]
@@ -80,6 +85,7 @@ class TestErosionTab:
         assert discharges.headerItem().text(2) == "Probability [-]"
 
     def test_discharge_widget_column_widths(self, initialize_erosion_tab):
+        """Check that discharge widget has correct column widths."""
         initialize_erosion_tab.create()
         state = StateStore.instance()
         discharges = state["discharges"]
@@ -92,6 +98,7 @@ def mock_edit_discharge_dialog(key, istr, file_name="", prob=""):
 
 class TestGuiBehaviorErosionTab:
     def test_adding_discharge_rows(self, qtbot, setup_tab_state, initialize_erosion_tab):
+        """Test adding rows in the discharge widget."""
         erosion_tab = initialize_erosion_tab
         erosion_tab.create()
         state = StateStore.instance()
@@ -126,6 +133,7 @@ class TestGuiBehaviorErosionTab:
         assert state["tabs"].count() == 2
 
     def test_removing_discharge_rows(self, qtbot, setup_tab_state, initialize_erosion_tab):
+        """Test removing rows in the discharge widget."""
         erosion_tab = initialize_erosion_tab
         erosion_tab.create()
         state = StateStore.instance()
@@ -204,4 +212,3 @@ class TestGuiBehaviorErosionTab:
         assert config["Erosion"]["BankEq"] == "bank_eq.txt"
         assert config["Erosion"]["EroVol"] == "erovol_standard.evo"
         assert config["Erosion"]["EroVolEqui"] == "erovol_eq.evo"
-

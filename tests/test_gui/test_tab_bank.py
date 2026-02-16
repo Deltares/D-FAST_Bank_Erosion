@@ -16,6 +16,7 @@ def initialize_bank_tab(setup_tab_state, qtbot):
 
 class TestBankTab:
     def test_widgets_registered(self, qtbot, initialize_bank_tab):
+        """Check that all expected widgets are registered in the state."""
         initialize_bank_tab.create()
         state = StateStore.instance()
         for key in [
@@ -26,6 +27,7 @@ class TestBankTab:
             assert key in state
 
     def test_strength_parameter_combo(self, qtbot, initialize_bank_tab):
+        """Check that strengthPar combo contains the correct options."""
         bank_tab = initialize_bank_tab
         bank_tab.create()
         state = StateStore.instance()
@@ -37,9 +39,7 @@ class TestBankTab:
 
     @pytest.mark.parametrize("field_key", ["velFilterWidth", "bedFilterWidth"])
     def test_filter_validator(self, qtbot, initialize_bank_tab, field_key):
-        """
-        Checks that the specified filters field use a QLineEdit with a QDoubleValidator (bottom=0).
-        """
+        """Check that filter fields use QLineEdit with QDoubleValidator (bottom=0)."""
         bank_tab = initialize_bank_tab
         bank_tab.create()
         state = StateStore.instance()
@@ -52,10 +52,7 @@ class TestBankTab:
         assert type(validator_obj) is type(ref_validator)
 
     def test_switching_strength_par_behaviour(self, qtbot, setup_tab_state, initialize_bank_tab):
-        """
-        Simulates switching strengthPar from 'Bank Type' to 'Critical Shear Stress' and checks
-        whether the Critical Shear Stress field gets enabled/disabled accordingly.
-        """
+        """Simulate switching strengthPar and check enabling/disabling of bankShear and bankType."""
         bank_tab = initialize_bank_tab
         bank_tab.create()
         state = StateStore.instance()
@@ -87,9 +84,7 @@ class TestBankTab:
         ("bedFilterActive", "bedFilterWidth"),
     ])
     def test_filter_checkbox_enables_width(self, qtbot, initialize_bank_tab, filter_key, width_key):
-        """
-        Checks that checking/unchecking the filter checkbox enables/disables the width field for both velocity and bank elevation filters.
-        """
+        """Check that checking/unchecking filter checkbox enables/disables the width field."""
         initialize_bank_tab.create()
         state = StateStore.instance()
         filter_checkbox = state[filter_key]
@@ -109,9 +104,7 @@ class TestBankTab:
         assert not filter_width.isEnabled()
 
     def test_bank_type_select_list(self, qtbot, initialize_bank_tab):
-        """
-        Checks that the bankType widget is a QComboBox and contains the expected select list items.
-        """
+        """Check that bankType QComboBox contains the expected select list items."""
         initialize_bank_tab.create()
         state = StateStore.instance()
         bank_type = state["bankTypeSelect"]
@@ -130,9 +123,7 @@ class TestBankTab:
         "bankType", "bankProtect", "bankShear", "bankSlope", "bankReed"
     ])
     def test_combo_fields_contain_variable_and_constant(self, qtbot, initialize_bank_tab, combo_key):
-        """
-        Checks that the specified combo fields contain 'variable' and 'constant' as options.
-        """
+        """Check that combo fields contain 'variable' and 'constant' options."""
         initialize_bank_tab.create()
         state = StateStore.instance()
         combo = state.get(f"{combo_key}Type")

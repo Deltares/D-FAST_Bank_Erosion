@@ -15,6 +15,7 @@ def initialize_shipping_tab(setup_tab_state, qtbot):
 
 class TestShippingTab:
     def test_widgets_registered(self, qtbot, initialize_shipping_tab):
+        """Check that all expected widgets are registered in the state."""
         initialize_shipping_tab.create()
         state = StateStore.instance()
         for key in [
@@ -24,6 +25,7 @@ class TestShippingTab:
             assert key in state
 
     def test_ship_type_select_list(self, qtbot, initialize_shipping_tab):
+        """Verify shipTypeSelect contains the expected ship types."""
         initialize_shipping_tab.create()
         state = StateStore.instance()
         ship_type = state["shipTypeSelect"]
@@ -36,6 +38,7 @@ class TestShippingTab:
         "shipType", "shipVeloc", "nShips", "shipNWaves", "shipDraught", "wavePar0", "wavePar1"
     ])
     def test_combo_fields_contain_variable_and_constant(self, qtbot, initialize_shipping_tab, combo_key):
+        """Check that combo fields contain 'variable' and 'constant' options."""
         initialize_shipping_tab.create()
         state = StateStore.instance()
         combo = state.get(f"{combo_key}Type")
@@ -49,6 +52,7 @@ class TestShippingTab:
         "shipVeloc", "nShips", "shipNWaves", "shipDraught", "wavePar0", "wavePar1"
     ])
     def test_filter_validator(self, qtbot, initialize_shipping_tab, field_key):
+        """Ensure filter fields use QLineEdit with a QDoubleValidator (bottom=0)."""
         initialize_shipping_tab.create()
         state = StateStore.instance()
         filter_field = state.get(f"{field_key}Edit")

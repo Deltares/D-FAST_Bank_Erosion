@@ -22,6 +22,7 @@ def initialize_detection_tab(setup_tab_state, qapp):
 
 class TestDetectionTab:
     def test_widgets_registered(self, initialize_detection_tab):
+        """Check that all expected widgets are registered in the state."""
         initialize_detection_tab.create()
         state = StateStore.instance()
         # These are the widgets DetectionTab actually registers
@@ -33,6 +34,7 @@ class TestDetectionTab:
             assert key in state
 
     def test_water_depth_validator(self, initialize_detection_tab):
+        """Check that waterDepth uses QLineEdit with QDoubleValidator (positive real)."""
         detection_tab = initialize_detection_tab
         detection_tab.create()
         state = StateStore.instance()
@@ -44,6 +46,7 @@ class TestDetectionTab:
         assert type(water_depth_validator) is type(ref_validator)
 
     def test_search_lines_widget_column_headers(self, initialize_detection_tab):
+        """Check that searchLines widget has correct column headers."""
         initialize_detection_tab.create()
         state = StateStore.instance()
         search_lines = state["searchLines"]
@@ -52,6 +55,7 @@ class TestDetectionTab:
         assert search_lines.headerItem().text(2) == "Search Distance [m]"
 
     def test_discharge_widget_column_widths(self, initialize_detection_tab):
+        """Check that searchLines widget has correct column widths."""
         initialize_detection_tab.create()
         state = StateStore.instance()
         search_lines = state["searchLines"]
