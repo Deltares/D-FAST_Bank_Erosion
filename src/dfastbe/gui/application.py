@@ -44,9 +44,7 @@ from dfastbe.gui.utils import (
     get_icon,
     ICONS_DIR,
 )
-from dfastbe.gui.configs import (
-    load_configuration,
-)
+from dfastbe.gui.configs import ConfigurationLoader
 
 from dfastbe.gui.tabs.detection import DetectionTab
 from dfastbe.gui.tabs.erosion import ErosionTab
@@ -176,6 +174,6 @@ def main(config: Optional[Path] = None) -> None:
     gui = GUI()
     gui.create()
     if config is not None:
-        load_configuration(config)
+        ConfigurationLoader(config_path=config)
 
     gui.activate()
