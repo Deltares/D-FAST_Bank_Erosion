@@ -29,64 +29,15 @@ __all__ = [
 class ConfigurationLoader:
     """Responsible for loading and applying configuration data to GUI state."""
     config_path: Path
-    config_file: ConfigFile | None = field(init=False, default=None)
     config: ConfigParser | None = field(init=False, default=None)
-    rootdir: str = field(init=False, default="")
     state_management: StateStore = field(init=False, default_factory=StateStore.instance)
-    _config_path_abs: Path = field(init=False, default=None)
 
     def __post_init__(self):
-        self._config_path_abs = (Path.cwd() / self.config_path).resolve()
-        self.rootdir = str(self._config_path_abs.parent)
-        try:
-            self.config_file = ConfigFile.read(self._config_path_abs)
-            self.config_file.path = self._config_path_abs
-        except FileNotFoundError:
-            if self._config_path_abs.name != "dfastbe.cfg":
-                show_error(f"The file {self._config_path_abs} does not exist!")
-            return
-        except Exception as e:
-            show_error(f"Error reading configuration file: {e}")
-            return
-        try:
-            version = self.config_file.version
-        except KeyError:
-            show_error(
-                f"No version information in the file {self.config_file.path}!"
-            )
-            return
+        self.config_file = ConfigFile.read(self.config_path)
         self.config = self.config_file.config
-        if version == "1.0":
-            self._load_general_section()
-            self._load_detect_section()
-            self._load_erosion_section()
-        else:
-            show_error(
-                f"Unsupported version number {version} in the file {self.config_file.path}!"
-            )
-
-
-    def _read_config_file(self) -> bool:
-        """Read and validate the configuration file.
-
-        Returns:
-            bool: True if file was read successfully, False otherwise.
-        """
-        config_path_abs = (Path.cwd() / self.config_path).resolve()
-        self.rootdir = str(config_path_abs.parent)
-        self.config_file = ConfigFile.read(config_path_abs)
-        self.config_file.path = config_path_abs
-
-        try:
-            _ = self.config_file.version
-        except KeyError:
-            show_error(
-                f"No version information in the file {self.config_path}!"
-            )
-            return False
-
-        self.config = self.config_file.config
-        return True
+        self._load_general_section()
+        self._load_detect_section()
+        self._load_erosion_section()
 
     def _load_general_section(self) -> None:
         """Load the General section from configuration."""
@@ -117,7 +68,7 @@ class ConfigurationLoader:
         fig_dir = self.config_file.get_str(
             "General",
             "FigureDir",
-            default=absolute_path(self.rootdir, "figures"),
+            default=absolute_path(self.config_file.root_dir, "figures"),
         )
         self.state_management["figureDirEdit"].setText(fig_dir)
 
