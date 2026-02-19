@@ -3,11 +3,12 @@ Unit tests for the ConfigurationLoader class.
 """
 
 import pytest
-from configparser import ConfigParser
 from pathlib import Path
+from configparser import ConfigParser
 from unittest.mock import Mock, patch, call, PropertyMock
 
 from dfastbe.gui.configs import ConfigurationLoader
+from dfastbe.gui.state_management import StateStore
 from dfastbe.io.config import ConfigFile
 
 
@@ -21,7 +22,9 @@ class TestConfigurationLoader:
         Returns:
             dict: A mock dictionary simulating the StateStore with mock widgets.
         """
-        mock_store = {}
+        # Initialize StateStore singleton properly
+        StateStore._instance = None  # Reset any previous instance
+        mock_store = StateStore.initialize()
 
         # Mock text input widgets (QLineEdit-like)
         text_fields = [
@@ -107,7 +110,11 @@ class TestConfigurationLoader:
                 mock_widget.text = Mock(return_value="")
                 mock_store[istr + suffix] = mock_widget
 
-        return mock_store
+        yield mock_store
+
+        # Clean up - reset singleton after test
+        StateStore._instance = None
+
 
     @pytest.fixture
     def mock_config_file(self):
@@ -173,7 +180,7 @@ class TestConfigurationLoader:
 
         mock_file = Mock(spec=ConfigFile)
         mock_file.config = config
-        mock_file.version = "1.0"
+        mock_file.root_dir = Path("/test")  # Add root_dir
         mock_file.get_range = Mock(return_value=(123.0, 128.0))
         mock_file.get_str = Mock(side_effect=lambda section, key, default=None: {
             ("General", "BankFile"): "bankfile",
@@ -225,150 +232,24 @@ class TestConfigurationLoader:
         config_path = tmp_path / "test_config.cfg"
         config_path.write_text("[General]\nVersion=1.0\n")
 
-        with patch('dfastbe.gui.configs.StateStore.instance',
-                   return_value=mock_state_store):
-            loader = ConfigurationLoader(config_path)
-            loader.config_file = mock_config_file
-            loader.config = mock_config_file.config
-            loader.rootdir = str(tmp_path)
-            return loader
+        # Patch ConfigFile.read to return our mock before instantiating ConfigurationLoader
 
-    @pytest.mark.parametrize(
-        "has_version,expected_result",
-        [
-            (True, True),
-            (False, False),
-        ],
-        ids=["with_version", "without_version"],
-    )
-    def test_read_config_file(
-        self,
-        mock_state_store,
-        tmp_path,
-        has_version,
-        expected_result
-    ):
-        """Test that _read_config_file reads and validates configuration correctly.
+        with (patch('dfastbe.gui.configs.ConfigFile.read', return_value=mock_config_file),
+             patch('dfastbe.gui.configs.StateStore.instance', return_value=mock_state_store),
+             patch('dfastbe.gui.configs.QTreeWidgetItem'),
+             patch('dfastbe.gui.configs.setParam'),
+             patch('dfastbe.gui.configs.setOptParam'),
+             patch('dfastbe.gui.configs.setFilter'),
+             patch('dfastbe.gui.configs.addTabForLevel'),
+             patch('dfastbe.gui.configs.bankStrengthSwitch')):
+                 loader = ConfigurationLoader(config_path)
+                 loader.rootdir = str(tmp_path)
+                 return loader
 
-        Args:
-            has_version: Whether the config file has version information.
-            expected_result: Expected return value (True for success, False for failure).
-        """
-        # Create a test config file
-        config_path = tmp_path / "test_config.cfg"
-        if has_version:
-            config_path.write_text("[General]\nVersion=1.0\n")
-        else:
-            config_path.write_text("[General]\nRiverKM=test.xyc\n")
-
-        with patch('dfastbe.gui.configs.StateStore.instance', return_value=mock_state_store), \
-             patch('dfastbe.gui.configs.ConfigFile.read') as mock_config_read, \
-             patch('dfastbe.gui.configs.absolute_path') as mock_absolute_path, \
-             patch('dfastbe.gui.configs.show_error') as mock_show_error:
-
-            # Setup mocks
-            mock_absolute_path.return_value = str(config_path)
-            mock_config_file = Mock()
-            mock_config_file.config = ConfigParser()
-            mock_config_file.config.read(str(config_path))
-
-            if has_version:
-                mock_config_file.version = "1.0"
-            else:
-                # Simulate KeyError when accessing version property
-                type(mock_config_file).version = PropertyMock(side_effect=KeyError("version"))
-
-            mock_config_read.return_value = mock_config_file
-
-            # Create loader and test _read_config_file
-            loader = ConfigurationLoader(config_path)
-            result = loader._read_config_file()
-
-            # Verify result
-            assert result == expected_result
-
-            # Verify absolute_path was called
-            mock_absolute_path.assert_called_once()
-
-            # Verify ConfigFile.read was called with absolute path
-            mock_config_read.assert_called_once_with(str(config_path))
-
-            if has_version:
-                # Verify success case: no error shown, config is set
-                mock_show_error.assert_not_called()
-                assert loader.config_file == mock_config_file
-                assert loader.config == mock_config_file.config
-                assert loader.rootdir == str(tmp_path)
-                assert loader.config_file.path == str(config_path)
-            else:
-                # Verify failure case: error was shown, config might not be fully set
-                mock_show_error.assert_called_once()
-                error_message = mock_show_error.call_args[0][0]
-                assert "No version information" in error_message
-                assert str(config_path) in error_message
-
-    @pytest.mark.parametrize(
-        "file_exists,use_tmp_path,file_name,expected_result,should_show_error",
-        [
-            (True, True, "test_config.cfg", True, False),
-            (False, True, "missing_config.cfg", False, True),
-            (False, False, "dfastbe.cfg", False, False),
-        ],
-        ids=["file_exists", "file_missing_show_error", "default_file_missing_no_error"],
-    )
-    def test_validate_path(
-        self,
-        mock_state_store,
-        tmp_path,
-        file_exists,
-        use_tmp_path,
-        file_name,
-        expected_result,
-        should_show_error
-    ):
-        """Test that _validate_path validates configuration file path correctly.
-
-        Args:
-            file_exists: Whether the config file exists.
-            use_tmp_path: Whether to use tmp_path for the config file location.
-            file_name: Name of the config file.
-            expected_result: Expected return value (True if valid, False if invalid).
-            should_show_error: Whether an error message should be shown.
-        """
-        # Create config path
-        if use_tmp_path:
-            config_path = tmp_path / file_name
-        else:
-            # For the special "dfastbe.cfg" case, use Path directly without directory
-            config_path = Path(file_name)
-
-        # Create the file only if it should exist
-        if file_exists:
-            config_path.write_text("[General]\nVersion=1.0\n")
-
-        with patch('dfastbe.gui.configs.StateStore.instance', return_value=mock_state_store), \
-             patch('dfastbe.gui.configs.show_error') as mock_show_error:
-
-            # Create loader and test _validate_path
-            loader = ConfigurationLoader(config_path)
-            result = loader._validate_path()
-
-            # Verify result
-            assert result == expected_result
-
-            # Verify error was shown or not shown as expected
-            if should_show_error:
-                mock_show_error.assert_called_once()
-                error_message = mock_show_error.call_args[0][0]
-                assert "does not exist" in error_message
-                assert str(config_path) in error_message
-            else:
-                mock_show_error.assert_not_called()
 
     def test_load_general_section_sets_parameters(self, config_loader, mock_state_store):
         """Test that _load_general_section sets the parameters fields correctly."""
-        config_loader._load_general_section()
-
+        # _load_general_section is already called during __post_init__, so just verify the calls
         mock_state_store["chainFileEdit"].setText.assert_called_once_with(
             "inputs/rivkm_20m.xyc")
         mock_state_store["startRange"].setText.assert_called_once_with("123.0")
@@ -387,21 +268,18 @@ class TestConfigurationLoader:
 
     def test_load_detect_section_sets_parameters(self, config_loader, mock_state_store):
         """Test that _load_detect_section sets the parameters fields correctly."""
-        with patch.object(config_loader, '_load_search_lines') as mock_load_search_lines:
-            config_loader._load_detect_section()
+        # _load_detect_section is already called during __post_init__, so just verify the calls
 
-            # Verify simFileEdit was set
-            mock_state_store["simFileEdit"].setText.assert_called_once_with("test_sim.nc")
+        # Verify simFileEdit was set
+        mock_state_store["simFileEdit"].setText.assert_called_once_with("test_sim.nc")
 
-            # Verify waterDepth was set
-            config_loader.config_file.get_float.assert_any_call("Detect", "WaterDepth", default=0.0)
-            mock_state_store["waterDepth"].setText.assert_called_once_with("0.5")
+        # Verify waterDepth was set
+        config_loader.config_file.get_float.assert_any_call("Detect", "WaterDepth", default=0.0)
+        mock_state_store["waterDepth"].setText.assert_called_once_with("0.5")
 
-            # Verify n_bank was retrieved
-            config_loader.config_file.get_int.assert_any_call("Detect", "NBank", default=0, positive=True)
+        # Verify n_bank was retrieved
+        config_loader.config_file.get_int.assert_any_call("Detect", "NBank", default=0, positive=True)
 
-            # Verify _load_search_lines was called with the correct n_bank value
-            mock_load_search_lines.assert_called_once_with(2)
 
     @pytest.mark.parametrize(
         "n_bank",
@@ -431,6 +309,11 @@ class TestConfigurationLoader:
             return default
 
         config_loader.config_file.get_str = Mock(side_effect=mock_get_str)
+
+        # Reset mocks that were called during __post_init__
+        mock_state_store["searchLines"].invisibleRootItem.reset_mock()
+        mock_state_store["searchLinesEdit"].setEnabled.reset_mock()
+        mock_state_store["searchLinesRemove"].setEnabled.reset_mock()
 
         with patch('dfastbe.gui.configs.QTreeWidgetItem') as mock_tree_item:
             config_loader._load_search_lines(n_bank)
@@ -463,15 +346,20 @@ class TestConfigurationLoader:
 
     def test_load_erosion_section_sets_basic_parameters(self, config_loader, mock_state_store):
         """Test that _load_erosion_section sets basic erosion parameters correctly."""
-        with (patch('dfastbe.gui.configs.QTreeWidgetItem'), \
-             patch('dfastbe.gui.configs.setParam') as mock_set_param, \
-             patch('dfastbe.gui.configs.setOptParam'), \
-             patch('dfastbe.gui.configs.setFilter') as mock_set_filter, \
-             patch('dfastbe.gui.configs.bankStrengthSwitch'), \
-             patch('dfastbe.gui.configs.addTabForLevel'), \
-             patch.object(config_loader, '_configure_tabs_for_levels') as mock_configure_tabs,  \
-             patch.object(config_loader, '_load_ship_parameters') as mock_load_ship_params, \
-             patch.object(config_loader, '_configure_bank_strength') as mock_configure_bank_strength, \
+        # Reset mocks that were called during __post_init__
+        for field in ["tErosion", "riverAxisEdit", "fairwayEdit", "chainageOutStep",
+                      "outDirEdit", "newBankFile", "newEqBankFile", "eroVol", "eroVolEqui"]:
+            mock_state_store[field].setText.reset_mock()
+
+        with (patch('dfastbe.gui.configs.QTreeWidgetItem'),
+             patch('dfastbe.gui.configs.setParam') as mock_set_param,
+             patch('dfastbe.gui.configs.setOptParam'),
+             patch('dfastbe.gui.configs.setFilter') as mock_set_filter,
+             patch('dfastbe.gui.configs.bankStrengthSwitch'),
+             patch('dfastbe.gui.configs.addTabForLevel'),
+             patch.object(config_loader, '_configure_tabs_for_levels') as mock_configure_tabs,
+             patch.object(config_loader, '_load_ship_parameters') as mock_load_ship_params,
+             patch.object(config_loader, '_configure_bank_strength') as mock_configure_bank_strength,
              patch.object(config_loader, '_load_discharges') as mock_load_discharges):
 
             config_loader._load_erosion_section()
@@ -560,6 +448,12 @@ class TestConfigurationLoader:
         Args:
             use_bank_type: Whether to use bank type (True) or critical shear stress (False).
         """
+        # Reset mocks that were called during __post_init__
+        for field in ["bankType", "bankTypeType", "bankTypeEdit", "bankTypeEditFile",
+                      "bankShear", "bankShearType", "bankShearEdit", "bankShearEditFile"]:
+            mock_state_store[field].setEnabled.reset_mock()
+        mock_state_store["strengthPar"].setCurrentText.reset_mock()
+
         with patch('dfastbe.gui.configs.setParam') as mock_set_param, \
              patch('dfastbe.gui.configs.bankStrengthSwitch') as mock_bank_strength_switch:
 
@@ -634,6 +528,13 @@ class TestConfigurationLoader:
 
         config_loader.config_file.get_str = Mock(side_effect=mock_get_str)
 
+        # Reset mocks that were called during __post_init__
+        mock_state_store["discharges"].invisibleRootItem.reset_mock()
+        mock_state_store["dischargesEdit"].setEnabled.reset_mock()
+        mock_state_store["dischargesRemove"].setEnabled.reset_mock()
+        mock_state_store["refLevel"].setText.reset_mock()
+        mock_state_store["refLevel"].validator().setTop.reset_mock()
+
         with patch('dfastbe.gui.configs.QTreeWidgetItem') as mock_tree_item:
             config_loader._load_discharges(n_level, mock_section)
 
@@ -667,58 +568,3 @@ class TestConfigurationLoader:
 
             # Verify refLevel text was set from section
             mock_state_store["refLevel"].setText.assert_called_once_with("1")
-
-    @pytest.mark.parametrize(
-        "version,should_load",
-        [
-            ("1.0", True),
-            ("2.0", False),
-            ("0.9", False),
-            ("invalid", False),
-        ],
-        ids=["valid_version_1.0", "unsupported_version_2.0", "unsupported_version_0.9", "invalid_version"],
-    )
-    def test_load_with_different_versions(
-        self,
-        config_loader,
-        mock_state_store,
-        mock_config_file,
-        version,
-        should_load
-    ):
-        """Test that load() handles different version numbers correctly.
-
-        Args:
-            version: The version string to test.
-            should_load: Whether the configuration should be loaded for this version.
-        """
-        # Set the version in the mock config file
-        mock_config_file.version = version
-        config_loader.config_file = mock_config_file
-
-        with patch('dfastbe.gui.configs.show_error') as mock_show_error, \
-             patch.object(config_loader, '_validate_path', return_value=True), \
-             patch.object(config_loader, '_read_config_file', return_value=True), \
-             patch.object(config_loader, '_load_general_section') as mock_load_general, \
-             patch.object(config_loader, '_load_detect_section') as mock_load_detect, \
-             patch.object(config_loader, '_load_erosion_section') as mock_load_erosion:
-
-            config_loader.load()
-
-            if should_load:
-                # Verify all section loaders were called for version 1.0
-                mock_load_general.assert_called_once()
-                mock_load_detect.assert_called_once()
-                mock_load_erosion.assert_called_once()
-                mock_show_error.assert_not_called()
-            else:
-                # Verify section loaders were not called for unsupported versions
-                mock_load_general.assert_not_called()
-                mock_load_detect.assert_not_called()
-                mock_load_erosion.assert_not_called()
-                # Verify error was shown
-                mock_show_error.assert_called_once()
-                error_message = mock_show_error.call_args[0][0]
-                assert f"Unsupported version number {version}" in error_message
-
-

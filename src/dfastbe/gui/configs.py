@@ -11,7 +11,6 @@ from dataclasses import dataclass, field
 
 from dfastbe.io.config import ConfigFile
 from dfastbe.gui.utils import (
-    show_error,
     typeUpdatePar,
     addTabForLevel
 )
@@ -29,7 +28,6 @@ __all__ = [
 class ConfigurationLoader:
     """Responsible for loading and applying configuration data to GUI state."""
     config_path: Path
-    config: ConfigParser | None = field(init=False, default=None)
     state_management: StateStore = field(init=False, default_factory=StateStore.instance)
 
     def __post_init__(self):
