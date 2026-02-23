@@ -80,8 +80,8 @@ class DischargeLevelsTabs:
                 val = float(value_str)
                 self.state_management[field + "Type"].setCurrentText("Constant")
                 if field + "Select" in self.state_management.keys():
-                    ival = int(val) - 1  # shipType 1 -> index 0
-                    self.state_management[field + "Select"].setCurrentIndex(ival)
+                    index = int(val) - 1  # shipType 1 -> index 0
+                    self.state_management[field + "Select"].setCurrentIndex(index)
                 else:
                     self.state_management[field + "Edit"].setText(value_str)
             except ValueError:
@@ -187,9 +187,9 @@ class ConfigurationLoader:
         self._configure_bank_strength(use_bank_type)
 
         # Load additional erosion parameters
-        setParam("bankProtect", self.config, "Erosion", "ProtectionLevel", "-1000")
-        setParam("bankSlope", self.config, "Erosion", "Slope", "20.0")
-        setParam("bankReed", self.config, "Erosion", "Reed", "0.0")
+        self._load_param("bankProtect", "Erosion", "ProtectionLevel", "-1000")
+        self._load_param("bankSlope", "Erosion", "Slope", "20.0")
+        self._load_param("bankReed", "Erosion", "Reed", "0.0")
 
         # Load filters
         self._load_filter("velFilter", "Erosion", "VelFilterDist")
@@ -247,15 +247,15 @@ class ConfigurationLoader:
 
     def _load_ship_parameters(self) -> None:
         """Load ship-related parameters from configuration."""
-        setParam("shipType", self.config, "Erosion", "ShipType")
-        setParam("shipVeloc", self.config, "Erosion", "VShip")
-        setParam("nShips", self.config, "Erosion", "NShip")
-        setParam("shipNWaves", self.config, "Erosion", "NWave", "5")
-        setParam("shipDraught", self.config, "Erosion", "Draught")
-        setParam("wavePar0", self.config, "Erosion", "Wave0", "200.0")
+        self._load_param("shipType", "Erosion", "ShipType")
+        self._load_param("shipVeloc", "Erosion", "VShip")
+        self._load_param("nShips", "Erosion", "NShip")
+        self._load_param("shipNWaves", "Erosion", "NWave", "5")
+        self._load_param("shipDraught", "Erosion", "Draught")
+        self._load_param("wavePar0", "Erosion", "Wave0", "200.0")
 
         wave0 = self.config_file.get_str("Erosion", "Wave0", "200.0")
-        setParam("wavePar1", self.config_file.config, "Erosion", "Wave1", wave0)
+        self._load_param("wavePar1", "Erosion", "Wave1", wave0)
 
     def _configure_bank_strength(self, use_bank_type: bool) -> None:
         """Configure bank strength settings based on configuration.
@@ -276,11 +276,11 @@ class ConfigurationLoader:
         if use_bank_type:
             self.state_management["strengthPar"].setCurrentText("Bank Type")
             bankStrengthSwitch()
-            setParam("bankType", self.config_file.config, "Erosion", "BankType")
+            self._load_param("bankType", "Erosion", "BankType")
         else:
             self.state_management["strengthPar"].setCurrentText("Critical Shear Stress")
             bankStrengthSwitch()
-            setParam("bankShear", self.config, "Erosion", "BankType")
+            self._load_param("bankShear", "Erosion", "BankType")
 
 
     def _load_filter(self, field: str, group: str, key: str) -> None:
@@ -297,6 +297,31 @@ class ConfigurationLoader:
             self.state_management[field + "Width"].setText(str(val))
         else:
             self.state_management[field + "Active"].setChecked(False)
+
+    def _load_param(self, field: str, group: str, key: str, default: str = "??") -> None:
+        """Load a general parameter from configuration.
+
+        Args:
+            field (str): Short name of the parameter (e.g., "shipType").
+            group (str): Name of the group in the configuration (e.g., "Erosion").
+            key (str): Name of the key in the configuration group (e.g., "ShipType").
+            default (str): Default value if the key doesn't exist.
+        """
+        config_value = self.config_file.get_str(group, key, default)
+
+        try:
+            val = float(config_value)
+            cast(QComboBox, self.state_management[field + "Type"]).setCurrentText("Constant")
+            if field + "Select" in self.state_management.keys():
+                int_value = int(val)
+                if field == "shipType":
+                    int_value = int_value - 1
+                cast(QComboBox, self.state_management[field + "Select"]).setCurrentIndex(int_value)
+            else:
+                cast(QLineEdit, self.state_management[field + "Edit"]).setText(config_value)
+        except ValueError:
+            cast(QComboBox, self.state_management[field + "Type"]).setCurrentText("Variable")
+            cast(QLineEdit, self.state_management[field + "Edit"]).setText(config_value)
 
 
 def get_configuration() -> ConfigParser:
@@ -419,43 +444,6 @@ def get_configuration() -> ConfigParser:
         if state_management[istr + "_eroVolEdit"].text() != "":
             config["Erosion"]["EroVol" + istr] = state_management[istr + "_eroVolEdit"].text()
     return config
-
-
-def setParam(field: str, config, group: str, key: str, default: str = "??") -> None:
-    """
-    Update the dialog for a general parameter based on configuration file.
-
-    Arguments
-    ---------
-    field : str
-        Short name of the parameter.
-    config : configparser.ConfigParser
-        Configuration for the D-FAST Bank Erosion analysis with absolute or relative paths.
-    group : str
-        Name of the group in the configuration.
-    key : str
-        Name of the key in the configuration group.
-    default : str
-        Default string if the group/key pair doesn't exist in the configuration.
-
-    """
-    state_management = StateStore.instance()
-    config_file = ConfigFile(config)
-    config_value = config_file.get_str(group, key, default)
-
-    try:
-        val = float(config_value)
-        cast(QComboBox, state_management[field + "Type"]).setCurrentText("Constant")
-        if field + "Select" in state_management.keys():
-            int_value = int(val)
-            if field == "shipType":
-                int_value = int_value - 1
-            cast(QComboBox, state_management[field + "Select"]).setCurrentIndex(int_value)
-        else:
-            cast(QLineEdit, state_management[field + "Edit"]).setText(config_value)
-    except:
-        cast(QComboBox, state_management[field + "Type"]).setCurrentText("Variable")
-        cast(QLineEdit, state_management[field + "Edit"]).setText(config_value)
 
 
 def bankStrengthSwitch() -> None:

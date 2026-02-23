@@ -38,6 +38,11 @@ class TestConfigurationLoader:
             "outDirEdit", "newBankFile", "newEqBankFile", "eroVol", "eroVolEqui",
             # Bank strength
             "bankTypeEdit", "bankShearEdit",
+            # Ship parameters
+            "shipTypeEdit", "shipVelocEdit", "nShipsEdit", "shipNWavesEdit",
+            "shipDraughtEdit", "wavePar0Edit", "wavePar1Edit",
+            # Erosion parameters
+            "bankProtectEdit", "bankSlopeEdit", "bankReedEdit",
         ]
         for field in text_fields:
             mock_widget = Mock()
@@ -66,13 +71,24 @@ class TestConfigurationLoader:
 
         # Mock combo boxes
         combo_fields = [
-            "strengthPar", "bankTypeType", "bankShearType"
+            "strengthPar", "bankTypeType", "bankShearType",
+            # Ship parameter types
+            "shipTypeType", "shipVelocType", "nShipsType", "shipNWavesType",
+            "shipDraughtType", "wavePar0Type", "wavePar1Type",
+            # Erosion parameter types
+            "bankProtectType", "bankSlopeType", "bankReedType",
         ]
         for field in combo_fields:
             mock_combo = Mock()
             mock_combo.setCurrentText = Mock()
             mock_combo.currentText = Mock(return_value="")
             mock_store[field] = mock_combo
+
+        # Mock shipTypeSelect combo box specifically
+        mock_ship_type_select = Mock()
+        mock_ship_type_select.setCurrentIndex = Mock()
+        mock_ship_type_select.currentIndex = Mock(return_value=0)
+        mock_store["shipTypeSelect"] = mock_ship_type_select
 
         # Mock tree widgets for searchLines and discharges
         for tree_field in ["searchLines", "discharges"]:
@@ -242,7 +258,6 @@ class TestConfigurationLoader:
         with (patch('dfastbe.gui.configs.ConfigFile.read', return_value=mock_config_file),
              patch('dfastbe.gui.configs.StateStore.instance', return_value=mock_state_store),
              patch('dfastbe.gui.configs.QTreeWidgetItem'),
-             patch('dfastbe.gui.configs.setParam'),
              patch('dfastbe.gui.configs.addTabForLevel'),
              patch('dfastbe.gui.configs.DischargeLevelsTabs'),
              patch('dfastbe.gui.configs.bankStrengthSwitch')):
@@ -344,13 +359,13 @@ class TestConfigurationLoader:
             mock_state_store[field].setText.reset_mock()
 
         with (patch('dfastbe.gui.configs.QTreeWidgetItem'),
-             patch('dfastbe.gui.configs.setParam') as mock_set_param,
              patch('dfastbe.gui.configs.bankStrengthSwitch'),
              patch('dfastbe.gui.configs.addTabForLevel'),
              patch('dfastbe.gui.configs.DischargeLevelsTabs') as mock_tabs_class,
              patch.object(config_loader, '_load_ship_parameters') as mock_load_ship_params,
              patch.object(config_loader, '_configure_bank_strength') as mock_configure_bank_strength,
              patch.object(config_loader, '_load_filter') as mock_load_filter,
+             patch.object(config_loader, '_load_param') as mock_load_param,
              patch.object(config_loader, '_load_discharges') as mock_load_discharges):
 
             # Setup mock for DischargeLevelsTabs instance
@@ -378,17 +393,14 @@ class TestConfigurationLoader:
             mock_tabs_class.assert_called_once_with(config_loader.config, config_loader.config_file)
             mock_tabs_instance.configure_tabs.assert_called_once_with(2)
 
-            expected_set_param_calls = [
-                (("bankProtect", config_loader.config, "Erosion", "ProtectionLevel", "-1000"), {}),
-                (("bankSlope", config_loader.config, "Erosion", "Slope", "20.0"), {}),
-                (("bankReed", config_loader.config, "Erosion", "Reed", "0.0"), {}),
+            # Check that _load_param was called with the expected arguments
+            expected_load_param_calls = [
+                call("bankProtect", "Erosion", "ProtectionLevel", "-1000"),
+                call("bankSlope", "Erosion", "Slope", "20.0"),
+                call("bankReed", "Erosion", "Reed", "0.0"),
             ]
-
-            # Check that setParam was called with the expected arguments
-            assert mock_set_param.call_count == len(expected_set_param_calls)
-            mock_set_param.assert_has_calls([
-                call(*call_args[0], **call_args[1]) for call_args in expected_set_param_calls
-            ], any_order=True)
+            assert mock_load_param.call_count == len(expected_load_param_calls)
+            mock_load_param.assert_has_calls(expected_load_param_calls, any_order=True)
 
             # Verify _load_filter calls
             expected_load_filter_calls = [
@@ -401,24 +413,22 @@ class TestConfigurationLoader:
 
     def test_load_ship_parameters_sets_all_parameters(self, config_loader, mock_state_store):
         """Test that _load_ship_parameters sets all ship-related parameters correctly."""
-        with patch('dfastbe.gui.configs.setParam') as mock_set_param:
+        with patch.object(config_loader, '_load_param') as mock_load_param:
             config_loader._load_ship_parameters()
 
-            # Verify all setParam calls for ship parameters
-            expected_set_param_calls = [
-                (("shipType", config_loader.config, "Erosion", "ShipType"), {}),
-                (("shipVeloc", config_loader.config, "Erosion", "VShip"), {}),
-                (("nShips", config_loader.config, "Erosion", "NShip"), {}),
-                (("shipNWaves", config_loader.config, "Erosion", "NWave", "5"), {}),
-                (("shipDraught", config_loader.config, "Erosion", "Draught"), {}),
-                (("wavePar0", config_loader.config, "Erosion", "Wave0", "200.0"), {}),
-                (("wavePar1", config_loader.config_file.config, "Erosion", "Wave1", "200.0"), {}),
+            # Verify all _load_param calls for ship parameters
+            expected_load_param_calls = [
+                call("shipType", "Erosion", "ShipType"),
+                call("shipVeloc", "Erosion", "VShip"),
+                call("nShips", "Erosion", "NShip"),
+                call("shipNWaves", "Erosion", "NWave", "5"),
+                call("shipDraught", "Erosion", "Draught"),
+                call("wavePar0", "Erosion", "Wave0", "200.0"),
+                call("wavePar1", "Erosion", "Wave1", "200.0"),
             ]
 
-            assert mock_set_param.call_count == len(expected_set_param_calls)
-            mock_set_param.assert_has_calls([
-                call(*call_args[0], **call_args[1]) for call_args in expected_set_param_calls
-            ], any_order=True)
+            assert mock_load_param.call_count == len(expected_load_param_calls)
+            mock_load_param.assert_has_calls(expected_load_param_calls, any_order=True)
 
             config_loader.config_file.get_str.assert_any_call("Erosion", "Wave0", "200.0")
 
@@ -443,7 +453,7 @@ class TestConfigurationLoader:
             mock_state_store[field].setEnabled.reset_mock()
         mock_state_store["strengthPar"].setCurrentText.reset_mock()
 
-        with patch('dfastbe.gui.configs.setParam') as mock_set_param, \
+        with patch.object(config_loader, '_load_param') as mock_load_param, \
              patch('dfastbe.gui.configs.bankStrengthSwitch') as mock_bank_strength_switch:
 
             config_loader._configure_bank_strength(use_bank_type)
@@ -462,17 +472,15 @@ class TestConfigurationLoader:
 
             if use_bank_type:
                 mock_state_store["strengthPar"].setCurrentText.assert_called_once_with("Bank Type")
-                mock_set_param.assert_called_once_with(
+                mock_load_param.assert_called_once_with(
                     "bankType",
-                    config_loader.config_file.config,
                     "Erosion",
                     "BankType"
                 )
             else:
                 mock_state_store["strengthPar"].setCurrentText.assert_called_once_with("Critical Shear Stress")
-                mock_set_param.assert_called_once_with(
+                mock_load_param.assert_called_once_with(
                     "bankShear",
-                    config_loader.config,
                     "Erosion",
                     "BankType"
                 )
