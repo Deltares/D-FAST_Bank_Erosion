@@ -21,7 +21,72 @@ __all__ = [
     "get_configuration",
     "bankStrengthSwitch",
     "ConfigurationLoader",
+    "DischargeLevelsTabs",
 ]
+
+
+@dataclass
+class DischargeLevelsTabs:
+    """Manages discharge level tabs configuration and loading."""
+
+    config: ConfigParser
+    config_file: ConfigFile
+    state_management: StateStore = field(init=False, default_factory=StateStore.instance)
+
+    def configure_tabs(self, n_level: int) -> None:
+        """Configure tabs for discharge levels.
+
+        Args:
+            n_level (int): Number of discharge levels.
+        """
+        tabs_manager = self.state_management["tabs"]
+
+        # Remove existing level tabs
+        for i in range(tabs_manager.count() - 1, 4, -1):
+            tabs_manager.removeTab(i)
+
+        # Add tabs for each level and load parameters
+        for i in range(n_level):
+            istr = str(i + 1)
+            addTabForLevel(istr)
+
+            # Load level-specific parameters
+            self._load_optional_param(istr + "_shipType", "Erosion", "ShipType" + istr)
+            self._load_optional_param(istr + "_shipVeloc", "Erosion", "VShip" + istr)
+            self._load_optional_param(istr + "_nShips", "Erosion", "NShip" + istr)
+            self._load_optional_param(istr + "_shipNWaves", "Erosion", "NWave" + istr)
+            self._load_optional_param(istr + "_shipDraught", "Erosion", "Draught" + istr)
+            self._load_optional_param(istr + "_bankSlope", "Erosion", "Slope" + istr)
+            self._load_optional_param(istr + "_bankReed", "Erosion", "Reed" + istr)
+
+            txt = self.config_file.get_str("Erosion", "EroVol" + istr, default="")
+            self.state_management[istr + "_eroVolEdit"].setText(txt)
+
+    def _load_optional_param(self, field: str, group: str, key: str) -> None:
+        """Load an optional parameter from configuration.
+
+        Args:
+            field (str): Short name of the parameter (e.g., "1_shipType").
+            group (str): Name of the group in the configuration (e.g., "Erosion").
+            key (str): Name of the key in the configuration group (e.g., "ShipType1").
+        """
+        value_str = self.config_file.get_str(group, key, "")
+
+        if value_str == "":
+            self.state_management[field + "Type"].setCurrentText("Use Default")
+            self.state_management[field + "Edit"].setText("")
+        else:
+            try:
+                val = float(value_str)
+                self.state_management[field + "Type"].setCurrentText("Constant")
+                if field + "Select" in self.state_management.keys():
+                    ival = int(val) - 1  # shipType 1 -> index 0
+                    self.state_management[field + "Select"].setCurrentIndex(ival)
+                else:
+                    self.state_management[field + "Edit"].setText(value_str)
+            except ValueError:
+                self.state_management[field + "Type"].setCurrentText("Variable")
+                self.state_management[field + "Edit"].setText(value_str)
 
 
 @dataclass
@@ -127,11 +192,12 @@ class ConfigurationLoader:
         setParam("bankReed", self.config, "Erosion", "Reed", "0.0")
 
         # Load filters
-        setFilter("velFilter", self.config, "Erosion", "VelFilterDist")
-        setFilter("bedFilter", self.config, "Erosion", "BedFilterDist")
+        self._load_filter("velFilter", "Erosion", "VelFilterDist")
+        self._load_filter("bedFilter", "Erosion", "BedFilterDist")
 
         # Configure tabs for discharge levels
-        self._configure_tabs_for_levels(n_level)
+        tabs_manager = DischargeLevelsTabs(self.config, self.config_file)
+        tabs_manager.configure_tabs(n_level)
 
     def _load_search_lines(self, n_bank: int) -> None:
         """Load search lines from configuration.
@@ -216,34 +282,21 @@ class ConfigurationLoader:
             bankStrengthSwitch()
             setParam("bankShear", self.config, "Erosion", "BankType")
 
-    def _configure_tabs_for_levels(self, n_level: int) -> None:
-        """Configure tabs for discharge levels.
+
+    def _load_filter(self, field: str, group: str, key: str) -> None:
+        """Load a filter configuration from the config file.
 
         Args:
-            n_level (int): Number of discharge levels.
+            field (str): Short name of the parameter (e.g., "velFilter").
+            group (str): Name of the group in the configuration (e.g., "Erosion").
+            key (str): Name of the key in the configuration group (e.g., "VelFilterDist").
         """
-        tabs = self.state_management["tabs"]
-
-        # Remove existing level tabs
-        for i in range(tabs.count() - 1, 4, -1):
-            tabs.removeTab(i)
-
-        # Add tabs for each level and load parameters
-        for i in range(n_level):
-            istr = str(i + 1)
-            addTabForLevel(istr)
-
-            # Load level-specific parameters
-            setOptParam(istr + "_shipType", self.config, "Erosion", "ShipType" + istr)
-            setOptParam(istr + "_shipVeloc", self.config, "Erosion", "VShip" + istr)
-            setOptParam(istr + "_nShips", self.config, "Erosion", "NShip" + istr)
-            setOptParam(istr + "_shipNWaves", self.config, "Erosion", "NWave" + istr)
-            setOptParam(istr + "_shipDraught", self.config, "Erosion", "Draught" + istr)
-            setOptParam(istr + "_bankSlope", self.config, "Erosion", "Slope" + istr)
-            setOptParam(istr + "_bankReed", self.config, "Erosion", "Reed" + istr)
-
-            txt = self.config_file.get_str("Erosion", "EroVol" + istr, default="")
-            self.state_management[istr + "_eroVolEdit"].setText(txt)
+        val = self.config_file.get_float(group, key, 0.0)
+        if val > 0.0:
+            self.state_management[field + "Active"].setChecked(True)
+            self.state_management[field + "Width"].setText(str(val))
+        else:
+            self.state_management[field + "Active"].setChecked(False)
 
 
 def get_configuration() -> ConfigParser:
@@ -405,40 +458,6 @@ def setParam(field: str, config, group: str, key: str, default: str = "??") -> N
         cast(QLineEdit, state_management[field + "Edit"]).setText(config_value)
 
 
-def setOptParam(field: str, config, group: str, key: str) -> None:
-    """Update the dialog for an optional parameter based on configuration file.
-
-    Arguments
-    ---------
-    field : str
-        Short name of the parameter.
-    config : configparser.ConfigParser
-        Configuration for the D-FAST Bank Erosion analysis with absolute or relative paths.
-    group : str
-        Name of the group in the configuration.
-    key : str
-        Name of the key in the configuration group.
-    """
-    state_management = StateStore.instance()
-    config_file = ConfigFile(config)
-    str = config_file.get_str(group, key, "")
-    if str == "":
-        state_management[field + "Type"].setCurrentText("Use Default")
-        state_management[field + "Edit"].setText("")
-    else:
-        try:
-            val = float(str)
-            state_management[field + "Type"].setCurrentText("Constant")
-            if field + "Select" in state_management.keys():
-                ival = int(val) - 1  # shipType 1 -> index 0
-                state_management[field + "Select"].setCurrentIndex(ival)
-            else:
-                state_management[field + "Edit"].setText(str)
-        except:
-            state_management[field + "Type"].setCurrentText("Variable")
-            state_management[field + "Edit"].setText(str)
-
-
 def bankStrengthSwitch() -> None:
     """Implements the dialog settings depending on the bank strength specification method."""
     state_management = StateStore.instance()
@@ -464,28 +483,3 @@ def bankStrengthSwitch() -> None:
         state_management["bankTypeEdit"].setEnabled(False)
         state_management["bankTypeEditFile"].setEnabled(False)
 
-
-def setFilter(field: str, config, group: str, key: str) -> None:
-    """
-    Update the dialog for a filter based on configuration file.
-
-    Arguments
-    ---------
-    field : str
-        Short name of the parameter.
-    config : configparser.ConfigParser
-        Configuration for the D-FAST Bank Erosion analysis with absolute or relative paths.
-    group : str
-        Name of the group in the configuration.
-    key : str
-        Name of the key in the configuration group.
-
-    """
-    state_management = StateStore.instance()
-    config_file = ConfigFile(config)
-    val = config_file.get_float(group, key, 0.0)
-    if val > 0.0:
-        state_management[field + "Active"].setChecked(True)
-        state_management[field + "Width"].setText(str(val))
-    else:
-        state_management[field + "Active"].setChecked(False)

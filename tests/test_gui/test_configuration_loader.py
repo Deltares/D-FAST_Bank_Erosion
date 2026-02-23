@@ -5,7 +5,7 @@ Unit tests for the ConfigurationLoader class.
 import pytest
 from pathlib import Path
 from configparser import ConfigParser
-from unittest.mock import Mock, patch, call, PropertyMock
+from unittest.mock import Mock, patch, call
 
 from dfastbe.gui.configs import ConfigurationLoader
 from dfastbe.gui.state_management import StateStore
@@ -26,8 +26,9 @@ class TestConfigurationLoader:
         StateStore._instance = None  # Reset any previous instance
         mock_store = StateStore.initialize()
 
-        # Mock text input widgets (QLineEdit-like)
+        # Mock text input widgets
         text_fields = [
+            # General section
             "chainFileEdit", "startRange", "endRange", "bankDirEdit",
             "bankFileName", "zoomPlotsRangeEdit", "figureDirEdit",
             # Detect section
@@ -47,13 +48,21 @@ class TestConfigurationLoader:
         # Mock checkbox widgets (QCheckBox-like)
         checkbox_fields = [
             "makePlotsEdit", "savePlotsEdit", "saveZoomPlotsEdit",
-            "closePlotsEdit", "debugOutputEdit"
+            "closePlotsEdit", "debugOutputEdit",
+            "velFilterActive", "bedFilterActive"
         ]
         for field in checkbox_fields:
             mock_widget = Mock()
             mock_widget.setChecked = Mock()
             mock_widget.isChecked = Mock(return_value=False)
             mock_store[field] = mock_widget
+
+        # Mock filter width widgets
+        for filter_field in ["velFilterWidth", "bedFilterWidth"]:
+            mock_widget = Mock()
+            mock_widget.setText = Mock()
+            mock_widget.text = Mock(return_value="")
+            mock_store[filter_field] = mock_widget
 
         # Mock combo boxes
         combo_fields = [
@@ -100,8 +109,7 @@ class TestConfigurationLoader:
         mock_tabs.removeTab = Mock()
         mock_store["tabs"] = mock_tabs
 
-        # Mock level-specific widgets (for _configure_tabs_for_levels)
-        for i in range(1, 5):  # Support up to 4 levels
+        for i in range(1, 5):
             istr = str(i)
             for suffix in ["_eroVolEdit", "_shipType", "_shipVeloc", "_nShips",
                           "_shipNWaves", "_shipDraught", "_bankSlope", "_bankReed"]:
@@ -112,7 +120,6 @@ class TestConfigurationLoader:
 
         yield mock_store
 
-        # Clean up - reset singleton after test
         StateStore._instance = None
 
 
@@ -232,15 +239,12 @@ class TestConfigurationLoader:
         config_path = tmp_path / "test_config.cfg"
         config_path.write_text("[General]\nVersion=1.0\n")
 
-        # Patch ConfigFile.read to return our mock before instantiating ConfigurationLoader
-
         with (patch('dfastbe.gui.configs.ConfigFile.read', return_value=mock_config_file),
              patch('dfastbe.gui.configs.StateStore.instance', return_value=mock_state_store),
              patch('dfastbe.gui.configs.QTreeWidgetItem'),
              patch('dfastbe.gui.configs.setParam'),
-             patch('dfastbe.gui.configs.setOptParam'),
-             patch('dfastbe.gui.configs.setFilter'),
              patch('dfastbe.gui.configs.addTabForLevel'),
+             patch('dfastbe.gui.configs.DischargeLevelsTabs'),
              patch('dfastbe.gui.configs.bankStrengthSwitch')):
                  loader = ConfigurationLoader(config_path)
                  loader.rootdir = str(tmp_path)
@@ -249,7 +253,6 @@ class TestConfigurationLoader:
 
     def test_load_general_section_sets_parameters(self, config_loader, mock_state_store):
         """Test that _load_general_section sets the parameters fields correctly."""
-        # _load_general_section is already called during __post_init__, so just verify the calls
         mock_state_store["chainFileEdit"].setText.assert_called_once_with(
             "inputs/rivkm_20m.xyc")
         mock_state_store["startRange"].setText.assert_called_once_with("123.0")
@@ -268,16 +271,11 @@ class TestConfigurationLoader:
 
     def test_load_detect_section_sets_parameters(self, config_loader, mock_state_store):
         """Test that _load_detect_section sets the parameters fields correctly."""
-        # _load_detect_section is already called during __post_init__, so just verify the calls
-
-        # Verify simFileEdit was set
         mock_state_store["simFileEdit"].setText.assert_called_once_with("test_sim.nc")
 
-        # Verify waterDepth was set
         config_loader.config_file.get_float.assert_any_call("Detect", "WaterDepth", default=0.0)
         mock_state_store["waterDepth"].setText.assert_called_once_with("0.5")
 
-        # Verify n_bank was retrieved
         config_loader.config_file.get_int.assert_any_call("Detect", "NBank", default=0, positive=True)
 
 
@@ -310,7 +308,6 @@ class TestConfigurationLoader:
 
         config_loader.config_file.get_str = Mock(side_effect=mock_get_str)
 
-        # Reset mocks that were called during __post_init__
         mock_state_store["searchLines"].invisibleRootItem.reset_mock()
         mock_state_store["searchLinesEdit"].setEnabled.reset_mock()
         mock_state_store["searchLinesRemove"].setEnabled.reset_mock()
@@ -318,17 +315,13 @@ class TestConfigurationLoader:
         with patch('dfastbe.gui.configs.QTreeWidgetItem') as mock_tree_item:
             config_loader._load_search_lines(n_bank)
 
-            # Verify get_bank_search_distances was called with correct n_bank
             config_loader.config_file.get_bank_search_distances.assert_called_once_with(n_bank)
 
-            # Verify the tree was cleared
             mock_state_store["searchLines"].invisibleRootItem.assert_called_once()
             mock_state_store["searchLines"].invisibleRootItem().takeChildren.assert_called_once()
 
-            # Verify correct number of tree items were created
             assert mock_tree_item.call_count == n_bank
 
-            # Verify each tree item was created with correct parameters
             for i in range(n_bank):
                 expected_line_name = f"bank_line_{i + 1}.xyc"
                 expected_distance = str(mock_distances[i])
@@ -346,44 +339,45 @@ class TestConfigurationLoader:
 
     def test_load_erosion_section_sets_basic_parameters(self, config_loader, mock_state_store):
         """Test that _load_erosion_section sets basic erosion parameters correctly."""
-        # Reset mocks that were called during __post_init__
         for field in ["tErosion", "riverAxisEdit", "fairwayEdit", "chainageOutStep",
                       "outDirEdit", "newBankFile", "newEqBankFile", "eroVol", "eroVolEqui"]:
             mock_state_store[field].setText.reset_mock()
 
         with (patch('dfastbe.gui.configs.QTreeWidgetItem'),
              patch('dfastbe.gui.configs.setParam') as mock_set_param,
-             patch('dfastbe.gui.configs.setOptParam'),
-             patch('dfastbe.gui.configs.setFilter') as mock_set_filter,
              patch('dfastbe.gui.configs.bankStrengthSwitch'),
              patch('dfastbe.gui.configs.addTabForLevel'),
-             patch.object(config_loader, '_configure_tabs_for_levels') as mock_configure_tabs,
+             patch('dfastbe.gui.configs.DischargeLevelsTabs') as mock_tabs_class,
              patch.object(config_loader, '_load_ship_parameters') as mock_load_ship_params,
              patch.object(config_loader, '_configure_bank_strength') as mock_configure_bank_strength,
+             patch.object(config_loader, '_load_filter') as mock_load_filter,
              patch.object(config_loader, '_load_discharges') as mock_load_discharges):
+
+            # Setup mock for DischargeLevelsTabs instance
+            mock_tabs_instance = Mock()
+            mock_tabs_class.return_value = mock_tabs_instance
 
             config_loader._load_erosion_section()
 
-            # Verify basic erosion parameters were set via setText
             mock_state_store["tErosion"].setText.assert_called_once_with("10.0")
             mock_state_store["riverAxisEdit"].setText.assert_called_once_with("river_axis.xyc")
             mock_state_store["fairwayEdit"].setText.assert_called_once_with("fairway.xyc")
             mock_state_store["chainageOutStep"].setText.assert_called_once_with("100.0")
             mock_state_store["outDirEdit"].setText.assert_called_once_with("output/erosion")
 
-            # Verify bank file parameters were set
             mock_state_store["newBankFile"].setText.assert_called_once_with("banknew")
             mock_state_store["newEqBankFile"].setText.assert_called_once_with("bankeq")
             mock_state_store["eroVol"].setText.assert_called_once_with("erovol_standard.evo")
             mock_state_store["eroVolEqui"].setText.assert_called_once_with("erovol_eq.evo")
 
-            # Assert that helper methods were called correctly
             mock_load_ship_params.assert_called_once()
             mock_load_discharges.assert_called_once_with(2, config_loader.config["Erosion"])
             mock_configure_bank_strength.assert_called_once_with(True)
-            mock_configure_tabs.assert_called_once_with(2)
 
-            # Verify setParam calls made directly in _load_erosion_section (not in mocked methods)
+            # Verify DischargeLevelsTabs was instantiated and configure_tabs was called
+            mock_tabs_class.assert_called_once_with(config_loader.config, config_loader.config_file)
+            mock_tabs_instance.configure_tabs.assert_called_once_with(2)
+
             expected_set_param_calls = [
                 (("bankProtect", config_loader.config, "Erosion", "ProtectionLevel", "-1000"), {}),
                 (("bankSlope", config_loader.config, "Erosion", "Slope", "20.0"), {}),
@@ -396,16 +390,14 @@ class TestConfigurationLoader:
                 call(*call_args[0], **call_args[1]) for call_args in expected_set_param_calls
             ], any_order=True)
 
-            # Verify setFilter calls
-            expected_set_filter_calls = [
-                (("velFilter", config_loader.config, "Erosion", "VelFilterDist"), {}),
-                (("bedFilter", config_loader.config, "Erosion", "BedFilterDist"), {}),
+            # Verify _load_filter calls
+            expected_load_filter_calls = [
+                call("velFilter", "Erosion", "VelFilterDist"),
+                call("bedFilter", "Erosion", "BedFilterDist"),
             ]
 
-            assert mock_set_filter.call_count == len(expected_set_filter_calls)
-            mock_set_filter.assert_has_calls([
-                call(*call_args[0], **call_args[1]) for call_args in expected_set_filter_calls
-            ], any_order=True)
+            assert mock_load_filter.call_count == len(expected_load_filter_calls)
+            mock_load_filter.assert_has_calls(expected_load_filter_calls, any_order=True)
 
     def test_load_ship_parameters_sets_all_parameters(self, config_loader, mock_state_store):
         """Test that _load_ship_parameters sets all ship-related parameters correctly."""
@@ -423,13 +415,11 @@ class TestConfigurationLoader:
                 (("wavePar1", config_loader.config_file.config, "Erosion", "Wave1", "200.0"), {}),
             ]
 
-            # Check that setParam was called with the expected arguments
             assert mock_set_param.call_count == len(expected_set_param_calls)
             mock_set_param.assert_has_calls([
                 call(*call_args[0], **call_args[1]) for call_args in expected_set_param_calls
             ], any_order=True)
 
-            # Verify that config_file.get_str was called to retrieve Wave0 value
             config_loader.config_file.get_str.assert_any_call("Erosion", "Wave0", "200.0")
 
     @pytest.mark.parametrize(
@@ -448,7 +438,6 @@ class TestConfigurationLoader:
         Args:
             use_bank_type: Whether to use bank type (True) or critical shear stress (False).
         """
-        # Reset mocks that were called during __post_init__
         for field in ["bankType", "bankTypeType", "bankTypeEdit", "bankTypeEditFile",
                       "bankShear", "bankShearType", "bankShearEdit", "bankShearEditFile"]:
             mock_state_store[field].setEnabled.reset_mock()
@@ -471,10 +460,8 @@ class TestConfigurationLoader:
             mock_state_store["bankShearEdit"].setEnabled.assert_called_once_with(not use_bank_type)
             mock_state_store["bankShearEditFile"].setEnabled.assert_called_once_with(not use_bank_type)
 
-            # Verify strengthPar was set correctly
             if use_bank_type:
                 mock_state_store["strengthPar"].setCurrentText.assert_called_once_with("Bank Type")
-                # Verify setParam was called with bankType
                 mock_set_param.assert_called_once_with(
                     "bankType",
                     config_loader.config_file.config,
@@ -483,7 +470,6 @@ class TestConfigurationLoader:
                 )
             else:
                 mock_state_store["strengthPar"].setCurrentText.assert_called_once_with("Critical Shear Stress")
-                # Verify setParam was called with bankShear
                 mock_set_param.assert_called_once_with(
                     "bankShear",
                     config_loader.config,
@@ -491,7 +477,6 @@ class TestConfigurationLoader:
                     "BankType"
                 )
 
-            # Verify bankStrengthSwitch was called
             mock_bank_strength_switch.assert_called_once()
 
     @pytest.mark.parametrize(
@@ -510,18 +495,16 @@ class TestConfigurationLoader:
         Args:
             n_level: Number of discharge levels.
         """
-        # Mock section containing RefLevel
         mock_section = {"RefLevel": "1"}
 
         # Mock get_str to return discharge file names and probabilities
         def mock_get_str(section, key, default=None):
             if section == "Erosion":
                 if key.startswith("SimFile"):
-                    level_num = key[-1]  # Extract number from "SimFile1", "SimFile2", etc.
+                    level_num = key[-1]
                     return f"discharge_file_{level_num}.nc"
                 elif key.startswith("PDischarge"):
-                    level_num = key[-1]  # Extract number from "PDischarge1", "PDischarge2", etc.
-                    # Return different probabilities for variety
+                    level_num = key[-1]
                     probabilities = ["0.5", "0.3", "0.15", "0.05"]
                     return probabilities[int(level_num) - 1] if int(level_num) <= len(probabilities) else "0.1"
             return default
@@ -538,14 +521,11 @@ class TestConfigurationLoader:
         with patch('dfastbe.gui.configs.QTreeWidgetItem') as mock_tree_item:
             config_loader._load_discharges(n_level, mock_section)
 
-            # Verify the tree was cleared
             mock_state_store["discharges"].invisibleRootItem.assert_called_once()
             mock_state_store["discharges"].invisibleRootItem().takeChildren.assert_called_once()
 
-            # Verify correct number of tree items were created
             assert mock_tree_item.call_count == n_level
 
-            # Verify each tree item was created with correct parameters
             for i in range(n_level):
                 level_num = str(i + 1)
                 expected_file_name = f"discharge_file_{level_num}.nc"
@@ -563,8 +543,6 @@ class TestConfigurationLoader:
                 mock_state_store["dischargesEdit"].setEnabled.assert_not_called()
                 mock_state_store["dischargesRemove"].setEnabled.assert_not_called()
 
-            # Verify refLevel validator was configured with correct n_level
             mock_state_store["refLevel"].validator().setTop.assert_called_once_with(n_level)
 
-            # Verify refLevel text was set from section
             mock_state_store["refLevel"].setText.assert_called_once_with("1")
