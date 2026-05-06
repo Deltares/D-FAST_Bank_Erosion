@@ -29,7 +29,7 @@ class TestConfigurationLoader:
         # Mock text input widgets
         text_fields = [
             # General section
-            "chainFileEdit", "startRange", "endRange", "bankDirEdit",
+            "riverKMEdit", "startRange", "endRange", "bankDirEdit",
             "bankFileName", "zoomPlotsRangeEdit", "figureDirEdit",
             # Detect section
             "simFileEdit", "waterDepth",
@@ -267,7 +267,7 @@ class TestConfigurationLoader:
 
     def test_load_general_section_sets_parameters(self, config_loader, mock_state_store):
         """Test that _load_general_section sets the parameters fields correctly."""
-        mock_state_store["chainFileEdit"].setText.assert_called_once_with(
+        mock_state_store["riverKMEdit"].setText.assert_called_once_with(
             "inputs/rivkm_20m.xyc")
         mock_state_store["startRange"].setText.assert_called_once_with("123.0")
         mock_state_store["endRange"].setText.assert_called_once_with("128.0")
@@ -359,7 +359,6 @@ class TestConfigurationLoader:
 
         with (patch('dfastbe.gui.configs.QTreeWidgetItem'),
              patch('dfastbe.gui.configs.bankStrengthSwitch'),
-             patch('dfastbe.gui.configs.addTabForLevel'),
              patch('dfastbe.gui.configs.DischargeLevelsTabs') as mock_tabs_class,
              patch.object(config_loader, '_load_ship_parameters') as mock_load_ship_params,
              patch.object(config_loader, '_configure_bank_strength') as mock_configure_bank_strength,
