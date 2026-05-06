@@ -9,7 +9,10 @@ from PySide6.QtWidgets import (
 )
 from dataclasses import dataclass, field
 
-from dfastbe.io.config import ConfigFile
+from dfastbe.io.config import (
+    ConfigFile,
+    ConfigFileError
+)
 from dfastbe.gui.utils import (
     typeUpdatePar,
 )
@@ -45,16 +48,72 @@ class ConfigurationLoader:
     config_path: Path
     state_management: StateStore = field(init=False, default_factory=StateStore.instance)
 
+    def _validate_configuration(self) -> None:
+        """Validate the loaded configuration for required sections and keys.
+
+        Only keys that are read without a default value by their corresponding `load`
+        method are added here. The other keys are considered optional.
+
+        Raises:
+            ConfigFileError: If an expected section or element are not in the config file
+        """
+        required_sections = {
+            "General": [
+                "RiverKM",
+                "Boundaries",
+                "BankDir"],
+            "Detect": [
+                "SimFile",
+            ],
+            "Erosion": [
+                "TErosion",
+                "RiverAxis",
+                "Fairway",
+                "OutputInterval",
+                "OutputDir",
+                "RefLevel",
+            ],
+        }
+
+        missing_section: list[str] = []
+        missing_element: dict[str, list[str]] = {}
+
+        for section, keys in required_sections.items():
+            if section not in self.config:
+                missing_section.append(section)
+                continue
+            for elem in keys:
+                if elem not in self.config[section]:
+                    missing_element.setdefault(elem, []).append(elem)
+
+        if missing_element or missing_section:
+            missing_info: list[str] = []
+            if missing_section:
+                missing_info.append(
+                    f"The following sections are missing: {', '.join(missing_section)}"
+                )
+            if missing_element:
+                for section, elem in missing_element.items():
+                    missing_info.append(
+                        f"Section {section} misses the following elements: {', '.join(elem)}"
+                    )
+            missing_info_msg = "; ".join(missing_info)
+            raise ConfigFileError(
+                f"Unsupported or invalid configuration file: {missing_info_msg}.")
+
     def __post_init__(self):
-        """Read the configuration file and load all supported sections.
+        """Read and validate the configuration file and load all supported sections.
 
         The configuration is parsed once into ``self.config_file`` and the raw
         :class:`configparser.ConfigParser` object is stored in ``self.config``
-        for convenience. After that, the General, Detect, and Erosion sections
-        are applied to the GUI in a fixed order.
+        for convenience. After that, the configuration is validated for all the
+        non-default values and finally the General, Detect, and Erosion sections
+        are loaded to the GUI in a fixed order.
         """
         self.config_file = ConfigFile.read(self.config_path)
         self.config = self.config_file.config
+        self._validate_configuration()
+
         self._load_general_section()
         self._load_detect_section()
         self._load_erosion_section()
