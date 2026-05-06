@@ -295,7 +295,7 @@ def get_configuration() -> ConfigParser:
 
     config.add_section("General")
     config["General"]["Version"] = "1.0"
-    config["General"]["RiverKM"] = state_management["RiverKM"].text()
+    config["General"]["RiverKM"] = state_management["chainFileEdit"].text()
     config["General"]["Boundaries"] = (
             state_management["startRange"].text() + ":" + state_management["endRange"].text()
     )
