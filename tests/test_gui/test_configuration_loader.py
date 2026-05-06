@@ -261,7 +261,6 @@ class TestConfigurationLoader:
              patch('dfastbe.gui.configs.DischargeLevelsTabs'),
              patch('dfastbe.gui.configs.bankStrengthSwitch')):
                  loader = ConfigurationLoader(config_path)
-                 loader.rootdir = str(tmp_path)
                  return loader
 
 
