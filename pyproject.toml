@@ -18,7 +18,6 @@ dependencies = [
     # earlier 11.2.x CWE-122 advisory in one constraint.
     "Pillow>=12.2.0",
     "dfastio @ git+https://github.com/Deltares/D-FAST_Commons.git@0.1.0",
-    "certifi==2025.1.31",
 ]
 
 [project.optional-dependencies]
@@ -65,6 +64,12 @@ binary = [
     "imageio>=2.33.1,<3.0.0",
     "fiona>=1.10.1,<2.0.0",
     "pytz>=2020.1",
+    # Pinned exactly because the Nuitka build script (BuildScripts/BuildDfastbe.bat
+    # + Move_Libs.bat) bundles `cacert.pem` into the standalone exe by path. certifi
+    # is also a transitive of netcdf4/pyogrio/pyproj/requests, so the runtime gets
+    # it regardless — this constraint exists only to fix the version that ships in
+    # the binary distribution.
+    "certifi==2025.1.31",
 ]
 
 [tool.poetry]

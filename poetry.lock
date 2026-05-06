@@ -5019,4 +5019,4 @@ gui = ["pyside6"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11.0,<3.15"
-content-hash = "4eee4f882a19ff12d6d08a00eb552fafb10ac86b2b04597e52bb9355f46a7a8d"
+content-hash = "59de5b722253143472b31ee85520a7f6eeea3257fc97aa4a0db994f542d561fa"
