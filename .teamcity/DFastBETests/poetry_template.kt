@@ -43,8 +43,11 @@ object PoetryTemplate : Template({
         script {
             name = "Install dependencies via poetry"
             id = "Install_dependencies_via_poetry"
+            // --all-extras is required: PySide6 lives in [project.optional-dependencies].gui
+            // (PEP 621) and `poetry install` alone does not install extras. The CLI imports
+            // the GUI on every run, so any test that touches dfastbe.runner needs PySide6.
             scriptContent = """
-                %POETRY_EXE% install
+                %POETRY_EXE% install --all-extras
             """.trimIndent()
         }
         script {

@@ -20,7 +20,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libegl1
 
       - name: Setup Python with Poetry
-        uses: Deltares-research/github-actions/actions/python-setup/poetry@python-setup/poetry/v1
+        uses: Deltares-research/github-actions/actions/python-setup/poetry@poetry/v1
         with:
           python-version: ${{ matrix.python-version }}
           install-groups: dev
