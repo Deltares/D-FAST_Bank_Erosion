@@ -258,7 +258,6 @@ class TestConfigurationLoader:
         with (patch('dfastbe.gui.configs.ConfigFile.read', return_value=mock_config_file),
              patch('dfastbe.gui.configs.StateStore.instance', return_value=mock_state_store),
              patch('dfastbe.gui.configs.QTreeWidgetItem'),
-             patch('dfastbe.gui.configs.addTabForLevel'),
              patch('dfastbe.gui.configs.DischargeLevelsTabs'),
              patch('dfastbe.gui.configs.bankStrengthSwitch')):
                  loader = ConfigurationLoader(config_path)
