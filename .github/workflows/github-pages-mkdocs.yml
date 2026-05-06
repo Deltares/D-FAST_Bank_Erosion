@@ -11,15 +11,14 @@ on:
     types:
       - published
 
-permissions:
-  contents: write
-  pages: write
-  id-token: write
-
 jobs:
   deploy-pr:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -37,6 +36,10 @@ jobs:
   deploy-main:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v6
         with:
@@ -55,6 +58,10 @@ jobs:
   deploy-release:
     if: github.event_name == 'release'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v6
         with:
