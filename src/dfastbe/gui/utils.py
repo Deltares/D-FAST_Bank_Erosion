@@ -293,7 +293,7 @@ def selectFile(key: str) -> None:
             caption="Select D-Flow FM Map File", filter="D-Flow FM Map Files (*map.nc)"
         )
         # getOpenFileName returns a tuple van file name and active file filter.
-    elif key == "chainFileEdit":
+    elif key == "riverKMEdit":
         fil, fltr = QFileDialog.getOpenFileName(
             caption="Select Chainage File", filter="Chainage Files (*.xyc)"
         )

@@ -62,7 +62,7 @@ class ConfigurationLoader:
     def _load_general_section(self) -> None:
         """Load the General section from configuration."""
         section = self.config["General"]
-        self.state_management["chainFileEdit"].setText(section["RiverKM"])
+        self.state_management["riverKMEdit"].setText(section["RiverKM"])
 
         study_range = self.config_file.get_range("General", "Boundaries")
         self.state_management["startRange"].setText(str(study_range[0]))
@@ -295,7 +295,7 @@ def get_configuration() -> ConfigParser:
 
     config.add_section("General")
     config["General"]["Version"] = "1.0"
-    config["General"]["RiverKM"] = state_management["chainFileEdit"].text()
+    config["General"]["RiverKM"] = state_management["riverKMEdit"].text()
     config["General"]["Boundaries"] = (
             state_management["startRange"].text() + ":" + state_management["endRange"].text()
     )
