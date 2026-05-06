@@ -11,7 +11,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
 
@@ -20,7 +20,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y libegl1
 
       - name: Setup Python with Poetry
-        uses: Deltares-research/github-actions/actions/python-setup/poetry@poetry/v1
+        uses: Deltares-research/github-actions/actions/python-setup/poetry@79b3df9a15699a66b25a9ba8e33f5ef9b07391d1 # poetry/v1
         with:
           python-version: ${{ matrix.python-version }}
           install-groups: dev
