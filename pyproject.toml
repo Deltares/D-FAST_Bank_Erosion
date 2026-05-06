@@ -30,8 +30,8 @@ dfastbe = "dfastbe.__main__:main"
 
 [dependency-groups]
 dev = [
-    "pytest>=7.2.1,<8.0.0",
-    "pytest-cov>=6.0.0,<7.0.0",
+    "pytest>=9.0.3,<10.0.0",
+    "pytest-cov>=7.0.0,<8.0.0",
     "pyfakefs>=5.1.0,<6.0.0",
     "teamcity-messages>=1.32,<2.0.0",
     "pre-commit>=4.2.0,<5.0.0",
