@@ -136,12 +136,57 @@ class TestConfigurationExporter:
             assert section[f"Line{i+1}"] == f"line{i+1}.xyc"
         assert section["DLines"] == expected_dlines
 
-    @pytest.mark.parametrize("ship_type,expected_shiptype", [
-        ("Constant", "2"),
-        ("Variable", "2"),
-    ])
-    def test_build_erosion_section_ship_params(self, mock_state_erosion, ship_type, expected_shiptype):
+    @pytest.mark.parametrize(
+        "ship_type,select_index,edit_text,expected_shiptype",
+        [
+            ("Constant", 2, "ignored-edit-text", "3"),
+            ("Variable", 99, "custom-edit-text", "custom-edit-text"),
+        ],
+    )
+    def test_build_erosion_section_ship_params(
+        self,
+        mock_state_erosion,
+        ship_type,
+        select_index,
+        edit_text,
+        expected_shiptype,
+    ):
+        """Verify the two branches of the top-level ship-type writer in the Erosion section.
+
+        The ship-parameters builder picks one of two sources for the ShipType
+        value depending on the value of the ship-type type selector:
+
+            * When the type selector reads Constant, the value is the string
+              of the ship-type combo-box current index plus one. The plus-one
+              offset translates the zero-based combo-box index into the
+              one-based ship-type identifier expected by the configuration
+              file format. The free-form edit field is not consulted.
+            * When the type selector reads anything else (commonly Variable),
+              the value is the literal text of the free-form edit field. The
+              combo-box index is not consulted.
+
+        What this parametrization checks:
+            * For the Constant row, the test sets the combo-box index to a
+              non-zero value and the edit field to a sentinel string. The
+              expected output is the string of index plus one. A regression
+              that reads from the edit field instead would produce the
+              sentinel and fail the assertion. A regression that drops the
+              plus-one would produce a different number and also fail.
+            * For the Variable row, the test sets the edit field to a
+              non-numeric sentinel string and the combo-box index to a value
+              that, if accidentally used, would produce a clearly different
+              numeric output. The expected output is the sentinel string. A
+              regression that reads the index plus one would produce a number
+              and fail the assertion.
+
+        The remaining ship-parameter keys (VShip, NShip, NWaves, Draught,
+        Wave0, Wave1) are populated from fields that do not depend on the
+        ship-type branch and are checked here as a sanity guard against
+        accidental misordering or omission.
+        """
         state = mock_state_erosion(ship_type=ship_type)
+        state["shipTypeSelect"].currentIndex.return_value = select_index
+        state["shipTypeEdit"].text.return_value = edit_text
         exporter = ConfigurationExporter(state)
         exporter._build_erosion_section()
         section = exporter.config["Erosion"]
