@@ -18,10 +18,6 @@ dependencies = [
     # earlier 11.2.x CWE-122 advisory in one constraint.
     "Pillow>=12.2.0",
     "dfastio @ git+https://github.com/Deltares/D-FAST_Commons.git@0.1.0",
-]
-
-[project.optional-dependencies]
-gui = [
     "pyside6>=6.10.1,<7.0.0",
 ]
 
