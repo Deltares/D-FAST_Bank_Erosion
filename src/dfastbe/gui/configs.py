@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import cast
+from typing import ClassVar, cast
 from pathlib import Path
 from configparser import ConfigParser
 from PySide6.QtWidgets import (
@@ -48,6 +48,32 @@ class ConfigurationLoader:
     config_path: Path
     state_management: StateStore = field(init=False, default_factory=StateStore.instance)
 
+    _REQUIRED_SECTIONS: ClassVar[dict[str, list[str]]] = {
+        "General": ["Version", "RiverKM", "Boundaries", "BankDir"],
+        "Detect": ["SimFile"],
+        "Erosion": [
+            "TErosion",
+            "RiverAxis",
+            "Fairway",
+            "OutputInterval",
+            "OutputDir",
+            "RefLevel",
+        ],
+    }
+
+    def _find_missing(self) -> tuple[list[str], dict[str, list[str]]]:
+        """Return missing sections and missing keys per existing section."""
+        missing_sections: list[str] = []
+        missing_elements: dict[str, list[str]] = {}
+        for section, keys in self._REQUIRED_SECTIONS.items():
+            if section not in self.config:
+                missing_sections.append(section)
+                continue
+            for elem in keys:
+                if elem not in self.config[section]:
+                    missing_elements.setdefault(section, []).append(elem)
+        return missing_sections, missing_elements
+
     def _validate_configuration(self) -> None:
         """Validate the loaded configuration for required sections and keys.
 
@@ -57,49 +83,22 @@ class ConfigurationLoader:
         Raises:
             ConfigFileError: If an expected section or element are not in the config file
         """
-        required_sections = {
-            "General": [
-                "RiverKM",
-                "Boundaries",
-                "BankDir"],
-            "Detect": [
-                "SimFile",
-            ],
-            "Erosion": [
-                "TErosion",
-                "RiverAxis",
-                "Fairway",
-                "OutputInterval",
-                "OutputDir",
-                "RefLevel",
-            ],
-        }
+        missing_sections, missing_elements = self._find_missing()
+        if not (missing_sections or missing_elements):
+            return
 
-        missing_section: list[str] = []
-        missing_element: dict[str, list[str]] = {}
-
-        for section, keys in required_sections.items():
-            if section not in self.config:
-                missing_section.append(section)
-                continue
-            for elem in keys:
-                if elem not in self.config[section]:
-                    missing_element.setdefault(elem, []).append(elem)
-
-        if missing_element or missing_section:
-            missing_info: list[str] = []
-            if missing_section:
-                missing_info.append(
-                    f"The following sections are missing: {', '.join(missing_section)}"
-                )
-            if missing_element:
-                for section, elem in missing_element.items():
-                    missing_info.append(
-                        f"Section {section} misses the following elements: {', '.join(elem)}"
-                    )
-            missing_info_msg = "; ".join(missing_info)
-            raise ConfigFileError(
-                f"Unsupported or invalid configuration file: {missing_info_msg}.")
+        messages: list[str] = []
+        if missing_sections:
+            messages.append(
+                f"The following sections are missing: {', '.join(missing_sections)}"
+            )
+        messages.extend(
+            f"Section {section} misses the following elements: {', '.join(elems)}"
+            for section, elems in missing_elements.items()
+        )
+        raise ConfigFileError(
+            f"Unsupported or invalid configuration file: {'; '.join(messages)}."
+        )
 
     def __post_init__(self):
         """Read and validate the configuration file and load all supported sections.
