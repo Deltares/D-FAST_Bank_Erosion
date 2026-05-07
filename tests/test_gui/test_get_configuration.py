@@ -203,3 +203,62 @@ class TestConfigurationExporter:
         assert section["ShipType1"] == "1"  # shipTypeSelect index + 1
         assert section["VShip2"] == "9.9"
         assert section["EroVol2"] == "vol2.evo"
+
+    def test_bank_type_constant_writes_string_index(self, mock_state_erosion):
+        """Verify BankType is serialized as a string in the Bank-Type / Constant branch.
+
+        When the bank-strength selector is set to Bank Type and the bank-type
+        selector is set to Constant, the bank-strength builder reads the
+        integer index from the bank-type combo box and writes it under the
+        BankType key of the Erosion section. The standard library config
+        parser only accepts string values for section options, so the index
+        must be converted to a string before assignment; otherwise the
+        assignment raises a TypeError saying option values must be strings.
+
+        What this test checks:
+            * Building the Erosion section runs to completion without raising
+              a TypeError when the Bank-Type / Constant branch is exercised.
+            * The stored value of BankType equals the string "2" for an index
+              of 2. A non-zero index is used so that a regression which drops
+              the index or hard-codes "0" would also be caught.
+            * The stored value is an instance of str, guarding against any
+              future change that assigns the raw integer.
+        """
+        state = mock_state_erosion(classes="Bank Type")
+        state["bankTypeSelect"].currentIndex.return_value = 2
+        exporter = ConfigurationExporter(state)
+        exporter._build_erosion_section()
+        section = exporter.config["Erosion"]
+        assert section["BankType"] == "2"
+        assert isinstance(section["BankType"], str)
+
+    def test_per_level_ship_type_constant_writes_string_index_plus_one(
+        self, mock_state_erosion
+    ):
+        """Verify per-level ShipType is serialized as the string of (index + 1) in the Constant branch.
+
+        For each discharge level n, when the per-level ship-type selector for
+        that level is set to Constant, the discharge-levels builder writes the
+        string of the combo-box current index plus one under the ShipTypeN
+        key of the Erosion section. The plus-one offset translates the
+        zero-based combo-box index into the one-based ship-type identifier
+        expected by the configuration file format. The result must be
+        converted to a string because the standard library config parser only
+        accepts string values for section options.
+
+        What this test checks:
+            * Building the Erosion section runs to completion without raising
+              a TypeError when the per-level Constant branch is exercised.
+            * The stored value of ShipType1 equals the string "3" for an index
+              of 2. A non-zero index pins both the string conversion and the
+              plus-one arithmetic, so a regression to either would be caught.
+            * The stored value is an instance of str, not int.
+        """
+        per_level = {"1_shipTypeType": "Constant"}
+        state = mock_state_erosion(nlevel=1, per_level=per_level)
+        state["1_shipTypeSelect"].currentIndex.return_value = 2
+        exporter = ConfigurationExporter(state)
+        exporter._build_erosion_section()
+        section = exporter.config["Erosion"]
+        assert section["ShipType1"] == "3"
+        assert isinstance(section["ShipType1"], str)
