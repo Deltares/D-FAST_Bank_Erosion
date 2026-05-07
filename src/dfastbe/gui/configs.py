@@ -239,13 +239,13 @@ class ConfigurationExporter:
         nbank = self.state["searchLines"].topLevelItemCount()
         section["NBank"] = str(nbank)
 
-        dlines = "[ "
+        distances: list[str] = []
         for i in range(nbank):
-            section[f"Line{i + 1}"] = self.state["searchLines"].topLevelItem(i).text(1)
-            dlines += self.state["searchLines"].topLevelItem(i).text(2) + ", "
+            item = self.state["searchLines"].topLevelItem(i)
+            section[f"Line{i + 1}"] = item.text(1)
+            distances.append(item.text(2))
 
-        dlines = dlines[:-2] + " ]"
-        section["DLines"] = dlines
+        section["DLines"] = f"[ {', '.join(distances)} ]" if distances else "[ ]"
 
     def _build_erosion_section(self) -> None:
         """Build the [Erosion] section of the configuration."""

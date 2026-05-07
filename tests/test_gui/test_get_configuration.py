@@ -125,6 +125,7 @@ class TestConfigurationExporter:
     @pytest.mark.parametrize("nbank,dlines,expected_dlines", [
         (2, [10, 20], "[ 10, 20 ]"),
         (1, [42], "[ 42 ]"),
+        (0, [], "[ ]"),
     ])
     def test_build_detect_section_nbank_lines_dlines(self, mock_state_detect, nbank, dlines, expected_dlines):
         state = mock_state_detect(nbank=nbank, dlines=dlines)
@@ -135,6 +136,80 @@ class TestConfigurationExporter:
         for i in range(nbank):
             assert section[f"Line{i+1}"] == f"line{i+1}.xyc"
         assert section["DLines"] == expected_dlines
+
+    def test_build_detect_section_zero_banks_emits_no_line_keys(self, mock_state_detect):
+        """Verify that the Detect section contains no per-bank Line keys when there are zero banks.
+
+        When the search-lines widget reports zero entries, the detect builder
+        must skip the per-bank loop entirely. The only Detect-section keys
+        produced should be the four scalar keys SimFile, WaterDepth, NBank and
+        DLines. Producing a Line1 (or any other Line<n>) key with no bank to
+        back it would create a malformed configuration.
+
+        What this test checks:
+            * Building the Detect section runs to completion.
+            * No key whose name starts with the literal prefix Line is
+              present in the resulting section, regardless of how the section
+              is iterated.
+            * The four scalar keys are still populated. NBank reads zero and
+              DLines reads as the empty-list literal.
+        """
+        state = mock_state_detect(nbank=0, dlines=[])
+        exporter = ConfigurationExporter(state)
+        exporter._build_detect_section()
+        section = exporter.config["Detect"]
+        assert section["NBank"] == "0"
+        assert section["DLines"] == "[ ]"
+        assert section["SimFile"] == "sim.nc"
+        assert section["WaterDepth"] == "0.0"
+        line_keys = [key for key in section.keys() if key.startswith("Line")]
+        assert line_keys == []
+
+    def test_build_erosion_section_zero_levels_emits_no_per_level_keys(
+        self, mock_state_erosion
+    ):
+        """Verify that the Erosion section contains no per-level keys when there are zero levels.
+
+        When the discharges widget reports zero entries, the discharge-levels
+        builder writes NLevel and RefLevel but skips the per-level loop. None
+        of the per-level keys (SimFile<n>, PDischarge<n>, ShipType<n>,
+        VShip<n>, NShip<n>, NWaves<n>, Draught<n>, Slope<n>, Reed<n>,
+        EroVol<n>) should appear in the resulting section.
+
+        What this test checks:
+            * Building the full Erosion section runs to completion.
+            * NLevel reads zero and RefLevel still reads from the validator
+              field, demonstrating that the two scalar keys are written
+              before the per-level loop is reached.
+            * No key matches any of the per-level prefixes followed by a
+              digit. This guards against a future refactor that mistakenly
+              moves a per-level write outside the loop body.
+        """
+        state = mock_state_erosion(nlevel=0)
+        exporter = ConfigurationExporter(state)
+        exporter._build_erosion_section()
+        section = exporter.config["Erosion"]
+        assert section["NLevel"] == "0"
+        assert section["RefLevel"] == "3"
+        per_level_prefixes = (
+            "SimFile",
+            "PDischarge",
+            "ShipType",
+            "VShip",
+            "NShip",
+            "NWaves",
+            "Draught",
+            "Slope",
+            "Reed",
+            "EroVol",
+        )
+        offending = [
+            key
+            for key in section.keys()
+            for prefix in per_level_prefixes
+            if key.startswith(prefix) and key[len(prefix):].isdigit()
+        ]
+        assert offending == []
 
     @pytest.mark.parametrize(
         "ship_type,select_index,edit_text,expected_shiptype",
