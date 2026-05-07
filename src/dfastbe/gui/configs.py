@@ -25,6 +25,12 @@ __all__ = [
     "bankStrengthSwitch",
     "ConfigurationLoader",
 ]
+
+BANK_TYPE = "Bank Type"
+CRITICAL_SHEAR_STRESS = "Critical Shear Stress"
+CONSTANT = "Constant"
+
+
 @dataclass
 class ConfigurationLoader:
     """Load a configuration file and apply its values to the GUI state.
@@ -289,11 +295,11 @@ class ConfigurationLoader:
         self.state_management["bankShearEditFile"].setEnabled(not use_bank_type)
 
         if use_bank_type:
-            self.state_management["strengthPar"].setCurrentText("Bank Type")
+            self.state_management["strengthPar"].setCurrentText(BANK_TYPE)
             bankStrengthSwitch()
             self._load_param("bankType", "Erosion", "BankType")
         else:
-            self.state_management["strengthPar"].setCurrentText("Critical Shear Stress")
+            self.state_management["strengthPar"].setCurrentText(CRITICAL_SHEAR_STRESS)
             bankStrengthSwitch()
             self._load_param("bankShear", "Erosion", "BankType")
 
@@ -332,7 +338,7 @@ class ConfigurationLoader:
 
         try:
             val = float(config_value)
-            cast(QComboBox, self.state_management[field + "Type"]).setCurrentText("Constant")
+            cast(QComboBox, self.state_management[field + "Type"]).setCurrentText(CONSTANT)
             if field + "Select" in self.state_management:
                 int_value = int(val)
                 if field == "shipType":
@@ -397,7 +403,7 @@ def get_configuration() -> ConfigParser:
     config["Erosion"]["EroVol"] = state_management["eroVol"].text()
     config["Erosion"]["EroVolEqui"] = state_management["eroVolEqui"].text()
 
-    if state_management["shipTypeType"].currentText() == "Constant":
+    if state_management["shipTypeType"].currentText() == CONSTANT:
         config["Erosion"]["ShipType"] = str(
             state_management["shipTypeSelect"].currentIndex() + 1
         )  # index 0 -> shipType 1
@@ -410,9 +416,9 @@ def get_configuration() -> ConfigParser:
     config["Erosion"]["Wave0"] = state_management["wavePar0Edit"].text()
     config["Erosion"]["Wave1"] = state_management["wavePar1Edit"].text()
 
-    if state_management["strengthPar"].currentText() == "Bank Type":
+    if state_management["strengthPar"].currentText() == BANK_TYPE:
         config["Erosion"]["Classes"] = "true"
-        if state_management["bankTypeType"].currentText() == "Constant":
+        if state_management["bankTypeType"].currentText() == CONSTANT:
             config["Erosion"]["BankType"] = state_management["bankTypeSelect"].currentIndex()
         else:
             config["Erosion"]["BankType"] = state_management["bankTypeEdit"].text()
@@ -440,7 +446,7 @@ def get_configuration() -> ConfigParser:
             state_management["discharges"].topLevelItem(i).text(2)
         )
         if state_management[istr + "_shipTypeType"].currentText() != "Use Default":
-            if state_management[istr + "_shipTypeType"].currentText() == "Constant":
+            if state_management[istr + "_shipTypeType"].currentText() == CONSTANT:
                 config["Erosion"]["ShipType" + istr] = (
                         state_management[istr + "_shipTypeSelect"].currentIndex() + 1
                 )  # index 0 -> shipType 1
@@ -471,7 +477,7 @@ def bankStrengthSwitch() -> None:
     """Implements the dialog settings depending on the bank strength specification method."""
     state_management = StateStore.instance()
     type = state_management["strengthPar"].currentText()
-    if type == "Bank Type":
+    if type == BANK_TYPE:
         state_management["bankType"].setEnabled(True)
         state_management["bankTypeType"].setEnabled(True)
         typeUpdatePar("bankType")
@@ -480,7 +486,7 @@ def bankStrengthSwitch() -> None:
         state_management["bankShearEdit"].setText("")
         state_management["bankShearEdit"].setEnabled(False)
         state_management["bankShearEditFile"].setEnabled(False)
-    elif type == "Critical Shear Stress":
+    elif type == CRITICAL_SHEAR_STRESS:
         state_management["bankShear"].setEnabled(True)
         state_management["bankShearType"].setEnabled(True)
         state_management["bankShearEdit"].setEnabled(True)
