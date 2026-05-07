@@ -333,7 +333,7 @@ class ConfigurationLoader:
         try:
             val = float(config_value)
             cast(QComboBox, self.state_management[field + "Type"]).setCurrentText("Constant")
-            if field + "Select" in self.state_management.keys():
+            if field + "Select" in self.state_management:
                 int_value = int(val)
                 if field == "shipType":
                     int_value = int_value - 1

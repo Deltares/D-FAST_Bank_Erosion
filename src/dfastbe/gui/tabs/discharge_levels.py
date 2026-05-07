@@ -61,7 +61,7 @@ class DischargeLevelsTabs:
             try:
                 val = float(value_str)
                 self.state_management[field + "Type"].setCurrentText("Constant")
-                if field + "Select" in self.state_management.keys():
+                if field + "Select" in self.state_management:
                     index = int(val) - 1  # shipType 1 -> index 0
                     self.state_management[field + "Select"].setCurrentIndex(index)
                 else:
