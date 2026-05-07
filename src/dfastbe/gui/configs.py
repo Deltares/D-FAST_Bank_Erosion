@@ -314,7 +314,13 @@ class ConfigurationLoader:
         else:
             self.state_management[field + "Active"].setChecked(False)
 
-    def _load_param(self, field: str, group: str, key: str, default: str = "??") -> None:
+    def _load_param(
+            self,
+            field: str,
+            group: str,
+            key: str,
+            default: str | None = None
+    ) -> None:
         """Load a general parameter from configuration.
 
         Args:
@@ -335,7 +341,7 @@ class ConfigurationLoader:
                 cast(QComboBox, self.state_management[field + "Select"]).setCurrentIndex(int_value)
             else:
                 cast(QLineEdit, self.state_management[field + "Edit"]).setText(config_value)
-        except ValueError:
+        except (ValueError, TypeError):
             cast(QComboBox, self.state_management[field + "Type"]).setCurrentText("Variable")
             cast(QLineEdit, self.state_management[field + "Edit"]).setText(config_value)
 

@@ -551,3 +551,102 @@ class TestConfigurationLoader:
             mock_state_store["refLevel"].validator().setTop.assert_called_once_with(n_level)
 
             mock_state_store["refLevel"].setText.assert_called_once_with("1")
+
+    @pytest.mark.parametrize(
+        "value, expected_active, expected_width_set",
+        [
+            (5.0, True, "5.0"),
+            (0.5, True, "0.5"),
+            (0.0, False, None),
+            (-1.0, False, None),
+        ],
+        ids=["positive_value", "small_positive", "zero", "negative"],
+    )
+    def test_load_filter_sets_state_based_on_value(
+        self,
+        config_loader,
+        mock_state_store,
+        value,
+        expected_active,
+        expected_width_set,
+    ):
+        """Test that _load_filter activates and sets width only for positive values."""
+        mock_state_store["velFilterActive"].setChecked.reset_mock()
+        mock_state_store["velFilterWidth"].setText.reset_mock()
+
+        config_loader.config_file.get_float = Mock(return_value=value)
+
+        config_loader._load_filter("velFilter", "Erosion", "VelFilterDist")
+
+        config_loader.config_file.get_float.assert_called_once_with(
+            "Erosion", "VelFilterDist", 0.0
+        )
+        mock_state_store["velFilterActive"].setChecked.assert_called_once_with(expected_active)
+        if expected_active:
+            mock_state_store["velFilterWidth"].setText.assert_called_once_with(expected_width_set)
+        else:
+            mock_state_store["velFilterWidth"].setText.assert_not_called()
+
+    def test_load_param_constant_with_select_non_shiptype(
+        self, config_loader, mock_state_store
+    ):
+        """Test _load_param sets Constant type and uses select index for non-shipType field."""
+        # bankType has a *Select widget in the store
+        mock_select = Mock()
+        mock_state_store["bankTypeSelect"] = mock_select
+        mock_state_store["bankTypeType"].setCurrentText.reset_mock()
+
+        config_loader.config_file.get_str = Mock(return_value="2")
+
+        config_loader._load_param("bankType", "Erosion", "BankType", "0")
+
+        config_loader.config_file.get_str.assert_called_once_with("Erosion", "BankType", "0")
+        mock_state_store["bankTypeType"].setCurrentText.assert_called_once_with("Constant")
+        # Non-shipType: index = int(val), no subtraction
+        mock_select.setCurrentIndex.assert_called_once_with(2)
+
+    def test_load_param_constant_with_select_shiptype_subtracts_one(
+        self, config_loader, mock_state_store
+    ):
+        """Test _load_param subtracts 1 from the index when field is shipType."""
+        mock_state_store["shipTypeSelect"].setCurrentIndex.reset_mock()
+        mock_state_store["shipTypeType"].setCurrentText.reset_mock()
+
+        config_loader.config_file.get_str = Mock(return_value="3")
+
+        config_loader._load_param("shipType", "Erosion", "ShipType", "1")
+
+        mock_state_store["shipTypeType"].setCurrentText.assert_called_once_with("Constant")
+
+        # When 'shipType' is passed the int_value will be decreased by 1
+        mock_state_store["shipTypeSelect"].setCurrentIndex.assert_called_once_with(2)
+
+    def test_load_param_constant_without_select_sets_edit(
+        self, config_loader, mock_state_store
+    ):
+        """Test _load_param writes the value to the Edit field when no Select widget exists."""
+        # bankProtect has no *Select widget in the store
+        assert "bankProtectSelect" not in mock_state_store
+        mock_state_store["bankProtectType"].setCurrentText.reset_mock()
+        mock_state_store["bankProtectEdit"].setText.reset_mock()
+
+        config_loader.config_file.get_str = Mock(return_value="-500.0")
+
+        config_loader._load_param("bankProtect", "Erosion", "ProtectionLevel", "-1000")
+
+        mock_state_store["bankProtectType"].setCurrentText.assert_called_once_with("Constant")
+        mock_state_store["bankProtectEdit"].setText.assert_called_once_with("-500.0")
+
+    def test_load_param_variable_value_sets_edit(
+        self, config_loader, mock_state_store
+    ):
+        """Test _load_param sets Variable type and writes the raw value when not numeric."""
+        mock_state_store["bankSlopeType"].setCurrentText.reset_mock()
+        mock_state_store["bankSlopeEdit"].setText.reset_mock()
+
+        config_loader.config_file.get_str = Mock(return_value="slope_file.xyc")
+
+        config_loader._load_param("bankSlope", "Erosion", "Slope", "20.0")
+
+        mock_state_store["bankSlopeType"].setCurrentText.assert_called_once_with("Variable")
+        mock_state_store["bankSlopeEdit"].setText.assert_called_once_with("slope_file.xyc")
