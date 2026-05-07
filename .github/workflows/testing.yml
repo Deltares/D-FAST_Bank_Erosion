@@ -24,7 +24,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           install-groups: dev
-          install-extras: gui
 
       - name: Test with pytest
         run: poetry run pytest --cov --cov=src/dfastbe --cov-report term-missing -m "not binaries"
