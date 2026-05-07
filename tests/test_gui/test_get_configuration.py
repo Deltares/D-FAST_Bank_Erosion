@@ -5,7 +5,7 @@ from dfastbe.gui.configs import ConfigurationExporter
 class TestConfigurationExporter:
     @pytest.fixture
     def mock_state_general(self):
-        def _make(overrides=None):
+        def _make():
             state = {}
             state["chainFileEdit"] = MagicMock(text=MagicMock(return_value="river.km"))
             state["startRange"] = MagicMock(text=MagicMock(return_value="0"))
@@ -19,8 +19,6 @@ class TestConfigurationExporter:
             state["figureDirEdit"] = MagicMock(text=MagicMock(return_value="figures"))
             state["closePlotsEdit"] = MagicMock(isChecked=MagicMock(return_value=False))
             state["debugOutputEdit"] = MagicMock(isChecked=MagicMock(return_value=True))
-            if overrides:
-                state.update(overrides)
             return state
         return _make
 
