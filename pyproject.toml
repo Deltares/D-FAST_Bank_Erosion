@@ -1,58 +1,75 @@
-[tool.poetry]
+[project]
 name = "d-fast-bank-erosion"
 version = "3.0.1"
 description = "A tool to perform a bank erosion analysis based on a number of D-Flow FM simulations."
-authors = ["Stichting Deltares <delft3d.support@deltares.nl>"]
 readme = "README.md"
-packages = [{ include = "dfastbe", from= "src"}]
+requires-python = ">=3.11.0,<3.15"
+authors = [
+    { name = "Stichting Deltares", email = "delft3d.support@deltares.nl" },
+]
+dependencies = [
+    "numpy>=1.26.4",
+    "netcdf4>=1.7.3,<2.0.0",
+    "pandas>=1.5.3",
+    "matplotlib>=3.8.4,<4.0.0",
+    "geopandas>=0.14.4",
+    "shapely>=2.1.0,<3.0.0",
+    # Pin to >=12.2.0 to satisfy multiple CVEs (CVE-2026-25990/40192/42308-42311) and the
+    # earlier 11.2.x CWE-122 advisory in one constraint.
+    "Pillow>=12.2.0",
+    "dfastio @ git+https://github.com/Deltares/D-FAST_Commons.git@0.1.0",
+    "pyside6>=6.10.1,<7.0.0",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.11.0,<3.15"
-numpy = ">=1.26.4"
-netcdf4 = "^1.7.3"
-pandas = ">=1.5.3"
-matplotlib = "^3.8.4"
-geopandas = ">=0.14.4"
-shapely = "^2.1.0"
-Pillow = "<11.2.0 || >=11.3.0"  # Allow only Pillow versions below 11.2.0 or 11.3.0 and above to avoid CWE-122 vulnerability
-dfastio = { git = "https://github.com/Deltares/D-FAST_Commons.git", rev = "0.1.0" }
-certifi = "2025.1.31"
+[project.scripts]
+dfastbe = "dfastbe.__main__:main"
 
-[tool.poetry.group.gui.dependencies]
-pyside6 = "^6.10.1"
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3,<10.0.0",
+    "pytest-cov>=7.0.0,<8.0.0",
+    "pyfakefs>=5.1.0,<6.0.0",
+    "teamcity-messages>=1.32,<2.0.0",
+    "pre-commit>=4.2.0,<5.0.0",
+    "commitizen>=4.8.3,<5.0.0",
+]
+docs = [
+    "mkdocs>=1.2,<2.0.0",
+    "mkdocs-material>=9.5,<10.0.0",
+    "mkdocstrings[python]>=0.27.0,<0.28.0",
+    # Pin <2.0: griffe 2.0 renamed its import package to `griffelib`, breaking
+    # mkdocstrings-python 1.13.0 (`from griffe import ...`). Drop this once
+    # mkdocstrings is bumped to a release that depends on griffelib>=2.0.
+    "griffe<2.0",
+    "pymdown-extensions>=10.12,<11.0.0",
+    "mkdocs-autorefs>=1.2,<2.0.0",
+    "mkdocs-macros-plugin>=1.3.7,<2.0.0",
+    "mkdocs-table-reader-plugin>=3.1.0,<4.0.0",
+    "mkdocs-jupyter>=0.25.1,<0.26.0",
+    "mkdocs-mermaid2-plugin>=1.2.1,<2.0.0",
+    "mike>=2.1.3,<3.0.0",
+    "jupyter-contrib-nbextensions>=0.7.0,<0.8.0",
+    # Pinned <7.0 because Notebook 7 dropped the classic frontend that
+    # jupyter-contrib-nbextensions plugs into.
+    "notebook<7.0",
+]
+binary = [
+    "cftime>=1.6.3",
+    "pyproj>=3.4.1,<4.0.0",
+    "nuitka>=2.0.0,<3.0.0",
+    "imageio>=2.33.1,<3.0.0",
+    "fiona>=1.10.1,<2.0.0",
+    "pytz>=2020.1",
+    # Pinned exactly because the Nuitka build script (BuildScripts/BuildDfastbe.bat
+    # + Move_Libs.bat) bundles `cacert.pem` into the standalone exe by path. certifi
+    # is also a transitive of netcdf4/pyogrio/pyproj/requests, so the runtime gets
+    # it regardless — this constraint exists only to fix the version that ships in
+    # the binary distribution.
+    "certifi==2025.1.31",
+]
 
-[tool.poetry.group.binary.dependencies]
-cftime  = ">=1.6.3"
-pyproj = "^3.4.1"
-nuitka = "^2.0.0"
-imageio = "^2.33.1"
-fiona = "^1.10.1"
-pytz = ">=2020.1"
-
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.2.1"
-pytest-cov = "^6.0.0"
-pyfakefs = "^5.1.0"
-teamcity-messages = "^1.32"
-pre-commit = "^4.2.0"
-commitizen = "^4.8.3"
-
-[tool.poetry.group.docs.dependencies]
-mkdocs = "^1.2"
-mkdocs-material = "^9.5"
-mkdocstrings = {extras = ["python"], version = "^0.27.0"}
-pymdown-extensions = "^10.12"
-mkdocs-autorefs = "^1.2"
-mkdocs-macros-plugin = "^1.3.7"
-mkdocs-table-reader-plugin = "^3.1.0"
-mkdocs-jupyter = "^0.25.1"
-mkdocs-mermaid2-plugin = "^1.2.1"
-mike = "^2.1.3"
-jupyter-contrib-nbextensions = "^0.7.0"
-notebook = "<7.0"
-
-[tool.poetry.scripts]
-dfastbe = 'dfastbe.__main__:main'
+[tool.poetry]
+packages = [{ include = "dfastbe", from = "src" }]
 
 
 [tool.coverage.run]
@@ -81,11 +98,8 @@ multi_line_output = 3
 
 [tool.commitizen]
 name = "cz_conventional_commits"
-version_provider = "poetry"
+version_provider = "pep621"
 tag_format = "$version"
-version_files = [
-    "src/dfastbe/__init__.py:__version__",
-]
 changelog_file = "docs/mkdocs/change-log.md"
 update_changelog_on_bump = true
 changelog_incremental = true
@@ -109,5 +123,5 @@ markers = [
 ]
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=2.0.0"]
 build-backend = "poetry.core.masonry.api"
