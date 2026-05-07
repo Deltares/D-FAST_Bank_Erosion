@@ -2,7 +2,7 @@ from __future__ import annotations
 import os
 from typing import cast
 from pathlib import Path
-from configparser import ConfigParser
+from configparser import ConfigParser, SectionProxy
 from PySide6.QtWidgets import (
     QTreeWidgetItem,
     QComboBox,
@@ -275,7 +275,7 @@ class ConfigurationExporter:
         # Discharge levels
         self._build_erosion_levels(section)
 
-    def _build_ship_parameters(self, section) -> None:
+    def _build_ship_parameters(self, section: SectionProxy) -> None:
         """Build ship-related parameters in the Erosion section.
 
         Args:
@@ -295,7 +295,7 @@ class ConfigurationExporter:
         section["Wave0"] = self.state["wavePar0Edit"].text()
         section["Wave1"] = self.state["wavePar1Edit"].text()
 
-    def _build_bank_strength_parameters(self, section) -> None:
+    def _build_bank_strength_parameters(self, section: SectionProxy) -> None:
         """Build bank strength parameters in the Erosion section.
 
         Args:
@@ -315,7 +315,7 @@ class ConfigurationExporter:
         section["Slope"] = self.state["bankSlopeEdit"].text()
         section["Reed"] = self.state["bankReedEdit"].text()
 
-    def _build_filters(self, section) -> None:
+    def _build_filters(self, section: SectionProxy) -> None:
         """Build filter parameters in the Erosion section.
 
         Args:
@@ -326,7 +326,7 @@ class ConfigurationExporter:
         if self.state["bedFilterActive"].isChecked():
             section["BedFilterDist"] = self.state["bedFilterWidth"].text()
 
-    def _build_erosion_levels(self, section) -> None:
+    def _build_erosion_levels(self, section: SectionProxy) -> None:
         """Build discharge level parameters in the Erosion section.
 
         Args:
