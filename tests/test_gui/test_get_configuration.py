@@ -7,8 +7,10 @@ section (via the private _build_* helpers) and end-to-end (via the public
 build method).
 """
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
 from dfastbe.gui.configs import ConfigurationExporter
 
 
@@ -44,14 +46,14 @@ class TestConfigurationExporter:
             state = {}
             state["simFileEdit"] = MagicMock(text=MagicMock(return_value="sim.nc"))
             state["waterDepth"] = MagicMock(text=MagicMock(return_value="0.0"))
-            searchLines = MagicMock()
-            searchLines.topLevelItemCount.return_value = nbank
+            search_lines = MagicMock()
+            search_lines.topLevelItemCount.return_value = nbank
             def make_item(i):
                 item = MagicMock()
                 item.text.side_effect = lambda idx: [str(i+1), f"line{i+1}.xyc", str((dlines or [10, 20])[i])][idx]
                 return item
-            searchLines.topLevelItem.side_effect = lambda i: make_item(i)
-            state["searchLines"] = searchLines
+            search_lines.topLevelItem.side_effect = lambda i: make_item(i)
+            state["searchLines"] = search_lines
             return state
         return _make
 

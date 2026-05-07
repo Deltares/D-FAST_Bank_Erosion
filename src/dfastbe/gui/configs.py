@@ -21,6 +21,8 @@ __all__ = [
     "ConfigurationExporter",
 ]
 
+USE_DEFAULT = "Use Default"
+
 
 def load_configuration(config_path: Path) -> None:
     """Open a configuration file and update the GUI accordingly.
@@ -326,6 +328,16 @@ class ConfigurationExporter:
         if self.state["bedFilterActive"].isChecked():
             section["BedFilterDist"] = self.state["bedFilterWidth"].text()
 
+    _OPTIONAL_PER_LEVEL_PARAMS = (
+        # (type_state_suffix, edit_state_suffix, section_key_prefix)
+        ("_shipVelocType", "_shipVelocEdit", "VShip"),
+        ("_nShipsType", "_nShipsEdit", "NShip"),
+        ("_shipNWavesType", "_shipNWavesEdit", "NWaves"),
+        ("_shipDraughtType", "_shipDraughtEdit", "Draught"),
+        ("_bankSlopeType", "_bankSlopeEdit", "Slope"),
+        ("_bankReedType", "_bankReedEdit", "Reed"),
+    )
+
     def _build_erosion_levels(self, section: SectionProxy) -> None:
         """Build discharge level parameters in the Erosion section.
 
@@ -337,39 +349,45 @@ class ConfigurationExporter:
         section["RefLevel"] = self.state["refLevel"].text()
 
         for i in range(nlevel):
-            n = i + 1
-            section[f"SimFile{n}"] = self.state["discharges"].topLevelItem(i).text(1)
-            section[f"PDischarge{n}"] = self.state["discharges"].topLevelItem(i).text(2)
+            self._build_single_erosion_level(section, i + 1)
 
-            ship_type_kind = self.state[f"{n}_shipTypeType"].currentText()
-            if ship_type_kind != "Use Default":
-                if ship_type_kind == "Constant":
-                    section[f"ShipType{n}"] = str(
-                        self.state[f"{n}_shipTypeSelect"].currentIndex() + 1
-                    )  # index 0 -> shipType 1
-                else:
-                    section[f"ShipType{n}"] = self.state[f"{n}_shipTypeEdit"].text()
+    def _build_single_erosion_level(self, section: SectionProxy, n: int) -> None:
+        """Populate the per-level keys for one discharge level.
 
-            if self.state[f"{n}_shipVelocType"].currentText() != "Use Default":
-                section[f"VShip{n}"] = self.state[f"{n}_shipVelocEdit"].text()
+        Args:
+            section: The ConfigParser section to populate.
+            n: One-based discharge level index.
+        """
+        item = self.state["discharges"].topLevelItem(n - 1)
+        section[f"SimFile{n}"] = item.text(1)
+        section[f"PDischarge{n}"] = item.text(2)
 
-            if self.state[f"{n}_nShipsType"].currentText() != "Use Default":
-                section[f"NShip{n}"] = self.state[f"{n}_nShipsEdit"].text()
+        self._write_optional_ship_type(section, n)
 
-            if self.state[f"{n}_shipNWavesType"].currentText() != "Use Default":
-                section[f"NWaves{n}"] = self.state[f"{n}_shipNWavesEdit"].text()
+        for type_suffix, edit_suffix, key in self._OPTIONAL_PER_LEVEL_PARAMS:
+            if self.state[f"{n}{type_suffix}"].currentText() != USE_DEFAULT:
+                section[f"{key}{n}"] = self.state[f"{n}{edit_suffix}"].text()
 
-            if self.state[f"{n}_shipDraughtType"].currentText() != "Use Default":
-                section[f"Draught{n}"] = self.state[f"{n}_shipDraughtEdit"].text()
+        ero_vol = self.state[f"{n}_eroVolEdit"].text()
+        if ero_vol != "":
+            section[f"EroVol{n}"] = ero_vol
 
-            if self.state[f"{n}_bankSlopeType"].currentText() != "Use Default":
-                section[f"Slope{n}"] = self.state[f"{n}_bankSlopeEdit"].text()
+    def _write_optional_ship_type(self, section: SectionProxy, n: int) -> None:
+        """Write the optional per-level ShipType key when the user overrides the default.
 
-            if self.state[f"{n}_bankReedType"].currentText() != "Use Default":
-                section[f"Reed{n}"] = self.state[f"{n}_bankReedEdit"].text()
-
-            if self.state[f"{n}_eroVolEdit"].text() != "":
-                section[f"EroVol{n}"] = self.state[f"{n}_eroVolEdit"].text()
+        Args:
+            section: The ConfigParser section to populate.
+            n: One-based discharge level index.
+        """
+        ship_type_kind = self.state[f"{n}_shipTypeType"].currentText()
+        if ship_type_kind == USE_DEFAULT:
+            return
+        if ship_type_kind == "Constant":
+            section[f"ShipType{n}"] = str(
+                self.state[f"{n}_shipTypeSelect"].currentIndex() + 1
+            )  # index 0 -> shipType 1
+        else:
+            section[f"ShipType{n}"] = self.state[f"{n}_shipTypeEdit"].text()
 
 
 def get_configuration() -> ConfigParser:
@@ -427,7 +445,7 @@ def setOptParam(field: str, config, group: str, key: str) -> None:
     config_file = ConfigFile(config)
     str = config_file.get_str(group, key, "")
     if str == "":
-        state_management[field + "Type"].setCurrentText("Use Default")
+        state_management[field + "Type"].setCurrentText(USE_DEFAULT)
         state_management[field + "Edit"].setText("")
     else:
         try:
