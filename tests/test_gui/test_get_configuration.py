@@ -5,22 +5,20 @@ from dfastbe.gui.configs import ConfigurationExporter
 class TestConfigurationExporter:
     @pytest.fixture
     def mock_state_general(self):
-        def _make():
-            state = {}
-            state["chainFileEdit"] = MagicMock(text=MagicMock(return_value="river.km"))
-            state["startRange"] = MagicMock(text=MagicMock(return_value="0"))
-            state["endRange"] = MagicMock(text=MagicMock(return_value="100"))
-            state["bankDirEdit"] = MagicMock(text=MagicMock(return_value="bankdir"))
-            state["bankFileName"] = MagicMock(text=MagicMock(return_value="bankfile.txt"))
-            state["makePlotsEdit"] = MagicMock(isChecked=MagicMock(return_value=True))
-            state["savePlotsEdit"] = MagicMock(isChecked=MagicMock(return_value=False))
-            state["saveZoomPlotsEdit"] = MagicMock(isChecked=MagicMock(return_value=True))
-            state["zoomPlotsRangeEdit"] = MagicMock(text=MagicMock(return_value="2.5"))
-            state["figureDirEdit"] = MagicMock(text=MagicMock(return_value="figures"))
-            state["closePlotsEdit"] = MagicMock(isChecked=MagicMock(return_value=False))
-            state["debugOutputEdit"] = MagicMock(isChecked=MagicMock(return_value=True))
-            return state
-        return _make
+        state = {}
+        state["chainFileEdit"] = MagicMock(text=MagicMock(return_value="river.km"))
+        state["startRange"] = MagicMock(text=MagicMock(return_value="0"))
+        state["endRange"] = MagicMock(text=MagicMock(return_value="100"))
+        state["bankDirEdit"] = MagicMock(text=MagicMock(return_value="bankdir"))
+        state["bankFileName"] = MagicMock(text=MagicMock(return_value="bankfile.txt"))
+        state["makePlotsEdit"] = MagicMock(isChecked=MagicMock(return_value=True))
+        state["savePlotsEdit"] = MagicMock(isChecked=MagicMock(return_value=False))
+        state["saveZoomPlotsEdit"] = MagicMock(isChecked=MagicMock(return_value=True))
+        state["zoomPlotsRangeEdit"] = MagicMock(text=MagicMock(return_value="2.5"))
+        state["figureDirEdit"] = MagicMock(text=MagicMock(return_value="figures"))
+        state["closePlotsEdit"] = MagicMock(isChecked=MagicMock(return_value=False))
+        state["debugOutputEdit"] = MagicMock(isChecked=MagicMock(return_value=True))
+        return state
 
     @pytest.fixture
     def mock_state_detect(self):
@@ -103,8 +101,7 @@ class TestConfigurationExporter:
         return _make
 
     def test_build_general_section_fields_and_defaults(self, mock_state_general):
-        state = mock_state_general()
-        exporter = ConfigurationExporter(state)
+        exporter = ConfigurationExporter(mock_state_general)
         exporter._build_general_section()
         section = exporter.config["General"]
         assert section["Version"] == "1.0"
@@ -402,7 +399,7 @@ class TestConfigurationExporter:
               bank-strength parameters, and per-level discharge parameters).
         """
         state = {}
-        state.update(mock_state_general())
+        state.update(mock_state_general)
         state.update(mock_state_detect(nbank=1, dlines=[10]))
         state.update(mock_state_erosion(nlevel=1))
         exporter = ConfigurationExporter(state)
