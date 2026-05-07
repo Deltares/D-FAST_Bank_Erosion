@@ -241,9 +241,9 @@ class ConfigurationExporter:
 
         dlines = "[ "
         for i in range(nbank):
-            istr = str(i + 1)
-            section["Line" + istr] = self.state["searchLines"].topLevelItem(i).text(1)
+            section[f"Line{i + 1}"] = self.state["searchLines"].topLevelItem(i).text(1)
             dlines += self.state["searchLines"].topLevelItem(i).text(2) + ", "
+
         dlines = dlines[:-2] + " ]"
         section["DLines"] = dlines
 
@@ -337,50 +337,39 @@ class ConfigurationExporter:
         section["RefLevel"] = self.state["refLevel"].text()
 
         for i in range(nlevel):
-            istr = str(i + 1)
-            section["SimFile" + istr] = (
-                self.state["discharges"].topLevelItem(i).text(1)
-            )
-            section["PDischarge" + istr] = (
-                self.state["discharges"].topLevelItem(i).text(2)
-            )
+            n = i + 1
+            section[f"SimFile{n}"] = self.state["discharges"].topLevelItem(i).text(1)
+            section[f"PDischarge{n}"] = self.state["discharges"].topLevelItem(i).text(2)
 
-            # Optional ship type parameter
-            if self.state[istr + "_shipTypeType"].currentText() != "Use Default":
-                if self.state[istr + "_shipTypeType"].currentText() == "Constant":
-                    section["ShipType" + istr] = str(
-                        self.state[istr + "_shipTypeSelect"].currentIndex() + 1
+            ship_type_kind = self.state[f"{n}_shipTypeType"].currentText()
+            if ship_type_kind != "Use Default":
+                if ship_type_kind == "Constant":
+                    section[f"ShipType{n}"] = str(
+                        self.state[f"{n}_shipTypeSelect"].currentIndex() + 1
                     )  # index 0 -> shipType 1
                 else:
-                    section["ShipType" + istr] = self.state[istr + "_shipTypeEdit"].text()
+                    section[f"ShipType{n}"] = self.state[f"{n}_shipTypeEdit"].text()
 
-            # Optional velocity parameter
-            if self.state[istr + "_shipVelocType"].currentText() != "Use Default":
-                section["VShip" + istr] = self.state[istr + "_shipVelocEdit"].text()
+            if self.state[f"{n}_shipVelocType"].currentText() != "Use Default":
+                section[f"VShip{n}"] = self.state[f"{n}_shipVelocEdit"].text()
 
-            # Optional number of ships parameter
-            if self.state[istr + "_nShipsType"].currentText() != "Use Default":
-                section["NShip" + istr] = self.state[istr + "_nShipsEdit"].text()
+            if self.state[f"{n}_nShipsType"].currentText() != "Use Default":
+                section[f"NShip{n}"] = self.state[f"{n}_nShipsEdit"].text()
 
-            # Optional number of waves parameter
-            if self.state[istr + "_shipNWavesType"].currentText() != "Use Default":
-                section["NWaves" + istr] = self.state[istr + "_shipNWavesEdit"].text()
+            if self.state[f"{n}_shipNWavesType"].currentText() != "Use Default":
+                section[f"NWaves{n}"] = self.state[f"{n}_shipNWavesEdit"].text()
 
-            # Optional draught parameter
-            if self.state[istr + "_shipDraughtType"].currentText() != "Use Default":
-                section["Draught" + istr] = self.state[istr + "_shipDraughtEdit"].text()
+            if self.state[f"{n}_shipDraughtType"].currentText() != "Use Default":
+                section[f"Draught{n}"] = self.state[f"{n}_shipDraughtEdit"].text()
 
-            # Optional slope parameter
-            if self.state[istr + "_bankSlopeType"].currentText() != "Use Default":
-                section["Slope" + istr] = self.state[istr + "_bankSlopeEdit"].text()
+            if self.state[f"{n}_bankSlopeType"].currentText() != "Use Default":
+                section[f"Slope{n}"] = self.state[f"{n}_bankSlopeEdit"].text()
 
-            # Optional reed parameter
-            if self.state[istr + "_bankReedType"].currentText() != "Use Default":
-                section["Reed" + istr] = self.state[istr + "_bankReedEdit"].text()
+            if self.state[f"{n}_bankReedType"].currentText() != "Use Default":
+                section[f"Reed{n}"] = self.state[f"{n}_bankReedEdit"].text()
 
-            # Optional erosion volume file
-            if self.state[istr + "_eroVolEdit"].text() != "":
-                section["EroVol" + istr] = self.state[istr + "_eroVolEdit"].text()
+            if self.state[f"{n}_eroVolEdit"].text() != "":
+                section[f"EroVol{n}"] = self.state[f"{n}_eroVolEdit"].text()
 
 
 def get_configuration() -> ConfigParser:
