@@ -262,3 +262,43 @@ class TestConfigurationExporter:
         section = exporter.config["Erosion"]
         assert section["ShipType1"] == "3"
         assert isinstance(section["ShipType1"], str)
+
+    def test_build_returns_complete_configuration_with_three_sections_in_order(
+        self, mock_state_general, mock_state_detect, mock_state_erosion
+    ):
+        """Verify build() returns a complete configuration with the expected sections in order.
+
+        The build method is the only public entry point on the exporter and is
+        what the get_configuration helper delegates to when extracting the GUI
+        state into a configuration. Downstream callers depend on a single call
+        producing a fully-populated configuration object.
+
+        What this test checks:
+            * build returns a config parser whose sections are exactly
+              General, Detect and Erosion, in that declaration order.
+            * Each of the three sections contains at least one representative
+              key drawn from the corresponding builder, demonstrating that
+              every per-section builder ran and contributed to the result.
+            * The Erosion section contains keys produced by every nested
+              builder it invokes (basic erosion parameters, ship parameters,
+              bank-strength parameters, and per-level discharge parameters).
+        """
+        state = {}
+        state.update(mock_state_general())
+        state.update(mock_state_detect(nbank=1, dlines=[10]))
+        state.update(mock_state_erosion(nlevel=1))
+        exporter = ConfigurationExporter(state)
+
+        config = exporter.build()
+
+        assert config.sections() == ["General", "Detect", "Erosion"]
+        assert config["General"]["Version"] == "1.0"
+        assert config["General"]["RiverKM"] == "river.km"
+        assert config["Detect"]["NBank"] == "1"
+        assert config["Detect"]["Line1"] == "line1.xyc"
+        assert config["Detect"]["DLines"] == "[ 10 ]"
+        assert config["Erosion"]["TErosion"] == "1"
+        assert config["Erosion"]["VShip"] == "5.0"
+        assert config["Erosion"]["Classes"] == "true"
+        assert config["Erosion"]["NLevel"] == "1"
+        assert config["Erosion"]["SimFile1"] == "sim1.nc"
