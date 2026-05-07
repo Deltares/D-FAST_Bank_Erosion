@@ -1,8 +1,26 @@
+"""Unit tests for the ConfigurationExporter class.
+
+These tests cover the GUI-state-to-configuration export pipeline in
+dfastbe.gui.configs without spinning up a Qt event loop. The state store
+is replaced with plain dicts of MagicMock widgets, exercised both per
+section (via the private _build_* helpers) and end-to-end (via the public
+build method).
+"""
+
 import pytest
 from unittest.mock import MagicMock
 from dfastbe.gui.configs import ConfigurationExporter
 
+
 class TestConfigurationExporter:
+    """Behavioral tests for ConfigurationExporter.
+
+    The fixtures below construct minimal mock state stores for each top-level
+    section (General, Detect, Erosion). Tests either drive a single private
+    builder (for fine-grained failure messages) or call the public build
+    method (to pin the public API contract).
+    """
+
     @pytest.fixture
     def mock_state_general(self):
         state = {}
@@ -85,17 +103,56 @@ class TestConfigurationExporter:
             state["discharges"].topLevelItem.side_effect = lambda i: make_level_item(i)
             state["refLevel"] = MagicMock(text=MagicMock(return_value="3"))
             # Per-level overrides
+            per_level_keys = [
+                "shipTypeType",
+                "shipTypeSelect",
+                "shipTypeEdit",
+                "shipVelocType",
+                "shipVelocEdit",
+                "nShipsType",
+                "nShipsEdit",
+                "shipNWavesType",
+                "shipNWavesEdit",
+                "shipDraughtType",
+                "shipDraughtEdit",
+                "bankSlopeType",
+                "bankSlopeEdit",
+                "bankReedType",
+                "bankReedEdit",
+                "eroVolEdit",
+            ]
+            per_level_type_keys = [
+                "shipTypeType",
+                "shipVelocType",
+                "nShipsType",
+                "shipNWavesType",
+                "shipDraughtType",
+                "bankSlopeType",
+                "bankReedType",
+            ]
+            per_level_edit_keys = [
+                "shipTypeEdit",
+                "shipVelocEdit",
+                "nShipsEdit",
+                "shipNWavesEdit",
+                "shipDraughtEdit",
+                "bankSlopeEdit",
+                "bankReedEdit",
+                "eroVolEdit",
+            ]
+            overrides = per_level or {}
             for i in range(nlevel):
-                istr = str(i+1)
-                for key in ["shipTypeType", "shipTypeSelect", "shipTypeEdit", "shipVelocType", "shipVelocEdit", "nShipsType", "nShipsEdit", "shipNWavesType", "shipNWavesEdit", "shipDraughtType", "shipDraughtEdit", "bankSlopeType", "bankSlopeEdit", "bankReedType", "bankReedEdit", "eroVolEdit"]:
+                istr = str(i + 1)
+                for key in per_level_keys:
                     state[f"{istr}_{key}"] = MagicMock()
-                # Set per-level types to 'Use Default' unless overridden
-                for key in ["shipTypeType", "shipVelocType", "nShipsType", "shipNWavesType", "shipDraughtType", "bankSlopeType", "bankReedType"]:
-                    state[f"{istr}_{key}"].currentText.return_value = (per_level or {}).get(f"{istr}_{key}", "Use Default")
-                # Set per-level edit fields
-                for key in ["shipTypeEdit", "shipVelocEdit", "nShipsEdit", "shipNWavesEdit", "shipDraughtEdit", "bankSlopeEdit", "bankReedEdit", "eroVolEdit"]:
-                    state[f"{istr}_{key}"].text.return_value = (per_level or {}).get(f"{istr}_{key}", "")
-                # For shipTypeSelect
+                for key in per_level_type_keys:
+                    state[f"{istr}_{key}"].currentText.return_value = overrides.get(
+                        f"{istr}_{key}", "Use Default"
+                    )
+                for key in per_level_edit_keys:
+                    state[f"{istr}_{key}"].text.return_value = overrides.get(
+                        f"{istr}_{key}", ""
+                    )
                 state[f"{istr}_shipTypeSelect"].currentIndex.return_value = 0
             return state
         return _make

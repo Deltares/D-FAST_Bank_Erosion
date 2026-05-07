@@ -375,9 +375,7 @@ class ConfigurationExporter:
 def get_configuration() -> ConfigParser:
     """Extract a configuration from the GUI.
 
-    Returns
-    -------
-    config : ConfigParser
+    Returns:
         Configuration for the D-FAST Bank Erosion analysis.
     """
     exporter = ConfigurationExporter(StateStore.instance())
@@ -385,22 +383,16 @@ def get_configuration() -> ConfigParser:
 
 
 def setParam(field: str, config, group: str, key: str, default: str = "??") -> None:
-    """
-    Update the dialog for a general parameter based on configuration file.
+    """Update the dialog for a general parameter based on configuration file.
 
-    Arguments
-    ---------
-    field : str
-        Short name of the parameter.
-    config : configparser.ConfigParser
-        Configuration for the D-FAST Bank Erosion analysis with absolute or relative paths.
-    group : str
-        Name of the group in the configuration.
-    key : str
-        Name of the key in the configuration group.
-    default : str
-        Default string if the group/key pair doesn't exist in the configuration.
-
+    Args:
+        field: Short name of the parameter.
+        config: Configuration for the D-FAST Bank Erosion analysis with absolute
+            or relative paths.
+        group: Name of the group in the configuration.
+        key: Name of the key in the configuration group.
+        default: Default string if the group/key pair doesn't exist in the
+            configuration.
     """
     state_management = StateStore.instance()
     config_file = ConfigFile(config)
@@ -424,16 +416,12 @@ def setParam(field: str, config, group: str, key: str, default: str = "??") -> N
 def setOptParam(field: str, config, group: str, key: str) -> None:
     """Update the dialog for an optional parameter based on configuration file.
 
-    Arguments
-    ---------
-    field : str
-        Short name of the parameter.
-    config : configparser.ConfigParser
-        Configuration for the D-FAST Bank Erosion analysis with absolute or relative paths.
-    group : str
-        Name of the group in the configuration.
-    key : str
-        Name of the key in the configuration group.
+    Args:
+        field: Short name of the parameter.
+        config: Configuration for the D-FAST Bank Erosion analysis with absolute
+            or relative paths.
+        group: Name of the group in the configuration.
+        key: Name of the key in the configuration group.
     """
     state_management = StateStore.instance()
     config_file = ConfigFile(config)
@@ -482,20 +470,14 @@ def bankStrengthSwitch() -> None:
 
 
 def setFilter(field: str, config, group: str, key: str) -> None:
-    """
-    Update the dialog for a filter based on configuration file.
+    """Update the dialog for a filter based on configuration file.
 
-    Arguments
-    ---------
-    field : str
-        Short name of the parameter.
-    config : configparser.ConfigParser
-        Configuration for the D-FAST Bank Erosion analysis with absolute or relative paths.
-    group : str
-        Name of the group in the configuration.
-    key : str
-        Name of the key in the configuration group.
-
+    Args:
+        field: Short name of the parameter.
+        config: Configuration for the D-FAST Bank Erosion analysis with absolute
+            or relative paths.
+        group: Name of the group in the configuration.
+        key: Name of the key in the configuration group.
     """
     state_management = StateStore.instance()
     config_file = ConfigFile(config)
