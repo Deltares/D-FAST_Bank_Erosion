@@ -40,7 +40,7 @@ class GeneralTab(BaseTab):
         general_layout = QFormLayout(general_widget)
         self.tabs.addTab(general_widget, "General")
 
-        addOpenFileRow(general_layout, "chainFile", "Chain File")
+        addOpenFileRow(general_layout, "riverKM", "RiverKM File")
 
         chain_range = QWidget()
         gridly = QGridLayout(chain_range)
