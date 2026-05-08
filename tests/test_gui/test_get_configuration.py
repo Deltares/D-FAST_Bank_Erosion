@@ -26,7 +26,7 @@ class TestConfigurationExporter:
     @pytest.fixture
     def mock_state_general(self):
         state = {}
-        state["chainFileEdit"] = MagicMock(text=MagicMock(return_value="river.km"))
+        state["riverKMEdit"] = MagicMock(text=MagicMock(return_value="river.km"))
         state["startRange"] = MagicMock(text=MagicMock(return_value="0"))
         state["endRange"] = MagicMock(text=MagicMock(return_value="100"))
         state["bankDirEdit"] = MagicMock(text=MagicMock(return_value="bankdir"))
