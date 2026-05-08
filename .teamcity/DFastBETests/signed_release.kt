@@ -14,6 +14,8 @@ object SignedRelease : BuildType({
 
     vcs {
         root(DslContext.settingsRoot)
+        
+        checkoutMode = CheckoutMode.MANUAL
     }
 
     steps {

@@ -1,4 +1,3 @@
-from collections import namedtuple
 from pathlib import Path
 from typing import List
 from unittest.mock import MagicMock, patch
@@ -27,7 +26,7 @@ from dfastbe.bank_erosion.data_models.inputs import (
 )
 from dfastbe.bank_erosion.erosion_calculator import ErosionCalculator
 from dfastbe.bank_erosion.mesh.processor import MeshProcessor
-from dfastbe.cmd import run
+from dfastbe.runner import Runner
 from dfastbe.io.config import ConfigFile
 from dfastbe.io.data_models import LineGeometry
 
@@ -55,15 +54,27 @@ def image_list() -> List[str]:
 
 
 @pytest.mark.e2e
-def test_bank_erosion(image_list: List[str]):
-    file = "erosion"
+@pytest.mark.parametrize(
+    "case, config_file",
+    [
+        ("meuse_manual", "meuse_manual.cfg"),
+        ("meuse_6gen", "Test_Meuse_6gen_km144-247.cfg")
+    ], ids=[
+          "5th gen Meuse short",
+          "6th gen Meuse short",
+    ],
+)
+def test_bank_erosion(image_list: List[str], case: str, config_file: str):
+    folder = f"./tests/data/erosion/{case}/"
     language = "UK"
-    config_file = f"tests/data/{file}/meuse_manual.cfg"
-    run(language, "BANKLINES", config_file)
+    folder_and_config_file = f"{folder}{config_file}"
+    runner = Runner(language, "BANKLINES", folder_and_config_file)
+    runner.run()
     print("Banklines done")
-    run(language, "BANKEROSION", config_file)
+    runner = Runner(language, "BANKEROSION", folder_and_config_file)
+    runner.run()
     print("Bank erosion done")
-    test_path = Path(f"./tests/data/{file}")
+    test_path = Path(folder)
 
     output_dir = test_path / "output/figures"
     reference_dir = test_path / "reference/figures"
@@ -704,6 +715,7 @@ class TestErosion:
             patch(
                 "dfastbe.bank_erosion.bank_erosion.DischargeLevels"
             ) as mock_discharge_levels,
+            patch("dfastbe.bank_erosion.bank_erosion.LogData")
         ):
             flow_erosion_dist = [
                 np.array([7.06542424e-02, 6.75617155e-02, 7.01268742e-02]),

@@ -1,5 +1,5 @@
 """
-Copyright (C) 2020 Stichting Deltares.
+Copyright (C) 2025 Stichting Deltares.
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -30,7 +30,7 @@ from pathlib import Path
 __all__ = ["absolute_path", "relative_path"]
 
 
-def absolute_path(rootdir: str, path: str) -> str:
+def absolute_path(rootdir: str, path: str | Path) -> str:
     """
     Convert a relative path to an absolute path.
 

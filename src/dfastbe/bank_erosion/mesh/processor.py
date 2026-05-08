@@ -15,7 +15,7 @@ from dfastbe.bank_erosion.data_models.calculation import (
 )
 from dfastbe.bank_erosion.data_models.inputs import ErosionRiverData
 from dfastbe.io.data_models import LineGeometry
-from dfastbe.io.logger import log_text
+from dfastbe.io.logger import LogData
 from dfastbe.utils import on_right_side
 
 __all__ = ["MeshProcessor"]
@@ -492,7 +492,7 @@ class MeshProcessor:
         self.wrapper = MeshWrapper(mesh_data, verbose=verbose)
 
     def get_fairway_data(self, river_axis: LineGeometry) -> FairwayData:
-        log_text("chainage_to_fairway")
+        LogData().log_text("chainage_to_fairway")
         # intersect fairway and mesh
         fairway_intersection_coords, fairway_face_indices = self.wrapper.intersect_with_coords(river_axis.as_array())
 
@@ -518,7 +518,7 @@ class MeshProcessor:
         bank_face_indices = []
         for bank_index in range(n_bank_lines):
             line_coords = np.array(self.bank_lines.geometry[bank_index].coords)
-            log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
+            LogData().log_text("bank_nodes", data={"ib": bank_index + 1, "n": len(line_coords)})
 
             coords_along_bank, face_indices = self.wrapper.intersect_with_coords(line_coords)
             bank_line_coords.append(coords_along_bank)
@@ -536,7 +536,7 @@ class MeshProcessor:
 
     def _link_lines_to_stations(self, bank_line_coords, bank_face_indices):
         # linking bank lines to chainage
-        log_text("chainage_to_banks")
+        LogData().log_text("chainage_to_banks")
         river_center_line = self.river_data.river_center_line.as_array()
         n_bank_lines = len(self.bank_lines)
 
@@ -563,9 +563,9 @@ class MeshProcessor:
                 coords, river_center_line[:, :2]
             )
             if is_right_bank[bank_index]:
-                log_text("right_side_bank", data={"ib": bank_index + 1})
+                LogData().log_text("right_side_bank", data={"ib": bank_index + 1})
             else:
-                log_text("left_side_bank", data={"ib": bank_index + 1})
+                LogData().log_text("left_side_bank", data={"ib": bank_index + 1})
 
         bank_order = tuple("right" if val else "left" for val in is_right_bank)
         data = {

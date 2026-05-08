@@ -1,5 +1,5 @@
 """
-Copyright (C) 2020 Stichting Deltares.
+Copyright (C) 2025 Stichting Deltares.
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -32,7 +32,7 @@ import netCDF4
 from shapely.geometry import LineString, Point
 from shapely import prepare
 from geopandas.geodataframe import GeoDataFrame
-from dfastbe.io.logger import log_text
+from dfastbe.io.logger import LogData
 from dfastbe.io.config import SimulationFilesError, ConfigFile, get_bbox
 
 
@@ -76,7 +76,7 @@ class LineGeometry:
         else:
             self.values: LineString = self.mask(line, mask)
 
-            log_text(
+            LogData().log_text(
                 "clip_chainage", data={"low": self.station_bounds[0], "high": self.station_bounds[1]}
             )
 
@@ -489,35 +489,51 @@ class BaseSimulationData:
         """
         name = Path(file_name).name
         if name.endswith("map.nc"):
-            log_text("read_grid", indent=indent)
+            LogData().log_text("read_grid", indent=indent)
+
+            # read the node coordinates
             x_node = _read_fm_map(file_name, "x", location="node")
             y_node = _read_fm_map(file_name, "y", location="node")
-            f_nc = _read_fm_map(file_name, "face_node_connectivity")
-            if f_nc.mask.shape == ():
-                # all faces have the same number of nodes
-                n_nodes = np.ones(f_nc.data.shape[0], dtype=int) * f_nc.data.shape[1]
+
+            # read the face node connectivity and make sure it's a masked array
+            f_nc_read = _read_fm_map(file_name, "face_node_connectivity")
+            if isinstance(f_nc_read, np.ma.MaskedArray):
+                f_nc = f_nc_read
+                # make sure the mask is a full array
+                if f_nc.mask.size == 1:
+                    f_nc.mask = np.full(f_nc.shape, False)
             else:
-                # varying number of nodes
-                n_nodes = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
+                f_nc = np.ma.MaskedArray(f_nc_read, np.full(f_nc_read.shape, False))
+
+            # sometimes the _FillValue is not correctly set or applied in all preprocessing steps
+            # clean-up the indices to make the code more robust:
+            
+            # 1) remove negative node indices
+            f_nc.mask[f_nc.data < 0] = True
+            # 2) remove node indices larger than the number of nodes
+            f_nc.mask[f_nc.data > x_node.size-1] = True
+            
+            # set all masked node indices to 0, such that indexing operations don't fail
             f_nc.data[f_nc.mask] = 0
+            n_nodes_per_face = f_nc.mask.shape[1] - f_nc.mask.sum(axis=1)
 
             face_node = f_nc
-            log_text("read_bathymetry", indent=indent)
+            LogData().log_text("read_bathymetry", indent=indent)
             bed_elevation_location = "node"
             bed_elevation_values = _read_fm_map(file_name, "altitude", location="node")
-            log_text("read_water_level", indent=indent)
+            LogData().log_text("read_water_level", indent=indent)
             water_level_face = _read_fm_map(file_name, "Water level")
-            log_text("read_water_depth", indent=indent)
+            LogData().log_text("read_water_depth", indent=indent)
             water_depth_face = np.maximum(
                 _read_fm_map(file_name, "sea_floor_depth_below_sea_surface"), 0.0
             )
-            log_text("read_velocity", indent=indent)
+            LogData().log_text("read_velocity", indent=indent)
             velocity_x_face = _read_fm_map(file_name, "sea_water_x_velocity")
             velocity_y_face = _read_fm_map(file_name, "sea_water_y_velocity")
-            log_text("read_chezy", indent=indent)
+            LogData().log_text("read_chezy", indent=indent)
             chezy_face = _read_fm_map(file_name, "Chezy roughness")
 
-            log_text("read_drywet", indent=indent)
+            LogData().log_text("read_drywet", indent=indent)
             root_group = netCDF4.Dataset(file_name)
             try:
                 file_source = root_group.converted_from
@@ -542,7 +558,7 @@ class BaseSimulationData:
         return cls(
             x_node=x_node,
             y_node=y_node,
-            n_nodes=n_nodes,
+            n_nodes=n_nodes_per_face,
             face_node=face_node,
             bed_elevation_location=bed_elevation_location,
             bed_elevation_values=bed_elevation_values,
@@ -603,6 +619,7 @@ class BaseSimulationData:
         y_min = bbox.coords[0][1]
         y_max = bbox.coords[2][1]
 
+        # mark which nodes to keep
         prepare(xy_buffer)
         x = self.x_node
         y = self.y_node
@@ -612,11 +629,13 @@ class BaseSimulationData:
             if keep[i] and not xy_buffer.contains(Point((x[i], y[i]))):
                 keep[i] = False
 
+        # mark which faces to keep
         fnc = self.face_node
-        keep_face = keep[fnc].all(axis=1)
+        keep_face_nodes = np.ma.masked_array(keep[fnc], fnc.mask)
+        keep_face = keep_face_nodes.all(axis=1)
         renum = np.zeros(nnodes, dtype=int)
         renum[keep] = range(sum(keep))
-        self.face_node = renum[fnc[keep_face]]
+        self.face_node = np.ma.masked_array(renum[fnc[keep_face]], fnc.mask[keep_face])
 
         self.x_node = x[keep]
         self.y_node = y[keep]
@@ -728,6 +747,7 @@ def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndar
     """
     # open file
     root_group = netCDF4.Dataset(filename)
+    remove_mask = True
 
     # locate 2d mesh variable
     mesh2d = root_group.get_variables_by_attributes(
@@ -767,6 +787,7 @@ def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndar
         var = root_group.variables[varname]
         if "start_index" in var.ncattrs():
             start_index = var.getncattr("start_index")
+        remove_mask = False
 
     else:
         # find any other variable by standard_name or long_name
@@ -787,9 +808,15 @@ def _read_fm_map(filename: str, varname: str, location: str = "face") -> np.ndar
     if var.get_dims()[0].isunlimited():
         # assume that time dimension is unlimited and is the first dimension
         # slice to obtain last time step
-        data = var[-1, :]
+        data_read = var[-1, :]
     else:
-        data = var[...] - start_index
+        data_read = var[...] - start_index
+
+    if remove_mask and isinstance(data_read, np.ma.MaskedArray):
+        data = data_read.data
+        data[data_read.mask] = np.nan
+    else:
+        data = data_read
 
     root_group.close()
 

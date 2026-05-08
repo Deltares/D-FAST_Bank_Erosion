@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -10,7 +11,7 @@ from shapely.geometry import LineString, MultiLineString, Polygon
 
 from dfastbe.bank_lines.bank_lines import BankLines
 from dfastbe.bank_lines.plotter import BankLinesPlotter
-from dfastbe.cmd import run
+from dfastbe.runner import Runner
 from dfastbe.io.config import ConfigFile, PlotProperties
 from dfastbe.io.data_models import BaseSimulationData, LineGeometry
 
@@ -40,7 +41,8 @@ def test_bank_lines():
     language = "UK"
     run_mode = "BANKLINES"
     config_file = test_r_dir / "Meuse_manual.cfg"
-    run(language, run_mode, str(config_file))
+    runner = Runner(language, run_mode, config_file)
+    runner.run()
 
     # check the detected banklines
     file_1 = test_r_dir / "output/banklines/raw_detected_bankline_fragments.shp"
@@ -98,7 +100,7 @@ class TestBankLines:
             MagicMock: A mock object simulating BaseSimulationData.
         """
         mock_data = MagicMock(spec=BaseSimulationData)
-        mock_data.face_node = np.array([[0, 1, 2], [1, 2, 3], [2, 3, 4]])
+        mock_data.face_node = np.ma.MaskedArray([[0, 1, 2], [1, 2, 3], [2, 3, 4]], np.full((3,3), False))
         mock_data.x_node = np.array([0, 1, 2, 3, 4, 5, 6, 7])
         mock_data.y_node = np.array([0, 1, 2, 3, 4, 5, 6, 7])
         mock_data.water_level_face = np.array([1.0, 2.0, 1.0])
@@ -196,7 +198,7 @@ class TestBankLines:
 
         with patch(
             "dfastbe.bank_lines.bank_lines.sort_connect_bank_lines"
-        ) as mock_sort, patch("dfastbe.bank_lines.bank_lines.log_text"):
+        ) as mock_sort, patch("dfastbe.bank_lines.bank_lines.LogData"):
             mock_sort.return_value = [LineString([(0, 0), (1, 1)])]
             bank_lines.detect()
             bank_lines.plot()
@@ -232,13 +234,9 @@ class TestBankLines:
         """
         h_node = BankLines._calculate_water_depth(mock_simulation_data)
         expected_h_node = np.array(
-            [
-                [0.1, 0.6, 0.2333333333],
-                [0.6, 0.2333333333, 0.4],
-                [0.2333333333, 0.4, -0.1],
-            ]
+            [0.1, 0.6, 0.2333333333, 0.4, -0.1, 0, 0, 0]
         )
-        assert h_node.shape == mock_simulation_data.face_node.shape
+        assert h_node.shape == mock_simulation_data.x_node.shape
         assert np.allclose(h_node, expected_h_node)
 
     @pytest.mark.unit
@@ -263,33 +261,28 @@ class TestBankLines:
             The method correctly handles the wet nodes and water depth to create
                 appropriate bank lines.
         """
-        wet_node = np.array(
-            [[True, False, True], [False, True, True], [True, False, True]]
+        h_node = np.array(
+            [0.1, 0.6, 0.2333333333, 0.4, -0.1, 0, 0, 0]
         )
-        n_wet_arr = np.ma.masked_array([2, 2, 2])
-        h_node = np.array([[0.9, 1.1, 0.9], [0.9, 0.5, 1.1], [0.9, 0.5, 1.1]])
         h0 = 0.3
 
         lines = BankLines._generate_bank_lines(
-            mock_simulation_data, wet_node, n_wet_arr, h_node, h0
+            mock_simulation_data, h_node, h0
         )
         expected = [
-            LineString([(-2.999999999, -2.999999999), (5.0, 5.0)]),
-            LineString([(-4.999999999, -4.999999999), (2.5, 2.5)]),
-            LineString([(3.5, 3.5), (2.6666666666, 2.6666666666)]),
+            LineString([(0.4, 0.4), (1.818181818, 1.818181818)]),
+            LineString([(1.818181818, 1.818181818), (2.4, 2.4)]),
+            LineString([(2.4, 2.4), (3.2, 3.2)]),
         ]
-        assert all(
-            [
-                line.equals_exact(expected[i], tolerance=1e-8)
-                for i, line in enumerate(lines)
-            ]
-        )
+        assert len(lines) == len(expected)
+        for i in range(len(lines)):
+            assert lines[i].equals_exact(expected[i], tolerance=1e-8)
 
     @pytest.mark.parametrize(
         "face_node, n_nodes, expected",
         [
             (
-                np.array([[0, 1, 2], [1, 2, 3], [2, 3, 4]]),
+                np.ma.masked_array([[0, 1, 2], [1, 2, 3], [2, 3, 4]], np.full((3, 3), False)),
                 np.array([3, 3, 3]),
                 LineString(
                     [
@@ -301,7 +294,7 @@ class TestBankLines:
                 ),
             ),
             (
-                np.array([[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 7]]),
+                np.ma.MaskedArray([[0, 1, 2, 3], [2, 3, 4, 5], [4, 5, 6, 7]], np.full((3, 4), False)),
                 np.array([4, 4, 4]),
                 MultiLineString(
                     [
@@ -437,7 +430,7 @@ class TestBankLines:
             "bank_areas": bank_areas,
         }
 
-        with patch("dfastbe.bank_lines.bank_lines.log_text"):
+        with patch("dfastbe.bank_lines.bank_lines.LogData"):
             bank_lines.save()
 
         assert (tmp_path / "bank_file.shp").exists()
@@ -507,7 +500,7 @@ class TestBankLines:
         ) as mock_close, patch(
             "dfastbe.plotting.Plot._zoom_xy_and_save"
         ) as mock_zoom_xy_and_save, patch(
-            "dfastbe.bank_lines.plotter.log_text"
+            "dfastbe.bank_lines.plotter.LogData"
         ):
 
             bank_lines_plotter = BankLinesPlotter(

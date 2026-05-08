@@ -1,5 +1,5 @@
 """
-Copyright (C) 2020 Stichting Deltares.
+Copyright (C) 2025 Stichting Deltares.
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -25,15 +25,16 @@ Stichting Deltares. All rights reserved.
 INFORMATION
 This file is part of D-FAST Bank Erosion: https://github.com/Deltares/D-FAST_Bank_Erosion
 """
-
+from __future__ import annotations
 import argparse
 import os
 from pathlib import Path
-from typing import Tuple
+from typing import Optional, Tuple
 
 import matplotlib
 
-from dfastbe.cmd import run
+from dfastbe.runner import Runner
+from dfastbe import __version__
 
 matplotlib.use("Qt5Agg")
 
@@ -58,40 +59,62 @@ if is_nuitka:
 # ------------------------------------------------------------------------------
 
 
-def parse_arguments() -> Tuple[str, str, str]:
+def _existing_path(value: str) -> Path:
+    """Return a Path for an existing file, or raise argparse error."""
+    path = Path(value)
+    if not path.exists():
+        raise argparse.ArgumentTypeError(f"config file not found: {path}")
+    return path
+
+
+def _upper(value: str) -> str:
+    """Return the uppercased string value for argparse."""
+    return value.upper()
+
+
+def parse_arguments() -> Tuple[str, str, Optional[Path]]:
     """Parse the command line arguments.
 
-    Raises:
-        LanguageError: If invalid language is specified.
     Returns:
         language (str):
             Language identifier ("NL" or "UK").
         run_mode (str):
             Specification of the run mode ("BANKLINES", "BANKEROSION" or "GUI")
-        config_name (str):
-            Name of the configuration file.
+        config_name (Path | None):
+            Path to the configuration file, required for non-GUI modes.
+
+    Note:
+        Exits with status code 2 via SystemExit if arguments are invalid.
     """
     parser = argparse.ArgumentParser(
         description="D-FAST Bank Erosion. Example: python -m dfastbe --mode BANKEROSION --config settings.cfg"
     )
     parser.add_argument(
+        "--version", action="version", version=f"%(prog)s {__version__}"
+    )
+    parser.add_argument(
         "--language",
         default="UK",
         choices=["NL", "UK"],
-        help="display language 'NL' or 'UK' ('UK' is default)",
+        type=_upper,
+        help=argparse.SUPPRESS,
     )
     parser.add_argument(
         "--mode",
-        choices=["BANKLINES", "BANKEROSION", "GUI"],
         default="GUI",
-        help="run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (GUI is default)",
+        choices=["BANKLINES", "BANKEROSION", "GUI"],
+        type=_upper,
+        help="run mode 'BANKLINES', 'BANKEROSION' or 'GUI' (%(default)s is default)",
     )
     parser.add_argument(
         "--config",
-        default="dfastbe.cfg",
-        help="name of the configuration file ('dfastbe.cfg' is default)",
+        default=None,
+        type=_existing_path,
+        help="path to the configuration file (required unless --mode GUI)",
     )
     args = parser.parse_args()
+    if args.mode != "GUI" and args.config is None:
+        parser.error("--config is required when --mode is BANKLINES or BANKEROSION")
 
     language = args.language
     run_mode = args.mode
@@ -103,7 +126,8 @@ def parse_arguments() -> Tuple[str, str, str]:
 def main():
     """Main function to run the D-FAST Bank Erosion application."""
     language, run_mode, configfile = parse_arguments()
-    run(language, run_mode, configfile)
+    runner = Runner(language, run_mode, configfile)
+    runner.run()
 
 
 if __name__ == "__main__":

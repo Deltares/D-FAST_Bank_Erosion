@@ -1,0 +1,33 @@
+name: Test Suite
+
+on: [push]
+
+jobs:
+  tests:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Install libEGL for PySide6
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libegl1
+
+      - name: Setup Python with Poetry
+        uses: Deltares-research/github-actions/actions/python-setup/poetry@79b3df9a15699a66b25a9ba8e33f5ef9b07391d1 # poetry/v1
+        with:
+          python-version: ${{ matrix.python-version }}
+          install-groups: dev
+
+      - name: Test with pytest
+        run: poetry run pytest --cov --cov=src/dfastbe --cov-report term-missing -m "not binaries"
+
+      - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
+        env:
+          CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}

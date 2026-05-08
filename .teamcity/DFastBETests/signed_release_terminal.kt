@@ -12,6 +12,8 @@ object SignedReleaseTerminal : BuildType({
 
     vcs {
         root(DslContext.settingsRoot)
+        
+        checkoutMode = CheckoutMode.MANUAL
     }
 
     dependencies {
