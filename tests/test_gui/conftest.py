@@ -77,7 +77,7 @@ def widget_specifications():
         ("bankFileName", QLineEdit, {}),
         ("startRange", QLineEdit, {}),
         ("endRange", QLineEdit, {}),
-        ("chainFileEdit", QLineEdit, {}),
+        ("riverKMEdit", QLineEdit, {}),
         ("bankDirEdit", QLineEdit, {}),
         ("fairwayEdit", QLineEdit, {}),
         ("simFileEdit", QLineEdit, {}),

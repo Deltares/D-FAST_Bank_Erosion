@@ -255,7 +255,7 @@ class TestGuiBehaviourGeneralTab:
         state["bankFileName"].setText("bankfile.txt")
         state["startRange"].setText("10")
         state["endRange"].setText("20")
-        state["chainFileEdit"].setText("chain.km")
+        state["riverKMEdit"].setText("river.km")
         state["bankDirEdit"].setText("banks/")
         # Ensure StateStore uses this widget state
         StateStore._instance = state
