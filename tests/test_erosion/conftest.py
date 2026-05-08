@@ -1,7 +1,24 @@
+from pathlib import Path
 from typing import Dict, List
 
 import numpy as np
 import pytest
+
+from dfastbe import __path__
+from dfastbe.io.logger import LogData
+
+
+@pytest.fixture(autouse=True)
+def initialize_log_data() -> LogData:
+    """Reset and seed the LogData singleton before each test.
+
+    Several modules under test (e.g. ``bank_erosion.data_models.inputs``) call
+    ``LogData()`` without a ``file_name``, which requires the singleton to
+    already exist. Without this fixture, tests pass or fail depending on
+    collection order and marker filters (e.g. ``pytest -m unit``).
+    """
+    LogData.reset()
+    return LogData(Path(__path__[0]) / "io/log_data/messages.UK.ini")
 
 
 @pytest.fixture
