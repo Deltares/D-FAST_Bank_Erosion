@@ -6,43 +6,75 @@ on:
       - master
   pull_request:
     branches:
-      - '**'  # Match all branches for pull requests
+      - '**'
   release:
-      types:
-        - published
+    types:
+      - published
 
 jobs:
   deploy-pr:
-      if: github.event_name == 'pull_request'
-      runs-on: ubuntu-latest
-      steps:
-      - uses: actions/checkout@v6
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v6
+      - name: Deploy PR documentation
+        uses: Deltares-research/github-actions/actions/mkdocs-deploy@c5bfdd34feddb4a679509af4ae51035e52416da8 # mkdocs-deploy/v1
         with:
           python-version: '3.11'
+          package-manager: poetry
+          install-groups: docs
+          trigger: pr
+          deploy-token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install poetry
-        run: |
-          pip install poetry
+  deploy-main:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
 
-      - name: Configure Poetry
-        run: |
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
+      - name: Deploy main documentation
+        uses: Deltares-research/github-actions/actions/mkdocs-deploy@c5bfdd34feddb4a679509af4ae51035e52416da8 # mkdocs-deploy/v1
+        with:
+          python-version: '3.11'
+          package-manager: poetry
+          install-groups: docs
+          trigger: main
+          deploy-token: ${{ secrets.GITHUB_TOKEN }}
+          main-set-default: 'false'
 
-      - name: Install dependencies
-        run: |
-          poetry install --with main,docs
+  deploy-release:
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
 
-      - name: Deploy to GitHub Pages (Pull Request)
-        env:
-          ACTIONS_DEPLOY_TOKEN: ${{ secrets.ACTIONS_DEPLOY_TOKEN }}
-        run: |
-          git config --global user.name '${{ github.actor }}'
-          git config --global user.email '${{ github.actor }}@users.noreply.github.com'
-
-          poetry run mike deploy --push --update-aliases develop latest
-          poetry run mike set-default --push latest
+      - name: Deploy release documentation
+        uses: Deltares-research/github-actions/actions/mkdocs-deploy@c5bfdd34feddb4a679509af4ae51035e52416da8 # mkdocs-deploy/v1
+        with:
+          python-version: '3.11'
+          package-manager: poetry
+          install-groups: docs
+          trigger: release
+          deploy-token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: ${{ github.event.release.tag_name }}
+          release-alias: latest
+          release-prerelease: ${{ github.event.release.prerelease }}
