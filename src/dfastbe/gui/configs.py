@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import ClassVar, cast
 from pathlib import Path
-from configparser import ConfigParser
+from configparser import ConfigParser, SectionProxy
 from PySide6.QtWidgets import (
     QTreeWidgetItem,
     QComboBox,
@@ -24,7 +24,10 @@ __all__ = [
     "get_configuration",
     "bankStrengthSwitch",
     "ConfigurationLoader",
+    "ConfigurationExporter",
 ]
+
+USE_DEFAULT = "Use Default"
 
 BANK_TYPE = "Bank Type"
 CRITICAL_SHEAR_STRESS = "Critical Shear Stress"
@@ -351,126 +354,283 @@ class ConfigurationLoader:
             cast(QLineEdit, self.state_management[field + "Edit"]).setText(config_value)
 
 
+class ConfigurationExporter:
+    """Exports GUI state to a ConfigParser configuration.
+
+    This class encapsulates the logic for building a configuration from the
+    StateStore, organizing it into logical sections with single-responsibility methods.
+    """
+
+    def __init__(self, state_store: StateStore):
+        """Initialize the exporter with a state store.
+
+        Args:
+            state_store: The StateStore instance containing GUI state.
+        """
+        self.state = state_store
+        self.config = ConfigParser()
+        self.config.optionxform = str  # case sensitive configuration
+
+    def build(self) -> ConfigParser:
+        """Build and return the complete configuration.
+
+        Returns:
+            ConfigParser: Complete configuration for D-FAST Bank Erosion analysis.
+        """
+        self._build_general_section()
+        self._build_detect_section()
+        self._build_erosion_section()
+        return self.config
+
+    def _build_general_section(self) -> None:
+        """Build the [General] section of the configuration."""
+        self.config.add_section("General")
+        section = self.config["General"]
+
+        section["Version"] = "1.0"
+        section["RiverKM"] = self.state["riverKMEdit"].text()
+        section["Boundaries"] = (
+            self.state["startRange"].text() + ":" + self.state["endRange"].text()
+        )
+        section["BankDir"] = self.state["bankDirEdit"].text()
+        section["BankFile"] = self.state["bankFileName"].text()
+        section["Plotting"] = str(self.state["makePlotsEdit"].isChecked())
+        section["SavePlots"] = str(self.state["savePlotsEdit"].isChecked())
+        section["SaveZoomPlots"] = str(self.state["saveZoomPlotsEdit"].isChecked())
+        section["ZoomStepKM"] = self.state["zoomPlotsRangeEdit"].text()
+        section["FigureDir"] = self.state["figureDirEdit"].text()
+        section["ClosePlots"] = str(self.state["closePlotsEdit"].isChecked())
+        section["DebugOutput"] = str(self.state["debugOutputEdit"].isChecked())
+
+    def _build_detect_section(self) -> None:
+        """Build the [Detect] section of the configuration."""
+        self.config.add_section("Detect")
+        section = self.config["Detect"]
+
+        section["SimFile"] = self.state["simFileEdit"].text()
+        section["WaterDepth"] = self.state["waterDepth"].text()
+
+        nbank = self.state["searchLines"].topLevelItemCount()
+        section["NBank"] = str(nbank)
+
+        distances: list[str] = []
+        for i in range(nbank):
+            item = self.state["searchLines"].topLevelItem(i)
+            section[f"Line{i + 1}"] = item.text(1)
+            distances.append(item.text(2))
+
+        section["DLines"] = f"[ {', '.join(distances)} ]" if distances else "[ ]"
+
+    def _build_erosion_section(self) -> None:
+        """Build the [Erosion] section of the configuration."""
+        self.config.add_section("Erosion")
+        section = self.config["Erosion"]
+
+        # Basic erosion parameters
+        section["TErosion"] = self.state["tErosion"].text()
+        section["RiverAxis"] = self.state["riverAxisEdit"].text()
+        section["Fairway"] = self.state["fairwayEdit"].text()
+        section["OutputInterval"] = self.state["chainageOutStep"].text()
+        section["OutputDir"] = self.state["outDirEdit"].text()
+        section["BankNew"] = self.state["newBankFile"].text()
+        section["BankEq"] = self.state["newEqBankFile"].text()
+        section["EroVol"] = self.state["eroVol"].text()
+        section["EroVolEqui"] = self.state["eroVolEqui"].text()
+
+        # Ship parameters
+        self._build_ship_parameters(section)
+
+        # Bank strength parameters
+        self._build_bank_strength_parameters(section)
+
+        # Filter parameters
+        self._build_filters(section)
+
+        # Discharge levels
+        self._build_erosion_levels(section)
+
+    def _build_ship_parameters(self, section: SectionProxy) -> None:
+        """Build ship-related parameters in the Erosion section.
+
+        Args:
+            section: The ConfigParser section to populate.
+        """
+        if self.state["shipTypeType"].currentText() == "Constant":
+            section["ShipType"] = str(
+                self.state["shipTypeSelect"].currentIndex() + 1
+            )  # index 0 -> shipType 1
+        else:
+            section["ShipType"] = self.state["shipTypeEdit"].text()
+
+        section["VShip"] = self.state["shipVelocEdit"].text()
+        section["NShip"] = self.state["nShipsEdit"].text()
+        section["NWaves"] = self.state["shipNWavesEdit"].text()
+        section["Draught"] = self.state["shipDraughtEdit"].text()
+        section["Wave0"] = self.state["wavePar0Edit"].text()
+        section["Wave1"] = self.state["wavePar1Edit"].text()
+
+    def _build_bank_strength_parameters(self, section: SectionProxy) -> None:
+        """Build bank strength parameters in the Erosion section.
+
+        Args:
+            section: The ConfigParser section to populate.
+        """
+        if self.state["strengthPar"].currentText() == BANK_TYPE:
+            section["Classes"] = "true"
+            if self.state["bankTypeType"].currentText() == CONSTANT:
+                section["BankType"] = str(self.state["bankTypeSelect"].currentIndex())
+            else:
+                section["BankType"] = self.state["bankTypeEdit"].text()
+        else:
+            section["Classes"] = "false"
+            section["BankType"] = self.state["bankShearEdit"].text()
+
+        section["ProtectionLevel"] = self.state["bankProtectEdit"].text()
+        section["Slope"] = self.state["bankSlopeEdit"].text()
+        section["Reed"] = self.state["bankReedEdit"].text()
+
+    def _build_filters(self, section: SectionProxy) -> None:
+        """Build filter parameters in the Erosion section.
+
+        Args:
+            section: The ConfigParser section to populate.
+        """
+        if self.state["velFilterActive"].isChecked():
+            section["VelFilterDist"] = self.state["velFilterWidth"].text()
+        if self.state["bedFilterActive"].isChecked():
+            section["BedFilterDist"] = self.state["bedFilterWidth"].text()
+
+    _OPTIONAL_PER_LEVEL_PARAMS = (
+        # (type_state_suffix, edit_state_suffix, section_key_prefix)
+        ("_shipVelocType", "_shipVelocEdit", "VShip"),
+        ("_nShipsType", "_nShipsEdit", "NShip"),
+        ("_shipNWavesType", "_shipNWavesEdit", "NWaves"),
+        ("_shipDraughtType", "_shipDraughtEdit", "Draught"),
+        ("_bankSlopeType", "_bankSlopeEdit", "Slope"),
+        ("_bankReedType", "_bankReedEdit", "Reed"),
+    )
+
+    def _build_erosion_levels(self, section: SectionProxy) -> None:
+        """Build discharge level parameters in the Erosion section.
+
+        Args:
+            section: The ConfigParser section to populate.
+        """
+        nlevel = self.state["discharges"].topLevelItemCount()
+        section["NLevel"] = str(nlevel)
+        section["RefLevel"] = self.state["refLevel"].text()
+
+        for i in range(nlevel):
+            self._build_single_erosion_level(section, i + 1)
+
+    def _build_single_erosion_level(self, section: SectionProxy, n: int) -> None:
+        """Populate the per-level keys for one discharge level.
+
+        Args:
+            section: The ConfigParser section to populate.
+            n: One-based discharge level index.
+        """
+        item = self.state["discharges"].topLevelItem(n - 1)
+        section[f"SimFile{n}"] = item.text(1)
+        section[f"PDischarge{n}"] = item.text(2)
+
+        self._write_optional_ship_type(section, n)
+
+        for type_suffix, edit_suffix, key in self._OPTIONAL_PER_LEVEL_PARAMS:
+            if self.state[f"{n}{type_suffix}"].currentText() != USE_DEFAULT:
+                section[f"{key}{n}"] = self.state[f"{n}{edit_suffix}"].text()
+
+        ero_vol = self.state[f"{n}_eroVolEdit"].text()
+        if ero_vol != "":
+            section[f"EroVol{n}"] = ero_vol
+
+    def _write_optional_ship_type(self, section: SectionProxy, n: int) -> None:
+        """Write the optional per-level ShipType key when the user overrides the default.
+
+        Args:
+            section: The ConfigParser section to populate.
+            n: One-based discharge level index.
+        """
+        ship_type_kind = self.state[f"{n}_shipTypeType"].currentText()
+        if ship_type_kind == USE_DEFAULT:
+            return
+        if ship_type_kind == "Constant":
+            section[f"ShipType{n}"] = str(
+                self.state[f"{n}_shipTypeSelect"].currentIndex() + 1
+            )  # index 0 -> shipType 1
+        else:
+            section[f"ShipType{n}"] = self.state[f"{n}_shipTypeEdit"].text()
+
+
 def get_configuration() -> ConfigParser:
     """Extract a configuration from the GUI.
 
-    Returns
-    -------
-    config : ConfigParser
+    Returns:
         Configuration for the D-FAST Bank Erosion analysis.
     """
+    exporter = ConfigurationExporter(StateStore.instance())
+    return exporter.build()
+
+
+def setParam(field: str, config, group: str, key: str, default: str = "??") -> None:
+    """Update the dialog for a general parameter based on configuration file.
+
+    Args:
+        field: Short name of the parameter.
+        config: Configuration for the D-FAST Bank Erosion analysis with absolute
+            or relative paths.
+        group: Name of the group in the configuration.
+        key: Name of the key in the configuration group.
+        default: Default string if the group/key pair doesn't exist in the
+            configuration.
+    """
     state_management = StateStore.instance()
-    config = ConfigParser()
-    config.optionxform = str  # case sensitive configuration
+    config_file = ConfigFile(config)
+    config_value = config_file.get_str(group, key, default)
 
-    config.add_section("General")
-    config["General"]["Version"] = "1.0"
-    config["General"]["RiverKM"] = state_management["riverKMEdit"].text()
-    config["General"]["Boundaries"] = (
-            state_management["startRange"].text() + ":" + state_management["endRange"].text()
-    )
-    config["General"]["BankDir"] = state_management["bankDirEdit"].text()
-    config["General"]["BankFile"] = state_management["bankFileName"].text()
-    config["General"]["Plotting"] = str(state_management["makePlotsEdit"].isChecked())
-    config["General"]["SavePlots"] = str(state_management["savePlotsEdit"].isChecked())
-    config["General"]["SaveZoomPlots"] = str(state_management["saveZoomPlotsEdit"].isChecked())
-    config["General"]["ZoomStepKM"] = state_management["zoomPlotsRangeEdit"].text()
-    config["General"]["FigureDir"] = state_management["figureDirEdit"].text()
-    config["General"]["ClosePlots"] = str(state_management["closePlotsEdit"].isChecked())
-    config["General"]["DebugOutput"] = str(state_management["debugOutputEdit"].isChecked())
-
-    config.add_section("Detect")
-    config["Detect"]["SimFile"] = state_management["simFileEdit"].text()
-    config["Detect"]["WaterDepth"] = state_management["waterDepth"].text()
-    nbank = state_management["searchLines"].topLevelItemCount()
-    config["Detect"]["NBank"] = str(nbank)
-    dlines = "[ "
-    for i in range(nbank):
-        istr = str(i + 1)
-        config["Detect"]["Line" + istr] = state_management["searchLines"].topLevelItem(i).text(1)
-        dlines += state_management["searchLines"].topLevelItem(i).text(2) + ", "
-    dlines = dlines[:-2] + " ]"
-    config["Detect"]["DLines"] = dlines
-
-    config.add_section("Erosion")
-    config["Erosion"]["TErosion"] = state_management["tErosion"].text()
-    config["Erosion"]["RiverAxis"] = state_management["riverAxisEdit"].text()
-    config["Erosion"]["Fairway"] = state_management["fairwayEdit"].text()
-    config["Erosion"]["OutputInterval"] = state_management["chainageOutStep"].text()
-    config["Erosion"]["OutputDir"] = state_management["outDirEdit"].text()
-    config["Erosion"]["BankNew"] = state_management["newBankFile"].text()
-    config["Erosion"]["BankEq"] = state_management["newEqBankFile"].text()
-    config["Erosion"]["EroVol"] = state_management["eroVol"].text()
-    config["Erosion"]["EroVolEqui"] = state_management["eroVolEqui"].text()
-
-    if state_management["shipTypeType"].currentText() == CONSTANT:
-        config["Erosion"]["ShipType"] = str(
-            state_management["shipTypeSelect"].currentIndex() + 1
-        )  # index 0 -> shipType 1
-    else:
-        config["Erosion"]["ShipType"] = state_management["shipTypeEdit"].text()
-    config["Erosion"]["VShip"] = state_management["shipVelocEdit"].text()
-    config["Erosion"]["NShip"] = state_management["nShipsEdit"].text()
-    config["Erosion"]["NWaves"] = state_management["shipNWavesEdit"].text()
-    config["Erosion"]["Draught"] = state_management["shipDraughtEdit"].text()
-    config["Erosion"]["Wave0"] = state_management["wavePar0Edit"].text()
-    config["Erosion"]["Wave1"] = state_management["wavePar1Edit"].text()
-
-    if state_management["strengthPar"].currentText() == BANK_TYPE:
-        config["Erosion"]["Classes"] = "true"
-        if state_management["bankTypeType"].currentText() == CONSTANT:
-            config["Erosion"]["BankType"] = str(state_management["bankTypeSelect"].currentIndex())
+    try:
+        val = float(config_value)
+        cast(QComboBox, state_management[field + "Type"]).setCurrentText("Constant")
+        if field + "Select" in state_management.keys():
+            int_value = int(val)
+            if field == "shipType":
+                int_value = int_value - 1
+            cast(QComboBox, state_management[field + "Select"]).setCurrentIndex(int_value)
         else:
-            config["Erosion"]["BankType"] = state_management["bankTypeEdit"].text()
+            cast(QLineEdit, state_management[field + "Edit"]).setText(config_value)
+    except:
+        cast(QComboBox, state_management[field + "Type"]).setCurrentText("Variable")
+        cast(QLineEdit, state_management[field + "Edit"]).setText(config_value)
+
+
+def setOptParam(field: str, config, group: str, key: str) -> None:
+    """Update the dialog for an optional parameter based on configuration file.
+
+    Args:
+        field: Short name of the parameter.
+        config: Configuration for the D-FAST Bank Erosion analysis with absolute
+            or relative paths.
+        group: Name of the group in the configuration.
+        key: Name of the key in the configuration group.
+    """
+    state_management = StateStore.instance()
+    config_file = ConfigFile(config)
+    str = config_file.get_str(group, key, "")
+    if str == "":
+        state_management[field + "Type"].setCurrentText(USE_DEFAULT)
+        state_management[field + "Edit"].setText("")
     else:
-        config["Erosion"]["Classes"] = "false"
-        config["Erosion"]["BankType"] = state_management["bankShearEdit"].text()
-    config["Erosion"]["ProtectionLevel"] = state_management["bankProtectEdit"].text()
-    config["Erosion"]["Slope"] = state_management["bankSlopeEdit"].text()
-    config["Erosion"]["Reed"] = state_management["bankReedEdit"].text()
-
-    if state_management["velFilterActive"].isChecked():
-        config["Erosion"]["VelFilterDist"] = state_management["velFilterWidth"].text()
-    if state_management["bedFilterActive"].isChecked():
-        config["Erosion"]["BedFilterDist"] = state_management["bedFilterWidth"].text()
-
-    nlevel = state_management["discharges"].topLevelItemCount()
-    config["Erosion"]["NLevel"] = str(nlevel)
-    config["Erosion"]["RefLevel"] = state_management["refLevel"].text()
-    for i in range(nlevel):
-        istr = str(i + 1)
-        config["Erosion"]["SimFile" + istr] = (
-            state_management["discharges"].topLevelItem(i).text(1)
-        )
-        config["Erosion"]["PDischarge" + istr] = (
-            state_management["discharges"].topLevelItem(i).text(2)
-        )
-        if state_management[istr + "_shipTypeType"].currentText() != "Use Default":
-            if state_management[istr + "_shipTypeType"].currentText() == CONSTANT:
-                config["Erosion"]["ShipType" + istr] = (
-                        state_management[istr + "_shipTypeSelect"].currentIndex() + 1
-                )  # index 0 -> shipType 1
+        try:
+            val = float(str)
+            state_management[field + "Type"].setCurrentText("Constant")
+            if field + "Select" in state_management.keys():
+                ival = int(val) - 1  # shipType 1 -> index 0
+                state_management[field + "Select"].setCurrentIndex(ival)
             else:
-                config["Erosion"]["ShipType" + istr] = state_management[
-                    istr + "_shipTypeEdit"
-                    ].text()
-        if state_management[istr + "_shipVelocType"].currentText() != "Use Default":
-            config["Erosion"]["VShip" + istr] = state_management[istr + "_shipVelocEdit"].text()
-        if state_management[istr + "_nShipsType"].currentText() != "Use Default":
-            config["Erosion"]["NShip" + istr] = state_management[istr + "_nShipsEdit"].text()
-        if state_management[istr + "_shipNWavesType"].currentText() != "Use Default":
-            config["Erosion"]["NWaves" + istr] = state_management[istr + "_shipNWavesEdit"].text()
-        if state_management[istr + "_shipDraughtType"].currentText() != "Use Default":
-            config["Erosion"]["Draught" + istr] = state_management[
-                istr + "_shipDraughtEdit"
-                ].text()
-        if state_management[istr + "_bankSlopeType"].currentText() != "Use Default":
-            config["Erosion"]["Slope" + istr] = state_management[istr + "_bankSlopeEdit"].text()
-        if state_management[istr + "_bankReedType"].currentText() != "Use Default":
-            config["Erosion"]["Reed" + istr] = state_management[istr + "_bankReedEdit"].text()
-        if state_management[istr + "_eroVolEdit"].text() != "":
-            config["Erosion"]["EroVol" + istr] = state_management[istr + "_eroVolEdit"].text()
-    return config
+                state_management[field + "Edit"].setText(str)
+        except:
+            state_management[field + "Type"].setCurrentText("Variable")
+            state_management[field + "Edit"].setText(str)
 
 
 def bankStrengthSwitch() -> None:
