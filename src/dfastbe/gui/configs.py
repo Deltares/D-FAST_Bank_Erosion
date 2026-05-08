@@ -388,7 +388,7 @@ class ConfigurationExporter:
         section = self.config["General"]
 
         section["Version"] = "1.0"
-        section["RiverKM"] = self.state["chainFileEdit"].text()
+        section["RiverKM"] = self.state["riverKMEdit"].text()
         section["Boundaries"] = (
             self.state["startRange"].text() + ":" + self.state["endRange"].text()
         )
