@@ -475,9 +475,9 @@ class ConfigurationExporter:
         Args:
             section: The ConfigParser section to populate.
         """
-        if self.state["strengthPar"].currentText() == "Bank Type":
+        if self.state["strengthPar"].currentText() == BANK_TYPE:
             section["Classes"] = "true"
-            if self.state["bankTypeType"].currentText() == "Constant":
+            if self.state["bankTypeType"].currentText() == CONSTANT:
                 section["BankType"] = str(self.state["bankTypeSelect"].currentIndex())
             else:
                 section["BankType"] = self.state["bankTypeEdit"].text()

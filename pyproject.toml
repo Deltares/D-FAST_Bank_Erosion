@@ -28,6 +28,7 @@ dfastbe = "dfastbe.__main__:main"
 dev = [
     "pytest>=9.0.3,<10.0.0",
     "pytest-cov>=7.0.0,<8.0.0",
+    "pytest-qt>=4.4.0,<5.0.0",
     "pyfakefs>=5.1.0,<6.0.0",
     "teamcity-messages>=1.32,<2.0.0",
     "pre-commit>=4.2.0,<5.0.0",
