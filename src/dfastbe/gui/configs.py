@@ -658,3 +658,22 @@ def bankStrengthSwitch() -> None:
         state_management["bankTypeEdit"].setEnabled(False)
         state_management["bankTypeEditFile"].setEnabled(False)
 
+
+def setFilter(field: str, config, group: str, key: str) -> None:
+    """Update the dialog for a filter based on configuration file.
+
+    Args:
+        field: Short name of the parameter.
+        config: Configuration for the D-FAST Bank Erosion analysis with absolute
+            or relative paths.
+        group: Name of the group in the configuration.
+        key: Name of the key in the configuration group.
+    """
+    state_management = StateStore.instance()
+    config_file = ConfigFile(config)
+    val = config_file.get_float(group, key, 0.0)
+    if val > 0.0:
+        state_management[field + "Active"].setChecked(True)
+        state_management[field + "Width"].setText(str(val))
+    else:
+        state_management[field + "Active"].setChecked(False)
