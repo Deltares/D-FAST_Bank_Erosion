@@ -28,6 +28,8 @@ from dfastbe.gui.tabs.main_components import (
 )
 from dfastbe.io.logger import LogData
 
+USE_DEFAULT = "Use Default"
+
 @pytest.fixture(scope="session")
 def qapp_args():
     """Arguments to pass to QApplication."""
@@ -267,49 +269,56 @@ def widget_specifications():
         ("bankShearEdit", QLineEdit, {}),
         ("bankProtectEdit", QLineEdit, {}),
         # Per-discharge widgets for nlevel=1
-        ("1_shipTypeType", QComboBox, {"items": ["Use Default", "Constant", "Other"], "current": "Use Default"}),
+        ("1_shipTypeType", QComboBox, {"items": [USE_DEFAULT, "Constant", "Other"], "current": USE_DEFAULT}),
         ("1_shipTypeSelect", QComboBox, {"items": ["Type1", "Type2"], "index": 0}),
         ("1_shipTypeEdit", QLineEdit, {}),
-        ("1_shipVelocType", QComboBox, {"items": ["Use Default", "Other"], "current": "Use Default"}),
+        ("1_shipVelocType", QComboBox, {"items": [USE_DEFAULT, "Other"], "current": USE_DEFAULT}),
         ("1_shipVelocEdit", QLineEdit, {}),
-        ("1_nShipsType", QComboBox, {"items": ["Use Default", "Other"], "current": "Use Default"}),
+        ("1_nShipsType", QComboBox, {"items": [USE_DEFAULT, "Other"], "current": USE_DEFAULT}),
         ("1_nShipsEdit", QLineEdit, {}),
-        ("1_shipNWavesType", QComboBox, {"items": ["Use Default", "Other"], "current": "Use Default"}),
+        ("1_shipNWavesType", QComboBox, {"items": [USE_DEFAULT, "Other"], "current": USE_DEFAULT}),
         ("1_shipNWavesEdit", QLineEdit, {}),
-        ("1_shipDraughtType", QComboBox, {"items": ["Use Default", "Other"], "current": "Use Default"}),
+        ("1_shipDraughtType", QComboBox, {"items": [USE_DEFAULT, "Other"], "current": USE_DEFAULT}),
         ("1_shipDraughtEdit", QLineEdit, {}),
-        ("1_bankSlopeType", QComboBox, {"items": ["Use Default", "Other"], "current": "Use Default"}),
+        ("1_bankSlopeType", QComboBox, {"items": [USE_DEFAULT, "Other"], "current": USE_DEFAULT}),
         ("1_bankSlopeEdit", QLineEdit, {}),
-        ("1_bankReedType", QComboBox, {"items": ["Use Default", "Other"], "current": "Use Default"}),
+        ("1_bankReedType", QComboBox, {"items": [USE_DEFAULT, "Other"], "current": USE_DEFAULT}),
         ("1_bankReedEdit", QLineEdit, {}),
         ("1_eroVolEdit", QLineEdit, {}),
     ]
     return specs
 
 
+def _build_combo_box(args):
+    widget = QComboBox()
+    for item in args.get("items", []):
+        widget.addItem(item)
+    if "current" in args:
+        widget.setCurrentText(args["current"])
+    if "index" in args:
+        widget.setCurrentIndex(args["index"])
+    return widget
+
+
+def _build_tree_widget(args):
+    widget = QTreeWidget()
+    for item_data in args.get("items", []):
+        widget.addTopLevelItem(QTreeWidgetItem(item_data))
+    return widget
+
+
+_WIDGET_BUILDERS = {
+    QComboBox: _build_combo_box,
+    QTreeWidget: _build_tree_widget,
+}
+
+
 def widget_factory():
-    """
-    Creates widgets based on widget_specifications and returns a state dict.
-    """
+    """Creates widgets based on widget_specifications and returns a state dict."""
     state = {}
     for key, widget_type, args in widget_specifications():
-        if widget_type is QComboBox:
-            widget = QComboBox()
-            items = args.get("items", [])
-            for item in items:
-                widget.addItem(item)
-            if "current" in args:
-                widget.setCurrentText(args["current"])
-            if "index" in args:
-                widget.setCurrentIndex(args["index"])
-        elif widget_type is QTreeWidget:
-            widget = QTreeWidget()
-            for item_data in args.get("items", []):
-                item = QTreeWidgetItem(item_data)
-                widget.addTopLevelItem(item)
-        else:
-            widget = widget_type()
-        state[key] = widget
+        builder = _WIDGET_BUILDERS.get(widget_type)
+        state[key] = builder(args) if builder else widget_type()
     return state
 
 
