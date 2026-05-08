@@ -274,6 +274,6 @@ class TestGuiBehaviourGeneralTab:
         assert config["General"]["ZoomStepKM"] == "2.5"
         assert Path(config["General"]["FigureDir"]).name == "my_figures"
         assert config["General"]["ClosePlots"] == "True"
-        assert Path(config["General"]["RiverKM"]).name == "chain.km"
+        assert Path(config["General"]["RiverKM"]).name == "river.km"
         assert config["General"]["Boundaries"] == "10:20"
         assert Path(config["General"]["BankDir"]).name == "banks"
