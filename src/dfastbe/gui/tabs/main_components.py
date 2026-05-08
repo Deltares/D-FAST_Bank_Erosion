@@ -18,7 +18,7 @@ from dfastbe.gui.utils import (
 )
 from dfastbe.gui.configs import (
     get_configuration,
-    load_configuration,
+    ConfigurationLoader,
 )
 from dfastbe.gui.tabs.analysis_runner import run_detection, run_erosion
 from dfastbe.io.config import ConfigFile
@@ -103,7 +103,7 @@ def menu_load_configuration() -> None:
     )
     filename = file[0]
     if filename != "":
-        load_configuration(Path(filename))
+        ConfigurationLoader(config_path=Path(filename))
 
 
 def menu_save_configuration() -> None:
