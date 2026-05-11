@@ -48,7 +48,7 @@ jobs:
           ref: ${{ github.event.inputs.release_branch }}
 
       - name: Run release
-        uses: Deltares-research/github-actions/actions/release/github@ad07e425b297afd0cdca1341a7916f462a6e8a51 # github-release/v1
+        uses: Deltares-research/github-actions/actions/release/github@main # github-release/v1
         with:
           release-branch: ${{ github.event.inputs.release_branch }}
           increment: ${{ github.event.inputs.increment }}
