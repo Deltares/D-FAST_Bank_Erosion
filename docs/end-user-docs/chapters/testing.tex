@@ -6,7 +6,8 @@ The results of the software is verified by means of
 \item Unit testing at the level of functions, such as reading and writing of files, and basic testing of the algorithms.
 A large part of the code base --- in particular the \keyw{io}, \keyw{bank\_lines} and \keyw{bank\_erosion} sub-packages --- is covered by unit tests, and a minimum overall line-coverage threshold (currently 61\%) is enforced.
 These tests are carried out by means of the \keyw{pytest} framework.
-\item Regression tests have to configured to verify that the results of the batch mode remain unchanged under further code developments.
+\item Regression tests have been configured to verify that the results of the batch mode remain
+unchanged under further code developments.
 \end{itemize}
 
 For the verification of \dfastbe three sets of input files for the Meuse River have been used:
@@ -38,7 +39,8 @@ The proper functioning of these options is tested by means of regression testing
 This is tested by means of regression testing using result files of \dflowfm version 1.2.105.67088.
 
 \item Users must be able to provide all data via an input file, similar to the ini-file like file of WAQBANK.
-This testing is included in the regression testing of the batch mode, and may in the future be included in the gui testing.
+This testing is included in the regression testing of the batch mode, and is also covered by the
+automated GUI tests.
 
 \item The input files must be consistent with those of WAQBANK, or aligned with open standards or the \dflowfm modeling system.
 The \dfastbe configuration file is identical to the WAQBANK definition file except for the fact that the new file contains three sections \keyw{[General]}, \keyw{[Detect]} and \keyw{[Erosion]} to give a bit more context for the purpose of each keyword.
@@ -75,8 +77,9 @@ The whole system is tested via the command line (entry via \keyw{\_\_main\_\_}) 
 These tests are repeated for the standalone compiled \dfastbe executable.
 For the system testing a limited number of regression tests are carried out comparing the latest results against previously accepted results.
 
-Since the testing of the graphical user interface is not included in the automated testing, a test protocol for manual tests has been defined.
-These tests are described in the following section.
+The graphical user interface is covered by automated tests that use the \keyw{pytest-qt} plugin (the
+\file{tests/test\_gui} suite). In addition, a protocol for manual user-interface tests has been
+defined; these manual tests are described in the following section.
 
 \subsection{Manual testing of the user interface} \label{Sec:GuiTests}
 
@@ -99,23 +102,90 @@ These workflows are driven through the \keyw{Runner} class in the \keyw{runner} 
 
 \section{Unit testing}
 
-Since the \keyw{io}, \keyw{bank\_lines}, \keyw{bank\_erosion} and \keyw{plotting} packages only depend on third party modules, they are well suited for unit testing, and an extensive unit-test suite covers them.
+The automated test suite lives under \file{tests} and is organised per sub-package; it currently
+comprises about 275 tests. The main groups are:
 
-The \keyw{gui} package interacts with the graphical user interface (either by extracting data from the state of the controls, or by setting the state of the controls).
-These routines are tested using the \keyw{pytest-qt} plugin, complemented by the manual system tests described above.
+\begin{itemize}
+\item \file{tests/test\_io} --- configuration parsing, file reading and writing, and logging
+(\file{test\_io.py}, \file{test\_logging.py});
+\item \file{tests/test\_bank\_lines} --- the bank line detection workflow and its data models;
+\item \file{tests/test\_erosion} --- the bank erosion workflow, data models, the erosion calculator
+and the mesh processor;
+\item \file{tests/test\_gui} --- the graphical user interface (see below);
+\item \file{tests/test\_cli\_main.py} --- the command-line entry point.
+\end{itemize}
+
+Since the \keyw{io}, \keyw{bank\_lines}, \keyw{bank\_erosion} and \keyw{plotting} packages only depend
+on third-party modules, they are well suited for unit testing and are covered in detail.
+
+\subsection{Graphical user interface testing}
+
+The \keyw{gui} package interacts with the graphical user interface by reading from and writing to the
+state of the controls. These routines are tested automatically with the \keyw{pytest-qt} plugin (the
+\file{tests/test\_gui} suite, about 140 tests), which drives the Qt widgets without requiring manual
+interaction. The suite covers the configuration loader and exporter, dialog creation, the GUI
+utilities, and each settings tab (General, Detection, Erosion, Bank Parameters and Shipping
+Parameters). The manual user-interface protocol described above complements these automated tests.
+
+The \keyw{pytest-qt} plugin lets the tests drive the real \keyw{PySide6} widgets in-process, without a
+human operator. It provides two key pytest fixtures:
+
+\begin{itemize}
+\item \keyw{qapp} --- a single shared \keyw{QApplication} for the test session. On a headless machine
+(for example the Linux continuous-integration runner without a display) it is started with the Qt
+\keyw{offscreen} platform, so the widgets are created and exercised entirely in memory and no window
+ever appears on screen.
+\item \keyw{qtbot} --- a helper that registers a widget with the test (\keyw{qtbot.addWidget}),
+simulates user interaction such as mouse clicks (\keyw{qtbot.mouseClick}), and waits for the
+application to process events or emit signals (\keyw{qtbot.wait}, \keyw{qtbot.waitSignal}).
+\end{itemize}
+
+A typical GUI test follows the same pattern a user would: it builds the relevant part of the interface
+through the project's own fixtures (for example \keyw{setup\_gui}, which instantiates the full
+\keyw{GUI} with all tabs, or the per-component \keyw{setup\_menubar} and \keyw{setup\_button\_bar}
+fixtures in \file{tests/test\_gui/conftest.py}), then puts the controls into a known state by setting
+their values directly (\keyw{setText} on a line edit, \keyw{setChecked} on a check box,
+\keyw{setCurrentText} on a drop-down) or by triggering an action with \keyw{qtbot.mouseClick}, and
+finally asserts on the result. The two main things asserted are: (i) that the widgets are created and
+laid out as expected (located with \keyw{findChildren}), and (ii) that the data round-trips correctly
+--- loading a configuration file populates the controls with the right values, and exporting the
+controls reproduces the original configuration. Because everything runs in memory, these tests are
+fast and require no manual clicking.
+
+\subsection{Binary testing}
+
+The standalone executable is verified by a separate set of tests marked with the \keyw{binaries}
+marker (\file{tests/test\_binaries}). These run the compiled \dfastbe binary and are executed on
+TeamCity; they are excluded from the GitHub Actions run with \keyw{-m "not binaries"}.
 
 \section{Automated testing}
 
-Automated TeamCity projects will be set up for testing the Python code, for building (and optionally signing of) binaries, and testing of the binaries.
-In this way the formal release process can be easily aligned with the other products.
-This is ongoing work; the test and build steps are currently run locally.
+The Python code is tested automatically by a GitHub Actions workflow (\keyw{testing.yml}) that runs
+the \keyw{pytest} suite on every push across a matrix of Python 3.11--3.13 on Linux and Windows and
+uploads the coverage to Codecov. The binary tests are excluded there (\keyw{-m "not binaries"}); the
+standalone binaries are built with the \keyw{BuildScripts} and tested on TeamCity.
 
-For all automated unit and regression tests the pytest framework is used.
+For all automated unit and regression tests the pytest framework is used. After installing the
+development dependencies with Poetry, the suite is run with:
 
 \begin{Verbatim}
-    > conda install pytest
-    > pytest
+    > poetry run pytest
 \end{Verbatim}
+
+\subsection{Test coverage}
+
+Coverage is measured with \keyw{pytest-cov}. A minimum overall line coverage of 61\% is enforced
+(\keyw{fail\_under} in \keyw{pyproject.toml}); the run fails below that threshold. A recent run reports
+an overall coverage of about 90\%. The line coverage of the main source packages is summarised below.
+
+\begin{tabular}{l|r}
+Package & Line coverage \\ \hline
+\keyw{io} & 91\% \\
+\keyw{bank\_lines} & 94\% \\
+\keyw{bank\_erosion} & 88\% \\
+\keyw{gui} & 72\% \\
+module-level files (\keyw{runner}, \keyw{plotting}, \keyw{utils}, \dots) & 89\% \\
+\end{tabular}
 
 %-------------------------------
 \chapter{Test Report} \label{Chp:TestReport}
@@ -143,22 +213,65 @@ Test & Description & Success / Comments \\ \hline
 
 \section{Automated tests}
 
-Below a brief pytest report of the automated regression and unit testing is included.
-Each period following a module name represents one successful test; failed test would be indicated by an F and a subsequent error report.
+The automated regression and unit tests are run with \keyw{pytest} and \keyw{pytest-cov}. The full
+per-file coverage report of a recent run (with the binary tests deselected) is included below. The
+per-line "Missing" column of the original report is omitted here for brevity.
 
 \begin{Verbatim}[fontsize=\tiny]
-=============================================== test session starts ================================================
+================================== test session starts ==================================
 platform win32 -- Python 3.11.12, pytest-9.0.3, pluggy-1.5.0
-rootdir: C:\checkouts\D-FAST_Bank_Erosion
 configfile: pyproject.toml
 plugins: cov-7.0.0, qt-4.4.0
-collected 275 items
+collected 275 items / 6 deselected / 269 selected
 
-tests\test_bank_lines\ ...............                                                                        [  5%]
-tests\test_erosion\ ........................................................                                  [ 26%]
-tests\test_gui\ .......................................................................................       [ 58%]
-tests\test_io\ ..........................................................................................     [ 91%]
-tests\test_binaries\ ......                                                                                   [100%]
+---------- coverage: platform win32, python 3.11.12-final-0 ----------
+Name                                                   Stmts   Miss  Cover
+--------------------------------------------------------------------------
+src\dfastbe\__init__.py                                    7      2    71%
+src\dfastbe\__main__.py                                   47     12    74%
+src\dfastbe\bank_erosion\__init__.py                       0      0   100%
+src\dfastbe\bank_erosion\bank_erosion.py                 258      4    98%
+src\dfastbe\bank_erosion\data_models\__init__.py           0      0   100%
+src\dfastbe\bank_erosion\data_models\calculation.py      223     15    93%
+src\dfastbe\bank_erosion\data_models\inputs.py           204     11    95%
+src\dfastbe\bank_erosion\debugger.py                      39      0   100%
+src\dfastbe\bank_erosion\erosion_calculator.py            77      0   100%
+src\dfastbe\bank_erosion\mesh\__init__.py                  0      0   100%
+src\dfastbe\bank_erosion\mesh\data_models.py             146     65    55%
+src\dfastbe\bank_erosion\mesh\processor.py               294     85    71%
+src\dfastbe\bank_erosion\plotter.py                      282      3    99%
+src\dfastbe\bank_erosion\utils.py                        283     31    89%
+src\dfastbe\bank_lines\__init__.py                         0      0   100%
+src\dfastbe\bank_lines\bank_lines.py                     133      1    99%
+src\dfastbe\bank_lines\data_models.py                     67      0   100%
+src\dfastbe\bank_lines\plotter.py                         62      0   100%
+src\dfastbe\bank_lines\utils.py                          144     22    85%
+src\dfastbe\base_calculator.py                            17      0   100%
+src\dfastbe\gui\__init__.py                                0      0   100%
+src\dfastbe\gui\application.py                            89     12    87%
+src\dfastbe\gui\base.py                                  137     56    59%
+src\dfastbe\gui\configs.py                               344     48    86%
+src\dfastbe\gui\state_management.py                       14      1    93%
+src\dfastbe\gui\tabs\analysis_runner.py                   48     28    42%
+src\dfastbe\gui\tabs\bank.py                              51      0   100%
+src\dfastbe\gui\tabs\detection.py                         25      0   100%
+src\dfastbe\gui\tabs\discharge_levels.py                  41     29    29%
+src\dfastbe\gui\tabs\erosion.py                           48      0   100%
+src\dfastbe\gui\tabs\general.py                           82      0   100%
+src\dfastbe\gui\tabs\main_components.py                  101     30    70%
+src\dfastbe\gui\tabs\shipping.py                          20      0   100%
+src\dfastbe\gui\utils.py                                 284    151    47%
+src\dfastbe\io\__init__.py                                 0      0   100%
+src\dfastbe\io\config.py                                 475     57    88%
+src\dfastbe\io\data_models.py                            274     11    96%
+src\dfastbe\io\file_utils.py                              20      0   100%
+src\dfastbe\io\logger.py                                  75      6    92%
+src\dfastbe\plotting.py                                  114      9    92%
+src\dfastbe\runner.py                                     40      3    92%
+src\dfastbe\utils.py                                      68      6    91%
+--------------------------------------------------------------------------
+TOTAL                                                   7198    706    90%
 
-============================================== 275 passed in 58.62s ================================================
+Required test coverage of 61.0% reached. Total coverage: 90.19%
+====================== 269 passed, 6 deselected in 135.42s (0:02:15) ======================
 \end{Verbatim}
