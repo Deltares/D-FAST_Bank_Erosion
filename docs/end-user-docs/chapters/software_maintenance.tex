@@ -7,18 +7,28 @@ or newer; the exact supported range is declared in \keyw{pyproject.toml}.
 The code has been documented using standard Python docstrings and type hinting.
 
 Code quality is enforced automatically through a \keyw{pre-commit} configuration
-(\keyw{.pre-commit-config.yaml}) that runs locally before each commit and in continuous integration.
-The main checks are:
+(\keyw{.pre-commit-config.yaml}) that runs locally on the developer's machine before each commit.
+The key checks include (see \keyw{.pre-commit-config.yaml} for the complete set):
 
 \begin{itemize}
-\item \emph{Black} for code formatting (line length 88);
+\item \emph{Black} for code formatting, with a line length of 88 characters that is shared with
+\keyw{isort} and \keyw{flake8} (the \keyw{[tool.black]}, \keyw{[tool.isort]} and \keyw{[tool.flake8]}
+sections of \keyw{pyproject.toml});
 \item \emph{isort} for import ordering;
 \item \emph{flake8} (with the \keyw{flake8-bugbear} and \keyw{flake8-docstrings} plugins) for linting
-and docstring conventions;
-\item \emph{bandit}, \emph{gitleaks}, \emph{detect-secrets} and \emph{trufflehog} for security and
-secret scanning;
-\item \emph{commitizen} to enforce the Conventional Commits message format;
-\item \emph{pytest} (unit, doctest and notebook runs) executed as local hooks.
+and PEP~257 docstring conventions; new docstrings follow the Google style;
+\item \emph{bandit}, \emph{gitleaks}, \emph{detect-secrets}, \emph{trufflehog}, \emph{checkov} and
+\emph{detect-private-key} for security and secret scanning;
+\item \emph{beautysh} and \emph{shell-lint} for the shell and \keyw{.bat} build scripts;
+\item \emph{commitizen} together with a set of commit-message hooks (imperative mood, capitalisation,
+length and punctuation of the summary, blank second line) to enforce the Conventional Commits format;
+\emph{commitizen} also drives version bumping and change-log generation (the \keyw{[tool.commitizen]}
+section, \keyw{update\_changelog\_on\_bump});
+\item a set of file-hygiene hooks (trailing whitespace, end-of-file, mixed line endings, large-file
+guard, merge-conflict markers, JSON/YAML/TOML validation) and a \keyw{no-commit-to-branch} guard that
+blocks direct commits to \keyw{main};
+\item \emph{pytest} (unit, doctest and notebook runs) executed as local hooks, excluding the
+end-to-end and binary tests.
 \end{itemize}
 
 The formatting and linting settings are defined in \keyw{pyproject.toml} (the \keyw{[tool.black]},
@@ -28,6 +38,13 @@ To run the full set of checks manually, install \keyw{pre-commit} and execute:
 \begin{Verbatim}
     > pre-commit run --all-files
 \end{Verbatim}
+
+The \keyw{pre-commit} hooks are not run by continuous integration; they are intended to be installed
+and run on the developer's machine. Continuous integration (the \keyw{testing.yml} GitHub Actions
+workflow) instead runs the \keyw{pytest} test suite (excluding the binary tests) across a matrix of
+Python 3.11--3.13 on Linux and Windows using Poetry, and uploads the coverage results to Codecov.
+A minimum overall line-coverage threshold of 61\% is enforced; see \autoref{Chp:TestPlan} for details
+of the test suite.
 
 \section{Version control}
 
