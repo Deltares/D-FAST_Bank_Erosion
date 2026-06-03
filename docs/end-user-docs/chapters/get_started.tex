@@ -264,7 +264,7 @@ This is only verified by the kernel during the analysis.
 
 An example of the graphical output of the 'banklines' mode is shown in \autoref{Fig2.2}.
 The water depth is given with colored surfaces (per grid cell) clipped to the area close to the area of interest (about twice the maximum distance of the bank lines from the fairway), the black lines are the determined bank lines and the river kilometres are displayed along the river axis.
-The computation has ended successfully when the message "BankLines ended successfully!" appears.
+The computation has ended successfully when the message "Bank line detection ended successfully!" appears.
 A full listing of the screen output of \dfastbe during the bank line detection analysis is given below at the end of this section in \autoref{logbanklines}. An example of the graphical output of the 'banklines' mode is shown in \autoref{Fig2.2}. In this figure the water depth is given with colored surfaces (per grid cell) clipped to the area close to the area of interest (about twice the maximum distance of the bank lines from the fairway), the black lines are the determined bank lines and the river kilometres are displayed along the river axis. 
 
 \NumNote{It is advised to check the detected banklines shown in the graphical output of the 'banklines'mode before continuing with the 'bankerosion' mode. Common issues with bank line detection and their solutions are described in \autoref{Sec4.2}.}
@@ -292,7 +292,7 @@ It is suggested to provide all lines with at least the resolution of the simulat
 =====================================================
 Determine bank lines
 =====================================================
-version: D-FAST Bank Erosion 2.1.0
+version: D-FAST Bank Erosion 3.1.0
 source: https://github.com/Deltares/D-FAST_Bank_Erosion
 -----------------------------------------------------
 saving output in directory: output\banklines
@@ -453,7 +453,7 @@ Output:
 
 The maps and graphs are only created when \command{Plotting} is on and written to file if \command{SavePlots} is on.
 You may optionally request zoomed versions of these plots by switching on \command{SaveZoomPlots} and selecting the desired step size for the chainage.
-The computation has ended successfully when the message "Bank line detection ended successfully!" appears.
+The computation has ended successfully when the message "Bank erosion analysis ended successfully!" appears.
 The listing of the screen output of \dfastbe during the bank erosion analysis is given below.
 
 \newpage
@@ -461,7 +461,7 @@ The listing of the screen output of \dfastbe during the bank erosion analysis is
 	=====================================================
 	Compute bank erosion
 	=====================================================
-	version: D-FAST Bank Erosion 2.1.0
+	version: D-FAST Bank Erosion 3.1.0
 	source: https://github.com/Deltares/D-FAST_Bank_Erosion
 	-----------------------------------------------------
 	getting input from directory: output\banklines
@@ -674,4 +674,5 @@ runner = Runner(language, run_mode, configfile)
 runner.run()
 \end{Verbatim}
 
-where optionally the \command{language} (default \command{UK}), \command{runmode} (default \command{GUI}) and \command{configfile} (default \command{dfastbe.cfg}) can be specified as arguments.
+where optionally the \command{language} (default \command{UK}), \command{run\_mode} (default \command{GUI})
+and \command{configfile} (default \command{dfastbe.cfg}) can be specified as arguments.

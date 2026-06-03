@@ -80,7 +80,8 @@ It is advised to check the detected bank lines shown in the graphical output of 
 This section describes some common issues and their solutions.
 
 \subsection{Detection of adjacent water body}
-At some locations an adjacent water body is located within the given search distance from the predefined bank lines (parameter \command{Dlines}).
+At some locations an adjacent water body is located within the given search distance from the predefined
+bank lines (parameter \command{DLines}).
 As a result the bank line of the adjacent water body is found, instead of the bank line of the main river channel.
 As a result the initial bank line shows strange variations.
 This is the case between kilometre 20 and 21 in \autoref{Fig_issue_bankline} location A.
@@ -94,9 +95,12 @@ This is the case between kilometre 20 and 21 in \autoref{Fig_issue_bankline} loc
 	\label{Fig_issue_bankline}
 \end{figure}
 
-By decreasing the parameter \command{Dlines} you decrease the search distance from the predefined lines for determining the bank lines.
+By decreasing the parameter \command{DLines} you decrease the search distance from the predefined lines
+for determining the bank lines.
 As a result, you decrease the chance that the bank line of an adjacent water  body is found.
-However, you won't find a correct initial bank line if you make the parameter \command{Dlines} too small, this can be especially the case close to groins, at wide shallow areas or along banks with a relatively flat slope (see left bank between kilometre 22 and 23 in \autoref{Fig_issue_bankline} location B).
+However, you won't find a correct initial bank line if you make the parameter \command{DLines} too small,
+this can be especially the case close to groins, at wide shallow areas or along banks with a relatively
+flat slope (see left bank between kilometre 22 and 23 in \autoref{Fig_issue_bankline} location B).
 
 Another option is to edit the initial bank line manually by removing the points that fall in the adjacent water body, so only the points along the main channel remain.
 

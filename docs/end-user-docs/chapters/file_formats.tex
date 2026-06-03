@@ -283,7 +283,9 @@ Some data blocks may contain one or more Python-style placeholders used for inse
 
 \subsubsection*{Example}
 
-The following excerpt of the default \keyw{messages.UK.cfg} dialog text file shows the string definition for 3 identifiers, namely \keyw{''} (the identifier for an empty line), \keyw{'header\_banklines'} and \keyw{'end\_banklines'}.
+The following excerpt of the default \keyw{messages.UK.ini} dialog text file shows the string definition
+for 3 identifiers, namely \keyw{''} (the identifier for an empty line), \keyw{'header\_banklines'} and
+\keyw{'end\_banklines'}.
 The header string contains two placeholders, namely \keyw{\{version\}} for the the version number and \keyw{\{location\}} for the url to the source code location.
 
 \begin{Verbatim}
@@ -293,13 +295,12 @@ The header string contains two placeholders, namely \keyw{\{version\}} for the t
 =====================================================
 Determine bank lines
 =====================================================
-version: {version}
+version: D-FAST Bank Erosion {version}
 source: {location}
------------------------------------------------------
 [end_banklines]
 
 =====================================================
-===        BankLines ended successfully!          ===
+===    Bank line detection ended successfully!    ===
 =====================================================
 ... continued ...
 \end{Verbatim}
