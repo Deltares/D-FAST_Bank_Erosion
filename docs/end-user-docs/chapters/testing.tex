@@ -4,7 +4,7 @@ The results of the software is verified by means of
 
 \begin{itemize}
 \item Unit testing at the level of functions, such as reading and writing of files, and basic testing of the algorithms.
-Currently about half of the functions included in \keyw{io.py} are covered by unit tests; more to be added.
+A large part of the code base --- in particular the \keyw{io}, \keyw{bank\_lines} and \keyw{bank\_erosion} sub-packages --- is covered by unit tests, and a minimum overall line-coverage threshold (currently 61\%) is enforced.
 These tests are carried out by means of the \keyw{pytest} framework.
 \item Regression tests have to configured to verify that the results of the batch mode remain unchanged under further code developments.
 \end{itemize}
@@ -94,17 +94,15 @@ These tests are described in the following section.
 
 \section{Integration testing}
 
-The \keyw{batch} module builds on the functionality of the \keyw{io}, \keyw{support}, \keyw{kernel} and \keyw{plotting} modules to provide the bank line detection and erosion analysis functionality as main routines.
-The main routines \keyw{banklines} and \keyw{bankerosion} are tested at this level via regression tests, the other routines in \keyw{batch} are tested as part of the unit testing.
+The \keyw{bank\_lines} and \keyw{bank\_erosion} sub-packages build on the functionality of the \keyw{io} and \keyw{plotting} modules to provide the bank line detection and erosion analysis workflows.
+These workflows are driven through the \keyw{Runner} class in the \keyw{runner} module and are tested at this level via integration and regression tests, while the supporting routines are tested as part of the unit testing.
 
 \section{Unit testing}
 
-Since the modules \keyw{io}, \keyw{support}, \keyw{kernel} and \keyw{plotting} only depend on third party modules, they are ideally suited for unit testing.
-Most of the routines in \keyw{batch} can be addressed by means of unit testing as well.
-An initial number of unit tests have been set up for \keyw{io} routines, more unit tests should be added.
+Since the \keyw{io}, \keyw{bank\_lines}, \keyw{bank\_erosion} and \keyw{plotting} packages only depend on third party modules, they are well suited for unit testing, and an extensive unit-test suite covers them.
 
-All routines inside \keyw{gui} are interacting with the graphical user interface (either by extracting data from the state of the controls, or by setting the state of the controls).
-These routines cannot be tested using the pytest framework, and are therefore tested by means of the manual system tests.
+The \keyw{gui} package interacts with the graphical user interface (either by extracting data from the state of the controls, or by setting the state of the controls).
+These routines are tested using the \keyw{pytest-qt} plugin, complemented by the manual system tests described above.
 
 \section{Automated testing}
 
@@ -150,11 +148,17 @@ Each period following a module name represents one successful test; failed test 
 
 \begin{Verbatim}[fontsize=\tiny]
 =============================================== test session starts ================================================
-platform win32 -- Python 3.8.5, pytest-6.1.2, py-1.9.0, pluggy-0.13.1
-rootdir: D:\checkouts\D-FAST\D-FAST_Bank_Erosion
-collected 33 items
+platform win32 -- Python 3.11.12, pytest-9.0.3, pluggy-1.5.0
+rootdir: C:\checkouts\D-FAST_Bank_Erosion
+configfile: pyproject.toml
+plugins: cov-7.0.0, qt-4.4.0
+collected 275 items
 
-tests\test_io.py .................................                                                            [100%]
+tests\test_bank_lines\ ...............                                                                        [  5%]
+tests\test_erosion\ ........................................................                                  [ 26%]
+tests\test_gui\ .......................................................................................       [ 58%]
+tests\test_io\ ..........................................................................................     [ 91%]
+tests\test_binaries\ ......                                                                                   [100%]
 
-=============================================== 33 passed in 11.79s ================================================
+============================================== 275 passed in 58.62s ================================================
 \end{Verbatim}
