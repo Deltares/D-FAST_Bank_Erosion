@@ -1,0 +1,76 @@
+name: Build LaTeX Manuals
+
+# Builds the three D-FAST Bank Erosion LaTeX documents to PDF using the
+# reusable Deltares latex-manual composite action.
+#
+# The manuals are authored directly in LaTeX (no Markdown source), so the
+# action's markdown-to-latex step is disabled via markdown-input-dir: ''.
+# The action fetches the shared Deltares LaTeX styles (deltares_manual.cls,
+# nomentbl, bibtex styles) from the internal Deltares/LatexInstallation repo
+# via `ddocs get-tex-template`; that requires a token with read access to that
+# repo, supplied as the LATEX_TEMPLATE_TOKEN secret. The project-specific
+# class (deltares_manual_dfastbe.cls) is committed in docs/end-user-docs.
+#
+# Targets (compiled from docs/end-user-docs, matching .teamcity latex_manual):
+#   * dfastbe_usermanual
+#   * dfastbe_techref
+#   * dfastbe_release_notes
+#
+# On a published release the resulting PDFs are also attached to the release.
+# On PRs touching the manual (and on manual dispatch) the PDFs are produced as
+# a workflow artifact for review.
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+  pull_request:
+    branches: ['**']
+    paths:
+      - 'docs/end-user-docs/**'
+      - '.github/workflows/build-latex-manual.yml'
+
+jobs:
+  build-manuals:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to attach PDFs to the release
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0   # full history so the git metadata below is accurate
+
+      # The [git] documentclass option reads a `gitsettings` file for the
+      # repository/branch/commit shown on the cover. The class falls back to
+      # placeholders if it is absent, but we write real values here (mirrors
+      # the .teamcity latex_manual build). It lands in the compile working dir
+      # and survives the action's style-fetch (which only merges files in).
+      - name: Write gitsettings (git metadata for the [git] documentclass)
+        working-directory: docs/end-user-docs
+        run: |
+          {
+            echo "\\def\\@gitrepository{${{ github.repository }}}"
+            echo "\\def\\@gitbranch{${{ github.ref_name }}}"
+            echo "\\def\\@githashlong{${{ github.sha }}}"
+            echo "\\def\\@githashshort{$(git rev-parse --short HEAD)}"
+          } > gitsettings
+          echo "gitsettings:"; cat gitsettings
+
+      - name: Build manuals
+        # Pre-release: pinned to the latex-manual feat branch HEAD. Once
+        # Deltares-research/github-actions PR #4 merges and is tagged, change
+        # this to the SHA behind `latex-manual/v1`.
+        uses: Deltares-research/github-actions/actions/release/latex-manual@ad41bbe8fd760560338986ff2536f5b4ce171967 # feat/latex-manual
+        with:
+          python-version: '3.11'
+          # Pure-LaTeX manual: skip the markdown-to-latex conversion.
+          markdown-input-dir: ''
+          # The .tex sources (and the project class) live here.
+          latex-output-dir: docs/end-user-docs
+          # Compile targets, without the .tex extension.
+          tex-files: dfastbe_usermanual,dfastbe_techref,dfastbe_release_notes
+          # Token with read access to Deltares/LatexInstallation for the styles.
+          latex-template-token: ${{ secrets.LATEX_TEMPLATE_TOKEN }}
+          # Attach PDFs to the GitHub release (only fires on the release event).
+          upload-to-release: 'true'
+          github-token: ${{ secrets.GITHUB_TOKEN }}
