@@ -77,6 +77,13 @@ packages = [{ include = "dfastbe", from = "src" }]
 [tool.coverage.run]
 omit = [
     "tests/test_binaries/*",
+    # PySide6/shiboken inject synthetic, source-less modules at import time
+    # (and netCDF4 ships a Cython .pyx). The teamcity-messages coverage reporter
+    # tries to read their source and crashes with coverage NoSource; omit them.
+    "*pyscript",
+    "*shibokensupport*",
+    "*signature_bootstrap.py",
+    "*.pyx",
 ]
 
 [tool.coverage.report]
