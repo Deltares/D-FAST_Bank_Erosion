@@ -80,13 +80,8 @@ omit = [
 ]
 
 [tool.coverage.report]
-# coverage's get_analysis_to_report() (the path the teamcity-messages reporter hits)
-# filters on report_omit, NOT [run] omit. Exclude the source-less modules that
-# PySide6/shiboken inject at import time (pyscript, shibokensupport, signature
-# bootstrap) and the netCDF4 Cython .pyx, so the TeamCity coverage report does not
-# crash with coverage NoSource. Note the directory glob must be **/name/** -- a bare
-# *shibokensupport* does not match because coverage's '*' does not cross path
-# separators.
+# Skip source-less modules (PySide6/shiboken injectables, netCDF4 .pyx) so the
+# TeamCity coverage reporter does not crash with coverage NoSource. See issue #207.
 omit = [
     "tests/test_binaries/*",
     "*pyscript",
