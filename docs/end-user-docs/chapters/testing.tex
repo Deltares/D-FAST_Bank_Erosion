@@ -155,8 +155,30 @@ fast and require no manual clicking.
 \subsection{Binary testing}
 
 The standalone executable is verified by a separate set of tests marked with the \keyw{binaries}
-marker (\file{tests/test\_binaries}). These run the compiled \dfastbe binary and are executed on
-TeamCity; they are excluded from the GitHub Actions run with \keyw{-m "not binaries"}.
+marker (\file{tests/test\_binaries}). They treat the compiled program as a black box: rather than
+importing the Python package, they locate \file{dfastbe.dist/dfastbe.exe} and invoke it through
+\keyw{subprocess}. \file{test\_basic.py} checks that the executable launches and responds, while
+\file{test\_batch.py} runs it in both batch modes (\keyw{-{}-mode BANKLINES} and
+\keyw{-{}-mode BANKEROSION}) with an example configuration file and asserts that the run succeeds and
+produces the expected output files. Because they require a compiled binary, these tests are excluded
+from the GitHub Actions run (\keyw{-m "not binaries"}).
+
+On TeamCity the binary tests are the last link of a build chain (configured as code under
+\file{.teamcity}); each step consumes the previous step's artifacts:
+
+\begin{enumerate}
+\item \emph{Build with command window} --- runs \keyw{BuildScripts/BuildDfastbe.bat} (the Nuitka
+build) and packages the resulting \file{dfastbe.dist} into \file{dfastbe.zip}.
+\item \emph{Signed release} --- combines that distribution with a code-signed \file{dfastbe.exe} and
+re-packages it into a signed release archive.
+\item \emph{Distribution Tests} --- unpacks the signed archive into \file{dfastbe.dist} and runs
+\keyw{poetry run pytest -v tests/test\_binaries/ -{}-no-cov} against it (coverage is disabled because
+the code under test is a compiled executable).
+\end{enumerate}
+
+The Distribution Tests build uses a clean checkout, reports its status back to the GitHub pull
+request, and fails if any binary test fails or if the number of executed tests drops below the
+previous run. In the production configuration it is triggered for every branch.
 
 \section{Automated testing}
 
