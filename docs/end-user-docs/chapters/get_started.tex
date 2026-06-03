@@ -370,13 +370,16 @@ Required input:
 \begin{itemize}
 \item The period during which the bank erosion acts (\command{TErosion}, default 1 year),
 \item The number of discharge levels (\command{NLevel}),
-\item \dflowfm files (netCDF map-files) for the different discharge levels and the corresponding probability distribution (\command{SimFile1}, \command{SimFile2}, ..., \command{FileN} and \command{PDischarge1}, \command{PDischarge2}, ..., \command{PDischargeN}, with $N$ the number of discharge levels),
+\item \dflowfm files (netCDF map-files) for the different discharge levels and the corresponding
+probability distribution (\command{SimFile1}, \command{SimFile2}, ..., \command{SimFileN} and
+\command{PDischarge1}, \command{PDischarge2}, ..., \command{PDischargeN}, with $N$ the number of
+discharge levels),
 \item Number of bank lines (\command{Nbank} default 2: the left and right bank),
 \item File which links river chainage (kilometres) to xy-coordinates (\command{RiverKM}),
 \item XY-coordinates of the river and fairway axis (\command{RiverAxis}, \command{Fairway}),
 \item Information about the strength or type of the soil of the banks (\command{BankType}).
 This can be done either in the form of classes or with a critical shear stress (see \autoref{Tab4.1}).
-In the first case \command{Classes} should be set to \command{true} and in the second case to \command{false} (default).
+In the first case \command{Classes} should be set to \command{true} and in the second case to \command{false}.
 The bank strength information can be given either as a constant value for the whole track or as a river kilometre dependent quantity in a ASCII-file per bank (see \autoref{Sec:parfile}),
 \item Shipping information (\command{Vship}, \command{Nship}, \command{ShipType}, \command{Draught}).
 This can again be given either as a constant value for the whole track or as a river kilometre dependent quantity in a single ASCII-file (see \autoref{Sec:parfile}).
