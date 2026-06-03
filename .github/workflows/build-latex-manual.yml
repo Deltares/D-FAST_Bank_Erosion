@@ -3,7 +3,6 @@ name: Build LaTeX Manuals
 on:
   workflow_dispatch:
   pull_request:
-    branches: ['**']
     paths:
       - 'docs/end-user-docs/**'
       - '.github/workflows/build-latex-manual.yml'
