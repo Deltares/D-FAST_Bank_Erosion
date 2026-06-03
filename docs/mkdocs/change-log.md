@@ -8,7 +8,6 @@
 ### Refactor
 
 - **configs**: extract get_configuration into ConfigurationExporter (#193)
-- **configs**: replace load_configuration with ConfigurationLoader (#190)
 - **gui**: Refactor GUI architecture (#180)
 - **logging**: migrate logging functions to LogData singleton class (#166)
 
@@ -28,6 +27,7 @@ code must be updated accordingly.
 ### Feat
 
 - **ci**: restructure and move TeamCity configurations and templates to the github repo (#87)
+- **ci**: restructure and move TeamCity configurations and templates to the github repo
 
 ### Fix
 
@@ -42,24 +42,38 @@ code must be updated accordingly.
 ### Refactor
 
 - **erosion**: introduce `Parameters` namedtuple and simplify erosion input handling (#149)
+- **erosion**: introduce `Parameters` namedtuple and simplify erosion input handling
 - **mesh**: refine MeshWrapper API and improve intersection handling structure (#148)
+- **mesh**: refine MeshWrapper API and improve intersection handling structure
 - **mesh**: modularize and restructure mesh and bank line processing logic (#147)
+- **mesh**: modularize and restructure mesh and bank line processing logic
 - **mesh**: restructure mesh module and improve submodule organization (#146)
+- **mesh**: restructure mesh module and improve submodule organization
 - **mesh**: modularize and restructure mesh (intersect line) and slicing logic (#143)
+- **mesh**: modularize and restructure mesh traversal and slicing logic
 - extract ship parameter functionality into ShipsParameters dataclass
 - **plotting**: modularize and abstract plotting system for bank erosion and bank lines (#102)
+- **plotting**: modularize and abstract plotting system for bank erosion and bank lines
 - **erosion**: restructure erosion modules and improve documentation (#115)
+- **erosion**: restructure erosion modules and improve documentation
 - reorganize project structure into sub-modules and improve file organization (#112)
+- reorganize project structure into sub-modules and improve file organization
 - **bank_erosion**: restructure discharge level processing and debugging utilities (#106)
+- **bank_erosion**: restructure discharge level processing and debugging utilities
+- **bank_erosion**: restructure module and improve clarity of core classes and methods `_prepare_initial_conditions` and `_process_discharge_levels`
 - **bank_erosion**: restructure module and improve clarity of core classes and methods `_prepare_initial_conditions` and `_process_discharge_levels`
 - **bank_erosion**: modularize and improve river and bank erosion data handling (#93)
+- **bank_erosion**: modularize and improve river and bank erosion data handling
 - **geometry**: `RiverData`, `GeometryLine` and `SearchLine` classes (#95)
 - **geometry**: rename CenterLine to GeometryLine and improve test coverage
 - **core**: restructure river analysis with new CenterLine and SearchLine classes (#92)
+- **core**: restructure river analysis with new CenterLine and SearchLine classes (#92)
+- clean up utilities by removing unused functions and protecting locals (#90)
 - clean up utilities by removing unused functions and protecting locals (#90)
 - **simulation**: restructure and rename SimulationData class and methods (#78)
 - **structures**: replace scattered variables with BankData, FairwayData & ErosionResults dataclasses (#77) (dfast-276)
-- Upgrade shapely to v2.1.0 (#73) (dfast-280) 
+- Upgrade shapely to v2.1.0 (#73) (dfast-280)
+- Upgrade shapely to v2.1.0 (#73) 
 - Use a dataclass for MeshData
 - Use dataclass for erosioninputs and waterleveldata
 - Combine variables into a WaterLevelData class
