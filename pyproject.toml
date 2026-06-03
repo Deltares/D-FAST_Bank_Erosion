@@ -75,13 +75,19 @@ packages = [{ include = "dfastbe", from = "src" }]
 
 
 [tool.coverage.run]
+# Exclude source-less modules (PySide6/shiboken injectables, netCDF4 .pyx) from
+# measurement so no coverage reporter warns or crashes on them. See issue #207.
 omit = [
     "tests/test_binaries/*",
+    "*pyscript",
+    "**/shibokensupport/**",
+    "*signature_bootstrap.py",
+    "*.pyx",
 ]
 
 [tool.coverage.report]
-# Skip source-less modules (PySide6/shiboken injectables, netCDF4 .pyx) so the
-# TeamCity coverage reporter does not crash with coverage NoSource. See issue #207.
+# Mirror the run-level omit; the TeamCity coverage reporter (get_analysis_to_report)
+# filters on report_omit, not [run] omit. See issue #207.
 omit = [
     "tests/test_binaries/*",
     "*pyscript",
