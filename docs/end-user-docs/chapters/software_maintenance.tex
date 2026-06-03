@@ -55,172 +55,75 @@ Since \dfastbe builds on WAQBANK, the initial release of the new Python product 
 
 \section{Automated building of code}
 
-An automated TeamCity project will be set up for building and signing of binaries.
-This is ongoing work; the build steps are currently run locally.
-The Nuitka compiler is used to build a binary by means of the following command
+The standalone Windows executable is built locally with the \emph{Nuitka} compiler, driven by the
+scripts in \keyw{BuildScripts} (\keyw{BuildDfastbe.bat}, or \keyw{BuildDfastbe\_no\_command\_window.bat}
+for a build without a console window). The script reads the version number from \keyw{poetry version}
+and invokes Nuitka roughly as follows:
 
 \begin{Verbatim}
-nuitka --standalone --python-flag=no_site --show-progress
-    --plugin-enable=numpy --plugin-enable=qt-plugins
-    --plugin-enable=tk-inter --file-reference-choice=runtime dfastbe
+python -m nuitka --standalone --mingw64 --enable-plugin=pyside6 --enable-plugin=anti-bloat
+    --python-flag=no_site --python-flag=no_asserts --python-flag=no_docstrings
+    --include-package=numpy --include-package=pyproj --include-module=shapely
+    --include-package=matplotlib --include-package=netCDF4 --include-package=cftime
+    --include-module=geopandas --include-package=pandas --include-package=pytz
+    --include-package-data=geopandas.datasets --include-module=fiona
+    --include-data-files=src/dfastbe/io/log_data/messages.UK.ini=dfastbe/io/log_data/messages.UK.ini
+    --file-reference-choice=runtime src/dfastbe
 \end{Verbatim}
 
 Unfortunately, this doesn't automatically build a binary that works out of the box.
 The following adjustments depend on the exact combination of Nuitka and package versions used, so they will need to be revisited when updating the software.
-A number of explicit module imports and environmental settings had to be added to \keyw{\_\_main\_\_} which the Nuitka compiler didn't automatically resolve.
+A number of environmental settings (together with an explicit \keyw{pyproj} data-directory setup) had
+to be added to \keyw{\_\_main\_\_} so that the standalone executable locates its bundled data
+directories at runtime; these are settings that the Nuitka compiler did not resolve automatically.
 
 \begin{Verbatim}
-#------------------------------------------------------------------------------
-# Needed for Nuitka compilation
-#------------------------------------------------------------------------------
 import os
-import pathlib
+from pathlib import Path
+
+import matplotlib
+
+matplotlib.use("Qt5Agg")
 
 is_nuitka = "__compiled__" in globals()
 if is_nuitka:
-    root = str(pathlib.Path(__file__).parent)
+    """Needed for Nuitka compilation"""
+
+    root = str(Path(__file__).parent)
     os.environ["GDAL_DATA"] = root + os.sep + "gdal"
     os.environ["PROJ_LIB"] = root + os.sep + "proj"
     os.environ["MATPLOTLIBDATA"] = root + os.sep + "matplotlib" + os.sep + "mpl-data"
     os.environ["TCL_LIBRARY"] = root + os.sep + "lib" + os.sep + "tcl8.6"
     proj_lib_dirs = os.environ.get("PROJ_LIB", "")
     import pyproj.datadir
+
     pyproj.datadir.set_data_dir(root + os.sep + "proj")
     import pyproj
-
-import fiona.ogrext
-import fiona._shim
-import fiona.schema
-import _ctypes
-import pandas._libs.tslibs.base
-import pyproj._compat
-import netCDF4.utils
-import cftime
-import matplotlib.backends.backend_qt5
-#------------------------------------------------------------------------------
 \end{Verbatim}
 
-If these import statements are not included, you will sooner or later get a runtime error such as
+If these environment settings are not applied, the standalone executable fails to locate its bundled
+data directories at runtime, producing errors such as a missing PROJ, matplotlib or Tcl/Tk data
+directory.
+
+The Nuitka options above already bundle the required packages together with the data files that the
+tool needs at runtime: the language files \keyw{messages.NL.ini} and \keyw{messages.UK.ini}, the GUI
+icons, the licence file and the three PDF manuals.
+
+A few shared libraries that Nuitka places in separate \keyw{*.libs} folders still have to be moved
+next to the packages that load them. This is handled automatically by \keyw{BuildScripts/Move\_Libs.bat},
+which moves the contents of \keyw{pyproj.libs}, \keyw{matplotlib.libs} and \keyw{fiona.libs} into the
+corresponding \keyw{pyproj}, \keyw{matplotlib} and \keyw{fiona} folders of the distribution:
 
 \begin{Verbatim}
-File "netCDF4\_netCDF4.pyx", line 1196, in init netCDF4._netCDF4
- ModuleNotFoundError: No module named 'netCDF4.utils'
+move dfastbe.dist\pyproj.libs\*     dfastbe.dist\pyproj
+move dfastbe.dist\matplotlib.libs\* dfastbe.dist\matplotlib
+move dfastbe.dist\fiona.libs\*      dfastbe.dist\fiona
 \end{Verbatim}
 
-Finally, the a number of directory creation and copy statements had to be executed to complete the build process where the Python environment was installed in \keyw{\%ENV\%}.
-These statements are included in the \keyw{build\_dfastbe.bat} file.
-The message "The code execution cannot proceed because python311.dll was not found. Reinstalling the program may fix this problem." is solved by executing
-
-\begin{Verbatim}
-copy %ENV%\python311.dll dfastbe.dist
-\end{Verbatim}
-
-The error "FileNotFoundError: [Errno 2] No such file or directory: '...\textbackslash{}dfastbe.dist\textbackslash{}certifi\textbackslash{}cacert.pem'" in the open\_binary routine within "importlib\textbackslash{}resources.py", line 97, is solved by
-
-\begin{Verbatim}
-mkdir dfastbe.dist\certifi
-copy %ENV%\Lib\site-packages\certifi\cacert.pem dfastbe.dist\certifi
-\end{Verbatim}
-
-The error "pyproj.exceptions.DataDirError: Valid PROJ data directory not found. Either set the path using the environmental variable PROJ\_LIB or with `pyproj.datadir.set\_data\_dir`." in the get\_data\_dir function within "pyproj\textbackslash{}datadir.py", line 109, is solved by
-
-\begin{Verbatim}
-mkdir dfastbe.dist\proj
-copy %ENV%\Lib\site-packages\pyproj\proj_dir\share\proj\* dfastbe.dist\proj
-\end{Verbatim}
-
-When the error "OSError: Could not find lib geos\_c.dll or load any of its variants []." is encountered in the load\_dll routine within "shapely\textbackslash{}geos.py", line 60, the following lines are needed
-
-\begin{Verbatim}
-mkdir dfastbe.dist\shapely\DLLs
-copy %ENV%\Lib\site-packages\shapely\DLLs\* dfastbe.dist\shapely\DLLs
-\end{Verbatim}
-
-The message "StopIteration" in the file "geopandas\textbackslash{}datasets\textbackslash{}\_\_init\_\_.py", line 6, is caused by missing geopandas datasets and it is resolve by
-
-\begin{Verbatim}
-mkdir dfastbe.dist\geopandas\datasets
-copy %ENV%\Lib\site-packages\geopandas\datasets\natural* dfastbe.dist\geopandas\datasets
-\end{Verbatim}
-
-%The error "ImportError: unable to find Qt5Core.dll on PATH" in the find\_qt routine within "PyQt5\textbackslash{}\_\_init\_\_.py", line 33, is resolved by
-%
-%\begin{Verbatim}
-%mkdir dfastbe.dist\PyQt5\Qt\bin
-%copy %ENV%\Library\bin\Qt5Core* dfastbe.dist\PyQt5\Qt\bin
-%\end{Verbatim}
-
-The import error "LoadLibraryExW 'fiona\textbackslash{}ogrext.pyd' failed: The specified module could not be found." in "fiona\textbackslash{}collection.py", line 9, whereas the ogrext.pyd is exactly where the program indicates, is caused by a large number of missing library dependencies (the boost libraries don't seem to be needed, so remove them after the copy)
-
-\begin{Verbatim}
-copy %ENV%\Library\bin\*.dll dfastbe.dist
-del /y dfastbe.dist/boost*.dll
-\end{Verbatim}
-
-The import error "LoadLibraryExW '\_ctypes.pyd' failed: The specified module could not be found." is solved by adding one more library from another folder
-
-\begin{Verbatim}
-copy %ENV%\DLLs\libffi-7.dll dfastbe.dist
-\end{Verbatim}
-
-The runtime error "Could not find the matplotlib data files" in the \_get\_data\_path function within "matplotlib\textbackslash{}\_\_init\_\_.py", line 772, is solved by running
-
-\begin{Verbatim}
-del /s /y dfastbe.dist\mpl-data
-mkdir dfastbe.dist\matplotlib\mpl-data
-xcopy /s /y %ENV%\Lib\site-packages\matplotlib\mpl-data\* dfastbe.dist\matplotlib\mpl-data
-\end{Verbatim}
-
-Note that as the first action we delete the mpl-data folder created by Nuitka; it seems to be in the wrong place.
-The operating system error "could not find or load spatialindex\_c-64.dll" in "rtree\textbackslash{}core.py", line 126, is solved by two libraries with similar names
-
-\begin{Verbatim}
-mkdir dfastbe.dist\Library\bin
-copy %ENV%\Library\bin\spatialindex* dfastbe.dist\Library\bin
-\end{Verbatim}
-
-%The import error "LoadLibraryExW 'PyQt5\textbackslash{}QtWidgets.pyd' failed: The specified module could not be found." in "dfastbe\textbackslash{}gui.py", line 32, is caused by a large number of missing libraries for PyQt5
-%
-%\begin{Verbatim}
-%copy %ENV%\python3.dll dfastbe.dist\PyQt5
-%copy dfastbe.dist\*.dll dfastbe.dist\PyQt5
-%\end{Verbatim}
-
-The runtime error "Unable to load language file 'messages.UK.ini'." (and the lack of icons in the dialog) is simply solved by adding the configuration files to a new subdirectory dfastbe as
-
-\begin{Verbatim}
-mkdir dfastbe.dist\dfastbe
-copy dfastbe\messages.*.ini dfastbe.dist\dfastbe
-copy dfastbe\*.png dfastbe.dist\dfastbe
-\end{Verbatim}
-
-The message "qt.qpa.plugin: Could not find the Qt platform plugin 'windows' in ''. This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem." is solved by adding the platforms folder to the distribution
-
-\begin{Verbatim}
-mkdir dfastbe.dist\platforms
-xcopy /s /y %ENV%\Library\plugins\platforms\* dfastbe.dist\platforms
-\end{Verbatim}
-
-By default matplotlib uses Tk for graphics; to resolve some stability issues with the compiled code, we have changed to the Qt5 environment consistent with the rest of the user interface.
-Unfortunatly, the overall code still depends on the Tcl/Tk environment.
-The message "\_tkinter.TclError: Can't find a usable init.tcl in the following directories: <directory list> This probably means that Tcl wasn't installed properly." is solved by
-
-\begin{Verbatim}
-del /s /y dfastbe.dist\tcl
-mkdir dfastbe.dist\lib\tcl8.6
-xcopy /s /y %ENV%\Library\lib\tcl8.6\* dfasstbe.dist\lib\tcl8.6
-\end{Verbatim}
-
-where the first line removes the tcl folder created by Nuitka.
-The related message "\_tkinter.TclError: Can't find a usable tk.tcl in the following directories: <directory list> rem This probably means that tk wasn't installed properly." in "tkinter\textbackslash{}\_\_init\_\_.py", line 2261, is solved by the similar lines (again removing the tk folder created by Nuitka)
-
-\begin{Verbatim}
-del /s /y dfastbe.dist\tk
-mkdir dfastbe.dist\lib\tk8.6
-xcopy /s /y %ENV%\Library\lib\tk8.6\* dfasstbe.dist\lib\tk8.6
-\end{Verbatim}
-
-The location where we need to copy the Tcl and Tk libraries depends on the environmental variable \keyw{TCL\_LIBRARY} set in the \keyw{\_\_main\_\_} routine.
+Finally, \keyw{BuildScripts/Collect\_Examples.bat} copies the example data sets into the distribution.
+At runtime, the environment settings shown above point \keyw{pyproj}, GDAL, PROJ, matplotlib and
+Tcl/Tk to the corresponding data directories inside the bundled distribution, so no further manual
+copying of data directories or DLLs is required.
 
 \section{Listing of external modules}
 
