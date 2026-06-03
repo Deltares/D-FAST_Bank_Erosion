@@ -8,7 +8,7 @@
 \newcommand{\dhydrosuite}{\textrm{D-HYDRO~Suite}\xspace}
 \newcommand{\dflowfm}{\textrm{D-Flow~FM}\xspace}
 \newcommand{\sobek}{\textrm{SOBEK}\xspace}
-\newcommand{\dfbeversion}{3.0.0}
+\newcommand{\dfbeversion}{3.1.0}
 
 \hypersetup
 {
@@ -66,6 +66,41 @@ The following documentation is distributed with this release:
 \end{itemize}
 
 \chapter{Release summary}
+
+\section{Version 3.1.0}
+
+\subsection{Key changes summary}
+This release modernises the graphical user interface and broadens platform support, while continuing the maintainability improvements started in version 3.0.0.
+
+The main user-relevant changes are:
+\begin{itemize}
+	\item Migrated the graphical user interface from PyQt5 to PySide6 (Qt~6).
+	\item Expanded the range of supported Python versions.
+	\item Improved the graphical user interface: additional GUI utilities, more robust input validation and clearer user feedback.
+\end{itemize}
+
+The analysis results are unchanged with respect to \dfbe 3.0.0.
+
+\subsection{Known issues}
+
+The known issues are:
+
+\begin{itemize}
+	\item none
+\end{itemize}
+
+\subsection{Overview of the resolved issues}
+
+The following changes since the release of version 3.0.0 are relevant for the end user:
+
+\begin{adjustbox}{left=-0.25cm}
+	\begin{tabular}{ l l }
+		issue & description / summary\\ \hline
+		\#177 & Migrate from PyQt5 to PySide6 and expand Python version support \\
+		\#175 & Add GUI utilities and improve input validation \\
+		\#180 & Refactor GUI architecture \\
+	\end{tabular}
+\end{adjustbox}
 
 \section{Version 3.0.0}
 
