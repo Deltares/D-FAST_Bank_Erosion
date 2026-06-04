@@ -46,7 +46,7 @@ jobs:
           } > gitsettings
 
       - name: Build manuals
-        uses: Deltares-research/github-actions/actions/release/latex-manual@29621a8ec563757b5c25a313499a9773f517614b # feat/latex-manual
+        uses: Deltares-research/github-actions/actions/release/latex-manual@10e7419a915092b3e9b2d38048b70d76237793db # feat/latex-manual
         with:
           python-version: '3.11'
           markdown-input-dir: ''
