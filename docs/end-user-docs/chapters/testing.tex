@@ -71,9 +71,6 @@ A most system tests are carried out using the default English configuration, but
 
 \section{System testing}
 
-% The whole system is tested via the command line (entry via \keyw{\_\_main\_\_}) and via Python calls to the \keyw{run()} method of the \keyw{Runner} class in the \keyw{runner} module. These tests are repeated for the standalone compiled \dfastbe executable. For the system testing a limited number of regression tests are carried out comparing the latest results against previously accepted results.
-% The graphical user interface is covered by automated tests that use the \keyw{pytest-qt} plugin (the \file{tests/test\_gui} suite). In addition, a protocol for the user-interface tests has been defined; these  tests are described in the following section.
-
 The standalone executable is verified by a separate set of tests marked with the \keyw{binaries}
 marker (\file{tests/test\_binaries}). They treat the compiled program as a black box: rather than
 importing the Python package, they locate \file{dfastbe.dist/dfastbe.exe} and invoke it through
@@ -81,7 +78,7 @@ importing the Python package, they locate \file{dfastbe.dist/dfastbe.exe} and in
 \file{test\_batch.py} runs it in both batch modes (\keyw{-{}-mode BANKLINES} and
 \keyw{-{}-mode BANKEROSION}) with an example configuration file and asserts that the run succeeds and
 produces the expected output files.
-% Because they require a compiled binary, these tests are excluded from the GitHub Actions run (\keyw{-m "not binaries"}).
+
 
 The binary tests are the last link of a build chain (configured as code under
 \file{.teamcity}); each step consumes the previous step's artifacts:
@@ -100,10 +97,6 @@ The Distribution Tests build uses a clean checkout, reports its status back to t
 request, and fails if any binary test fails or if the number of executed tests drops below the
 previous run. In the production configuration it is triggered for every branch.
 
-%\section{Integration testing}
-
-% The \keyw{bank\_lines} and \keyw{bank\_erosion} sub-packages build on the functionality of the \keyw{io} and \keyw{plotting} modules to provide the bank line detection and erosion analysis workflows.
-% These workflows are driven through the \keyw{Runner} class in the \keyw{runner} module and are tested at this level via regression tests, while the supporting routines are tested as part of the unit testing.
 
 \section{Unit testing}
 
@@ -120,18 +113,6 @@ All modules, including the graphical user interface, are tested automatically. T
 Since the \keyw{io}, \keyw{bank\_lines}, \keyw{bank\_erosion} and \keyw{plotting} packages only depend
 on third-party modules, they are well suited for unit testing and are covered in detail.
 
-%\subsection{Graphical user interface testing}
-
-% The \keyw{gui} package interacts with the graphical user interface (GUI) by reading from and writing to the state of the controls. These routines are tested automatically with the \keyw{pytest-qt} plugin (the \file{tests/test\_gui} suite, about 140 tests), which drives the Qt widgets without requiring manual interaction. The suite covers the configuration loader and exporter, dialog creation, the GUI utilities, and each settings tab (General, Detection, Erosion, Bank Parameters and Shipping Parameters). The manual user-interface protocol described above complements these automated tests.
-
-% The \keyw{pytest-qt} plugin lets the tests drive the real \keyw{PySide6} widgets in-process, without a human operator. It provides two key pytest fixtures:
-
-%\begin{itemize}
-%\item \keyw{qapp} --- a single shared \keyw{QApplication} for the test session. On a headless machine (for example the Linux continuous-integration runner without a display) it is started with the Qt \keyw{offscreen} platform, so the widgets are created and exercised entirely in memory and no window ever appears on screen.
-% \item \keyw{qtbot} --- a helper that registers a widget with the test (\keyw{qtbot.addWidget}), simulates user interaction such as mouse clicks (\keyw{qtbot.mouseClick}), and waits for the application to process events or emit signals (\keyw{qtbot.wait}, \keyw{qtbot.waitSignal}).
-%\end{itemize}
-
-% A typical GUI test follows the same pattern a user would: it builds the relevant part of the interface through the project's own fixtures (for example \keyw{setup\_gui}, which instantiates the full \keyw{GUI} with all tabs, or the per-component \keyw{setup\_menubar} and \keyw{setup\_button\_bar} fixtures in \file{tests/test\_gui/conftest.py}), then puts the controls into a known state by setting their values directly (\keyw{setText} on a line edit, \keyw{setChecked} on a check box, \keyw{setCurrentText} on a drop-down) or by triggering an action with \keyw{qtbot.mouseClick}, and finally asserts on the result. % The two main things asserted are: (i) that the widgets are created and laid out as expected (located with \keyw{findChildren}), and (ii) that the data round-trips correctly --- loading a configuration file populates the controls with the right values, and exporting the controls reproduces the original configuration. Because everything runs in memory, these tests are fast and require no manual clicking.
 
 \section{Test automation}
 
