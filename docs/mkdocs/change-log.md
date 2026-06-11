@@ -1,3 +1,25 @@
+## 3.1.0 (2026-06-11)
+
+### Feat
+
+- migrate from PyQt5 to PySide6 and expand Python version support (#177)
+- migrate from PyQt5 to PySide6 and expand Python version support
+- **gui**: add and test GUI utilities, improve input validation and documentation (#175)
+- **gui**: add and test GUI utilities, improve input validation and documentation
+
+### Fix
+
+- **docs**: define dfbeversion in techref so the manual build succeeds
+
+### Refactor
+
+- **configs**: extract get_configuration into ConfigurationExporter (#193)
+- **configs**: replace load_configuration with ConfigurationLoader (#190)
+- **gui**: Refactor GUI architecture (#180)
+- **gui**: Refactor GUI architecture (#180)
+- **logging**: migrate logging functions to LogData singleton class (#166)
+- **logging**: migrate logging functions to LogData singleton class
+
 ## 3.0.1 (2026-01-05)
 
 ## 3.0.0 (2025-09-04)
