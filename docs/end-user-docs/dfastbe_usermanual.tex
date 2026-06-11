@@ -10,17 +10,17 @@
 \newcommand{\dflow}{\textrm{Delft3D-FLOW}\xspace}
 \newcommand{\Frou}{\operatorname{\mathit{F\kern-.17em r}}}
 
+% Distribution version: written by the build (CI / BuildScripts) from pyproject.toml,
+% which commitizen bumps during the release workflow. Fallback keeps local compiles working.
+\providecommand{\dfbeversion}{0.0.0}
+\InputIfFileExists{version.tex}{}{}
+
 \hypersetup
 {
     pdfauthor   = {Deltares},
     pdftitle    = {\dfastbe},
     pdfkeywords = {Deltares User Manual \dfbe}
 }
-
-%------------------------------------------------------------------------------
-%
-
-%\makeindex
 
 %------------------------------------------------------------------------------
 %
@@ -31,8 +31,8 @@
 \title{D-FAST\\ Bank Erosion}
 \subtitle{}
 \manualtype{User Manual}
-\distribution{Released for: \newline \phantom{M} \dfbe version 3.0 or higher}
-\version{\the\year.\the\month}
+\distribution{Released for: \newline \phantom{M} \dfbe version \dfbeversion\ or higher}
+\version{\the\year.\ifnum\month<10 0\fi\the\month}
 
 \author{ }
 
@@ -52,8 +52,6 @@
 \appendix
 \include{chapters/bankmaterial}
 \include{chapters/file_formats}
-
-%\markdownInput[shiftHeadings=1]{techref.md}
 
 \pagestyle{empty}
 \cleardoublepage

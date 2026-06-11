@@ -4,7 +4,7 @@
 \usepackage[pipeTables=true]{markdown}
 
 %------------------------------------------------------------------------------
-\newcommand{\dfastbe}{\textrm{D-FAST~Bank~Erosion}\xspace}
+\newcommand{\dfastbe}{\textrm{D-FAST~Bank Erosion}\xspace}
 \newcommand{\dfbe}{\textrm{D-FAST~BE}\xspace}
 \newcommand{\dflowfm}{\textrm{D-Flow~FM}\xspace}
 
@@ -22,8 +22,8 @@
 \title{D-FAST\\ Bank Erosion}
 \subtitle{}
 \manualtype{Technical Reference Manual and Test Report}
-\distribution{Released for: \newline \phantom{M} \dfbe version 3.1.0 or higher}
-\version{\the\year.\the\month}
+\distribution{Released for: \newline \phantom{M} \dfbe version \dfbeversion\ or higher}
+\version{\the\year.\ifnum\month<10 0\fi\the\month}
 
 \author{ }
 
@@ -36,10 +36,6 @@
 \include{chapters/code_structure}
 \include{chapters/software_maintenance}
 \include{chapters/testing}
-%\markdownInput{techref.md}
-
-%\nonumchapter{References}
-%\bibliography{dfastbe}
 
 \appendix
 \include{chapters/file_formats}

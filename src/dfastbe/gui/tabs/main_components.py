@@ -146,7 +146,7 @@ def menu_about_self():
 
     msg = QMessageBox()
     msg.setText(f"D-FAST Bank Erosion {__version__}")
-    msg.setInformativeText("Copyright (c) 2025 Deltares.")
+    msg.setInformativeText("Copyright (c) 2020-2026 Deltares.")
     msg.setDetailedText(gui_text("license"))
     msg.setWindowTitle(gui_text("about"))
     msg.setStandardButtons(QMessageBox.StandardButton.Ok)
