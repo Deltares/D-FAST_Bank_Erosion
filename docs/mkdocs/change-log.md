@@ -1,16 +1,3 @@
-## 3.1.0 (2026-05-11)
-
-### Feat
-
-- migrate from PyQt5 to PySide6 and expand Python version support (#177)
-- **gui**: add and test GUI utilities, improve input validation and documentation (#175)
-
-### Refactor
-
-- **configs**: extract get_configuration into ConfigurationExporter (#193)
-- **gui**: Refactor GUI architecture (#180)
-- **logging**: migrate logging functions to LogData singleton class (#166)
-
 ## 3.0.1 (2026-01-05)
 
 ## 3.0.0 (2025-09-04)
