@@ -45,6 +45,19 @@ jobs:
             echo "\\def\\@githashshort{$(git rev-parse --short HEAD)}"
           } > gitsettings
 
+      - name: Write manual version
+        working-directory: docs/end-user-docs
+        run: |
+          # Single source of truth for the distribution version is pyproject.toml,
+          # which commitizen bumps during the release workflow. Extract it without
+          # extra tooling so the manuals never drift from the package version.
+          ver=$(grep -m1 -E '^version[[:space:]]*=' ../../pyproject.toml | sed -E 's/.*"([^"]+)".*/\1/')
+          if [ -z "$ver" ]; then
+            echo "::error::Could not read version from pyproject.toml"
+            exit 1
+          fi
+          echo "\\newcommand{\\dfbeversion}{$ver}" > version.tex
+
       - name: Build manuals
         uses: Deltares-research/github-actions/actions/release/latex-manual@b145fdb7af62c9a3c204af3450c3aeb52f2754cf # v1.0.0
         with:

@@ -1,6 +1,7 @@
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildFeatures.swabra
+import jetbrains.buildServer.configs.kotlin.buildSteps.powerShell
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import jetbrains.buildServer.configs.kotlin.failureConditions.BuildFailureOnText
 import jetbrains.buildServer.configs.kotlin.failureConditions.failOnText
@@ -38,6 +39,26 @@ object LatexManual : BuildType({
                 echo \def\@githashlong{%build.revisions.revision%} >> gitsettings
                 echo \def\@githashshort{%build.revisions.short%} >> gitsettings
             """.trimIndent()
+        }
+        powerShell {
+            name = "Write manual version"
+            id = "write_manual_version"
+            workingDir = "docs/end-user-docs"
+            // Single source of truth for the distribution version is pyproject.toml,
+            // which commitizen bumps during the release workflow. Mirrors the
+            // "Write manual version" step in .github/workflows/build-latex-manual.yml so
+            // the TeamCity and GitHub builds produce identical manuals.
+            scriptMode = script {
+                content = """
+                    ${'$'}raw = (Select-String -Path '..\..\pyproject.toml' -Pattern '^version\s*=' |
+                        Select-Object -First 1).Line
+                    ${'$'}ver = ${'$'}raw -replace '.*"(.*)".*', '${'$'}1'
+                    if ([string]::IsNullOrWhiteSpace(${'$'}ver)) {
+                        throw 'Could not read version from pyproject.toml'
+                    }
+                    Set-Content -Path 'version.tex' -Value "\newcommand{\dfbeversion}{${'$'}ver}" -Encoding ascii
+                """.trimIndent()
+            }
         }
         script {
             name = "Generate User Manual"
