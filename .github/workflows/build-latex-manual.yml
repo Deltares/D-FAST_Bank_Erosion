@@ -56,7 +56,9 @@ jobs:
             echo "::error::Could not read version from pyproject.toml"
             exit 1
           fi
-          echo "\\newcommand{\\dfbeversion}{$ver}" > version.tex
+          # Use \def (not \newcommand): the wrappers \providecommand a fallback first,
+          # so \newcommand would fail with "already defined". \def redefines safely.
+          echo "\\def\\dfbeversion{$ver}" > version.tex
 
       - name: Build manuals
         uses: Deltares-research/github-actions/actions/release/latex-manual@b145fdb7af62c9a3c204af3450c3aeb52f2754cf # v1.0.0

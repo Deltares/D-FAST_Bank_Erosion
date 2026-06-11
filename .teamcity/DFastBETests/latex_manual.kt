@@ -56,7 +56,9 @@ object LatexManual : BuildType({
                     if ([string]::IsNullOrWhiteSpace(${'$'}ver)) {
                         throw 'Could not read version from pyproject.toml'
                     }
-                    Set-Content -Path 'version.tex' -Value "\newcommand{\dfbeversion}{${'$'}ver}" -Encoding ascii
+                    # Use \def (not \newcommand): the wrappers \providecommand a fallback first,
+                    # so \newcommand would fail with "already defined". \def redefines safely.
+                    Set-Content -Path 'version.tex' -Value "\def\dfbeversion{${'$'}ver}" -Encoding ascii
                 """.trimIndent()
             }
         }
