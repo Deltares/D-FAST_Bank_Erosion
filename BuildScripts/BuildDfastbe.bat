@@ -60,7 +60,7 @@ START /B /WAIT python -m nuitka ^
  --product-name="D-FAST Bank Erosion" ^
  --file-description="A Python tool to perform a bank erosion analysis based on a number of D-Flow FM simulations." ^
  --trademarks="All indications and logos of, and references to, \"D-FAST\", \"D-FAST Bank Erosion\" and \"D-FAST BE\" are registered trademarks of Stichting Deltares, and remain the property of Stichting Deltares. All rights reserved." ^
- --copyright="Copyright (C) 2025 Stichting Deltares." ^
+ --copyright="Copyright (C) 2020-2026 Stichting Deltares." ^
  --windows-icon-from-ico=%ICONS_SRC%/D-FASTBE.png ^
  --include-data-files=%LOG_DATA_SRC%/messages.NL.ini=%LOG_DATA_DEST%/messages.NL.ini ^
  --include-data-files=%LOG_DATA_SRC%/messages.UK.ini=%LOG_DATA_DEST%/messages.UK.ini ^
