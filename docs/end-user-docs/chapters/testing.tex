@@ -56,7 +56,7 @@ There are unit and integration tests addressing the writing of the output files.
 All quantities previously read from the SIMONA SDS-files and Delft3D-FLOW trim-files is now read from the \dflowfm map.nc files.
 
 \item A simple graphical user interface could support users in process of creating the input file.
-The graphical user interface that you get by running \dfastbe in default mode or by explicitly specifying \keyw{-{}-mode gui} is tested by means of automated GUI tests as described in \autoref{Sec:GuiTests}.
+The graphical user interface that you get by running \dfastbe in default mode or by explicitly specifying \keyw{-{}-mode gui} is tested by means of automated GUI tests.
 
 \item It would be nice if the software would be more generally applicable than just the Dutch rivers.
 The code does not include specific knowledge of the Dutch rivers except for the fact that some of the rules of thumb have been derived using Dutch river data.
@@ -71,94 +71,16 @@ A most system tests are carried out using the default English configuration, but
 
 \section{System testing}
 
-The whole system is tested via the command line (entry via \keyw{\_\_main\_\_}) and via Python calls to the \keyw{run()} method of the \keyw{Runner} class in the \keyw{runner} module. These tests are repeated for the standalone compiled \dfastbe executable. For the system testing a limited number of regression tests are carried out comparing the latest results against previously accepted results.
-
-The graphical user interface is covered by automated tests that use the \keyw{pytest-qt} plugin (the \file{tests/test\_gui} suite). In addition, a protocol for the user-interface tests has been defined; these  tests are described in the following section.
-
-\subsection{Graphical user interface tests} \label{Sec:GuiTests}
-
-\subsubsection{Test 1: starting blank}
-\subsubsection{Test 2: save default configuration file}
-\subsubsection{Test 3: modify general settings}
-\subsubsection{Test 4: modify detection settings}
-\subsubsection{Test 5: modify erosion settings}
-\subsubsection{Test 6: save modified configuration file}
-\subsubsection{Test 7: load default configuration file}
-\subsubsection{Test 8: load modified configuration file}
-\subsubsection{Test 9: run detection analysis}
-\subsubsection{Test 10: run erosion analysis}
-\subsubsection{Test 11: view manual and about Windows}
-
-%\section{Integration testing}
-\section{Regression testing}
-
-The \keyw{bank\_lines} and \keyw{bank\_erosion} sub-packages build on the functionality of the \keyw{io} and \keyw{plotting} modules to provide the bank line detection and erosion analysis workflows.
-These workflows are driven through the \keyw{Runner} class in the \keyw{runner} module and are tested at this level via regression tests, while the supporting routines are tested as part of the unit testing.
-
-\section{Unit testing}
-
-The automated test suite lives under \file{tests} and is organised per sub-package; it currently
-comprises about 275 tests. The main groups are:
-
-\begin{itemize}
-\item \file{tests/test\_io} --- configuration parsing, file reading and writing, and logging
-(\file{test\_io.py}, \file{test\_logging.py});
-\item \file{tests/test\_bank\_lines} --- the bank line detection workflow and its data models;
-\item \file{tests/test\_erosion} --- the bank erosion workflow, data models, the erosion calculator
-and the mesh processor;
-\item \file{tests/test\_gui} --- the graphical user interface (see below);
-\item \file{tests/test\_cli\_main.py} --- the command-line entry point.
-\end{itemize}
-
-Since the \keyw{io}, \keyw{bank\_lines}, \keyw{bank\_erosion} and \keyw{plotting} packages only depend
-on third-party modules, they are well suited for unit testing and are covered in detail.
-
-\subsection{Graphical user interface testing}
-
-The \keyw{gui} package interacts with the graphical user interface (GUI) by reading from and writing to the
-state of the controls. These routines are tested automatically with the \keyw{pytest-qt} plugin (the
-\file{tests/test\_gui} suite, about 140 tests), which drives the Qt widgets without requiring manual
-interaction. The suite covers the configuration loader and exporter, dialog creation, the GUI
-utilities, and each settings tab (General, Detection, Erosion, Bank Parameters and Shipping
-Parameters). The manual user-interface protocol described above complements these automated tests.
-
-The \keyw{pytest-qt} plugin lets the tests drive the real \keyw{PySide6} widgets in-process, without a
-human operator. It provides two key pytest fixtures:
-
-\begin{itemize}
-\item \keyw{qapp} --- a single shared \keyw{QApplication} for the test session. On a headless machine
-(for example the Linux continuous-integration runner without a display) it is started with the Qt
-\keyw{offscreen} platform, so the widgets are created and exercised entirely in memory and no window
-ever appears on screen.
-\item \keyw{qtbot} --- a helper that registers a widget with the test (\keyw{qtbot.addWidget}),
-simulates user interaction such as mouse clicks (\keyw{qtbot.mouseClick}), and waits for the
-application to process events or emit signals (\keyw{qtbot.wait}, \keyw{qtbot.waitSignal}).
-\end{itemize}
-
-A typical GUI test follows the same pattern a user would: it builds the relevant part of the interface
-through the project's own fixtures (for example \keyw{setup\_gui}, which instantiates the full
-\keyw{GUI} with all tabs, or the per-component \keyw{setup\_menubar} and \keyw{setup\_button\_bar}
-fixtures in \file{tests/test\_gui/conftest.py}), then puts the controls into a known state by setting
-their values directly (\keyw{setText} on a line edit, \keyw{setChecked} on a check box,
-\keyw{setCurrentText} on a drop-down) or by triggering an action with \keyw{qtbot.mouseClick}, and
-finally asserts on the result. The two main things asserted are: (i) that the widgets are created and
-laid out as expected (located with \keyw{findChildren}), and (ii) that the data round-trips correctly
---- loading a configuration file populates the controls with the right values, and exporting the
-controls reproduces the original configuration. Because everything runs in memory, these tests are
-fast and require no manual clicking.
-
-\subsection{Binary testing}
-
 The standalone executable is verified by a separate set of tests marked with the \keyw{binaries}
 marker (\file{tests/test\_binaries}). They treat the compiled program as a black box: rather than
 importing the Python package, they locate \file{dfastbe.dist/dfastbe.exe} and invoke it through
 \keyw{subprocess}. \file{test\_basic.py} checks that the executable launches and responds, while
 \file{test\_batch.py} runs it in both batch modes (\keyw{-{}-mode BANKLINES} and
 \keyw{-{}-mode BANKEROSION}) with an example configuration file and asserts that the run succeeds and
-produces the expected output files. Because they require a compiled binary, these tests are excluded
-from the GitHub Actions run (\keyw{-m "not binaries"}).
+produces the expected output files.
 
-On TeamCity the binary tests are the last link of a build chain (configured as code under
+
+The binary tests are the last link of a build chain (configured as code under
 \file{.teamcity}); each step consumes the previous step's artifacts:
 
 \begin{enumerate}
@@ -175,14 +97,31 @@ The Distribution Tests build uses a clean checkout, reports its status back to t
 request, and fails if any binary test fails or if the number of executed tests drops below the
 previous run. In the production configuration it is triggered for every branch.
 
+
+\section{Unit testing}
+
+All modules, including the graphical user interface, are tested automatically. The test suite lives under \file{tests} and is organised per sub-package; it currently comprises about 275 tests. The main groups are:
+
+\begin{itemize}
+\item \file{tests/test\_bank\_erosion} --- the bank erosion workflow, data models, the erosion calculator and the mesh processor;
+\item \file{tests/test\_bank\_lines} --- the bank line detection workflow and its data models;
+\item \file{tests/test\_cli\_main.py} --- the command-line entry point;
+\item \file{tests/test\_gui} --- the graphical user interface (see below);
+\item \file{tests/test\_io} --- configuration parsing, file reading and writing, and logging (\file{test\_io.py}, \file{test\_logging.py}).
+\end{itemize}
+
+Since the \keyw{io}, \keyw{bank\_lines}, \keyw{bank\_erosion} and \keyw{plotting} packages only depend
+on third-party modules, they are well suited for unit testing and are covered in detail.
+
+
 \section{Test automation}
 
 The Python code is tested automatically by a GitHub Actions workflow (\keyw{testing.yml}) that runs
 the \keyw{pytest} suite on every push across a matrix of Python 3.11--3.13 on Linux and Windows and
-uploads the coverage to Codecov. The binary tests are excluded there (\keyw{-m "not binaries"}); the
+uploads the coverage to Codecov. The system (binary) tests are excluded there (\keyw{-m "not binaries"}); the
 standalone binaries are built with the \keyw{BuildScripts} and tested on TeamCity.
 
-For all automated unit and regression tests the pytest framework is used. After installing the
+For all automated tests the pytest framework is used. After installing the
 development dependencies with Poetry, the suite is run with:
 
 \begin{Verbatim}
@@ -207,28 +146,6 @@ module-level files (\keyw{runner}, \keyw{plotting}, \keyw{utils}, \dots) & 89\% 
 %-------------------------------
 \chapter{Test Report} \label{Chp:TestReport}
 
-The test plan describes the (graphical user interface, unit and regression) tests and how they are automated.
-
-\section{Graphical user interface tests}
-
-The automated graphical user interface tests are run with \keyw{pytest-qt}. The results summarize as below.
-
-\begin{tabular}{ll|l}
-Test & Description & Success / Comments \\ \hline
-1 & starting blank & OK \\
-2 & save default configuration file & OK \\
-3 & modify general settings & OK \\
-4 & modify detection settings & OK \\
-5 & modify erosion settings & OK \\
-6 & save modified configuration file & OK \\
-7 & load default configuration file & OK \\
-8 & load modified configuration file & OK \\
-9 & run detection analysis & OK \\
-10 & run erosion analysis & OK \\
-11 & view manual and about Windows & OK \\
-\end{tabular}
-
-\section{Unit and regression tests}
 
 The automated regression and unit tests are run with \keyw{pytest} and \keyw{pytest-cov}. The full
 per-file coverage report of a recent run (with the binary tests deselected) is included below. The
