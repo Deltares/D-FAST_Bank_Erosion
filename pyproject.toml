@@ -1,6 +1,6 @@
 [project]
 name = "d-fast-bank-erosion"
-version = "3.1.0"
+version = "3.0.1"
 description = "A tool to perform a bank erosion analysis based on a number of D-Flow FM simulations."
 readme = "README.md"
 requires-python = ">=3.11.0,<3.15"
@@ -33,6 +33,7 @@ dev = [
     "teamcity-messages>=1.32,<2.0.0",
     "pre-commit>=4.2.0,<5.0.0",
     "commitizen>=4.8.3,<5.0.0",
+    "Deltares-HMS-Docs @ git+https://github.com/Deltares-research/doc_utils.git@0.2.0",
 ]
 docs = [
     "mkdocs>=1.2,<2.0.0",
@@ -74,11 +75,26 @@ packages = [{ include = "dfastbe", from = "src" }]
 
 
 [tool.coverage.run]
+# Exclude source-less modules (PySide6/shiboken injectables, netCDF4 .pyx) from
+# measurement so no coverage reporter warns or crashes on them. See issue #207.
 omit = [
     "tests/test_binaries/*",
+    "*pyscript",
+    "**/shibokensupport/**",
+    "*signature_bootstrap.py",
+    "*.pyx",
 ]
 
 [tool.coverage.report]
+# Mirror the run-level omit; the TeamCity coverage reporter (get_analysis_to_report)
+# filters on report_omit, not [run] omit. See issue #207.
+omit = [
+    "tests/test_binaries/*",
+    "*pyscript",
+    "**/shibokensupport/**",
+    "*signature_bootstrap.py",
+    "*.pyx",
+]
 show_missing = true
 fail_under = 61
 

@@ -1,5 +1,5 @@
 """
-Copyright (C) 2025 Stichting Deltares.
+Copyright (C) 2020-2026 Stichting Deltares.
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -39,12 +39,10 @@ from dfastbe import __version__
 matplotlib.use("Qt5Agg")
 
 
-# ------------------------------------------------------------------------------
-# Needed for Nuitka compilation
-# ------------------------------------------------------------------------------
-
 is_nuitka = "__compiled__" in globals()
 if is_nuitka:
+    """Needed for Nuitka compilation"""
+
     root = str(Path(__file__).parent)
     os.environ["GDAL_DATA"] = root + os.sep + "gdal"
     os.environ["PROJ_LIB"] = root + os.sep + "proj"
@@ -56,7 +54,6 @@ if is_nuitka:
     pyproj.datadir.set_data_dir(root + os.sep + "proj")
     import pyproj
 
-# ------------------------------------------------------------------------------
 
 
 def _existing_path(value: str) -> Path:

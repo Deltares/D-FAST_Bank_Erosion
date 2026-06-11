@@ -3,12 +3,12 @@
 %------------------------------------------------------------------------------
 \newcommand{\dfastmi}{\textrm{D-FAST~Morphological~Impact}\xspace}
 \newcommand{\dfmi}{\textrm{D-FAST~MI}\xspace}
-\newcommand{\dfastbe}{\textrm{D-FAST~Bank Erosion}\xspace}
+\newcommand{\dfastbe}{\textrm{D-FAST~Bank~Erosion}\xspace}
 \newcommand{\dfbe}{\textrm{D-FAST~BE}\xspace}
 \newcommand{\dhydrosuite}{\textrm{D-HYDRO~Suite}\xspace}
 \newcommand{\dflowfm}{\textrm{D-Flow~FM}\xspace}
 \newcommand{\sobek}{\textrm{SOBEK}\xspace}
-\newcommand{\dfbeversion}{3.0.0}
+\newcommand{\dfbeversion}{3.1.0}
 
 \hypersetup
 {
@@ -49,7 +49,7 @@ The tool requires the result of a \dflowfm computation for a given set of flow c
 }}
 
 \section{Compatibility}
-\dfastbe is compatible with \dhydrosuite 2025.02.
+\dfastbe is compatible with \dhydrosuite 2025.02 (or higher).
 
 \section{Installation}
 \dfastbe is distributed as a plain zip-file.
@@ -67,20 +67,47 @@ The following documentation is distributed with this release:
 
 \chapter{Release summary}
 
+\section{Version 3.1.0}
+
+\subsection{Key changes summary}
+This release modernises the graphical user interface and broadens platform support, while continuing the maintainability improvements released in version 3.0.0.
+
+The main user-relevant changes are:
+\begin{itemize}
+	\item Migrated the graphical user interface from PyQt5 to PySide6 (Qt~6).
+	\item Expanded the range of supported Python versions.
+	\item Improved the graphical user interface: additional GUI utilities, more robust input validation and clearer user feedback.
+\end{itemize}
+
+The analysis results are unchanged with respect to \dfbe 3.0.0.
+
+\subsection{Known issues}
+
+The known issues are:
+
+\begin{itemize}
+	\item none
+\end{itemize}
+
+\subsection{Overview of the resolved issues}
+
+The following changes since the release of version 3.0.0 are relevant for the end user:
+
+\begin{adjustbox}{left=-0.25cm}
+	\begin{tabular}{ l l }
+		issue & description / summary\\ \hline
+		\#177 & Migrate from PyQt5 to PySide6 and expand Python version support \\
+		\#175 & Add GUI utilities and improve input validation \\
+		\#180 & Refactor GUI architecture \\
+	\end{tabular}
+\end{adjustbox}
+
 \section{Version 3.0.0}
 
 \subsection{Key changes summary}
 This is a completely revised release, where the maintainability has been enhanced by improving the readability of the code, extend the testbench resulting in a (so-called) code-coverage of above 80\% and monitor code quality statistics during software maintenance.
 
 The results are the same as those of the previous release \dfbe 2.3.1.
-
-%Apart from the above, the following changes are worth mentioning:
-%\begin{itemize}
-%	\item Complete overview of analysis settings included in the report.
-%	\item The tool is no longer supported in the Dutch language.
-%	\item The WAQMORF compatible \keyw{cli} mode is no longer supported.
-%	\item Configuration files of \dfmi version 2 are no longer supported by the GUI.
-%\end{itemize}
 
 \subsection{Known issues}
 

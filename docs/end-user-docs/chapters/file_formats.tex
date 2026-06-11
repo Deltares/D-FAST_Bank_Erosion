@@ -64,6 +64,7 @@ Block & Keyword & Description \\ \hline
 & \keyw{BankNew} & Name of file(s) in which new xy-coordinates of bank lines are stored (default 'banknew') \\
 & \keyw{BankEq} & Name of file(s) in which xy-coordinates of equilibrium bank lines are stored (default: 'bankeq') \\
 & \keyw{EroVol} & Name of file in which eroded volume per river-km is stored (default: 'erovol.evo') \\
+& \keyw{EroVolEqui} & Name of file in which the equilibrium eroded volume per river-km is stored (default: 'erovol\_eq.evo') \\
 & \keyw{ShipType} & Constant or name of file containing type of ship (per river-km) \\
 & \keyw{Vship} & Constant or name of file containing relative velocity of the ships (per river-km) \unitbrackets{m/s} \\
 & \keyw{Nship} & Constant or name of file containing number of ships per year (per river-km) \\
@@ -282,7 +283,9 @@ Some data blocks may contain one or more Python-style placeholders used for inse
 
 \subsubsection*{Example}
 
-The following excerpt of the default \keyw{messages.UK.cfg} dialog text file shows the string definition for 3 identifiers, namely \keyw{''} (the identifier for an empty line), \keyw{'header\_banklines'} and \keyw{'end\_banklines'}.
+The following excerpt of the default \keyw{messages.UK.ini} dialog text file shows the string definition
+for 3 identifiers, namely \keyw{''} (the identifier for an empty line), \keyw{'header\_banklines'} and
+\keyw{'end\_banklines'}.
 The header string contains two placeholders, namely \keyw{\{version\}} for the the version number and \keyw{\{location\}} for the url to the source code location.
 
 \begin{Verbatim}
@@ -292,13 +295,12 @@ The header string contains two placeholders, namely \keyw{\{version\}} for the t
 =====================================================
 Determine bank lines
 =====================================================
-version: {version}
+version: D-FAST Bank Erosion {version}
 source: {location}
------------------------------------------------------
 [end_banklines]
 
 =====================================================
-===        BankLines ended successfully!          ===
+===    Bank line detection ended successfully!    ===
 =====================================================
 ... continued ...
 \end{Verbatim}
