@@ -29,6 +29,7 @@ object BuildMain : BuildType({
     }
 
     failureConditions {
+        executionTimeoutMin = 90
         failOnText {
             conditionType = BuildFailureOnText.ConditionType.CONTAINS
             pattern = "AssertionError"

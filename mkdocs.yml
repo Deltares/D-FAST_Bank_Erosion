@@ -115,6 +115,8 @@ nav:
           - guides/doctest.md
           - guides/testing.md
           - guides/teamcity-ci.md
+      - Release:
+          - guides/release-procedures.md
   - Architecture Design:
       - architecture-design/main-components.md
       - architecture-design/class-diagram.md
